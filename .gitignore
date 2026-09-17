@@ -1,0 +1,20 @@
+node_modules/
+dist/
+data/*.db
+data/*.db-journal
+data/*.db-wal
+.env
+*.local
+
+# hasil screenshot pengujian browser
+shots-e2e/
+shots/
+
+# Unity: log build + scene hasil generate (dibuat ulang oleh menu "2. Generate Diorama")
+unity/build-web.log
+unity/Assets/Scenes/
+
+# profil Chrome dari skrip ulasan UI (berisi data sesi browser, jangan di-commit)
+.ui-review/chrome-profile/
+
+data/*.db-shm

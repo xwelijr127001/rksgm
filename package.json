@@ -1,0 +1,38 @@
+{
+  "name": "raksa-game",
+  "version": "1.0.0",
+  "private": true,
+  "description": "RAKSA GAME - Raksa Claim: Misi Lindungi Kota",
+  "workspaces": [
+    "server",
+    "client"
+  ],
+  "scripts": {
+    "dev": "concurrently -k -n SERVER,CLIENT -c green,yellow \"npm:dev:server\" \"npm:dev:client\"",
+    "dev:server": "npm -w @raksa/server run dev",
+    "dev:client": "npm -w @raksa/client run dev",
+    "build": "npm -w @raksa/client run build && npm -w @raksa/server run build",
+    "start": "npm -w @raksa/server run start",
+    "typecheck": "npm -w @raksa/server run typecheck && npm -w @raksa/client run typecheck",
+    "test": "npm run test:server && npm run test:client",
+    "loadtest": "npm -w @raksa/server run loadtest --",
+    "gen:music": "node tools/make-music.mjs",
+    "gen:unity": "tsx tools/gen-unity-data.ts",
+    "unity:build": "powershell -ExecutionPolicy Bypass -File unity/build.ps1",
+    "check:csharp": "powershell -ExecutionPolicy Bypass -File tools/check-csharp.ps1",
+    "test:server": "npm -w @raksa/server run test",
+    "test:client": "tsx --test client/src/unity/bridge.test.ts client/src/unity/missionObjects.test.ts",
+    "test:e2e": "node tools/e2e-browser.mjs",
+    "check:audio": "node tools/audio-check.mjs",
+    "check:unity-load": "node tools/unity-load-check.mjs"
+  },
+  "engines": {
+    "node": ">=20.11"
+  },
+  "devDependencies": {
+    "@esbuild/win32-x64": "^0.28.2",
+    "concurrently": "^10.0.5",
+    "lamejs": "^1.2.1",
+    "typescript": "^7.0.2"
+  }
+}

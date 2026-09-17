@@ -1,0 +1,906 @@
+{
+  "generatedFrom": "shared/missions.ts",
+  "catatan": "JANGAN diedit manual. Jalankan: npm run gen:unity",
+  "missions": [
+    {
+      "id": "m01-parkir",
+      "number": 1,
+      "scene": "parkiran",
+      "product": "AUTO",
+      "title": "Parkir Kurang Mulus",
+      "location": "Parkiran Kota",
+      "durationSeconds": 20,
+      "cameraViews": [
+        "default"
+      ],
+      "steps": [
+        {
+          "id": "s1",
+          "kind": "single",
+          "presentation": "cards",
+          "prompt": "Apa tindakan berikutnya?",
+          "requiredSelections": null,
+          "buckets": [],
+          "objects": [
+            {
+              "stepId": "s1",
+              "optionId": "dokumentasi",
+              "label": "Dokumentasikan kerusakan dan laporkan kejadian melalui kanal klaim",
+              "kind": "bukti",
+              "multi": false,
+              "anchor": "s1:dokumentasi"
+            },
+            {
+              "stepId": "s1",
+              "optionId": "perbaiki",
+              "label": "Langsung memperbaiki tanpa dokumentasi atau koordinasi",
+              "kind": "bukti",
+              "multi": false,
+              "anchor": "s1:perbaiki"
+            },
+            {
+              "stepId": "s1",
+              "optionId": "buang",
+              "label": "Membuang bagian yang rusak",
+              "kind": "bukti",
+              "multi": false,
+              "anchor": "s1:buang"
+            },
+            {
+              "stepId": "s1",
+              "optionId": "abaikan",
+              "label": "Mengabaikan kejadian karena kendaraan masih bisa berjalan",
+              "kind": "bukti",
+              "multi": false,
+              "anchor": "s1:abaikan"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "m02-detektif-penyok",
+      "number": 2,
+      "scene": "bengkel",
+      "product": "AUTO",
+      "title": "Detektif Penyok",
+      "location": "Bengkel Mitra",
+      "durationSeconds": 25,
+      "cameraViews": [
+        "default",
+        "depan",
+        "kiri",
+        "kanan"
+      ],
+      "steps": [
+        {
+          "id": "bukti",
+          "kind": "multi",
+          "presentation": "cards",
+          "prompt": "Pilih 3 bukti yang relevan",
+          "requiredSelections": 3,
+          "buckets": [],
+          "objects": [
+            {
+              "stepId": "bukti",
+              "optionId": "foto-full",
+              "label": "Foto keseluruhan kendaraan",
+              "kind": "bukti",
+              "multi": true,
+              "anchor": "bukti:foto-full"
+            },
+            {
+              "stepId": "bukti",
+              "optionId": "foto-depan-kiri",
+              "label": "Foto detail kerusakan depan kiri",
+              "kind": "bukti",
+              "multi": true,
+              "anchor": "bukti:foto-depan-kiri"
+            },
+            {
+              "stepId": "bukti",
+              "optionId": "foto-identitas",
+              "label": "Foto identitas kendaraan (plat & nomor rangka)",
+              "kind": "bukti",
+              "multi": true,
+              "anchor": "bukti:foto-identitas"
+            },
+            {
+              "stepId": "bukti",
+              "optionId": "foto-makanan",
+              "label": "Foto makan siang di kafe",
+              "kind": "bukti",
+              "multi": true,
+              "anchor": "bukti:foto-makanan"
+            },
+            {
+              "stepId": "bukti",
+              "optionId": "foto-selfie",
+              "label": "Selfie di parkiran",
+              "kind": "bukti",
+              "multi": true,
+              "anchor": "bukti:foto-selfie"
+            },
+            {
+              "stepId": "bukti",
+              "optionId": "foto-kucing",
+              "label": "Foto kucing di kap mobil",
+              "kind": "bukti",
+              "multi": true,
+              "anchor": "bukti:foto-kucing"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "m03-berkas-ruko",
+      "number": 3,
+      "scene": "ruko",
+      "product": "FIRE",
+      "title": "Berkas Ruko",
+      "location": "Ruko Jalan Melati",
+      "durationSeconds": 30,
+      "cameraViews": [
+        "default"
+      ],
+      "steps": [
+        {
+          "id": "berkas",
+          "kind": "multi",
+          "presentation": "folder",
+          "prompt": "Masukkan dokumen yang sesuai checklist",
+          "requiredSelections": 4,
+          "buckets": [],
+          "objects": [
+            {
+              "stepId": "berkas",
+              "optionId": "kronologi",
+              "label": "Kronologi kejadian",
+              "kind": "dokumen",
+              "multi": true,
+              "anchor": "berkas:kronologi"
+            },
+            {
+              "stepId": "berkas",
+              "optionId": "foto-kerusakan",
+              "label": "Foto kerusakan ruko",
+              "kind": "dokumen",
+              "multi": true,
+              "anchor": "berkas:foto-kerusakan"
+            },
+            {
+              "stepId": "berkas",
+              "optionId": "daftar-barang",
+              "label": "Daftar barang terdampak",
+              "kind": "dokumen",
+              "multi": true,
+              "anchor": "berkas:daftar-barang"
+            },
+            {
+              "stepId": "berkas",
+              "optionId": "estimasi",
+              "label": "Estimasi kerugian",
+              "kind": "dokumen",
+              "multi": true,
+              "anchor": "berkas:estimasi"
+            },
+            {
+              "stepId": "berkas",
+              "optionId": "brosur",
+              "label": "Brosur promo toko",
+              "kind": "dokumen",
+              "multi": true,
+              "anchor": "berkas:brosur"
+            },
+            {
+              "stepId": "berkas",
+              "optionId": "struk-kopi",
+              "label": "Struk kopi tim renovasi",
+              "kind": "dokumen",
+              "multi": true,
+              "anchor": "berkas:struk-kopi"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "m04-excavator",
+      "number": 4,
+      "scene": "proyek",
+      "product": "HVC",
+      "title": "Excavator Miring",
+      "location": "Proyek Jalan Baru",
+      "durationSeconds": 35,
+      "cameraViews": [
+        "default",
+        "depan",
+        "kiri",
+        "kanan"
+      ],
+      "steps": [
+        {
+          "id": "temuan",
+          "kind": "multi",
+          "presentation": "hotspot",
+          "prompt": "Ketuk 4 informasi pada adegan",
+          "requiredSelections": 4,
+          "buckets": [],
+          "objects": [
+            {
+              "stepId": "temuan",
+              "optionId": "seri",
+              "label": "Identitas / nomor seri unit",
+              "kind": "hotspot",
+              "multi": true,
+              "anchor": "temuan:seri",
+              "hotspot": {
+                "x": 57,
+                "y": 47
+              }
+            },
+            {
+              "stepId": "temuan",
+              "optionId": "posisi",
+              "label": "Posisi unit saat kejadian",
+              "kind": "hotspot",
+              "multi": true,
+              "anchor": "temuan:posisi",
+              "hotspot": {
+                "x": 34,
+                "y": 72
+              }
+            },
+            {
+              "stepId": "temuan",
+              "optionId": "rusak",
+              "label": "Bagian yang rusak",
+              "kind": "hotspot",
+              "multi": true,
+              "anchor": "temuan:rusak",
+              "hotspot": {
+                "x": 71,
+                "y": 34
+              }
+            },
+            {
+              "stepId": "temuan",
+              "optionId": "operator",
+              "label": "Keterangan operator",
+              "kind": "hotspot",
+              "multi": true,
+              "anchor": "temuan:operator",
+              "hotspot": {
+                "x": 16,
+                "y": 55
+              }
+            },
+            {
+              "stepId": "temuan",
+              "optionId": "spanduk",
+              "label": "Spanduk proyek",
+              "kind": "hotspot",
+              "multi": true,
+              "anchor": "temuan:spanduk",
+              "hotspot": {
+                "x": 86,
+                "y": 63
+              }
+            },
+            {
+              "stepId": "temuan",
+              "optionId": "warung",
+              "label": "Warung kopi di tepi proyek",
+              "kind": "hotspot",
+              "multi": true,
+              "anchor": "temuan:warung",
+              "hotspot": {
+                "x": 91,
+                "y": 82
+              }
+            },
+            {
+              "stepId": "temuan",
+              "optionId": "awan",
+              "label": "Awan di langit",
+              "kind": "hotspot",
+              "multi": true,
+              "anchor": "temuan:awan",
+              "hotspot": {
+                "x": 22,
+                "y": 15
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "m05-polis-mana",
+      "number": 5,
+      "scene": "kantor",
+      "product": "AUTO",
+      "title": "Polisnya yang Mana?",
+      "location": "Kantor Raksa",
+      "durationSeconds": 40,
+      "cameraViews": [
+        "default"
+      ],
+      "steps": [
+        {
+          "id": "cocok",
+          "kind": "assign",
+          "presentation": "match",
+          "prompt": "Pilih kesimpulan untuk tiap kasus",
+          "requiredSelections": null,
+          "buckets": [
+            {
+              "id": "lanjut",
+              "label": "Dapat dilanjutkan untuk penilaian kerusakan benturan"
+            },
+            {
+              "id": "tidak-ambang",
+              "label": "Kerusakan tidak memenuhi ambang TLO dalam simulasi"
+            },
+            {
+              "id": "perlu-data",
+              "label": "Perlu informasi tambahan sebelum disimpulkan"
+            }
+          ],
+          "objects": [
+            {
+              "stepId": "cocok",
+              "optionId": "kasus-a",
+              "label": "Kasus A - Kartu Polis A (Comprehensive)",
+              "kind": "kasus",
+              "multi": false,
+              "anchor": "cocok:kasus-a"
+            },
+            {
+              "stepId": "cocok",
+              "optionId": "kasus-b",
+              "label": "Kasus B - Kartu Polis B (TLO)",
+              "kind": "kasus",
+              "multi": false,
+              "anchor": "cocok:kasus-b"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "m06-paket-penyok",
+      "number": 6,
+      "scene": "pelabuhan",
+      "product": "CARGO",
+      "title": "Paket Datang Penyok",
+      "location": "Pelabuhan & Logistik",
+      "durationSeconds": 45,
+      "cameraViews": [
+        "default"
+      ],
+      "steps": [
+        {
+          "id": "selisih",
+          "kind": "number",
+          "presentation": null,
+          "prompt": "Berapa selisih jumlah peti?",
+          "requiredSelections": null,
+          "buckets": [],
+          "objects": []
+        },
+        {
+          "id": "rusak",
+          "kind": "number",
+          "presentation": null,
+          "prompt": "Berapa peti diterima dengan kemasan rusak?",
+          "requiredSelections": null,
+          "buckets": [],
+          "objects": []
+        },
+        {
+          "id": "tindak",
+          "kind": "single",
+          "presentation": "cards",
+          "prompt": "Pilih tindak lanjut",
+          "requiredSelections": null,
+          "buckets": [],
+          "objects": [
+            {
+              "stepId": "tindak",
+              "optionId": "dokumentasi",
+              "label": "Dokumentasikan ketidaksesuaian dan lengkapi dokumen pengangkutan untuk pemeriksaan",
+              "kind": "bukti",
+              "multi": false,
+              "anchor": "tindak:dokumentasi"
+            },
+            {
+              "stepId": "tindak",
+              "optionId": "bayar-semua",
+              "label": "Simpulkan seluruh kerugian otomatis dijamin dan ajukan pembayaran penuh",
+              "kind": "bukti",
+              "multi": false,
+              "anchor": "tindak:bayar-semua"
+            },
+            {
+              "stepId": "tindak",
+              "optionId": "tolak",
+              "label": "Tolak seluruh pengiriman tanpa mencatat apa pun",
+              "kind": "bukti",
+              "multi": false,
+              "anchor": "tindak:tolak"
+            },
+            {
+              "stepId": "tindak",
+              "optionId": "diam",
+              "label": "Terima saja karena barang sudah sampai",
+              "kind": "bukti",
+              "multi": false,
+              "anchor": "tindak:diam"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "m07-banjir-gudang",
+      "number": 7,
+      "scene": "gudang",
+      "product": "FIRE",
+      "title": "Banjir di Gudang",
+      "location": "Gudang Sentra Niaga",
+      "durationSeconds": 50,
+      "cameraViews": [
+        "default"
+      ],
+      "steps": [
+        {
+          "id": "polis",
+          "kind": "single",
+          "presentation": "cards",
+          "prompt": "Polis mana yang memiliki jaminan relevan dalam simulasi?",
+          "requiredSelections": null,
+          "buckets": [],
+          "objects": [
+            {
+              "stepId": "polis",
+              "optionId": "polis-a",
+              "label": "Polis A",
+              "kind": "bukti",
+              "multi": false,
+              "anchor": "polis:polis-a"
+            },
+            {
+              "stepId": "polis",
+              "optionId": "polis-b",
+              "label": "Polis B",
+              "kind": "bukti",
+              "multi": false,
+              "anchor": "polis:polis-b"
+            },
+            {
+              "stepId": "polis",
+              "optionId": "keduanya",
+              "label": "Keduanya sama saja",
+              "kind": "bukti",
+              "multi": false,
+              "anchor": "polis:keduanya"
+            }
+          ]
+        },
+        {
+          "id": "alasan",
+          "kind": "single",
+          "presentation": "list",
+          "prompt": "Pilih alasan yang benar",
+          "requiredSelections": null,
+          "buckets": [],
+          "objects": [
+            {
+              "stepId": "alasan",
+              "optionId": "perluasan-periode",
+              "label": "Perluasan banjir tercantum dan periode polis sesuai tanggal kejadian",
+              "kind": "bukti",
+              "multi": false,
+              "anchor": "alasan:perluasan-periode"
+            },
+            {
+              "stepId": "alasan",
+              "optionId": "nilai-besar",
+              "label": "Karena nilai pertanggungannya lebih besar",
+              "kind": "bukti",
+              "multi": false,
+              "anchor": "alasan:nilai-besar"
+            },
+            {
+              "stepId": "alasan",
+              "optionId": "dekat-kantor",
+              "label": "Karena gudangnya lebih dekat dengan kantor",
+              "kind": "bukti",
+              "multi": false,
+              "anchor": "alasan:dekat-kantor"
+            },
+            {
+              "stepId": "alasan",
+              "optionId": "selalu-dijamin",
+              "label": "Karena banjir selalu dijamin pada semua polis properti",
+              "kind": "bukti",
+              "multi": false,
+              "anchor": "alasan:selalu-dijamin"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "m08-benturan-keausan",
+      "number": 8,
+      "scene": "gudang-forklift",
+      "product": "HVC",
+      "title": "Benturan atau Keausan?",
+      "location": "Gudang Alat Berat",
+      "durationSeconds": 55,
+      "cameraViews": [
+        "default",
+        "depan",
+        "kiri",
+        "kanan"
+      ],
+      "steps": [
+        {
+          "id": "klasifikasi",
+          "kind": "assign",
+          "presentation": "sort",
+          "prompt": "Tentukan kategori tiap bukti",
+          "requiredSelections": null,
+          "buckets": [
+            {
+              "id": "terkait",
+              "label": "Periksa sebagai kerusakan terkait kejadian"
+            },
+            {
+              "id": "sebelumnya",
+              "label": "Pisahkan sebagai kondisi sebelum kejadian"
+            },
+            {
+              "id": "teknis",
+              "label": "Perlu pemeriksaan teknis tambahan"
+            }
+          ],
+          "objects": [
+            {
+              "stepId": "klasifikasi",
+              "optionId": "panel",
+              "label": "Panel rusak setelah benturan",
+              "kind": "kasus",
+              "multi": false,
+              "anchor": "klasifikasi:panel"
+            },
+            {
+              "stepId": "klasifikasi",
+              "optionId": "catatan-aus",
+              "label": "Catatan servis: komponen sudah aus sebelum kejadian",
+              "kind": "kasus",
+              "multi": false,
+              "anchor": "klasifikasi:catatan-aus"
+            },
+            {
+              "stepId": "klasifikasi",
+              "optionId": "internal",
+              "label": "Kerusakan internal, hubungan dengan benturan belum jelas",
+              "kind": "kasus",
+              "multi": false,
+              "anchor": "klasifikasi:internal"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "m09-hitung-teliti",
+      "number": 9,
+      "scene": "kantor-hitung",
+      "product": "HVC",
+      "title": "Hitung dengan Teliti",
+      "location": "Meja Hitung Kantor Raksa",
+      "durationSeconds": 60,
+      "cameraViews": [
+        "default"
+      ],
+      "steps": [
+        {
+          "id": "persen",
+          "kind": "number",
+          "presentation": null,
+          "prompt": "10% x Rp100.000.000 = ?",
+          "requiredSelections": null,
+          "buckets": [],
+          "objects": []
+        },
+        {
+          "id": "risiko",
+          "kind": "number",
+          "presentation": null,
+          "prompt": "Risiko sendiri yang dipakai",
+          "requiredSelections": null,
+          "buckets": [],
+          "objects": []
+        },
+        {
+          "id": "hasil",
+          "kind": "number",
+          "presentation": null,
+          "prompt": "Hasil akhir simulasi",
+          "requiredSelections": null,
+          "buckets": [],
+          "objects": []
+        }
+      ]
+    },
+    {
+      "id": "m10-grand-mission",
+      "number": 10,
+      "scene": "kota-banjir",
+      "product": "MIX",
+      "title": "Grand Mission",
+      "location": "Kompleks Usaha Kota",
+      "durationSeconds": 75,
+      "cameraViews": [
+        "default",
+        "atas"
+      ],
+      "steps": [
+        {
+          "id": "produk",
+          "kind": "assign",
+          "presentation": "stage",
+          "prompt": "Tahap 1 - Cocokkan produk tiap kasus",
+          "requiredSelections": null,
+          "buckets": [
+            {
+              "id": "AUTO",
+              "label": "AUTO"
+            },
+            {
+              "id": "HVC",
+              "label": "HVC (Alat Berat)"
+            },
+            {
+              "id": "PROPERTY",
+              "label": "FIRE / PROPERTY"
+            },
+            {
+              "id": "CARGO",
+              "label": "CARGO"
+            }
+          ],
+          "objects": [
+            {
+              "stepId": "produk",
+              "optionId": "kasus-a",
+              "label": "Kasus A - Mobil operasional",
+              "kind": "kasus",
+              "multi": false,
+              "anchor": "produk:kasus-a"
+            },
+            {
+              "stepId": "produk",
+              "optionId": "kasus-b",
+              "label": "Kasus B - Alat berat",
+              "kind": "kasus",
+              "multi": false,
+              "anchor": "produk:kasus-b"
+            },
+            {
+              "stepId": "produk",
+              "optionId": "kasus-c",
+              "label": "Kasus C - Gudang",
+              "kind": "kasus",
+              "multi": false,
+              "anchor": "produk:kasus-c"
+            }
+          ]
+        },
+        {
+          "id": "periksa",
+          "kind": "assign",
+          "presentation": "stage",
+          "prompt": "Tahap 2 - Informasi apa yang perlu diperiksa?",
+          "requiredSelections": null,
+          "buckets": [
+            {
+              "id": "jaminan",
+              "label": "Cakupan banjir pada kartu polis"
+            },
+            {
+              "id": "identitas",
+              "label": "Kesesuaian nomor seri unit"
+            },
+            {
+              "id": "bukti",
+              "label": "Kelengkapan bukti awal & kesesuaian objek"
+            }
+          ],
+          "objects": [
+            {
+              "stepId": "periksa",
+              "optionId": "kasus-a",
+              "label": "Kasus A - Mobil operasional",
+              "kind": "kasus",
+              "multi": false,
+              "anchor": "periksa:kasus-a"
+            },
+            {
+              "stepId": "periksa",
+              "optionId": "kasus-b",
+              "label": "Kasus B - Alat berat",
+              "kind": "kasus",
+              "multi": false,
+              "anchor": "periksa:kasus-b"
+            },
+            {
+              "stepId": "periksa",
+              "optionId": "kasus-c",
+              "label": "Kasus C - Gudang",
+              "kind": "kasus",
+              "multi": false,
+              "anchor": "periksa:kasus-c"
+            }
+          ]
+        },
+        {
+          "id": "tindak",
+          "kind": "assign",
+          "presentation": "stage",
+          "prompt": "Tahap 3 - Pilih tindak lanjut",
+          "requiredSelections": null,
+          "buckets": [
+            {
+              "id": "luar-jaminan",
+              "label": "Di luar jaminan yang tercantum pada kartu simulasi"
+            },
+            {
+              "id": "klarifikasi",
+              "label": "Klarifikasi identitas unit sebelum melanjutkan penilaian"
+            },
+            {
+              "id": "survei",
+              "label": "Lanjutkan ke survei / penilaian sesuai prosedur"
+            }
+          ],
+          "objects": [
+            {
+              "stepId": "tindak",
+              "optionId": "kasus-a",
+              "label": "Kasus A - Mobil operasional",
+              "kind": "kasus",
+              "multi": false,
+              "anchor": "tindak:kasus-a"
+            },
+            {
+              "stepId": "tindak",
+              "optionId": "kasus-b",
+              "label": "Kasus B - Alat berat",
+              "kind": "kasus",
+              "multi": false,
+              "anchor": "tindak:kasus-b"
+            },
+            {
+              "stepId": "tindak",
+              "optionId": "kasus-c",
+              "label": "Kasus C - Gudang",
+              "kind": "kasus",
+              "multi": false,
+              "anchor": "tindak:kasus-c"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "tutorial",
+      "number": 0,
+      "scene": "kantor",
+      "product": "AUTO",
+      "title": "Latihan Mengetuk",
+      "location": "Kantor Raksa",
+      "durationSeconds": 45,
+      "cameraViews": [
+        "default"
+      ],
+      "steps": [
+        {
+          "id": "latihan",
+          "kind": "single",
+          "presentation": "cards",
+          "prompt": "Ketuk kartu bergambar helm proyek",
+          "requiredSelections": null,
+          "buckets": [],
+          "objects": [
+            {
+              "stepId": "latihan",
+              "optionId": "helm",
+              "label": "Helm proyek",
+              "kind": "bukti",
+              "multi": false,
+              "anchor": "latihan:helm"
+            },
+            {
+              "stepId": "latihan",
+              "optionId": "kopi",
+              "label": "Kopi",
+              "kind": "bukti",
+              "multi": false,
+              "anchor": "latihan:kopi"
+            },
+            {
+              "stepId": "latihan",
+              "optionId": "kucing",
+              "label": "Kucing",
+              "kind": "bukti",
+              "multi": false,
+              "anchor": "latihan:kucing"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "m11-penentuan",
+      "number": 11,
+      "scene": "kantor",
+      "product": "AUTO",
+      "title": "Ronde Penentuan",
+      "location": "Kantor Raksa",
+      "durationSeconds": 15,
+      "cameraViews": [
+        "default"
+      ],
+      "steps": [
+        {
+          "id": "penentuan",
+          "kind": "single",
+          "presentation": "cards",
+          "prompt": "Informasi pertama yang paling perlu dicatat",
+          "requiredSelections": null,
+          "buckets": [],
+          "objects": [
+            {
+              "stepId": "penentuan",
+              "optionId": "identitas-kronologi",
+              "label": "Identitas kendaraan dan kronologi singkat kejadian",
+              "kind": "bukti",
+              "multi": false,
+              "anchor": "penentuan:identitas-kronologi"
+            },
+            {
+              "stepId": "penentuan",
+              "optionId": "warna-favorit",
+              "label": "Warna favorit nasabah",
+              "kind": "bukti",
+              "multi": false,
+              "anchor": "penentuan:warna-favorit"
+            },
+            {
+              "stepId": "penentuan",
+              "optionId": "harga-bengkel",
+              "label": "Daftar harga bengkel terdekat",
+              "kind": "bukti",
+              "multi": false,
+              "anchor": "penentuan:harga-bengkel"
+            },
+            {
+              "stepId": "penentuan",
+              "optionId": "jadwal-servis",
+              "label": "Jadwal servis tahun depan",
+              "kind": "bukti",
+              "multi": false,
+              "anchor": "penentuan:jadwal-servis"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
