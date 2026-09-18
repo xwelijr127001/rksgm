@@ -541,7 +541,10 @@ export class Room {
 
   finish(): void {
     const mission = missionForRound(this.roundIndex);
-    if (mission && this.phase === 'ACTIVE') this.settleRound(this.roundIndex, mission);
+    // Sama seperti closeRound(): ronde ACTIVE yang sedang DIJEDA juga dibukukan,
+    // supaya jawaban yang sudah masuk tidak hilang bila host mengakhiri saat jeda.
+    const aktif = this.phase === 'ACTIVE' || (this.phase === 'PAUSED' && this.prevPhase === 'ACTIVE');
+    if (mission && aktif) this.settleRound(this.roundIndex, mission);
     this.clearTimer();
     this.phase = 'FINISHED';
     this.prevPhase = null;

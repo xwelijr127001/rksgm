@@ -719,10 +719,10 @@ function Pelabuhan(): ReactElement {
       <Peti x={118} y={240} w={40} h={32} />
       <Peti x={52} y={208} w={40} h={32} rusak />
       <Peti x={96} y={208} w={40} h={32} />
-      <Papan x={20} y={186} w={66} h={15} teks="2 PETI RUSAK" isi={C.merah} ukuran={8} />
+      <Papan x={20} y={186} w={66} h={15} teks="DERMAGA" isi={C.biru} ukuran={8} />
       <Forklift x={198} y={244} s={0.78} />
       <Orang x={318} y={246} s={1.2} seragam={C.hijau} papan helm />
-      <Papan x={284} y={196} w={82} h={15} teks="PETUGAS CATAT" ukuran={8} />
+      <Papan x={284} y={196} w={82} h={15} teks="PETUGAS" ukuran={8} />
       <g className="anim-melayang">
         <path
           d="M120 60 q8 -6 16 0 q8 -6 16 0"
@@ -785,7 +785,7 @@ function Gudang(): ReactElement {
       ))}
       <Orang x={214} y={226} s={1.15} seragam={C.hijau} helm papan />
       <path d="M198 224 q16 -5 32 0" fill="none" stroke={C.putih} strokeWidth="2.4" opacity="0.8" />
-      <Papan x={38} y={176} w={108} h={16} teks="BANJIR MATA KAKI" isi={C.biru} ukuran={9} />
+      <Papan x={38} y={176} w={108} h={16} teks="BANJIR" isi={C.biru} ukuran={9} />
     </>
   );
 }
@@ -822,7 +822,7 @@ function GudangForklift(): ReactElement {
       <path d="M0 206 L400 200 L400 210 L0 216 Z" fill={C.betonTua} />
       <path d="M40 260 L96 212 M180 260 L214 212 M320 260 L330 210" stroke={C.betonTua} strokeWidth="2" opacity="0.6" />
       <Forklift x={148} y={244} s={1.35} penyok balik />
-      <Papan x={158} y={150} w={110} h={16} teks="PANEL PENYOK BARU" isi={C.merah} ukuran={9} />
+      <Papan x={158} y={150} w={110} h={16} teks="FORKLIFT GT-220" isi={C.cokelat} ukuran={9} />
       <Bayangan cx={52} cy={250} rx={48} ry={9} />
       <rect x="10" y="212" width="84" height="8" rx="3" fill="#a87f4b" />
       <rect x="16" y="220" width="7" height="28" rx="3" fill="#8d6737" />
@@ -835,7 +835,7 @@ function GudangForklift(): ReactElement {
         <rect x="0" y="0" width="40" height="18" rx="2" fill="#f0e6cd" stroke={C.cokelat} strokeWidth="1.2" />
         <path d="M5 6 h28 M5 11 h18" stroke={C.cokelat} strokeWidth="1.3" />
       </g>
-      <Papan x={4} y={172} w={102} h={16} teks="CATATAN SERVIS LAMA" isi={C.cokelat} ukuran={8} />
+      <Papan x={4} y={172} w={102} h={16} teks="CATATAN SERVIS" isi={C.cokelat} ukuran={8} />
     </>
   );
 }

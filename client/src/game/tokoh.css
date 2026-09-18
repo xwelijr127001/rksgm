@@ -1,0 +1,95 @@
+/* Tokoh Raksa di halaman HTML. Sprite sheet 4 frame berjajar. */
+.tokoh { display: flex; align-items: flex-end; gap: 12px; margin: 0; }
+.tokoh-atas { flex-direction: column-reverse; align-items: center; }
+.tokoh-bawah { flex-direction: column; align-items: center; gap: 6px; }
+.tokoh-sprite {
+  flex: 0 0 auto;
+  background-size: 400% 100%;
+  background-repeat: no-repeat;
+  background-position: 0% 0;
+  filter: drop-shadow(0 6px 0 rgba(23, 54, 42, .10));
+}
+.tokoh-sprite.tokoh-ceo, .tokoh-potret-isi.tokoh-ceo {
+  background-image: url('/karakter/ceo-besar.png');
+  background-image: image-set(url('/karakter/ceo-besar.webp') type('image/webp'), url('/karakter/ceo-besar.png') type('image/png'));
+}
+.tokoh-sprite.tokoh-missRaksa, .tokoh-potret-isi.tokoh-missRaksa {
+  background-image: url('/karakter/miss-raksa-besar.png');
+  background-image: image-set(url('/karakter/miss-raksa-besar.webp') type('image/webp'), url('/karakter/miss-raksa-besar.png') type('image/png'));
+}
+.tokoh-sprite.tokoh-isti, .tokoh-potret-isi.tokoh-isti {
+  background-image: url('/karakter/isti-besar.png');
+  background-image: image-set(url('/karakter/isti-besar.webp') type('image/webp'), url('/karakter/isti-besar.png') type('image/png'));
+}
+/* Potret bulat pemandu (frame diam, kepala & bahu). Ukuran & posisi isi diatur inline. */
+.tokoh-potret {
+  position: relative; display: inline-block; flex: 0 0 auto; overflow: hidden; border-radius: 50%;
+  background: #fbefd0; box-shadow: 0 0 0 1px #e2d6ad;
+}
+.tokoh-potret::after { content: ''; position: absolute; inset: 0; border-radius: 50%; box-shadow: inset 0 0 0 2px #fff; }
+.tokoh-potret-isi { position: absolute; overflow: hidden; background-size: 400% 100%; background-repeat: no-repeat; background-position: 0 0; }
+/* Slot pemandu di panel: potret + nama + satu kalimat. */
+.pemandu-kata { display: flex; gap: 12px; align-items: center; }
+.pemandu-kata > p { margin: 0; font-size: 15px; line-height: 1.45; color: #243d30; }
+.pemandu-kata > p > b { display: block; font-size: 12px; font-weight: 700; letter-spacing: .02em; color: #176b45; }
+/* Frame: 0 diam, 1 tangan setengah, 2 tangan tinggi, 3 diam (variasi). */
+.tokoh-sprite.lambai { animation: tokoh-lambai 4s infinite step-end; }
+/* Tokoh yang berdiri bersama tidak melambai serempak. */
+.tokoh-trio .tokoh:nth-child(1) .tokoh-sprite.lambai { animation-delay: -1.4s; }
+.tokoh-trio .tokoh:nth-child(3) .tokoh-sprite.lambai { animation-delay: -2.7s; }
+@keyframes tokoh-lambai {
+  0% { background-position-x: 0%; }
+  6% { background-position-x: 33.333%; }
+  12% { background-position-x: 66.667%; }
+  18% { background-position-x: 33.333%; }
+  24% { background-position-x: 66.667%; }
+  30% { background-position-x: 33.333%; }
+  36% { background-position-x: 0%; }
+  70% { background-position-x: 100%; }
+  78% { background-position-x: 0%; }
+}
+.tokoh-balon {
+  position: relative; max-width: 280px; padding: 10px 14px; border-radius: 16px;
+  background: #fff; border: 2px solid #e3e7dc; color: #243d30; font-size: 15px; line-height: 1.45;
+  box-shadow: 0 4px 12px rgba(23, 54, 42, .08); text-align: left;
+}
+.tokoh-balon b, .tokoh-nama b { display: block; font-size: 12px; font-weight: 700; letter-spacing: .02em; color: #176b45; }
+.tokoh-nama small { display: block; font-size: 11px; color: #5b6b61; }
+.tokoh-samping .tokoh-balon::before {
+  content: ''; position: absolute; left: -9px; bottom: 16px; width: 14px; height: 14px; background: #fff;
+  border-left: 2px solid #e3e7dc; border-bottom: 2px solid #e3e7dc; transform: rotate(45deg);
+}
+.tokoh-atas .tokoh-balon { margin-bottom: 4px; text-align: center; }
+.tokoh-nama { padding: 4px 10px; border-radius: 999px; background: #fffefa; border: 1px solid #e3e7dc; }
+/* Tinggi papan nama sama (1 atau 2 baris) supaya kaki tokoh yang berjajar tetap sejajar. */
+.tokoh-bawah .tokoh-nama { text-align: center; border-radius: 12px; min-height: 44px; display: flex; flex-direction: column; justify-content: center; }
+.tokoh-balon-atas { margin: 0 0 8px; text-align: center; }
+.tokoh-balon-atas::after {
+  content: ''; position: absolute; left: 50%; bottom: -9px; width: 14px; height: 14px; margin-left: -7px; background: #fff;
+  border-right: 2px solid #e3e7dc; border-bottom: 2px solid #e3e7dc; transform: rotate(45deg);
+}
+@media (prefers-reduced-motion: reduce) { .tokoh-sprite.lambai { animation: none; } }
+
+/* Pesan koneksi terputus dengan Bu Isti kecil. */
+.tokoh-putus { display: flex; gap: 10px; align-items: center; }
+.tokoh-putus-isi b { display: block; font-size: 12px; font-weight: 700; letter-spacing: .02em; }
+
+/* Penempatan per halaman. */
+.welcome-ceo { position: absolute; left: 1%; bottom: 3%; z-index: 2; gap: 6px; }
+.welcome-ceo .tokoh-nama { margin-bottom: 6px; }
+.lobby-ceo, .pj-ceo { justify-content: center; }
+.lobby-ceo { margin-top: 6px; }
+.hasil-ceo { margin: 8px 0 4px; }
+.join-tokoh { margin: 0 0 6px; justify-content: center; }
+/* Proyektor: balon Bu Isti berisi petunjuk bergabung (termasuk alamat), jadi lebih lebar. */
+.pj-isti { align-items: center; justify-content: center; }
+.pj-isti .tokoh-balon { max-width: 470px; font-size: 18px; margin-bottom: 0 !important; }
+.tokoh-trio { display: flex; justify-content: center; align-items: flex-end; gap: 28px; flex-wrap: wrap; }
+@media (max-width: 700px) {
+  .welcome-ceo { left: -3%; bottom: 0; gap: 2px; }
+  .welcome-ceo .tokoh-sprite { width: 55px !important; height: 104px !important; }
+  .welcome-ceo .tokoh-nama { padding: 2px 8px; }
+  .welcome-ceo .tokoh-nama b { font-size: 10.5px; letter-spacing: 0; }
+  .welcome-ceo .tokoh-nama small { font-size: 9px; }
+  .welcome-page .raki-greeting { left: 4px; }
+}

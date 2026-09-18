@@ -157,6 +157,15 @@ export interface StepReveal {
   /** Jawaban benar dalam bentuk teks siap tampil. */
   correctText: string[];
   explanation: string;
+  /**
+   * Bentuk mesin dari jawaban benar (id, bukan teks) supaya adegan bisa menandai
+   * objek yang tepat. Ikut aturan yang sama: hanya dikirim saat REVEAL.
+   */
+  correct?: {
+    optionIds?: string[];
+    assign?: Record<string, string>;
+    value?: number;
+  };
 }
 
 export interface MissionReveal {

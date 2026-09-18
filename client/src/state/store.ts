@@ -30,6 +30,8 @@ export interface GameState {
   error: string | null;
   notice: string | null;
   kicked: boolean;
+  /** Bertambah saat host meminta pemain memuat ulang adegan (scene:retry). */
+  sceneNonce: number;
 }
 
 const DEFAULT_LOOK: PlayerLook = { body: 0, skin: 1, hair: 0, accessory: 'none', color: 0 };
@@ -45,6 +47,7 @@ let state: GameState = {
   error: null,
   notice: null,
   kicked: false,
+  sceneNonce: 0,
 };
 
 const listeners = new Set<() => void>();
@@ -169,7 +172,13 @@ export function initConnection() {
     set({ room, clockOffset: room.serverNow - Date.now() });
   });
   sock.on('me', (me: MePrivate) => set({ me }));
-  sock.on('kicked', () => set({ kicked: true, notice: 'Kamu dikeluarkan dari room oleh host.' }));
+  sock.on('kicked', () => {
+    const code = state.identity?.code;
+    if (code) forgetRoom(code);
+    set({ kicked: true, notice: 'Panitia mengeluarkanmu dari permainan ini.' });
+  });
+  // Host menekan "Minta muat ulang adegan": muat ulang adegan ronde ini saja.
+  sock.on('scene:retry', () => set({ sceneNonce: state.sceneNonce + 1 }));
 }
 
 /** Pulihkan sesi setelah reconnect: server adalah sumber state. */

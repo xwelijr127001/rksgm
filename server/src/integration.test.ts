@@ -119,6 +119,20 @@ function wrongAnswer(roundIndex: number): Record<string, unknown> {
   return answer;
 }
 
+test('paket socket cacat tidak menjatuhkan server', async () => {
+  const s = connect();
+  await ready(s);
+  // Objek yang melempar saat diubah ke string/angka (dulu mematikan proses server).
+  const racun = { toString: 1, valueOf: 1 };
+  for (const ev of ['host:create', 'host:attach', 'player:join', 'player:rejoin', 'state:request', 'spectator:join']) {
+    const res = await rpc(s, ev, { code: racun, eventName: racun, playerToken: racun, look: { body: racun } });
+    assert.equal(res.ok, false, `${ev} ditolak dengan ack gagal`);
+  }
+  const health = (await (await fetch(`${BASE}/api/health`)).json()) as { ok: boolean };
+  assert.equal(health.ok, true, 'server tetap hidup');
+  s.close();
+});
+
 test('pertandingan penuh: host + 2 pemain + penonton', async (t) => {
   const host = connect();
   const p1 = connect();

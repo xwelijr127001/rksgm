@@ -1,6 +1,7 @@
 ﻿import { useState } from 'react';
 import { Raki } from './Raki';
 import { playSfx } from '../audio/audio';
+import { KarakterTokoh } from '../game/KarakterTokoh';
 export function WelcomeArt() {
   const [wave, setWave] = useState(false);
   return <div className="welcome-world">
@@ -32,6 +33,7 @@ export function WelcomeArt() {
       <path d="m102 116 4 11 12 3-12 4-4 11-3-11-12-4 12-3 3-11Z" fill="#287451" /><path d="m443 44 3 9 9 3-9 3-3 9-3-9-9-3 9-3 3-9Z" fill="#E7946E" />
       <path d="M148 82h48m-34-14h39" stroke="#E9BA3F" strokeWidth="4" strokeLinecap="round" />
     </svg>
+    <KarakterTokoh tokoh="ceo" className="welcome-ceo" tinggi={150} />
     <div className="world-caption">Kota ini butuh andalan.<span>Kamu, misalnya.</span></div>
     <button className="welcome-raki" aria-label="Sapa Raki" onClick={() => { setWave(v => !v); playSfx('pilih'); }}><Raki size={170} mood={wave ? 'senang' : 'sapa'} /><span className="raki-greeting" aria-live="polite">{wave ? 'Yuk, main bareng!' : 'Hai, aku Raki!'}</span></button>
   </div>;

@@ -176,3 +176,22 @@ test('buildReveal menghasilkan teks jawaban, bukan id', () => {
   assert.ok(reveal.summary.length > 10);
   assert.ok(reveal.learning.length > 10);
 });
+
+test('buildReveal juga memuat id jawaban benar yang sama persis dengan kunci', () => {
+  MISSIONS.forEach((mission, i) => {
+    const key = keyForRound(i)!;
+    const reveal = buildReveal(mission, key);
+    for (const sk of key.steps) {
+      const sr = reveal.steps.find((s) => s.stepId === sk.stepId)!;
+      assert.ok(sr.correct, `${mission.id}/${sk.stepId} punya bentuk mesin`);
+      if (sk.single !== undefined) assert.deepEqual(sr.correct!.optionIds, [sk.single]);
+      if (sk.multi !== undefined) assert.deepEqual(sr.correct!.optionIds, sk.multi);
+      if (sk.assign !== undefined) assert.deepEqual(sr.correct!.assign, sk.assign);
+      if (sk.number !== undefined) assert.equal(sr.correct!.value, sk.number.value);
+      // Setiap id harus id opsi/item yang benar-benar ada di misi publik.
+      const step = mission.steps.find((s) => s.id === sk.stepId)!;
+      const ids = step.kind === 'single' || step.kind === 'multi' ? step.options.map((o) => o.id) : [];
+      for (const id of sr.correct!.optionIds ?? []) assert.ok(ids.includes(id), `${mission.id}/${step.id}: ${id}`);
+    }
+  });
+});

@@ -1,0 +1,51 @@
+{
+  "frames": 4,
+  "ceo": {
+    "berkas": "ceo",
+    "sumber": "character/owner-pixel-wave-sheet.png",
+    "potong": {
+      "minX": 50,
+      "minY": 23,
+      "cw": 362,
+      "ch": 685,
+      "fw": 543,
+      "fh": 724
+    },
+    "besar": {
+      "frameW": 190,
+      "frameH": 360
+    }
+  },
+  "isti": {
+    "berkas": "isti",
+    "sumber": "character/Direktur IT Isti Marlisa wave.png",
+    "potong": {
+      "minX": 44,
+      "minY": 86,
+      "cw": 349,
+      "ch": 763,
+      "fw": 443,
+      "fh": 887
+    },
+    "besar": {
+      "frameW": 165,
+      "frameH": 360
+    }
+  },
+  "missRaksa": {
+    "berkas": "miss-raksa",
+    "sumber": "character/Miss Raksa.png",
+    "potong": {
+      "minX": 60,
+      "minY": 46,
+      "cw": 319,
+      "ch": 813,
+      "fw": 443,
+      "fh": 887
+    },
+    "besar": {
+      "frameW": 141,
+      "frameH": 360
+    }
+  }
+}

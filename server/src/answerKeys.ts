@@ -287,12 +287,20 @@ export function buildReveal(mission: MissionPublic, key: MissionKey): MissionRev
     }
     if (sk.order !== undefined) correctText.push(sk.order.map((id) => labelOf(step, id)).join(' -> '));
 
+    const correct: StepReveal['correct'] = {};
+    if (sk.single !== undefined) correct.optionIds = [sk.single];
+    if (sk.multi !== undefined) correct.optionIds = [...sk.multi];
+    if (sk.order !== undefined) correct.optionIds = [...sk.order];
+    if (sk.assign !== undefined) correct.assign = { ...sk.assign };
+    if (sk.number !== undefined) correct.value = sk.number.value;
+
     return {
       stepId: sk.stepId,
       prompt: step?.prompt ?? sk.stepId,
       weight: sk.weight,
       correctText,
       explanation: sk.explanation,
+      correct,
     };
   });
 

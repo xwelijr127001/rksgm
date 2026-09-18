@@ -1,4 +1,7 @@
 /**
+ * LEGACY - dipakai hanya oleh components/MissionStage.tsx (referensi Unity). Kontrol HTML
+ * yang aktif sekarang ada di client/src/game/MissionPlay.tsx (KontrolLangkah).
+ *
  * Renderer interaksi satu langkah misi (RAKSA GAME).
  *
  * Semua jenis langkah bisa diselesaikan dengan TAP saja. Kunci jawaban hanya

@@ -5,6 +5,9 @@ import { Avatar } from '../art/Avatar';
 import { playSfx, setTrack } from '../audio/audio';
 import { CharacterPicker } from '../components/CharacterPicker';
 import { PlayerShell } from '../components/PlayerShell';
+import { prefetchAdegan } from '../game/prefetch';
+import { KarakterTokoh, PotretTokoh } from '../game/KarakterTokoh';
+import { TOKOH, namaTokoh } from '@shared/brand';
 import { useOnChange } from '../hooks';
 import { actions, savedLook, useGame } from '../state/store';
 import { Memuat, Modal, Pesan } from '../ui/kit';
@@ -15,7 +18,8 @@ export default function Lobby() {
   const [look, setLook] = useState<PlayerLook>(() => savedLook());
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  useEffect(() => { setTrack('lobby'); return () => setTrack(null); }, []);
+  // Unduh engine adegan selagi menunggu, supaya misi pertama langsung tampil.
+  useEffect(() => { setTrack('lobby'); prefetchAdegan(); return () => setTrack(null); }, []);
   useOnChange(room?.playerCount ?? 0, (next, prev) => { if (prev !== undefined && next > prev) playSfx('masuk'); });
   if (!identity) return <PlayerShell back="/"><main className="result-focus"><h1>Gabung dulu, yuk.</h1><Link className="primary-action" to="/join">Masukkan kode permainan</Link></main></PlayerShell>;
   if (!room) return <PlayerShell><main className="result-focus"><Memuat teks="Menyiapkan ruang main…" /><Link className="quiet-link" to="/join">Coba gabung lagi</Link></main></PlayerShell>;
@@ -33,8 +37,9 @@ export default function Lobby() {
   return <PlayerShell label={'Kode ' + room.code}>
     <main className="lobby-focus"><span className="eyebrow">{room.eventName}</span><div className="lobby-avatar"><Avatar look={myLook} size={135} mood={ready ? 'senang' : 'netral'} /></div><h1>Halo, {name}!</h1><p>{ready ? 'Kamu sudah siap. Tunggu aba-aba panitia.' : 'Sudah nyaman? Kita segera mulai.'}</p>
       <button className="primary-action" disabled={ready || status !== 'connected'} onClick={() => { playSfx('pilih'); void actions.setReady(true); }}>{ready ? '✓  Siap bermain' : 'Saya siap!'}</button>
-      {status !== 'connected' ? <Pesan jenis="kuning">Koneksi terputus. Sedang menyambungkan kembali…</Pesan> : null}
+      {status !== 'connected' ? <Pesan jenis="kuning"><span className="tokoh-putus"><PotretTokoh tokoh="isti" ukuran={44} /><span className="tokoh-putus-isi">{TOKOH.isti.aktif ? <b>{namaTokoh('isti')}</b> : null}Koneksi terputus. Sedang menyambungkan kembali…</span></span></Pesan> : null}
       <div className="result-links"><button className="text-button" onClick={() => { setNick(name); setLook(myLook); setError(null); setModal(true); }}>Ganti karakter</button>{ready ? <button className="text-button" disabled={status !== 'connected'} onClick={() => void actions.setReady(false)}>Belum siap</button> : null}</div>
+      <KarakterTokoh tokoh="ceo" className="lobby-ceo" tinggi={120} teks={TOKOH.ceo.sapaan.lobby} />
       <div className="lobby-roster"><p>{others.length ? others.length + ' teman sudah bergabung' : 'Teman-temanmu segera bergabung.'}</p><div className="lobby-peers">{others.slice(0, 10).map(p => <div key={p.id}><Avatar look={p.look} size={48} mood={p.ready ? 'senang' : 'netral'} /><span>{p.nickname}</span></div>)}</div>{others.length > 10 ? <p>dan {others.length - 10} pemain lainnya</p> : null}</div>
     </main>
     {modal ? <Modal judul="Karakter kamu" onTutup={() => setModal(false)} aksi={<><button className="text-button" onClick={() => setModal(false)}>Batal</button><button className="primary-action" disabled={nick.trim().length < 2 || saving || status !== 'connected'} onClick={() => void save()}>{saving ? 'Menyimpan…' : 'Simpan'}</button></>}><CharacterPicker nickname={nick} look={look} onNickname={setNick} onLook={setLook} />{error ? <Pesan jenis="error">{error}</Pesan> : null}</Modal> : null}

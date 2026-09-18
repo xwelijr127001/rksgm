@@ -64,7 +64,7 @@ export const MISSIONS: MissionPublic[] = [
     location: 'Bengkel Mitra',
     scene: 'bengkel',
     story: 'Benturan terjadi di bagian depan kiri kendaraan.',
-    instruction: 'Pilih tiga bukti yang relevan dari enam kartu bergambar.',
+    instruction: 'Potret tiga bukti yang relevan dari enam pilihan di bengkel.',
     interactionLabel: 'Pilih 3 bukti',
     durationSeconds: 25,
     briefingSeconds: 10,
@@ -102,7 +102,7 @@ export const MISSIONS: MissionPublic[] = [
     scene: 'ruko',
     story:
       'Kebakaran sudah ditangani dan lokasi dinyatakan aman. Nasabah ingin menyiapkan laporan awal.',
-    instruction: 'Masukkan empat kartu dokumen yang sesuai ke folder laporan.',
+    instruction: 'Masukkan empat dokumen yang sesuai ke folder laporan.',
     interactionLabel: 'Masukkan 4 dokumen ke folder',
     durationSeconds: 30,
     briefingSeconds: 10,
@@ -723,8 +723,8 @@ export const TUTORIAL_MISSION: MissionPublic = {
   location: 'Kantor Raksa',
   scene: 'kantor',
   story:
-    'Latihan singkat sebelum pertandingan. Ketuk kartu untuk memilih, lalu tekan Kirim Jawaban. Jawaban latihan tidak dihitung pada skor kompetisi.',
-  instruction: 'Ketuk kartu bergambar helm, lalu tekan Kirim Jawaban.',
+    'Latihan singkat sebelum pertandingan. Ketuk benda di gambar (atau pilihan di daftar) untuk memilih, lalu tekan Kirim. Jawaban latihan tidak dihitung pada skor kompetisi.',
+  instruction: 'Ketuk helm proyek di gambar, lalu tekan Kirim.',
   interactionLabel: 'Latihan',
   durationSeconds: 45,
   briefingSeconds: 0,
@@ -735,7 +735,7 @@ export const TUTORIAL_MISSION: MissionPublic = {
     {
       kind: 'single',
       id: 'latihan',
-      prompt: 'Ketuk kartu bergambar helm proyek',
+      prompt: 'Ketuk helm proyek',
       presentation: 'cards',
       weight: 1,
       options: [

@@ -226,6 +226,23 @@ const reply = (cb: unknown, res: Ack<unknown>) => {
 io.on('connection', (socket: Socket) => {
   const data = socket.data as SocketData;
 
+  // Satu paket cacat (mis. { code: { toString: 1 } }) tidak boleh menjatuhkan
+  // server dan menghapus semua room: setiap handler dijaga, pengirim dapat ack gagal.
+  const pasang = socket.on.bind(socket);
+  socket.on = ((ev: string, fn: (...args: unknown[]) => unknown) =>
+    pasang(ev, (...args: unknown[]) => {
+      const gagal = (err: unknown): void => {
+        console.warn(`[socket] ${ev} ditolak: ${(err as Error)?.message ?? String(err)}`);
+        reply(args[args.length - 1], { ok: false, error: 'Permintaan tidak dapat diproses.' });
+      };
+      try {
+        const hasil = fn(...args);
+        if (hasil && typeof (hasil as Promise<unknown>).catch === 'function') (hasil as Promise<unknown>).catch(gagal);
+      } catch (err) {
+        gagal(err);
+      }
+    })) as typeof socket.on;
+
   socket.on('host:create', (payload: { eventName?: string }, cb) => {
     const room = manager.create(sanitizeEventName(payload?.eventName) || undefined);
     data.code = room.code;
@@ -483,7 +500,17 @@ io.on('connection', (socket: Socket) => {
 // ------------------------------------------------------------------ static
 
 if (fs.existsSync(CONFIG.clientDist)) {
-  app.use(express.static(CONFIG.clientDist));
+  app.use(
+    express.static(CONFIG.clientDist, {
+      // Berkas di /assets bernama hash (Vite): aman di-cache lama, jadi engine
+      // adegan tidak diunduh ulang oleh HP peserta setiap ronde/refresh.
+      setHeaders: (res, filePath) => {
+        if (/[\\/]assets[\\/]/.test(filePath)) res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
+        // Sprite tokoh: nama berkas tetap, jadi cukup di-cache 1 jam (tidak divalidasi ulang tiap halaman).
+        else if (/[\\/]karakter[\\/]/.test(filePath)) res.setHeader('Cache-Control', 'public, max-age=3600');
+      },
+    }),
+  );
   app.get(/^(?!\/api\/|\/socket\.io\/).*/, (_req, res) => {
     res.sendFile(path.join(CONFIG.clientDist, 'index.html'));
   });

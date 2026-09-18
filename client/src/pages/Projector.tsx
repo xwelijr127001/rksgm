@@ -17,7 +17,9 @@ import { Avatar } from '../art/Avatar';
 import { CityMap } from '../art/CityMap';
 import { Icon } from '../art/Icon';
 import { RakiBubble } from '../art/Raki';
-import { Scene } from '../art/Scene';
+import { AdeganLayar } from '../game/AdeganLayar';
+import { KarakterTokoh } from '../game/KarakterTokoh';
+import { TOKOH } from '@shared/brand';
 import { playSfx, preferMusicOn, setTrack } from '../audio/audio';
 import { useOnChange } from '../hooks';
 import { actions, useGame } from '../state/store';
@@ -279,23 +281,44 @@ export default function Projector() {
   const gerbangGabung = (
     <div className="pj-kolom">
       <div className="panel stack stack-l" style={{ alignItems: 'center', textAlign: 'center' }}>
-        <QrCode value={room.joinUrl} size={300} />
+        <QrCode value={room.joinUrl} size={TOKOH.isti.aktif ? 260 : 300} />
         <div className="pj-kode">
           <KodeRoom code={room.code} />
         </div>
-        <p className="pj-teks">
-          Pindai QR atau buka{' '}
-          <strong className="mono" style={{ overflowWrap: 'anywhere' }}>
-            {room.joinUrl}
-          </strong>{' '}
-          lalu masukkan kode di atas.
-        </p>
-        <p className="pj-teks2">Pilih karakter, tulis nama panggilan, lalu tekan Siap.</p>
+        {/* Bu Isti (Direktur IT) menjelaskan cara bergabung; tanpa tokoh, petunjuk biasa. */}
+        {TOKOH.isti.aktif ? (
+          <KarakterTokoh
+            tokoh="isti"
+            className="pj-isti"
+            tinggi={150}
+            teks={
+              <>
+                Pindai QR atau buka{' '}
+                <strong className="mono" style={{ overflowWrap: 'anywhere' }}>
+                  {room.joinUrl}
+                </strong>{' '}
+                lalu masukkan kode di atas. {TOKOH.isti.sapaan.gabung}
+              </>
+            }
+          />
+        ) : (
+          <>
+            <p className="pj-teks">
+              Pindai QR atau buka{' '}
+              <strong className="mono" style={{ overflowWrap: 'anywhere' }}>
+                {room.joinUrl}
+              </strong>{' '}
+              lalu masukkan kode di atas.
+            </p>
+            <p className="pj-teks2">Pilih karakter, tulis nama panggilan, lalu tekan Siap.</p>
+          </>
+        )}
       </div>
       <div className="stack">
+        <KarakterTokoh tokoh="ceo" className="pj-ceo" tinggi={150} teks={TOKOH.ceo.sapaan.awal} />
         <div className="panel">
           <h2 className="pj-judul2">Peta perjalanan misi</h2>
-          <CityMap currentRound={-1} completed={[]} />
+          <CityMap currentRound={-1} completed={[]} compact />
         </div>
         <div className="panel stack">
           <div className="baris-antara">
@@ -373,9 +396,15 @@ export default function Projector() {
 
   const misiBerjalan = (
     <div className="pj-kolom">
-      <div className="panel">
-        <h2 className="pj-judul2">Perjalanan misi</h2>
-        <CityMap currentRound={room.roundIndex} completed={selesai} />
+      <div className="stack">
+        <div className="panel">
+          <h2 className="pj-judul2">Perjalanan misi</h2>
+          <CityMap currentRound={room.roundIndex} completed={selesai} />
+        </div>
+        {/* Kasus dibawakan Miss Raksa (CS) di kolom kiri supaya terlihat tanpa menggulung. */}
+        {fase === 'BRIEFING' && misi && misi.id !== 'tutorial' ? (
+          <KarakterTokoh tokoh="missRaksa" className="pj-ceo" tinggi={190} teks={misi.rakiBriefing} />
+        ) : null}
       </div>
       <div className="stack">
         <div className="panel stack">
@@ -388,11 +417,11 @@ export default function Projector() {
           </h2>
           {misi ? <p className="pj-teks">{misi.story}</p> : null}
           {misi ? (
-            <div style={{ maxWidth: 380 }}>
-              <Scene scene={misi.scene} />
+            <div style={{ maxWidth: 560 }}>
+              <AdeganLayar mission={misi} roundIndex={room.roundIndex} reveal={null} />
             </div>
           ) : null}
-          {fase === 'BRIEFING' && misi ? (
+          {fase === 'BRIEFING' && misi && (misi.id === 'tutorial' || !TOKOH.missRaksa.aktif) ? (
             <RakiBubble judul="Briefing" teks={misi.rakiBriefing} mood="bicara" size={88} />
           ) : null}
           {fase === 'BRIEFING' && totalPeserta > 0 ? (
@@ -436,7 +465,7 @@ export default function Projector() {
       </div>
       <div className="stack">
         <RakiBubble judul="Yang dibawa pulang" teks={room.reveal.learning} mood="bicara" size={110} />
-        {misi ? <Scene scene={misi.scene} /> : null}
+        {misi ? <AdeganLayar mission={misi} roundIndex={room.roundIndex} reveal={room.reveal} /> : null}
         <div className="panel">
           <h2 className="pj-judul2">Perjalanan misi</h2>
           <CityMap currentRound={room.roundIndex} completed={selesai} compact />
@@ -458,6 +487,7 @@ export default function Projector() {
         </div>
       </div>
       <div className="stack">
+        <KarakterTokoh tokoh="isti" className="pj-ceo" tinggi={130} teks={TOKOH.isti.sapaan.ringkasan} />
         <div className="panel stack-s">
           <h2 className="pj-judul2">Ringkasan ronde {room.roundIndex + 1}</h2>
           <p className="pj-teks">
@@ -488,6 +518,11 @@ export default function Projector() {
   const akhir = (
     <div className="stack stack-l">
       <h2 className="pj-judul tengah">Juara {room.eventName}</h2>
+      <div className="tokoh-trio">
+        <KarakterTokoh tokoh="isti" tinggi={170} susun="bawah" />
+        <KarakterTokoh tokoh="ceo" tinggi={190} susun="bawah" teks={TOKOH.ceo.sapaan.podium} />
+        <KarakterTokoh tokoh="missRaksa" tinggi={170} susun="bawah" />
+      </div>
       {room.tie ? (
         <Pesan jenis="kuning">
           Ada peringkat seri. Panitia dapat menjalankan ronde penentuan untuk memisahkan poin

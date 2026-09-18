@@ -33,6 +33,86 @@ export const BRAND = {
     'Logo & warna resmi belum diverifikasi dari raksaonline.com. Ganti di shared/brand.ts.',
 } as const;
 
+/**
+ * Tokoh Raksa yang muncul di game. Sprite: client/public/karakter/ (dibuat dari character/
+ * lewat `node tools/siapkan-karakter.mjs`).
+ *
+ *   ceo       Mr Roger - pembuka & penutup: halaman awal, lobby, slot pemandu di bawah hasil
+ *             pembahasan, podium
+ *   Tokoh tidak pernah digambar di adegan misi: tempatnya di panel (potret kecil), supaya
+ *   tidak menutupi objek, label, atau tanda pembahasan.
+ *   missRaksa Miss Raksa - ikon & pilar Raksa CS, "pembawa kasus": sapaan di halaman gabung,
+ *             suara briefing tiap misi (HP & proyektor)
+ *   isti      Bu Isti - Direktur IT, "urusan sistem": cara bergabung (QR) & ringkasan data
+ *             ronde di proyektor, pesan saat koneksi HP terputus
+ *   Ketiganya berdiri bersama di podium proyektor.
+ *
+ * PENTING: kalimat sapaan di bawah adalah USULAN tim game. Mohon disetujui oleh yang
+ * bersangkutan (atau Corporate Communication) sebelum dipakai di acara resmi.
+ * Set `aktif: false` untuk menyembunyikan satu tokoh di seluruh game.
+ */
+export const TOKOH = {
+  ceo: {
+    aktif: true,
+    nama: 'Mr Roger' as string | null,
+    jabatan: 'CEO Asuransi Raksa',
+    /** false = cukup nama ("Mr Roger") di papan nama & balon; jabatan tetap untuk pembaca layar. */
+    tampilJabatan: false,
+    sapaan: {
+      awal: 'Selamat datang di Misi Lindungi Kota!',
+      lobby: 'Terima kasih sudah bergabung. Selamat bermain!',
+      /**
+       * Di bawah hasil pembahasan tiap misi (slot pemandu di panel), bergiliran menurut
+       * nomor misi. Netral: cocok untuk jawaban tepat maupun belum tepat.
+       */
+      pembahasan: [
+        'Setiap kasus adalah pelajaran.',
+        'Terima kasih sudah ikut belajar.',
+        'Semangat untuk kasus berikutnya!',
+      ],
+      podium: 'Selamat untuk para juara. Terima kasih sudah ikut bermain!',
+    },
+  },
+  missRaksa: {
+    aktif: true,
+    nama: 'Miss Raksa' as string | null,
+    jabatan: 'Ikon Raksa CS',
+    tampilJabatan: true,
+    sapaan: {
+      /** Halaman gabung: langkah kode, lalu langkah kenalan. Briefing misi memakai teks misi. */
+      gabungKode: 'Halo, selamat datang di Raksa!',
+      gabungKenalan: 'Senang berkenalan denganmu!',
+    },
+  },
+  isti: {
+    aktif: true,
+    nama: 'Bu Isti' as string | null,
+    jabatan: 'Direktur IT',
+    tampilJabatan: true,
+    sapaan: {
+      /** Lobby proyektor, di bawah QR (setelah petunjuk alamat & kode). */
+      gabung: 'Pilih karakter, lalu tekan Siap. Kalau koneksi putus, cukup buka lagi tautannya.',
+      /** Papan peringkat proyektor, di atas ringkasan ronde. */
+      ringkasan: 'Jawaban ronde ini sudah tercatat. Ini datanya.',
+    },
+  },
+};
+
+export type IdTokoh = keyof typeof TOKOH;
+
+/** Nama tampil: "nama · jabatan" (atau nama saja bila tampilJabatan false); tanpa nama = jabatan. */
+export function namaTokoh(id: IdTokoh): string {
+  const t = TOKOH[id];
+  if (!t.nama) return t.jabatan;
+  return t.tampilJabatan ? `${t.nama} · ${t.jabatan}` : t.nama;
+}
+
+/** Nama lengkap untuk pembaca layar (selalu dengan jabatan). */
+export function labelTokoh(id: IdTokoh): string {
+  const t = TOKOH[id];
+  return t.nama ? `${t.nama}, ${t.jabatan}` : t.jabatan;
+}
+
 export const DEFAULT_EVENT_NAME = 'Raksa Claim - Misi Lindungi Kota';
 
 export const DEFAULT_PRIZES = {

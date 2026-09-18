@@ -1,3 +1,8 @@
+/**
+ * LEGACY - tidak dipakai halaman mana pun sejak layar misi 2D (client/src/game/MissionPlay.tsx).
+ * Disimpan sebagai referensi integrasi Unity selama migrasi; tidak ikut dibundel karena
+ * tidak diimpor. Hapus bersama client/src/unity/ dan unity/ setelah migrasi dinyatakan selesai.
+ */
 import { useEffect, useMemo, useRef, useState } from 'react';
 import type { MissionAnswer, MissionPublic, MissionReveal, Phase, StepAnswer, StepDef } from '@shared/types';
 import type { CameraView, FromUnityMessage } from '@shared/unityBridge';

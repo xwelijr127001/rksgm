@@ -26,8 +26,9 @@ Produk yang dikenalkan: **AUTO** (kendaraan bermotor), **HVC** (alat berat),
 | Jaringan | Semua perangkat berada pada satu jaringan (Wi-Fi kantor / hotspot) |
 
 Tidak butuh internet saat acara berlangsung: tidak ada font, CDN, atau layanan berbayar
-eksternal. Ilustrasi 2D adalah SVG lokal, adegan 3D memakai build Unity lokal, musik latar
-adalah file MP3 yang dihasilkan sendiri, dan efek suara disintesis dengan Web Audio API.
+eksternal. Adegan 2D digambar dari SVG buatan proyek sendiri dan dijalankan engine Phaser
+yang ikut dibundel, musik latar adalah file MP3 yang dihasilkan sendiri, dan efek suara
+disintesis dengan Web Audio API.
 
 ## 1a. Arsitektur
 
@@ -35,20 +36,22 @@ Tiga lapisan dengan tanggung jawab yang tegas:
 
 | Lapisan | Menangani | Catatan |
 | --- | --- | --- |
-| **React + TypeScript** | Landing, join, pilih karakter, lobby, instruksi & pilihan jawaban, timer, tombol kirim, leaderboard, host dashboard, pengaturan audio, hasil | Semua teks & formulir tetap HTML supaya terbaca dan nyaman dengan keyboard HP |
-| **Unity 6 (Web)** | Lingkungan diorama 3D, karakter & maskot, kendaraan/alat berat, objek yang diketuk, pengumpulan bukti, animasi perpindahan lokasi, respons visual | Opsional saat runtime: bila build belum ada, game memakai **mode ringan** (adegan SVG) |
-| **Node.js + Socket.IO + SQLite** | Room, fase, deadline, jawaban, skor, peringkat, penyimpanan hasil | **Sumber kebenaran.** Unity tidak pernah menghitung skor |
+| **Phaser 4 (adegan 2D)** | Diorama tiap misi, petugas pemain, objek yang diketuk, animasi memotret / memasukkan ke folder / menempel stiker, tanda pembahasan | Dimuat terpisah (lazy) dan diunduh lebih awal sejak lobby. Bila gagal, gambar sederhana tampil dan pemain menjawab lewat HTML |
+| **React + TypeScript** | Instruksi, dokumen kasus, daftar pilihan yang mudah diakses, baki bukti, timer, tombol kirim, status kirim, pembahasan, leaderboard, host, hasil | Semua teks & formulir tetap HTML supaya terbaca dan nyaman di HP |
+| **Node.js + Socket.IO + SQLite** | Room, fase, deadline, validasi jawaban, skor, peringkat, penyimpanan hasil | **Sumber kebenaran.** Engine tidak pernah menilai atau menyimpan jawaban |
 
 Aturan yang dijaga lintas lapisan:
 
 - Kunci jawaban hanya ada di `server/src/answerKeys.ts` dan baru dikirim ke client pada fase `REVEAL`.
-- ID objek Unity dihasilkan dari `shared/missions.ts` (`npm run gen:unity`) sehingga ketukan
-  di canvas dan pilihan di kontrol HTML mengisi **draft jawaban yang sama**.
-- Pesan dari Unity adalah data, bukan perintah: pesan dari misi/ronde lama dibuang.
-- Kesiapan adegan 3D tidak pernah menambah waktu menjawab siapa pun.
+- **Draft jawaban hanya dimiliki React.** Ketukan di adegan dan tombol HTML memanggil fungsi yang
+  sama (`client/src/game/draft.ts`), jadi keduanya selalu sinkron dan tunduk pada aturan yang sama.
+- Engine hanya menggambar `StageView` terbaru; animasi dipicu oleh selisih status, bukan oleh ketukan.
+- Ketukan dari instance/ronde/misi lama dibuang (token per instance + id misi + ronde).
+- Umpan balik sebelum `REVEAL` netral (kuning/biru, tanpa benar-salah).
+- Kesiapan adegan hanya informasi untuk host; tidak pernah menambah waktu menjawab siapa pun.
 
-Kontrak pesan bridge: [`shared/unityBridge.ts`](shared/unityBridge.ts).
-Detail proyek Unity: [`unity/README.md`](unity/README.md).
+Kode Unity lama (`unity/`, `client/src/unity/`, `shared/unityBridge.ts`) **disimpan sebagai
+referensi migrasi** dan tidak lagi dimuat oleh halaman mana pun.
 
 ## 2. Instalasi
 
@@ -98,16 +101,105 @@ Setelah `npm run build`, server otomatis menyajikan hasil build client, sehingga
 game diakses dari **satu port saja** (4000). Ini mode yang disarankan saat acara: lebih
 sederhana untuk dibagikan ke HP peserta.
 
-## 4a. Adegan 3D Unity
+## 4a. Adegan 2D (Phaser)
 
-> **Adegan 3D DIMATIKAN secara default (18 September 2026).** Build Unity sudah jadi, tetapi
-> komposisi diorama belum rapi: di GPU nyata adegannya tampil sebagai kotak kosong. Karena
-> adegan SVG 2D sudah lengkap di 10 misi dan sudah lolos e2e, itulah yang dipakai untuk acara.
-> Nyalakan kembali dengan `UNITY_3D=on` di `.env` setelah framing selesai disetel dan diuji di HP.
+Setiap misi punya diorama 2D interaktif yang digambar engine **Phaser 4.2.1** (MIT). Tidak ada
+yang perlu dipasang atau di-build terpisah: `npm install` + `npm run build` sudah cukup.
 
-Unity menangani adegan; React tetap menangani seluruh UI. **Build Unity bersifat opsional**:
-bila `UNITY_3D` tidak `on` atau `unity/Build/Web` belum ada, peserta memakai adegan SVG dan
-pertandingan tetap berjalan penuh.
+| Hal | Cara kerjanya |
+| --- | --- |
+| Memuat | Engine berada di chunk terpisah (~380 KB gzip) dan diunduh lebih awal di lobby, tutorial, dan latihan. Berkas di `/assets` di-cache browser (`immutable`) |
+| Gambar | SVG buatan proyek (`client/src/game/art`, `client/src/game/scenes`) dirasterisasi di HP sesuai kepadatan layar, jadi tetap tajam tanpa unduhan gambar |
+| Sentuhan | Semua interaksi = ketuk. Geser jari di atas gambar tetap menggulung halaman. Ketukan ganda cepat diabaikan |
+| Gagal dimuat | Gambar sederhana (SVG statis) tetap tampil dan daftar pilihan HTML terbuka otomatis. Pesan untuk pemain tidak memakai istilah teknis |
+| Mode ringan manual | Tambahkan `?adegan=ringan` di alamat HP peserta (tersimpan di HP itu); `?adegan=penuh` untuk menyalakan lagi |
+| Pembersihan | Satu instance engine per ronde; saat misi berganti, kanvas, listener, dan konteks WebGL dilepas |
+
+Tangkapan layar hasil aktual (HP, HP mendatar, desktop, proyektor): [`docs/tangkapan-2d/`](docs/tangkapan-2d/README.md).
+
+### Layar misi: tata letak per keadaan
+
+Setiap tahap menjawab tiga pertanyaan pemain: *saya sedang apa, apa tindakan berikutnya, dan
+apakah pilihan saya sudah tercatat*. Urutan diatur dengan CSS grid-area
+(`client/src/game/stage.css`); elemen DOM tidak berpindah, jadi rotasi/resize atau berpindah ke
+pembahasan tidak memuat ulang adegan dan tidak menghilangkan pilihan.
+
+| Keadaan | HP tegak | Desktop & HP mendatar |
+| --- | --- | --- |
+| Menjawab | Kartu tugas (pertanyaan + petunjuk satu kalimat + tombol Cerita/Dokumen/Cara main) → adegan → "Pilihanmu: … · Tersimpan" + daftar pilihan → bar aksi lengket | Adegan kiri (lengket), kartu tugas & jawaban kanan. Desktop: tombol kirim ikut alur (tidak menutupi pilihan). HP mendatar: header & bar aksi ringkas, cerita terlipat |
+| Menjawab misi hitung (6, 9) | Kartu tugas → jawaban → adegan (ruang membaca dulu) | Panel jawaban lebih lebar |
+| Jeda | Tata letak menjawab tetap, adegan & pilihan terkunci, pemberitahuan di atas pilihan | sama |
+| Briefing / terkirim / waktu habis | Status dulu (Miss Raksa + kasus / konfirmasi terkirim + ringkasan terkunci), adegan sesudahnya | Adegan diperkecil |
+| Pembahasan | Hasil dulu: status ("Jawabanmu tepat!" / "Belum tepat. Yuk, lihat langkah yang benar." / "Sebagian sudah tepat.") → Pilihanmu → Langkah yang tepat / Yang masih terlewat → Kenapa? → Intinya → satu tombol utama. "Lihat adegan dengan tandanya" menggulir ke adegan | Hasil jadi kolom utama, adegan diperkecil |
+
+Aturan yang dijaga:
+
+- **Tidak ada karakter, balon, atau dekorasi di atas adegan.** Pemandu (Miss Raksa, Raki di
+  pemanasan, Mr Roger di bawah hasil) punya slot potret kecil di panel. Keterangan objek
+  "info" dan peringatan (baki penuh, pilih bagian dulu) tampil di panel HTML, bukan balon.
+- **Satu penanda per objek**, di dalam label: ○ bisa diketuk, ✓/angka sudah dipilih, ikon lembar
+  = dokumen. Sebelum pembahasan penanda netral (kuning/putih). Saat pembahasan: ✓ tepat,
+  ✕ kurang tepat, ! terlewat (ikon + warna), dan penjelasannya dalam kata di panel.
+- **Status per langkah** ("Pilihanmu", "Langkah yang tepat", "Terlewat") dihitung di
+  `client/src/game/hasil.ts` dengan `gradeStep` yang sama dengan server; `hasil.test.ts`
+  membuktikan hasilnya sama untuk semua misi (benar, salah, sebagian, kosong).
+- Fokus pindah ke judul tahap baru (terkirim, pembahasan, pertanyaan berikutnya), kecuali saat
+  jeda/lanjut dari jeda supaya pemain tidak dipindah tempat. Gerak dikurangi bila
+  `prefers-reduced-motion`.
+- Tumpang-tindih label/tanda di semua adegan diperiksa otomatis: `window.__raksaStage.kotak()`
+  memberi kotak label & objek (koordinat dunia) untuk skrip uji.
+
+Cara menambah/mengubah adegan: lihat komentar di `client/src/game/types.ts` dan contoh
+`client/src/game/scenes/m02-bengkel.ts`. `npm test` menjalankan `scenes.test.ts` yang memastikan
+setiap objek adegan merujuk id misi/opsi/dokumen yang benar-benar ada dan kode adegan tidak
+menyentuh kunci jawaban. Asal & lisensi aset: `client/src/game/ASET.md`.
+
+### Tokoh Raksa: Mr Roger, Miss Raksa, Bu Isti
+
+Tiga tokoh pixel art (sumber di `character/`) menyapa dan memandu; petugas pilihan pemain tetap
+satu-satunya tokoh di adegan misi. **Tokoh tidak pernah digambar di atas adegan** (tidak menutupi
+objek, label, atau tanda pembahasan): di layar misi mereka tampil sebagai potret kecil di panel.
+Tiap tokoh diberi peran sesuai perannya di Raksa:
+
+| Tokoh | Peran di game | Tempat |
+| --- | --- | --- |
+| **Mr Roger**, CEO Asuransi Raksa | Pembuka & penutup | Halaman awal (papan nama), lobby pemain & proyektor (sapaan), **potret di bawah hasil pembahasan** tiap misi, hasil pemain (ucapan selamat) |
+| **Miss Raksa**, ikon Raksa CS | "Pembawa kasus": laporan nasabah masuk lewat CS | Halaman gabung (sapaan), **kalimat briefing tiap misi** di HP & proyektor, potret di kartu tugas saat menjawab (menggantikan Raki; pemanasan tetap Raki karena teksnya "Aku Raki") |
+| **Bu Isti**, Direktur IT | "Urusan sistem" | Lobby proyektor (cara bergabung lewat QR), papan peringkat proyektor (ringkasan data ronde), **pesan saat koneksi HP terputus** (lobby & layar misi) |
+| Ketiganya | Penutup | Podium proyektor: berdiri bersama, Mr Roger memberi ucapan selamat |
+
+Pengaturan di `shared/brand.ts` -> `TOKOH` (`ceo`, `missRaksa`, `isti`):
+
+- `aktif: false` menyembunyikan satu tokoh di semua tempat (Raki / petunjuk biasa kembali dipakai).
+- `nama`, `jabatan`, `tampilJabatan`: teks papan nama. Mr Roger tampil "Mr Roger" saja
+  (`tampilJabatan: false`); jabatan tetap dibacakan pembaca layar. `nama: null` = hanya jabatan.
+- Potret bulat di panel memakai jendela kepala-bahu per tokoh (`JENDELA_POTRET` di
+  `client/src/game/KarakterTokoh.tsx`); sesuaikan bila gambar sumber diganti.
+- `sapaan`: semua kalimat balon. Kalimat pembahasan Mr Roger dipilih bergiliran per
+  nomor misi. Kalimat briefing Miss Raksa memakai teks briefing tiap misi (`rakiBriefing` di
+  `shared/missions.ts`, tidak diubah). Semua kalimat ini **usulan** dan perlu disetujui.
+
+Sprite yang dipakai game dibuat dari gambar sumber (dipotong rapat & diperkecil ke WebP + PNG
+cadangan). Setelah mengganti gambar di `character/`, jalankan:
+
+```
+npm install --no-save puppeteer-core
+node tools/siapkan-karakter.mjs            # semua tokoh; atau: ... isti missRaksa
+```
+
+Hasilnya di `client/public/karakter/`: `ceo-besar.*` (96 KB WebP), `miss-raksa-besar.*` (64 KB),
+`isti-besar.*` (72 KB), dan ukuran frame di `client/src/game/art/karakter-sprite.json`. Potret
+bulat di panel diambil dari sprite yang sama (diskalakan, tidak diregangkan). Nama berkas sumber
+tiap tokoh diatur di bagian atas `tools/siapkan-karakter.mjs`. Ketiga sprite ikut diunduh lebih
+awal di lobby, sehingga pesan Bu Isti tetap bergambar saat koneksi sudah putus. Bila gambar gagal
+dimuat, permainan tetap berjalan tanpa tokoh itu.
+
+### Unity 3D (referensi lama)
+
+> **Tidak dipakai lagi oleh client.** Adegan 3D sempat tampil sebagai kotak kosong di GPU
+> nyata, sehingga diganti adegan 2D di atas. Kode & dokumentasinya disimpan sebagai referensi
+> selama migrasi. Endpoint server `/api/unity/status` dan `/unity/*` masih ada tetapi tidak
+> dipanggil halaman mana pun.
 
 ```bash
 npm run gen:unity      # sinkronkan data misi -> proyek Unity (wajib setelah mengubah misi)
@@ -305,6 +397,7 @@ Semua konfigurasi terpusat di dua file.
 | Kunci jawaban, bobot rubric, penjelasan | `server/src/answerKeys.ts` (**hanya di server**) |
 | Pilihan karakter (warna, aksesori) | `shared/brand.ts` -> `UNIFORM_COLORS`, `SKIN_TONES`, `HAIR_COLORS`, `ACCESSORIES` |
 | Pemberitahuan simulasi | `shared/brand.ts` -> `DISCLAIMER` |
+| Tokoh Mr Roger, Miss Raksa, Bu Isti: tampil/tidak, nama, kalimat sapaan | `shared/brand.ts` -> `TOKOH` (lihat bagian 4a) |
 
 Bila menambah/mengubah langkah misi, `server/src/answerKeys.ts` harus ikut diperbarui.
 Server memeriksa konsistensinya saat start (`assertKeysComplete()`) dan menolak berjalan bila
@@ -368,7 +461,9 @@ raksa-game/
 │   ├── unityServe.ts        penyajian build Unity (MIME/Content-Encoding) + status
 │   ├── config.ts            env + deteksi IP LAN untuk QR
 │   └── *.test.ts            unit test + smoke test multiplayer
+├── character/               gambar sumber tokoh Mr Roger, Miss Raksa, Bu Isti (pixel art 4 frame)
 ├── tools/
+│   ├── siapkan-karakter.mjs character/ -> sprite CEO WebP/PNG di client/public/karakter
 │   ├── gen-unity-data.ts    shared/missions.ts -> data & ID untuk proyek Unity
 │   └── make-music.mjs       menghasilkan musik latar (MP3) secara prosedural
 ├── unity/                   proyek Unity 6 (lihat unity/README.md)
@@ -376,7 +471,18 @@ raksa-game/
 │   ├── Assets/Editor/       generator scene + build Web
 │   └── build.ps1 / build.sh build CLI
 └── client/src/
-    ├── unity/               loader, bridge, UnityStage, mock + tes bridge
+    ├── game/                ADEGAN 2D (Phaser) + layar misi
+    │   ├── MissionPlay.tsx  satu layar misi: kartu tugas + adegan + jawaban HTML + bar aksi + hasil
+    │   ├── GameStage.tsx    memasang/membersihkan engine, gambar sederhana bila gagal
+    │   ├── draft.ts         aturan draft jawaban (dipakai adegan & HTML) - murni & teruji
+    │   ├── hasil.ts         status pembahasan per langkah (aturan = penilaian server) - teruji
+    │   ├── engine/          Phaser: scene generik, rasterisasi SVG, siklus hidup instance
+    │   ├── art/             kit gambar, karakter, kendaraan, properti (SVG sebagai kode)
+    │   ├── scenes/          tata letak & gambar tiap misi (+ tutorial, penentuan)
+    │   ├── *.test.ts        tes draft & penjaga anti-melenceng adegan
+    │   ├── KarakterTokoh.tsx, tokoh.ts/.css  tokoh Raksa di halaman & pemuat sprite
+    │   └── ASET.md          asal & lisensi aset
+    ├── unity/               (referensi lama) loader, bridge, UnityStage + tes bridge
     ├── public/audio/        musik latar + CREDITS.md
     ├── state/store.ts       cache state dari server + aksi (server tetap sumber kebenaran)
     ├── net/socket.ts        transport Socket.IO
@@ -392,62 +498,59 @@ raksa-game/
 
 ## 11. Batasan yang masih ada
 
-### Unity 3D — build berhasil, komposisi gambar belum rapi
+### Adegan 2D — kondisi sebenarnya (18 September 2026)
 
-Diverifikasi 18 September 2026 dengan Unity **6000.6.1f1** (bukan 6.3 LTS — lihat di bawah).
+**Sudah jalan & teruji di browser (emulasi):** 10 misi + tutorial + ronde penentuan punya
+adegan 2D interaktif; semua jalur jawaban juga bisa diselesaikan lewat daftar HTML; mode
+ringan tanpa engine lolos satu pertandingan penuh (lihat bagian 12).
 
-**Sudah terbukti jalan:**
+**Belum / keterbatasan:**
 
-| Hal | Bukti |
+- **Belum diuji di HP fisik.** Semua angka berasal dari Chrome headless dengan WebGL
+  perangkat lunak (SwiftShader) dan emulasi viewport/sentuh. Kelancaran di Android kelas
+  bawah, Safari iOS, rotasi sungguhan, dan keyboard HP harus dicek langsung sebelum acara.
+- **Ilustrasi masih gaya vektor buatan kode**, bukan karya ilustrator. Tidak ada aset
+  pihak ketiga, tetapi belum layak disebut aset final (lihat `client/src/game/ASET.md`).
+- Setelah memilih objek, petugas pemain berjalan sekitar 1 detik di jalurnya di tepi bawah lalu
+  kembali; label & tanda selalu digambar di atasnya.
+- Keterangan singkat ("Difoto", "Dipilih") muncul ±1 detik menggantikan label objek itu.
+- Label di adegan tetap singkatan (mis. "Foto & lapor"); teks lengkap ada di daftar HTML.
+  Di HP 360 px teks label sekitar 12 px: terbaca di emulasi, tetapi perlu dicek di HP fisik.
+- Di misi 2, label "Penyok" dan "Kucing" berada di atas badan mobil karena keduanya memang
+  bagian dari mobil itu (objek bersarang); label tidak saling bertumpuk.
+- Bar aksi di HP lengket di bawah layar dan menutupi ±100 px sampai halaman digulir; di akhir
+  halaman ia berada di bawah pilihan terakhir (diuji e2e). Setelah "Lanjut", halaman menggulir
+  halus ±0,4 detik ke pertanyaan baru.
+- Pengacakan urutan tampil pilihan bersifat tetap per misi (sama untuk semua pemain),
+  bukan acak per pemain.
+- Engine Phaser 4 memakai WebGL; renderer Canvas masih ada sebagai cadangan tetapi
+  berstatus *deprecated* di Phaser 4. Bila keduanya gagal, gambar sederhana + daftar HTML dipakai.
+
+### Materi yang perlu ditinjau PIC Claim
+
+Tidak ada kunci jawaban atau fakta klaim yang diubah. Hal berikut ditemukan saat membuat
+adegan dan **perlu keputusan PIC Claim** (belum diubah):
+
+| Misi | Temuan |
 | --- | --- |
-| Kompilasi C# | 0 error terhadap 185 assembly Unity asli (`npm run check:csharp`) |
-| Generator scene | Dijalankan Unity: 13 material, 16 prefab, scene 3 MB, 10 diorama |
-| Validasi anchor | 55/55 anchor misi ada di diorama-nya (generator gagal bila tidak) |
-| Unity Web build | Berhasil, **unduhan 4,8 MB** (target < 20 MB) |
-| Dimuat di browser | `Initialize engine version: 6000.6.1f1`, WebGL 2.0, PhysX, 0 error |
-| Bridge dua arah | `unityReady` + `missionReady` diterima (`npm run check:unity-load`) |
-| Perpindahan diorama | 5 misi diuji (1, 4, 6, 7, 10), semuanya siap |
-| Penyajian berkas | 4/4 berkas HTTP 200, MIME & `Content-Encoding` benar |
+| 1, 6, 7, 11, tutorial | Di `shared/missions.ts`, jawaban benar hampir selalu **opsi pertama**. Tampilan kini diacak tetap per misi, tetapi urutan datanya sebaiknya dibenahi. |
+| 4 | Hanya 4 opsi benar yang punya keterangan tambahan (`desc`); pengecoh tidak. Di daftar HTML ini bisa menjadi petunjuk. Keterangan 'rusak' menyebut undercarriage, padahal adegan memisahkan roda rantai sebagai 'Posisi unit'. |
+| 5, 7, 10 | Kartu polis menampilkan chip **"sesuai" (hijau) / "perhatikan" (merah)** dari `flag` data. Chip ini menunjuk baris penentu jawaban. Contoh: Polis B misi 7 'Perluasan banjir: Tidak tercantum' diberi 'perhatikan', dan 'Tanggal kejadian' bernilai sama di kedua polis tetapi flag-nya berbeda. |
+| 5, 8 (HTML) | Ikon kategori dari data (cek/silang) kini tampil abu-abu sebelum pembahasan; pertimbangkan ikon yang tidak berkonotasi benar/salah. |
+| 6 | Adegan menomori peti 1–8 (materi hanya menyebut #4 dan #7). Label aksi disingkat satu kata: Catat / Bayar / Tolak / Terima. |
+| 3, 8, 11 | Label singkat di adegan: 'Estimasi rugi', 'Kondisi lama', 'Plat & kronologi'. Mohon konfirmasi. Teks lengkap tetap di daftar HTML. |
+| 10 | Teks learning/briefing menyebut 'periode', tetapi tahap 2 tidak punya kategori tentang periode. |
 
-**Keputusan 18 September 2026: adegan 3D dimatikan (`UNITY_3D=off`, default).** Di GPU nyata
-diorama tampil sebagai kotak kosong, jadi acara memakai adegan SVG 2D yang sudah lengkap.
-Efek sampingnya: masalah "misi 4 tampil dua kali" ikut hilang. Sisa catatan di bawah tetap
-berlaku bila suatu saat 3D-nya diteruskan.
+**Salinan UI yang diubah (bukan materi klaim):** instruksi misi 2 "Potret tiga bukti yang
+relevan dari enam pilihan di bengkel." (sebelumnya "...dari enam kartu bergambar"), instruksi misi 3 tanpa kata "kartu",
+dan teks tutorial yang menyebut "benda di gambar" alih-alih "kartu".
 
-**Yang BELUM selesai — komposisi gambar diorama.** Unity merender, tetapi geometri
-belum terpusat di dalam frame dan sebagian area masih kosong. Framing sudah tidak
-memakai angka tetap (diukur dari `Renderer.bounds` diorama aktif saat runtime, lalu
-jarak kamera dihitung dari rasio canvas), dan angka diagnostiknya menunjukkan
-perhitungan itu benar — tetapi hasil gambarnya belum sesuai.
+### Unity 3D (referensi lama)
 
-Penyetelan ini **tidak bisa diselesaikan lewat Chrome headless**: rendernya memakai
-WebGL software (SwiftShader) dan pembacaan piksel `drawImage` selalu mengembalikan
-transparan tanpa `preserveDrawingBuffer`, jadi bukan alat ukur yang sah. Perlu dilihat
-di browser desktop biasa atau HP. Diagnostik sudah tersedia: `GameRoot.logDiagnostik`
-mencetak posisi kamera, fov, rasio, dan bounds diorama ke console setiap misi dimuat.
-Langkah lanjutannya ada di [`unity/README.md`](unity/README.md) bagian 10.
+Build Unity 6 pernah berhasil (4,8 MB) tetapi diorama tampil sebagai kotak kosong di GPU
+nyata, sehingga diganti adegan 2D. Semua catatan teknisnya ada di
+[`unity/README.md`](unity/README.md); kodenya disimpan sebagai referensi selama migrasi.
 
-**Versi Unity.** 6.3 LTS (6000.3.24f1) terpasang **tanpa modul Web Build Support**,
-sehingga tidak bisa membuat build Web; karena itu build memakai 6.6. Untuk acara,
-6.3 LTS tetap lebih disarankan (didukung sampai Des 2027). Setelah modulnya dipasang:
-
-```
-unity install-modules -e 6000.3.24f1 -m webgl
-npm run unity:build
-```
-
-`unity/build.ps1` menolak lebih awal bila tidak ada editor bermodul Web dan mencetak
-perintah yang tepat, jadi tidak gagal dengan pesan membingungkan di tengah build.
-
-**Catatan lain:**
-
-- Misi hotspot (misi 4) menampilkan adegan **dua kali**: canvas Unity di atas dan
-  adegan SVG berpenanda angka di bawahnya. Ketukan tetap berfungsi lewat SVG, tetapi
-  tampilannya redundan dan perlu dirapikan.
-- Perkiraan poligon 5.300–10.400 tris per diorama, di atas target internal < 6.000.
-  Jalur perbaikan ada sebagai komentar `ponytail:` di `RaksaSceneGeneratorParts.cs`.
-- Papan nama lokasi tanpa teks; paket `com.unity.modules.textrendering` **tidak ada
-  di Unity 6** dan sempat membuat build gagal, jadi tidak dipakai.
 
 ### Aset brand
 
@@ -457,6 +560,12 @@ perintah yang tepat, jadi tidak gagal dengan pesan membingungkan di tengah build
   (raksaonline.com) tidak diverifikasi dari lingkungan ini, jadi warna, tipografi, dan gaya
   ilustrasi perlu dicocokkan dengan brand guideline sebelum dipakai untuk acara resmi.
 - Nama & desain maskot "Raki" adalah usulan karakter game.
+- Mr Roger dan Bu Isti menggambarkan **orang sungguhan**; Miss Raksa adalah ikon perusahaan.
+  Pemakaian wajah, nama, dan kalimat sapaan di `TOKOH.*.sapaan` perlu **persetujuan yang
+  bersangkutan / Corporate Communication** sebelum acara. Pembuat & lisensi gambar sumber
+  di `character/` belum tercatat. Gayanya pixel art, sengaja berbeda dari ilustrasi vektor lain.
+- Potret tokoh adalah potongan kepala-bahu dari sprite pixel art (dikalibrasi per tokoh); di
+  ukuran 40–48 px detailnya kecil. Kalimat sapaan Mr Roger di bawah hasil (`TOKOH.ceo.sapaan.pembahasan`) masih usulan.
 
 ### Konten
 
@@ -486,81 +595,99 @@ perintah yang tepat, jadi tidak gagal dengan pesan membingungkan di tengah build
   (`/projector?room=KODE`).
 - Ronde penentuan hanya bisa dijalankan satu kali per pertandingan.
 - Drag-and-drop tidak dipakai; semua interaksi memakai tap (disengaja, agar nyaman di HP).
-- Beberapa kontrol sekunder masih di bawah 44 px: tombol suara & tombol "Simpan" (38 px),
-  slider volume (16 px), checkbox (22 px), dan tautan logo (33 px). Semua kontrol utama
-  (jawaban, Lanjut, Kirim jawaban) sudah 54-68 px.
+- Di halaman pemain, kontrol di bawah 44 px tinggal tautan logo (33 px) dan "Untuk panitia" di
+  landing (40 px). Di halaman host: tombol "Simpan" & suara (38 px), slider volume (16 px),
+  checkbox (22 px). Semua kontrol misi (pilihan, Lanjut, Kirim laporan, Batal) >= 44 px.
 
 ## 12. Hasil pengujian
 
-Semua angka di bawah berasal dari perintah yang **benar-benar dijalankan** pada
-Windows 11 + Node 22.9.0 + Chrome 153 (headless), 17 September 2026.
+Semua angka di bawah berasal dari perintah yang **benar-benar dijalankan** pada Windows 11 +
+Node 22 + Chrome headless (WebGL perangkat lunak / SwiftShader), 18 September 2026.
+**Ini emulasi browser, bukan HP fisik.**
 
 ```bash
 npm run typecheck      # server + client: 0 error
-npm run build          # client + server: sukses
-npm test               # 44 tes server + 12 tes client = 56 lulus, 0 gagal
-npm run check:csharp   # C# Unity vs 185 assembly asli: 0 error
-npm run unity:build      # build Unity Web: berhasil, 4,8 MB
-npm run check:unity-load # Unity dimuat di browser + bridge: berfungsi
-npm run test:e2e       # 1 pertandingan penuh 10 misi di Chrome: 0 kegagalan
-npm run check:audio    # isi 3 trek musik didekode & diukur: lolos
+npm run build          # client + server: sukses (engine Phaser = chunk terpisah 382 KB gzip)
+npm test               # 47 tes server + 42 tes client = 89 lulus, 0 gagal
+npm run test:e2e       # 1 pertandingan penuh 10 misi, 4 pemain + proyektor: 0 kegagalan, 0 error console
 ```
 
-### Pengujian otomatis (`npm test` — 56 tes)
+Setelah perbaikan UI/UX layar misi (18 September 2026), keempat perintah di atas dijalankan
+ulang: 89/89 tes, e2e 0 kegagalan (termasuk uji baru di bawah), 0 error console/HTTP, dan
+pemeriksa tumpang-tindih label/tanda di misi 1–10 (bermain & pembahasan) bersih. Tangkapan
+sebelum/sesudah di 360×740, 390×844, 768×1024, 844×390, 1280×800, dan 1440×900:
+[`docs/tangkapan-2d/perbaikan-ui/`](docs/tangkapan-2d/perbaikan-ui/README.md).
 
-Aturan skor & rubric:
+Setelah tokoh Mr Roger, Miss Raksa, dan Bu Isti ditambahkan, keempat perintah di atas dijalankan ulang (18 September 2026)
+dengan hasil sama: 85/85 tes, e2e 0 kegagalan, 0 error console/HTTP, tanpa luber horizontal,
+adegan dimuat dalam 120–303 ms dan heap setelah ronde 22–46 MB (naik-turun, tidak terus naik).
+Tampilan ketiga tokoh (halaman awal, gabung, lobby, briefing, pembahasan misi 1/4/10, papan
+peringkat, podium, hasil, koneksi putus)
+diperiksa lewat tangkapan layar di `docs/tangkapan-2d/`.
 
-- jawaban benar / salah / sebagian benar / timeout / lewat batas waktu;
-- multi-select: memilih semua opsi **tidak** menghasilkan skor penuh;
-- rubric berbobot per langkah; langkah kosong tidak mendapat nilai;
-- setiap dari 10 misi punya jawaban sempurna yang menghasilkan ketepatan 1;
-- urutan peringkat (poin, lalu ketepatan, lalu waktu), penandaan seri, delta, lencana.
+### Pengujian otomatis (`npm test` — 89 tes)
 
-Integritas pertandingan:
+Semua tes lama tetap lulus. Tes baru:
 
-- pengiriman ganda tidak menambah skor; jawaban ronde salah & lewat deadline ditolak;
-- pause/resume menyimpan fase & sisa waktu, durasi jeda tidak menambah waktu menjawab;
-- kunci jawaban tidak dikirim sebelum `REVEAL`; `/api/missions` tidak memuat kunci jawaban;
-- pemain biasa tidak dapat menjalankan tindakan host (token divalidasi di server);
-- refresh/reconnect mempertahankan identitas & skor;
-- satu pertandingan penuh 10 misi sampai podium lewat Socket.IO sungguhan
-  (1 host + 2 pemain + 1 penonton);
-- hasil tersimpan di SQLite dan ekspor CSV sesuai.
-
-Unity (tanpa Editor — memakai fixture & mock):
-
-- MIME & `Content-Encoding` build Unity sesuai dokumentasi resmi, termasuk
-  `.data.gz` menjadi `application/gzip` (bug Safari);
-- file Unity yang hilang menjadi **404 JSON, bukan HTML SPA**; path traversal ditolak;
-- `/api/unity/status` menemukan loader lewat pola `*.loader.js` (nama tidak di-hardcode);
-- kesiapan adegan hanya berlaku untuk ronde saat ini, idempoten, direset per ronde,
-  dan **tidak menggeser deadline**;
-- bridge: pesan sebelum `unityReady` diantrekan lalu terkirim berurutan; pesan dari
-  misi/ronde lama diabaikan; pesan cacat (bukan JSON, type asing, stepId kosong) diabaikan;
-  `dispose()` melepas handler;
-- anchor objek yang dikirim React **identik** dengan yang dihasilkan generator data Unity
-  (penjaga anti-drift antara konten dan scene).
+- **Server:** id jawaban benar di payload REVEAL sama persis dengan kunci; host mengakhiri
+  pertandingan saat **jeda** tetap membukukan jawaban ronde itu; paket socket cacat tidak
+  menjatuhkan server.
+- **Draft (`client/src/game/draft.test.ts`):** ketukan adegan & kontrol HTML menghasilkan
+  perubahan yang identik; batas pilihan; ganti/batal pilihan; jawaban sebagian boleh dikirim
+  dengan konfirmasi; draft lama disaring; ketukan saat briefing/jeda/terkirim/pembahasan
+  diabaikan; **tampilan netral sebelum REVEAL walau data reveal ada**; urutan tampil acak tetap.
+- **Pembahasan (`client/src/game/hasil.test.ts`):** status per langkah yang ditampilkan
+  (tepat/sebagian/belum/kosong) sama dengan penilaian server untuk semua misi dengan jawaban
+  benar, salah, sebagian, dan kosong; pilihan salah vs langkah yang tepat/terlewat; tidak ada
+  lagi "Makin paham" untuk 0%.
+- **Adegan (`client/src/game/scenes.test.ts`):** 12 adegan terdaftar; setiap objek merujuk
+  id misi/langkah/opsi/dokumen yang ada; bila satu opsi tampil maka semua opsi langkah itu
+  tampil; kunci gambar unik; kode adegan tidak menyentuh kunci jawaban; acak posisi hanya
+  menukar slot seragam.
 
 ### Pengujian browser (`npm run test:e2e`)
 
-Satu pertandingan penuh di Chrome headless: 1 host (1366x900) + 2 pemain (390x844, mode
-sentuh) + 1 proyektor (1366x768).
+Satu pertandingan penuh (tutorial + 10 misi). Tiap pemain memakai proses browser sendiri:
+
+| Pemain | Perangkat (emulasi) | Cara menjawab |
+| --- | --- | --- |
+| Ani | HP 390x844, sentuh | benar, lewat **ketukan adegan** (kategori/angka lewat HTML) |
+| Budi | HP 360x740, sentuh, **mode ringan** (engine tidak dimuat) | lewat daftar HTML |
+| Dedi | HP mendatar 844x390, sentuh | lewat daftar HTML |
+| Citra | desktop 1280x800, mouse | lewat adegan |
+| proyektor | 1366x768 | menonton |
 
 | Yang diperiksa | Hasil |
 | --- | --- |
-| 10 misi dimainkan dengan jawaban benar lewat ketukan | **10/10 terkirim & diakui server** |
-| Halaman per misi (satu pertanyaan per waktu) | 1, 1, 1, 1, 2, 3, 2, 3, 3, 9 halaman |
-| Pembahasan muncul setelah ronde ditutup | 10/10 |
-| Papan peringkat setelah pembahasan | 10/10 |
-| Input terkunci saat BRIEFING | ya (0 opsi aktif, tombol nonaktif) |
-| Podium akhir | Ani 12.899 poin (#1), Budi 2.038 poin (#2) |
-| Kendali host bocor ke halaman pemain | tidak |
-| Pemberitahuan simulasi edukasi di tutorial | tampil |
-| Refresh pemain memulihkan identitas | ya |
-| Ekspor CSV | 200, berisi data kedua pemain |
-| Mode latihan | misi dimainkan & dinilai |
-| Horizontal scroll (360 px & 390 px) | 0 px di semua halaman |
+| Ani: 10 misi terkirim & diakui server, poin penuh | 10/10 (+1.181 s.d. +1.273 per misi) |
+| Budi (mode ringan), Dedi, Citra: laporan terkirim tiap misi | 30/30 |
+| Kontrol jawaban tidak ada saat BRIEFING; ketukan saat briefing tidak memilih | ya |
+| Geser jari di atas kanvas menggulung halaman & tidak memilih objek | ya |
+| Jeda host mengunci ketukan adegan (tata letak menjawab tetap, pilihan terkunci) | ya |
+| Refresh di tengah menjawab memulihkan draft (2 dokumen), tanpa kanvas ganda | ya |
+| Kirim diklik dua kali cepat = satu laporan | ya |
+| Kanvas & instance engine hilang setelah tiap ronde | 10/10 |
+| Scroll horizontal (360/390/mendatar/desktop, semua misi) | 0 px |
 | Console error / HTTP 400+ | **0** |
+| Refresh halaman hasil memulihkan identitas; ekspor CSV | ya |
+| Mode latihan di HP 360: misi 4 lewat adegan, jawaban benar = "Jawabanmu tepat" (tanpa "Makin paham") | ya |
+| HP diputar (360×740 → 740×360 → kembali): pilihan tetap & adegan tidak dimuat ulang | ya |
+| Digulir sampai habis: pilihan terakhir berada di atas bar aksi lengket | ya |
+
+### Pengukuran (emulasi, BUKAN HP fisik)
+
+Satu halaman latihan, HP 390x844, Chrome headless + WebGL perangkat lunak:
+
+| Kondisi | Adegan siap (misi pertama, cache kosong) | Misi berikutnya | FPS saat diam |
+| --- | --- | --- | --- |
+| CPU normal | 985 ms | 437–612 ms | 57–60 |
+| CPU diperlambat 4x (emulasi HP kelas bawah) | 1.373 ms | 650–921 ms | 57–60 |
+
+Rasterisasi gambar SVG per misi 9–129 ms. Dalam dua kali pertandingan E2E (5 browser berjalan
+bersamaan di satu komputer) fps Ani 41–59 dan heap JS setelah tiap ronde tetap di 21–48 MB (tidak
+naik terus, jadi tidak ada tanda kebocoran antar ronde). HP bertenaga rendah (<= 4 inti / <= 2 GB)
+otomatis dibatasi 30 fps.
+
 
 ### Verifikasi isi audio (`npm run check:audio`)
 
@@ -577,22 +704,23 @@ diulang. RMS sekitar -16 sampai -17 dBFS dipilih agar tidak menutupi suara MC.
 
 ### Yang TIDAK diuji
 
-- **Unity di perangkat fisik**: FPS, waktu loading, dan memori di HP kelas menengah
-  belum diukur. Komposisi gambar diorama juga belum rapi (lihat bagian 11).
-- **Perangkat fisik**: pengujian hanya memakai viewport 360/390 px di Chrome desktop
-  headless. Itu **tidak membuktikan** kompatibilitas Android/iPhone sungguhan — safe area,
-  keyboard HP, rotasi, WebGL di Safari, dan performa nyata belum diuji di perangkat.
-- **Beban**: tidak ada pengujian dengan banyak peserta; jumlah koneksi yang benar-benar
-  diuji adalah **4** (1 host + 2 pemain + 1 penonton).
+- **HP fisik**: semua angka di atas berasal dari Chrome desktop headless dengan emulasi
+  viewport/sentuh dan WebGL perangkat lunak. Itu **tidak membuktikan** kelancaran di
+  Android/iPhone sungguhan: safe area, keyboard HP, rotasi nyata, WebGL di Safari iOS,
+  panas & baterai, dan fps di GPU HP kelas bawah belum diuji di perangkat.
+- **Beban**: jumlah koneksi yang diuji bersamaan adalah **6** (1 host + 4 pemain + 1 proyektor).
+  Uji dengan ~100 peserta belum dijalankan (`npm run loadtest -- --players 100`).
+- **Pembaca layar** (TalkBack/VoiceOver) belum dicoba langsung; daftar pilihan HTML memakai
+  peran radio/checkbox dan pengumuman `aria-live`.
 - **Audio oleh telinga manusia** dan kenyamanan volume di ruang acara.
-- **Jaringan kantor sebenarnya** (firewall, client isolation, VPN).
+- **Jaringan kantor sebenarnya** (firewall, client isolation, VPN, unduhan engine bersamaan).
 
 ### Menjalankan ulang pengujian browser
 
 Skrip uji bukan bagian dependensi proyek supaya bundel acara tetap kecil:
 
 ```bash
-npm install -D puppeteer-core socket.io-client
+npm install --no-save puppeteer-core   # socket.io-client sudah ada di workspace
 npm run build && npm start        # server di http://127.0.0.1:4000
 npm run test:e2e                  # pertandingan penuh, keluar 1 bila ada yang gagal
 npm run check:audio               # ukur isi musik

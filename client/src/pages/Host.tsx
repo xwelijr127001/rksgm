@@ -357,100 +357,13 @@ function Kendali({ room }: { room: RoomPublicState }) {
 
 // ------------------------------------------------------------------ kesiapan adegan
 
-/** Bentuk /api/unity/status yang dipakai halaman ini (tanpa mengimpor server/). */
-interface StatusBuild {
-  available: boolean;
-  totalMb: number | null;
-  downloadMb: number | null;
-  compression: 'gzip' | 'br' | 'none' | null;
-  reason: string | null;
-}
-
-const LABEL_KOMPRESI: Record<'gzip' | 'br' | 'none', string> = {
-  gzip: 'Gzip',
-  br: 'Brotli',
-  none: 'tanpa kompresi',
-};
-
-function bacaStatusBuild(data: unknown): StatusBuild | null {
-  if (typeof data !== 'object' || data === null) return null;
-  const o = data as Record<string, unknown>;
-  const angka = (v: unknown): number | null =>
-    typeof v === 'number' && Number.isFinite(v) ? v : null;
-  const k = o.compression;
-  return {
-    available: o.available === true,
-    totalMb: angka(o.totalMb),
-    downloadMb: angka(o.downloadMb),
-    compression: k === 'gzip' || k === 'br' || k === 'none' ? k : null,
-    reason: typeof o.reason === 'string' ? o.reason : null,
-  };
-}
-
-/** Status build 3D dari server. Tidak tersedia = informasi, bukan kegagalan. */
-function StatusBuild3D() {
-  const [data, setData] = useState<StatusBuild | null>(null);
-  const [gagal, setGagal] = useState(false);
-
-  useEffect(() => {
-    let hidup = true;
-    const jalan = async (): Promise<void> => {
-      try {
-        const res = await fetch('/api/unity/status', { headers: { accept: 'application/json' } });
-        if (!res.ok) throw new Error(String(res.status));
-        const hasil = bacaStatusBuild((await res.json()) as unknown);
-        if (!hidup) return;
-        if (hasil) setData(hasil);
-        else setGagal(true);
-      } catch {
-        if (hidup) setGagal(true);
-      }
-    };
-    void jalan();
-    return () => {
-      hidup = false;
-    };
-  }, []);
-
-  if (gagal) {
-    return (
-      <Pesan jenis="kuning">
-        Status build 3D tidak bisa dibaca dari server. Peserta tetap bisa bermain memakai mode
-        ringan (adegan SVG).
-      </Pesan>
-    );
-  }
-  if (!data) {
-    return (
-      <p className="kecil lembut" style={{ margin: 0 }}>
-        Memeriksa build 3D...
-      </p>
-    );
-  }
-  if (!data.available) {
-    return (
-      <Pesan jenis="info">
-        Build 3D belum tersedia, jadi peserta memakai <strong>mode ringan</strong> (adegan SVG).
-        Permainan, waktu, dan skor tetap berjalan normal.
-        {data.reason ? <span className="mini lembut"> ({data.reason})</span> : null}
-      </Pesan>
-    );
-  }
+/** Keterangan adegan 2D untuk panitia (bahasa sehari-hari, tanpa istilah teknis). */
+function InfoAdegan2D() {
   return (
-    <div className="baris">
-      <span className="chip chip-hijau">
-        <Icon name="cek" size={15} /> Build 3D tersedia
-      </span>
-      {data.downloadMb !== null ? (
-        <span className="chip">
-          <Icon name="kilat" size={15} /> Unduhan peserta {data.downloadMb} MB
-        </span>
-      ) : null}
-      {data.totalMb !== null ? <span className="chip">Total build {data.totalMb} MB</span> : null}
-      {data.compression !== null ? (
-        <span className="chip">Kompresi {LABEL_KOMPRESI[data.compression]}</span>
-      ) : null}
-    </div>
+    <p className="kecil lembut" style={{ margin: 0 }}>
+      Adegan 2D dimuat di HP peserta sejak lobby. Bila HP peserta tidak sanggup menampilkannya,
+      peserta otomatis memakai gambar sederhana dan tetap bisa menjawab lewat daftar pilihan.
+    </p>
   );
 }
 
@@ -468,7 +381,7 @@ function KesiapanAdegan({ room }: { room: RoomPublicState }) {
         </span>
       </div>
 
-      <StatusBuild3D />
+      <InfoAdegan2D />
 
       <p className="kecil lembut" style={{ margin: 0 }}>
         Melanjutkan ronde tidak memberi tambahan waktu bagi peserta yang belum siap - waktu
@@ -493,7 +406,7 @@ function KesiapanAdegan({ room }: { room: RoomPublicState }) {
                 <strong title={p.nickname}>{p.nickname}</strong>
                 <i>
                   <Icon name={p.connected ? 'jam' : 'silang'} size={13} />
-                  {p.connected ? 'belum siap memuat adegan' : 'terputus'}
+                  {p.connected ? 'adegan belum tampil' : 'terputus'}
                 </i>
               </span>
               <button

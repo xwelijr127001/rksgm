@@ -129,7 +129,7 @@ export function Raki({
    memakai Raki jauh lebih besar, ekor balon bisa ikut pindah sedikit lebih awal/lambat. */
 const CSS_BALON = `
 .rb{display:flex;align-items:flex-start;gap:10px;flex-wrap:wrap;container-type:inline-size}
-.rb-balon{position:relative;flex:1 1 240px;min-width:0;background:var(--putih);
+.rb-balon{position:relative;flex:1 1 240px;min-width:0;background:var(--putih);color:var(--tinta);
   border:2px solid var(--krem-tua);border-radius:var(--radius-l);padding:12px 14px;
   box-shadow:var(--shadow-s);overflow-wrap:anywhere;line-height:1.45}
 .rb-judul{font-family:var(--font-judul);font-weight:800;font-size:15px;color:var(--hijau);
