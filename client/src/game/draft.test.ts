@@ -1,13 +1,17 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { MISSIONS, TUTORIAL_MISSION } from '../../../shared/missions';
-import type { MissionReveal, StepDef } from '../../../shared/types';
+import { MISSIONS, TIEBREAK_MISSION, TUTORIAL_MISSION } from '../../../shared/missions';
+import type { MissionAnswer, MissionPublic, MissionReveal, StepDef } from '../../../shared/types';
 import {
   assignItem, chooseSingle, missingParts, missionStarted, objectStates, resolveTap, sanitizeDraft,
   stepComplete, stepStarted, toggleMulti, unassignItem, urutanTampil,
 } from './draft';
+import { sceneFor } from './scenes';
 import { sceneBengkel } from './scenes/m02-bengkel';
 import type { StageView } from './types';
+// Hanya di tes: kamus UI, untuk membuktikan teks bawaan draft.ts = kamus `id` dan penerjemah dipakai.
+import { aturBahasa, t } from '../i18n';
+import kamusMisi from '../i18n/kamus/misi';
 
 const m02 = MISSIONS[1]!;
 const m05 = MISSIONS[4]!;
@@ -62,6 +66,54 @@ test('kelengkapan: sebagian boleh dikirim (dengan konfirmasi), bukan diblokir', 
   assert.deepEqual(missingParts(m05, partial), ['1 bagian belum dipilih']);
   assert.deepEqual(missingParts(m05, { cocok: { 'kasus-a': 'lanjut', 'kasus-b': 'tidak-ambang' } }), []);
   assert.equal(missionStarted(TUTORIAL_MISSION, {}), false);
+});
+
+test('missingParts: teks bawaan = kamus Indonesia; dengan penerjemah mengikuti bahasa aktif', () => {
+  const m10 = MISSIONS[9]!;
+  // Bertipe eksplisit: tanpa ini TypeScript menggabungkan bentuk tiap `a` (cocok?: undefined, ...) yang bukan MissionAnswer.
+  const kasus: { m: MissionPublic; a: MissionAnswer }[] = [
+    { m: m05, a: { cocok: { 'kasus-a': 'lanjut' } } },
+    { m: m05, a: { cocok: {} } },
+    { m: m02, a: { bukti: ['foto-full'] } },
+    { m: m10, a: {} },
+    { m: TUTORIAL_MISSION, a: {} },
+  ];
+  assert.ok(m10.steps.length > 1, 'misi berlangkah banyak memakai awalan "Pertanyaan n:"');
+  assert.match(missingParts(m10, {})[0]!, /^Pertanyaan 1: /);
+  assert.deepEqual(missingParts(m02, { bukti: ['foto-full'] }), [`baru 1 dari ${multi.requiredSelections} pilihan`]);
+  for (const { m, a } of kasus) assert.deepEqual(missingParts(m, a, t), missingParts(m, a), `${m.id}: bawaan sama dengan kamus id`);
+  try {
+    aturBahasa('en');
+    assert.deepEqual(missingParts(m05, { cocok: { 'kasus-a': 'lanjut' } }, t), ['1 part not chosen yet']);
+    assert.match(missingParts(m10, {}, t)[0]!, /^Question 1: /);
+    aturBahasa('zh');
+    assert.match(missingParts(m10, {}, t)[0]!, /^第 1 题：/);
+  } finally {
+    aturBahasa('id');
+  }
+});
+
+test('keterangan objek info di adegan: kamus misi.info.<misi>.<objek> lengkap, teks id = teks adegan', () => {
+  const kunciAdegan: string[] = [];
+  for (const m of [TUTORIAL_MISSION, ...MISSIONS, TIEBREAK_MISSION]) {
+    const spec = sceneFor(m, 'id');
+    for (const o of spec?.objects ?? []) {
+      if (o.role !== 'info') continue;
+      const asli = o.info ?? o.label;
+      const kunci = `info.${m.id}.${o.id}`;
+      kunciAdegan.push(kunci);
+      // Ketukan objek info mengembalikan teks adegan (Indonesia); MissionPlay menggantinya lewat kamus.
+      assert.deepEqual(resolveTap(m, spec!, view({ focusStepId: null }), o.id), { kind: 'info', objectId: o.id, text: asli });
+      assert.equal(kamusMisi.id[kunci], asli, `misi.${kunci}: teks id berbeda dari berkas adegan`);
+      for (const b of ['en', 'zh'] as const) {
+        assert.ok(kamusMisi[b][kunci]?.trim(), `misi.${kunci} (${b}) belum diterjemahkan`);
+        assert.notEqual(kamusMisi[b][kunci], asli, `misi.${kunci} (${b}) masih teks Indonesia`);
+      }
+    }
+  }
+  assert.ok(kunciAdegan.length > 0, 'ada adegan yang punya objek info');
+  // Tidak ada kunci info yatim (objeknya sudah dihapus dari adegan).
+  assert.deepEqual(Object.keys(kamusMisi.id).filter((k) => k.startsWith('info.')).sort(), [...kunciAdegan].sort());
 });
 
 test('sanitizeDraft membuang id asing & memotong kelebihan pilihan dari draft lama', () => {

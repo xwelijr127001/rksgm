@@ -1,9 +1,9 @@
-/** Ekspor hasil pertandingan ke CSV (UTF-8 + BOM agar rapi di Excel). */
+/**
+ * Ekspor hasil pertandingan ke CSV (UTF-8 + BOM agar rapi di Excel).
+ * Kolom ronde mengikuti PLAYLIST room (jumlah soal bisa selain 10).
+ */
 
-import { TOTAL_ROUNDS } from '../../shared/types';
-import { computeBadges } from '../../shared/scoring';
-import { MISSIONS } from '../../shared/missions';
-import { TIEBREAK_ROUND, missionForRound, type Room } from './rooms';
+import type { Room } from './rooms';
 
 function cell(v: unknown): string {
   const s = v === null || v === undefined ? '' : String(v);
@@ -12,8 +12,9 @@ function cell(v: unknown): string {
 
 export function buildResultsCsv(room: Room): string {
   const roundIdx: number[] = [];
-  for (let i = 0; i < TOTAL_ROUNDS; i++) roundIdx.push(i);
-  if (room.tiebreakUsed) roundIdx.push(TIEBREAK_ROUND);
+  const penentuan = room.tiebreakRound;
+  for (let i = 0; i < room.totalRounds; i++) roundIdx.push(i);
+  if (room.tiebreakUsed) roundIdx.push(penentuan);
 
   const header = [
     'kode_room',
@@ -28,7 +29,7 @@ export function buildResultsCsv(room: Room): string {
     'hadiah',
   ];
   for (const i of roundIdx) {
-    const label = i === TIEBREAK_ROUND ? 'penentuan' : `misi${i + 1}`;
+    const label = i === penentuan ? 'penentuan' : `misi${i + 1}`;
     header.push(`${label}_poin`, `${label}_ketepatan`, `${label}_detik`, `${label}_terjawab`);
   }
 
@@ -57,7 +58,7 @@ export function buildResultsCsv(room: Room): string {
       (Math.round(p.totalAccuracy * 1000) / 1000).toFixed(3),
       (p.totalTimeMs / 1000).toFixed(1),
       p.rounds.filter((r) => r.answered).length,
-      computeBadges(p.rounds, rank, MISSIONS).map((b) => b.label).join(' | '),
+      room.lencana(p, rank).map((b) => b.label).join(' | '),
       prize,
     ];
     for (const i of roundIdx) {
@@ -76,10 +77,10 @@ export function buildResultsCsv(room: Room): string {
   lines.push('');
   lines.push(cell('# keterangan misi') + ',' + cell('judul') + ',' + cell('produk') + ',' + cell('detik'));
   for (const i of roundIdx) {
-    const m = missionForRound(i);
+    const m = room.missionForRound(i);
     if (!m) continue;
     lines.push(
-      [`# misi ${i === TIEBREAK_ROUND ? 'penentuan' : i + 1}`, m.title, m.productLabel, m.durationSeconds]
+      [`# misi ${i === penentuan ? 'penentuan' : i + 1}`, m.title, m.productLabel, m.durationSeconds]
         .map(cell)
         .join(','),
     );

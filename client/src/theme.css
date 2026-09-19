@@ -595,10 +595,12 @@ button {
 .anim-melayang { animation: melayang 3.2s ease-in-out infinite; }
 .anim-denyut { animation: denyut 1.1s ease-in-out infinite; }
 
+/* Tidak berlaku bila animasi dinyalakan di perangkat ini (<html data-gerak="penuh">, lihat gerak.ts). */
 @media (prefers-reduced-motion: reduce) {
-  *,
-  *::before,
-  *::after {
+  :root:not([data-gerak="penuh"]),
+  :root:not([data-gerak="penuh"]) *,
+  :root:not([data-gerak="penuh"]) *::before,
+  :root:not([data-gerak="penuh"]) *::after {
     animation-duration: 0.001ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.001ms !important;

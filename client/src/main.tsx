@@ -1,8 +1,10 @@
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import App from './App';
+import { siapkanGerak } from './gerak';
 import './theme.css';
 
+siapkanGerak();
 const el = document.getElementById('root');
 if (!el) throw new Error('Elemen #root tidak ditemukan');
 

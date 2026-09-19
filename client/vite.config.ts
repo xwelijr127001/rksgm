@@ -19,6 +19,8 @@ export default defineConfig({
     fs: { allow: [repoRoot] },
     proxy: {
       '/api': { target: serverTarget, changeOrigin: true },
+      // Gambar soal buatan panitia disimpan & dilayani server (lihat server/src/gambarSoal.ts).
+      '/gambar-soal': { target: serverTarget, changeOrigin: true },
       '/socket.io': { target: serverTarget, ws: true, changeOrigin: true },
       // Build Unity disajikan Express (bukan Vite) supaya MIME & Content-Encoding benar.
       // Musik (/audio/*.mp3) TIDAK diproxy: itu aset di client/public dan sudah
@@ -30,6 +32,8 @@ export default defineConfig({
     host: true,
     proxy: {
       '/api': { target: serverTarget, changeOrigin: true },
+      // Gambar soal buatan panitia disimpan & dilayani server (lihat server/src/gambarSoal.ts).
+      '/gambar-soal': { target: serverTarget, changeOrigin: true },
       '/socket.io': { target: serverTarget, ws: true, changeOrigin: true },
       '/unity': { target: serverTarget, changeOrigin: true },
     },

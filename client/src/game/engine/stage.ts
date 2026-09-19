@@ -13,7 +13,7 @@ import { heroArt, type HeroProp } from '../art/characters';
 import type { ArtRef, SceneSpec, StageStats, StageView } from '../types';
 import { WORLD_H, WORLD_W } from '../types';
 import { stepIdsOf } from '../draft';
-import { defineMissionScene, type MissionSceneInstance } from './MissionScene';
+import { defineMissionScene, type KataAdegan, type MissionSceneInstance } from './MissionScene';
 import { rasterize, rasterScaleFor } from './raster';
 
 type PhaserModule = typeof Phaser;
@@ -43,6 +43,7 @@ export interface StageOptions {
   look: PlayerLook;
   view: StageView;
   bucketShort: Record<string, string>;
+  kata: KataAdegan;
   onTap(objectId: string): void;
   /** Batas waktu memuat sebelum dianggap gagal (ms). */
   timeoutMs?: number;
@@ -154,6 +155,7 @@ export async function createStage(opts: StageOptions): Promise<StageHandle> {
       rasterScale: skala,
       heroArt: semua.hero,
       bucketShort: opts.bucketShort,
+      kata: opts.kata,
       onTap: opts.onTap,
       onReady: () => {
         if (selesai) return;

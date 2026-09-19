@@ -16,6 +16,11 @@ process.env.HOST = '127.0.0.1';
 process.env.DB_FILE = DB_FILE;
 process.env.PUBLIC_BASE_URL = `http://127.0.0.1:${PORT}`;
 process.env.NODE_ENV = 'test';
+// Tes ini memainkan 10 misi paket latihan dengan kunci answerKeys.ts; room baru tanpa pilihan
+// paket mengikuti RAKSA_PAKET, jadi dipaku di sini (bawaan server = paket acara).
+process.env.RAKSA_PAKET = 'latihan';
+// String kosong (bukan delete) supaya PANITIA_PIN di .env tidak ikut terbaca oleh config.ts.
+process.env.PANITIA_PIN = '';
 
 // eslint-disable-next-line @typescript-eslint/no-require-imports
 const srv = require('./index') as typeof import('./index');

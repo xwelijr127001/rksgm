@@ -11,7 +11,7 @@ import type { SceneSpec } from '../types';
 import { INK, INK_TIPIS, P, art, building, circle, cloud, line, path, rect, rrect, shadow, text } from '../art/kit';
 
 /** Papan lembar hitung (digambar engine): posisi & lebar dipakai juga untuk rak kapur di latar. */
-const PAPAN = { x: 250, y: 24, w: 410, baris: 3 };
+export const PAPAN = { x: 250, y: 24, w: 410, baris: 3 };
 const PAPAN_BAWAH = PAPAN.y + 44 + PAPAN.baris * 40;
 
 // ------------------------------------------------------------------ latar
@@ -126,7 +126,7 @@ function meja(): string {
     ${rect(36, 428, 160, 6, '#000', 'opacity="0.08"')}${rect(384, 428, 160, 6, '#000', 'opacity="0.08"')}`;
 }
 
-function latar(): string {
+export function latar(): string {
   const kiri = PAPAN.x - PAPAN.w / 2;
   return `
     <!-- dinding -->
@@ -155,7 +155,7 @@ function latar(): string {
 // ------------------------------------------------------------------ objek
 
 /** Lembar Data Simulasi di papan klip, 92 x 108 (membuka tabel data). */
-function lembarData(): string {
+export function lembarData(): string {
   let baris = '';
   for (let i = 0; i < 4; i += 1) {
     const y = 50 + i * 12;

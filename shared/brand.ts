@@ -37,14 +37,13 @@ export const BRAND = {
  * Tokoh Raksa yang muncul di game. Sprite: client/public/karakter/ (dibuat dari character/
  * lewat `node tools/siapkan-karakter.mjs`).
  *
- *   ceo       Mr Roger - pembuka & penutup: halaman awal, lobby, slot pemandu di bawah hasil
- *             pembahasan, podium
+ *   ceo       Mr Roger - pembuka & penutup: halaman awal, lobby, hasil akhir, podium
  *   Tokoh tidak pernah digambar di adegan misi: tempatnya di panel (potret kecil), supaya
  *   tidak menutupi objek, label, atau tanda pembahasan.
  *   missRaksa Miss Raksa - ikon & pilar Raksa CS, "pembawa kasus": sapaan di halaman gabung,
  *             suara briefing tiap misi (HP & proyektor)
- *   isti      Bu Isti - Direktur IT, "urusan sistem": cara bergabung (QR) & ringkasan data
- *             ronde di proyektor, pesan saat koneksi HP terputus
+ *   isti      Bu Isti - Direktur IT, JURI: membacakan hasil tiap misi (HP & proyektor) dan
+ *             ringkasan data ronde; juga cara bergabung (QR) & pesan saat koneksi HP terputus
  *   Ketiganya berdiri bersama di podium proyektor.
  *
  * PENTING: kalimat sapaan di bawah adalah USULAN tim game. Mohon disetujui oleh yang
@@ -61,15 +60,6 @@ export const TOKOH = {
     sapaan: {
       awal: 'Selamat datang di Misi Lindungi Kota!',
       lobby: 'Terima kasih sudah bergabung. Selamat bermain!',
-      /**
-       * Di bawah hasil pembahasan tiap misi (slot pemandu di panel), bergiliran menurut
-       * nomor misi. Netral: cocok untuk jawaban tepat maupun belum tepat.
-       */
-      pembahasan: [
-        'Setiap kasus adalah pelajaran.',
-        'Terima kasih sudah ikut belajar.',
-        'Semangat untuk kasus berikutnya!',
-      ],
       podium: 'Selamat untuk para juara. Terima kasih sudah ikut bermain!',
     },
   },
@@ -90,6 +80,8 @@ export const TOKOH = {
     jabatan: 'Direktur IT',
     tampilJabatan: true,
     sapaan: {
+      /** Sebutan peran di samping namanya saat membacakan hasil misi ("Bu Isti · Juri"). */
+      juri: 'Juri',
       /** Lobby proyektor, di bawah QR (setelah petunjuk alamat & kode). */
       gabung: 'Pilih karakter, lalu tekan Siap. Kalau koneksi putus, cukup buka lagi tautannya.',
       /** Papan peringkat proyektor, di atas ringkasan ronde. */

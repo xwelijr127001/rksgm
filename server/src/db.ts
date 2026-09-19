@@ -1,12 +1,11 @@
-/** Penyimpanan hasil pertandingan (SQLite via better-sqlite3). */
+/** Penyimpanan hasil pertandingan + soal kustom bank soal (SQLite via better-sqlite3). */
 
 import fs from 'node:fs';
 import path from 'node:path';
 import Database from 'better-sqlite3';
-import { computeBadges } from '../../shared/scoring';
-import { MISSIONS } from '../../shared/missions';
+import type { SoalKustom } from '../../shared/bankSoal';
 import { CONFIG } from './config';
-import { missionForRound, type Room } from './rooms';
+import type { Room } from './rooms';
 
 let db: Database.Database | null = null;
 
@@ -56,6 +55,14 @@ export function getDb(): Database.Database {
       elapsed_ms INTEGER NOT NULL,
       answer_json TEXT,
       PRIMARY KEY (match_id, player_id, round_index)
+    );
+
+    CREATE TABLE IF NOT EXISTS soal_kustom (
+      id TEXT PRIMARY KEY,
+      judul TEXT NOT NULL,
+      data_json TEXT NOT NULL,
+      dibuat INTEGER NOT NULL,
+      diubah INTEGER NOT NULL
     );
   `);
   return db;
@@ -126,7 +133,7 @@ export function saveMatch(room: Room): number {
         p.totalAccuracy,
         p.totalTimeMs,
         p.rounds.filter((r) => r.answered).length,
-        JSON.stringify(computeBadges(p.rounds, rank, MISSIONS).map((b) => b.id)),
+        JSON.stringify(room.lencana(p, rank).map((b) => b.id)),
       );
       for (const r of p.rounds) {
         const sub = room.submissionOf(p.id, r.roundIndex);
@@ -134,7 +141,7 @@ export function saveMatch(room: Room): number {
           id,
           p.id,
           r.roundIndex,
-          missionForRound(r.roundIndex)?.id ?? '-',
+          room.missionForRound(r.roundIndex)?.id ?? '-',
           r.answered ? 1 : 0,
           r.accuracy,
           r.basePoints,
@@ -165,6 +172,66 @@ export function listMatches(limit = 50): MatchSummaryRow[] {
   return getDb()
     .prepare('SELECT id, code, event_name, started_at, finished_at, player_count, saved_at FROM matches ORDER BY saved_at DESC LIMIT ?')
     .all(limit) as MatchSummaryRow[];
+}
+
+// ------------------------------------------------------------------ soal kustom (bank soal)
+// Baris menyimpan SoalKustom utuh (TERMASUK kunci) sebagai JSON. Isinya sudah divalidasi
+// soalKustom.ts sebelum disimpan; pembacaan tetap tahan baris rusak (dilewati, bukan melempar).
+
+/** Pengaman: jumlah soal kustom yang boleh tersimpan. */
+export const BATAS_JUMLAH_SOAL_KUSTOM = 200;
+
+interface BarisSoalKustom {
+  id: string;
+  data_json: string;
+  diubah: number;
+}
+
+function bacaBarisSoal(baris: BarisSoalKustom | undefined): SoalKustom | undefined {
+  if (!baris) return undefined;
+  try {
+    const soal = JSON.parse(baris.data_json) as SoalKustom;
+    if (!soal || typeof soal !== 'object' || !Array.isArray(soal.steps)) return undefined;
+    return { ...soal, id: baris.id, diubah: baris.diubah };
+  } catch {
+    return undefined;
+  }
+}
+
+/** Semua soal kustom, urut waktu dibuat. */
+export function daftarSoalKustom(): SoalKustom[] {
+  const baris = getDb()
+    .prepare('SELECT id, data_json, diubah FROM soal_kustom ORDER BY dibuat ASC, id ASC')
+    .all() as BarisSoalKustom[];
+  return baris.map(bacaBarisSoal).filter((s): s is SoalKustom => s !== undefined);
+}
+
+export function ambilSoalKustom(id: string): SoalKustom | undefined {
+  const baris = getDb().prepare('SELECT id, data_json, diubah FROM soal_kustom WHERE id = ?').get(id) as
+    | BarisSoalKustom
+    | undefined;
+  return bacaBarisSoal(baris);
+}
+
+export function jumlahSoalKustom(): number {
+  return (getDb().prepare('SELECT COUNT(*) AS n FROM soal_kustom').get() as { n: number }).n;
+}
+
+/** Simpan baru / timpa soal dengan id yang sama. Hasil = soal dengan cap waktu `diubah`. */
+export function simpanSoalKustom(soal: SoalKustom): SoalKustom {
+  const kini = Date.now();
+  const { diubah: _lama, ...isi } = soal;
+  getDb()
+    .prepare(
+      `INSERT INTO soal_kustom (id, judul, data_json, dibuat, diubah) VALUES (?, ?, ?, ?, ?)
+       ON CONFLICT(id) DO UPDATE SET judul = excluded.judul, data_json = excluded.data_json, diubah = excluded.diubah`,
+    )
+    .run(soal.id, soal.title, JSON.stringify(isi), kini, kini);
+  return { ...isi, diubah: kini };
+}
+
+export function hapusSoalKustom(id: string): boolean {
+  return getDb().prepare('DELETE FROM soal_kustom WHERE id = ?').run(id).changes > 0;
 }
 
 export function closeDb(): void {

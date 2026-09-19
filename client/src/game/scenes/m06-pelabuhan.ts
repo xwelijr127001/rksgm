@@ -85,7 +85,8 @@ function gudang(): string {
     ${rect(440, 248, 200, 8, '#d9ccb2')}`;
 }
 
-function latar(): string {
+/** Diekspor: dipakai ulang apa adanya oleh adegan acara a04 (kunci tekstur `m06-latar`, SVG harus identik). */
+export function latar(): string {
   return `
     ${rect(0, 0, 640, 150, P.langit)}
     ${rect(0, 0, 640, 56, P.langitAtas, 'opacity="0.5"')}
@@ -126,7 +127,7 @@ const BENTUK_PETI = {
 };
 
 /** Satu peti 50 x 44 tanpa garis tepi tinta (latar), nomor dicat di sisi. */
-function peti(x: number, y: number, nomor: string, o: { remuk?: 'kanan' | 'kiri'; terbuka?: boolean; basah?: boolean } = {}): string {
+export function peti(x: number, y: number, nomor: string, o: { remuk?: 'kanan' | 'kiri'; terbuka?: boolean; basah?: boolean } = {}): string {
   const d = o.remuk === 'kanan' ? BENTUK_PETI.remukKanan : o.remuk === 'kiri' ? BENTUK_PETI.remukKiri : BENTUK_PETI.utuh;
   const lipat = o.remuk === 'kanan'
     ? line('M30 1 C33 9 40 14 49 16', '#6f4c2e', 3) + line('M33 18 l4 6 M40 18 l3 6 M26 8 l5 3', '#6f4c2e', 2)
@@ -157,7 +158,7 @@ function tumpukanPeti(): string {
 // ------------------------------------------------------------------ dokumen
 
 /** Papan klip daftar kiriman 70 x 94 (ikon kapal kecil = dokumen pengiriman). */
-function papanKiriman(): string {
+export function papanKiriman(): string {
   return `
     ${shadow(35, 90, 28, 4)}
     ${rrect(5, 8, 60, 80, 7, P.kayu, INK)}
@@ -169,7 +170,7 @@ function papanKiriman(): string {
 }
 
 /** Lembar bukti terima 72 x 92 dengan ikon peti & cap bulat. */
-function lembarTerima(): string {
+export function lembarTerima(): string {
   return `<g transform="rotate(-4 36 46)">
     ${shadow(36, 88, 30, 4)}
     ${rrect(5, 4, 62, 80, 6, P.putih, INK)}
@@ -183,7 +184,7 @@ function lembarTerima(): string {
   </g>`;
 }
 
-function polaroid(x: number, y: number, sudut: number, isi: string): string {
+export function polaroid(x: number, y: number, sudut: number, isi: string): string {
   return `<g transform="translate(${x} ${y}) rotate(${sudut} 13 17)">
     ${rrect(0, 0, 26, 32, 2, P.putih, INK_TIPIS)}
     ${rect(3, 3, 20, 20, P.langit)}
@@ -210,7 +211,7 @@ function fotoPeti(): string {
 // ------------------------------------------------------------------ papan aksi (tindak lanjut)
 
 /** Papan aksi berdiri 84 x 84. Papan, tiang, dan ukuran SAMA untuk keempat pilihan. */
-function papanAksi(ikon: string): string {
+export function papanAksi(ikon: string): string {
   return `
     ${shadow(42, 80, 24, 4)}
     ${rrect(20, 74, 44, 7, 3.5, P.besiTua)}
@@ -227,7 +228,7 @@ const manset = rrect(52, 45, 16, 9, 2, P.biru, INK_TIPIS);
  */
 const tangan = (isi: string): string => `<g transform="translate(2 7) scale(0.9)">${isi}</g>`;
 
-const IKON = {
+export const IKON = {
   catat: `
     ${rrect(12, 12, 28, 40, 4, P.kayu, INK_TIPIS)}
     ${rrect(16, 18, 20, 29, 2, P.putih)}

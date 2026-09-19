@@ -133,23 +133,47 @@ export function missionStarted(mission: MissionPublic, answer: MissionAnswer): b
   return mission.steps.some((s) => stepStarted(s, answer[s.id]));
 }
 
-/** Daftar bagian yang belum lengkap, dalam bahasa sehari-hari (untuk konfirmasi kirim). */
-export function missingParts(mission: MissionPublic, answer: MissionAnswer): string[] {
+/**
+ * Penerjemah teks dengan bentuk yang sama dengan t() di client/src/i18n. Diterima sebagai
+ * parameter supaya modul ini tetap murni (tanpa React/kamus).
+ */
+export type Penerjemah = (kunci: string, param?: Record<string, string | number>) => string;
+
+/** Teks bawaan (Indonesia) = kamus `misi` bagian `id`; kesamaannya dijaga draft.test.ts. */
+const KURANG_ID: Record<string, string> = {
+  'misi.kurang.bernomor': 'Pertanyaan {n}: {isi}',
+  'misi.kurang.multi': 'baru {n} dari {total} pilihan',
+  'misi.kurang.assignSatu': '{n} bagian belum dipilih',
+  'misi.kurang.assign': '{n} bagian belum dipilih',
+  'misi.kurang.kosong': 'belum diisi',
+};
+
+const teksIndonesia: Penerjemah = (kunci, param) => {
+  let teks = KURANG_ID[kunci] ?? kunci;
+  if (param) for (const [k, v] of Object.entries(param)) teks = teks.split(`{${k}}`).join(String(v));
+  return teks;
+};
+
+/**
+ * Daftar bagian yang belum lengkap, dalam bahasa sehari-hari (untuk konfirmasi kirim).
+ * `tr` = penerjemah bahasa aktif (UI mengirim t()); tanpa itu teksnya Indonesia.
+ */
+export function missingParts(mission: MissionPublic, answer: MissionAnswer, tr: Penerjemah = teksIndonesia): string[] {
   const out: string[] = [];
   mission.steps.forEach((s, i) => {
     const v = answer[s.id];
     if (stepComplete(s, v)) return;
-    const nomor = mission.steps.length > 1 ? `Pertanyaan ${i + 1}: ` : '';
+    let isi: string;
     if (s.kind === 'multi') {
-      const n = asList(v).length;
-      out.push(`${nomor}baru ${n} dari ${s.requiredSelections} pilihan`);
+      isi = tr('misi.kurang.multi', { n: asList(v).length, total: s.requiredSelections });
     } else if (s.kind === 'assign') {
       const peta = asRecord(v);
       const belum = s.items.filter((it) => !peta[it.id]).length;
-      out.push(`${nomor}${belum} ${belum === 1 ? 'bagian' : 'bagian'} belum dipilih`);
+      isi = tr(belum === 1 ? 'misi.kurang.assignSatu' : 'misi.kurang.assign', { n: belum });
     } else {
-      out.push(`${nomor}belum diisi`);
+      isi = tr('misi.kurang.kosong');
     }
+    out.push(mission.steps.length > 1 ? tr('misi.kurang.bernomor', { n: i + 1, isi }) : isi);
   });
   return out;
 }

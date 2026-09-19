@@ -1,15 +1,28 @@
 /**
  * Layar host (prioritas desktop, tetap terbaca di HP/tablet).
  * Membuat room, mengundang peserta lewat QR, mengendalikan ronde, dan mengekspor hasil.
+ * Teks tampil dalam bahasa aktif (kamus: ../i18n/kamus/host.ts). Data acara (nama acara,
+ * label hadiah) yang DIISI panitia tampil apa adanya; hanya nilai BAWAAN yang ikut bahasa aktif
+ * saat ditampilkan (terjemahkanBawaan). Kolom isian selalu memuat nilai aslinya.
  */
 
-import { useEffect, useState } from 'react';
+import { PilihBahasa } from '../components/PilihBahasa';
+import { TombolGerak } from '../components/TombolGerak';
+import { useEffect, useMemo, useState } from 'react';
+import type { IdPaket } from '@shared/bankSoal';
 import { BRAND, DEFAULT_EVENT_NAME } from '@shared/brand';
 import type { HostAction, PlayerPublic, Prizes, RoomPublicState } from '@shared/types';
 import { Avatar } from '../art/Avatar';
 import { Icon } from '../art/Icon';
 import { preferMusicOn } from '../audio/audio';
-import { actions, savedHostToken, savedLastHostRoom, useGame } from '../state/store';
+import { misiDalamBahasa, t, useBahasa } from '../i18n';
+import { terjemahkanBawaan, terjemahkanGalat } from '../i18n/galat';
+import kamusHost from '../i18n/kamus/host';
+import { useKonfigBank } from '../state/bank';
+import { actions, savedHostToken, savedLastHostRoom, savedPin, useGame } from '../state/store';
+import { AturSoal } from './host/AturSoal';
+import { PaketAwal } from './host/PaketAwal';
+import { KolomPin } from './host/PinPanitia';
 import {
   AudioControls,
   BrandTitle,
@@ -42,22 +55,47 @@ function jalankan(action: HostAction, extra?: Record<string, unknown>) {
   void actions.hostAction(action, extra);
 }
 
+/**
+ * Catatan aset adalah data di shared/brand.ts. Nilai bawaannya diterjemahkan; bila panitia
+ * sudah mengganti teksnya, tampilkan apa adanya.
+ */
+function catatanAset(): string {
+  const catatan: string = BRAND.assetNote;
+  return catatan === kamusHost.id.catatanAset ? t('host.catatanAset') : catatan;
+}
+
+/** "Juara 1" / "1st place" / "第一名". Peringkat di luar 1-3 memakai bentuk umum. */
+function teksJuara(rank: number): string {
+  return rank >= 1 && rank <= 3 ? t(`host.juara${rank}`) : t('host.juaraN', { n: rank });
+}
+
 // ------------------------------------------------------------------ mulai
 
 function MulaiHost() {
+  useBahasa();
   const [nama, setNama] = useState(DEFAULT_EVENT_NAME);
   const [kode, setKode] = useState('');
   const [token, setToken] = useState('');
   const [sibuk, setSibuk] = useState(false);
   const [tersimpan] = useState(() => {
     const code = savedLastHostRoom();
-    const t = code ? savedHostToken(code) : null;
-    return code && t ? { code, token: t } : null;
+    // (bukan `t`: nama itu dipakai fungsi terjemahan)
+    const tok = code ? savedHostToken(code) : null;
+    return code && tok ? { code, token: tok } : null;
   });
+  // PIN panitia hanya diminta bila server memasangnya; paket soal hanya bila bank soal tersedia.
+  const konfig = useKonfigBank();
+  const butuhPin = konfig?.butuhPin === true;
+  const [pin, setPin] = useState(() => savedPin() ?? '');
+  const [paket, setPaket] = useState<IdPaket | null>(null);
 
   const buat = async () => {
+    if (sibuk || (butuhPin && !pin.trim())) return;
     setSibuk(true);
-    await actions.hostCreate(nama.trim() || DEFAULT_EVENT_NAME);
+    await actions.hostCreate(nama.trim() || DEFAULT_EVENT_NAME, {
+      ...(paket ? { paket } : {}),
+      ...(butuhPin ? { pin } : {}),
+    });
     setSibuk(false);
   };
 
@@ -70,10 +108,10 @@ function MulaiHost() {
   return (
     <div className="wrap stack-l" style={{ padding: 0 }}>
       <section className="panel stack">
-        <h2>Buat Room</h2>
+        <h2>{t('host.buatRoom')}</h2>
         <div>
           <label className="label-kolom" htmlFor="host-nama">
-            Nama acara
+            {t('host.namaAcara')}
           </label>
           <input
             id="host-nama"
@@ -84,8 +122,14 @@ function MulaiHost() {
             placeholder={DEFAULT_EVENT_NAME}
           />
         </div>
-        <button className="btn btn-utama btn-blok" onClick={() => void buat()} disabled={sibuk}>
-          Buat Room Baru
+        <PaketAwal nilai={paket} onPilih={setPaket} />
+        {butuhPin ? <KolomPin nilai={pin} onUbah={setPin} onEnter={() => void buat()} /> : null}
+        <button
+          className="btn btn-utama btn-blok"
+          onClick={() => void buat()}
+          disabled={sibuk || (butuhPin && !pin.trim())}
+        >
+          {t('host.buatRoomBaru')}
         </button>
         {tersimpan ? (
           <button
@@ -93,17 +137,17 @@ function MulaiHost() {
             onClick={() => void sambung(tersimpan.code, tersimpan.token)}
             disabled={sibuk}
           >
-            Lanjutkan room {tersimpan.code}
+            {t('host.lanjutkanRoom', { kode: tersimpan.code })}
           </button>
         ) : null}
       </section>
 
       <section className="panel stack">
-        <h3>Masuk dengan token host</h3>
-        <p className="kecil lembut">Pakai ini bila kamu berpindah browser atau perangkat.</p>
+        <h3>{t('host.masukToken')}</h3>
+        <p className="kecil lembut">{t('host.masukTokenKet')}</p>
         <div>
           <label className="label-kolom" htmlFor="host-kode">
-            Kode room (4 huruf)
+            {t('host.kodeRoom')}
           </label>
           <input
             id="host-kode"
@@ -117,7 +161,7 @@ function MulaiHost() {
         </div>
         <div>
           <label className="label-kolom" htmlFor="host-token">
-            Token host
+            {t('host.tokenHost')}
           </label>
           <input
             id="host-token"
@@ -125,7 +169,7 @@ function MulaiHost() {
             value={token}
             autoComplete="off"
             onChange={(e) => setToken(e.target.value)}
-            placeholder="tempel token di sini"
+            placeholder={t('host.tempelToken')}
           />
         </div>
         <button
@@ -133,12 +177,9 @@ function MulaiHost() {
           onClick={() => void sambung(kode, token)}
           disabled={sibuk || kode.trim().length < 4 || token.trim().length === 0}
         >
-          Masuk sebagai Host
+          {t('host.masukSebagaiHost')}
         </button>
-        <Pesan jenis="info">
-          Token host berbeda dari kode room peserta. Kode room boleh dibagikan; token host jangan
-          dibagikan ke peserta karena bisa dipakai mengendalikan pertandingan.
-        </Pesan>
+        <Pesan jenis="info">{t('host.infoToken')}</Pesan>
       </section>
     </div>
   );
@@ -147,6 +188,7 @@ function MulaiHost() {
 // ------------------------------------------------------------------ undang peserta
 
 function Undang({ room }: { room: RoomPublicState }) {
+  useBahasa();
   const [salin, setSalin] = useState<'diam' | 'ok' | 'gagal'>('diam');
 
   const salinTautan = async () => {
@@ -160,7 +202,7 @@ function Undang({ room }: { room: RoomPublicState }) {
 
   return (
     <section className="panel stack" aria-labelledby="host-undang">
-      <h3 id="host-undang">Undang Peserta</h3>
+      <h3 id="host-undang">{t('host.undangPeserta')}</h3>
       <div className="stack tengah">
         <div>
           <KodeRoom code={room.code} />
@@ -169,36 +211,34 @@ function Undang({ room }: { room: RoomPublicState }) {
           <QrCode value={room.joinUrl} size={230} label={room.joinUrl} />
         </div>
       </div>
-      <p className="kecil lembut">
-        Peserta memindai QR atau membuka tautan di atas, lalu memasukkan kode room.
-      </p>
+      <p className="kecil lembut">{t('host.caraGabung')}</p>
       <div className="baris">
         <button className="btn btn-netral" onClick={() => void salinTautan()}>
-          <Icon name="dokumen" size={18} /> Salin tautan
+          <Icon name="dokumen" size={18} /> {t('host.salinTautan')}
         </button>
         <button
           className="btn btn-garis"
           onClick={() => window.open(`/projector?room=${room.code}`, '_blank', 'noopener')}
         >
-          Buka layar proyektor
+          {t('host.bukaProyektor')}
         </button>
       </div>
-      {salin === 'ok' ? <Pesan jenis="sukses">Tautan sudah disalin.</Pesan> : null}
+      {salin === 'ok' ? <Pesan jenis="sukses">{t('host.tautanDisalin')}</Pesan> : null}
       {salin === 'gagal' ? (
         <Pesan jenis="kuning">
-          Browser ini tidak mengizinkan salin otomatis. Salin tautan berikut secara manual:
+          {t('host.salinManual')}
           <input
             className="kolom mono kecil"
             style={{ marginTop: 8 }}
             readOnly
             value={room.joinUrl}
             onFocus={(e) => e.currentTarget.select()}
-            aria-label="Tautan undangan untuk disalin manual"
+            aria-label={t('host.salinManualAria')}
           />
         </Pesan>
       ) : null}
       <Pesan jenis="info">
-        <span className="mini">{BRAND.assetNote}</span>
+        <span className="mini">{catatanAset()}</span>
       </Pesan>
     </section>
   );
@@ -207,6 +247,12 @@ function Undang({ room }: { room: RoomPublicState }) {
 // ------------------------------------------------------------------ kendali pertandingan
 
 function Kendali({ room }: { room: RoomPublicState }) {
+  const { bahasa } = useBahasa();
+  // Judul, lokasi, dan produk misi mengikuti bahasa aktif (id misi tidak berubah).
+  const misi = useMemo(
+    () => (room.mission ? misiDalamBahasa(room.mission, bahasa) : null),
+    [room.mission, bahasa],
+  );
   const dijeda = room.phase === 'PAUSED';
   const fase = dijeda ? (room.prevPhase ?? 'LOBBY') : room.phase;
   const rondeTerakhir = room.roundIndex >= room.totalRounds - 1;
@@ -214,46 +260,43 @@ function Kendali({ room }: { room: RoomPublicState }) {
 
   return (
     <section className="panel stack" aria-labelledby="host-kendali">
-      <h3 id="host-kendali">Kendali Pertandingan</h3>
+      <h3 id="host-kendali">{t('host.kendali')}</h3>
 
       <div className="baris">
         <PhaseBadge phase={room.phase} />
         <span className="chip">
-          Ronde {room.roundIndex + 1} / {room.totalRounds}
+          {t('host.ronde', { n: room.roundIndex + 1, total: room.totalRounds })}
         </span>
         <Timer endsAt={room.phaseEndsAt} durationMs={room.phaseDurationMs} />
       </div>
 
       <div className="stack-s">
         <strong>
-          {room.mission
-            ? `Misi ${room.mission.number}: ${room.mission.title}`
-            : 'Belum ada misi aktif'}
+          {misi ? t('host.misiJudul', { n: misi.number, judul: misi.title }) : t('host.belumAdaMisi')}
         </strong>
-        {room.mission ? (
+        {misi ? (
           <span className="kecil lembut">
-            {room.mission.location} - {room.mission.productLabel}
+            {misi.location} - {misi.productLabel}
           </span>
         ) : null}
       </div>
 
       <div className="baris">
         <span className="chip chip-biru">
-          <Icon name="cek" size={15} /> Jawaban masuk {room.submittedCount} / {room.playerCount}{' '}
-          peserta
+          <Icon name="cek" size={15} />{' '}
+          {t('host.jawabanMasuk', { masuk: room.submittedCount, total: room.playerCount })}
         </span>
         <span className="chip">
-          <Icon name="operator" size={15} /> Terhubung {room.connectedCount} / {room.playerCount}
+          <Icon name="operator" size={15} />{' '}
+          {t('host.terhubung', { n: room.connectedCount, total: room.playerCount })}
         </span>
       </div>
 
       {dijeda ? (
         <Pesan jenis="kuning">
-          Pertandingan dijeda
           {room.pausedRemainingMs !== null
-            ? ` dengan sisa ${Math.ceil(room.pausedRemainingMs / 1000)} detik`
-            : ''}
-          . Tekan &quot;Lanjutkan&quot; agar tombol ronde bisa dipakai lagi.
+            ? t('host.dijedaSisa', { detik: Math.ceil(room.pausedRemainingMs / 1000) })
+            : t('host.dijeda')}
         </Pesan>
       ) : null}
 
@@ -264,7 +307,7 @@ function Kendali({ room }: { room: RoomPublicState }) {
             onClick={() => jalankan('startTutorial')}
             disabled={dijeda}
           >
-            Mulai Tutorial
+            {t('host.mulaiTutorial')}
           </button>
         ) : null}
         {fase === 'LOBBY' || fase === 'TUTORIAL' ? (
@@ -273,12 +316,12 @@ function Kendali({ room }: { room: RoomPublicState }) {
             onClick={() => jalankan('startMatch')}
             disabled={dijeda || tanpaPeserta}
           >
-            Mulai Pertandingan
+            {t('host.mulaiPertandingan')}
           </button>
         ) : null}
         {fase === 'BRIEFING' ? (
           <button className="btn btn-utama" onClick={() => jalankan('next')} disabled={dijeda}>
-            Mulai Menjawab Sekarang
+            {t('host.mulaiMenjawab')}
           </button>
         ) : null}
         {fase === 'ACTIVE' ? (
@@ -287,53 +330,53 @@ function Kendali({ room }: { room: RoomPublicState }) {
             onClick={() => jalankan('closeRound')}
             disabled={dijeda}
           >
-            Tutup Ronde
+            {t('host.tutupRonde')}
           </button>
         ) : null}
         {fase === 'REVEAL' ? (
           <button className="btn btn-utama" onClick={() => jalankan('next')} disabled={dijeda}>
-            Tampilkan Peringkat
+            {t('host.tampilkanPeringkat')}
           </button>
         ) : null}
         {fase === 'LEADERBOARD' ? (
           <button className="btn btn-utama" onClick={() => jalankan('next')} disabled={dijeda}>
-            {rondeTerakhir ? 'Selesaikan Pertandingan' : 'Ronde Berikutnya'}
+            {rondeTerakhir ? t('host.selesaikan') : t('host.rondeBerikutnya')}
           </button>
         ) : null}
         {fase === 'FINISHED' && room.tie ? (
           <button className="btn btn-utama" onClick={() => jalankan('tiebreak')} disabled={dijeda}>
-            Ronde Penentuan
+            {t('host.rondePenentuan')}
           </button>
         ) : null}
         <button className="btn btn-netral" onClick={() => jalankan(dijeda ? 'resume' : 'pause')}>
-          {dijeda ? 'Lanjutkan' : 'Jeda'}
+          {dijeda ? t('host.lanjutkan') : t('host.jeda')}
         </button>
       </div>
 
       {(fase === 'LOBBY' || fase === 'TUTORIAL') && tanpaPeserta ? (
         <p className="kecil lembut" style={{ margin: 0 }}>
-          Tombol &quot;Mulai Pertandingan&quot; nonaktif karena belum ada peserta yang bergabung.
+          {t('host.mulaiNonaktif')}
         </p>
       ) : null}
       {fase === 'FINISHED' && room.tie ? (
         <p className="kecil lembut" style={{ margin: 0 }}>
-          Ada peringkat seri di puncak. Ronde penentuan memakai satu misi tambahan.
+          {t('host.adaSeri')}
         </p>
       ) : null}
 
       <div className="baris">
         <TombolKonfirmasi
-          label="Akhiri Pertandingan"
-          judul="Akhiri pertandingan sekarang?"
-          pesan="Semua peserta langsung dipindahkan ke halaman hasil. Ronde yang belum dimainkan tidak dijalankan. Skor yang sudah terkumpul tetap tersimpan dan masih bisa diekspor."
-          labelSetuju="Ya, akhiri"
+          label={t('host.akhiri')}
+          judul={t('host.akhiriJudul')}
+          pesan={t('host.akhiriPesan')}
+          labelSetuju={t('host.akhiriSetuju')}
           onSetuju={() => jalankan('end')}
         />
         <TombolKonfirmasi
-          label="Reset Pertandingan"
-          judul="Reset pertandingan?"
-          pesan="Semua skor, jawaban, dan peringkat dihapus lalu room kembali ke lobby. Tindakan ini tidak bisa dibatalkan - ekspor CSV dulu bila hasilnya masih dibutuhkan."
-          labelSetuju="Ya, reset"
+          label={t('host.reset')}
+          judul={t('host.resetJudul')}
+          pesan={t('host.resetPesan')}
+          labelSetuju={t('host.resetSetuju')}
           onSetuju={() => jalankan('reset')}
         />
       </div>
@@ -344,12 +387,10 @@ function Kendali({ room }: { room: RoomPublicState }) {
           checked={room.autoAdvance}
           onChange={(e) => void actions.hostSettings({ autoAdvance: e.target.checked })}
         />
-        Lanjut otomatis antar ronde
+        {t('host.lanjutOtomatis')}
       </label>
       <p className="kecil lembut" style={{ margin: 0 }}>
-        {room.autoAdvance
-          ? 'Aktif: ronde berpindah sendiri saat waktu habis, kamu tidak perlu menekan tombol.'
-          : 'Nonaktif: setiap perpindahan ronde menunggu kamu menekan tombol.'}
+        {room.autoAdvance ? t('host.otomatisAktif') : t('host.otomatisNonaktif')}
       </p>
     </section>
   );
@@ -359,44 +400,44 @@ function Kendali({ room }: { room: RoomPublicState }) {
 
 /** Keterangan adegan 2D untuk panitia (bahasa sehari-hari, tanpa istilah teknis). */
 function InfoAdegan2D() {
+  useBahasa();
   return (
     <p className="kecil lembut" style={{ margin: 0 }}>
-      Adegan 2D dimuat di HP peserta sejak lobby. Bila HP peserta tidak sanggup menampilkannya,
-      peserta otomatis memakai gambar sederhana dan tetap bisa menjawab lewat daftar pilihan.
+      {t('host.infoAdegan')}
     </p>
   );
 }
 
 function KesiapanAdegan({ room }: { room: RoomPublicState }) {
+  useBahasa();
   const belum = room.players.filter((p) => !p.sceneReady);
 
   return (
     <section className="panel stack" aria-labelledby="host-kesiapan">
       <div className="baris-antara">
         <h3 id="host-kesiapan" style={{ margin: 0 }}>
-          Kesiapan Adegan
+          {t('host.kesiapan')}
         </h3>
         <span className="chip chip-biru">
-          <Icon name="cek" size={15} /> Adegan siap {room.sceneReadyCount} / {room.playerCount}
+          <Icon name="cek" size={15} />{' '}
+          {t('host.adeganSiap', { n: room.sceneReadyCount, total: room.playerCount })}
         </span>
       </div>
 
       <InfoAdegan2D />
 
       <p className="kecil lembut" style={{ margin: 0 }}>
-        Melanjutkan ronde tidak memberi tambahan waktu bagi peserta yang belum siap - waktu
-        menjawab dihitung server dan sama untuk semua.
+        {t('host.tanpaTambahanWaktu')}
       </p>
 
       {room.playerCount === 0 ? (
-        <div className="kosong">Belum ada peserta di room ini.</div>
+        <div className="kosong">{t('host.belumAdaPesertaRoom')}</div>
       ) : !room.mission ? (
         <p className="kecil lembut" style={{ margin: 0 }}>
-          Kesiapan dihitung ulang setiap ronde. Belum ada misi aktif, jadi daftar ini kosong
-          sampai ronde pertama dimulai.
+          {t('host.kesiapanKosong')}
         </p>
       ) : belum.length === 0 ? (
-        <div className="kosong">Semua peserta sudah memuat adegan ronde ini.</div>
+        <div className="kosong">{t('host.semuaSiap')}</div>
       ) : (
         <ul className="host-siap">
           {belum.map((p) => (
@@ -406,14 +447,14 @@ function KesiapanAdegan({ room }: { room: RoomPublicState }) {
                 <strong title={p.nickname}>{p.nickname}</strong>
                 <i>
                   <Icon name={p.connected ? 'jam' : 'silang'} size={13} />
-                  {p.connected ? 'adegan belum tampil' : 'terputus'}
+                  {p.connected ? t('host.adeganBelumTampil') : t('host.terputusKecil')}
                 </i>
               </span>
               <button
                 className="btn btn-garis btn-kecil"
                 onClick={() => jalankan('retryScene', { playerId: p.id })}
               >
-                Minta muat ulang adegan
+                {t('host.mintaMuatUlang')}
               </button>
             </li>
           ))}
@@ -425,10 +466,14 @@ function KesiapanAdegan({ room }: { room: RoomPublicState }) {
 
 // ------------------------------------------------------------------ pengaturan acara
 
+/** Kunci kamus untuk pesan "tersimpan" (disimpan sebagai kunci supaya ikut berganti bahasa). */
+type PesanSimpan = 'host.namaAcaraDisimpan' | 'host.hadiahDisimpan';
+
 function Pengaturan({ room }: { room: RoomPublicState }) {
+  useBahasa();
   const [nama, setNama] = useState(room.eventName);
   const [hadiah, setHadiah] = useState<Prizes>(room.prizes);
-  const [pesan, setPesan] = useState<string | null>(null);
+  const [pesan, setPesan] = useState<PesanSimpan | null>(null);
 
   // Sinkron ulang hanya saat nilai dari server berubah, bukan tiap snapshot masuk.
   useEffect(() => setNama(room.eventName), [room.eventName]);
@@ -438,25 +483,26 @@ function Pengaturan({ room }: { room: RoomPublicState }) {
 
   const simpan = async (
     patch: { eventName?: string; prizes?: Prizes },
-    teks: string,
+    kunciPesan: PesanSimpan,
   ): Promise<void> => {
     const ok = await actions.hostSettings(patch);
-    if (ok) setPesan(teks);
+    if (ok) setPesan(kunciPesan);
   };
 
+  // Label kolom diterjemahkan; ISI kolom (label hadiah) adalah data acara dari panitia.
   const LABEL: { kunci: keyof Prizes; teks: string }[] = [
-    { kunci: 'first', teks: 'Juara 1' },
-    { kunci: 'second', teks: 'Juara 2' },
-    { kunci: 'third', teks: 'Juara 3' },
+    { kunci: 'first', teks: 'host.hadiahJuara1' },
+    { kunci: 'second', teks: 'host.hadiahJuara2' },
+    { kunci: 'third', teks: 'host.hadiahJuara3' },
   ];
 
   return (
     <section className="panel stack" aria-labelledby="host-pengaturan">
-      <h3 id="host-pengaturan">Pengaturan Acara</h3>
+      <h3 id="host-pengaturan">{t('host.pengaturan')}</h3>
 
       <div>
         <label className="label-kolom" htmlFor="set-nama">
-          Nama acara
+          {t('host.namaAcara')}
         </label>
         <input
           id="set-nama"
@@ -469,16 +515,16 @@ function Pengaturan({ room }: { room: RoomPublicState }) {
       <button
         className="btn btn-kecil"
         onClick={() =>
-          void simpan({ eventName: nama.trim() || DEFAULT_EVENT_NAME }, 'Nama acara disimpan.')
+          void simpan({ eventName: nama.trim() || DEFAULT_EVENT_NAME }, 'host.namaAcaraDisimpan')
         }
       >
-        Simpan nama acara
+        {t('host.simpanNamaAcara')}
       </button>
 
       {LABEL.map((l) => (
         <div key={l.kunci}>
           <label className="label-kolom" htmlFor={`set-${l.kunci}`}>
-            Hadiah {l.teks}
+            {t(l.teks)}
           </label>
           <input
             id={`set-${l.kunci}`}
@@ -491,18 +537,18 @@ function Pengaturan({ room }: { room: RoomPublicState }) {
       ))}
       <button
         className="btn btn-kecil"
-        onClick={() => void simpan({ prizes: hadiah }, 'Label hadiah disimpan.')}
+        onClick={() => void simpan({ prizes: hadiah }, 'host.hadiahDisimpan')}
       >
-        Simpan label hadiah
+        {t('host.simpanHadiah')}
       </button>
 
       {pesan ? (
         <Pesan jenis="sukses" onTutup={() => setPesan(null)}>
-          {pesan}
+          {t(pesan)}
         </Pesan>
       ) : null}
       <p className="mini lembut" style={{ margin: 0 }}>
-        Perubahan baru berlaku setelah kamu menekan tombol simpan.
+        {t('host.berlakuSetelahSimpan')}
       </p>
     </section>
   );
@@ -511,6 +557,7 @@ function Pengaturan({ room }: { room: RoomPublicState }) {
 // ------------------------------------------------------------------ daftar peserta
 
 function BarisPeserta({ p }: { p: PlayerPublic }) {
+  useBahasa();
   return (
     <tr>
       <td>
@@ -521,17 +568,19 @@ function BarisPeserta({ p }: { p: PlayerPublic }) {
       </td>
       <td className="kecil">
         <Icon name={p.connected ? 'cek' : 'silang'} size={14} />{' '}
-        {p.connected ? 'Aktif' : 'Terputus'}
+        {p.connected ? t('host.aktif') : t('host.terputus')}
       </td>
       <td className="kecil">
         {p.submittedThisRound ? (
           <>
-            <Icon name="cek" size={14} /> Sudah kirim
-            {p.submitElapsedSeconds !== null ? ` (${p.submitElapsedSeconds}s)` : ''}
+            <Icon name="cek" size={14} />{' '}
+            {p.submitElapsedSeconds !== null
+              ? t('host.sudahKirimDetik', { detik: p.submitElapsedSeconds })
+              : t('host.sudahKirim')}
           </>
         ) : (
           <>
-            <Icon name="jam" size={14} /> Belum kirim
+            <Icon name="jam" size={14} /> {t('host.belumKirim')}
           </>
         )}
       </td>
@@ -539,11 +588,11 @@ function BarisPeserta({ p }: { p: PlayerPublic }) {
       <td>#{p.rank}</td>
       <td>
         <TombolKonfirmasi
-          label="Keluarkan"
+          label={t('host.keluarkan')}
           kelas="btn btn-kecil btn-bahaya"
-          judul={`Keluarkan ${p.nickname}?`}
-          pesan="Peserta ini langsung keluar dari room dan skornya tidak lagi dihitung. Ia bisa bergabung lagi lewat QR bila pertandingan belum dimulai."
-          labelSetuju="Ya, keluarkan"
+          judul={t('host.keluarkanJudul', { nama: p.nickname })}
+          pesan={t('host.keluarkanPesan')}
+          labelSetuju={t('host.keluarkanSetuju')}
           onSetuju={() => jalankan('kick', { playerId: p.id })}
         />
       </td>
@@ -552,28 +601,29 @@ function BarisPeserta({ p }: { p: PlayerPublic }) {
 }
 
 function DaftarPeserta({ room }: { room: RoomPublicState }) {
+  useBahasa();
   const urut = [...room.players].sort((a, b) => b.totalPoints - a.totalPoints);
   return (
     <section className="panel stack" aria-labelledby="host-peserta">
       <div className="baris-antara">
         <h3 id="host-peserta" style={{ margin: 0 }}>
-          Daftar Peserta
+          {t('host.daftarPeserta')}
         </h3>
-        <span className="chip">{room.playerCount} peserta</span>
+        <span className="chip">{t('host.jumlahPeserta', { n: room.playerCount })}</span>
       </div>
       {urut.length === 0 ? (
-        <div className="kosong">Belum ada peserta. Minta peserta memindai QR.</div>
+        <div className="kosong">{t('host.belumAdaPeserta')}</div>
       ) : (
         <div className="host-geser">
           <table className="tabel">
             <thead>
               <tr>
-                <th scope="col">Peserta</th>
-                <th scope="col">Koneksi</th>
-                <th scope="col">Ronde ini</th>
-                <th scope="col">Poin</th>
-                <th scope="col">Peringkat</th>
-                <th scope="col">Aksi</th>
+                <th scope="col">{t('host.kolomPeserta')}</th>
+                <th scope="col">{t('host.kolomKoneksi')}</th>
+                <th scope="col">{t('host.kolomRondeIni')}</th>
+                <th scope="col">{t('host.kolomPoin')}</th>
+                <th scope="col">{t('host.kolomPeringkat')}</th>
+                <th scope="col">{t('host.kolomAksi')}</th>
               </tr>
             </thead>
             <tbody>
@@ -591,6 +641,7 @@ function DaftarPeserta({ room }: { room: RoomPublicState }) {
 // ------------------------------------------------------------------ halaman
 
 export default function Host() {
+  useBahasa();
   const { room, hostToken, status, error } = useGame();
 
   useEffect(() => {
@@ -606,22 +657,22 @@ export default function Host() {
       <header className="topbar">
         <span className="baris baris-rapat">
           <BrandTitle size="kecil" />
-          <span className="judul-kecil">Layar Host</span>
+          <span className="judul-kecil">{t('host.layarHost')}</span>
         </span>
-        <ConnectionBadge />
+        <span className="baris baris-rapat" style={{ justifyContent: 'flex-end' }}>
+          <PilihBahasa />
+          <ConnectionBadge />
+        </span>
       </header>
 
       <main className="isi wrap-lebar stack-l" style={{ paddingTop: 16 }}>
         {error ? (
           <Pesan jenis="error" onTutup={actions.clearError}>
-            {error}
+            {terjemahkanGalat(error)}
           </Pesan>
         ) : null}
         {status !== 'connected' ? (
-          <Pesan jenis="kuning">
-            Koneksi ke server belum stabil. Tombol kendali bisa gagal sampai status kembali
-            &quot;Tersambung&quot;.
-          </Pesan>
+          <Pesan jenis="kuning">{t('host.koneksiBelumStabil')}</Pesan>
         ) : null}
 
         {!room ? (
@@ -629,14 +680,18 @@ export default function Host() {
         ) : (
           <>
             <div className="baris-antara">
-              <h1 style={{ margin: 0 }}>{room.eventName}</h1>
-              <span className="chip chip-kuning">Room {room.code}</span>
+              <h1 style={{ margin: 0 }}>{terjemahkanBawaan(room.eventName)}</h1>
+              <span className="chip chip-kuning">{t('host.chipRoom', { kode: room.code })}</span>
             </div>
+
+            {/* Soal acara ini: playlist + soal buatan panitia (komponen terpisah, ringkas bila ditutup). */}
+            <AturSoal room={room} />
 
             <div className="host-grid">
               <div className="stack-l">
                 <Undang room={room} />
                 <AudioControls />
+                <TombolGerak className="btn btn-netral" />
               </div>
               <div className="stack-l">
                 <Kendali room={room} />
@@ -648,30 +703,34 @@ export default function Host() {
             <DaftarPeserta room={room} />
 
             <section className="panel stack" aria-labelledby="host-papan">
-              <h3 id="host-papan">Papan Peringkat Terkini</h3>
+              <h3 id="host-papan">{t('host.papanPeringkat')}</h3>
               <Leaderboard rows={room.leaderboard ?? []} prizes={room.prizes} />
             </section>
 
             {room.phase === 'FINISHED' && room.podium && room.podium.length > 0 ? (
               <section className="panel stack" aria-labelledby="host-podium">
-                <h3 id="host-podium">Podium</h3>
+                <h3 id="host-podium">{t('host.podium')}</h3>
                 <div className="host-podium">
                   {room.podium.map((r) => (
                     <div key={r.playerId} className="panel-krem tengah stack-s">
                       <span className="chip chip-kuning">
-                        <Icon name="medali" size={15} /> Juara {r.rank}
+                        <Icon name="medali" size={15} /> {teksJuara(r.rank)}
                       </span>
                       <div style={{ display: 'grid', placeItems: 'center' }}>
                         <Avatar look={r.look} size={72} mood="senang" />
                       </div>
                       <strong>{r.nickname}</strong>
-                      <span className="kecil">{r.totalPoints.toLocaleString('id-ID')} poin</span>
+                      <span className="kecil">
+                        {t('host.poin', { poin: r.totalPoints.toLocaleString('id-ID') })}
+                      </span>
                       <span className="mini lembut">
-                        {r.rank === 1
-                          ? room.prizes.first
-                          : r.rank === 2
-                            ? room.prizes.second
-                            : room.prizes.third}
+                        {terjemahkanBawaan(
+                          r.rank === 1
+                            ? room.prizes.first
+                            : r.rank === 2
+                              ? room.prizes.second
+                              : room.prizes.third,
+                        )}
                       </span>
                     </div>
                   ))}
@@ -680,18 +739,17 @@ export default function Host() {
             ) : null}
 
             <section className="panel stack" aria-labelledby="host-ekspor">
-              <h3 id="host-ekspor">Ekspor Hasil</h3>
+              <h3 id="host-ekspor">{t('host.eksporHasil')}</h3>
               <div className="baris">
                 <a className="btn btn-netral" href={tautanEkspor('csv')} download>
-                  Ekspor CSV
+                  {t('host.eksporCsv')}
                 </a>
                 <a className="btn btn-netral" href={tautanEkspor('json')} download>
-                  Ekspor JSON
+                  {t('host.eksporJson')}
                 </a>
               </div>
               <p className="kecil lembut" style={{ margin: 0 }}>
-                File berisi hasil lengkap per misi untuk tiap peserta: ketepatan, poin, bonus
-                kecepatan, dan waktu menjawab. Unduh sebelum menekan reset.
+                {t('host.eksporKet')}
               </p>
             </section>
           </>

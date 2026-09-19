@@ -1,6 +1,8 @@
 import fs from 'node:fs';
 import { networkInterfaces } from 'node:os';
 import path from 'node:path';
+import type { IdPaket } from '../../shared/bankSoal';
+import { MISSIONS_ACARA } from '../../shared/missions.acara';
 
 /**
  * Cari root repo dengan menaiki folder sampai menemukan folder `client/` + `shared/`.
@@ -73,6 +75,16 @@ const num = (v: string | undefined, fallback: number) => {
   return Number.isFinite(n) && n > 0 ? n : fallback;
 };
 
+/**
+ * Paket soal untuk room baru bila host tidak memilih. Bawaan `acara`; selama paket acara
+ * belum berisi (shared/missions.acara.ts kosong) jatuh ke `latihan` supaya room tetap bisa main.
+ */
+function pilihPaket(v: string | undefined): IdPaket {
+  const mau = (v || 'acara').toLowerCase().trim();
+  if (mau === 'latihan') return 'latihan';
+  return MISSIONS_ACARA.length > 0 ? 'acara' : 'latihan';
+}
+
 export const CONFIG = {
   port: num(process.env.PORT, 4000),
   host: process.env.HOST || '0.0.0.0',
@@ -104,6 +116,15 @@ export const CONFIG = {
   unity3d: (process.env.UNITY_3D || '').toLowerCase() === 'on',
   /** Batas peserta per room. */
   maxPlayersPerRoom: num(process.env.MAX_PLAYERS, 150),
+  /** Paket soal room baru (RAKSA_PAKET=acara|latihan). Host bisa memilih lain saat membuat room. */
+  paketBawaan: pilihPaket(process.env.RAKSA_PAKET),
+  /**
+   * PIN panitia (opsional). Bila diisi: membuat room dan API bank soal yang menulis / membuka
+   * kunci mewajibkan PIN ini. Kosong = terbuka seperti halaman host (batasan yang disadari).
+   */
+  panitiaPin: (process.env.PANITIA_PIN || '').trim(),
+  /** Halaman awal boleh mengiklankan room yang sedang di lobby (RAKSA_IKLAN_ROOM=off untuk mematikan). */
+  iklanRoom: (process.env.RAKSA_IKLAN_ROOM || 'on').toLowerCase().trim() !== 'off',
 };
 
 /** true bila hasil build client tersedia dan disajikan oleh server ini. */

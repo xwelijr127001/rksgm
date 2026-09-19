@@ -29,7 +29,8 @@ function rambut(body: number, warna: string): string {
 
 function aksesori(jenis: PlayerLook['accessory']): string {
   if (jenis === 'helm') {
-    return path('M16 34 C16 16 28 10 40 10 C52 10 64 16 64 34 Z', P.kuning, INK) + rrect(12, 31, 56, 7, 3.5, P.kuning, INK) + line('M40 11 V31', P.kuningTua, 3);
+    // Pinggiran helm berhenti di atas mata (mata: y 38-44).
+    return path('M16 31 C16 13 28 7 40 7 C52 7 64 13 64 31 Z', P.kuning, INK) + rrect(12, 28, 56, 7, 3.5, P.kuning, INK) + line('M40 8 V28', P.kuningTua, 3);
   }
   if (jenis === 'topi') {
     return path('M19 30 C19 16 29 12 40 12 C51 12 61 16 61 30 Z', P.hijau, INK) + rrect(14, 27, 44, 7, 3.5, P.kuning, INK) + circle(40, 13, 3, P.kuning);
@@ -105,7 +106,7 @@ export function heroArt(look: PlayerLook, prop: HeroProp = 'none'): ArtRef {
     ${circle(32, 41, 3, P.tinta)}${circle(48, 41, 3, P.tinta)}
     ${circle(33, 40, 1, P.putih)}${circle(49, 40, 1, P.putih)}
     ${circle(27, 48, 3.4, P.merah, 'opacity="0.2"')}${circle(53, 48, 3.4, P.merah, 'opacity="0.2"')}
-    ${line(aksi ? 'M34 49 Q40 55 46 49' : 'M35 50 Q40 53 45 50', P.tinta, 2.4)}
+    ${line('M34 49 Q40 55 46 49', P.tinta, 2.4)}
     ${aksesori(look.accessory)}
     ${benda(prop)}`;
   const key = `hero-${body}-${look.skin}-${look.hair}-${look.color}-${look.accessory}-${prop}`;
@@ -161,6 +162,6 @@ export function personArt(o: PersonOpts): ArtRef {
     ${circle(32, 41, 3, P.tinta)}${circle(48, 41, 3, P.tinta)}
     ${o.mood === 'cemas' ? line('M28 33 l7 2 M52 33 l-7 2', P.tinta, 2) : ''}
     ${line(mulut, P.tinta, 2.4)}
-    ${o.helmet ? path('M16 34 C16 16 28 10 40 10 C52 10 64 16 64 34 Z', P.kuning, INK) + rrect(12, 31, 56, 7, 3.5, P.kuning, INK) : ''}`;
+    ${o.helmet ? path('M16 31 C16 13 28 7 40 7 C52 7 64 13 64 31 Z', P.kuning, INK) + rrect(12, 28, 56, 7, 3.5, P.kuning, INK) : ''}`;
   return art(o.key, 80, 152, body);
 }

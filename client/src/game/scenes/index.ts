@@ -4,6 +4,8 @@
  * (dijaga oleh scenes.test.ts supaya tidak melenceng).
  */
 
+import type { Bahasa } from '@shared/bahasa';
+import { LABEL } from './label';
 import type { MissionPublic } from '@shared/types';
 import type { SceneSpec } from '../types';
 import { urutanTampil } from '../draft';
@@ -19,6 +21,7 @@ import { sceneHitung } from './m09-hitung';
 import { sceneKotaBanjir } from './m10-kota';
 import { scenePenentuan } from './m11-penentuan';
 import { sceneTutorial } from './tutorial';
+import { ADEGAN_ACARA } from './acara';
 
 type Pembuat = () => SceneSpec | null;
 
@@ -35,15 +38,35 @@ export const ADEGAN: Record<string, Pembuat> = {
   'm09-hitung-teliti': sceneHitung,
   'm10-grand-mission': sceneKotaBanjir,
   'm11-penentuan': scenePenentuan,
+  // Paket acara (a01-a10): lihat ./acara/
+  ...ADEGAN_ACARA,
 };
 
 const cache = new Map<string, SceneSpec | null>();
 
-export function sceneFor(mission: MissionPublic): SceneSpec | null {
-  if (cache.has(mission.id)) return cache.get(mission.id) ?? null;
+/** Ganti teks yang digambar di adegan (label, stiker kategori, papan); posisi & id tidak berubah. */
+function denganLabel(spec: SceneSpec, bahasa: Bahasa): SceneSpec {
+  if (bahasa === 'id') return spec;
+  const t = LABEL[bahasa][spec.missionId];
+  if (!t) return spec;
+  return {
+    ...spec,
+    objects: spec.objects.map((o) => (t.objek[o.id] ? { ...o, label: t.objek[o.id]! } : o)),
+    bucketShort: spec.bucketShort ? { ...spec.bucketShort, ...(t.kategori ?? {}) } : spec.bucketShort,
+    boards: spec.boards?.map((b) => {
+      const p = t.papan?.[b.id];
+      return p ? { ...b, title: p.title, lines: b.lines.map((l, i) => ({ ...l, label: p.lines[i] ?? l.label })) } : b;
+    }),
+  };
+}
+
+export function sceneFor(mission: MissionPublic, bahasa: Bahasa = 'id'): SceneSpec | null {
+  const kunci = `${mission.id}:${bahasa}`;
+  if (cache.has(kunci)) return cache.get(kunci) ?? null;
   const buat = ADEGAN[mission.id];
-  const spec = buat ? acakSlot(buat()) : null;
-  cache.set(mission.id, spec);
+  const dasar = buat ? acakSlot(buat()) : null;
+  const spec = dasar ? denganLabel(dasar, bahasa) : null;
+  cache.set(kunci, spec);
   return spec;
 }
 

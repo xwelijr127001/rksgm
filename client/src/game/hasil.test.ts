@@ -5,7 +5,8 @@ import { gradeMission } from '../../../shared/scoring';
 import type { MissionAnswer, StepAnswer, StepDef } from '../../../shared/types';
 // Hanya di tes: kunci asli server untuk membuktikan penilaian tampilan = penilaian resmi.
 import { buildReveal, keyForMissionId } from '../../../server/src/answerKeys';
-import { JUDUL_HASIL, nilaiLangkah, nilaiMisi, statusMisi } from './hasil';
+import { aturBahasa } from '../i18n';
+import { judulHasil, nilaiLangkah, nilaiMisi, statusMisi, type StatusMisi } from './hasil';
 
 const semua = [...MISSIONS, TIEBREAK_MISSION];
 
@@ -76,5 +77,30 @@ test('status misi & kalimat utama: tidak ada lagi "Makin paham" untuk 0%', () =>
   assert.equal(statusMisi(0.5, true), 'sebagian');
   assert.equal(statusMisi(0, true), 'belum');
   assert.equal(statusMisi(0, false), 'terlewat');
-  assert.match(JUDUL_HASIL.belum.judul + ' ' + JUDUL_HASIL.belum.sub, /Belum tepat\. Yuk, lihat langkah yang benar\./);
+  // Bahasa bawaan (Indonesia): teksnya persis seperti sebelum multibahasa.
+  assert.match(judulHasil('belum').judul + ' ' + judulHasil('belum').sub, /Belum tepat\. Yuk, lihat langkah yang benar\./);
+  assert.deepEqual(judulHasil('tepat'), { judul: 'Jawabanmu tepat!', sub: 'Kerja bagus. Langkahmu sudah sesuai.' });
+  assert.deepEqual(judulHasil('sebagian'), { judul: 'Sebagian sudah tepat.', sub: 'Cek bagian yang masih terlewat di bawah.' });
+  assert.deepEqual(judulHasil('terlewat'), { judul: 'Ronde ini terlewat.', sub: 'Yuk, lihat langkah yang benar untuk kasus ini.' });
+});
+
+test('kalimat utama hasil mengikuti bahasa aktif (en, zh) dan kembali ke Indonesia', () => {
+  const semuaStatus: StatusMisi[] = ['tepat', 'sebagian', 'belum', 'terlewat'];
+  const id = semuaStatus.map((s) => judulHasil(s));
+  try {
+    for (const b of ['en', 'zh'] as const) {
+      aturBahasa(b);
+      semuaStatus.forEach((s, i) => {
+        const h = judulHasil(s);
+        assert.ok(h.judul.trim() && h.sub.trim(), `${b}/${s}: teks kosong`);
+        assert.ok(!h.judul.startsWith('misi.') && !h.sub.startsWith('misi.'), `${b}/${s}: kunci kamus tidak ditemukan`);
+        assert.notEqual(h.judul, id[i]!.judul, `${b}/${s}: judul belum diterjemahkan`);
+      });
+    }
+    aturBahasa('en');
+    assert.equal(judulHasil('tepat').judul, 'Your answer is correct!');
+  } finally {
+    aturBahasa('id');
+  }
+  assert.equal(judulHasil('tepat').judul, 'Jawabanmu tepat!');
 });

@@ -6,6 +6,7 @@ import { useId } from 'react';
 import type { ReactElement } from 'react';
 import type { PlayerLook } from '@shared/types';
 import { ACCESSORIES, HAIR_COLORS, SKIN_TONES, UNIFORM_COLORS } from '@shared/brand';
+import { bahasaKini, t, useBahasa } from '../i18n';
 
 type Mood = 'senang' | 'netral' | 'fokus';
 
@@ -19,11 +20,20 @@ function pilih(daftar: readonly string[], i: number): string {
   return daftar[((bulat % n) + n) % n];
 }
 
-const MOOD_TEKS: Record<Mood, string> = {
-  senang: 'tersenyum',
-  netral: 'tenang',
-  fokus: 'serius',
-};
+/**
+ * Keterangan avatar untuk pembaca layar, dalam bahasa aktif (kamus: pemain.avatarAria,
+ * pemain.aksesori.<id>, pemain.suasana.<mood>). Aksesori yang belum ada di kamus memakai label
+ * bawaannya. Huruf kecil hanya untuk bahasa Indonesia (teks aslinya memang begitu).
+ */
+function labelAvatar(aks: { id: string; label: string } | undefined, mood: Mood): string {
+  const kunci = 'pemain.aksesori.' + (aks?.id ?? 'none');
+  const teks = t(kunci);
+  const aksesori = teks === kunci ? (aks?.label ?? '') : teks;
+  return t('pemain.avatarAria', {
+    aksesori: bahasaKini() === 'id' ? aksesori.toLowerCase() : aksesori,
+    suasana: t('pemain.suasana.' + mood),
+  });
+}
 
 function rambut(body: number, warna: string): ReactElement {
   // Busur mengikuti garis kepala (ellipse rx 11.4 / ry 11.8) agar tidak ada celah di puncak.
@@ -86,7 +96,7 @@ function wajah(mood: Mood): ReactElement {
         <circle cx="27.6" cy="26.2" r="1.7" fill={TINTA} />
         <circle cx="36.4" cy="26.2" r="1.7" fill={TINTA} />
         <path
-          d="M24.6 21.8l4.6 1.8M39.4 21.8l-4.6 1.8M29.2 31.4h5.6"
+          d="M25 23.4l4.2 1M39 23.4l-4.2 1M29 31q3 1.8 6 0"
           fill="none"
           stroke={TINTA}
           strokeWidth={1.9}
@@ -100,12 +110,14 @@ function wajah(mood: Mood): ReactElement {
       <circle cx="27.6" cy="26" r="1.8" fill={TINTA} />
       <circle cx="36.4" cy="26" r="1.8" fill={TINTA} />
       <path
-        d="M29 30.6q3 2.2 6 0"
+        d="M27.8 30.2q4.2 3.6 8.4 0"
         fill="none"
         stroke={TINTA}
         strokeWidth={1.9}
         strokeLinecap="round"
       />
+      <circle cx="23.4" cy="29.4" r="2.2" fill="rgba(196,69,47,0.18)" />
+      <circle cx="40.6" cy="29.4" r="2.2" fill="rgba(196,69,47,0.18)" />
     </>
   );
 }
@@ -124,14 +136,17 @@ function jaket(torso: string, clipTorso: string): ReactElement {
   );
 }
 
-/** Aksesori kepala digambar paling akhir agar tidak tertutup rambut. */
+/**
+ * Aksesori kepala digambar paling akhir agar tidak tertutup rambut. Pinggiran helm/topi harus
+ * berhenti di y <= 23: mata ada di y 24-28, dan wajah yang tertutup membuat avatar tampak tanpa ekspresi.
+ */
 function aksesoriKepala(jenis: PlayerLook['accessory']): ReactElement | null {
   if (jenis === 'helm') {
     return (
       <>
-        <path d="M20 21.6a12 12 0 0 1 24 0Z" fill={KUNING} />
-        <rect x="16.6" y="20.6" width="30.8" height="4.2" rx="2.1" fill={KUNING} />
-        <path d="M32 9.8v10.8" fill="none" stroke="rgba(23,54,42,0.25)" strokeWidth={2} />
+        <path d="M20 19a12 12 0 0 1 24 0Z" fill={KUNING} />
+        <rect x="16.6" y="18" width="30.8" height="4.2" rx="2.1" fill={KUNING} />
+        <path d="M32 7.2v10.8" fill="none" stroke="rgba(23,54,42,0.25)" strokeWidth={2} />
       </>
     );
   }
@@ -155,9 +170,9 @@ function aksesoriKepala(jenis: PlayerLook['accessory']): ReactElement | null {
   if (jenis === 'topi') {
     return (
       <>
-        <path d="M21 23.4a11 11 0 0 1 22 0Z" fill="var(--hijau)" />
-        <path d="M20.2 23.4h23.6a1.9 1.9 0 0 1 0 3.8H20.2a1.9 1.9 0 0 1 0-3.8Z" fill={KUNING} />
-        <circle cx="32" cy="18.6" r="2.1" fill={KUNING} />
+        <path d="M21 19.2a11 11 0 0 1 22 0Z" fill="var(--hijau)" />
+        <path d="M20.2 19.2h23.6a1.9 1.9 0 0 1 0 3.8H20.2a1.9 1.9 0 0 1 0-3.8Z" fill={KUNING} />
+        <circle cx="32" cy="14.4" r="2.1" fill={KUNING} />
       </>
     );
   }
@@ -175,6 +190,7 @@ export function Avatar({
   mood?: Mood;
   className?: string;
 }) {
+  useBahasa();
   const uid = useId().replace(/[^a-zA-Z0-9-]/g, '');
   const clipBulat = `av-b-${uid}`;
   const clipTorso = `av-t-${uid}`;
@@ -191,9 +207,7 @@ export function Avatar({
   } 41.6 32 41.6c${bahu} 0 ${lebar} 7.4 ${lebar} 22.4Z`;
 
   const aks = ACCESSORIES.find((a) => a.id === look.accessory);
-  const label = `Avatar petugas Raksa, ${(aks?.label ?? 'tanpa aksesori').toLowerCase()}, ${
-    MOOD_TEKS[mood]
-  }`;
+  const label = labelAvatar(aks, mood);
 
   return (
     <svg

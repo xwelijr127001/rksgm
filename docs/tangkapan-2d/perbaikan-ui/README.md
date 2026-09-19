@@ -1,5 +1,8 @@
 # Perbaikan UI/UX layar misi: sebelum & sesudah (18 September 2026)
 
+> Tangkapan "sesudah" untuk **pembahasan** di folder ini sudah memakai tampilan yang lebih ringan
+> dari putaran 19 September (gambar dulu, Bu Isti sebagai juri); lihat [`../momen-ringan/`](../momen-ringan/README.md).
+
 Semua gambar diambil dari build produksi di **Chrome headless dengan emulasi perangkat**
 (WebGL perangkat lunak), bukan HP fisik. Mode latihan (`/latihan?misi=N`), kecuali disebut lain.
 "Sebelum" = versi yang dilaporkan pengguna; "sesudah" = versi saat ini.

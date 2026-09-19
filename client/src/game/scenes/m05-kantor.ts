@@ -16,10 +16,11 @@ import { INK, INK_TIPIS, P, art, circle, cloud, line, path, rect, rrect, shadow,
 import { stamp } from '../art/props';
 import { carSide } from '../art/vehicles';
 
+// Yang diekspor di berkas ini dipakai ulang adegan paket acara a05 (scenes/acara/a05.ts).
 /** Warna tinta stempel: sengaja netral (bukan hijau/merah) dan sama dengan warna stiker kategori. */
-const TINTA_STEMPEL = { lanjut: '#2f6fb0', 'tidak-ambang': '#7a5aa6', 'perlu-data': '#b26b1f' } as const;
+export const TINTA_STEMPEL = { lanjut: '#2f6fb0', 'tidak-ambang': '#7a5aa6', 'perlu-data': '#b26b1f' } as const;
 /** Skala stempel dari props.stamp() (56 x 70) supaya titik sentuh cukup besar di HP. */
-const SKALA_STEMPEL = 1.5;
+export const SKALA_STEMPEL = 1.5;
 
 // ---- tata letak (dunia 640 x 480)
 /**
@@ -27,8 +28,8 @@ const SKALA_STEMPEL = 1.5;
  * y 94: label stempel (bawah 180) tetap di atas keterangan aksi yang muncul di atas map.
  */
 // Jarak stempel memberi ruang untuk tiga label kategori berdampingan tanpa bersinggungan.
-const STEMPEL_X = [104, 308, 512] as const;
-const STEMPEL_Y = 94;
+export const STEMPEL_X = [104, 308, 512] as const;
+export const STEMPEL_Y = 94;
 const MAP_W = 160;
 const MAP_H = 118;
 /**
@@ -53,7 +54,16 @@ function alas(x: number, y: number, w: number, h: number): string {
   return rrect(x, y + 5, w, h, 16, ALAS_BIBIR) + rrect(x, y, w, h, 16, ALAS);
 }
 
-function latar(): string {
+/** Satu alas kerja di meja: [x, y, lebar, tinggi] (dunia). */
+export type AlasKerja = readonly [x: number, y: number, w: number, h: number];
+/** Dua alas misi 5 (kiri & kanan). */
+const ALAS_M05: readonly AlasKerja[] = [[8, 216, 304, 186], [328, 216, 304, 186]];
+
+/**
+ * Latar kantor. Tanpa argumen = latar misi 5 (kunci tekstur `m05-latar`, gambarnya tidak berubah).
+ * Adegan lain boleh memberi susunan alas sendiri, tetapi WAJIB memakai kunci tekstur lain.
+ */
+export function latar(alasKerja: readonly AlasKerja[] = ALAS_M05): string {
   let garisDinding = '';
   for (let x = 24; x < 640; x += 52) garisDinding += rect(x, 10, 18, 140, '#f0e4cc');
   let ubin = '';
@@ -99,8 +109,7 @@ function latar(): string {
     ${rrect(566, mejaY - 30, 52, 30, 4, P.putih, 'opacity="0.8"')}${rrect(570, mejaY - 36, 52, 30, 4, '#f7f3ea', 'opacity="0.9"')}
     ${line(`M578 ${mejaY - 26} H610 M578 ${mejaY - 18} H604`, P.besiMuda, 2.4, 'opacity="0.8"')}
     <!-- alas kerja kiri & kanan (pengelompok pasangan kasus) -->
-    ${alas(8, 216, 304, 186)}
-    ${alas(328, 216, 304, 186)}
+    ${alasKerja.map(([x, y, w, h]) => alas(x, y, w, h)).join('\n    ')}
     <!-- sisi depan meja -->
     ${rect(0, 430, 640, 22, '#b98a58')}
     ${rect(0, 430, 640, 4, '#c99c68')}
@@ -113,7 +122,7 @@ function latar(): string {
  * Stempel besar: bentuk dari props.stamp() yang diperbesar. Tebal garis tepi
  * dikembalikan ke 3/2 satuan supaya sama dengan objek lain di adegan.
  */
-function stempel(warna: string, simbol: 'cek' | 'silang' | 'tanya'): string {
+export function stempel(warna: string, simbol: 'cek' | 'silang' | 'tanya'): string {
   const s = SKALA_STEMPEL;
   const tepi = stamp(warna, simbol)
     .split(`stroke="${P.tinta}" stroke-width="3"`).join(`stroke="${P.tinta}" stroke-width="${(3 / s).toFixed(2)}"`)
@@ -125,7 +134,7 @@ function stempel(warna: string, simbol: 'cek' | 'silang' | 'tanya'): string {
 }
 
 /** Map kasus 160 x 118: sampul map, foto mobil (dijepit), kartu polis kecil, huruf kasus. */
-function mapKasus(huruf: 'A' | 'B'): string {
+export function mapKasus(huruf: 'A' | 'B' | 'C'): string {
   return `
     ${shadow(80, 112, 70, 6)}
     ${path('M14 18 L18 7 C19 4 21 3 24 3 L58 3 C61 3 63 4 64 7 L68 18 Z', '#e2ad3e', INK)}
@@ -150,7 +159,7 @@ function mapKasus(huruf: 'A' | 'B'): string {
 }
 
 /** Kartu polis 104 x 80 (dokumen yang bisa dibuka), sedikit miring. */
-function kartuPolis(huruf: 'A' | 'B', miring: number): string {
+export function kartuPolis(huruf: 'A' | 'B' | 'C', miring: number): string {
   return `
     ${shadow(52, 76, 44, 4)}
     <g transform="rotate(${miring} 52 40)">

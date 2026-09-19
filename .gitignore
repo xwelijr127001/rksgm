@@ -18,3 +18,6 @@ unity/Assets/Scenes/
 .ui-review/chrome-profile/
 
 data/*.db-shm
+shots-acara/
+# Gambar soal buatan panitia (data acara, bukan kode; repo ini publik)
+data/gambar-soal/

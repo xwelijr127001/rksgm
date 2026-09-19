@@ -129,13 +129,16 @@ pembahasan tidak memuat ulang adegan dan tidak menghilangkan pilihan.
 | Menjawab | Kartu tugas (pertanyaan + petunjuk satu kalimat + tombol Cerita/Dokumen/Cara main) → adegan → "Pilihanmu: … · Tersimpan" + daftar pilihan → bar aksi lengket | Adegan kiri (lengket), kartu tugas & jawaban kanan. Desktop: tombol kirim ikut alur (tidak menutupi pilihan). HP mendatar: header & bar aksi ringkas, cerita terlipat |
 | Menjawab misi hitung (6, 9) | Kartu tugas → jawaban → adegan (ruang membaca dulu) | Panel jawaban lebih lebar |
 | Jeda | Tata letak menjawab tetap, adegan & pilihan terkunci, pemberitahuan di atas pilihan | sama |
-| Briefing / terkirim / waktu habis | Status dulu (Miss Raksa + kasus / konfirmasi terkirim + ringkasan terkunci), adegan sesudahnya | Adegan diperkecil |
-| Pembahasan | Hasil dulu: status ("Jawabanmu tepat!" / "Belum tepat. Yuk, lihat langkah yang benar." / "Sebagian sudah tepat.") → Pilihanmu → Langkah yang tepat / Yang masih terlewat → Kenapa? → Intinya → satu tombol utama. "Lihat adegan dengan tandanya" menggulir ke adegan | Hasil jadi kolom utama, adegan diperkecil |
+| Briefing / terkirim / waktu habis | **Gambar dulu**, lalu sesedikit mungkin teks: Miss Raksa membawakan kasus + satu kalimat "Tugasmu"; "Terkirim!" + jumlah pemain (ringkasan jawaban dilipat); "Waktu habis." | Adegan kiri (diperkecil), status kanan |
+| Pembahasan | **Gambar bertanda ✓ ✕ ! di atas** + legenda satu baris → juri (Bu Isti) membacakan satu kalimat hasil ("Jawabanmu tepat!" / "Belum tepat." / "Sebagian sudah tepat.") → poin → paling banyak tiga baris per pertanyaan (✕ Kamu pilih, ✓ Sudah tepat, ! Yang tepat / Masih terlewat) → lipatan "Kenapa begitu?" → satu tombol. Pertandingan (±14 detik, proyektor memuat pembahasan lengkap): misi berlangkah banyak cukup satu baris status per pertanyaan, rincian dilipat; semua tepat = tanpa daftar | Adegan kiri (diperkecil), hasil kanan |
 
 Aturan yang dijaga:
 
-- **Tidak ada karakter, balon, atau dekorasi di atas adegan.** Pemandu (Miss Raksa, Raki di
-  pemanasan, Mr Roger di bawah hasil) punya slot potret kecil di panel. Keterangan objek
+- **Tidak ada karakter, balon, atau dekorasi di atas adegan.** Pemandu punya slot potret kecil
+  di panel: Miss Raksa membawakan kasus, **Bu Isti sebagai juri** membacakan hasil (Raki di
+  pemanasan).
+- **Warna di momen status/hasil:** hijau + satu aksen merah bata (hanya ikon ✕ dan kata
+  statusnya); tidak ada kotak berlatar warna. Kuning hanya berarti "pilihan tersimpan". Keterangan objek
   "info" dan peringatan (baki penuh, pilih bagian dulu) tampil di panel HTML, bukan balon.
 - **Satu penanda per objek**, di dalam label: ○ bisa diketuk, ✓/angka sudah dipilih, ikon lembar
   = dokumen. Sebelum pembahasan penanda netral (kuning/putih). Saat pembahasan: ✓ tepat,
@@ -154,6 +157,43 @@ Cara menambah/mengubah adegan: lihat komentar di `client/src/game/types.ts` dan 
 setiap objek adegan merujuk id misi/opsi/dokumen yang benar-benar ada dan kode adegan tidak
 menyentuh kunci jawaban. Asal & lisensi aset: `client/src/game/ASET.md`.
 
+### Bahasa: Indonesia (bawaan), English, 简体中文
+
+Pemain memilih bahasa di header (**ID / EN / 中文**); pilihan tersimpan di perangkat itu, jadi satu
+room bisa berisi pemain dengan bahasa berbeda. Bawaan selalu Indonesia. Lewat alamat:
+`?lang=en`, `?lang=zh`, `?lang=id` (berguna untuk layar proyektor & halaman host).
+
+| Yang diterjemahkan | Tempatnya | Catatan |
+| --- | --- | --- |
+| Teks antarmuka (±610 kunci) | `client/src/i18n/kamus/<ruang>.ts` = `{ id, en, zh }` | `t('ruang.kunci', { param })` + `useBahasa()`; pola di `client/src/i18n/index.ts` |
+| Konten misi (cerita, tugas, opsi, kartu polis, tabel) | `shared/i18n/misi.en.ts`, `misi.zh.ts` | Lapisan di atas `shared/missions.ts` berdasarkan **id**; id/urutan/ikon/flag tidak berubah, jadi draft, kunci, dan skor sama di semua bahasa |
+| Ringkasan & penjelasan jawaban | `server/src/answerKeys.i18n.ts` (**server only**) | Membocorkan kunci, jadi tidak ada di bundel client; dikirim saat `REVEAL` lewat `MissionReveal.terjemahan` (opsional, kontrak lama tetap berlaku) |
+| Label di adegan (objek, stiker, papan) | `client/src/game/scenes/label.en.ts`, `label.zh.ts` | Batas panjang: Inggris ±18 huruf, Mandarin ±8 aksara, supaya label tidak bertumpuk |
+| Pesan galat server | `client/src/i18n/kamus/server.ts` + `galat.ts` | Server tetap mengirim teks Indonesia; client mencocokkan teksnya. Pesan berisi nilai dinamis tampil apa adanya |
+
+Tidak diterjemahkan: nama tokoh, kode produk (AUTO/HVC/FIRE/PROPERTY/CARGO), TLO/Comprehensive,
+format rupiah (`Rp100.000.000`), data isian panitia, dan tulisan pada gambar latar adegan.
+
+**Menambah/mengubah teks:** tambah kunci yang sama di `id`, `en`, `zh`. Mengubah konten misi di
+`shared/missions.ts` → perbarui juga `misi.en.ts`/`misi.zh.ts` (dan `answerKeys.i18n.ts` bila
+penjelasannya berubah). `npm test` menjalankan `client/src/i18n/terjemahan.test.ts` yang menolak:
+kunci/parameter yang tidak sama antar bahasa, id misi/opsi/dokumen tanpa terjemahan, **angka yang
+berubah** (nominal, persen, jumlah, nomor seri; hanya angka bulan pada tanggal yang boleh bertambah),
+penjelasan server yang belum diterjemahkan, dan label adegan yang terlalu panjang.
+Tangkapan layar: [`docs/tangkapan-2d/bahasa/`](docs/tangkapan-2d/bahasa/README.md).
+
+### Animasi mati? ("kurangi gerak")
+
+Game menghormati pengaturan perangkat "kurangi gerak" (Windows: *Settings → Accessibility → Visual
+effects → Animation effects* mati; Android: *Remove animations*; iOS: *Reduce Motion*): tokoh tidak
+melambai, petugas tidak berjalan, transisi seketika. **Banyak laptop kantor mematikan efek animasi
+demi performa**, sehingga tokoh tampak diam di layar acara. Untuk menyalakan animasi di perangkat
+itu saja: tombol **"Nyalakan animasi"** (muncul di halaman awal, host, dan pojok proyektor hanya bila
+perangkat meminta gerak dikurangi), atau buka sekali dengan `?gerak=penuh` (`?gerak=ikut` untuk
+kembali mengikuti perangkat). Logikanya di `client/src/gerak.ts`.
+Chrome headless mewarisi setelan OS ini, jadi `npm run test:e2e` kini memaksa animasi **menyala**
+(bawaan, seperti kebanyakan HP pemain); `RAKSA_GERAK=kurang npm run test:e2e` menguji jalur sebaliknya.
+
 ### Tokoh Raksa: Mr Roger, Miss Raksa, Bu Isti
 
 Tiga tokoh pixel art (sumber di `character/`) menyapa dan memandu; petugas pilihan pemain tetap
@@ -163,9 +203,9 @@ Tiap tokoh diberi peran sesuai perannya di Raksa:
 
 | Tokoh | Peran di game | Tempat |
 | --- | --- | --- |
-| **Mr Roger**, CEO Asuransi Raksa | Pembuka & penutup | Halaman awal (papan nama), lobby pemain & proyektor (sapaan), **potret di bawah hasil pembahasan** tiap misi, hasil pemain (ucapan selamat) |
+| **Mr Roger**, CEO Asuransi Raksa | Pembuka & penutup | Halaman awal (papan nama), lobby pemain & proyektor (sapaan), hasil akhir pemain (ucapan selamat) |
 | **Miss Raksa**, ikon Raksa CS | "Pembawa kasus": laporan nasabah masuk lewat CS | Halaman gabung (sapaan), **kalimat briefing tiap misi** di HP & proyektor, potret di kartu tugas saat menjawab (menggantikan Raki; pemanasan tetap Raki karena teksnya "Aku Raki") |
-| **Bu Isti**, Direktur IT | "Urusan sistem" | Lobby proyektor (cara bergabung lewat QR), papan peringkat proyektor (ringkasan data ronde), **pesan saat koneksi HP terputus** (lobby & layar misi) |
+| **Bu Isti**, Direktur IT | **Juri** & "urusan sistem" | **Membacakan hasil tiap misi** di HP ("Bu Isti · Juri", potret dengan lencana ✓/✕/!) dan "Yang dibawa pulang" di proyektor; lobby proyektor (cara bergabung lewat QR), papan peringkat proyektor (ringkasan data ronde), pesan saat koneksi HP terputus |
 | Ketiganya | Penutup | Podium proyektor: berdiri bersama, Mr Roger memberi ucapan selamat |
 
 Pengaturan di `shared/brand.ts` -> `TOKOH` (`ceo`, `missRaksa`, `isti`):
@@ -175,9 +215,11 @@ Pengaturan di `shared/brand.ts` -> `TOKOH` (`ceo`, `missRaksa`, `isti`):
   (`tampilJabatan: false`); jabatan tetap dibacakan pembaca layar. `nama: null` = hanya jabatan.
 - Potret bulat di panel memakai jendela kepala-bahu per tokoh (`JENDELA_POTRET` di
   `client/src/game/KarakterTokoh.tsx`); sesuaikan bila gambar sumber diganti.
-- `sapaan`: semua kalimat balon. Kalimat pembahasan Mr Roger dipilih bergiliran per
-  nomor misi. Kalimat briefing Miss Raksa memakai teks briefing tiap misi (`rakiBriefing` di
-  `shared/missions.ts`, tidak diubah). Semua kalimat ini **usulan** dan perlu disetujui.
+- Kalimat balon & jabatan dalam tiga bahasa ada di `client/src/i18n/kamus/tokoh.ts` (teks `id`-nya
+  sama dengan `TOKOH.*.sapaan`); nama tokoh tidak diterjemahkan.
+- `sapaan`: semua kalimat balon; `TOKOH.isti.sapaan.juri` = sebutan perannya ("Juri"). Saat
+  briefing di HP Miss Raksa membawakan **cerita kasus** (`story`); kalimat `rakiBriefing` tiap
+  misi (tidak diubah) hanya tampil di proyektor karena di HP ia mengulang tugas. Semua kalimat ini **usulan** dan perlu disetujui.
 
 Sprite yang dipakai game dibuat dari gambar sumber (dipotong rapat & diperkecil ke WebP + PNG
 cadangan). Setelah mengganti gambar di `character/`, jalankan:
@@ -328,10 +370,20 @@ Variabel lain: `PORT`, `HOST`, `CLIENT_PORT`, `DB_FILE`, `MAX_PLAYERS`, `VITE_SE
 
 | Peran | Alamat |
 | --- | --- |
-| Pemain | `/` -> `/join` -> `/lobby` -> `/tutorial` -> `/main` -> `/hasil` |
+| Pemain ikut acara | `/` -> **Punya kode acara?** -> `/join` -> `/lobby` -> `/tutorial` -> `/main` -> `/hasil` |
+| Pemain main sendiri (mode solo, tanpa room) | `/` -> **Ayo, main!** -> `/kenalan` -> `/solo` -> `/solo/main?misi=N` -> `/solo/hasil` |
 | Host (panitia) | `/host` |
 | Layar proyektor / penonton | `/projector` (atau `/projector?room=KODE`) |
-| Mode latihan (tanpa room) | `/latihan` |
+| Alamat lama mode latihan | `/latihan` dialihkan ke `/solo` (`/latihan?misi=N` -> `/solo/main?misi=N`) |
+
+**"Ayo, main!" tidak pernah buntu:** pemain berkenalan dulu dengan Miss Raksa (nama + karakter,
+tersimpan di HP itu saja), lalu masuk **peta misi solo**: 10 misi paket latihan, bintang per misi,
+total poin, rekor pribadi, boleh diulang. Di mode solo waktu hanya menentukan bonus cepat (tidak
+pernah mengunci) dan ada tombol jeda. Kunjungan berikutnya langsung "Main sebagai X · ubah".
+**Kode acara diperiksa langsung di langkah pertama** `/join` ("Kode ditemukan · nama acara · N pemain
+menunggu"); kode salah atau pertandingan sudah mulai diberi tahu di situ, bukan setelah mengisi
+nama. Bila tepat satu acara sedang dibuka, halaman awal menampilkan spanduk **Gabung**
+(`RAKSA_IKLAN_ROOM=off` untuk mematikannya).
 
 ### Urutan menjalankan acara
 
@@ -339,8 +391,10 @@ Variabel lain: `PORT`, `HOST`, `CLIENT_PORT`, `DB_FILE`, `MAX_PLAYERS`, `VITE_SE
    Server memberi **kode room 4 karakter** dan **token host** (token disimpan di browser
    panitia; token ini berbeda dari kode room dan tidak boleh dibagikan ke peserta).
 2. Buka `/projector` di layar besar lewat tombol **Buka layar proyektor**.
-3. Peserta memindai QR, mengisi nama panggilan (maks 16 karakter), memilih karakter,
-   lalu masuk lobby. Peserta baru hanya boleh masuk selama fase lobby.
+3. Peserta memindai QR (kode langsung terisi & diperiksa), mengisi nama panggilan (maks 16
+   karakter) dan memilih karakter, atau cukup menekan **Ikut bermain** bila sudah pernah
+   berkenalan di HP itu, lalu masuk lobby. Peserta baru hanya boleh masuk selama fase lobby.
+   Sebelum memulai, host boleh membuka **Soal acara ini -> Atur soal** (lihat bagian 7a).
 4. Host menekan **Mulai Tutorial** agar peserta mencoba cara mengetuk dan mengirim jawaban.
 5. Host menekan **Mulai Pertandingan**. Setiap ronde berjalan:
    `BRIEFING` (8-12 detik, input terkunci) -> `ACTIVE` (waktu menjawab) ->
@@ -348,12 +402,74 @@ Variabel lain: `PORT`, `HOST`, `CLIENT_PORT`, `DB_FILE`, `MAX_PLAYERS`, `VITE_SE
 6. Host dapat **Jeda/Lanjutkan** kapan saja; sisa waktu tersimpan dan durasi jeda tidak
    dihitung sebagai waktu menjawab peserta.
 7. Saklar **Lanjut otomatis** menentukan apakah perpindahan ronde otomatis atau manual.
-8. Setelah misi ke-10, pertandingan `FINISHED` dan podium muncul. Bila ada peringkat seri
+8. Setelah soal terakhir di playlist (bawaan 10), pertandingan `FINISHED` dan podium muncul. Bila ada peringkat seri
    di tiga besar, host dapat menjalankan **Ronde Penentuan** satu kali.
 9. Host menekan **Ekspor CSV** untuk mengunduh hasil.
 
 Target durasi satu pertandingan: sekitar 12-15 menit
 (total waktu menjawab 7 menit 15 detik + briefing/pembahasan/peringkat).
+
+## 7a. Bank soal: paket latihan, paket acara, dan soal buatan panitia
+
+Daftar soal sebuah pertandingan adalah **data** (playlist per room), bukan kode. Rancangan & kontrak
+API: [`docs/rancangan-bank-soal.md`](docs/rancangan-bank-soal.md).
+
+| Asal | Isi | Dipakai untuk | Visual |
+| --- | --- | --- | --- |
+| **Paket Latihan** | 10 misi `m01`–`m10` (`shared/missions.ts`) | mode solo; boleh juga dipakai acara | adegan 2D |
+| **Paket Acara** | 10 misi `a01`–`a10`, **makin tinggi makin sulit** (mudah 1–3, sedang 4–7, sulit 8–10) | bawaan room baru | adegan 2D |
+| **Soal buatan panitia** | dibuat di halaman host | ditambahkan ke playlist | **gambar** buatan desainer |
+
+Peserta hanya bisa berlatih dengan Paket Latihan. `POST /api/practice/grade` menolak id paket acara
+dan soal panitia, jadi kunci jawaban soal acara **tidak bisa dipancing dari luar pertandingan**.
+
+### Mengatur soal dari halaman host (tanpa coding)
+
+1. Buat room, lalu di lobby buka **Soal acara ini -> Atur soal**.
+2. Pilih cepat **Paket Acara** / **Paket Latihan**, atau racik sendiri: naik/turunkan urutan, lepas
+   soal, **Tambah soal** dari bank. Minimal 1, maksimal 20 soal. Perubahan langsung tersimpan; setelah
+   pertandingan dimulai daftar terkunci. Jumlah ronde, nomor misi, CSV, dan podium mengikuti playlist.
+3. **Buat soal sendiri:** judul, produk, tingkat, cerita singkat (dibawakan Miss Raksa), kalimat
+   tugas, pelajaran, durasi 20–180 detik, **gambar**, lalu 1–4 pertanyaan berjenis *Pilih satu*,
+   *Pilih beberapa*, atau *Isi angka* (2–6 opsi; tandai jawaban benar; tulis penjelasannya).
+   Ada pratinjau "seperti di HP pemain". Setelah tersimpan: **Tambahkan ke playlist**.
+4. Soal panitia bisa diubah/dihapus kapan saja. Soal yang sedang dipakai pertandingan berjalan tidak
+   bisa dihapus, dan suntingan di tengah pertandingan baru berlaku pada pertandingan berikutnya.
+
+**Panduan gambar untuk desainer grafis:** PNG/JPG/WebP, maksimal 3 MB, **rasio 4:3** (mis. 1600×1200),
+hal penting jangan di tepi (di HP gambar tampil selebar layar, ±360 px), teks di dalam gambar besar
+dan sedikit, dan sertakan **teks alternatif** (wajib diisi di editor) untuk pembaca layar. SVG ditolak.
+Gambar tampil di tempat adegan 2D; pemain menjawab lewat daftar pilihan di bawahnya.
+
+### Pengaturan server
+
+| Variabel `.env` | Bawaan | Arti |
+| --- | --- | --- |
+| `RAKSA_PAKET` | `acara` | Paket untuk room baru bila host tidak memilih (`latihan` / `acara`) |
+| `PANITIA_PIN` | kosong | Bila diisi: wajib untuk membuat room dan untuk membuat/mengubah/melihat soal panitia |
+| `RAKSA_IKLAN_ROOM` | `on` | Spanduk "acara sedang dibuka" di halaman awal (hanya bila tepat satu room di lobby) |
+
+**Pasang `PANITIA_PIN` untuk acara berhadiah.** Tanpa PIN, siapa pun di jaringan bisa membuka `/host`,
+membuat room, lalu membaca kunci soal buatan panitia lewat API bank. Soal panitia tersimpan di SQLite
+(tabel `soal_kustom`) dan gambarnya di folder `gambar-soal/` di sebelah berkas DB: **cadangkan keduanya**.
+
+### Mengganti soal Paket Acara (mis. setelah ada soal resmi dari PIC Claim)
+
+Satu misi = satu set berkas, jadi bisa diganti satu per satu tanpa menyentuh yang lain:
+
+| Berkas | Isi |
+| --- | --- |
+| `shared/acara/aNN.ts` | konten publik (cerita, tugas, opsi, dokumen), **tanpa kunci** |
+| `server/src/acara/aNN.ts` | kunci jawaban + penjelasan (id, en, zh), **server only** |
+| `shared/i18n/acara/aNN.ts` | terjemahan konten en/zh |
+| `client/src/game/scenes/acara/aNN.ts` + `aNN.label.ts` | adegan 2D + label adegan en/zh |
+
+Setelah mengubah: `npm test` (kelengkapan kunci, id adegan, terjemahan, angka tidak berubah) lalu
+`npm run build && npm start` dan `npm run test:acara` (pertandingan penuh paket acara: kunci
+dinilai 100% oleh server, adegan siap, label tidak bertumpuk dalam tiga bahasa). Silabus, alasan
+tangga kesulitan, dan **daftar hal yang perlu dikonfirmasi PIC Claim**:
+[`docs/silabus-paket-acara.md`](docs/silabus-paket-acara.md). Cara tercepat memakai soal resmi tanpa
+coding tetap lewat **Buat soal sendiri** di halaman host.
 
 ### Aturan skor
 
@@ -451,11 +567,14 @@ raksa-game/
 │   ├── unityBridge.ts       kontrak pesan JavaScript <-> Unity + validasinya
 │   ├── brand.ts             konfigurasi terpusat: nama, warna, logo, hadiah, durasi
 │   ├── missions.ts          konten 10 misi + tutorial + ronde penentuan
+│   ├── bahasa.ts            daftar bahasa (id bawaan, en, zh)
+│   ├── i18n/                terjemahan konten misi per id (misi.en.ts, misi.zh.ts) + terjemahkanMisi/Reveal
 │   └── scoring.ts           rumus skor, rubric, peringkat, lencana (pure & teruji)
 ├── server/src/
 │   ├── index.ts             Express + Socket.IO + REST + penyajian hasil build
 │   ├── rooms.ts             sumber kebenaran: room, fase, deadline, jawaban, skor
 │   ├── answerKeys.ts        KUNCI JAWABAN + rubric (server only)
+│   ├── answerKeys.i18n.ts   ringkasan & penjelasan jawaban en/zh (server only, dikirim saat REVEAL)
 │   ├── db.ts                penyimpanan SQLite
 │   ├── csv.ts               ekspor hasil
 │   ├── unityServe.ts        penyajian build Unity (MIME/Content-Encoding) + status
@@ -484,6 +603,8 @@ raksa-game/
     │   └── ASET.md          asal & lisensi aset
     ├── unity/               (referensi lama) loader, bridge, UnityStage + tes bridge
     ├── public/audio/        musik latar + CREDITS.md
+    ├── i18n/                bahasa: t(), useBahasa(), kamus/<ruang>.ts {id,en,zh}, galat.ts, tes penjaga
+    ├── gerak.ts             preferensi animasi (ikut perangkat / dinyalakan paksa)
     ├── state/store.ts       cache state dari server + aksi (server tetap sumber kebenaran)
     ├── net/socket.ts        transport Socket.IO
     ├── audio/audio.ts       satu pengelola audio: musik MP3 + efek Web Audio
@@ -526,6 +647,24 @@ ringan tanpa engine lolos satu pertandingan penuh (lihat bagian 12).
 - Engine Phaser 4 memakai WebGL; renderer Canvas masih ada sebagai cadangan tetapi
   berstatus *deprecated* di Phaser 4. Bila keduanya gagal, gambar sederhana + daftar HTML dipakai.
 
+### Paket Acara & bank soal (19 September 2026)
+
+- **Paket Acara adalah DRAF buatan tim game, belum ditinjau PIC Claim.** Konsep klaimnya diambil dari
+  materi Paket Latihan (tidak ada ketentuan polis baru), tetapi kasus, angka, dan pengecohnya baru.
+  Daftar butir konfirmasi ada di `docs/silabus-paket-acara.md`. Jangan dipakai untuk acara berhadiah
+  sebelum dibaca PIC Claim, atau ganti dengan soal resmi lewat halaman host.
+- Soal buatan panitia: hanya *pilih satu / pilih beberapa / isi angka*; belum ada titik ketuk di atas
+  gambar, belum ada jenis mencocokkan/mengurutkan, dan **tidak diterjemahkan** (tampil sesuai ketikan
+  panitia di semua bahasa).
+- Tanpa `PANITIA_PIN`, halaman host dan bank soal terbuka bagi siapa pun di jaringan.
+- `GET /api/bank` (judul, produk, tingkat, durasi soal) bersifat publik; isi pertanyaan & kunci tidak.
+- Konten publik Paket Acara (tanpa kunci) ikut di bundel client: bundel utama ±596 KB (195 KB gzip),
+  naik dari ±488 KB. Peserta yang membongkar bundel bisa membaca pertanyaan, **bukan jawabannya**.
+- Lencana yang terikat nomor misi (Detektif, Teliti, Pahlawan Kota) hanya diberikan bila playlist =
+  paket bawaan utuh.
+- Profil & progres solo tersimpan di HP itu saja (localStorage); ganti HP/hapus data = mulai lagi.
+- Alur baru, mode solo, editor soal, dan adegan paket acara **baru diuji di emulasi Chrome**, belum di HP fisik.
+
 ### Materi yang perlu ditinjau PIC Claim
 
 Tidak ada kunci jawaban atau fakta klaim yang diubah. Hal berikut ditemukan saat membuat
@@ -565,7 +704,26 @@ nyata, sehingga diganti adegan 2D. Semua catatan teknisnya ada di
   bersangkutan / Corporate Communication** sebelum acara. Pembuat & lisensi gambar sumber
   di `character/` belum tercatat. Gayanya pixel art, sengaja berbeda dari ilustrasi vektor lain.
 - Potret tokoh adalah potongan kepala-bahu dari sprite pixel art (dikalibrasi per tokoh); di
-  ukuran 40–48 px detailnya kecil. Kalimat sapaan Mr Roger di bawah hasil (`TOKOH.ceo.sapaan.pembahasan`) masih usulan.
+  ukuran 40–56 px detailnya kecil. Peran Bu Isti sebagai "Juri" adalah usulan game dan perlu
+  persetujuan beliau.
+- Saat briefing di HP, contoh "cara main" tidak lagi tampil otomatis (tersedia lewat tombol
+  **Cara main** saat menjawab dan di pemanasan); penjelasan "Kenapa begitu?" dan "Intinya"
+  di pertandingan berada di dalam lipatan, jadi pemain yang tidak membukanya hanya
+  mendapatkannya dari layar proyektor.
+
+### Bahasa
+
+- Terjemahan Inggris & Mandarin dibuat dan ditinjau dengan bantuan AI (dua putaran: terjemah lalu
+  sunting istilah asuransi). **Belum ditinjau penutur asli maupun PIC Claim**; istilah seperti
+  免赔额 (risiko sendiri), 查勘 (survei), 扩展保障 (perluasan) perlu dikonfirmasi sebelum acara.
+- Mandarin memakai aksara sederhana (简体). Stiker kategori "FIRE/PROPERTY" di adegan misi 10
+  disingkat "PROPERTY" karena batas panjang.
+- Tulisan pada gambar latar adegan (papan nama, spanduk) tetap Indonesia.
+- Pesan galat server yang berisi nilai dinamis, nama acara/hadiah isian panitia, dan nama pemain
+  tampil apa adanya.
+- Kamus & konten tiga bahasa ikut di bundel utama: ±488 KB (160 KB gzip), naik dari ±374 KB
+  (121 KB gzip). Belum dipecah per bahasa.
+- Layar proyektor hanya satu bahasa pada satu waktu (pilih di pojok layar atau `?lang=`).
 
 ### Konten
 
@@ -601,6 +759,18 @@ nyata, sehingga diganti adegan 2D. Semua catatan teknisnya ada di
 
 ## 12. Hasil pengujian
 
+**19 September 2026 (sore) — alur main baru, mode solo, bank soal, Paket Acara.** Dijalankan ulang:
+`npm run typecheck` 0 error; `npm test` **217 tes lulus** (server 77, client 140: termasuk bank soal,
+playlist, soal panitia, unggah gambar, PIN, serta penjaga konten/kunci/terjemahan/adegan **per misi**
+untuk a01–a10); `npm run build` sukses; `npm run test:e2e` (Paket Latihan, 4 pemain + proyektor,
+animasi menyala) **0 kegagalan**; `npm run test:acara` (pertandingan penuh Paket Acara): kunci ke-10
+soal dinilai **100%** oleh server, semua adegan siap, console bersih, tanpa luber horizontal, label
+adegan tidak bertumpuk di id/en/zh (satu catatan: label "Kaca" misi a08 berada di celah sempit antara
+ruang mesin dan pangkal boom; bersih secara visual). Soal panitia bergambar diuji dari ujung ke ujung
+(unggah -> buat soal -> playlist -> main di HP emulasi -> pembahasan -> proyektor): SVG & akses tanpa
+token ditolak, `/api/bank` tanpa kunci, `/api/practice/grade` menolak soal panitia & paket acara,
+penjelasan kunci paket acara (id/en/zh) **tidak** ada di bundel client. **Semua emulasi, bukan HP fisik.**
+
 Semua angka di bawah berasal dari perintah yang **benar-benar dijalankan** pada Windows 11 +
 Node 22 + Chrome headless (WebGL perangkat lunak / SwiftShader), 18 September 2026.
 **Ini emulasi browser, bukan HP fisik.**
@@ -608,15 +778,28 @@ Node 22 + Chrome headless (WebGL perangkat lunak / SwiftShader), 18 September 20
 ```bash
 npm run typecheck      # server + client: 0 error
 npm run build          # client + server: sukses (engine Phaser = chunk terpisah 382 KB gzip)
-npm test               # 47 tes server + 42 tes client = 89 lulus, 0 gagal
+npm test               # 47 tes server + 50 tes client = 97 lulus, 0 gagal
 npm run test:e2e       # 1 pertandingan penuh 10 misi, 4 pemain + proyektor: 0 kegagalan, 0 error console
 ```
+
+Setelah tiga bahasa & tombol animasi ditambahkan (19 September 2026): 97/97 tes; e2e penuh dalam
+bahasa Indonesia dengan **animasi menyala** 0 kegagalan & 0 error console (jalur beranimasi baru
+teruji sejak putaran ini; sebelumnya Chrome headless diam-diam mewarisi "kurangi gerak" dari OS);
+pemeriksaan per bahasa (id/en/zh, misi 1–10 bermain & pembahasan): tanpa luber horizontal, tanpa teks
+Indonesia tertinggal di layar EN/ZH, tanpa label adegan bertumpuk; satu room berisi pemain id+en+zh:
+ganti bahasa di tengah menjawab tidak menghilangkan pilihan, penjelasan server tampil dalam bahasa
+tiap pemain; penjelasan jawaban (id/en/zh) **tidak** ada di bundel client.
 
 Setelah perbaikan UI/UX layar misi (18 September 2026), keempat perintah di atas dijalankan
 ulang: 89/89 tes, e2e 0 kegagalan (termasuk uji baru di bawah), 0 error console/HTTP, dan
 pemeriksa tumpang-tindih label/tanda di misi 1–10 (bermain & pembahasan) bersih. Tangkapan
 sebelum/sesudah di 360×740, 390×844, 768×1024, 844×390, 1280×800, dan 1440×900:
 [`docs/tangkapan-2d/perbaikan-ui/`](docs/tangkapan-2d/perbaikan-ui/README.md).
+
+Putaran berikutnya (19 September 2026) meringankan momen briefing/terkirim/pembahasan (gambar
+dulu, sedikit teks, satu aksen warna) dan menjadikan Bu Isti juri; 89/89 tes, e2e 0 kegagalan,
+pemeriksa tumpang-tindih bersih. Sebelum/sesudah:
+[`docs/tangkapan-2d/momen-ringan/`](docs/tangkapan-2d/momen-ringan/README.md).
 
 Setelah tokoh Mr Roger, Miss Raksa, dan Bu Isti ditambahkan, keempat perintah di atas dijalankan ulang (18 September 2026)
 dengan hasil sama: 85/85 tes, e2e 0 kegagalan, 0 error console/HTTP, tanpa luber horizontal,
@@ -625,7 +808,7 @@ Tampilan ketiga tokoh (halaman awal, gabung, lobby, briefing, pembahasan misi 1/
 peringkat, podium, hasil, koneksi putus)
 diperiksa lewat tangkapan layar di `docs/tangkapan-2d/`.
 
-### Pengujian otomatis (`npm test` — 89 tes)
+### Pengujian otomatis (`npm test` — 217 tes)
 
 Semua tes lama tetap lulus. Tes baru:
 
@@ -640,6 +823,9 @@ Semua tes lama tetap lulus. Tes baru:
   (tepat/sebagian/belum/kosong) sama dengan penilaian server untuk semua misi dengan jawaban
   benar, salah, sebagian, dan kosong; pilihan salah vs langkah yang tepat/terlewat; tidak ada
   lagi "Makin paham" untuk 0%.
+- **Terjemahan (`client/src/i18n/terjemahan.test.ts`):** kelengkapan & kesamaan kunci kamus,
+  kelengkapan konten misi/pembahasan/label adegan en & zh, angka tidak berubah, bentuk misi
+  (id, urutan, ikon, flag) tidak berubah setelah diterjemahkan, panjang label adegan.
 - **Adegan (`client/src/game/scenes.test.ts`):** 12 adegan terdaftar; setiap objek merujuk
   id misi/langkah/opsi/dokumen yang ada; bila satu opsi tampil maka semua opsi langkah itu
   tampil; kunci gambar unik; kode adegan tidak menyentuh kunci jawaban; acak posisi hanya

@@ -12,6 +12,7 @@
 import { useEffect, useRef, useState } from 'react';
 import type { MissionPublic, PlayerLook } from '@shared/types';
 import { Scene } from '../art/Scene';
+import { t, useBahasa } from '../i18n';
 
 import type { SceneSpec, StageStats, StageView } from './types';
 import type { StageHandle } from './engine/stage';
@@ -58,6 +59,7 @@ export function GameStage({
   apiRef?: React.MutableRefObject<StageApi | null>;
   label: string;
 }) {
+  useBahasa();
   const host = useRef<HTMLDivElement>(null);
   const handle = useRef<StageHandle | null>(null);
   const viewRef = useRef(view);
@@ -88,6 +90,11 @@ export function GameStage({
           look,
           view: viewRef.current,
           bucketShort: spec.bucketShort ?? {},
+          // Bahasa berganti -> spec berganti (sceneFor(mission, bahasa)) -> instance baru dengan kata baru.
+          kata: {
+            difoto: t('adegan.difoto'), masukFolder: t('adegan.masukFolder'), dicatat: t('adegan.dicatat'), didengar: t('adegan.didengar'),
+            dipilih: t('adegan.dipilih'), ditandai: t('adegan.ditandai'), dibatalkan: t('adegan.dibatalkan'), dijeda: t('adegan.dijeda'),
+          },
           onTap: (objectId) => {
             // Pesan dari instance/ronde lama dibuang.
             if (batal || token !== tokenGlobal || konteks.missionId !== mission.id || konteks.roundIndex !== roundIndex) return;
@@ -140,7 +147,7 @@ export function GameStage({
       ) : null}
       {status === 'loading' ? (
         <span className="adegan-chip" role="status">
-          <i className="adegan-spinner" aria-hidden="true" /> Menyiapkan adegan…
+          <i className="adegan-spinner" aria-hidden="true" /> {t('layar.menyiapkanAdegan')}
         </span>
       ) : null}
     </div>

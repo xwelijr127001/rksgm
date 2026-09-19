@@ -6,6 +6,7 @@
  *   npm run build && npm start               # server di http://127.0.0.1:4000 (ubah lewat UI_BASE)
  *   npm run test:e2e
  * Chrome: RAKSA_CHROME=<path chrome.exe> bila bukan lokasi standar.
+ * Animasi: bawaan MENYALA; RAKSA_GERAK=kurang untuk menguji "kurangi gerak".
  *
  * Pemeran (satu pertandingan penuh 10 misi + tutorial):
  *   Ani   HP 390x844, sentuh  - menjawab benar lewat KETUKAN ADEGAN (kontrol HTML hanya
@@ -29,6 +30,12 @@ const BASE = process.env.UI_BASE || 'http://127.0.0.1:4000';
 const CHROME = process.env.RAKSA_CHROME || 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe';
 const OUT = path.resolve(process.env.RAKSA_SHOTS || 'shots-e2e');
 fs.mkdirSync(OUT, { recursive: true });
+
+// Chrome headless MEWARISI setelan "kurangi gerak" dari OS (mis. Animation effects Windows mati),
+// dan game lalu mematikan semua animasi. Bawaan uji = animasi MENYALA seperti di kebanyakan HP
+// pemain; RAKSA_GERAK=kurang menguji jalur gerak dikurangi.
+const GERAK = process.env.RAKSA_GERAK === 'kurang' ? 'reduce' : 'no-preference';
+const aturGerak = (page) => page.emulateMediaFeatures([{ name: 'prefers-reduced-motion', value: GERAK }]);
 
 const konsol = [];
 const gagal = [];
@@ -268,6 +275,7 @@ const br = await browserBaru();
 
 try {
   const hostPage = await br.newPage();
+  await aturGerak(hostPage);
   pantau(hostPage, 'host');
   await hostPage.setViewport({ width: 1366, height: 900 });
   await hostPage.goto(`${BASE}/`, { waitUntil: 'domcontentloaded' });
@@ -277,6 +285,7 @@ try {
   await periksaLayout(hostPage, 'host 1366');
 
   const proj = await (await browserBaru()).newPage();
+  await aturGerak(proj);
   pantau(proj, 'proyektor');
   await proj.setViewport({ width: 1366, height: 768 });
   await proj.goto(`${BASE}/projector?room=${code}`, { waitUntil: 'networkidle2' });
@@ -286,6 +295,7 @@ try {
   const buat = async (nama, vp, ringan) => {
     // Konteks terpisah = HP berbeda: localStorage/sessionStorage tidak saling bercampur.
     const p = await (await browserBaru()).newPage();
+    await aturGerak(p);
     pantau(p, nama);
     await p.setViewport(vp);
     await p.goto(`${BASE}/join?room=${code}`, { waitUntil: 'networkidle2' });
@@ -460,9 +470,10 @@ try {
 
   // ------------------------------------------------------------ latihan di HP kecil
   const kecil = await (await browserBaru()).newPage();
+  await aturGerak(kecil);
   pantau(kecil, 'latihan360');
   await kecil.setViewport({ width: 360, height: 740, isMobile: true, hasTouch: true, deviceScaleFactor: 2 });
-  for (const [rute, nama] of [['/', 'landing'], ['/join', 'join'], ['/latihan', 'latihan-daftar']]) {
+  for (const [rute, nama] of [['/', 'landing'], ['/join', 'join'], ['/kenalan', 'kenalan'], ['/latihan', 'latihan-daftar']]) {
     await kecil.goto(`${BASE}${rute}`, { waitUntil: 'networkidle2' });
     await tidur(700);
     await periksaLayout(kecil, `${nama} 360`);

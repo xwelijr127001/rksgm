@@ -5,6 +5,7 @@
  */
 
 import { useSyncExternalStore } from 'react';
+import type { IdPaket } from '@shared/bankSoal';
 import type { MePrivate, MissionAnswer, PlayerLook, Prizes, RoomPublicState } from '@shared/types';
 import { getSocket, rpc } from '../net/socket';
 
@@ -151,6 +152,46 @@ export function forgetRoom(code: string) {
   }
 }
 
+// ------------------------------------------------------------------ PIN panitia
+
+/**
+ * PIN panitia (hanya bila server memasang PANITIA_PIN). Disimpan di sessionStorage: cukup diisi
+ * sekali per tab, dan hilang saat tab ditutup (laptop panitia sering dipakai bergantian).
+ */
+const SS_PIN = 'raksa:panitia:pin';
+/** Cadangan bila sessionStorage diblokir: PIN berlaku sampai halaman dimuat ulang. */
+let pinMemori: string | null = null;
+
+export function savedPin(): string | null {
+  try {
+    const pin = sessionStorage.getItem(SS_PIN);
+    if (pin && pin.trim()) return pin;
+  } catch {
+    /* penyimpanan diblokir: pakai cadangan di memori */
+  }
+  return pinMemori;
+}
+
+export function simpanPin(pin: string): void {
+  const bersih = pin.trim();
+  pinMemori = bersih || null;
+  try {
+    if (bersih) sessionStorage.setItem(SS_PIN, bersih);
+    else sessionStorage.removeItem(SS_PIN);
+  } catch {
+    /* abaikan */
+  }
+}
+
+export function lupakanPin(): void {
+  pinMemori = null;
+  try {
+    sessionStorage.removeItem(SS_PIN);
+  } catch {
+    /* abaikan */
+  }
+}
+
 // ------------------------------------------------------------------ socket wiring
 
 let wired = false;
@@ -215,14 +256,28 @@ export const actions = {
     set({ notice: null });
   },
 
-  async hostCreate(eventName: string): Promise<{ ok: boolean; code?: string; error?: string }> {
+  /**
+   * `paket`: paket soal awal room (tanpa nilai = bawaan server). `pin`: PIN panitia, hanya
+   * dibutuhkan bila server memasangnya; bawaan = PIN tersimpan di tab ini. PIN yang diterima
+   * server disimpan supaya cukup diisi sekali.
+   */
+  async hostCreate(
+    eventName: string,
+    opsi: { paket?: IdPaket; pin?: string } = {},
+  ): Promise<{ ok: boolean; code?: string; error?: string }> {
+    const pin = (opsi.pin ?? savedPin() ?? '').trim();
     const res = await rpc<{ code: string; hostToken: string; state: RoomPublicState }>('host:create', {
       eventName,
+      ...(opsi.paket ? { paket: opsi.paket } : {}),
+      ...(pin ? { pin } : {}),
     });
     if (!res.ok || !res.data) {
+      // PIN tersimpan yang ditolak server ("PIN panitia salah") dibuang supaya diminta ulang.
+      if (res.error === 'PIN panitia salah') lupakanPin();
       set({ error: res.error ?? 'Gagal membuat room' });
       return { ok: false, error: res.error };
     }
+    if (pin) simpanPin(pin);
     writeJson(LS.host(res.data.code), res.data.hostToken);
     writeJson(LS.lastHostRoom, res.data.code);
     set({
@@ -284,6 +339,24 @@ export const actions = {
     }
     if (res.data?.state) set({ room: res.data.state });
     return true;
+  },
+
+  /**
+   * Playlist (daftar id soal berurutan) room ini. Tanpa argumen = baca saja; dengan argumen =
+   * ganti (server hanya mengizinkan saat LOBBY). Galat TIDAK masuk ke `error` global: bagian
+   * "Soal acara ini" menampilkan statusnya sendiri, dan halaman host lama tetap bersih bila
+   * server belum mengenal event ini (rpc kehabisan waktu).
+   */
+  async hostPlaylist(playlist?: string[]): Promise<{ ok: boolean; playlist?: string[]; error?: string }> {
+    const { room, hostToken } = state;
+    if (!room || !hostToken) return { ok: false, error: 'Room tidak ditemukan' };
+    const res = await rpc<{ playlist: string[] }>(
+      'host:playlist',
+      { code: room.code, hostToken, ...(playlist ? { playlist } : {}) },
+      6000,
+    );
+    if (!res.ok || !Array.isArray(res.data?.playlist)) return { ok: false, error: res.error };
+    return { ok: true, playlist: res.data.playlist.filter((id): id is string => typeof id === 'string') };
   },
 
   async join(

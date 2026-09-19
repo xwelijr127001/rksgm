@@ -7,6 +7,9 @@
 import type { MissionKey } from '../../shared/scoring';
 import type { MissionPublic, MissionReveal, StepDef, StepReveal } from '../../shared/types';
 import { MISSIONS, TIEBREAK_MISSION, TUTORIAL_MISSION } from '../../shared/missions';
+import { MISSIONS_ACARA } from '../../shared/missions.acara';
+import { KUNCI_ACARA, PEMBAHASAN_ACARA_I18N } from './acara';
+import { PEMBAHASAN_I18N } from './answerKeys.i18n';
 
 export const MISSION_KEYS: MissionKey[] = [
   {
@@ -304,56 +307,78 @@ export function buildReveal(mission: MissionPublic, key: MissionKey): MissionRev
     };
   });
 
+  // Terjemahan pembahasan: paket latihan + paket acara. Soal kustom tidak punya (tampil apa adanya).
+  const terjemahan: MissionReveal['terjemahan'] = {};
+  for (const bahasa of ['en', 'zh'] as const) {
+    const t = PEMBAHASAN_I18N[bahasa][mission.id] ?? PEMBAHASAN_ACARA_I18N[bahasa][mission.id];
+    if (t) terjemahan[bahasa] = t;
+  }
+
   return {
     missionId: mission.id,
     roundIndex: key.roundIndex,
     summary: key.summary,
     learning: mission.learning,
     steps,
+    ...(Object.keys(terjemahan).length ? { terjemahan } : {}),
   };
 }
 
-/** Sanity check saat boot: tiap misi punya kunci untuk semua langkahnya. */
+/**
+ * Periksa satu pasang misi + kunci: tiap langkah punya tepat satu bentuk kunci yang sesuai
+ * jenisnya dan semua id di kunci benar-benar ada di misi. Hasil = daftar masalah (kosong = beres).
+ * Dipakai saat boot (paket bawaan) dan oleh tes konversi soal kustom.
+ */
+export function periksaKunciMisi(m: MissionPublic, key: MissionKey | undefined): string[] {
+  if (!key) return [`misi ${m.id} tidak punya kunci jawaban`];
+  const problems: string[] = [];
+  for (const step of m.steps) {
+    const sk = key.steps.find((s) => s.stepId === step.id);
+    if (!sk) {
+      problems.push(`misi ${m.id} langkah ${step.id} tidak punya kunci`);
+      continue;
+    }
+    const kinds = ['single', 'multi', 'assign', 'number', 'order'] as const;
+    const filled = kinds.filter((k) => sk[k] !== undefined);
+    if (filled.length !== 1) {
+      problems.push(`misi ${m.id} langkah ${step.id} punya ${filled.length} bentuk kunci`);
+    } else if (filled[0] !== step.kind) {
+      problems.push(
+        `misi ${m.id} langkah ${step.id}: jenis langkah ${step.kind} tapi kunci ${filled[0]}`,
+      );
+    }
+    if (step.kind === 'multi' && sk.multi && (sk.requiredSelections ?? sk.multi.length) !== step.requiredSelections) {
+      problems.push(`misi ${m.id} langkah ${step.id}: requiredSelections tidak sinkron`);
+    }
+    if (step.kind === 'assign' && sk.assign) {
+      for (const [itemId, bucketId] of Object.entries(sk.assign)) {
+        if (!step.items.some((i) => i.id === itemId)) problems.push(`${m.id}/${step.id}: item ${itemId} tak ada`);
+        if (!step.buckets.some((b) => b.id === bucketId)) problems.push(`${m.id}/${step.id}: bucket ${bucketId} tak ada`);
+      }
+      if (Object.keys(sk.assign).length !== step.items.length) {
+        problems.push(`${m.id}/${step.id}: jumlah item kunci != jumlah item`);
+      }
+    }
+    if ((step.kind === 'single' && sk.single && !step.options.some((o) => o.id === sk.single)) ||
+        (step.kind === 'multi' && sk.multi && sk.multi.some((id) => !step.options.some((o) => o.id === id)))) {
+      problems.push(`${m.id}/${step.id}: id opsi pada kunci tidak ditemukan`);
+    }
+  }
+  return problems;
+}
+
+/** Sanity check saat boot: tiap misi (paket latihan, paket acara, tutorial, penentuan) punya kunci lengkap. */
 export function assertKeysComplete(): void {
   const problems: string[] = [];
   for (const m of [...MISSIONS, TUTORIAL_MISSION, TIEBREAK_MISSION]) {
-    const key = keyForMissionId(m.id);
-    if (!key) {
-      problems.push(`misi ${m.id} tidak punya kunci jawaban`);
-      continue;
-    }
-    for (const step of m.steps) {
-      const sk = key.steps.find((s) => s.stepId === step.id);
-      if (!sk) {
-        problems.push(`misi ${m.id} langkah ${step.id} tidak punya kunci`);
-        continue;
-      }
-      const kinds = ['single', 'multi', 'assign', 'number', 'order'] as const;
-      const filled = kinds.filter((k) => sk[k] !== undefined);
-      if (filled.length !== 1) {
-        problems.push(`misi ${m.id} langkah ${step.id} punya ${filled.length} bentuk kunci`);
-      } else if (filled[0] !== step.kind) {
-        problems.push(
-          `misi ${m.id} langkah ${step.id}: jenis langkah ${step.kind} tapi kunci ${filled[0]}`,
-        );
-      }
-      if (step.kind === 'multi' && sk.multi && (sk.requiredSelections ?? sk.multi.length) !== step.requiredSelections) {
-        problems.push(`misi ${m.id} langkah ${step.id}: requiredSelections tidak sinkron`);
-      }
-      if (step.kind === 'assign' && sk.assign) {
-        for (const [itemId, bucketId] of Object.entries(sk.assign)) {
-          if (!step.items.some((i) => i.id === itemId)) problems.push(`${m.id}/${step.id}: item ${itemId} tak ada`);
-          if (!step.buckets.some((b) => b.id === bucketId)) problems.push(`${m.id}/${step.id}: bucket ${bucketId} tak ada`);
-        }
-        if (Object.keys(sk.assign).length !== step.items.length) {
-          problems.push(`${m.id}/${step.id}: jumlah item kunci != jumlah item`);
-        }
-      }
-      if ((step.kind === 'single' && sk.single && !step.options.some((o) => o.id === sk.single)) ||
-          (step.kind === 'multi' && sk.multi && sk.multi.some((id) => !step.options.some((o) => o.id === id)))) {
-        problems.push(`${m.id}/${step.id}: id opsi pada kunci tidak ditemukan`);
-      }
-    }
+    problems.push(...periksaKunciMisi(m, keyForMissionId(m.id)));
   }
+  for (const m of MISSIONS_ACARA) {
+    problems.push(...periksaKunciMisi(m, KUNCI_ACARA.find((k) => k.missionId === m.id)));
+  }
+  // Id soal adalah alamat di bank soal: tidak boleh bentrok antarpaket, dan awalan "k-" milik soal kustom.
+  const semuaId = [...MISSIONS, ...MISSIONS_ACARA, TUTORIAL_MISSION, TIEBREAK_MISSION].map((m) => m.id);
+  for (const id of semuaId.filter((x, i) => semuaId.indexOf(x) !== i)) problems.push(`id misi ${id} dipakai lebih dari sekali`);
+  for (const id of semuaId.filter((x) => x.startsWith('k-'))) problems.push(`id misi ${id}: awalan "k-" khusus soal kustom`);
   if (problems.length) throw new Error('Kunci jawaban tidak konsisten:\n- ' + problems.join('\n- '));
 }

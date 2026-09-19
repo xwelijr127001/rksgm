@@ -27,9 +27,13 @@ export interface SceneInit {
   heroArt: Record<HeroProp, ArtRef>;
   /** Label singkat kategori assign (untuk stiker di adegan). */
   bucketShort: Record<string, string>;
+  /** Kata singkat yang digambar engine (bahasa aktif): lihat i18n/kamus/adegan.ts. */
+  kata: KataAdegan;
   onTap(objectId: string): void;
   onReady(): void;
 }
+
+export interface KataAdegan { difoto: string; masukFolder: string; dicatat: string; didengar: string; dipilih: string; ditandai: string; dibatalkan: string; dijeda: string }
 
 const FONT = '"Segoe UI Variable", "Segoe UI", system-ui, -apple-system, Roboto, Arial, sans-serif';
 const HEX = {
@@ -316,7 +320,7 @@ export function defineMissionScene(P: Ph) {
       pill.fillStyle(HEX.krem, 1).fillRoundedRect(-150, -34, 300, 68, 22);
       pill.lineStyle(3, HEX.tinta, 1).strokeRoundedRect(-150, -34, 300, 68, 22);
       pill.setPosition(WORLD_W / 2, WORLD_H / 2);
-      const t = this.teks(WORLD_W / 2, WORLD_H / 2, 'Dijeda panitia', 28);
+      const t = this.teks(WORLD_W / 2, WORLD_H / 2, this.cfg.kata.dijeda, 28);
       this.pauseLayer = this.add.container(0, 0, [g, pill, t]).setDepth(500).setVisible(false);
     }
 
@@ -576,17 +580,18 @@ export function defineMissionScene(P: Ph) {
     }
 
     kataAksi(fx: SceneObjectSpec['fx'], v: ObjView): string {
-      if (fx === 'photo') return 'Difoto';
-      if (fx === 'file') return 'Masuk folder';
+      const k = this.cfg.kata;
+      if (fx === 'photo') return k.difoto;
+      if (fx === 'file') return k.masukFolder;
       // Sengaja seragam untuk semua objek: keterangan tambahan hanya ada pada
       // sebagian opsi di shared/missions.ts, jadi menampilkannya bisa jadi petunjuk.
-      if (fx === 'note') return 'Dicatat';
-      if (fx === 'talk') return 'Didengar';
+      if (fx === 'note') return k.dicatat;
+      if (fx === 'talk') return k.didengar;
       if (fx === 'stamp' || fx === 'tag') {
         const tag = v.state?.tags[v.state.tags.length - 1];
-        return tag ? (this.cfg.bucketShort[`${tag.stepId}:${tag.refId}`] ?? 'Ditandai') : 'Ditandai';
+        return tag ? (this.cfg.bucketShort[`${tag.stepId}:${tag.refId}`] ?? k.ditandai) : k.ditandai;
       }
-      return 'Dipilih';
+      return k.dipilih;
     }
 
     /** Keterangan aksi singkat DI POSISI LABEL objek itu (label disembunyikan sebentar), supaya tidak menutupi objek lain. */
@@ -677,7 +682,7 @@ export function defineMissionScene(P: Ph) {
     }
 
     efekBatal(v: ObjView): void {
-      this.caption(v, 'Dibatalkan');
+      this.caption(v, this.cfg.kata.dibatalkan);
       if (this.reduced()) return;
       this.tweens.add({ targets: v.root, angle: { from: -3, to: 3 }, duration: 70, yoyo: true, repeat: 1, onComplete: () => v.root.setAngle(0) });
     }

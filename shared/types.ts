@@ -32,7 +32,9 @@ export type SceneKey =
   | 'gudang'
   | 'gudang-forklift'
   | 'kantor-hitung'
-  | 'kota-banjir';
+  | 'kota-banjir'
+  /** Soal tanpa adegan 2D: visualnya sebuah gambar (lihat MissionPublic.image). */
+  | 'gambar';
 
 /** Ikon SVG kecil untuk kartu opsi / bukti. */
 export type IconKey =
@@ -142,6 +144,13 @@ export interface MissionPublic {
   learning: string;
   /** Kalimat Raki saat briefing. */
   rakiBriefing: string;
+  /** Tingkat kesulitan: 1 mudah, 2 sedang, 3 sulit. Tanpa nilai = belum ditentukan. */
+  level?: 1 | 2 | 3;
+  /**
+   * Visual berupa gambar (soal buatan panitia, scene = 'gambar'). Bila ada, client menampilkan
+   * gambar ini di tempat adegan 2D dan pemain menjawab lewat daftar pilihan.
+   */
+  image?: { src: string; alt: string } | null;
 }
 
 /** Jawaban satu langkah. */
@@ -174,6 +183,11 @@ export interface MissionReveal {
   summary: string;
   learning: string;
   steps: StepReveal[];
+  /**
+   * Ringkasan & penjelasan dalam bahasa lain (per stepId). Ikut aturan yang sama dengan kunci:
+   * hanya ada di server dan baru dikirim saat REVEAL. Opsional: tanpa ini client memakai teks Indonesia.
+   */
+  terjemahan?: Partial<Record<'en' | 'zh', { summary: string; steps: Record<string, string> }>>;
 }
 
 export interface RoundResult {
@@ -311,4 +325,5 @@ export interface Ack<T = unknown> {
   data?: T;
 }
 
+/** Panjang playlist BAWAAN. Jumlah ronde sebuah room = RoomPublicState.totalRounds (bisa berbeda). */
 export const TOTAL_ROUNDS = 10;

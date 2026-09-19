@@ -217,10 +217,16 @@ export const ALL_BADGES: Badge[] = [
   { id: 'pahlawan-kota', label: 'Pahlawan Kota', desc: 'Sempurna di Grand Mission', icon: 'gudang' },
 ];
 
+/**
+ * `missions` = soal yang dimainkan, berurutan (playlist room; paket latihan untuk mode solo).
+ * `opsi.lencanaMisi = false` mematikan lencana yang terikat nomor misi (detektif, teliti,
+ * pahlawan-kota): dipakai room ber-playlist campuran, karena "Misi 9" di sana soal lain.
+ */
 export function computeBadges(
   rounds: RoundResult[],
   rank: number,
   missions: Pick<MissionPublic, 'durationSeconds'>[],
+  opsi: { lencanaMisi?: boolean } = {},
 ): Badge[] {
   const byId = new Map(ALL_BADGES.map((b) => [b.id, b]));
   const earned: Badge[] = [];
@@ -234,7 +240,9 @@ export function computeBadges(
 
   if (rank === 1) add('juara');
   if (rounds.length > 0 && avgAccuracy >= 0.9) add('tepat-sasaran');
-  if (answered.length >= 8) {
+  // Butuh 8 jawaban pada pertandingan 10 soal; playlist yang lebih pendek cukup semua soalnya.
+  const minimalKilat = missions.length > 0 ? Math.min(8, missions.length) : 8;
+  if (answered.length >= minimalKilat) {
     const ratios = answered.map((r) => {
       const dur = (missions[r.roundIndex]?.durationSeconds ?? 30) * 1000;
       return dur > 0 ? r.elapsedMs / dur : 1;
@@ -243,10 +251,12 @@ export function computeBadges(
     if (avgRatio <= 0.4) add('kilat');
   }
   if (rounds.length > 0 && answered.length === rounds.length) add('lengkap');
-  const perfect = (i: number) => rounds.find((r) => r.roundIndex === i)?.accuracy === 1;
-  if (perfect(1) && perfect(3)) add('detektif');
-  if (perfect(8)) add('teliti');
-  if (perfect(9)) add('pahlawan-kota');
+  if (opsi.lencanaMisi !== false) {
+    const perfect = (i: number) => rounds.find((r) => r.roundIndex === i)?.accuracy === 1;
+    if (perfect(1) && perfect(3)) add('detektif');
+    if (perfect(8)) add('teliti');
+    if (perfect(9)) add('pahlawan-kota');
+  }
 
   return earned;
 }

@@ -8,7 +8,7 @@
     "build": "tsc -p tsconfig.json",
     "start": "node dist/server/src/index.js",
     "typecheck": "tsc -p tsconfig.json --noEmit",
-    "test": "tsx --test src/scoring.test.ts src/rooms.test.ts src/unity.test.ts src/integration.test.ts",
+    "test": "tsx --test src/scoring.test.ts src/rooms.test.ts src/bankSoal.test.ts src/unity.test.ts src/integration.test.ts src/bank.integration.test.ts",
     "loadtest": "tsx src/loadtest.ts"
   },
   "dependencies": {

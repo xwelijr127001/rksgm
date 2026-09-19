@@ -20,6 +20,17 @@
 .sound-button:hover { background: #edf1e8; }
 .back-link { display: flex; align-items: center; gap: 10px; font-size: 15px; text-decoration: none; min-height: 44px; }
 .player-footer { width: min(1200px,100%); margin: auto auto 0; padding: 25px 40px; display: flex; justify-content: space-between; align-items: center; gap: 16px; font-size: 12px; color: #768074; }
+/* Pemilih bahasa (header pemain, host, proyektor). Latar terang supaya terbaca juga di layar gelap. */
+.pilih-bahasa { display: inline-flex; flex: 0 0 auto; align-items: center; gap: 4px; min-height: 44px; padding: 0 8px 0 10px; border: 1px solid #dce2d7; border-radius: 999px; background: #fffefa; color: #2f5439; cursor: pointer; }
+.pilih-bahasa:focus-within { outline: 3px solid #397bca; outline-offset: 2px; }
+.pilih-bahasa select { appearance: none; -webkit-appearance: none; border: 0; background: transparent; color: inherit; font: inherit; font-size: 14px; font-weight: 700; min-height: 44px; padding: 0 2px; cursor: pointer; outline: none; }
+.pilih-bahasa select option { color: #17362a; background: #fff; }
+@media (max-width: 420px) { .pilih-bahasa { padding: 0 6px 0 8px; } .pilih-bahasa svg { display: none; } }
+/* Header tidak boleh luber: label boleh mengecil/terpotong, tombol tidak. */
+.player-header-right { min-width: 0; }
+.header-label { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.player-header > :first-child { flex: 0 1 auto; min-width: 0; }
+.tombol-gerak { font-size: 12px; padding: 0 8px; text-align: center; }
 .host-links { position: relative; }
 .host-links summary { cursor: pointer; padding: 12px 0; }
 .host-links nav { position: absolute; bottom: 50px; right: 0; width: 240px; padding: 10px; border: 1px solid #dce2d7; background: #fff; border-radius: 14px; z-index: 10; box-shadow: 0 10px 30px #17362a12; }
@@ -39,9 +50,12 @@
 .quiet-link:hover,.text-button:hover { color: #163e2b; text-decoration: underline; text-underline-offset: 4px; }
 .centered { justify-content: center; text-align: center; }
 .welcome-note { display: block; margin-top: 22px; font-size: 12px; color: #7d877b; }
-.welcome-world { position: relative; width: 100%; max-width: 570px; aspect-ratio: 560 / 510; }
+/* container-type: ukuran huruf catatan kota mengikuti lebar gambar (cqw), bukan layar. */
+.welcome-world { position: relative; width: 100%; max-width: 570px; aspect-ratio: 560 / 510; container-type: inline-size; }
 .world-drawing { width: 100%; height: 100%; }
-.world-caption { position: absolute; top: 14%; left: 35%; font-size: 13px; line-height: 1.6; transform: rotate(-8deg); color: #746331; }
+/* Catatan kota di pojok kiri atas gambar: satu-satunya area tanpa pohon/gedung/tokoh, dan cukup
+   lebar untuk kalimat Inggris/Mandarin yang lebih panjang. Huruf mengecil bersama gambar. */
+.world-caption { position: absolute; top: 9%; left: 1%; width: 45%; font-size: 13px; font-size: clamp(10.5px, 2.7cqw, 15px); line-height: 1.35; text-align: left; text-wrap: balance; transform: rotate(-6deg); transform-origin: left center; color: #746331; }
 .world-caption span { display: block; }
 .welcome-raki { position: absolute; right: 11%; bottom: 7%; padding: 0; background: transparent; border: 0; cursor: pointer; }
 .welcome-raki > svg { filter: drop-shadow(0 10px 0 #17362a0c); }
@@ -175,7 +189,6 @@
   .welcome-raki { right: 11%; bottom: 6%; }
   .welcome-raki > svg { height: 90px; width: 90px; }
   .raki-greeting { font-size: 10px; padding: 5px 9px; bottom: -14px; left: -12px; }
-  .world-caption { font-size: 9px; }
   .welcome-actions { order: 4; flex-direction: column; gap: 3px; width: min(320px,100%); margin-top: 5px; }
   .welcome-actions .primary-action { width: 100%; }
   .welcome-note { order: 5; margin-top: -2px; font-size: 11px; }
@@ -200,7 +213,7 @@
   .result-focus h1 { font-size: 30px; }
   .briefing-main h1 { font-size: 29px; }
 }
-@media (prefers-reduced-motion: reduce) { .waiting-orbit i { animation: none; } }
+@media (prefers-reduced-motion: reduce) { :root:not([data-gerak="penuh"]) .waiting-orbit i { animation: none; } }
 
 
 .folder-progress { display: flex; align-items: center; gap: 12px; background: #edf2e6; padding: 16px; border-radius: 12px; color: #517244; }
@@ -233,4 +246,103 @@
 .podium-person p { font-size: 11px; margin: 0; color: #6d7c62; }
 .podium-rank { display: flex; align-items: center; gap: 4px; font-size: 12px; }
 @media (max-width: 700px) { .final-main { grid-template-columns: 1fr; padding: 20px 22px 50px; gap: 35px; }.number-option { font-size: 15px; }.final-personal h1 { font-size: 31px; } }
+
+/* ==================================================================== ALUR MASUK PEMAIN
+   Halaman awal (baris profil + spanduk acara), /kenalan, dan /join (pemeriksaan kode, kartu diri).
+   Semua kelas di bagian ini berawalan "alur-". Rancangan: docs/rancangan-bank-soal.md bagian 2. */
+
+/* --- Halaman awal: "Main sebagai X · ubah". Tautan "ubah" tetap setinggi 44px walau teksnya kecil. */
+.alur-sebagai { display: flex; align-items: center; flex-wrap: wrap; gap: 0 8px; min-height: 44px; margin-top: 8px; font-size: 14px; line-height: 1.3; color: #5a6b5e; }
+.alur-sebagai-avatar { display: inline-flex; flex: 0 0 auto; }
+.alur-sebagai-nama { min-width: 0; overflow-wrap: anywhere; }
+.alur-sebagai-ubah { display: inline-flex; align-items: center; min-height: 44px; padding: 0 10px 0 2px; color: #215c40; font-weight: 600; text-decoration: underline; text-underline-offset: 4px; }
+.alur-sebagai-ubah:hover { color: #163e2b; }
+
+/* --- Halaman awal: spanduk "Acara «N» sedang dibuka". MELAYANG (fixed), bukan di dalam alur halaman:
+   jawaban server datang setelah halaman tampil, dan tombol "Ayo, main!" tidak boleh bergeser tepat
+   saat hendak diketuk. Wadahnya selalu ada (kosong, tembus ketukan) untuk pembaca layar. */
+.alur-spanduk-wadah { position: fixed; z-index: 8; left: 0; right: 0; bottom: 0; display: flex; justify-content: center; padding: 0 max(16px, env(safe-area-inset-right)) calc(14px + env(safe-area-inset-bottom)) max(16px, env(safe-area-inset-left)); pointer-events: none; }
+.alur-spanduk { pointer-events: auto; display: flex; align-items: center; gap: 12px; width: min(560px, 100%); padding: 9px 9px 9px 16px; border: 1px solid #b9cdb7; border-radius: 16px; background: #fffefa; box-shadow: 0 10px 30px #17362a24; color: #243d30; animation: alur-naik .32s ease both; }
+.alur-spanduk p { flex: 1; min-width: 0; margin: 0; font-size: 14px; line-height: 1.35; font-weight: 600; text-align: left; overflow-wrap: anywhere; }
+.alur-spanduk-titik { flex: 0 0 auto; width: 10px; height: 10px; border-radius: 50%; background: #2e9a66; box-shadow: 0 0 0 4px #2e9a6633; }
+.alur-spanduk-gabung { flex: 0 0 auto; display: inline-flex; align-items: center; gap: 8px; min-height: 46px; padding: 0 16px; border-radius: 12px; background: #215c40; color: #fff; font-size: 15px; font-weight: 600; text-decoration: none; }
+.alur-spanduk-gabung:hover { background: #163e2b; }
+@keyframes alur-naik { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: none; } }
+@keyframes alur-turun { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: none; } }
+/* Ruang gulir setinggi spanduk di LUAR kotak halaman (margin + bayangan sewarna latar): isi halaman
+   tidak bergeser saat spanduk muncul, tetapi footer tetap bisa digulir naik melewati spanduk. */
+.alur-ada-spanduk { margin-bottom: calc(86px + env(safe-area-inset-bottom)); box-shadow: 0 calc(86px + env(safe-area-inset-bottom)) 0 0 var(--krem); }
+/* Layar lebar: pil di tengah pita header (di antara logo dan tombol bahasa/suara), tanpa ruang tambahan. */
+@media (min-width: 1001px) {
+  .alur-landing { position: relative; }
+  .alur-spanduk-wadah { position: absolute; top: 22px; bottom: auto; padding: 0; }
+  .alur-spanduk { width: auto; max-width: min(560px, calc(100% - 520px)); padding: 5px 5px 5px 16px; border-radius: 28px; box-shadow: none; animation-name: alur-turun; }
+  .alur-spanduk-gabung { min-height: 44px; border-radius: 22px; }
+  .alur-ada-spanduk { margin-bottom: 0; box-shadow: none; }
+}
+
+/* --- /kenalan: satu layar. Miss Raksa + balon, judul, isian, bar aksi lengket. */
+.alur-kenalan { width: min(470px,100%); margin: auto; padding: 12px 24px 40px; }
+.alur-kenalan-sapa { display: flex; justify-content: center; }
+.alur-kenalan-sapa > svg { display: block; }
+.alur-tokoh { justify-content: center; }
+.alur-kenalan-judul { margin: 10px 0 16px; font-size: 31px; text-align: center; }
+.alur-kenalan-form { display: flex; flex-direction: column; gap: 12px; }
+.alur-catatan { margin: 0; font-size: 12px; color: #7d877b; text-align: center; }
+
+/* --- Bar aksi (dipakai /kenalan dan /join). Versi lengket mengikuti pola .misi-aksi: bagian dari alur
+   halaman, jadi saat digulir sampai habis ia berada di bawah isian dan tidak ada yang tertutup.
+   Pesan galat ada DI DALAM bar supaya selalu terlihat di dekat tombol. */
+.alur-aksi { display: flex; flex-direction: column; gap: 8px; }
+.alur-aksi-baris { display: flex; align-items: center; gap: 12px; }
+.alur-aksi-baris .primary-action { flex: 1; min-width: 0; }
+.alur-aksi-avatar { flex: 0 0 auto; display: inline-flex; }
+.alur-aksi-lengket { position: sticky; bottom: 0; z-index: 5; margin: 0 -24px; padding: 10px 24px calc(10px + env(safe-area-inset-bottom)); background: #faf9f5; border-top: 1px solid #e6e9df; }
+.alur-aksi .field-error, .alur-aksi .connection-note { margin: 0; }
+
+/* --- /join langkah 1: status pemeriksaan kode. Tinggi minimum dipesan supaya tombol Lanjut tidak
+   melompat saat keadaan berganti. Tiap keadaan = ikon + teks (warna hanya penguat). */
+.alur-cek { display: flex; align-items: center; flex-wrap: wrap; gap: 4px 12px; min-height: 88px; padding: 12px 14px; border: 1px solid transparent; border-radius: 12px; text-align: left; }
+.alur-cek-ikon { flex: 0 0 auto; display: inline-flex; }
+.alur-cek-teks { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.alur-cek-teks p { margin: 0; font-size: 14px; line-height: 1.45; color: #5a6b5e; }
+.alur-cek-teks small { font-size: 12px; font-weight: 700; letter-spacing: .02em; color: #176b45; overflow-wrap: anywhere; }
+.alur-cek-teks b { font-size: 16px; font-weight: 600; line-height: 1.35; color: #243d30; overflow-wrap: anywhere; }
+.alur-cek-kosong, .alur-cek-memeriksa { justify-content: center; padding-top: 0; padding-bottom: 0; }
+.alur-cek-kosong .alur-cek-teks, .alur-cek-memeriksa .alur-cek-teks { flex: 0 1 auto; text-align: center; }
+.alur-cek-ada { border-color: #b9cdb7; background: #eef5e9; }
+.alur-cek-tolak, .alur-cek-gagal { border-color: #ecd48d; background: #fdf6df; }
+.alur-cek-tolak .alur-cek-teks small { color: #6d520a; }
+.alur-cek-tiada { border-color: #e6bfb5; background: #fbeee9; }
+.alur-cek-aksi { flex: 1 0 100%; justify-content: flex-start; padding-left: 38px; color: #215c40; font-weight: 600; }
+
+/* --- /join langkah 2: baris room (nama acara + kode) dan kartu "Main sebagai X · ubah". */
+.alur-room { gap: 12px; }
+.alur-room-teks { min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.joined-code .alur-room-acara { margin-left: 0; letter-spacing: 0; font-size: 15px; font-weight: 600; color: #243d30; overflow-wrap: anywhere; }
+.alur-room .text-button { flex: 0 0 auto; }
+.alur-diri { display: flex; align-items: center; gap: 14px; padding: 12px 14px; border: 1px solid #dfe4d7; border-radius: 14px; background: #fffefa; }
+.alur-diri > svg { flex: 0 0 auto; }
+.alur-diri-nama { flex: 1; min-width: 0; font-size: 17px; font-weight: 600; line-height: 1.3; overflow-wrap: anywhere; }
+.alur-diri-ubah { flex: 0 0 auto; padding: 11px 6px; color: #215c40; font-weight: 600; text-decoration: underline; text-underline-offset: 4px; }
+/* Sasaran fokus terprogram (judul langkah, wadah isian): bukan kendali, jadi tanpa cincin fokus. */
+.player-ui .alur-judul-fokus:focus-visible, .player-ui .alur-isian:focus-visible { outline: none; }
+
+@media (max-width: 700px) {
+  /* .welcome-copy memakai display: contents + order; baris profil duduk tepat di bawah tombol (order 4). */
+  .alur-sebagai { order: 4; justify-content: center; margin-top: -2px; }
+  /* Spanduk dibuat ringkas supaya tidak menyentuh tautan "Punya kode acara?" di HP 360x740. */
+  .alur-spanduk-wadah { padding-bottom: calc(10px + env(safe-area-inset-bottom)); }
+  .alur-spanduk { gap: 10px; padding: 8px 8px 8px 14px; }
+  .alur-spanduk p { font-size: 13px; }
+  .alur-spanduk-gabung { gap: 6px; padding: 0 13px; font-size: 14px; }
+  .alur-spanduk-titik { display: none; }
+  .alur-ada-spanduk { margin-bottom: calc(78px + env(safe-area-inset-bottom)); box-shadow: 0 calc(78px + env(safe-area-inset-bottom)) 0 0 var(--krem); }
+  .alur-kenalan { margin-top: 0; padding: 0 24px 24px; }
+  .alur-kenalan-judul { margin: 8px 0 12px; font-size: 27px; }
+  /* /join langkah 2: jarak dirapatkan supaya pilihan karakter terlihat utuh di atas bar aksi. */
+  .alur-join-l2 .join-heading { margin-bottom: 12px; }
+  .alur-join-l2 .join-heading h1 { margin: 8px 0; }
+  .alur-join-l2 .join-form { gap: 14px; }
+}
 

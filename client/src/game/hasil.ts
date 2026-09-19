@@ -4,10 +4,12 @@
  * Murni & teruji (hasil.test.ts). Memakai gradeStep yang SAMA dengan server, dengan kunci
  * yang disusun dari `StepReveal.correct` (baru dikirim saat REVEAL). Skor resmi tetap dari
  * server; fungsi ini hanya menjelaskan hasil itu per langkah dengan kata-kata.
+ * Penilaian tidak bergantung pada bahasa; hanya judulHasil() yang membaca kamus (t()).
  */
 
 import { formatRupiah, gradeStep, type StepKey } from '@shared/scoring';
 import type { MissionReveal, OptionDef, StepAnswer, StepDef, StepReveal } from '@shared/types';
+import { t } from '../i18n';
 import { asList, asNumber, asRecord, asText } from './draft';
 
 export type StatusLangkah = 'tepat' | 'sebagian' | 'belum' | 'kosong';
@@ -90,7 +92,7 @@ export function nilaiLangkah(step: StepDef, r: StepReveal, v: StepAnswer | undef
     if (typeof c?.value === 'number') tepat.push({ teks: angka(step, c.value), tanda: n === c.value ? 'dipilih' : 'terlewat' });
   }
   // Tanpa bentuk mesin (atau jenis langkah lain): pakai teks jawaban dari server apa adanya.
-  if (!tepat.length) for (const t of r.correctText) tepat.push({ teks: t, tanda: 'terlewat' });
+  if (!tepat.length) for (const teks of r.correctText) tepat.push({ teks, tanda: 'terlewat' });
 
   return { stepId: step.id, prompt: r.prompt, status, akurasi, pilihan, tepat, alasan: r.explanation };
 }
@@ -112,10 +114,10 @@ export function statusMisi(akurasi: number, dijawab: boolean): StatusMisi {
   return 'belum';
 }
 
-/** Kalimat utama hasil: manusiawi, bukan persentase besar. */
-export const JUDUL_HASIL: Record<StatusMisi, { judul: string; sub: string }> = {
-  tepat: { judul: 'Jawabanmu tepat!', sub: 'Kerja bagus. Langkahmu sudah sesuai.' },
-  sebagian: { judul: 'Sebagian sudah tepat.', sub: 'Cek bagian yang masih terlewat di bawah.' },
-  belum: { judul: 'Belum tepat.', sub: 'Yuk, lihat langkah yang benar.' },
-  terlewat: { judul: 'Ronde ini terlewat.', sub: 'Yuk, lihat langkah yang benar untuk kasus ini.' },
-};
+/**
+ * Kalimat utama hasil dalam bahasa aktif: manusiawi, bukan persentase besar.
+ * Teksnya ada di kamus `misi` (hasil.<status>.judul / .sub); dibaca saat render.
+ */
+export function judulHasil(st: StatusMisi): { judul: string; sub: string } {
+  return { judul: t(`misi.hasil.${st}.judul`), sub: t(`misi.hasil.${st}.sub`) };
+}

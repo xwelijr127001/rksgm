@@ -105,6 +105,9 @@ async function main() {
   await ready(host);
   const created = await rpc<{ code: string; hostToken: string }>(host, 'host:create', {
     eventName: `Uji Beban ${PLAYERS} pemain`,
+    // Jawaban skrip ini disusun dari kunci paket latihan (keyForRound).
+    paket: 'latihan',
+    pin: process.env.PANITIA_PIN,
   });
   if (!created.ok || !created.data) throw new Error('gagal buat room: ' + created.error);
   const { code, hostToken } = created.data;

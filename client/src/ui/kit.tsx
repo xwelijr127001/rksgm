@@ -5,7 +5,7 @@
 
 import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import QRCode from 'qrcode';
-import { BRAND, DISCLAIMER } from '@shared/brand';
+import { BRAND } from '@shared/brand';
 import type { DocTable, LeaderRow, Phase, PolicyCard, Prizes } from '@shared/types';
 import { Avatar } from '../art/Avatar';
 import { Icon } from '../art/Icon';
@@ -18,6 +18,8 @@ import {
   setSfxVolume,
 } from '../audio/audio';
 import { useAudioPrefs, useCountdown, useReducedMotion } from '../hooks';
+import { t, useBahasa } from '../i18n';
+import { terjemahkanBawaan } from '../i18n/galat';
 import { useGame } from '../state/store';
 
 // ---------------------------------------------------------------- judul brand
@@ -77,6 +79,7 @@ export function Timer({
   label?: string;
   onZero?: () => void;
 }) {
+  useBahasa();
   const { seconds, ratio } = useCountdown(endsAt, durationMs);
   const fired = useRef(false);
   useEffect(() => {
@@ -89,7 +92,7 @@ export function Timer({
 
   if (seconds === null) {
     return (
-      <span className="timer" aria-label="Menunggu host">
+      <span className="timer" aria-label={t('layar.timerMenungguHost')}>
         <Icon name="jam" size={18} /> --
       </span>
     );
@@ -98,7 +101,7 @@ export function Timer({
   return (
     <span className="timer" role="timer" aria-live="off">
       <Icon name="jam" size={18} />
-      <span style={{ color: mendesak ? 'var(--kuning)' : undefined }}>{seconds}s</span>
+      <span style={{ color: mendesak ? 'var(--kuning)' : undefined }}>{t('layar.timerDetik', { n: seconds })}</span>
       {label ? <span className="mini lembut">{label}</span> : null}
       {ratio !== null ? (
         <span className={'timer-bar' + (mendesak ? ' mendesak' : '')} style={{ width: 84 }} aria-hidden>
@@ -110,6 +113,7 @@ export function Timer({
 }
 
 export function TimerBar({ endsAt, durationMs }: { endsAt: number | null; durationMs: number | null }) {
+  useBahasa();
   const { ratio, seconds } = useCountdown(endsAt, durationMs);
   if (ratio === null) return null;
   return (
@@ -119,7 +123,7 @@ export function TimerBar({ endsAt, durationMs }: { endsAt: number | null; durati
       aria-valuemin={0}
       aria-valuemax={100}
       aria-valuenow={Math.round(ratio * 100)}
-      aria-label="Sisa waktu"
+      aria-label={t('layar.sisaWaktu')}
     >
       <i style={{ width: `${ratio * 100}%` }} />
     </div>
@@ -128,22 +132,15 @@ export function TimerBar({ endsAt, durationMs }: { endsAt: number | null; durati
 
 // ---------------------------------------------------------------- fase
 
-const PHASE_LABEL: Record<Phase, string> = {
-  LOBBY: 'Lobby',
-  TUTORIAL: 'Tutorial',
-  BRIEFING: 'Briefing',
-  ACTIVE: 'Menjawab',
-  REVEAL: 'Pembahasan',
-  LEADERBOARD: 'Peringkat',
-  FINISHED: 'Selesai',
-  PAUSED: 'Dijeda',
-};
-
+/** Nama fase dalam bahasa aktif (kamus: layar.fase.<PHASE>); fase tak dikenal ditampilkan apa adanya. */
 export function phaseLabel(phase: Phase): string {
-  return PHASE_LABEL[phase] ?? phase;
+  const kunci = `layar.fase.${phase}`;
+  const teks = t(kunci);
+  return teks === kunci ? phase : teks;
 }
 
 export function PhaseBadge({ phase }: { phase: Phase }) {
+  useBahasa();
   const warna =
     phase === 'ACTIVE' ? 'chip-hijau'
     : phase === 'PAUSED' ? 'chip-merah'
@@ -161,14 +158,15 @@ export function PhaseBadge({ phase }: { phase: Phase }) {
 
 export function ConnectionBadge() {
   const { status } = useGame();
+  useBahasa();
   const info =
     status === 'connected'
-      ? { cls: 'ok', text: 'Tersambung' }
+      ? { cls: 'ok', text: t('layar.tersambung') }
       : status === 'reconnecting'
-        ? { cls: '', text: 'Menyambung ulang...' }
+        ? { cls: '', text: t('layar.menyambungUlang') }
         : status === 'connecting'
-          ? { cls: '', text: 'Menyambung...' }
-          : { cls: 'putus', text: 'Tidak tersambung' };
+          ? { cls: '', text: t('layar.menyambung') }
+          : { cls: 'putus', text: t('layar.tidakTersambung') };
   return (
     <span className="status-koneksi" role="status">
       <i className={`titik ${info.cls}`} aria-hidden />
@@ -188,32 +186,37 @@ export function Pesan({
   children: ReactNode;
   onTutup?: () => void;
 }) {
+  useBahasa();
   const ikon = jenis === 'error' ? 'silang' : jenis === 'sukses' ? 'cek' : 'tanya';
   return (
     <div className={`pesan pesan-${jenis}`} role={jenis === 'error' ? 'alert' : 'status'}>
       <Icon name={ikon} size={20} />
       <div style={{ flex: 1 }}>{children}</div>
       {onTutup ? (
-        <button className="btn btn-kecil btn-netral" onClick={onTutup} aria-label="Tutup pesan">
-          Tutup
+        <button className="btn btn-kecil btn-netral" onClick={onTutup} aria-label={t('layar.tutupPesan')}>
+          {t('layar.tutup')}
         </button>
       ) : null}
     </div>
   );
 }
 
-export function Memuat({ teks = 'Memuat...' }: { teks?: string }) {
+/** `teks` bawaan: "Memuat..." dalam bahasa aktif. */
+export function Memuat({ teks }: { teks?: string }) {
+  useBahasa();
   return (
     <div className="kosong">
-      <span className="memuat" aria-hidden /> <div style={{ marginTop: 10 }}>{teks}</div>
+      <span className="memuat" aria-hidden /> <div style={{ marginTop: 10 }}>{teks ?? t('layar.memuat')}</div>
     </div>
   );
 }
 
+/** Teks `id` sama dengan DISCLAIMER di shared/brand.ts. */
 export function Disclaimer() {
+  useBahasa();
   return (
     <p className="mini lembut" style={{ marginTop: 8 }}>
-      {DISCLAIMER}
+      {t('layar.disclaimer')}
     </p>
   );
 }
@@ -231,6 +234,7 @@ export function Modal({
   onTutup: () => void;
   aksi?: ReactNode;
 }) {
+  useBahasa();
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.key === 'Escape') onTutup();
@@ -263,7 +267,7 @@ export function Modal({
         <div className="baris" style={{ marginTop: 14, justifyContent: 'flex-end' }}>
           {aksi ?? (
             <button className="btn btn-netral" onClick={onTutup}>
-              Tutup
+              {t('layar.tutup')}
             </button>
           )}
         </div>
@@ -272,14 +276,14 @@ export function Modal({
   );
 }
 
-/** Tombol dengan konfirmasi dua langkah (untuk aksi berisiko host). */
+/** Tombol dengan konfirmasi dua langkah (untuk aksi berisiko host). `labelSetuju` bawaan: "Ya, lanjutkan" dalam bahasa aktif. */
 export function TombolKonfirmasi({
   label,
   judul,
   pesan,
   onSetuju,
   kelas = 'btn btn-bahaya',
-  labelSetuju = 'Ya, lanjutkan',
+  labelSetuju,
   disabled,
 }: {
   label: ReactNode;
@@ -291,6 +295,7 @@ export function TombolKonfirmasi({
   disabled?: boolean;
 }) {
   const [buka, setBuka] = useState(false);
+  useBahasa();
   return (
     <>
       <button className={kelas} onClick={() => setBuka(true)} disabled={disabled}>
@@ -303,7 +308,7 @@ export function TombolKonfirmasi({
           aksi={
             <>
               <button className="btn btn-netral" onClick={() => setBuka(false)}>
-                Batal
+                {t('layar.batal')}
               </button>
               <button
                 className="btn btn-bahaya"
@@ -312,7 +317,7 @@ export function TombolKonfirmasi({
                   onSetuju();
                 }}
               >
-                {labelSetuju}
+                {labelSetuju ?? t('layar.yaLanjutkan')}
               </button>
             </>
           }
@@ -329,6 +334,7 @@ export function TombolKonfirmasi({
 export function QrCode({ value, size = 220, label }: { value: string; size?: number; label?: string }) {
   const [src, setSrc] = useState<string | null>(null);
   const [gagal, setGagal] = useState(false);
+  useBahasa();
 
   useEffect(() => {
     let alive = true;
@@ -352,7 +358,7 @@ export function QrCode({ value, size = 220, label }: { value: string; size?: num
   if (gagal) {
     return (
       <div className="panel-krem tengah" style={{ width: size }}>
-        <p className="kecil tebal">QR gagal dibuat.</p>
+        <p className="kecil tebal">{t('layar.qrGagal')}</p>
         <p className="mini mono" style={{ wordBreak: 'break-all' }}>
           {value}
         </p>
@@ -374,7 +380,7 @@ export function QrCode({ value, size = 220, label }: { value: string; size?: num
         }}
       >
         {src ? (
-          <img src={src} width={size - 20} height={size - 20} alt={`QR menuju ${value}`} />
+          <img src={src} width={size - 20} height={size - 20} alt={t('layar.qrAlt', { alamat: value })} />
         ) : (
           <span className="memuat" aria-hidden />
         )}
@@ -389,6 +395,7 @@ export function QrCode({ value, size = 220, label }: { value: string; size?: num
 }
 
 export function KodeRoom({ code, size = 'besar' }: { code: string; size?: 'besar' | 'kecil' }) {
+  useBahasa();
   return (
     <span
       className="mono tebal"
@@ -401,7 +408,7 @@ export function KodeRoom({ code, size = 'besar' }: { code: string; size?: 'besar
         borderRadius: 14,
         display: 'inline-block',
       }}
-      aria-label={`Kode room ${code.split('').join(' ')}`}
+      aria-label={t('layar.kodeRoomAria', { kode: code.split('').join(' ') })}
     >
       {code}
     </span>
@@ -410,13 +417,15 @@ export function KodeRoom({ code, size = 'besar' }: { code: string; size?: 'besar
 
 // ---------------------------------------------------------------- kartu polis & dokumen
 
+/** `teks` = kunci kamus; dibaca lewat t() saat render supaya ikut bahasa aktif. */
 const FLAG_TEKS: Record<string, { teks: string; kelas: string; icon: 'cek' | 'silang' | 'tanya' }> = {
-  ok: { teks: 'sesuai', kelas: 'chip-hijau', icon: 'cek' },
-  no: { teks: 'perhatikan', kelas: 'chip-merah', icon: 'silang' },
-  info: { teks: 'info', kelas: 'chip-biru', icon: 'tanya' },
+  ok: { teks: 'layar.flagSesuai', kelas: 'chip-hijau', icon: 'cek' },
+  no: { teks: 'layar.flagPerhatikan', kelas: 'chip-merah', icon: 'silang' },
+  info: { teks: 'layar.flagInfo', kelas: 'chip-biru', icon: 'tanya' },
 };
 
 export function PolicyCardView({ card, aktif }: { card: PolicyCard; aktif?: boolean }) {
+  useBahasa();
   return (
     <article
       className="panel-krem"
@@ -444,7 +453,7 @@ export function PolicyCardView({ card, aktif }: { card: PolicyCard; aktif?: bool
                 {f ? (
                   <span className={`chip ${f.kelas} mini`} style={{ minHeight: 22, padding: '1px 8px' }}>
                     <Icon name={f.icon} size={12} />
-                    {f.teks}
+                    {t(f.teks)}
                   </span>
                 ) : null}
               </dd>
@@ -458,6 +467,7 @@ export function PolicyCardView({ card, aktif }: { card: PolicyCard; aktif?: bool
 }
 
 export function DocTableView({ table }: { table: DocTable }) {
+  useBahasa();
   return (
     <article className="panel-krem" style={{ minWidth: 230 }}>
       <div className="baris" style={{ marginBottom: 6 }}>
@@ -477,7 +487,7 @@ export function DocTableView({ table }: { table: DocTable }) {
                   {r.value}
                   {f && r.flag !== 'info' ? (
                     <span className="mini" style={{ marginLeft: 6 }}>
-                      <Icon name={f.icon} size={12} /> {f.teks}
+                      <Icon name={f.icon} size={12} /> {t(f.teks)}
                     </span>
                   ) : null}
                 </td>
@@ -506,13 +516,17 @@ export function Leaderboard({
   showAvatar?: boolean;
   prizes?: Prizes;
 }) {
+  useBahasa();
   const shown = limit ? rows.slice(0, limit) : rows;
   const sisa = limit ? Math.max(0, rows.length - limit) : 0;
   if (rows.length === 0) {
-    return <div className="kosong">Belum ada peringkat. Peringkat muncul setelah ronde ditutup.</div>;
+    return <div className="kosong">{t('layar.papanKosong')}</div>;
   }
-  const hadiah = (rank: number) =>
-    !prizes ? null : rank === 1 ? prizes.first : rank === 2 ? prizes.second : rank === 3 ? prizes.third : null;
+  // Label hadiah BAWAAN ikut bahasa aktif; label isian panitia tampil apa adanya.
+  const hadiah = (rank: number) => {
+    const teks = !prizes ? null : rank === 1 ? prizes.first : rank === 2 ? prizes.second : rank === 3 ? prizes.third : null;
+    return teks ? terjemahkanBawaan(teks) : null;
+  };
 
   return (
     <div className="papan">
@@ -525,8 +539,8 @@ export function Leaderboard({
           {showAvatar ? <Avatar look={r.look} size={38} /> : null}
           <span className="papan-nama">
             {r.nickname}
-            {r.playerId === highlightId ? <span className="mini lembut"> (kamu)</span> : null}
-            {r.tied ? <span className="mini"> - seri</span> : null}
+            {r.playerId === highlightId ? <span className="mini lembut"> {t('layar.kamu')}</span> : null}
+            {r.tied ? <span className="mini"> - {t('layar.seri')}</span> : null}
             {hadiah(r.rank) ? <div className="mini lembut">{hadiah(r.rank)}</div> : null}
           </span>
           {r.delta !== 0 ? (
@@ -537,14 +551,16 @@ export function Leaderboard({
           <span className="papan-poin">{r.totalPoints.toLocaleString('id-ID')}</span>
         </div>
       ))}
-      {sisa > 0 ? <p className="kecil lembut tengah">+{sisa} peserta lain</p> : null}
+      {sisa > 0 ? <p className="kecil lembut tengah">{t('layar.pesertaLain', { n: sisa })}</p> : null}
     </div>
   );
 }
 
 // ---------------------------------------------------------------- stempel & confetti
 
-export function Stempel({ teks = 'Misi Selesai' }: { teks?: string }) {
+/** `teks` bawaan: "Misi Selesai" dalam bahasa aktif. */
+export function Stempel({ teks }: { teks?: string }) {
+  useBahasa();
   return (
     <div
       className="anim-stempel"
@@ -563,7 +579,7 @@ export function Stempel({ teks = 'Misi Selesai' }: { teks?: string }) {
         background: 'rgba(255,255,255,0.9)',
       }}
     >
-      {teks}
+      {teks ?? t('layar.misiSelesai')}
     </div>
   );
 }
@@ -610,6 +626,7 @@ export function Confetti({ jumlah = 60 }: { jumlah?: number }) {
 
 export function AudioControls({ ringkas = false }: { ringkas?: boolean }) {
   const prefs = useAudioPrefs();
+  useBahasa();
   const toggleMute = () => {
     initAudio();
     setMuted(!prefs.muted);
@@ -620,18 +637,18 @@ export function AudioControls({ ringkas = false }: { ringkas?: boolean }) {
         className="btn btn-kecil btn-netral"
         onClick={toggleMute}
         aria-pressed={prefs.muted}
-        aria-label={prefs.muted ? 'Aktifkan suara' : 'Matikan suara'}
-        title={prefs.muted ? 'Aktifkan suara' : 'Matikan suara'}
+        aria-label={prefs.muted ? t('layar.suaraAktifkan') : t('layar.suaraMatikan')}
+        title={prefs.muted ? t('layar.suaraAktifkan') : t('layar.suaraMatikan')}
       >
-        {prefs.muted ? '🔇 Suara mati' : '🔊 Suara'}
+        {prefs.muted ? `🔇 ${t('layar.suaraMati')}` : `🔊 ${t('layar.suara')}`}
       </button>
     );
   }
   return (
     <div className="panel-krem stack stack-s">
-      <strong className="kecil">Suara</strong>
+      <strong className="kecil">{t('layar.suara')}</strong>
       <button className="btn btn-kecil btn-netral" onClick={toggleMute} aria-pressed={prefs.muted}>
-        {prefs.muted ? '🔇 Semua suara: MATI' : '🔊 Semua suara: HIDUP'}
+        {prefs.muted ? `🔇 ${t('layar.semuaSuaraMati')}` : `🔊 ${t('layar.semuaSuaraHidup')}`}
       </button>
       <label className="saklar kecil">
         <input
@@ -642,10 +659,10 @@ export function AudioControls({ ringkas = false }: { ringkas?: boolean }) {
             setMusicEnabled(e.target.checked);
           }}
         />
-        Musik latar
+        {t('layar.musikLatar')}
       </label>
       <label className="mini lembut">
-        Volume musik
+        {t('layar.volumeMusik')}
         <input
           type="range"
           min={0}
@@ -653,11 +670,11 @@ export function AudioControls({ ringkas = false }: { ringkas?: boolean }) {
           value={Math.round(prefs.musicVolume * 100)}
           onChange={(e) => setMusicVolume(Number(e.target.value) / 100)}
           className="penuh"
-          aria-label="Volume musik"
+          aria-label={t('layar.volumeMusik')}
         />
       </label>
       <label className="mini lembut">
-        Volume efek
+        {t('layar.volumeEfek')}
         <input
           type="range"
           min={0}
@@ -665,7 +682,7 @@ export function AudioControls({ ringkas = false }: { ringkas?: boolean }) {
           value={Math.round(prefs.sfxVolume * 100)}
           onChange={(e) => setSfxVolume(Number(e.target.value) / 100)}
           className="penuh"
-          aria-label="Volume efek suara"
+          aria-label={t('layar.volumeEfekAria')}
         />
       </label>
     </div>

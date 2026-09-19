@@ -5,8 +5,9 @@
  * jalur melengkung bernomor 1-10. Judul & lokasi diambil dari MISSIONS.
  * Status simpul dibaca tanpa warna: selalu ada nomor + ikon (centang / panah / titik).
  */
-import type { ReactElement } from 'react';
+import { useMemo, type ReactElement } from 'react';
 import { MISSIONS } from '@shared/missions';
+import { misiDalamBahasa, t, useBahasa } from '../i18n';
 
 const C = {
   kuning: '#f6c445',
@@ -22,8 +23,32 @@ const CX = 240;
 /** Sudut simpul: busur 300 derajat dari kiri-bawah, memutar sampai kanan-bawah. */
 const SUDUT = MISSIONS.map((_, i) => ((130 + i * (300 / 9)) * Math.PI) / 180);
 
+/** Aksara Han & tanda baca lebar penuh: tanpa spasi antarkata dan kira-kira dua kali lebar huruf Latin. */
+const AKSARA_LEBAR = /[⺀-鿿豈-﫿＀-￯]/;
+
+/** Label beraksara Han: dipotong per aksara menurut lebar tampil (aksara Han = 2, lainnya = 1). */
+function pecahLabelHan(teks: string, maks: number): string[] {
+  const baris: string[] = [];
+  let kini = '';
+  let lebar = 0;
+  for (const huruf of teks) {
+    const l = AKSARA_LEBAR.test(huruf) ? 2 : 1;
+    if (kini && lebar + l > maks) {
+      baris.push(kini.trim());
+      kini = '';
+      lebar = 0;
+    }
+    kini += huruf;
+    lebar += l;
+  }
+  if (kini.trim()) baris.push(kini.trim());
+  if (baris.length <= 2) return baris;
+  return [baris[0], `${baris[1]}…`];
+}
+
 /** Potong label jadi maksimal 2 baris pendek supaya tidak tabrakan di HP. */
 function pecahLabel(teks: string, maks = 14): string[] {
+  if (AKSARA_LEBAR.test(teks)) return pecahLabelHan(teks, maks);
   const baris: string[] = [];
   let kini = '';
   for (const kata of teks.split(' ')) {
@@ -68,6 +93,7 @@ function Titik({ x, y }: { x: number; y: number }): ReactElement {
 
 /** Kantor Raksa - pusat kota. */
 function Pusat({ x, y, label }: { x: number; y: number; label: boolean }): ReactElement {
+  useBahasa();
   return (
     <g transform={`translate(${x} ${y})`}>
       <ellipse cx="0" cy="30" rx="46" ry="12" fill={C.tinta} opacity="0.14" />
@@ -87,7 +113,7 @@ function Pusat({ x, y, label }: { x: number; y: number; label: boolean }): React
       <path d="M1.6 -38 l18 5 -18 5 z" fill={C.kuning} />
       {label ? (
         <text x="0" y="50" textAnchor="middle" fontSize="11" fontWeight="800" fill="currentColor">
-          Kantor Raksa
+          {t('layar.kantorRaksa')}
         </text>
       ) : null}
     </g>
@@ -105,6 +131,9 @@ export function CityMap({
   compact?: boolean;
   className?: string;
 }): ReactElement {
+  const { bahasa } = useBahasa();
+  // Judul & lokasi misi dalam bahasa aktif (id & urutan tidak berubah).
+  const daftarMisi = useMemo(() => MISSIONS.map((m) => misiDalamBahasa(m, bahasa)), [bahasa]);
   const rx = compact ? 195 : 150;
   const ry = compact ? 78 : 96;
   const cy = compact ? 112 : 148;
@@ -114,11 +143,11 @@ export function CityMap({
   const simpul = SUDUT.map((a) => ({ x: CX + rx * Math.cos(a), y: cy + ry * Math.sin(a) }));
   const selesai = new Set(completed);
   const total = MISSIONS.length;
-  const misiKini = MISSIONS[currentRound];
+  const misiKini = daftarMisi[currentRound];
   const ringkas = misiKini
-    ? `Misi ${currentRound + 1} dari ${total} sedang berjalan: ${misiKini.title} di ${misiKini.location}.`
-    : `Belum ada misi yang berjalan.`;
-  const aria = `Peta perjalanan misi. ${selesai.size} dari ${total} misi selesai. ${ringkas}`;
+    ? t('layar.petaAriaBerjalan', { n: currentRound + 1, total, judul: misiKini.title, lokasi: misiKini.location })
+    : t('layar.petaAriaBelum');
+  const aria = t('layar.petaAria', { selesai: selesai.size, total, ringkas });
 
   const jalur = simpul.slice(0, -1).map((a, i) => {
     const b = simpul[i + 1];
@@ -168,7 +197,7 @@ export function CityMap({
       <Pusat x={CX} y={cy} label={!compact} />
 
       {simpul.map((p, i) => {
-        const misi = MISSIONS[i];
+        const misi = daftarMisi[i];
         const sudah = selesai.has(i);
         const kini = i === currentRound;
         const nomor = i + 1;
@@ -246,15 +275,15 @@ export function CityMap({
         <g transform="translate(20 276)">
           <Centang x={8} y={0} />
           <text x="20" y="4" fontSize="10" fontWeight="700" fill="currentColor" fillOpacity="0.8">
-            Selesai
+            {t('layar.petaSelesai')}
           </text>
           <Panah x={82} y={0} />
           <text x="94" y="4" fontSize="10" fontWeight="700" fill="currentColor" fillOpacity="0.8">
-            Berjalan
+            {t('layar.petaBerjalan')}
           </text>
           <Titik x={160} y={0} />
           <text x="172" y="4" fontSize="10" fontWeight="700" fill="currentColor" fillOpacity="0.8">
-            Belum
+            {t('layar.petaBelum')}
           </text>
         </g>
       )}

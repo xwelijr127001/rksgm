@@ -4,12 +4,28 @@
  */
 
 import type { ReactNode } from 'react';
-import { TOKOH, labelTokoh, namaTokoh, type IdTokoh } from '@shared/brand';
+import { TOKOH, type IdTokoh } from '@shared/brand';
+import { t, useBahasa } from '../i18n';
 import { SPRITE_BESAR } from './tokoh';
 import './tokoh.css';
 
+/** Jabatan tokoh dalam bahasa aktif. */
+const jabatan = (id: IdTokoh): string => t(`tokoh.${id}.jabatan`);
+/** "nama · jabatan" (atau nama saja bila tampilJabatan false); tanpa nama = jabatan. */
+export function namaTokoh(id: IdTokoh): string {
+  const k = TOKOH[id];
+  if (!k.nama) return jabatan(id);
+  return k.tampilJabatan ? `${k.nama} · ${jabatan(id)}` : k.nama;
+}
+/** Nama lengkap untuk pembaca layar (selalu dengan jabatan). */
+function labelTokoh(id: IdTokoh): string {
+  const k = TOKOH[id];
+  return k.nama ? `${k.nama}, ${jabatan(id)}` : jabatan(id);
+}
+
 /** Sprite saja, tanpa nama/balon (mis. di dalam balon briefing). */
 export function SpriteTokoh({ tokoh, tinggi, lambai = true }: { tokoh: IdTokoh; tinggi: number; lambai?: boolean }) {
+  useBahasa();
   if (!TOKOH[tokoh].aktif) return null;
   const s = SPRITE_BESAR[tokoh];
   return (
@@ -17,7 +33,7 @@ export function SpriteTokoh({ tokoh, tinggi, lambai = true }: { tokoh: IdTokoh; 
       className={`tokoh-sprite tokoh-${tokoh}` + (lambai ? ' lambai' : '')}
       style={{ width: Math.round((tinggi * s.frameW) / s.frameH), height: tinggi }}
       role="img"
-      aria-label={`${labelTokoh(tokoh)} melambaikan tangan`}
+      aria-label={t('tokoh.melambai', { nama: labelTokoh(tokoh) })}
     />
   );
 }
@@ -29,6 +45,7 @@ export function SpriteTokoh({ tokoh, tinggi, lambai = true }: { tokoh: IdTokoh; 
  * satu frame supaya frame sebelahnya (tangan melambai) tidak ikut terlihat di tepi.
  */
 export function PotretTokoh({ tokoh, ukuran = 44 }: { tokoh: IdTokoh; ukuran?: number }) {
+  useBahasa();
   if (!TOKOH[tokoh].aktif) return null;
   const s = SPRITE_BESAR[tokoh];
   const j = JENDELA_POTRET[tokoh];
@@ -55,12 +72,13 @@ const JENDELA_POTRET: Record<IdTokoh, { atas: number; tinggi: number; cx: number
 };
 
 /** Slot pemandu: potret + nama + satu kalimat, di panel (tidak pernah menutupi adegan). */
-export function SapaanPemandu({ tokoh, teks, ukuran = 48, className = '' }: { tokoh: IdTokoh; teks: ReactNode; ukuran?: number; className?: string }) {
+export function SapaanPemandu({ tokoh, teks, ukuran = 48, className = '', label }: { tokoh: IdTokoh; teks: ReactNode; ukuran?: number; className?: string; /** Baris nama; bawaan "nama · jabatan". */ label?: string }) {
+  useBahasa();
   if (!TOKOH[tokoh].aktif) return null;
   return (
     <div className={'pemandu-kata ' + className}>
       <PotretTokoh tokoh={tokoh} ukuran={ukuran} />
-      <p><b>{namaTokoh(tokoh)}</b>{teks}</p>
+      <p><b>{label ?? namaTokoh(tokoh)}</b>{teks}</p>
     </div>
   );
 }
@@ -72,6 +90,7 @@ export function KarakterTokoh({
   lambai = true,
   susun = 'samping',
   className = '',
+  label,
 }: {
   tokoh: IdTokoh;
   /** Tinggi tampil sprite (px CSS). */
@@ -82,9 +101,12 @@ export function KarakterTokoh({
   /** Keterangan di samping sprite, di atasnya, atau di bawahnya. */
   susun?: 'samping' | 'atas' | 'bawah';
   className?: string;
+  /** Baris nama di balon; bawaan "nama · jabatan" (mis. "Bu Isti · Juri" saat membacakan hasil). */
+  label?: string;
 }) {
+  useBahasa();
   if (!TOKOH[tokoh].aktif) return null;
-  const t = TOKOH[tokoh];
+  const k = TOKOH[tokoh];
   if (susun === 'bawah') {
     // Balon (opsional) di atas kepala, papan nama di bawah kaki: beberapa tokoh berjajar tetap sejajar.
     return (
@@ -92,7 +114,7 @@ export function KarakterTokoh({
         {teks ? <p className="tokoh-balon tokoh-balon-atas">{teks}</p> : null}
         <SpriteTokoh tokoh={tokoh} tinggi={tinggi} lambai={lambai} />
         <figcaption className="tokoh-nama">
-          {t.nama ? <><b>{t.nama}</b>{t.tampilJabatan ? <small>{t.jabatan}</small> : null}</> : <b>{t.jabatan}</b>}
+          {k.nama ? <><b>{k.nama}</b>{k.tampilJabatan ? <small>{jabatan(tokoh)}</small> : null}</> : <b>{jabatan(tokoh)}</b>}
         </figcaption>
       </figure>
     );
@@ -102,7 +124,7 @@ export function KarakterTokoh({
       <SpriteTokoh tokoh={tokoh} tinggi={tinggi} lambai={lambai} />
       {/* Di samping: balon sejajar kepala (jarak dihitung dari tinggi sprite, bukan persen). */}
       <figcaption className={teks ? 'tokoh-balon' : 'tokoh-nama'} style={teks && susun === 'samping' ? { marginBottom: Math.round(tinggi * 0.46) } : undefined}>
-        {teks ? <><b>{namaTokoh(tokoh)}</b><span>{teks}</span></> : t.nama ? <><b>{t.nama}</b>{t.tampilJabatan ? <small>{t.jabatan}</small> : null}</> : <b>{t.jabatan}</b>}
+        {teks ? <><b>{label ?? namaTokoh(tokoh)}</b><span>{teks}</span></> : k.nama ? <><b>{k.nama}</b>{k.tampilJabatan ? <small>{jabatan(tokoh)}</small> : null}</> : <b>{jabatan(tokoh)}</b>}
       </figcaption>
     </figure>
   );

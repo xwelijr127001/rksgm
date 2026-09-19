@@ -13,7 +13,7 @@ import {
   SKIN_TONES,
   UNIFORM_COLORS,
 } from '../../shared/brand';
-import { MISSIONS, TIEBREAK_MISSION } from '../../shared/missions';
+import { TIEBREAK_MISSION } from '../../shared/missions';
 import {
   computeBadges,
   gradeMission,
@@ -23,7 +23,7 @@ import {
   type RankInput,
 } from '../../shared/scoring';
 import {
-  TOTAL_ROUNDS,
+  type Badge,
   type LeaderRow,
   type MePrivate,
   type MissionAnswer,
@@ -36,17 +36,23 @@ import {
   type RoundResult,
   type StepAnswer,
 } from '../../shared/types';
-import { buildReveal, keyForRound } from './answerKeys';
+import type { MissionKey } from '../../shared/scoring';
+import { TIEBREAK_KEY, buildReveal } from './answerKeys';
+import { GALAT_PLAYLIST, cariSoalBawaan, idPaket, periksaPlaylist, type PencariSoal } from './bankSoal';
+import { cleanText } from './teks';
 
 const CODE_ALPHABET = 'ACDEFGHJKLMNPQRTUVWXY34679';
 const NICK_MAX = 16;
 
-/** Indeks ronde khusus untuk ronde penentuan (tiebreak). */
-export const TIEBREAK_ROUND = TOTAL_ROUNDS;
+/** Satu soal di playlist room: misi bernomor sesuai posisinya + kunci ber-roundIndex posisi itu. */
+interface SoalRonde {
+  id: string;
+  misi: MissionPublic;
+  kunci: MissionKey;
+}
 
-export function missionForRound(roundIndex: number): MissionPublic | null {
-  if (roundIndex === TIEBREAK_ROUND) return TIEBREAK_MISSION;
-  return MISSIONS[roundIndex] ?? null;
+function samaUrutan(a: string[], b: string[]): boolean {
+  return a.length === b.length && a.every((x, i) => x === b[i]);
 }
 
 export interface Submission {
@@ -87,17 +93,6 @@ export interface RoomSettings {
   eventName: string;
   autoAdvance: boolean;
   prizes: Prizes;
-}
-
-/** Karakter kontrol dibuang, spasi dirapikan, lalu dipotong sesuai batas. */
-function cleanText(raw: unknown, max: number): string {
-  let out = '';
-  for (const ch of String(raw ?? '')) {
-    const code = ch.codePointAt(0) ?? 0;
-    if (code < 0x20 || code === 0x7f) continue;
-    out += ch;
-  }
-  return out.replace(/\s+/g, ' ').trim().slice(0, max);
 }
 
 export function sanitizeNickname(raw: unknown): string {
@@ -219,6 +214,17 @@ export class Room {
   private settledRounds = new Set<number>();
   tiebreakUsed = false;
 
+  /**
+   * Daftar id soal pertandingan ini, berurutan. TIDAK masuk publicState (judul soal berikutnya
+   * tidak boleh bocor ke pemain); host membacanya lewat host:attach / host:playlist.
+   */
+  playlist: string[] = [];
+  /** Isi playlist yang sudah dicari di bank (misi + kunci). Dibekukan selama pertandingan berjalan. */
+  private soal: SoalRonde[] = [];
+  /** true bila playlist = satu paket bawaan utuh; lencana per-misi hanya bermakna di situ. */
+  private playlistPaketUtuh = true;
+  private cari: PencariSoal;
+
   private timer: NodeJS.Timeout | null = null;
   /** Waktu mulai jeda saat ini (untuk mengeluarkan durasi jeda dari waktu menjawab). */
   private pausedAt: number | null = null;
@@ -232,6 +238,10 @@ export class Room {
     now?: () => number;
     emit?: (room: Room, ev: RoomEvent) => void;
     baseUrl?: () => string;
+    /** Id soal berurutan. Tanpa ini: paket latihan (perilaku lama). */
+    playlist?: string[];
+    /** Pencari soal. Bawaan = paket bawaan saja; server memberi pencari lengkap (bankKustom.ts). */
+    cari?: PencariSoal;
   }) {
     this.code = opts.code;
     this.hostToken = randomUUID();
@@ -244,6 +254,77 @@ export class Room {
       autoAdvance: true,
       prizes: { ...DEFAULT_PRIZES },
     };
+    this.cari = opts.cari ?? cariSoalBawaan;
+    this.pasangPlaylist(opts.playlist ?? idPaket('latihan'));
+    if (this.soal.length === 0) this.pasangPlaylist(idPaket('latihan'));
+  }
+
+  // ------------------------------------------------------------ playlist
+
+  /**
+   * Cari ulang tiap id di bank lalu bekukan hasilnya. Id yang sudah tidak ada (soal kustom
+   * dihapus) dibuang. Nomor misi & roundIndex kunci = posisi di playlist.
+   */
+  private pasangPlaylist(ids: string[]): void {
+    const soal: SoalRonde[] = [];
+    for (const id of ids) {
+      if (soal.some((s) => s.id === id)) continue;
+      const e = this.cari(id);
+      if (!e) continue;
+      const posisi = soal.length;
+      soal.push({ id, misi: { ...e.misi, number: posisi + 1 }, kunci: { ...e.kunci, roundIndex: posisi } });
+    }
+    this.soal = soal;
+    this.playlist = soal.map((s) => s.id);
+    this.playlistPaketUtuh =
+      samaUrutan(this.playlist, idPaket('latihan')) || samaUrutan(this.playlist, idPaket('acara'));
+  }
+
+  /** Ganti playlist (host). Hanya saat LOBBY; id harus ada di bank, tanpa duplikat, 1-20. */
+  setPlaylist(raw: unknown): string[] {
+    if (this.phase !== 'LOBBY') throw new Error(GALAT_PLAYLIST.bukanLobby);
+    this.pasangPlaylist(periksaPlaylist(raw, this.cari));
+    this.touch();
+    return [...this.playlist];
+  }
+
+  /** Soal dihapus dari bank: keluarkan dari playlist room yang masih di lobby. */
+  buangDariPlaylist(id: string, cadangan: string[]): boolean {
+    if (this.phase !== 'LOBBY' || !this.playlist.includes(id)) return false;
+    const sisa = this.playlist.filter((x) => x !== id);
+    this.pasangPlaylist(sisa.length ? sisa : cadangan);
+    this.touch();
+    return true;
+  }
+
+  get totalRounds(): number {
+    return this.playlist.length;
+  }
+
+  /** Indeks ronde penentuan: tepat setelah soal terakhir playlist. */
+  get tiebreakRound(): number {
+    return this.playlist.length;
+  }
+
+  missionForRound(roundIndex: number): MissionPublic | null {
+    if (roundIndex === this.tiebreakRound) return TIEBREAK_MISSION;
+    return this.soal[roundIndex]?.misi ?? null;
+  }
+
+  /** SERVER ONLY: kunci ronde. Jangan pernah dikirim mentah ke client (lihat buildReveal). */
+  private keyForRound(roundIndex: number): MissionKey | undefined {
+    if (roundIndex === this.tiebreakRound) return { ...TIEBREAK_KEY, roundIndex };
+    return this.soal[roundIndex]?.kunci;
+  }
+
+  /** Lencana pemain memakai durasi soal playlist room ini (dipakai privateState, CSV, dan DB). */
+  lencana(player: PlayerRecord, rank: number): Badge[] {
+    return computeBadges(
+      player.rounds,
+      rank,
+      this.soal.map((s) => s.misi),
+      { lencanaMisi: this.playlistPaketUtuh },
+    );
   }
 
   // ------------------------------------------------------------ peserta
@@ -251,7 +332,7 @@ export class Room {
   get mission(): MissionPublic | null {
     if (this.phase === 'LOBBY') return null;
     if (this.phase === 'TUTORIAL') return null;
-    return missionForRound(this.roundIndex);
+    return this.missionForRound(this.roundIndex);
   }
 
   get matchStarted(): boolean {
@@ -344,13 +425,17 @@ export class Room {
   startMatch(): void {
     if (this.matchStarted) throw new Error('Pertandingan sudah dimulai');
     if (this.players.size === 0) throw new Error('Belum ada peserta');
+    // Muat ulang dari bank: soal kustom yang disunting saat lobby ikut versi terbaru, lalu beku
+    // sampai pertandingan selesai (suntingan di tengah pertandingan tidak mengubah ronde berjalan).
+    this.pasangPlaylist(this.playlist);
+    if (this.soal.length === 0) throw new Error(GALAT_PLAYLIST.kosong);
     this.startedAt = this.now();
     this.roundIndex = 0;
     this.beginBriefing();
   }
 
   private beginBriefing(): void {
-    const mission = missionForRound(this.roundIndex);
+    const mission = this.missionForRound(this.roundIndex);
     if (!mission) {
       this.finish();
       return;
@@ -365,7 +450,7 @@ export class Room {
   }
 
   private beginActive(): void {
-    const mission = missionForRound(this.roundIndex);
+    const mission = this.missionForRound(this.roundIndex);
     if (!mission) {
       this.finish();
       return;
@@ -380,7 +465,7 @@ export class Room {
   /** Tutup ronde: bukukan skor, hitung peringkat, masuk REVEAL. */
   closeRound(): void {
     if (this.phase !== 'ACTIVE' && !(this.phase === 'PAUSED' && this.prevPhase === 'ACTIVE')) return;
-    const mission = missionForRound(this.roundIndex);
+    const mission = this.missionForRound(this.roundIndex);
     if (!mission) return;
 
     this.settleRound(this.roundIndex, mission);
@@ -470,7 +555,8 @@ export class Room {
       return;
     }
     if (this.phase === 'LEADERBOARD') {
-      if (this.roundIndex === TIEBREAK_ROUND || this.roundIndex >= TOTAL_ROUNDS - 1) {
+      // Soal terakhir playlist ATAU ronde penentuan (indeksnya = totalRounds).
+      if (this.roundIndex >= this.totalRounds - 1) {
         this.finish();
       } else {
         this.roundIndex += 1;
@@ -535,12 +621,12 @@ export class Room {
     this.tiebreakUsed = true;
     this.finishedAt = null;
     this.podium = null;
-    this.roundIndex = TIEBREAK_ROUND;
+    this.roundIndex = this.tiebreakRound;
     this.beginBriefing();
   }
 
   finish(): void {
-    const mission = missionForRound(this.roundIndex);
+    const mission = this.missionForRound(this.roundIndex);
     // Sama seperti closeRound(): ronde ACTIVE yang sedang DIJEDA juga dibukukan,
     // supaya jawaban yang sudah masuk tidak hilang bila host mengakhiri saat jeda.
     const aktif = this.phase === 'ACTIVE' || (this.phase === 'PAUSED' && this.prevPhase === 'ACTIVE');
@@ -585,6 +671,8 @@ export class Room {
       p.ready = false;
       p.sceneReadyRound = null;
     }
+    // Kembali ke lobby: buang id soal yang sudah dihapus dari bank supaya host melihat daftar yang nyata.
+    this.pasangPlaylist(this.playlist);
     this.touch();
   }
 
@@ -592,7 +680,7 @@ export class Room {
 
   get deadline(): number | null {
     if (this.phase !== 'ACTIVE' || this.roundStartedAt === null) return null;
-    const mission = missionForRound(this.roundIndex);
+    const mission = this.missionForRound(this.roundIndex);
     if (!mission) return null;
     return this.roundStartedAt + mission.durationSeconds * 1000 + this.roundPausedMs;
   }
@@ -604,7 +692,7 @@ export class Room {
   ): { accepted: boolean; reason?: string; elapsedMs?: number } {
     if (this.phase !== 'ACTIVE') return { accepted: false, reason: 'Ronde belum/sudah tidak menerima jawaban' };
     if (roundIndex !== this.roundIndex) return { accepted: false, reason: 'Nomor ronde tidak sesuai' };
-    const mission = missionForRound(this.roundIndex);
+    const mission = this.missionForRound(this.roundIndex);
     if (!mission || this.roundStartedAt === null) return { accepted: false, reason: 'Ronde tidak aktif' };
 
     const key = `${roundIndex}:${player.id}`;
@@ -619,7 +707,7 @@ export class Room {
 
     const elapsedMs = Math.max(0, now - this.roundStartedAt - this.roundPausedMs);
     const answer = sanitizeAnswer(mission, rawAnswer);
-    const missionKey = keyForRound(roundIndex);
+    const missionKey = this.keyForRound(roundIndex);
     const grade = missionKey ? gradeMission(missionKey, answer) : { accuracy: 0, steps: [] };
     const score = scoreRound(grade.accuracy, elapsedMs / 1000, mission.durationSeconds);
 
@@ -698,8 +786,8 @@ export class Room {
     const showReveal =
       revealPhases.includes(this.phase) ||
       (this.phase === 'PAUSED' && this.prevPhase !== null && revealPhases.includes(this.prevPhase));
-    const mission = missionForRound(this.roundIndex);
-    const revealMissionKey = showReveal ? keyForRound(this.roundIndex) : undefined;
+    const mission = this.missionForRound(this.roundIndex);
+    const revealMissionKey = showReveal ? this.keyForRound(this.roundIndex) : undefined;
 
     const players: PlayerPublic[] = [...this.players.values()].map((p) => {
       const sub = this.submissions.get(`${this.roundIndex}:${p.id}`);
@@ -728,7 +816,7 @@ export class Room {
       prevPhase: this.prevPhase,
       pausedRemainingMs: this.pausedRemainingMs,
       roundIndex: this.roundIndex,
-      totalRounds: TOTAL_ROUNDS,
+      totalRounds: this.totalRounds,
       serverNow: now,
       phaseEndsAt: this.phaseEndsAt,
       phaseDurationMs: this.phaseDurationMs,
@@ -765,10 +853,7 @@ export class Room {
       totalTimeMs: player.totalTimeMs,
       answeredCount: player.rounds.filter((r) => r.answered).length,
       rounds: player.rounds,
-      badges:
-        this.phase === 'FINISHED'
-          ? computeBadges(player.rounds, row?.rank ?? 0, MISSIONS)
-          : [],
+      badges: this.phase === 'FINISHED' ? this.lencana(player, row?.rank ?? 0) : [],
       submittedRound: sub ? this.roundIndex : null,
       submittedAnswer: sub ? sub.answer : null,
     };
@@ -789,6 +874,7 @@ export class RoomManager {
     private emit: (room: Room, ev: RoomEvent) => void,
     private baseUrl: () => string,
     private now: () => number = () => Date.now(),
+    private cari: PencariSoal = cariSoalBawaan,
   ) {}
 
   private newCode(): string {
@@ -802,10 +888,13 @@ export class RoomManager {
     throw new Error('Gagal membuat kode room');
   }
 
-  create(eventName?: string): Room {
+  /** `playlist` kosong = paket latihan (perilaku lama). Server acara mengisinya dari paket pilihan host. */
+  create(eventName?: string, playlist?: string[]): Room {
     const room = new Room({
       code: this.newCode(),
       eventName,
+      playlist,
+      cari: this.cari,
       emit: this.emit,
       baseUrl: this.baseUrl,
       now: this.now,

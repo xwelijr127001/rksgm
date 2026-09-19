@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { getAudioPrefs, subscribeAudio, type AudioPrefs } from './audio/audio';
 import { serverNow } from './state/store';
+import { gerakDikurangi, gerakPenuhDipaksa, pantauGerak, sistemMintaKurang } from './gerak';
 
 /**
  * Hitung mundur berbasis jam SERVER (tidak bisa dicurangi di client).
@@ -30,18 +31,19 @@ export function useAudioPrefs(): AudioPrefs {
   return prefs;
 }
 
-/** true bila pengguna meminta animasi dikurangi. */
+/** true bila animasi harus dikurangi: perangkat memintanya dan tidak dinyalakan paksa (lihat gerak.ts). */
 export function useReducedMotion(): boolean {
-  const [reduced, setReduced] = useState(
-    () => typeof window !== 'undefined' && window.matchMedia?.('(prefers-reduced-motion: reduce)').matches,
-  );
-  useEffect(() => {
-    const mq = window.matchMedia('(prefers-reduced-motion: reduce)');
-    const on = () => setReduced(mq.matches);
-    mq.addEventListener('change', on);
-    return () => mq.removeEventListener('change', on);
-  }, []);
+  const [reduced, setReduced] = useState(() => typeof window !== 'undefined' && gerakDikurangi());
+  useEffect(() => pantauGerak(() => setReduced(gerakDikurangi())), []);
   return Boolean(reduced);
+}
+
+/** Untuk tombol "Nyalakan animasi": apakah perangkat meminta gerak dikurangi, dan apakah sudah dinyalakan paksa. */
+export function useSetelanGerak(): { sistemKurang: boolean; dipaksa: boolean } {
+  const baca = () => ({ sistemKurang: sistemMintaKurang(), dipaksa: gerakPenuhDipaksa() });
+  const [s, setS] = useState(baca);
+  useEffect(() => pantauGerak(() => setS(baca())), []);
+  return s;
 }
 
 /** Jalankan callback sekali saat nilai berubah menjadi sesuatu yang baru. */

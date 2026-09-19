@@ -1,0 +1,270 @@
+/* ==========================================================================
+   MODE SOLO: peta misi (/solo), main satu misi (/solo/main), hasil akhir (/solo/hasil).
+   Semua kelas berawalan "solo-" (kelas global lain pernah bentrok, mis. .kosong).
+
+   - HP tegak      : kepala -> jalur misi -> SATU tombol utama lengket di bawah (bagian dari alur
+                     halaman, jadi di ujung gulir tidak ada konten yang tertutup) -> tautan kode acara
+   - HP mendatar & layar lebar: dua kolom; kepala + tombol utama di kiri (lengket), jalur di kanan
+   Status tidak hanya lewat warna: bintang terisi/garis + teks, tingkat = balok + kata.
+   ========================================================================== */
+
+.solo-layar .player-header {
+  min-height: 56px;
+  padding: 8px max(16px, env(safe-area-inset-right)) 8px max(16px, env(safe-area-inset-left));
+}
+@media (min-width: 900px) and (min-height: 541px) { .solo-layar .player-header { min-height: 72px; padding-top: 14px; padding-bottom: 14px; } }
+@media (orientation: landscape) and (max-height: 540px) { .solo-layar .player-header { min-height: 44px; padding-top: 0; padding-bottom: 0; } }
+
+/* ------------------------------------------------------------------ bagian bersama */
+.solo-bintang { display: inline-flex; align-items: center; gap: 2px; vertical-align: middle; }
+.solo-bintang svg { display: block; flex: 0 0 auto; }
+.solo-avatar { flex: 0 0 auto; display: grid; place-items: center; width: 72px; height: 72px; border-radius: 50%; background: #f7dfa0; }
+.solo-tingkat { display: inline-flex; align-items: center; gap: 5px; white-space: nowrap; }
+.solo-tingkat-balok { display: inline-flex; align-items: flex-end; gap: 2px; height: 12px; }
+.solo-tingkat-balok i { width: 5px; border-radius: 2px; background: transparent; box-shadow: inset 0 0 0 1.5px #9aa996; }
+.solo-tingkat-balok i:nth-child(1) { height: 6px; }
+.solo-tingkat-balok i:nth-child(2) { height: 9px; }
+.solo-tingkat-balok i:nth-child(3) { height: 12px; }
+.solo-tingkat-balok i.solo-balok-isi { background: #215c40; box-shadow: none; }
+
+/* ------------------------------------------------------------------ peta misi */
+.solo-peta {
+  --solo-pl: max(16px, env(safe-area-inset-left));
+  --solo-pr: max(16px, env(safe-area-inset-right));
+  flex: 1; width: min(1040px, 100%); margin: 0 auto; padding: 4px var(--solo-pr) 0 var(--solo-pl);
+  display: flex; flex-direction: column;
+}
+/* Urutan DOM: kepala, tombol utama, tautan, lalu jalur (tombol utama lebih dulu untuk keyboard).
+   Di HP tegak pembungkusnya "hilang" dan urutan tampil diatur `order`. */
+.solo-sisi { display: contents; }
+.solo-kepala { order: 0; display: flex; flex-direction: column; gap: 12px; padding: 4px 0 18px; min-width: 0; }
+.solo-jalur { order: 1; }
+.solo-aksi { order: 2; }
+.solo-kaki { order: 3; }
+
+.solo-pemain { display: flex; align-items: center; gap: 12px; min-width: 0; }
+.solo-pemain > div { min-width: 0; }
+.solo-pemain h1 { font-size: 24px; line-height: 1.15; margin: 3px 0 2px; overflow-wrap: anywhere; }
+.solo-pemain p { margin: 0; font-size: 14px; line-height: 1.4; color: #5a6b5e; }
+.solo-angka { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; margin: 0; }
+.solo-angka > div { display: flex; flex-direction: column-reverse; justify-content: flex-end; min-width: 0; padding: 8px 10px; border-radius: 12px; background: #fffefa; border: 1px solid #e3e7dc; }
+.solo-angka dt { font-size: 11px; line-height: 1.3; color: #65756b; }
+.solo-angka dd { display: flex; align-items: center; gap: 4px; margin: 0; font-size: 19px; font-weight: 650; letter-spacing: -.02em; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.solo-angka dd small { font-size: 12px; font-weight: 500; color: #65756b; letter-spacing: 0; }
+
+/* Jalur berkelok: titik bergantian kiri-kanan, dihubungkan "jalan" yang membelok di sela antarbaris. */
+.solo-jalur {
+  --solo-no: 56px; --solo-sela: 30px; --solo-jalan: 6px;
+  list-style: none; margin: 0 auto; padding: 2px 0 12px; width: 100%; max-width: 540px;
+  display: flex; flex-direction: column; gap: var(--solo-sela);
+}
+.solo-titik { position: relative; }
+.solo-titik-tombol { position: relative; z-index: 1; display: flex; align-items: flex-start; gap: 10px; color: inherit; text-decoration: none; border-radius: 18px; }
+.solo-kanan .solo-titik-tombol { flex-direction: row-reverse; }
+.solo-no {
+  position: relative; flex: 0 0 var(--solo-no); width: var(--solo-no); height: var(--solo-no); border-radius: 50%;
+  display: grid; place-items: center; font-size: 22px; font-weight: 800; line-height: 1;
+  background: #fffefa; border: 3px solid #b9c7b3; color: #36523e;
+}
+.solo-dicoba .solo-no { background: #215c40; border-color: #215c40; color: #fff; }
+.solo-saran .solo-no { background: #f6c445; border-color: #17362a; color: #17362a; }
+.solo-saran .solo-no::after { content: ''; position: absolute; inset: -8px; border-radius: 50%; border: 3px solid #d8a41f; animation: solo-denyut 1.6s ease-in-out infinite; }
+.solo-no-cek { position: absolute; right: -6px; top: -6px; display: grid; place-items: center; border-radius: 50%; background: #faf9f5; }
+.solo-kartu {
+  flex: 1; min-width: 0; min-height: 76px; display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; column-gap: 8px;
+  padding: 10px 12px; border-radius: 16px; background: #fffefa; border: 1px solid #e3e7dc; transition: border-color .12s, transform .12s;
+}
+.solo-titik-tombol:hover .solo-kartu { border-color: #a9b99f; }
+.solo-titik-tombol:active .solo-kartu { transform: scale(.985); }
+.solo-saran .solo-kartu { border: 2px solid #215c40; padding: 9px 11px; }
+.solo-kartu-teks { min-width: 0; display: flex; flex-direction: column; align-items: flex-start; gap: 3px; }
+.solo-chip-saran { padding: 1px 8px; border-radius: 999px; background: #215c40; color: #fff; font-size: 11px; font-weight: 700; letter-spacing: .02em; }
+.solo-judul { font-size: 15.5px; font-weight: 650; line-height: 1.25; letter-spacing: -.01em; overflow-wrap: anywhere; }
+.solo-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 2px 10px; font-size: 12px; font-weight: 600; color: #5c6f58; }
+.solo-capai { display: flex; flex-wrap: wrap; align-items: center; gap: 2px 8px; }
+.solo-capai small { font-size: 12px; color: #65756b; }
+.solo-ikon { width: 40px; height: 40px; display: grid; place-items: center; border-radius: 12px; background: #f1f4ea; color: #43604a; }
+
+.solo-titik:not(:last-child)::before, .solo-titik:not(:last-child)::after {
+  content: ''; position: absolute; z-index: 0; box-sizing: border-box; pointer-events: none; border: 0 solid #d9dfd2;
+}
+/* Titik di kiri -> titik berikutnya di kanan: turun dari titik, belok di tengah sela, turun ke titik berikutnya. */
+.solo-titik:not(:last-child)::before {
+  left: calc(var(--solo-no) / 2 - var(--solo-jalan) / 2); width: calc(50% - var(--solo-no) / 2 + var(--solo-jalan) / 2);
+  top: var(--solo-no); bottom: calc(var(--solo-sela) / -2 - var(--solo-jalan) / 2);
+  border-left-width: var(--solo-jalan); border-bottom-width: var(--solo-jalan); border-bottom-left-radius: 18px;
+}
+.solo-titik:not(:last-child)::after {
+  left: 50%; right: calc(var(--solo-no) / 2 - var(--solo-jalan) / 2);
+  top: calc(100% + var(--solo-sela) / 2 - var(--solo-jalan) / 2); height: calc(var(--solo-sela) / 2 + var(--solo-jalan) / 2);
+  border-top-width: var(--solo-jalan); border-right-width: var(--solo-jalan); border-top-right-radius: 18px;
+}
+.solo-kanan:not(:last-child)::before {
+  left: auto; right: calc(var(--solo-no) / 2 - var(--solo-jalan) / 2);
+  border-left-width: 0; border-bottom-left-radius: 0; border-right-width: var(--solo-jalan); border-bottom-right-radius: 18px;
+}
+.solo-kanan:not(:last-child)::after {
+  left: calc(var(--solo-no) / 2 - var(--solo-jalan) / 2); right: 50%;
+  border-right-width: 0; border-top-right-radius: 0; border-left-width: var(--solo-jalan); border-top-left-radius: 18px;
+}
+/* Ruas setelah misi yang sudah dicoba: hijau (hiasan; statusnya sendiri ada di bintang + teks). */
+.solo-dicoba:not(:last-child)::before, .solo-dicoba:not(:last-child)::after { border-color: #9bb88f; }
+
+.solo-aksi {
+  position: sticky; bottom: 0; z-index: 5; display: flex; flex-direction: column; gap: 4px;
+  margin: 8px calc(var(--solo-pr) * -1) 0 calc(var(--solo-pl) * -1);
+  padding: 10px var(--solo-pr) calc(8px + env(safe-area-inset-bottom)) var(--solo-pl);
+  background: #faf9f5; border-top: 1px solid #e3e7dc; box-shadow: 0 -8px 18px -12px rgba(23, 54, 42, .3);
+}
+.solo-aksi .primary-action { width: 100%; min-height: 54px; padding: 13px 20px; }
+.solo-aksi-ket { margin: 0; min-height: 20px; font-size: 13px; line-height: 1.5; text-align: center; color: #5a6b5e; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.solo-kaki { display: flex; flex-direction: column; align-items: center; text-align: center; padding: 4px 0 calc(18px + env(safe-area-inset-bottom)); }
+.solo-kaki p { margin: 0; font-size: 12px; color: #6b7866; }
+
+@media (max-width: 339px) { .solo-ikon { display: none; } .solo-angka dd { font-size: 17px; } }
+
+@media (min-width: 760px), (orientation: landscape) and (max-height: 540px) and (min-width: 620px) {
+  .solo-peta { display: grid; grid-template-columns: minmax(250px, 320px) minmax(0, 1fr); column-gap: clamp(20px, 4vw, 56px); align-items: start; padding-top: 8px; padding-bottom: calc(32px + env(safe-area-inset-bottom)); }
+  .solo-sisi { display: flex; flex-direction: column; gap: 4px; position: sticky; top: 12px; min-width: 0; }
+  .solo-kepala { padding-bottom: 12px; }
+  .solo-aksi { position: static; margin: 0; padding: 0; background: none; border: 0; box-shadow: none; }
+  .solo-kaki { padding-bottom: 0; }
+}
+@media (min-width: 900px) and (min-height: 541px) {
+  .solo-pemain h1 { font-size: 30px; }
+  .solo-jalur { --solo-no: 60px; --solo-sela: 34px; }
+}
+/* HP mendatar: kolom kiri harus muat setinggi layar (kolom itu lengket). */
+@media (orientation: landscape) and (max-height: 540px) {
+  .solo-peta .solo-avatar { width: 52px; height: 52px; }
+  .solo-peta .solo-avatar svg { width: 44px; height: 44px; }
+  .solo-pemain h1 { font-size: 20px; }
+  .solo-pemain p, .solo-kaki p { display: none; }
+  .solo-kepala { gap: 8px; padding-bottom: 8px; }
+  .solo-angka > div { padding: 5px 8px; }
+  .solo-angka dd { font-size: 17px; }
+  .solo-aksi .primary-action { min-height: 48px; padding: 10px 18px; }
+  .solo-sisi { top: 4px; }
+}
+
+/* ------------------------------------------------------------------ main satu misi */
+.solo-bilah { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 8px 12px; padding: 4px 16px 10px; }
+.solo-bilah-judul { flex: 1 1 100%; min-width: 0; }
+.solo-bilah-judul h1 { font-size: 22px; line-height: 1.2; margin: 4px 0 0; }
+.solo-bilah-judul .eyebrow { font-size: 11px; }
+.solo-alat { flex: 1 1 100%; min-width: 0; display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+/* Waktu = bonus saja: chip kecil, bukan penghitung besar. Habis = abu-abu tenang, bukan merah. */
+.solo-bonus {
+  min-width: 0; display: inline-flex; align-items: center; gap: 6px; min-height: 36px; padding: 4px 12px 4px 8px; border-radius: 999px;
+  background: #fff4cf; border: 1px solid #e8cf7c; color: #5d4a12; font-size: 14px; font-weight: 600; font-variant-numeric: tabular-nums;
+}
+.solo-bonus > svg { flex: 0 0 auto; }
+.solo-bonus > span { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.solo-bonus[data-status="jeda"] { border-style: dashed; background: #fffaf0; }
+.solo-bonus[data-status="habis"] { background: #eef1e8; border-color: #d9dfd2; color: #3f5245; }
+.solo-tombol-jeda {
+  flex: 0 0 auto; display: inline-flex; align-items: center; gap: 6px; min-height: 44px; padding: 6px 16px 6px 12px; border-radius: 999px;
+  border: 1px solid #b9cdb7; background: #fffefa; color: #215c40; font-size: 14px; font-weight: 600; cursor: pointer;
+}
+.solo-tombol-jeda:hover:not(:disabled) { background: #eef5e9; }
+.solo-tombol-jeda:disabled { opacity: .5; cursor: not-allowed; }
+.solo-jeda-isi { flex: 1; min-width: 0; }
+.solo-jeda-lanjut { width: 100%; min-height: 50px; margin-top: 10px; padding: 12px 18px; }
+
+/* Bintang yang didapat: satu baris tanpa kotak berwarna (selaras panel hasil di stage.css). */
+.solo-raih { display: flex; align-items: center; gap: 12px; margin: 0 0 14px; padding: 0 0 12px; border-bottom: 1px solid #e3e7dc; }
+.solo-raih-bintang { gap: 3px; }
+.solo-raih-bintang .solo-bintang-isi { animation: solo-pop .42s ease-out backwards; }
+.solo-raih-bintang .solo-bintang-isi:nth-child(2) { animation-delay: .14s; }
+.solo-raih-bintang .solo-bintang-isi:nth-child(3) { animation-delay: .28s; }
+.solo-raih-teks { min-width: 0; display: flex; flex-direction: column; line-height: 1.3; }
+.solo-raih-teks b { font-size: 16px; font-weight: 650; }
+.solo-raih-teks small { font-size: 13px; color: #4f6254; }
+.solo-aksi-lain { display: flex; flex-wrap: wrap; justify-content: center; gap: 0 24px; }
+
+@media (min-width: 560px) {
+  .solo-bilah { flex-wrap: nowrap; padding: 8px 20px 12px; }
+  .solo-bilah-judul { flex: 1 1 0; }
+  .solo-alat { flex: 0 1 auto; justify-content: flex-end; }
+}
+@media (min-width: 900px) and (min-height: 541px) {
+  .solo-bilah { padding: 6px 0 16px; }
+  .solo-bilah-judul h1 { font-size: 28px; }
+}
+/* HP mendatar: judul disembunyikan (seperti .misi-judul) dan chip bonus + jeda pindah ke tengah
+   header yang kosong, supaya adegan tetap setinggi layar. */
+@media (orientation: landscape) and (max-height: 540px) {
+  .solo-main { position: relative; }
+  .solo-bilah { padding: 0; }
+  .solo-bilah-judul { display: none; }
+  .solo-alat { position: absolute; z-index: 6; top: 0; left: 50%; transform: translateX(-50%); height: 44px; max-width: calc(100% - 300px); flex: none; }
+  .solo-bonus { min-height: 32px; font-size: 13px; }
+}
+
+/* ------------------------------------------------------------------ hasil akhir */
+.solo-hasil {
+  --solo-pl: max(16px, env(safe-area-inset-left));
+  --solo-pr: max(16px, env(safe-area-inset-right));
+  flex: 1; width: min(1040px, 100%); margin: 0 auto; padding: 8px var(--solo-pr) calc(40px + env(safe-area-inset-bottom)) var(--solo-pl);
+  display: grid; grid-template-columns: minmax(0, 1fr); gap: 28px; align-content: start;
+}
+.solo-hasil-diri { min-width: 0; display: flex; flex-direction: column; align-items: center; text-align: center; gap: 12px; }
+.solo-avatar-besar { width: 140px; height: 140px; }
+.solo-hasil-diri h1 { font-size: 30px; line-height: 1.15; margin: 0; overflow-wrap: anywhere; }
+.solo-hasil-angka { display: grid; grid-template-columns: repeat(2, minmax(0, auto)); justify-content: center; gap: 8px 32px; margin: 0; }
+.solo-hasil-angka > div { display: flex; flex-direction: column-reverse; align-items: center; min-width: 0; }
+.solo-hasil-angka dd { display: flex; align-items: center; gap: 6px; margin: 0; font-size: 36px; font-weight: 600; line-height: 1.15; letter-spacing: -.04em; font-variant-numeric: tabular-nums; }
+.solo-hasil-angka dt { margin-top: 4px; font-size: 12px; color: #74836c; }
+.solo-rekor { display: flex; flex-direction: column; align-items: center; gap: 3px; }
+.solo-rekor p { margin: 0; font-size: 14px; line-height: 1.45; color: #4f6254; }
+.solo-rekor .solo-rekor-kecil { font-size: 13px; color: #6b7866; }
+.solo-rekor-baru { display: inline-flex; align-items: center; gap: 6px; padding: 4px 14px 4px 8px; border-radius: 999px; background: #f6c445; color: #17362a; font-size: 14px; font-weight: 700; animation: solo-pop .42s ease-out backwards; }
+.solo-hasil-aksi { width: min(360px, 100%); display: flex; flex-direction: column; align-items: center; gap: 4px; margin-top: 4px; }
+.solo-hasil-aksi .primary-action { width: 100%; }
+.solo-hasil-ket { margin: 2px 0 0; font-size: 13px; line-height: 1.45; color: #5a6b5e; }
+
+.solo-hasil-sisi { min-width: 0; display: flex; flex-direction: column; gap: 12px; }
+.solo-hasil-sisi h2 { font-size: 20px; margin: 6px 0 0; }
+.solo-ceo { margin: 0 0 2px; }
+.solo-lencana-daftar { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.simple-details > .solo-lencana-daftar { padding-bottom: 14px; }
+.solo-lencana { display: flex; align-items: center; gap: 12px; padding: 10px 12px; border-radius: 14px; border: 1px dashed #cfd8c8; color: #5a6b5e; }
+.solo-lencana-terbuka { border: 1px solid #e8cf7c; background: #fff8e1; color: #243d30; }
+.solo-lencana-ikon { flex: 0 0 40px; width: 40px; height: 40px; display: grid; place-items: center; border-radius: 12px; background: #fffefa; border: 1px solid #e3e7dc; }
+.solo-lencana:not(.solo-lencana-terbuka) .solo-lencana-ikon { filter: grayscale(1); opacity: .6; }
+.solo-lencana-teks { flex: 1; min-width: 0; display: flex; flex-direction: column; line-height: 1.3; }
+.solo-lencana-teks b { font-size: 15px; font-weight: 650; }
+.solo-lencana-teks small { font-size: 13px; color: #5a6b5e; }
+.solo-lencana-status { flex: 0 0 auto; display: inline-flex; align-items: center; gap: 4px; font-size: 12px; font-weight: 700; }
+.solo-lencana-kosong { margin: 0; font-size: 14px; color: #5a6b5e; }
+.solo-rincian { list-style: none; margin: 0; padding: 0 0 10px; }
+.solo-rincian li {
+  display: grid; grid-template-columns: 28px minmax(0, 1fr) auto; grid-template-areas: "no judul bintang" "no poin bintang";
+  align-items: center; column-gap: 10px; padding: 9px 0; border-top: 1px solid #e7eade;
+}
+.solo-rincian-no { grid-area: no; width: 28px; height: 28px; display: grid; place-items: center; border-radius: 50%; background: #eef3e7; color: #36523e; font-size: 13px; font-weight: 800; }
+.solo-rincian-judul { grid-area: judul; min-width: 0; font-size: 14px; font-weight: 600; line-height: 1.3; overflow-wrap: anywhere; }
+.solo-rincian .solo-bintang { grid-area: bintang; }
+.solo-rincian small { grid-area: poin; font-size: 12px; color: #65756b; }
+
+@media (min-width: 760px), (orientation: landscape) and (max-height: 540px) and (min-width: 620px) {
+  .solo-hasil { grid-template-columns: minmax(0, .9fr) minmax(0, 1.1fr); column-gap: clamp(24px, 5vw, 64px); align-items: start; padding-top: 16px; }
+}
+@media (orientation: landscape) and (max-height: 540px) {
+  .solo-hasil { padding-top: 4px; }
+  .solo-hasil-diri { gap: 8px; }
+  .solo-avatar-besar { width: 84px; height: 84px; }
+  .solo-avatar-besar svg { width: 72px; height: 72px; }
+  .solo-hasil-diri h1 { font-size: 24px; }
+  .solo-hasil-angka dd { font-size: 28px; }
+}
+
+/* ------------------------------------------------------------------ gerak */
+@keyframes solo-denyut { 0%, 100% { transform: scale(1); opacity: .9; } 50% { transform: scale(1.1); opacity: .25; } }
+@keyframes solo-pop { 0% { transform: scale(.3); opacity: 0; } 70% { transform: scale(1.18); opacity: 1; } 100% { transform: none; } }
+@media (prefers-reduced-motion: reduce) {
+  /* Pseudo-elemen tidak boleh di dalam :is(), jadi ditulis terpisah. */
+  :root:not([data-gerak="penuh"]) .solo-saran .solo-no::after { animation: none; opacity: .6; }
+  :root:not([data-gerak="penuh"]) :is(.solo-raih-bintang .solo-bintang-isi, .solo-rekor-baru) { animation: none; }
+  :root:not([data-gerak="penuh"]) .solo-titik-tombol:active .solo-kartu { transform: none; }
+}

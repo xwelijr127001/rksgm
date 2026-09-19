@@ -2,7 +2,9 @@
 import { Raki } from './Raki';
 import { playSfx } from '../audio/audio';
 import { KarakterTokoh } from '../game/KarakterTokoh';
+import { t, useBahasa } from '../i18n';
 export function WelcomeArt() {
+  useBahasa();
   const [wave, setWave] = useState(false);
   return <div className="welcome-world">
     <svg className="world-drawing" viewBox="0 0 560 510" fill="none" aria-hidden="true">
@@ -30,12 +32,12 @@ export function WelcomeArt() {
         <path d="M-2 30h10m77 0h8" stroke="#F7D45B" strokeWidth="4" />
       </g>
       <g stroke="#214C3C" strokeWidth="2.5" strokeLinecap="round"><path d="M285 176v-34m-9 12 9 9 10-11" /><path d="M267 139c-10-37 46-40 39 0-7 18-32 18-39 0Z" fill="#6CA887" /><path d="M485 312v-35m-8 12 8 9 9-11" /><path d="M469 274c-12-35 45-38 33 0-5 17-29 17-33 0Z" fill="#6CA887" /></g>
-      <path d="m102 116 4 11 12 3-12 4-4 11-3-11-12-4 12-3 3-11Z" fill="#287451" /><path d="m443 44 3 9 9 3-9 3-3 9-3-9-9-3 9-3 3-9Z" fill="#E7946E" />
-      <path d="M148 82h48m-34-14h39" stroke="#E9BA3F" strokeWidth="4" strokeLinecap="round" />
+      {/* Bintang hijau di kanan (dulu di kiri atas, area itu kini untuk catatan kota). */}<path d="m512 136 4 11 12 3-12 4-4 11-3-11-12-4 12-3 3-11Z" fill="#287451" /><path d="m443 44 3 9 9 3-9 3-3 9-3-9-9-3 9-3 3-9Z" fill="#E7946E" />
+      <path d="M470 96h40m-28-13h33" stroke="#E9BA3F" strokeWidth="4" strokeLinecap="round" />
     </svg>
     <KarakterTokoh tokoh="ceo" className="welcome-ceo" tinggi={150} />
-    <div className="world-caption">Kota ini butuh andalan.<span>Kamu, misalnya.</span></div>
-    <button className="welcome-raki" aria-label="Sapa Raki" onClick={() => { setWave(v => !v); playSfx('pilih'); }}><Raki size={170} mood={wave ? 'senang' : 'sapa'} /><span className="raki-greeting" aria-live="polite">{wave ? 'Yuk, main bareng!' : 'Hai, aku Raki!'}</span></button>
+    <div className="world-caption">{t('pemain.sambutKota')}<span>{t('pemain.sambutKamu')}</span></div>
+    <button className="welcome-raki" aria-label={t('pemain.sapaRaki')} onClick={() => { setWave(v => !v); playSfx('pilih'); }}><Raki size={170} mood={wave ? 'senang' : 'sapa'} /><span className="raki-greeting" aria-live="polite">{wave ? t('pemain.rakiYuk') : t('pemain.rakiHai')}</span></button>
   </div>;
 }
 

@@ -35,7 +35,7 @@ interface Kotak {
   h: number;
 }
 
-const FORKLIFT: Kotak = { x0: 8, y0: 86, w: 404, h: 262 };
+export const FORKLIFT: Kotak = { x0: 8, y0: 86, w: 404, h: 262 };
 const PANEL: Kotak = { x0: 100, y0: 188, w: 118, h: 96 };
 const MESIN: Kotak = { x0: 302, y0: 132, w: 112, h: 128 };
 
@@ -60,7 +60,7 @@ const AKSEN = {
 
 // ------------------------------------------------------------------ latar
 
-function latar(): string {
+export function latar(): string {
   const sambungan = [212, 244, 276, 308, 340, 372, 404, 436, 468]
     .map((x) => line(`M${x} 60 V292`, '#e6dbc1', 3))
     .join('');
@@ -129,7 +129,7 @@ function latar(): string {
 // ------------------------------------------------------------------ forklift (properti)
 
 /** Forklift GT-220 menghadap KIRI (garpu di kiri, pemberat & mesin di kanan). Koordinat dunia. */
-function forklift(): string {
+export function forklift(): string {
   const isi = `
     ${shadow(212, 338, 204, 8)}
     <!-- badan -->

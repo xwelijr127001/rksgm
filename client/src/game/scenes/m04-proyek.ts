@@ -15,23 +15,23 @@ import { personArt } from '../art/characters';
 // ------------------------------------------------------------------ geometri excavator
 
 /** Titik tumpu = ujung depan-bawah roda rantai (masih di tanah). */
-const PX = 384;
-const PY = 392;
+export const PX = 384;
+export const PY = 392;
 /** Kemiringan (derajat, negatif = depan naik, belakang turun ke galian). */
 const MIRING = -9;
 const RAD = Math.PI / 180;
 const COS = Math.cos(MIRING * RAD);
 const SIN = Math.sin(MIRING * RAD);
 
-type Titik = [number, number];
+export type Titik = [number, number];
 
 /** Koordinat lokal excavator (x ke depan/kanan, y ke atas negatif) -> dunia. */
-function dunia(lx: number, ly: number): Titik {
+export function dunia(lx: number, ly: number): Titik {
   return [PX + lx * COS - ly * SIN, PY + lx * SIN + ly * COS];
 }
 
 /** Bungkus gambar lokal excavator supaya ikut miring di dunia. */
-function miring(isi: string): string {
+export function miring(isi: string): string {
   return `<g transform="translate(${PX} ${PY}) rotate(${MIRING})">${isi}</g>`;
 }
 
@@ -39,7 +39,7 @@ function miring(isi: string): string {
  * Potong sebagian gambar dunia menjadi ArtRef + titik tengahnya.
  * `titik` = sudut-sudut bagian (dunia); kotak = batasnya + `pad`.
  */
-function potong(key: string, titik: Titik[], pad: number, isiDunia: string): { art: ArtRef; x: number; y: number } {
+export function potong(key: string, titik: Titik[], pad: number, isiDunia: string): { art: ArtRef; x: number; y: number } {
   const xs = titik.map((t) => t[0]);
   const ys = titik.map((t) => t[1]);
   const x0 = Math.floor(Math.min(...xs) - pad);
@@ -49,17 +49,17 @@ function potong(key: string, titik: Titik[], pad: number, isiDunia: string): { a
   return { art: art(key, w, h, `<g transform="translate(${-x0} ${-y0})">${isiDunia}</g>`), x: x0 + w / 2, y: y0 + h / 2 };
 }
 
-function kotakLokal(x: number, y: number, w: number, h: number): Titik[] {
+export function kotakLokal(x: number, y: number, w: number, h: number): Titik[] {
   return [dunia(x, y), dunia(x + w, y), dunia(x, y + h), dunia(x + w, y + h)];
 }
 
 // Bagian-bagian (lokal)
-const RANTAI = { x: -194, y: -50, w: 194, h: 50 };
+export const RANTAI = { x: -194, y: -50, w: 194, h: 50 };
 const PLAT = { cx: -133, cy: -93, w: 72, h: 40 };
-const SIKU: Titik = [62, -232]; // sendi boom-lengan
-const ROOT: Titik = [-18, -104]; // pangkal boom
+export const SIKU: Titik = [62, -232]; // sendi boom-lengan
+export const ROOT: Titik = [-18, -104]; // pangkal boom
 
-function rodaRantaiLokal(): string {
+export function rodaRantaiLokal(): string {
   let tapak = '';
   for (let x = -172; x <= -22; x += 15) tapak += line(`M${x} -49 v9 M${x} -10 v9`, P.besiTua, 3, 'opacity="0.9"');
   const roda = (cx: number, r: number): string => circle(cx, -25, r, P.besi, INK_TIPIS) + circle(cx, -25, r * 0.38, P.besiTua);
@@ -103,7 +103,7 @@ function goresBoom(rx: number, ry: number): string {
   </g>`;
 }
 
-function boomLokal(): string {
+export function boomLokal(): string {
   const [ex, ey] = SIKU;
   const [rx, ry] = ROOT;
   return `
@@ -119,7 +119,7 @@ function boomLokal(): string {
 }
 
 /** Badan excavator (rumah mesin, kabin, lengan & bucket) - tidak bisa diketuk. */
-function badanDunia(): string {
+export function badanDunia(): string {
   const [ex, ey] = dunia(SIKU[0], SIKU[1]);
   // Lengan: dari sendi siku turun ke bucket yang bertumpu di tanah.
   const bx = ex + 38;
@@ -176,7 +176,7 @@ function barikade(x: number, y: number, w = 70): string {
     <g>${rrect(x, y, w, 14, 3, P.oranye)}<clipPath id="bk${x}"><rect x="${x}" y="${y}" width="${w}" height="14" rx="3"/></clipPath><g clip-path="url(#bk${x})">${belang}</g></g>`;
 }
 
-function latar(): string {
+export function latar(): string {
   const langit = linearGradient('m04-langit', P.langitAtas, '#e4f2f8');
   const kota = [
     [20, 58, 44, '#d9cdb7'], [66, 40, 60, '#cddbd0'], [112, 52, 38, '#e1d3bb'], [300, 46, 52, '#d6cfc0'],
@@ -276,7 +276,7 @@ function operator(): ArtRef {
 // ------------------------------------------------------------------ adegan
 
 /** Geser label ke titik dunia (tx, ty) - engine menaruh label default di bawah gambar. */
-function labelKe(o: { x: number; y: number; art: ArtRef }, tx: number, ty: number): { labelDx: number; labelDy: number } {
+export function labelKe(o: { x: number; y: number; art: ArtRef }, tx: number, ty: number): { labelDx: number; labelDy: number } {
   return { labelDx: Math.round(tx - o.x), labelDy: Math.round(ty - (o.y + o.art.h / 2 + 18)) };
 }
 

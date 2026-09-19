@@ -1,16 +1,18 @@
 /**
  * Router RAKSA GAME.
  *
- * Alur pemain  : / -> /join -> /lobby -> /tutorial -> /main -> /hasil
+ * Alur acara   : / -> /join -> /lobby -> /tutorial -> /main -> /hasil
+ * Alur solo    : / -> /kenalan -> /solo -> /solo/main?misi=N -> /solo/hasil
  * Alur host    : /host
  * Layar besar  : /projector
- * Mode latihan : /latihan  (terpisah dari kompetisi)
+ * /latihan (alamat lama) dialihkan ke mode solo. Rancangan: docs/rancangan-bank-soal.md
  */
 
 import { Suspense, lazy, useEffect } from 'react';
-import { BrowserRouter, Navigate, Route, Routes, useLocation, useNavigate } from 'react-router-dom';
+import { BrowserRouter, Navigate, Route, Routes, useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import type { Phase } from '@shared/types';
 import { AudioUnlocker, Memuat } from './ui/kit';
+import { t, useBahasa } from './i18n';
 import { bootstrapHost, bootstrapPlayer, initConnection, useGame } from './state/store';
 
 const Landing = lazy(() => import('./pages/Landing'));
@@ -19,7 +21,10 @@ const Lobby = lazy(() => import('./pages/Lobby'));
 const Tutorial = lazy(() => import('./pages/Tutorial'));
 const Play = lazy(() => import('./pages/Play'));
 const Result = lazy(() => import('./pages/Result'));
-const Practice = lazy(() => import('./pages/Practice'));
+const Kenalan = lazy(() => import('./pages/Kenalan'));
+const Solo = lazy(() => import('./pages/Solo'));
+const SoloMain = lazy(() => import('./pages/SoloMain'));
+const SoloHasil = lazy(() => import('./pages/SoloHasil'));
 const Host = lazy(() => import('./pages/Host'));
 const Projector = lazy(() => import('./pages/Projector'));
 
@@ -82,19 +87,30 @@ function Bootstrap() {
   return null;
 }
 
+/** Alamat lama mode latihan: /latihan -> /solo, /latihan?misi=N -> /solo/main?misi=N. */
+function AlihkanLatihan() {
+  const [params] = useSearchParams();
+  const misi = params.get('misi');
+  return <Navigate to={misi ? '/solo/main?misi=' + encodeURIComponent(misi) : '/solo'} replace />;
+}
+
+/** Tampilan selagi halaman diunduh (teks ikut bahasa aktif). */
+function Menyiapkan() {
+  useBahasa();
+  return (
+    <div className="wrap" style={{ paddingTop: 48 }}>
+      <Memuat teks={t('umum.menyiapkanGame')} />
+    </div>
+  );
+}
+
 export default function App() {
   return (
     <BrowserRouter>
       <AudioUnlocker />
       <Bootstrap />
       <PhaseRouter />
-      <Suspense
-        fallback={
-          <div className="wrap" style={{ paddingTop: 48 }}>
-            <Memuat teks="Menyiapkan game..." />
-          </div>
-        }
-      >
+      <Suspense fallback={<Menyiapkan />}>
         <Routes>
           <Route path="/" element={<Landing />} />
           <Route path="/join" element={<Join />} />
@@ -102,7 +118,11 @@ export default function App() {
           <Route path="/tutorial" element={<Tutorial />} />
           <Route path="/main" element={<Play />} />
           <Route path="/hasil" element={<Result />} />
-          <Route path="/latihan" element={<Practice />} />
+          <Route path="/kenalan" element={<Kenalan />} />
+          <Route path="/solo" element={<Solo />} />
+          <Route path="/solo/main" element={<SoloMain />} />
+          <Route path="/solo/hasil" element={<SoloHasil />} />
+          <Route path="/latihan" element={<AlihkanLatihan />} />
           <Route path="/host" element={<Host />} />
           <Route path="/projector" element={<Projector />} />
           <Route path="*" element={<Navigate to="/" replace />} />

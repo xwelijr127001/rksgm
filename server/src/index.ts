@@ -1,5 +1,6 @@
 /** Server RAKSA GAME: Express + Socket.IO. Sumber kebenaran pertandingan. */
 
+import { createHash, timingSafeEqual } from 'node:crypto';
 import fs from 'node:fs';
 import http from 'node:http';
 import path from 'node:path';
@@ -7,14 +8,38 @@ import cors from 'cors';
 import express from 'express';
 import { Server as SocketServer, type Socket } from 'socket.io';
 
+import { BATAS_KUSTOM, type AcaraTerbuka, type IdPaket, type InfoRoom } from '../../shared/bankSoal';
 import { BRAND, DISCLAIMER, PHASE_DURATIONS } from '../../shared/brand';
-import { MISSIONS, TIEBREAK_MISSION, TUTORIAL_MISSION } from '../../shared/missions';
+import { TIEBREAK_MISSION, TUTORIAL_MISSION } from '../../shared/missions';
 import { gradeMission, scoreRound } from '../../shared/scoring';
 import type { Ack, HostAction, Prizes } from '../../shared/types';
-import { assertKeysComplete, buildReveal, keyForMissionId } from './answerKeys';
+import { assertKeysComplete, buildReveal } from './answerKeys';
+import { cariSoal, daftarBank } from './bankKustom';
+import { misiLatihan, playlistPaket, soalLatihan } from './bankSoal';
 import { CONFIG, detectLanIp, publicBaseUrl } from './config';
 import { buildResultsCsv } from './csv';
-import { listMatches, saveMatch } from './db';
+import {
+  BATAS_JUMLAH_SOAL_KUSTOM,
+  ambilSoalKustom,
+  daftarSoalKustom,
+  hapusSoalKustom,
+  jumlahSoalKustom,
+  listMatches,
+  saveMatch,
+  simpanSoalKustom,
+} from './db';
+import {
+  GalatGambar,
+  MIME_GAMBAR,
+  PESAN_JENIS_GAMBAR,
+  PESAN_TERLALU_BESAR,
+  POLA_NAMA_GAMBAR,
+  folderGambar,
+  gambarAda,
+  hapusGambar,
+  simpanGambar,
+} from './gambarSoal';
+import { POLA_ID_KUSTOM, idKustomBaru, validasiSoalKustom } from './soalKustom';
 import { mountUnity } from './unityServe';
 import {
   RoomManager,
@@ -88,7 +113,8 @@ function onRoomEvent(room: Room, ev: RoomEvent) {
   }
 }
 
-const manager = new RoomManager(onRoomEvent, publicBaseUrl);
+// Pencari soal lengkap (paket bawaan + soal kustom di SQLite) supaya playlist boleh memuat soal panitia.
+const manager = new RoomManager(onRoomEvent, publicBaseUrl, undefined, cariSoal);
 
 setInterval(() => {
   const removed = manager.sweep();
@@ -108,13 +134,21 @@ app.get('/api/config', (_req, res) => {
     phaseDurations: PHASE_DURATIONS,
     joinBaseUrl: publicBaseUrl(),
     lanIp: detectLanIp(),
-    totalRounds: MISSIONS.length,
+    // Jumlah ronde room BARU (paket bawaan). Room yang sedang berjalan: RoomPublicState.totalRounds.
+    totalRounds: playlistPaket(CONFIG.paketBawaan).length,
+    paketBawaan: CONFIG.paketBawaan,
+    /** true = membuat room & menulis bank soal butuh PIN panitia. */
+    butuhPin: Boolean(CONFIG.panitiaPin),
   });
 });
 
-/** Konten publik misi (tanpa kunci jawaban) untuk mode latihan & pratinjau. */
+/**
+ * Konten publik misi (tanpa kunci jawaban) untuk mode solo/latihan & pratinjau.
+ * HANYA paket latihan + tutorial + penentuan: isi soal paket acara & soal kustom tidak bisa
+ * diambil dari luar; pemain baru melihatnya saat rondenya dimulai.
+ */
 app.get('/api/missions', (_req, res) => {
-  res.json({ missions: MISSIONS, tutorial: TUTORIAL_MISSION, tiebreak: TIEBREAK_MISSION });
+  res.json({ missions: misiLatihan(), tutorial: TUTORIAL_MISSION, tiebreak: TIEBREAK_MISSION });
 });
 
 /**
@@ -127,15 +161,14 @@ app.post('/api/practice/grade', (req, res) => {
     answer?: unknown;
     elapsedSeconds?: number;
   };
-  const mission =
-    MISSIONS.find((m) => m.id === missionId) ??
-    (missionId === TUTORIAL_MISSION.id ? TUTORIAL_MISSION : undefined) ??
-    (missionId === TIEBREAK_MISSION.id ? TIEBREAK_MISSION : undefined);
-  const key = missionId ? keyForMissionId(missionId) : undefined;
-  if (!mission || !key) {
+  // Hanya paket latihan + tutorial. Id paket acara / soal kustom -> 404, supaya kuncinya tidak
+  // bisa dipancing dari luar. Ronde penentuan hanya di luar production (alat uji).
+  const entri = soalLatihan(missionId, { penentuan: process.env.NODE_ENV !== 'production' });
+  if (!entri) {
     res.status(404).json({ ok: false, error: 'Misi tidak ditemukan' });
     return;
   }
+  const { misi: mission, kunci: key } = entri;
   const clean = sanitizeAnswer(mission, answer);
   const grade = gradeMission(key, clean);
   const elapsed = Number.isFinite(elapsedSeconds) ? Math.max(0, Number(elapsedSeconds)) : mission.durationSeconds;
@@ -202,6 +235,231 @@ app.get('/api/matches', (_req, res) => {
   }
 });
 
+// ------------------------------------------------------------------ validasi kode room
+
+// Teks alasan SAMA PERSIS dengan balasan player:join supaya client menerjemahkannya lewat kamus yang sama.
+const GALAT_GABUNG = {
+  sudahMulai: 'Pertandingan sudah dimulai. Kamu bisa masuk sebagai penonton.',
+  penuh: 'Room sudah penuh.',
+} as const;
+
+function alasanTidakBisaGabung(room: Room): string | undefined {
+  if (room.matchStarted) return GALAT_GABUNG.sudahMulai;
+  if (room.players.size >= CONFIG.maxPlayersPerRoom) return GALAT_GABUNG.penuh;
+  return undefined;
+}
+
+/** Cek kode room SEBELUM pemain mengisi nama & karakter. Tanpa data pemain, tanpa isi soal. */
+app.get('/api/room/:code/info', (req, res) => {
+  const room = manager.get(String(req.params.code ?? ''));
+  if (!room) {
+    res.status(404).json({ ok: false, error: 'Kode tidak ditemukan' });
+    return;
+  }
+  const alasan = alasanTidakBisaGabung(room);
+  const info: InfoRoom = {
+    ok: true,
+    code: room.code,
+    eventName: room.settings.eventName,
+    phase: room.phase,
+    playerCount: room.players.size,
+    bisaGabung: alasan === undefined,
+    ...(alasan ? { alasan } : {}),
+  };
+  res.json(info);
+});
+
+/** Spanduk halaman awal: terisi hanya bila TEPAT satu room sedang di lobby (dan iklan tidak dimatikan). */
+app.get('/api/acara-terbuka', (_req, res) => {
+  const lobby = CONFIG.iklanRoom ? manager.all().filter((r) => r.phase === 'LOBBY') : [];
+  const satu = lobby.length === 1 ? lobby[0] : undefined;
+  const hasil: AcaraTerbuka = {
+    ok: true,
+    acara: satu ? { code: satu.code, eventName: satu.settings.eventName, playerCount: satu.players.size } : null,
+  };
+  res.json(hasil);
+});
+
+// ------------------------------------------------------------------ PIN panitia
+
+const GALAT_PIN = {
+  salah: 'PIN panitia salah',
+  terkunci: 'Terlalu banyak percobaan PIN. Coba lagi beberapa menit lagi.',
+} as const;
+const PIN_MAKS_GAGAL = 8;
+const PIN_JENDELA_MS = 5 * 60 * 1000;
+/** asal (alamat IP) -> jumlah PIN salah dalam jendela waktu. Rem untuk tebak-tebakan PIN. */
+const gagalPin = new Map<string, { n: number; sampai: number }>();
+
+/** Banding teks tanpa membocorkan posisi beda lewat waktu. */
+function samaAman(a: string, b: string): boolean {
+  const ha = createHash('sha256').update(a).digest();
+  const hb = createHash('sha256').update(b).digest();
+  return timingSafeEqual(ha, hb);
+}
+
+function cekPin(pin: unknown, asal: string): 'ok' | 'salah' | 'terkunci' {
+  if (!CONFIG.panitiaPin) return 'ok';
+  const kini = Date.now();
+  if (gagalPin.size > 2000) for (const [k, v] of gagalPin) if (v.sampai <= kini) gagalPin.delete(k);
+  let catatan = gagalPin.get(asal);
+  if (catatan && catatan.sampai <= kini) {
+    gagalPin.delete(asal);
+    catatan = undefined;
+  }
+  if (catatan && catatan.n >= PIN_MAKS_GAGAL) return 'terkunci';
+  if (typeof pin === 'string' && samaAman(pin, CONFIG.panitiaPin)) return 'ok';
+  gagalPin.set(asal, { n: (catatan?.n ?? 0) + 1, sampai: catatan?.sampai ?? kini + PIN_JENDELA_MS });
+  return 'salah';
+}
+
+/** Untuk tes. */
+function resetPembatasPin(): void {
+  gagalPin.clear();
+}
+
+// ------------------------------------------------------------------ bank soal
+
+/**
+ * Izin API bank yang MENULIS atau MEMBUKA KUNCI: host room hidup mana pun (x-room-code +
+ * x-host-token) DAN PIN panitia bila dipasang (x-panitia-pin). Tanpa PANITIA_PIN, siapa pun
+ * yang bisa membuat room bisa menulis bank - sama terbukanya dengan halaman host.
+ */
+function izinBank(req: express.Request, res: express.Response): boolean {
+  const room = manager.get(String(req.header('x-room-code') ?? ''));
+  const token = String(req.header('x-host-token') ?? '');
+  if (!room || !token || !samaAman(token, room.hostToken)) {
+    res.status(403).json({ ok: false, error: 'Token host tidak valid' });
+    return false;
+  }
+  const pin = cekPin(req.header('x-panitia-pin'), String(req.ip ?? 'rest'));
+  if (pin !== 'ok') {
+    res.status(pin === 'terkunci' ? 429 : 403).json({ ok: false, error: GALAT_PIN[pin] });
+    return false;
+  }
+  return true;
+}
+
+const wajibIzinBank: express.RequestHandler = (req, res, next) => {
+  if (izinBank(req, res)) next();
+};
+
+/** Ringkasan semua soal (tanpa isi pertanyaan & tanpa kunci) untuk penyusun playlist. */
+app.get('/api/bank', (_req, res) => {
+  res.json(daftarBank());
+});
+
+/** Isi lengkap satu soal KUSTOM untuk editor. MEMUAT KUNCI -> wajib izin. Paket bawaan tidak pernah lewat sini. */
+app.get('/api/bank/soal/:id', wajibIzinBank, (req, res) => {
+  const id = String(req.params.id ?? '');
+  const soal = POLA_ID_KUSTOM.test(id) ? ambilSoalKustom(id) : undefined;
+  if (!soal) {
+    res.status(404).json({ ok: false, error: 'Soal tidak ditemukan' });
+    return;
+  }
+  res.json({ ok: true, soal });
+});
+
+app.post('/api/bank/soal', wajibIzinBank, (req, res) => {
+  if (jumlahSoalKustom() >= BATAS_JUMLAH_SOAL_KUSTOM) {
+    res.status(400).json({
+      ok: false,
+      error: 'Bank soal penuh',
+      rincian: [`Soal kustom maksimal ${BATAS_JUMLAH_SOAL_KUSTOM}. Hapus soal yang tidak dipakai.`],
+    });
+    return;
+  }
+  let id = idKustomBaru();
+  while (ambilSoalKustom(id)) id = idKustomBaru();
+  const hasil = validasiSoalKustom(req.body, { id, gambarAda });
+  if (!hasil.ok) {
+    res.status(400).json({ ok: false, error: 'Soal belum lengkap', rincian: hasil.rincian });
+    return;
+  }
+  res.json({ ok: true, soal: simpanSoalKustom(hasil.soal) });
+});
+
+app.put('/api/bank/soal/:id', wajibIzinBank, (req, res) => {
+  const id = String(req.params.id ?? '');
+  if (!POLA_ID_KUSTOM.test(id) || !ambilSoalKustom(id)) {
+    res.status(404).json({ ok: false, error: 'Soal tidak ditemukan' });
+    return;
+  }
+  const hasil = validasiSoalKustom(req.body, { id, gambarAda });
+  if (!hasil.ok) {
+    res.status(400).json({ ok: false, error: 'Soal belum lengkap', rincian: hasil.rincian });
+    return;
+  }
+  // Room yang sedang bertanding memakai salinan beku soal ini; suntingan berlaku di pertandingan berikutnya.
+  res.json({ ok: true, soal: simpanSoalKustom(hasil.soal) });
+});
+
+app.delete('/api/bank/soal/:id', wajibIzinBank, (req, res) => {
+  const id = String(req.params.id ?? '');
+  const soal = POLA_ID_KUSTOM.test(id) ? ambilSoalKustom(id) : undefined;
+  if (!soal) {
+    res.status(404).json({ ok: false, error: 'Soal tidak ditemukan' });
+    return;
+  }
+  const dipakai = manager.all().some((r) => r.phase !== 'LOBBY' && r.phase !== 'FINISHED' && r.playlist.includes(id));
+  if (dipakai) {
+    res.status(409).json({ ok: false, error: 'Soal sedang dipakai pertandingan yang berjalan' });
+    return;
+  }
+  hapusSoalKustom(id);
+  // Room yang masih di lobby: keluarkan soal ini dari playlist-nya (state disiarkan lewat touch()).
+  for (const r of manager.all()) r.buangDariPlaylist(id, playlistPaket(CONFIG.paketBawaan));
+  // Gambar bernama hash isi bisa dipakai beberapa soal: hapus hanya bila sudah yatim.
+  const src = soal.image?.src;
+  if (src && !daftarSoalKustom().some((s) => s.image?.src === src)) hapusGambar(src);
+  res.json({ ok: true });
+});
+
+/**
+ * Unggah gambar soal. Badan = byte gambar. Izin diperiksa SEBELUM badan dibaca; jenis berkas
+ * ditentukan dari magic bytes (bukan nama / Content-Type kiriman), jadi SVG selalu ditolak.
+ */
+app.post(
+  '/api/bank/gambar',
+  wajibIzinBank,
+  (req, res, next) => {
+    const jenis = String(req.header('content-type') ?? '').split(';')[0].trim().toLowerCase();
+    if (!(MIME_GAMBAR as readonly string[]).includes(jenis)) {
+      res.status(415).json({ ok: false, error: PESAN_JENIS_GAMBAR });
+      return;
+    }
+    next();
+  },
+  express.raw({ type: () => true, limit: BATAS_KUSTOM.gambarMaks }),
+  (req, res) => {
+    try {
+      res.json({ ok: true, src: simpanGambar(req.body as Buffer) });
+    } catch (err) {
+      if (!(err instanceof GalatGambar)) throw err;
+      res.status(err.status).json({ ok: false, error: err.message });
+    }
+  },
+);
+
+/**
+ * Berkas gambar soal. Hanya nama berpola hash (tanpa pemisah folder) yang dilayani, jadi
+ * path traversal tidak mungkin. WAJIB dipasang sebelum fallback SPA.
+ */
+app.get('/gambar-soal/:nama', (req, res) => {
+  const nama = String(req.params.nama ?? '');
+  const tiada = () => {
+    if (!res.headersSent) res.status(404).type('text/plain').send('Gambar tidak ditemukan');
+  };
+  if (!POLA_NAMA_GAMBAR.test(nama)) return tiada();
+  res.setHeader('X-Content-Type-Options', 'nosniff');
+  res.sendFile(nama, { root: folderGambar(), maxAge: 24 * 60 * 60 * 1000, dotfiles: 'deny' }, (err) => {
+    if (err) tiada();
+  });
+});
+app.use('/gambar-soal', (_req, res) => {
+  res.status(404).type('text/plain').send('Gambar tidak ditemukan');
+});
+
 // Build Unity disajikan di /unity/* dengan MIME & Content-Encoding yang benar.
 // WAJIB dipasang sebelum fallback SPA supaya file Unity yang hilang jadi 404,
 // bukan halaman HTML.
@@ -243,13 +501,20 @@ io.on('connection', (socket: Socket) => {
       }
     })) as typeof socket.on;
 
-  socket.on('host:create', (payload: { eventName?: string }, cb) => {
-    const room = manager.create(sanitizeEventName(payload?.eventName) || undefined);
+  socket.on('host:create', (payload: { eventName?: string; paket?: string; pin?: string }, cb) => {
+    const pin = cekPin(payload?.pin, String(socket.handshake.address ?? 'ws'));
+    if (pin !== 'ok') return reply(cb, fail(GALAT_PIN[pin]));
+    const paket: IdPaket =
+      payload?.paket === 'latihan' || payload?.paket === 'acara' ? payload.paket : CONFIG.paketBawaan;
+    const room = manager.create(sanitizeEventName(payload?.eventName) || undefined, playlistPaket(paket));
     data.code = room.code;
     data.role = 'host';
     socket.join(room.code);
-    console.log(`[room] dibuat ${room.code} - ${room.settings.eventName}`);
-    reply(cb, ok({ code: room.code, hostToken: room.hostToken, state: room.publicState() }));
+    console.log(`[room] dibuat ${room.code} - ${room.settings.eventName} (${room.totalRounds} soal)`);
+    reply(
+      cb,
+      ok({ code: room.code, hostToken: room.hostToken, state: room.publicState(), playlist: [...room.playlist] }),
+    );
   });
 
   socket.on('host:attach', (payload: { code?: string; hostToken?: string }, cb) => {
@@ -259,7 +524,23 @@ io.on('connection', (socket: Socket) => {
     data.code = room.code;
     data.role = 'host';
     socket.join(room.code);
-    reply(cb, ok({ code: room.code, state: room.publicState() }));
+    // Playlist hanya untuk host (tidak ada di publicState: judul soal berikutnya tidak boleh bocor).
+    reply(cb, ok({ code: room.code, state: room.publicState(), playlist: [...room.playlist] }));
+  });
+
+  /** Baca (tanpa `playlist`) atau ganti playlist room. Mengganti hanya saat LOBBY. */
+  socket.on('host:playlist', (payload: { code?: string; hostToken?: string; playlist?: unknown }, cb) => {
+    const room = manager.get(String(payload?.code ?? ''));
+    if (!room || payload?.hostToken !== room.hostToken) return reply(cb, fail('Token host tidak valid'));
+    if (payload.playlist === undefined || payload.playlist === null) {
+      return reply(cb, ok({ playlist: [...room.playlist] }));
+    }
+    try {
+      // setPlaylist menyiarkan state baru (totalRounds) lewat event room.
+      reply(cb, ok({ playlist: room.setPlaylist(payload.playlist) }));
+    } catch (err) {
+      reply(cb, fail((err as Error).message));
+    }
   });
 
   socket.on(
@@ -344,12 +625,8 @@ io.on('connection', (socket: Socket) => {
   socket.on('player:join', (payload: { code?: string; nickname?: string; look?: unknown }, cb) => {
     const room = manager.get(String(payload?.code ?? ''));
     if (!room) return reply(cb, fail('Room tidak ditemukan. Periksa kembali kodenya.'));
-    if (room.matchStarted) {
-      return reply(cb, fail('Pertandingan sudah dimulai. Kamu bisa masuk sebagai penonton.'));
-    }
-    if (room.players.size >= CONFIG.maxPlayersPerRoom) {
-      return reply(cb, fail('Room sudah penuh.'));
-    }
+    const alasan = alasanTidakBisaGabung(room);
+    if (alasan) return reply(cb, fail(alasan));
     const nickname = sanitizeNickname(payload?.nickname);
     if (nickname.length < 2) return reply(cb, fail('Nama panggilan minimal 2 karakter.'));
 
@@ -527,6 +804,28 @@ if (fs.existsSync(CONFIG.clientDist)) {
   });
 }
 
+// Galat REST -> JSON berbahasa Indonesia (bukan halaman HTML + jejak tumpukan bawaan Express):
+// badan permintaan cacat / melewati batas, dan galat tak terduga di rute /api (mis. SQLite).
+app.use((err: unknown, req: express.Request, res: express.Response, next: express.NextFunction) => {
+  if (res.headersSent) return next(err);
+  const jenis = (err as { type?: string } | null)?.type;
+  if (jenis === 'entity.too.large') {
+    const unggahGambar = req.path === '/api/bank/gambar';
+    res.status(413).json({ ok: false, error: unggahGambar ? PESAN_TERLALU_BESAR : 'Data terlalu besar' });
+    return;
+  }
+  if (jenis === 'entity.parse.failed') {
+    res.status(400).json({ ok: false, error: 'Data tidak dapat dibaca' });
+    return;
+  }
+  if (req.path.startsWith('/api/')) {
+    console.error(`[api] ${req.method} ${req.path}:`, (err as Error)?.message ?? err);
+    res.status(500).json({ ok: false, error: 'Terjadi galat di server' });
+    return;
+  }
+  next(err);
+});
+
 server.listen(CONFIG.port, CONFIG.host, () => {
   const base = publicBaseUrl();
   console.log('');
@@ -538,4 +837,4 @@ server.listen(CONFIG.port, CONFIG.host, () => {
   console.log('');
 });
 
-export { app, server, io, manager };
+export { app, server, io, manager, resetPembatasPin };

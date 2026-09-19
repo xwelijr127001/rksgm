@@ -8,7 +8,8 @@ import type { SceneSpec } from '../types';
 import { INK, INK_TIPIS, P, art, building, circle, cloud, line, path, rect, rrect, shadow, text } from '../art/kit';
 import { carSide, dentPatch } from '../art/vehicles';
 
-function latar(): string {
+/** Latar bengkel mitra. Diekspor supaya misi acara a03 memakai latar yang SAMA (kunci tekstur `m02-latar`). */
+export function latar(): string {
   return `
     ${rect(0, 0, 640, 300, '#f4ead3')}
     ${rect(0, 0, 640, 18, '#e3d5b4')}

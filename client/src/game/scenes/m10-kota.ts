@@ -20,7 +20,7 @@ import { personArt, type PersonOpts } from '../art/characters';
 import { wheel } from '../art/vehicles';
 
 /** NPC dengan skala sama seperti petugas di adegan (0,8). */
-function wargaKecil(key: string, o: Omit<PersonOpts, 'key'>, s = 0.8): ArtRef {
+export function wargaKecil(key: string, o: Omit<PersonOpts, 'key'>, s = 0.8): ArtRef {
   const penuh = personArt({ ...o, key });
   const isi = penuh.svg.replace(/^<svg[^>]*>/, '').replace(/<\/svg>$/, '');
   const w = Math.round(penuh.w * s);
@@ -46,7 +46,7 @@ function riak(x: number, y: number, w: number): string {
   return line(`M${x} ${y} q${w / 4} -5 ${w / 2} 0 t${w / 2} 0`, P.putih, 2.5, 'opacity="0.75"');
 }
 
-function latar(): string {
+export function latar(): string {
   return `
     <!-- langit -->
     ${rect(0, 0, 640, 180, '#dcedf5')}
@@ -100,7 +100,7 @@ function latar(): string {
 // ------------------------------------------------------------------ kasus (item)
 
 /** Genangan di kaki objek: elips air + riak, lebar w, pusat y cy. */
-function genangan(w: number, cy: number): string {
+export function genangan(w: number, cy: number): string {
   const cx = w / 2;
   let riakDepan = '';
   for (let x = 16; x < w - 30; x += 38) riakDepan += `M${x} ${cy - 3} q8 -4 16 0 `;
@@ -114,14 +114,14 @@ function genangan(w: number, cy: number): string {
  * (pelat mobil, pelat seri alat berat, pelat nomor gudang) supaya tidak ada
  * kasus yang pelatnya lebih menonjol (bukan petunjuk "cek nomor seri").
  */
-function pelatId(x: number, y: number): string {
+export function pelatId(x: number, y: number): string {
   return `${rrect(x, y, 28, 15, 3, P.krem, INK_TIPIS)}
     ${circle(x + 4.5, y + 7.5, 1.6, P.besi)}${circle(x + 23.5, y + 7.5, 1.6, P.besi)}
     ${line(`M${x + 9} ${y + 5.5} H${x + 19} M${x + 9} ${y + 10} H${x + 17}`, P.tintaLembut, 1.8)}`;
 }
 
 /** Kasus A: mobil operasional (van) menghadap kiri, 190 x 104. */
-function mobilOperasional(): string {
+export function mobilOperasional(): string {
   return `
     ${shadow(96, 92, 86, 7, 0.12)}
     ${path('M14 78 C12 66 18 58 30 56 L46 54 L64 22 C67 16 72 13 80 13 L172 13 C180 13 184 18 184 26 L184 80 C184 84 181 87 177 87 L18 87 C15 87 14 84 14 78 Z', P.biru, INK)}
@@ -142,7 +142,7 @@ function mobilOperasional(): string {
 }
 
 /** Kasus B: excavator menghadap kanan dengan pelat seri (tanpa tulisan), 190 x 108. */
-function alatBerat(): string {
+export function alatBerat(): string {
   return `
     ${shadow(90, 97, 84, 7, 0.12)}
     ${rrect(98, 20, 8, 18, 3, P.besi, INK_TIPIS)}
@@ -165,7 +165,7 @@ function alatBerat(): string {
 }
 
 /** Kasus C: gudang beratap pelana dengan pintu gulung & pelat nomor (tanpa tulisan), 180 x 116. */
-function gudang(): string {
+export function gudang(): string {
   let siding = '';
   for (let x = 22; x <= 160; x += 12) siding += `M${x} 44 V100 `;
   let rolling = '';
@@ -193,7 +193,7 @@ function gudang(): string {
 // ------------------------------------------------------------------ kartu polis (doc)
 
 /** Kartu polis kecil di atas penyangga, 70 x 62. Semua kartu sama; beda hanya huruf. */
-function kartuBerdiri(huruf: string): string {
+export function kartuBerdiri(huruf: string): string {
   return `
     ${shadow(35, 58, 26, 4)}
     ${line('M22 40 L15 57 M48 40 L55 57', P.tinta, 8)}

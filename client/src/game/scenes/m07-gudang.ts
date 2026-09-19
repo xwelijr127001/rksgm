@@ -29,7 +29,35 @@ function kardusLatar(x: number, y: number, w: number, h: number, basah = false):
     ${basah ? rrect(x, y + h * 0.45, w, h * 0.55, 3, P.tanahTua, 'opacity="0.55"') : ''}`;
 }
 
-function latar(): string {
+/**
+ * Pengaturan latar gudang. Tanpa argumen = latar Misi 7 persis seperti semula (kunci `m07-latar`).
+ * Adegan lain yang mengubah salah satu nilai WAJIB memakai kunci tekstur sendiri (mis. `a07-latar`).
+ */
+export interface OpsiLatarGudang {
+  /** Tepi kiri & kanan daun meja kering. Bawaan 210 - 430 (poros x=320). */
+  meja?: { x0: number; x1: number };
+  /** Ketinggian palang bawah meja. Bawaan 388; diturunkan bila palang dipakai sebagai rak kartu. */
+  palangY?: number;
+  /** Geseran ember (beserta riaknya) dari posisinya di Misi 7. */
+  ember?: { dx: number; dy: number };
+  /** Geseran pel dari posisinya di Misi 7. */
+  pel?: { dx: number; dy: number };
+  /** Pusat riak air di kaki tumpukan kardus basah. Bawaan (120, 436). */
+  riakKardus?: { x: number; y: number };
+}
+
+export function latar(opsi: OpsiLatarGudang = {}): string {
+  const { x0, x1 } = opsi.meja ?? { x0: 210, x1: 430 };
+  const palangY = opsi.palangY ?? 388;
+  const riakKardus = opsi.riakKardus ?? { x: 120, y: 436 };
+  // Tanpa geseran, isi dikembalikan apa adanya supaya latar Misi 7 tidak berubah satu huruf pun.
+  const geser = (isi: string, g?: { dx: number; dy: number }): string =>
+    g && (g.dx !== 0 || g.dy !== 0) ? `<g transform="translate(${g.dx} ${g.dy})">${isi}</g>` : isi;
+  const pel = `${line('M528 318 L514 398', P.kayuTua, 5)}
+    ${path('M504 396 L526 396 L522 406 L508 406 Z', P.besiMuda)}`;
+  const ember = `${path('M458 376 L494 376 L490 408 L462 408 Z', P.biruMuda)}
+    ${line('M460 376 Q476 360 492 376', P.besi, 2.5)}
+    <ellipse cx="478" cy="410" rx="24" ry="5" fill="none" stroke="${P.putih}" stroke-width="2" opacity="0.7"/>`;
   const panel = Array.from({ length: 16 }, (_, i) => 196 + i * 28)
     .map((x) => line(`M${x} 16 V${x > 516 ? 112 : 298}`, '#e5d9bf', 3))
     .join('');
@@ -81,26 +109,23 @@ function latar(): string {
     ${line('M0 350 C70 336 150 348 230 340 C320 331 410 346 500 337 C560 331 606 340 640 334', P.putih, 3, 'opacity="0.65"')}
     ${line('M24 378 h36 M258 412 h48 M300 464 h40 M448 448 h44 M612 420 h18', P.putih, 3, 'opacity="0.45"')}
     <!-- ember & pel (sedang bersih-bersih), di kanan meja -->
-    ${line('M528 318 L514 398', P.kayuTua, 5)}
-    ${path('M504 396 L526 396 L522 406 L508 406 Z', P.besiMuda)}
-    ${path('M458 376 L494 376 L490 408 L462 408 Z', P.biruMuda)}
-    ${line('M460 376 Q476 360 492 376', P.besi, 2.5)}
-    <ellipse cx="478" cy="410" rx="24" ry="5" fill="none" stroke="${P.putih}" stroke-width="2" opacity="0.7"/>
-    <!-- meja tinggi (kering), simetris di tengah adegan (x 210-430, poros x=320) -->
-    ${rect(222, 326, 12, 106, P.besi)}${rect(406, 326, 12, 106, P.besi)}
-    ${rect(222, 388, 196, 9, P.besiMuda)}
-    ${rrect(216, 428, 24, 6, 3, P.besiTua)}${rrect(400, 428, 24, 6, 3, P.besiTua)}
-    <ellipse cx="228" cy="432" rx="22" ry="5" fill="none" stroke="${P.putih}" stroke-width="2" opacity="0.75"/>
-    <ellipse cx="412" cy="432" rx="22" ry="5" fill="none" stroke="${P.putih}" stroke-width="2" opacity="0.75"/>
-    ${rrect(210, 304, 220, 12, 4, '#ddb27d')}
-    ${rrect(210, 314, 220, 14, 4, P.kayuTua)}
+    ${geser(pel, opsi.pel)}
+    ${geser(ember, opsi.ember)}
+    <!-- meja tinggi (kering), simetris di tengah adegan (x ${x0}-${x1}, poros x=${(x0 + x1) / 2}) -->
+    ${rect(x0 + 12, 326, 12, 106, P.besi)}${rect(x1 - 24, 326, 12, 106, P.besi)}
+    ${rect(x0 + 12, palangY, x1 - x0 - 24, 9, P.besiMuda)}
+    ${rrect(x0 + 6, 428, 24, 6, 3, P.besiTua)}${rrect(x1 - 30, 428, 24, 6, 3, P.besiTua)}
+    <ellipse cx="${x0 + 18}" cy="432" rx="22" ry="5" fill="none" stroke="${P.putih}" stroke-width="2" opacity="0.75"/>
+    <ellipse cx="${x1 - 18}" cy="432" rx="22" ry="5" fill="none" stroke="${P.putih}" stroke-width="2" opacity="0.75"/>
+    ${rrect(x0, 304, x1 - x0, 12, 4, '#ddb27d')}
+    ${rrect(x0, 314, x1 - x0, 14, 4, P.kayuTua)}
     <!-- riak di kaki petugas & kardus -->
     <ellipse cx="590" cy="474" rx="34" ry="6" fill="none" stroke="${P.putih}" stroke-width="2.5" opacity="0.7"/>
-    <ellipse cx="120" cy="436" rx="70" ry="9" fill="none" stroke="${P.putih}" stroke-width="2.5" opacity="0.6"/>`;
+    <ellipse cx="${riakKardus.x}" cy="${riakKardus.y}" rx="70" ry="9" fill="none" stroke="${P.putih}" stroke-width="2.5" opacity="0.6"/>`;
 }
 
 /** Tumpukan kardus basah di genangan, 128 x 100. */
-function kardusBasah(): string {
+export function kardusBasah(): string {
   const noda = (x: number, y: number, w: number): string =>
     path(`M${x} ${y} ${Array.from({ length: Math.ceil(w / 16) }, () => 'q4 -5 8 0 t8 0').join(' ')} L${x + w} ${y + 26} L${x} ${y + 26} Z`, P.tanahTua, 'opacity="0.6"');
   return `
@@ -162,11 +187,14 @@ export function sceneGudangBanjir(): SceneSpec {
       {
         id: 'binder-a', role: 'doc', refId: 'polis-a',
         x: 262, y: 262, art: art('m07-binder-a', 80, 100, binder(P.biru, 'A')), label: 'Polis A', depth: 20,
+        // Label sedikit menjauh satu sama lain: versi Inggris ("Policy A") lebih lebar dari jarak kedua binder.
+        labelDx: -10,
         hit: { w: 96, h: 112 },
       },
       {
         id: 'binder-b', role: 'doc', refId: 'polis-b',
         x: 378, y: 262, art: art('m07-binder-b', 80, 100, binder(P.ungu, 'B')), label: 'Polis B', depth: 20,
+        labelDx: 10,
         hit: { w: 96, h: 112 },
       },
       // Kalender di poros tengah, di atas kedua binder (tidak berdekatan dengan salah satunya).

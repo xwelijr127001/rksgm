@@ -28,7 +28,7 @@ const MEJA_Y = 96;
 
 // ------------------------------------------------------------------ latar
 
-function latar(): string {
+export function latar(): string {
   const dinding = '#f3e6cc';
   const jelaga = P.tinta;
   const hangus = '#4a3b30';
@@ -113,7 +113,7 @@ function latar(): string {
 }
 
 /** Lampu gantung (prop berayun pelan). 40 x 70. */
-function lampu(): string {
+export function lampu(): string {
   return `
     ${line('M20 0 V30', P.besiTua, 2)}
     ${circle(20, 50, 16, P.kuningPucat, 'opacity="0.55"')}

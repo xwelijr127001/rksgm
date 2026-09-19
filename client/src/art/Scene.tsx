@@ -948,7 +948,10 @@ function KotaBanjir(): ReactElement {
 
 /* ================================================================== ekspor */
 
-const ADEGAN: Record<SceneKey, () => ReactElement> = {
+/** Adegan vektor lama; soal bergambar (scene 'gambar') tidak punya padanannya di sini. */
+type AdeganVektor = Exclude<SceneKey, 'gambar'>;
+
+const ADEGAN: Record<AdeganVektor, () => ReactElement> = {
   parkiran: Parkiran,
   bengkel: Bengkel,
   ruko: Ruko,
@@ -962,7 +965,7 @@ const ADEGAN: Record<SceneKey, () => ReactElement> = {
 };
 
 /** Label lokasi singkat per adegan. */
-export const SCENE_LABEL: Record<SceneKey, string> = {
+export const SCENE_LABEL: Record<AdeganVektor, string> = {
   parkiran: 'Parkiran Kota',
   bengkel: 'Bengkel Mitra',
   ruko: 'Ruko Jalan Melati',
@@ -976,7 +979,7 @@ export const SCENE_LABEL: Record<SceneKey, string> = {
 };
 
 /** Keterangan adegan untuk pembaca layar. */
-const SCENE_DESC: Record<SceneKey, string> = {
+const SCENE_DESC: Record<AdeganVektor, string> = {
   parkiran: 'Area parkir dengan mobil nasabah yang penyok kecil di bodi, mobil lain, garis parkir, pohon, dan lampu parkir.',
   bengkel: 'Bengkel mitra dengan mobil di depan pintu, kerusakan depan kiri terlihat, rak alat, dan montir.',
   ruko: 'Ruko dua lantai bekas kebakaran yang sudah aman, ada jejak arang, petugas, serta meja berkas dan folder.',
@@ -998,7 +1001,9 @@ export function Scene({
   className?: string;
   children?: ReactNode;
 }): ReactElement {
-  const Isi = ADEGAN[scene];
+  // Soal bergambar tidak punya adegan vektor: pakai latar kantor sebagai cadangan netral.
+  const kunci: AdeganVektor = scene === 'gambar' ? 'kantor' : scene;
+  const Isi = ADEGAN[kunci];
   return (
     <div
       className={className}
@@ -1016,7 +1021,7 @@ export function Scene({
         viewBox="0 0 400 260"
         preserveAspectRatio="xMidYMid slice"
         role="img"
-        aria-label={`${SCENE_LABEL[scene]}. ${SCENE_DESC[scene]}`}
+        aria-label={`${SCENE_LABEL[kunci]}. ${SCENE_DESC[kunci]}`}
         style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', display: 'block' }}
       >
         <Isi />

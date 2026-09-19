@@ -7,11 +7,11 @@ Diambil otomatis oleh `npm run test:e2e` pada 18 September 2026 dari build produ
 | Berkas | Perangkat (emulasi) | Isi |
 | --- | --- | --- |
 | `01-hp-tutorial.png`, `02-hp-tutorial-dipilih.png` | HP 390x844 | Pemanasan: kartu tugas dengan Raki & bantuan "cara main" terbuka, pilihan tercatat |
-| `m01-hp-briefing.png` | HP 390x844 | Briefing: Miss Raksa (potret) membawakan kasus, "Tugasmu", contoh cara main; adegan di bawah, belum bisa disentuh |
-| `m01-hp-terkirim.png` | HP 390x844 | Konfirmasi "Laporanmu sudah terkirim" + ringkasan pilihan yang terkunci |
+| `m01-hp-briefing.png` | HP 390x844 | Briefing: gambar di atas (belum bisa disentuh), Miss Raksa membawakan kasus, satu kalimat "Tugasmu" |
+| `m01-hp-terkirim.png` | HP 390x844 | "Terkirim!" + jumlah pemain; ringkasan jawaban dilipat |
 | `m02-hp-aktif.png` | HP 390x844 | Kamera bukti: 3 foto bernomor di adegan & album |
 | `m02-hp-jeda.png` | HP 390x844 | Dijeda panitia: tata letak tetap, adegan & pilihan terkunci, pemberitahuan di atas pilihan |
-| `m02-hp-pembahasan.png`, `m04-hp-pembahasan.png`, `m10-hp-pembahasan.png` | HP 390x844 | Pembahasan: status, Pilihanmu, langkah yang tepat, alasan; tanda ✓/✕/! di gambar (di bawah hasil) |
+| `m02-hp-pembahasan.png`, `m04-hp-pembahasan.png`, `m10-hp-pembahasan.png` | HP 390x844 | Pembahasan: gambar bertanda ✓/✕/! di atas, Bu Isti (juri) membacakan hasil + poin; rincian dilipat |
 | `m03`–`m10-hp-aktif.png` | HP 390x844 | Adegan tiap misi saat menjawab |
 | `m02-hp360-ringan.png`, `m05-hp360-ringan.png` | HP 360x740, mode ringan | Tanpa engine: gambar sederhana + daftar pilihan HTML |
 | `m04-hp-mendatar.png`, `m10-hp-mendatar.png` | HP 844x390 mendatar | Adegan kiri, kartu tugas & jawaban kanan, bar aksi ringkas |
@@ -36,7 +36,11 @@ diuji dengan mematikan server saat pemain sedang menjawab.
 | `tokoh-proyektor-papan.png` | 1366x768 | Papan peringkat: Bu Isti membawakan ringkasan ronde |
 | `tokoh-proyektor-podium.png`, `tokoh-hasil-hp.png` | 1366x768, HP 390x844 | Podium: ketiga tokoh bersama; hasil HP: ucapan Mr Roger |
 
-Mr Roger juga muncul sebagai potret kecil di bawah hasil pembahasan tiap misi (lihat `m*-hp-pembahasan.png`).
+Bu Isti juga menjadi **juri** yang membacakan hasil tiap misi (lihat `m*-hp-pembahasan.png` dan `proyektor-pembahasan.png`).
+
+### Momen dibuat ringan (gambar dulu, sedikit teks & warna)
+
+Sebelum/sesudah briefing, terkirim, dan pembahasan: [`momen-ringan/`](momen-ringan/README.md).
 
 ### Perbaikan UI/UX layar misi
 

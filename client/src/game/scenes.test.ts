@@ -7,12 +7,13 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
 import { MISSIONS, TIEBREAK_MISSION, TUTORIAL_MISSION } from '../../../shared/missions';
+import { MISSIONS_ACARA } from '../../../shared/missions.acara';
 import type { MissionPublic } from '../../../shared/types';
 import { ADEGAN, acakSlot } from './scenes';
 import { stepIdsOf } from './draft';
 import { WORLD_H, WORLD_W, type SceneObjectSpec, type SceneSpec } from './types';
 
-const SEMUA: MissionPublic[] = [TUTORIAL_MISSION, ...MISSIONS, TIEBREAK_MISSION];
+const SEMUA: MissionPublic[] = [TUTORIAL_MISSION, ...MISSIONS, TIEBREAK_MISSION, ...MISSIONS_ACARA];
 
 function adegan(m: MissionPublic): SceneSpec | null {
   const buat = ADEGAN[m.id];
@@ -102,10 +103,13 @@ test('kunci gambar unik antar adegan (tidak saling menimpa cache tekstur)', () =
 test('kode adegan tidak pernah menyentuh kunci jawaban', () => {
   const dir = path.join(import.meta.dirname, 'scenes');
   const dirArt = path.join(import.meta.dirname, 'art');
+  // Menelusuri subfolder juga (scenes/acara/): adegan paket acara ikut dijaga.
+  const berkas = (d: string): string[] =>
+    fs.readdirSync(d, { withFileTypes: true }).flatMap((e) => (e.isDirectory() ? berkas(path.join(d, e.name)) : [path.join(d, e.name)]));
   for (const d of [dir, dirArt, path.join(import.meta.dirname, 'engine')]) {
-    for (const f of fs.readdirSync(d)) {
-      const isi = fs.readFileSync(path.join(d, f), 'utf8');
-      assert.ok(!/answerKeys|MISSION_KEYS|server\//.test(isi), `${f} tidak mengimpor kunci jawaban`);
+    for (const f of berkas(d)) {
+      const isi = fs.readFileSync(f, 'utf8');
+      assert.ok(!/answerKeys|MISSION_KEYS|KUNCI_ACARA|server\//.test(isi), `${path.relative(import.meta.dirname, f)} tidak mengimpor kunci jawaban`);
     }
   }
 });

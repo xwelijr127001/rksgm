@@ -40,7 +40,8 @@ function toko(x: number, baseY: number, w: number, kaca: string): string {
     ${rrect(x + w * 0.62, baseY - 30, w * 0.26, 30, 3, '#b7a58a')}`;
 }
 
-function latar(): string {
+/** Latar parkiran kota 640 x 480. Diekspor: dipakai ulang apa adanya (kunci `m01-latar`) oleh misi acara a02. */
+export function latar(): string {
   return `
     ${rect(0, 0, 640, 170, P.langit)}
     ${rect(0, 0, 640, 64, P.langitAtas, 'opacity="0.45"')}

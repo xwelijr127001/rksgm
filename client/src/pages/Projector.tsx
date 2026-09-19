@@ -10,7 +10,7 @@
  * tampilkan `.kosong` yang jujur.
  */
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import type { LeaderRow, Phase } from '@shared/types';
 import { Avatar } from '../art/Avatar';
@@ -18,10 +18,15 @@ import { CityMap } from '../art/CityMap';
 import { Icon } from '../art/Icon';
 import { RakiBubble } from '../art/Raki';
 import { AdeganLayar } from '../game/AdeganLayar';
+import { misiBergambar } from '../game/gambar';
 import { KarakterTokoh } from '../game/KarakterTokoh';
+import { PilihBahasa } from '../components/PilihBahasa';
+import { TombolGerak } from '../components/TombolGerak';
 import { TOKOH } from '@shared/brand';
 import { playSfx, preferMusicOn, setTrack } from '../audio/audio';
 import { useOnChange } from '../hooks';
+import { misiDalamBahasa, revealDalamBahasa, t, useBahasa } from '../i18n';
+import { terjemahkanBawaan, terjemahkanGalat } from '../i18n/galat';
 import { actions, useGame } from '../state/store';
 import {
   AudioControls,
@@ -48,6 +53,9 @@ const TRACK: Record<Phase, 'lobby' | 'game' | 'podium'> = {
   FINISHED: 'podium',
   PAUSED: 'game',
 };
+
+/** Penanda "room tidak ditemukan" tanpa pesan server; teksnya dibaca saat render (ikut bahasa aktif). */
+const GAGAL_TANPA_PESAN = 'layar.roomTidakDitemukan';
 
 const MAKS_AVATAR = 40;
 const MAKS_TITIK = 60;
@@ -109,7 +117,7 @@ const CSS = `
 .pj-kunci{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px}
 .pj-kunci li{display:flex;gap:8px;align-items:flex-start}
 
-.pj-pojok{position:fixed;right:12px;bottom:12px;z-index:40}
+.pj-pojok{position:fixed;right:12px;bottom:12px;z-index:40;display:flex;gap:8px;align-items:center}
 .pj-jeda{position:fixed;inset:0;z-index:45;display:grid;place-items:center;text-align:center;
   padding:24px;background:rgba(12,42,29,.92)}
 .pj-jeda-kata{font-family:var(--font-judul);font-weight:900;letter-spacing:.06em;line-height:1;
@@ -146,6 +154,7 @@ function rataKetepatan(rows: readonly LeaderRow[]): number | null {
 
 export default function Projector() {
   const { room, status } = useGame();
+  const { bahasa } = useBahasa();
   const [params, setParams] = useSearchParams();
   const kodeUrl = (params.get('room') ?? '').trim().toUpperCase();
 
@@ -167,9 +176,15 @@ export default function Projector() {
     setGagal(null);
     void actions.spectate(kodeUrl).then((res) => {
       setMenyambung(false);
-      setGagal(res.ok ? null : (res.error ?? 'Room tidak ditemukan.'));
+      setGagal(res.ok ? null : (res.error ?? GAGAL_TANPA_PESAN));
     });
   }, [kodeUrl]);
+
+  // Misi & pembahasan dalam bahasa aktif (id tidak berubah). Dihitung sebelum early-return (aturan hooks).
+  const misiAsli = room?.mission ?? null;
+  const revealAsli = room?.reveal ?? null;
+  const misi = useMemo(() => (misiAsli ? misiDalamBahasa(misiAsli, bahasa) : null), [misiAsli, bahasa]);
+  const reveal = useMemo(() => (revealAsli ? revealDalamBahasa(revealAsli, misi, bahasa) : null), [revealAsli, misi, bahasa]);
 
   // Fase yang ditampilkan: saat PAUSED tetap tampilkan isi fase yang dijeda.
   const fase: Phase = room
@@ -196,18 +211,19 @@ export default function Projector() {
   // ---------------------------------------------------------------- gerbang kode
 
   if (gagal || (!room && !menyambung)) {
+    const pesanGagal = gagal === GAGAL_TANPA_PESAN ? t(GAGAL_TANPA_PESAN) : terjemahkanGalat(gagal);
     return (
       <div className="proyektor">
         <style>{CSS}</style>
         <div className="wrap-lebar stack stack-l" style={{ maxWidth: 620, paddingTop: 24 }}>
           <BrandTitle size="besar" />
-          <h1 className="pj-judul">Layar Acara</h1>
+          <h1 className="pj-judul">{t('layar.layarAcara')}</h1>
           {gagal ? (
             <Pesan jenis="error">
-              {gagal} Periksa kode room di layar panitia, lalu coba lagi.
+              {t('layar.gagalPeriksaKode', { pesan: pesanGagal })}
             </Pesan>
           ) : (
-            <p className="pj-teks">Masukkan kode room untuk menampilkan layar acara.</p>
+            <p className="pj-teks">{t('layar.masukkanKode')}</p>
           )}
           <form
             className="stack"
@@ -221,7 +237,7 @@ export default function Projector() {
             }}
           >
             <label className="label-kolom" htmlFor="pj-kode">
-              Kode room (4 huruf)
+              {t('layar.labelKode')}
             </label>
             <input
               id="pj-kode"
@@ -236,13 +252,14 @@ export default function Projector() {
               aria-describedby="pj-kode-bantu"
             />
             <button className="btn btn-utama btn-blok" type="submit" disabled={ketikan.trim().length < 4}>
-              Tampilkan layar
+              {t('layar.tampilkanLayar')}
             </button>
           </form>
           <p id="pj-kode-bantu" className="pj-teks2">
-            Kode ada di layar panitia. Halaman ini hanya menonton - kamu tidak ikut menjawab.
+            {t('layar.bantuKode')}
           </p>
           <div className="pj-pojok">
+            <PilihBahasa />
             <AudioControls ringkas />
           </div>
         </div>
@@ -255,7 +272,7 @@ export default function Projector() {
       <div className="proyektor">
         <style>{CSS}</style>
         <div className="wrap-lebar" style={{ maxWidth: 620, paddingTop: 48 }}>
-          <Memuat teks={`Menyambung ke room ${kodeUrl}...`} />
+          <Memuat teks={t('layar.menyambungKeRoom', { kode: kodeUrl })} />
         </div>
       </div>
     );
@@ -263,7 +280,6 @@ export default function Projector() {
 
   // ---------------------------------------------------------------- data turunan
 
-  const misi = room.mission;
   const selesai = rondeSelesai(room.roundIndex);
   const papan = room.leaderboard ?? [];
   const podium = room.podium ?? papan;
@@ -271,7 +287,9 @@ export default function Projector() {
   const masuk = room.submittedCount;
   const totalPeserta = room.playerCount;
   const persen = totalPeserta > 0 ? Math.round((masuk / totalPeserta) * 100) : 0;
-  const hadiah = [room.prizes.first, room.prizes.second, room.prizes.third];
+  // Nama acara & label hadiah BAWAAN ikut bahasa aktif; isian panitia tampil apa adanya.
+  const hadiah = [room.prizes.first, room.prizes.second, room.prizes.third].map(terjemahkanBawaan);
+  const namaAcara = terjemahkanBawaan(room.eventName);
 
   const galeri = potong(room.players, MAKS_AVATAR);
   const titik = potong(room.players, MAKS_TITIK);
@@ -293,42 +311,42 @@ export default function Projector() {
             tinggi={150}
             teks={
               <>
-                Pindai QR atau buka{' '}
+                {t('layar.pindaiAwal')}{' '}
                 <strong className="mono" style={{ overflowWrap: 'anywhere' }}>
                   {room.joinUrl}
                 </strong>{' '}
-                lalu masukkan kode di atas. {TOKOH.isti.sapaan.gabung}
+                {t('layar.pindaiAkhir')} {t('tokoh.isti.gabung')}
               </>
             }
           />
         ) : (
           <>
             <p className="pj-teks">
-              Pindai QR atau buka{' '}
+              {t('layar.pindaiAwal')}{' '}
               <strong className="mono" style={{ overflowWrap: 'anywhere' }}>
                 {room.joinUrl}
               </strong>{' '}
-              lalu masukkan kode di atas.
+              {t('layar.pindaiAkhir')}
             </p>
-            <p className="pj-teks2">Pilih karakter, tulis nama panggilan, lalu tekan Siap.</p>
+            <p className="pj-teks2">{t('layar.pilihKarakter')}</p>
           </>
         )}
       </div>
       <div className="stack">
-        <KarakterTokoh tokoh="ceo" className="pj-ceo" tinggi={150} teks={TOKOH.ceo.sapaan.awal} />
+        <KarakterTokoh tokoh="ceo" className="pj-ceo" tinggi={150} teks={t('tokoh.ceo.awal')} />
         <div className="panel">
-          <h2 className="pj-judul2">Peta perjalanan misi</h2>
+          <h2 className="pj-judul2">{t('layar.petaPerjalanan')}</h2>
           <CityMap currentRound={-1} completed={[]} compact />
         </div>
         <div className="panel stack">
           <div className="baris-antara">
-            <h2 className="pj-judul2">Peserta bergabung</h2>
+            <h2 className="pj-judul2">{t('layar.pesertaBergabung')}</h2>
             <span className="chip chip-kuning">
-              <Icon name="bintang" size={16} /> {totalPeserta} orang
+              <Icon name="bintang" size={16} /> {t('layar.nOrang', { n: totalPeserta })}
             </span>
           </div>
           {totalPeserta === 0 ? (
-            <div className="kosong">Belum ada peserta. Pindai QR untuk bergabung.</div>
+            <div className="kosong">{t('layar.belumAdaPesertaQr')}</div>
           ) : (
             <>
               <div className="pj-avatars">
@@ -340,7 +358,7 @@ export default function Projector() {
                 ))}
               </div>
               {galeri.sisa > 0 ? (
-                <p className="pj-teks tebal">+{galeri.sisa} peserta lain sudah bergabung</p>
+                <p className="pj-teks tebal">{t('layar.pesertaLainBergabung', { n: galeri.sisa })}</p>
               ) : null}
             </>
           )}
@@ -352,9 +370,9 @@ export default function Projector() {
   const progres = (
     <div className="panel stack">
       <div className="baris-antara">
-        <h2 className="pj-judul2">Progres pengiriman</h2>
+        <h2 className="pj-judul2">{t('layar.progresPengiriman')}</h2>
         <strong className="pj-teks">
-          {masuk} / {totalPeserta} jawaban masuk
+          {t('layar.jawabanMasuk', { masuk, total: totalPeserta })}
         </strong>
       </div>
       <div
@@ -363,12 +381,12 @@ export default function Projector() {
         aria-valuemin={0}
         aria-valuemax={100}
         aria-valuenow={persen}
-        aria-label={`${masuk} dari ${totalPeserta} jawaban masuk`}
+        aria-label={t('layar.jawabanMasukAria', { masuk, total: totalPeserta })}
       >
         <i style={{ width: `${persen}%` }} />
       </div>
       {totalPeserta === 0 ? (
-        <div className="kosong">Belum ada peserta di room ini.</div>
+        <div className="kosong">{t('layar.belumAdaPesertaRoom')}</div>
       ) : (
         <>
           <div className="pj-titik">
@@ -379,17 +397,17 @@ export default function Projector() {
                   <b title={p.nickname}>{p.nickname}</b>
                   <i>
                     <Icon name={p.submittedThisRound ? 'cek' : 'jam'} size={13} />
-                    {p.submittedThisRound ? 'terkirim' : 'menunggu'}
+                    {p.submittedThisRound ? t('layar.terkirim') : t('layar.menunggu')}
                   </i>
                 </span>
               </span>
             ))}
           </div>
-          {titik.sisa > 0 ? <p className="pj-teks2">+{titik.sisa} peserta lain</p> : null}
+          {titik.sisa > 0 ? <p className="pj-teks2">{t('layar.pesertaLain', { n: titik.sisa })}</p> : null}
         </>
       )}
       <p className="pj-teks2">
-        Isi jawaban dan kunci jawaban baru ditampilkan saat pembahasan.
+        {t('layar.kunciSaatPembahasan')}
       </p>
     </div>
   );
@@ -398,7 +416,7 @@ export default function Projector() {
     <div className="pj-kolom">
       <div className="stack">
         <div className="panel">
-          <h2 className="pj-judul2">Perjalanan misi</h2>
+          <h2 className="pj-judul2">{t('layar.perjalananMisi')}</h2>
           <CityMap currentRound={room.roundIndex} completed={selesai} />
         </div>
         {/* Kasus dibawakan Miss Raksa (CS) di kolom kiri supaya terlihat tanpa menggulung. */}
@@ -409,25 +427,25 @@ export default function Projector() {
       <div className="stack">
         <div className="panel stack">
           <div className="baris">
-            <span className="label-produk">{misi ? misi.productLabel : 'MISI'}</span>
+            <span className="label-produk">{misi ? misi.productLabel : t('layar.labelMisi')}</span>
             {misi ? <span className="chip chip-biru">{misi.location}</span> : null}
           </div>
           <h2 className="pj-judul">
-            {misi ? `Misi ${misi.number}: ${misi.title}` : 'Menunggu misi dari panitia'}
+            {misi ? t('layar.judulMisi', { n: misi.number, judul: misi.title }) : t('layar.menungguMisi')}
           </h2>
           {misi ? <p className="pj-teks">{misi.story}</p> : null}
           {misi ? (
-            <div style={{ maxWidth: 560 }}>
+            // Soal bergambar: gambar adalah bahan utamanya, jadi boleh selebar kolom (dibaca dari jauh).
+            <div style={{ maxWidth: misiBergambar(misi) ? 760 : 560 }}>
               <AdeganLayar mission={misi} roundIndex={room.roundIndex} reveal={null} />
             </div>
           ) : null}
           {fase === 'BRIEFING' && misi && (misi.id === 'tutorial' || !TOKOH.missRaksa.aktif) ? (
-            <RakiBubble judul="Briefing" teks={misi.rakiBriefing} mood="bicara" size={88} />
+            <RakiBubble judul={t('layar.briefing')} teks={misi.rakiBriefing} mood="bicara" size={88} />
           ) : null}
           {fase === 'BRIEFING' && totalPeserta > 0 ? (
             <p className="pj-teks tebal">
-              <Icon name="cek" size={20} /> Adegan siap: {room.sceneReadyCount}/{totalPeserta}{' '}
-              peserta
+              <Icon name="cek" size={20} /> {t('layar.adeganSiap', { siap: room.sceneReadyCount, total: totalPeserta })}
             </p>
           ) : null}
           {fase === 'ACTIVE' && misi ? <p className="pj-teks tebal">{misi.instruction}</p> : null}
@@ -437,25 +455,25 @@ export default function Projector() {
     </div>
   );
 
-  const pembahasan = !room.reveal ? (
-    <div className="kosong">Pembahasan belum dibuka oleh panitia.</div>
+  const pembahasan = !reveal ? (
+    <div className="kosong">{t('layar.pembahasanBelum')}</div>
   ) : (
     <div className="pj-kolom">
       <div className="stack">
         <div className="panel stack-s">
           <h2 className="pj-judul">
-            Pembahasan{misi ? ` - Misi ${misi.number}: ${misi.title}` : ''}
+            {misi ? t('layar.pembahasanMisi', { n: misi.number, judul: misi.title }) : t('layar.pembahasan')}
           </h2>
-          <p className="pj-teks">{room.reveal.summary}</p>
+          <p className="pj-teks">{reveal.summary}</p>
         </div>
-        {room.reveal.steps.map((s) => (
+        {reveal.steps.map((s) => (
           <div className="panel stack-s" key={s.stepId}>
             <strong className="pj-teks">{s.prompt}</strong>
             <ul className="pj-kunci">
-              {s.correctText.map((t, i) => (
+              {s.correctText.map((teksBenar, i) => (
                 <li key={i} className="pj-teks">
                   <Icon name="cek" size={22} />
-                  <span>{t}</span>
+                  <span>{teksBenar}</span>
                 </li>
               ))}
             </ul>
@@ -464,10 +482,15 @@ export default function Projector() {
         ))}
       </div>
       <div className="stack">
-        <RakiBubble judul="Yang dibawa pulang" teks={room.reveal.learning} mood="bicara" size={110} />
-        {misi ? <AdeganLayar mission={misi} roundIndex={room.roundIndex} reveal={room.reveal} /> : null}
+        {/* Bu Isti sebagai juri membacakan inti pembahasan (Raki bila tokoh dinonaktifkan). */}
+        {TOKOH.isti.aktif ? (
+          <KarakterTokoh tokoh="isti" className="pj-juri" tinggi={140} label={`${TOKOH.isti.nama} · ${t('tokoh.isti.juri')}`} teks={<><strong>{t('layar.dibawaPulangTitik')}</strong> {reveal.learning}</>} />
+        ) : (
+          <RakiBubble judul={t('layar.dibawaPulang')} teks={reveal.learning} mood="bicara" size={110} />
+        )}
+        {misi ? <AdeganLayar mission={misi} roundIndex={room.roundIndex} reveal={reveal} /> : null}
         <div className="panel">
-          <h2 className="pj-judul2">Perjalanan misi</h2>
+          <h2 className="pj-judul2">{t('layar.perjalananMisi')}</h2>
           <CityMap currentRound={room.roundIndex} completed={selesai} compact />
         </div>
       </div>
@@ -480,34 +503,34 @@ export default function Projector() {
   const peringkat = (
     <div className="pj-kolom">
       <div className="panel stack">
-        <h2 className="pj-judul">Peringkat 10 besar</h2>
+        <h2 className="pj-judul">{t('layar.peringkat10')}</h2>
         {/* key = ronde: papan dianimasikan ulang tiap kali peringkat diperbarui. */}
         <div className="pj-papan anim-masuk" key={`papan-${room.roundIndex}`}>
           <Leaderboard rows={papan} limit={10} prizes={room.prizes} />
         </div>
       </div>
       <div className="stack">
-        <KarakterTokoh tokoh="isti" className="pj-ceo" tinggi={130} teks={TOKOH.isti.sapaan.ringkasan} />
+        <KarakterTokoh tokoh="isti" className="pj-ceo" tinggi={130} teks={t('tokoh.isti.ringkasan')} />
         <div className="panel stack-s">
-          <h2 className="pj-judul2">Ringkasan ronde {room.roundIndex + 1}</h2>
+          <h2 className="pj-judul2">{t('layar.ringkasanRonde', { n: room.roundIndex + 1 })}</h2>
           <p className="pj-teks">
-            <strong>{masuk}</strong> dari {totalPeserta} peserta mengirim jawaban
+            <strong>{masuk}</strong> {t('layar.dariPesertaMengirim', { total: totalPeserta })}
           </p>
           {rata !== null ? (
             <p className="pj-teks">
-              Rata-rata ketepatan per ronde terjawab: <strong>{Math.round(rata * 100)}%</strong>
+              {t('layar.rataKetepatan')} <strong>{Math.round(rata * 100)}%</strong>
             </p>
           ) : (
-            <p className="pj-teks2">Rata-rata ketepatan belum bisa dihitung.</p>
+            <p className="pj-teks2">{t('layar.rataBelum')}</p>
           )}
           {naik > 0 ? (
             <p className="pj-teks2">
-              <Icon name="kilat" size={18} /> {naik} peserta naik peringkat
+              <Icon name="kilat" size={18} /> {t('layar.naikPeringkat', { n: naik })}
             </p>
           ) : null}
         </div>
         <div className="panel">
-          <h2 className="pj-judul2">Perjalanan misi</h2>
+          <h2 className="pj-judul2">{t('layar.perjalananMisi')}</h2>
           <CityMap currentRound={room.roundIndex} completed={selesai} compact />
         </div>
       </div>
@@ -517,20 +540,19 @@ export default function Projector() {
   const tigaBesar = podium.slice(0, 3);
   const akhir = (
     <div className="stack stack-l">
-      <h2 className="pj-judul tengah">Juara {room.eventName}</h2>
+      <h2 className="pj-judul tengah">{t('layar.juara', { acara: namaAcara })}</h2>
       <div className="tokoh-trio">
         <KarakterTokoh tokoh="isti" tinggi={170} susun="bawah" />
-        <KarakterTokoh tokoh="ceo" tinggi={190} susun="bawah" teks={TOKOH.ceo.sapaan.podium} />
+        <KarakterTokoh tokoh="ceo" tinggi={190} susun="bawah" teks={t('tokoh.ceo.podium')} />
         <KarakterTokoh tokoh="missRaksa" tinggi={170} susun="bawah" />
       </div>
       {room.tie ? (
         <Pesan jenis="kuning">
-          Ada peringkat seri. Panitia dapat menjalankan ronde penentuan untuk memisahkan poin
-          yang sama.
+          {t('layar.adaSeri')}
         </Pesan>
       ) : null}
       {tigaBesar.length === 0 ? (
-        <div className="kosong">Belum ada hasil. Pertandingan berakhir tanpa jawaban masuk.</div>
+        <div className="kosong">{t('layar.belumAdaHasil')}</div>
       ) : (
         <div className="pj-podium">
           {[1, 0, 2].map((idx, kolom) => {
@@ -548,23 +570,23 @@ export default function Projector() {
                 </span>
                 <Avatar look={r.look} size={110} mood="senang" />
                 <div className="pj-nama">{r.nickname}</div>
-                <div className="pj-poin">{r.totalPoints.toLocaleString('id-ID')} poin</div>
+                <div className="pj-poin">{t('layar.nPoin', { n: r.totalPoints.toLocaleString('id-ID') })}</div>
                 <span className="chip chip-kuning">
                   <Icon name="medali" size={16} /> {hadiah[idx]}
                 </span>
-                {r.tied ? <span className="pj-teks2">peringkat seri</span> : null}
+                {r.tied ? <span className="pj-teks2">{t('layar.peringkatSeri')}</span> : null}
               </div>
             );
           })}
         </div>
       )}
       <div className="panel stack">
-        <h2 className="pj-judul2">10 besar</h2>
+        <h2 className="pj-judul2">{t('layar.sepuluhBesar')}</h2>
         <div className="pj-papan">
           <Leaderboard rows={podium} limit={10} prizes={room.prizes} />
         </div>
       </div>
-      <p className="pj-teks2 tengah">Terima kasih sudah bermain. Sampai jumpa di acara berikutnya.</p>
+      <p className="pj-teks2 tengah">{t('layar.terimaKasih')}</p>
     </div>
   );
 
@@ -589,31 +611,30 @@ export default function Projector() {
       <header className="wrap-lebar pj-lebar baris-antara" style={{ flexWrap: 'wrap', gap: 12 }}>
         <div className="baris">
           <BrandTitle size="kecil" />
-          <span className="pj-acara">{room.eventName}</span>
+          <span className="pj-acara">{namaAcara}</span>
           <PhaseBadge phase={room.phase} />
         </div>
         <div className="baris">
           {tampilRonde ? (
             <span className="chip chip-biru">
-              <Icon name="lokasi" size={16} /> Ronde {room.roundIndex + 1} / {room.totalRounds}
+              <Icon name="lokasi" size={16} /> {t('layar.rondeKe', { n: room.roundIndex + 1, total: room.totalRounds })}
             </span>
           ) : null}
           <span className="pj-timer">
             <Timer endsAt={room.phaseEndsAt} durationMs={room.phaseDurationMs} />
           </span>
           <span className="chip chip-hijau">
-            <Icon name="operator" size={16} /> {totalPeserta} peserta ({room.connectedCount}{' '}
-            tersambung)
+            <Icon name="operator" size={16} /> {t('layar.pesertaTersambung', { n: totalPeserta, tersambung: room.connectedCount })}
           </span>
           <span className="chip">
-            <Icon name="selfie" size={16} /> {room.spectatorCount} penonton
+            <Icon name="selfie" size={16} /> {t('layar.nPenonton', { n: room.spectatorCount })}
           </span>
         </div>
       </header>
 
       <div className="wrap-lebar pj-lebar stack">
         {status !== 'connected' ? (
-          <Pesan jenis="kuning">Menyambung ulang ke server... angka di layar mungkin tertunda.</Pesan>
+          <Pesan jenis="kuning">{t('layar.menyambungUlangServer')}</Pesan>
         ) : null}
         {isi}
       </div>
@@ -623,21 +644,23 @@ export default function Projector() {
       {room.phase === 'PAUSED' ? (
         <div className="pj-jeda" role="status">
           <div className="stack">
-            <div className="pj-jeda-kata">DIJEDA</div>
+            <div className="pj-jeda-kata">{t('layar.dijedaBesar')}</div>
             <p className="pj-teks">
-              Fase yang dijeda: <strong>{phaseLabel(fase)}</strong>
+              {t('layar.faseDijeda')} <strong>{phaseLabel(fase)}</strong>
             </p>
             <p className="pj-teks">
               {room.pausedRemainingMs !== null
-                ? `Sisa waktu ${Math.ceil(room.pausedRemainingMs / 1000)} detik`
-                : 'Fase ini tanpa hitung mundur.'}
+                ? t('layar.sisaWaktuDetik', { n: Math.ceil(room.pausedRemainingMs / 1000) })
+                : t('layar.tanpaHitungMundur')}
             </p>
-            <p className="pj-teks2">Menunggu panitia melanjutkan permainan.</p>
+            <p className="pj-teks2">{t('layar.menungguLanjut')}</p>
           </div>
         </div>
       ) : null}
 
       <div className="pj-pojok">
+        <TombolGerak ringkas />
+        <PilihBahasa />
         <AudioControls ringkas />
       </div>
     </div>
