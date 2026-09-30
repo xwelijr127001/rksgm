@@ -34,18 +34,37 @@
   },
   "missRaksa": {
     "berkas": "miss-raksa",
-    "sumber": "character/Miss Raksa.png",
-    "potong": {
-      "minX": 60,
-      "minY": 46,
-      "cw": 319,
-      "ch": 813,
-      "fw": 443,
-      "fh": 887
+    "sumber": "client/src/cerita/seni/piksel/miss-raksa.png + miss-raksa.json (seni piksel v4, penyusun seni/piksel/susun.ts)",
+    "piksel": {
+      "skala": 2,
+      "frameW": 61,
+      "frameH": 184,
+      "kaki": {
+        "x": 33,
+        "y": 183
+      },
+      "kepala": {
+        "x": 32.5,
+        "y": 28
+      },
+      "kepalaTinggi": 54,
+      "wajah": {
+        "x": 24,
+        "y": 28,
+        "w": 24,
+        "h": 22
+      },
+      "hadap": "kanan",
+      "frame": [
+        "berdiri-kanan senyum",
+        "berdiri-sambut-kanan senyum",
+        "berdiri-sambut-kanan senyum kedip",
+        "berdiri-kanan senyum kedip"
+      ]
     },
     "besar": {
-      "frameW": 141,
-      "frameH": 360
+      "frameW": 122,
+      "frameH": 368
     }
   }
 }

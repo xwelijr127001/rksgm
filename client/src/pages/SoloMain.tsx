@@ -3,16 +3,18 @@ import { Link, Navigate, useSearchParams } from 'react-router-dom';
 import { MISSIONS, TIEBREAK_MISSION, TUTORIAL_MISSION } from '@shared/missions';
 import type { MissionAnswer, MissionPublic, MissionReveal } from '@shared/types';
 import type { RoundScore } from '@shared/scoring';
+import { TOKOH } from '@shared/brand';
 import { Icon } from '../art/Icon';
 import { forceMusic, playSfx, setTrack } from '../audio/audio';
 import { PlayerShell, Arrow } from '../components/PlayerShell';
-import { HasilMisi, MissionPlay, type SubmitState } from '../game/MissionPlay';
+import { SapaanPemandu, namaTokoh } from '../game/KarakterTokoh';
+import { HasilMisi, MissionPlay, type PanelBantu, type SubmitState } from '../game/MissionPlay';
 import { prefetchAdegan } from '../game/prefetch';
 import { misiDalamBahasa, revealDalamBahasa, t, useBahasa } from '../i18n';
 import { terjemahkanGalat } from '../i18n/galat';
 import { bintangUntuk, catatHasilSolo, progresSolo, savedProfil } from '../state/profil';
 import { savedLook } from '../state/store';
-import { BarisBintang, TOTAL_MISI, angka, jumlahDicoba, tingkatMisi } from './soloBagian';
+import { BarisBintang, KeteranganBintang, TOTAL_MISI, angka, jumlahDicoba, tingkatMisi } from './soloBagian';
 import './solo.css';
 
 interface HasilSolo { accuracy: number; score: RoundScore; reveal: MissionReveal; }
@@ -20,7 +22,10 @@ interface HasilSolo { accuracy: number; score: RoundScore; reveal: MissionReveal
 /** Yang terjadi pada catatan perangkat setelah misi dinilai. */
 interface CatatanBaru { terbaikBaru: boolean; terbaik: number; semuaDicoba: boolean; }
 
-/** Bila adegan tak kunjung melapor siap, hitungan bonus tetap dimulai (pemain sudah bisa menjawab lewat daftar). */
+/**
+ * Setelah "Siap mulai": bila adegan tak kunjung melapor siap, hitungan bonus tetap dimulai (pemain
+ * sudah bisa menjawab lewat daftar). Waktu menunggu adegan tidak dihitung selama batas ini.
+ */
 const TUNGGU_ADEGAN_MS = 8000;
 
 function cariMisi(mentah: string | null): MissionPublic | null {
@@ -34,6 +39,8 @@ function cariMisi(mentah: string | null): MissionPublic | null {
 
 /**
  * MAIN SATU MISI (mode solo). Alamat: /solo/main?misi=N. Dinilai server lewat POST /api/practice/grade.
+ * Alur: kartu "Siap mulai" (kasus, tugas, cara main ringkas; MissionPlay mode 'intro') -> menjawab ->
+ * hasil. Bonus waktu baru berjalan SETELAH "Siap mulai" ditekan; waktu membaca kartu tidak dihitung.
  * Waktu hanya memengaruhi bonus cepat dan tidak pernah mengunci; tombol jeda menghentikan hitungan.
  * Boleh dimainkan tanpa profil ("coba dulu" dari tautan lama /latihan?misi=N): tampilan tokoh
  * memakai tampilan terakhir/bawaan, progres tetap tercatat di perangkat.
@@ -59,6 +66,8 @@ function SesiSolo({ asli, onUlang }: { asli: MissionPublic; onUlang: () => void 
   const [error, setError] = useState<string | null>(null);
   const [kirim, setKirim] = useState<SubmitState>('idle');
   const [jeda, setJeda] = useState(false);
+  /** "Siap mulai" sudah ditekan: baru sekarang menjawab & bonus waktu dimulai. */
+  const [mulai, setMulai] = useState(false);
   const [adeganSiap, setAdeganSiap] = useState(false);
   const [terpakaiMs, setTerpakaiMs] = useState(0);
   const [look] = useState(() => savedProfil()?.look ?? savedLook());
@@ -73,14 +82,14 @@ function SesiSolo({ asli, onUlang }: { asli: MissionPublic; onUlang: () => void 
 
   useEffect(() => { window.scrollTo(0, 0); }, []);
 
-  // ---- jam bonus: hanya menghitung waktu AKTIF (tanpa jeda, tanpa menunggu adegan dimuat).
+  // ---- jam bonus: hanya menghitung waktu AKTIF (setelah "Siap mulai", tanpa jeda, tanpa menunggu adegan dimuat).
   const durasiMs = asli.durationSeconds * 1000;
   const jam = useRef<{ terpakai: number; mulai: number | null }>({ terpakai: 0, mulai: null });
   const bacaJam = useCallback((): number => {
     const j = jam.current;
     return j.terpakai + (j.mulai === null ? 0 : performance.now() - j.mulai);
   }, []);
-  const berjalan = adeganSiap && !jeda && !result && kirim !== 'sending';
+  const berjalan = mulai && adeganSiap && !jeda && !result && kirim !== 'sending';
   useEffect(() => {
     const j = jam.current;
     if (berjalan) j.mulai = performance.now();
@@ -91,13 +100,15 @@ function SesiSolo({ asli, onUlang }: { asli: MissionPublic; onUlang: () => void 
     return () => window.clearInterval(id);
   }, [berjalan, bacaJam]);
   useEffect(() => {
-    if (adeganSiap) return;
+    // Batas tunggu adegan dihitung sejak "Siap mulai" (bukan sejak halaman dibuka).
+    if (adeganSiap || !mulai) return;
     const id = window.setTimeout(() => setAdeganSiap(true), TUNGGU_ADEGAN_MS);
     return () => window.clearTimeout(id);
-  }, [adeganSiap]);
+  }, [adeganSiap, mulai]);
 
   // Pindah tab / layar terkunci saat menjawab = jeda otomatis (waktu bonus tidak terbuang diam-diam).
-  const bolehJeda = !result && kirim !== 'sending';
+  // Sebelum "Siap mulai" tidak ada yang berjalan, jadi tidak ada yang perlu dijeda.
+  const bolehJeda = mulai && !result && kirim !== 'sending';
   const bolehJedaRef = useRef(bolehJeda);
   bolehJedaRef.current = bolehJeda;
   useEffect(() => {
@@ -152,10 +163,15 @@ function SesiSolo({ asli, onUlang }: { asli: MissionPublic; onUlang: () => void 
 
   const sisaDetik = Math.max(0, Math.ceil((durasiMs - terpakaiMs) / 1000));
   const bonusHabis = terpakaiMs >= durasiMs;
-  const statusBonus = bonusHabis ? 'habis' : jeda ? 'jeda' : 'jalan';
+  // 'siap' = belum dimulai (kartu "Siap mulai"): bonus penuh, belum berjalan.
+  const statusBonus = bonusHabis ? 'habis' : !mulai ? 'siap' : jeda ? 'jeda' : 'jalan';
   const nomor = String(asli.number).padStart(2, '0');
+  const bintang = result ? bintangUntuk(result.accuracy) : 0;
 
-  return <PlayerShell back="/solo" label={t('solo.labelMain')} className="kompak solo-layar solo-main">
+  // Judul tab "Misi 3: Berkas Ruko" (useHalaman lewat PlayerShell); pratinjau development tanpa nomor.
+  const judulTab = tercatat ? t('misi.judulTab', { n: asli.number, judul: misi.title }) : misi.title;
+
+  return <PlayerShell back="/solo" label={t('solo.labelMain')} className="kompak solo-layar solo-main" judul={judulTab}>
     <main className="misi-main">
       <div className="solo-bilah">
         <div className="solo-bilah-judul">
@@ -167,9 +183,10 @@ function SesiSolo({ asli, onUlang }: { asli: MissionPublic; onUlang: () => void 
             <Icon name="jam" size={18} />
             <span>{bonusHabis ? t('solo.bonusHabis') : jeda ? t('solo.bonusJeda', { detik: sisaDetik }) : t('solo.bonusSisa', { detik: sisaDetik })}</span>
           </span>
-          <button type="button" className="solo-tombol-jeda" disabled={kirim === 'sending'} onClick={() => { playSfx('tik'); setJeda((j) => !j); }}>
+          {/* Sebelum "Siap mulai" tidak ada yang berjalan: tombol jeda baru tampil setelah mulai. */}
+          {mulai ? <button type="button" className="solo-tombol-jeda" disabled={kirim === 'sending'} onClick={() => { playSfx('tik'); setJeda((j) => !j); }}>
             <TandaJeda lanjut={jeda} />{jeda ? t('solo.lanjutkan') : t('solo.jeda')}
-          </button>
+          </button> : null}
         </div> : null}
         <p className="sr-only" aria-live="polite">{bonusHabis && !result ? t('solo.bonusHabis') : ''}</p>
       </div>
@@ -177,7 +194,7 @@ function SesiSolo({ asli, onUlang }: { asli: MissionPublic; onUlang: () => void 
         mission={misi}
         roundIndex={-1}
         look={look}
-        mode={result ? 'reveal' : jeda ? 'paused' : 'play'}
+        mode={result ? 'reveal' : !mulai ? 'intro' : jeda ? 'paused' : 'play'}
         answer={answer}
         onAnswer={(id, value) => setAnswer((old) => ({ ...old, [id]: value }))}
         onSubmit={() => void submit()}
@@ -185,40 +202,68 @@ function SesiSolo({ asli, onUlang }: { asli: MissionPublic; onUlang: () => void 
         submitError={galat}
         reveal={reveal}
         submitLabel={t('misi.periksaJawabanku')}
-        bantuanAwal={pertamaKali}
+        // Kasus sudah dibaca di kartu "Siap mulai": saat menjawab cerita dilipat, kunjungan pertama cukup satu baris petunjuk.
+        sudahBriefing
+        kiatAwal={pertamaKali}
+        ketIntro={t('misi.adeganSetelahMulai', { tombol: t('misi.siapMulai') })}
         onSceneStatus={(s) => { if (s !== 'loading') setAdeganSiap(true); }}
-        panel={result && reveal ? <>
-          {tercatat ? <p className="solo-raih">
-            <BarisBintang n={bintangUntuk(result.accuracy)} ukuran={30} className="solo-raih-bintang" />
-            <span className="solo-raih-teks">
-              <b aria-hidden="true">{t('solo.nBintang', { n: bintangUntuk(result.accuracy) })}</b>
-              <small>{catatan?.terbaikBaru ? t('solo.terbaikBaru') : catatan && catatan.terbaik > result.score.roundScore ? t('solo.terbaikmu', { n: angka(catatan.terbaik) }) : t('solo.tersimpan')}</small>
-            </span>
-          </p> : null}
-          <HasilMisi
-            mission={misi}
-            reveal={reveal}
-            answer={answer}
-            akurasi={result.accuracy}
-            dijawab
-            poin={result.score.roundScore}
-            aksi={tepat
-              ? <>{lanjut}<div className="solo-aksi-lain">{ulangi}{peta}</div></>
-              : <>{ulangi}<div className="solo-aksi-lain">{lanjut}{peta}</div></>}
-            catatan={<p className="practice-note">{t('misi.catatanSimulasiPolis')}</p>}
-          />
-        </> : jeda ? <div className="status-panel status-jeda" role="status">
-          <Icon name="jam" size={22} />
-          <div className="solo-jeda-isi">
-            <h2>{t('solo.jedaJudul')}</h2>
-            <p>{t('solo.jedaTeks')}</p>
-            <button type="button" className="primary-action solo-jeda-lanjut" onClick={() => { playSfx('tik'); setJeda(false); }}>{t('solo.lanjutkanMain')} <Arrow /></button>
-          </div>
-        </div> : null}
+        panel={(bantu) => result && reveal ? <HasilMisi
+          mission={misi}
+          reveal={reveal}
+          answer={answer}
+          akurasi={result.accuracy}
+          dijawab
+          poin={result.score.roundScore}
+          raihan={tercatat ? <>
+            <p className="solo-raih">
+              <BarisBintang n={bintang} ukuran={30} className="solo-raih-bintang" />
+              <span className="solo-raih-teks">
+                <b aria-hidden="true">{t('solo.nBintang', { n: bintang })}</b>
+                <small>{catatan?.terbaikBaru ? t('solo.terbaikBaru') : catatan && catatan.terbaik > result.score.roundScore ? t('solo.terbaikmu', { n: angka(catatan.terbaik) }) : t('solo.tersimpan')}</small>
+              </span>
+            </p>
+            <KeteranganBintang n={bintang} ringkas />
+          </> : null}
+          aksi={tepat
+            ? <>{lanjut}<div className="solo-aksi-lain">{ulangi}{peta}</div></>
+            : <>{ulangi}<div className="solo-aksi-lain">{lanjut}{peta}</div></>}
+          catatan={<p className="practice-note">{t('misi.catatanSimulasiPolis')}</p>}
+        /> : !mulai ? <KartuMulai misi={misi} bantu={bantu} onMulai={() => { playSfx('tik'); setMulai(true); }} />
+          : jeda ? <div className="status-panel status-jeda" role="status">
+            <Icon name="jam" size={22} />
+            <div className="solo-jeda-isi">
+              <h2>{t('solo.jedaJudul')}</h2>
+              <p>{t('solo.jedaTeks')}</p>
+              <button type="button" className="primary-action solo-jeda-lanjut" onClick={() => { playSfx('tik'); setJeda(false); }}>{t('solo.lanjutkanMain')} <Arrow /></button>
+            </div>
+          </div> : null}
       />
       {!result ? <p className="practice-note misi-catatan">{t('misi.catatanSimulasiPeriksa')}</p> : null}
     </main>
   </PlayerShell>;
+}
+
+/**
+ * Gerbang "Siap mulai": kasus (dibawakan Miss Raksa), tugas, cara main ringkas sesuai mode adegan,
+ * tombol dokumen/checklist bila ada, dan janji bahwa bonus waktu baru berjalan setelah tombol ditekan.
+ * Tugas = h2 (menerima fokus saat kartu tampil); judul misi = h1 tepat di atasnya.
+ */
+function KartuMulai({ misi, bantu, onMulai }: { misi: MissionPublic; bantu: PanelBantu; onMulai: () => void }) {
+  useBahasa();
+  const tombol = t('misi.siapMulai');
+  const kasus = TOKOH.missRaksa.aktif
+    ? <SapaanPemandu tokoh="missRaksa" label={`${namaTokoh('missRaksa')} · ${t('misi.labelKasus')}`} teks={misi.story} ukuran={44} />
+    : <div><span className="status-label">{t('misi.labelKasus')}</span><p>{misi.story}</p></div>;
+  return <div className="status-panel misi-mulai">
+    {kasus}
+    <div className="status-tugas"><span className="status-label">{t('misi.tugasmu')}</span><h2>{misi.instruction}</h2></div>
+    <div className="misi-mulai-cara"><span className="status-label">{t('misi.caraMain')}</span>{bantu.caraRingkas}</div>
+    {bantu.tombolInfo}
+    <div className="misi-mulai-aksi">
+      <p className="misi-mulai-bonus"><Icon name="jam" size={18} /><span>{t('misi.bonusSetelahMulai', { tombol })}</span></p>
+      <button type="button" className="primary-action" onClick={onMulai}>{tombol}<Arrow /></button>
+    </div>
+  </div>;
 }
 
 /** Ikon jeda (dua balok) / lanjut (segitiga); hiasan, katanya ada di sebelahnya. */

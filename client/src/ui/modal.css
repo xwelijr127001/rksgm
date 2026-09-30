@@ -1,0 +1,73 @@
+/* Dialog modal bersama (Modal di ui/kit.tsx; logika fokus/tumpukan/inert di ui/modal.ts). Awalan kelas: mdl-
+ *
+ * Struktur: body > .mdl-latar (lapisan, anak langsung body lewat portal) > .mdl-panel[role=dialog]
+ *   > .mdl-judul + .mdl-isi (satu-satunya kotak gulir) + .mdl-aksi (selalu terlihat).
+ * Panel tidak pernah lebih tinggi dari layar: isi yang panjang menggulir di .mdl-isi, tombol tutup/aksi
+ * tetap di bawah. Kelas tema halaman (.player-ui) ikut dibawa ke .mdl-latar supaya gaya pemain tetap
+ * berlaku; `body >` membuat aturan di bawah lebih kuat dari .player-ui tanpa !important.
+ */
+
+body > .mdl-latar {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 0;
+  padding:
+    max(16px, env(safe-area-inset-top))
+    max(16px, env(safe-area-inset-right))
+    max(16px, env(safe-area-inset-bottom))
+    max(16px, env(safe-area-inset-left));
+  background: rgba(23, 54, 42, 0.55);
+  overflow: hidden;
+  overscroll-behavior: contain;
+}
+
+.mdl-panel {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: 420px;
+  max-height: 100%;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.mdl-judul {
+  flex: 0 0 auto;
+  overflow-wrap: anywhere;
+}
+/* Judul hanya pegangan fokus awal (dibaca pembaca layar), bukan kontrol: tanpa cincin fokus
+   (lebih kuat dari `.player-ui :focus-visible`). */
+.mdl-panel .mdl-judul:focus {
+  outline: none;
+}
+
+.mdl-isi {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+  /* Ruang cincin fokus kontrol di dalam kotak gulir. */
+  margin: 0 -8px;
+  padding: 4px 8px;
+}
+.mdl-panel .mdl-isi:focus-visible {
+  outline: 3px solid #397bca;
+  outline-offset: -3px;
+  border-radius: 10px;
+}
+
+.mdl-aksi {
+  flex: 0 0 auto;
+  margin-top: 14px;
+  justify-content: flex-end;
+}
+
+/* Panel menerima fokus hanya agar klik pada isi yang tidak bisa difokus tidak melempar fokus ke body; tanpa cincin. */
+.mdl-panel:focus { outline: none; }

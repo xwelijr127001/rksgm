@@ -20,7 +20,7 @@ import path from 'node:path';
 const BASE = process.env.UI_BASE || 'http://127.0.0.1:4000';
 const OUT = path.resolve(process.env.RAKSA_SHOTS || 'shots-acara');
 const DIST = path.resolve(import.meta.dirname, '../server/dist');
-const CHROME = process.env.RAKSA_CHROME || 'C:\Program Files\Google\Chrome\Application\chrome.exe';
+const CHROME = process.env.RAKSA_CHROME || 'C:/Program Files/Google/Chrome/Application/chrome.exe';
 const HANYA = process.argv[2] ? process.argv[2].split(',') : null; // mis. "a03,a07" -> tangkapan hanya misi itu
 fs.mkdirSync(OUT, { recursive: true });
 const require = createRequire(import.meta.url);

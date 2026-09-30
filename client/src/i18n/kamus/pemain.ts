@@ -5,9 +5,10 @@ import type { KamusRuang } from '.';
  * hasil akhir (Result), dan pemilih karakter (CharacterPicker).
  *
  * Catatan:
- * - `landingIsi2` sengaja diawali spasi di id/en: di HP <br> di antaranya disembunyikan,
- *   jadi spasi itulah yang memisahkan kedua penggal kalimat (zh tidak memakai spasi).
- *   `seri` juga diawali spasi di id/en karena ditempel langsung setelah "Juara 1".
+ * - Halaman awal = tiga pintu (`pintu*`): Main cerita (utama), Latihan misi, Gabung acara
+ *   (docs/rancangan-mode-cerita.md bagian 1). `sambutKota` + `sambutKamu` = sapaan Mr Roger di
+ *   ilustrasi kota.
+ * - `seri` diawali spasi di id/en karena ditempel langsung setelah "Juara 1".
  * - `aksesori.<id>` mengikuti id ACCESSORIES (shared/brand.ts); `lencana.<id>.nama/ket`
  *   mengikuti id ALL_BADGES (shared/scoring.ts). Teks id keduanya = salinan persis sumbernya.
  * - Nama pemain adalah isian pemain: tidak diterjemahkan. Nama acara & label hadiah isian panitia
@@ -21,15 +22,19 @@ const kamus: KamusRuang = {
     landingEyebrow: 'MAIN BARENG RAKSA',
     landingJudul1: 'Siap jadi',
     landingJudul2: 'andalan?',
-    landingIsi1: 'Jelajahi kota, bantu nasabah,',
-    landingIsi2: ' dan rebut posisi pertama.',
+    landingPilih: 'Belajar melayani klaim asuransi sambil bermain. Pilih cara mainmu:',
+    pilihCaraMain: 'Pilih cara main',
+    pintuMulai: 'Mulai di sini',
+    pintuCeritaJudul: 'Main cerita',
+    pintuCeritaIsi: 'Bantu seorang pelanggan, langkah demi langkah. Tanpa timer.',
+    pintuLatihanJudul: 'Latihan misi',
+    pintuLatihanIsi: '10 misi singkat, bisa diulang.',
+    pintuAcaraJudul: 'Gabung acara',
+    pintuAcaraIsi: 'Punya kode dari panitia?',
     ayoMain: 'Ayo, main!',
-    landingCatatan: '10 misi seru · Main dari HP kamu',
+    landingCatatan: 'Tanpa akun · Main dari HP atau laptop',
     sambutKota: 'Kota ini butuh andalan.',
     sambutKamu: 'Kamu, misalnya.',
-    sapaRaki: 'Sapa Raki',
-    rakiYuk: 'Yuk, main bareng!',
-    rakiHai: 'Hai, aku Raki!',
 
     // --- Join
     labelGabung: 'Gabung permainan',
@@ -118,7 +123,7 @@ const kamus: KamusRuang = {
     // --- CharacterPicker
     mauDipanggil: 'Mau dipanggil siapa?',
     namaPanggilan: 'Nama panggilan kamu',
-    pilihTeman: 'Pilih teman mainmu',
+    pilihTeman: 'Pilih karaktermu',
     presetSigap: 'Si Sigap',
     presetTeliti: 'Si Teliti',
     presetTangguh: 'Si Tangguh',
@@ -166,15 +171,19 @@ const kamus: KamusRuang = {
     landingEyebrow: 'PLAY WITH RAKSA',
     landingJudul1: 'Ready to',
     landingJudul2: 'step up?',
-    landingIsi1: 'Explore the city, help customers,',
-    landingIsi2: ' and race for first place.',
+    landingPilih: 'Learn to serve insurance claim customers through play. Choose how to play:',
+    pilihCaraMain: 'Choose how to play',
+    pintuMulai: 'Start here',
+    pintuCeritaJudul: 'Play the story',
+    pintuCeritaIsi: 'Help a customer, one step at a time. No timer.',
+    pintuLatihanJudul: 'Mission practice',
+    pintuLatihanIsi: '10 short missions you can replay.',
+    pintuAcaraJudul: 'Join an event',
+    pintuAcaraIsi: 'Got a code from the organisers?',
     ayoMain: 'Let’s play!',
-    landingCatatan: '10 fun missions · Play on your phone',
+    landingCatatan: 'No account needed · Play on your phone or laptop',
     sambutKota: 'This city needs someone to count on.',
     sambutKamu: 'Someone like you.',
-    sapaRaki: 'Say hello to Raki',
-    rakiYuk: 'Come on, let’s play!',
-    rakiHai: 'Hi, I’m Raki!',
 
     // --- Join
     labelGabung: 'Join the game',
@@ -263,7 +272,7 @@ const kamus: KamusRuang = {
     // --- CharacterPicker
     mauDipanggil: 'What should we call you?',
     namaPanggilan: 'Your nickname',
-    pilihTeman: 'Pick your game buddy',
+    pilihTeman: 'Pick your character',
     presetSigap: 'Speedy',
     presetTeliti: 'Sharp Eye',
     presetTangguh: 'Sturdy',
@@ -311,15 +320,19 @@ const kamus: KamusRuang = {
     landingEyebrow: '和 RAKSA 一起玩',
     landingJudul1: '准备好',
     landingJudul2: '挑大梁？',
-    landingIsi1: '探索城市，帮助客户，',
-    landingIsi2: '争夺第一名。',
+    landingPilih: '边玩边学习保险理赔服务。选择你的玩法：',
+    pilihCaraMain: '选择玩法',
+    pintuMulai: '从这里开始',
+    pintuCeritaJudul: '故事模式',
+    pintuCeritaIsi: '一步一步帮助一位客户，没有计时。',
+    pintuLatihanJudul: '任务练习',
+    pintuLatihanIsi: '10 个简短任务，可以反复练习。',
+    pintuAcaraJudul: '加入活动',
+    pintuAcaraIsi: '有主办方给的代码吗？',
     ayoMain: '开始玩吧！',
-    landingCatatan: '10 个精彩任务 · 用手机就能玩',
+    landingCatatan: '无需账号 · 用手机或电脑都能玩',
     sambutKota: '这座城市需要一个靠得住的人。',
     sambutKamu: '比如，你。',
-    sapaRaki: '和 Raki 打个招呼',
-    rakiYuk: '来，一起玩吧！',
-    rakiHai: '嗨，我是 Raki！',
 
     // --- Join
     labelGabung: '加入游戏',
@@ -408,7 +421,7 @@ const kamus: KamusRuang = {
     // --- CharacterPicker
     mauDipanggil: '怎么称呼你？',
     namaPanggilan: '你的昵称',
-    pilihTeman: '选择你的游戏伙伴',
+    pilihTeman: '选择你的角色',
     presetSigap: '小机灵',
     presetTeliti: '小细心',
     presetTangguh: '小坚强',

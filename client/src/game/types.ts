@@ -23,6 +23,25 @@ export interface ArtRef {
   svg: string;
   w: number;
   h: number;
+  /**
+   * Seni PIKSEL (opsional, saat ini hanya properti adegan): potongan atlas PNG disusun ke kanvas 1 px per piksel seni
+   * (engine/raster.ts), tekstur NEAREST, tampil pada piksel PERANGKAT bulat per piksel seni setinggi kira-kira `h`
+   * dunia, titik pijak di tengah tepi bawah kotak w x h (MissionScene). Atlas gagal dimuat = `svg` dipakai biasa.
+   */
+  piksel?: ArtPiksel;
+}
+
+/** Susunan seni piksel dari atlas PNG (lihat ArtRef.piksel). */
+export interface ArtPiksel {
+  /** URL PNG atlas (satu asal dengan halaman). */
+  url: string;
+  /** Ukuran gambar hasil susunan (piksel seni). */
+  w: number;
+  h: number;
+  /** Titik pijak (piksel seni) yang diletakkan di tengah tepi bawah kotak w x h. Bawaan: tengah tepi bawah gambar. */
+  jangkar?: { x: number; y: number };
+  /** Potongan atlas berurutan: sumber (sx, sy, w, h) -> letak (x, y) di gambar, piksel seni. */
+  lapisan: readonly { sx: number; sy: number; w: number; h: number; x: number; y: number }[];
 }
 
 /**

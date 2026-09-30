@@ -2,8 +2,13 @@ import type { KamusRuang } from './index';
 
 /**
  * Ruang kamus `alur`: alur masuk pemain (docs/rancangan-bank-soal.md bagian 2).
- *  - Landing  : tautan "Punya kode acara?", baris "Main sebagai X · ubah", spanduk acara terbuka.
- *  - Kenalan  : sapaan Miss Raksa, judul/aksi versi baru & versi "ubah".
+ *  - Landing  : baris "Main sebagai X · ubah", spanduk acara terbuka. (Tiga pintu halaman awal ada di
+ *               kamus `pemain`, kunci `pintu*`; tautan lama "Punya kode acara?" diganti pintu Gabung acara.)
+ *  - Kenalan  : sapaan Miss Raksa, judul/aksi versi baru & versi "ubah". Miss Raksa = mentor layanan
+ *               klaim (jabatannya di kamus `tokoh` sama dengan perannya di mode cerita). `missKenalan`
+ *               berlaku untuk tujuan apa pun; `missKenalanCerita` untuk tujuan /cerita: sapaan umum saja,
+ *               peran pemain diperkenalkan sekali di awal episode (docs/rancangan-mode-cerita.md 11.3).
+ *               `ubahTampilan` = tombol lipatan tampilan karakter (opsional) untuk tujuan /cerita.
  *  - Join     : keadaan pemeriksaan kode (GET /api/room/:code/info) dan langkah 2 dengan profil.
  *
  * Catatan:
@@ -17,7 +22,6 @@ import type { KamusRuang } from './index';
 const kamus: KamusRuang = {
   id: {
     // --- Landing
-    punyaKode: 'Punya kode acara?',
     mainSebagai: 'Main sebagai {nama}',
     ubahKecil: 'ubah',
     ubahProfilAria: 'Ubah nama dan karakter',
@@ -27,13 +31,15 @@ const kamus: KamusRuang = {
     // --- Kenalan
     labelKenalan: 'Kenalan dulu',
     labelUbah: 'Ubah karakter',
-    missKenalan: 'Hai! Aku yang menemanimu di tiap misi. Kenalan dulu, yuk!',
+    missKenalan: 'Hai! Aku mentormu di layanan klaim Raksa. Kenalan dulu, yuk!',
+    missKenalanCerita: 'Hai, senang ketemu kamu!',
     missUbah: 'Mau ganti gaya, {nama}? Boleh banget!',
     judulUbah: 'Ubah nama & karakter',
     simpanMain: 'Simpan & main',
     simpanLanjut: 'Simpan & lanjut',
     simpanPerubahan: 'Simpan perubahan',
     catatanPerangkat: 'Tersimpan di perangkat ini saja.',
+    ubahTampilan: 'Ubah tampilan (opsional)',
 
     // --- Join, langkah 1: pemeriksaan kode
     cekPetunjuk: 'Begitu 4 karakter terisi, kodenya langsung dicek.',
@@ -56,7 +62,6 @@ const kamus: KamusRuang = {
   },
   en: {
     // --- Landing
-    punyaKode: 'Got an event code?',
     mainSebagai: 'Playing as {nama}',
     ubahKecil: 'change',
     ubahProfilAria: 'Change your name and character',
@@ -66,13 +71,15 @@ const kamus: KamusRuang = {
     // --- Kenalan
     labelKenalan: 'Say hello first',
     labelUbah: 'Change character',
-    missKenalan: 'Hi! I’ll be with you on every mission. Let’s get to know you first!',
+    missKenalan: 'Hi! I’m your mentor in Raksa claims service. Let’s get to know you first!',
+    missKenalanCerita: 'Hi, nice to meet you!',
     missUbah: 'Fancy a new look, {nama}? Go for it!',
     judulUbah: 'Change your name & character',
     simpanMain: 'Save & play',
     simpanLanjut: 'Save & continue',
     simpanPerubahan: 'Save changes',
     catatanPerangkat: 'Saved on this device only.',
+    ubahTampilan: 'Change your look (optional)',
 
     // --- Join, step 1: checking the code
     cekPetunjuk: 'As soon as all 4 characters are in, we’ll check the code.',
@@ -95,7 +102,6 @@ const kamus: KamusRuang = {
   },
   zh: {
     // --- Landing
-    punyaKode: '有活动代码吗？',
     mainSebagai: '以“{nama}”的身份游戏',
     ubahKecil: '修改',
     ubahProfilAria: '修改名字和角色',
@@ -105,13 +111,15 @@ const kamus: KamusRuang = {
     // --- Kenalan
     labelKenalan: '先认识一下',
     labelUbah: '修改角色',
-    missKenalan: '嗨！每个任务我都会陪着你。先来认识一下吧！',
+    missKenalan: '嗨！我是你在 Raksa 理赔服务的导师。先来认识一下吧！',
+    missKenalanCerita: '嗨，很高兴见到你！',
     missUbah: '{nama}，想换个造型吗？当然可以！',
     judulUbah: '修改名字和角色',
     simpanMain: '保存并开始',
     simpanLanjut: '保存并继续',
     simpanPerubahan: '保存修改',
     catatanPerangkat: '仅保存在这台设备上。',
+    ubahTampilan: '更改形象（可选）',
 
     // --- Join，第 1 步：检查代码
     cekPetunjuk: '填满 4 个字符后，会立刻检查代码。',

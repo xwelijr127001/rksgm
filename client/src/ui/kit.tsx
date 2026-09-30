@@ -3,7 +3,8 @@
  * Semua status ditampilkan dengan teks/ikon, tidak hanya warna.
  */
 
-import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
+import { useEffect, useId, useMemo, useRef, useState, type ReactNode } from 'react';
+import { createPortal } from 'react-dom';
 import QRCode from 'qrcode';
 import { BRAND } from '@shared/brand';
 import type { DocTable, LeaderRow, Phase, PolicyCard, Prizes } from '@shared/types';
@@ -21,6 +22,8 @@ import { useAudioPrefs, useCountdown, useReducedMotion } from '../hooks';
 import { t, useBahasa } from '../i18n';
 import { terjemahkanBawaan } from '../i18n/galat';
 import { useGame } from '../state/store';
+import { gulirUntukTombol, kelasKonteks, useBisaGulir, useLapisanDialog, type KembaliKe } from './modal';
+import './modal.css';
 
 // ---------------------------------------------------------------- judul brand
 
@@ -223,56 +226,104 @@ export function Disclaimer() {
 
 // ---------------------------------------------------------------- modal / konfirmasi
 
+/**
+ * Dialog modal bersama (logika di ./modal.ts, gaya di ./modal.css).
+ * Dirender lewat portal ke <body>: fokus masuk ke judul saat dibuka, Tab/Shift+Tab berputar di dalam,
+ * latar inert, Escape hanya menutup dialog teratas, klik latar menutup. Saat ditutup fokus kembali ke
+ * `kembaliKe` (mis. tombol "Dokumen" bila dialog dibuka dari kanvas), lalu ke elemen pembuka.
+ * Isi panjang menggulir di wilayah isi (bisa difokus & digulir keyboard); tombol aksi selalu terlihat.
+ * `lebar` = lebar maksimum panel (bawaan 420px).
+ */
+export type SebabTutup = 'escape' | 'latar' | 'tombol';
+
 export function Modal({
   judul,
   children,
   onTutup,
   aksi,
+  kembaliKe,
+  lebar,
 }: {
   judul: string;
   children?: ReactNode;
-  onTutup: () => void;
+  /** `sebab`: 'escape' | 'latar' | 'tombol'. Pemanggil yang perlu menjaga klik hantu cukup mengabaikan 'latar'. */
+  onTutup: (sebab?: SebabTutup) => void;
   aksi?: ReactNode;
+  kembaliKe?: KembaliKe;
+  lebar?: number | string;
 }) {
   useBahasa();
-  useEffect(() => {
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onTutup();
-    };
-    window.addEventListener('keydown', onKey);
-    return () => window.removeEventListener('keydown', onKey);
-  }, [onTutup]);
+  const idJudul = useId();
+  const latarRef = useRef<HTMLDivElement>(null);
+  const judulRef = useRef<HTMLHeadingElement>(null);
+  const isiRef = useRef<HTMLDivElement>(null);
+  // Tekan dimulai di latar? (klik "hantu" dari ketukan yang membuka dialog, atau seret dari dalam panel, tidak menutup)
+  const tekanDiLatar = useRef(false);
+  const bisaGulir = useBisaGulir(isiRef);
+  // Gaya pemain (player.css) bergantung pada leluhur .player-ui: bawa kelas tema halaman ke portal.
+  const [konteks] = useState(() => kelasKonteks(typeof document === 'undefined' ? null : (document.activeElement as HTMLElement | null)));
+  useLapisanDialog(latarRef, { onEscape: () => onTutup('escape'), kembaliKe, fokusAwal: () => judulRef.current });
 
-  return (
+  if (typeof document === 'undefined') return null;
+  return createPortal(
     <div
-      role="dialog"
-      aria-modal="true"
-      aria-label={judul}
-      style={{
-        position: 'fixed',
-        inset: 0,
-        background: 'rgba(23,54,42,0.55)',
-        display: 'grid',
-        placeItems: 'center',
-        padding: 16,
-        zIndex: 60,
+      ref={latarRef}
+      className={'mdl-latar' + (konteks ? ` ${konteks}` : '')}
+      onPointerDown={(e) => {
+        tekanDiLatar.current = e.target === e.currentTarget;
       }}
       onClick={(e) => {
-        if (e.target === e.currentTarget) onTutup();
+        const dariLatar = tekanDiLatar.current;
+        tekanDiLatar.current = false;
+        if (e.target === e.currentTarget && dariLatar) onTutup('latar');
       }}
     >
-      <div className="panel anim-skala" style={{ width: '100%', maxWidth: 420 }}>
-        <h3>{judul}</h3>
-        <div className="stack">{children}</div>
-        <div className="baris" style={{ marginTop: 14, justifyContent: 'flex-end' }}>
+      <div
+        className="panel anim-skala mdl-panel"
+        role="dialog"
+        // Bisa difokus (bukan tab stop): klik/ketukan pada isi yang tidak bisa difokus - termasuk klik tiruan
+        // setelah ketukan sentuh yang membuka dialog - memindah fokus ke panel ini, bukan ke body di luar dialog.
+        tabIndex={-1}
+        aria-modal="true"
+        aria-labelledby={idJudul}
+        style={lebar !== undefined ? { maxWidth: lebar } : undefined}
+      >
+        <h3
+          id={idJudul}
+          ref={judulRef}
+          tabIndex={-1}
+          className="mdl-judul"
+          onKeyDown={(e) => {
+            // Fokus awal di judul: panah / PageUp / PageDown / Home / End langsung menggulir isi.
+            const isi = isiRef.current;
+            if (!isi || !bisaGulir) return;
+            const jarak = gulirUntukTombol(e.key, isi.clientHeight);
+            if (jarak === null) return;
+            e.preventDefault();
+            if (jarak === 'awal') isi.scrollTop = 0;
+            else if (jarak === 'akhir') isi.scrollTop = isi.scrollHeight;
+            else isi.scrollBy({ top: jarak });
+          }}
+        >
+          {judul}
+        </h3>
+        <div
+          ref={isiRef}
+          className="mdl-isi"
+          {...(bisaGulir ? { tabIndex: 0, role: 'region', 'aria-label': t('umum.dialogIsi', { judul }) } : {})}
+        >
+          <div className="stack">{children}</div>
+        </div>
+        <div className="baris mdl-aksi">
           {aksi ?? (
-            <button className="btn btn-netral" onClick={onTutup}>
+            <button type="button" className="btn btn-netral" onClick={() => onTutup('tombol')}>
               {t('layar.tutup')}
             </button>
           )}
         </div>
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }
 
@@ -295,22 +346,26 @@ export function TombolKonfirmasi({
   disabled?: boolean;
 }) {
   const [buka, setBuka] = useState(false);
+  // Fokus kembali ke tombol ini walau klik tidak memberinya fokus (Safari) atau ia digambar ulang.
+  const tombolRef = useRef<HTMLButtonElement>(null);
   useBahasa();
   return (
     <>
-      <button className={kelas} onClick={() => setBuka(true)} disabled={disabled}>
+      <button ref={tombolRef} type="button" className={kelas} onClick={() => setBuka(true)} disabled={disabled}>
         {label}
       </button>
       {buka ? (
         <Modal
           judul={judul}
           onTutup={() => setBuka(false)}
+          kembaliKe={() => tombolRef.current}
           aksi={
             <>
-              <button className="btn btn-netral" onClick={() => setBuka(false)}>
+              <button type="button" className="btn btn-netral" onClick={() => setBuka(false)}>
                 {t('layar.batal')}
               </button>
               <button
+                type="button"
                 className="btn btn-bahaya"
                 onClick={() => {
                   setBuka(false);

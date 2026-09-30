@@ -1,0 +1,20 @@
+/* Seni mode cerita: Bu Rina (panggung & potret) dan latar panggung. Awalan kelas: cseni- */
+
+/* Latar panggung: mengisi wadahnya (tampilan cerita yang mengatur ukuran & posisi). */
+.cseni-latar { display: block; width: 100%; height: 100%; }
+
+/* Bu Rina di panggung. Tanpa `tinggi`, tinggi mengikuti wadah & lebar mengikuti rasio gambar. */
+.cseni-tokoh { display: block; height: 100%; width: auto; overflow: visible; }
+.cseni-tokoh-bingkai { display: inline-block; line-height: 0; }
+/* Ganti ekspresi: respons kecil & tenang (0,2 dtk; rancangan 11.6: <= 200 ms). Gerak dikurangi = ganti instan. */
+.cseni-tokoh-bingkai.cseni-ganti { animation: cseni-ganti 200ms ease-out; transform-origin: 50% 100%; }
+@keyframes cseni-ganti {
+  0% { transform: translateY(3px) scale(0.985); }
+  100% { transform: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  :root:not([data-gerak="penuh"]) .cseni-tokoh-bingkai.cseni-ganti { animation: none; }
+}
+
+/* Potret bulat: bingkai = .tokoh-potret (game/tokoh.css) supaya sama dengan potret tokoh Raksa. */
+.cseni-potret > svg { display: block; }

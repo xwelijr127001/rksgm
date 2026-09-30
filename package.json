@@ -21,11 +21,15 @@
     "unity:build": "powershell -ExecutionPolicy Bypass -File unity/build.ps1",
     "check:csharp": "powershell -ExecutionPolicy Bypass -File tools/check-csharp.ps1",
     "test:server": "npm -w @raksa/server run test",
-    "test:client": "tsx --tsconfig client/tsconfig.json --test client/src/game/draft.test.ts client/src/game/gambar.test.ts client/src/pages/host/drafSoal.test.ts client/src/game/hasil.test.ts client/src/game/scenes.test.ts client/src/i18n/terjemahan.test.ts client/src/unity/bridge.test.ts client/src/unity/missionObjects.test.ts",
+    "test:client": "tsx --tsconfig client/tsconfig.json --test client/src/game/draft.test.ts client/src/ui/halaman.test.ts client/src/cerita/ui/tampilan.test.ts client/src/cerita/ui/tinjauan.test.ts client/src/cerita/ui/hasilAktivitas.test.ts client/src/cerita/seni/seni.test.ts client/src/cerita/ui/adegan.test.ts client/src/cerita/seni/ruang/ruang.test.ts client/src/cerita/seni/tokoh/missRaksa.test.ts client/src/cerita/seni/tokoh/buRina.test.ts client/src/cerita/ui/panggung/kamera.test.ts client/src/cerita/ui/panggung/piksel.test.ts client/src/cerita/ui/panggung/rencana.test.ts client/src/cerita/ui/panggung/sutradara.test.ts client/src/game/scenes/cerita/cerita.test.ts client/src/cerita/mesin.test.ts client/src/cerita/simpan.test.ts client/src/cerita/validasi.test.ts client/src/cerita/episode/auto-1/episode.test.ts client/src/state/profil.test.ts client/src/ui/modal.test.ts client/src/game/aksesInfo.test.ts client/src/game/gambar.test.ts client/src/pages/host/drafSoal.test.ts client/src/game/hasil.test.ts client/src/game/scenes.test.ts client/src/i18n/terjemahan.test.ts client/src/unity/bridge.test.ts client/src/unity/missionObjects.test.ts client/src/cerita/seni/piksel/susun.test.ts",
     "test:e2e": "node tools/e2e-browser.mjs",
     "check:audio": "node tools/audio-check.mjs",
     "check:unity-load": "node tools/unity-load-check.mjs",
-    "test:acara": "node tools/uji-paket-acara.mjs"
+    "test:acara": "node tools/uji-paket-acara.mjs",
+    "test:cerita": "node tools/uji-cerita.mjs",
+    "test:panggung": "node tools/uji-panggung.mjs",
+    "ekspor:aset-cerita": "tsx --tsconfig client/tsconfig.json tools/ekspor-aset-cerita.ts",
+    "test:review": "node tools/uji-temuan-review.mjs"
   },
   "engines": {
     "node": ">=20.11"

@@ -111,6 +111,8 @@ export async function createStage(opts: StageOptions): Promise<StageHandle> {
 
   const Scene = defineMissionScene(P);
   let scene: MissionSceneInstance | null = null;
+  /** Entri diagnostik `__raksaStage.scene` yang didaftarkan instans ini (untuk dibersihkan hanya oleh pemiliknya). */
+  let adeganUji: NonNullable<Window['__raksaStage']>['scene'];
 
   return new Promise<StageHandle>((resolve, reject) => {
     let selesai = false;
@@ -131,7 +133,9 @@ export async function createStage(opts: StageOptions): Promise<StageHandle> {
       audio: { noAudio: true },
       scale: { mode: P.Scale.NONE, width: awal.w, height: awal.h, zoom: 1 / dpr },
       // capture:false -> sentuhan di kanvas tetap bisa menggulung halaman.
-      input: { touch: { capture: false }, activePointers: 1, keyboard: false, gamepad: false },
+      // windowEvents mati: tanpa ini Phaser ikut memproses ketukan pada elemen HTML di atas kanvas
+      // (mis. bar aksi lengket) dan mengenai objek adegan di bawahnya.
+      input: { touch: { capture: false }, activePointers: 1, keyboard: false, gamepad: false, windowEvents: false },
       render: { antialias: true, roundPixels: false, powerPreference: 'default' },
       // HP lemah (<= 4 inti atau <= 2 GB RAM): batasi 30 fps supaya tidak panas & boros baterai.
       fps: { target: 60, limit: hematDaya() ? 30 : 0 },
@@ -169,7 +173,7 @@ export async function createStage(opts: StageOptions): Promise<StageHandle> {
         reg.created += 1;
         reg.last = stats;
         reg.fps = () => game.loop.actualFps;
-        reg.scene = {
+        reg.scene = adeganUji = {
           missionId: opts.mission.id,
           objects: opts.spec.objects.map((o) => ({ id: o.id, role: o.role, refId: o.refId, stepIds: stepIdsOf(o), x: o.x, y: o.y })),
         };
@@ -217,7 +221,9 @@ export async function createStage(opts: StageOptions): Promise<StageHandle> {
           const reg = catat();
           reg.live = hidup;
           reg.destroyed += 1;
-          if (reg.scene?.missionId === opts.mission.id) reg.scene = undefined;
+          // Hanya daftar milik instans ini: di StrictMode (dev) instans yang dibuang bisa dihancurkan SESUDAH instans
+          // pengganti mendaftar dengan misi yang sama.
+          if (reg.scene && reg.scene === adeganUji) reg.scene = undefined;
         },
       };
     };

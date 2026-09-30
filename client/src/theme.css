@@ -4,30 +4,39 @@
    resmi perusahaan. Ubah nilai di :root untuk menyesuaikan brand.
    ========================================================================== */
 
+/* Satu bahasa visual untuk pemain, host, dan proyektor (review 26 Sep, temuan F): krem tenang,
+   hijau utama, tombol datar. Nilai di sini sama dengan yang dipakai halaman pemain (player.css),
+   jadi host & komponen bersama (ui/kit.tsx) tidak lagi memakai krem kekuningan & bayangan 3D.
+   Kuning tetap aksen (chip, podium, kode room), bukan warna tombol. */
 :root {
   --kuning: #f6c445;
   --kuning-tua: #d8a41f;
-  --hijau: #176b45;
+  --hijau: #215c40;
+  --hijau-tua: #163e2b;
   --hijau-muda: #2e9a66;
-  --hijau-pucat: #dff0e4;
-  --krem: #fff9e9;
-  --krem-tua: #f3e7c9;
-  --tinta: #17362a;
-  --tinta-lembut: #47604f;
+  --hijau-pucat: #eef5e9;
+  --krem: #faf9f5;
+  --krem-tua: #e6e8df;
+  --tinta: #243d30;
+  --tinta-lembut: #5f6f64;
+  --garis: #dfe4d8;
   --cokelat: #5b4636;
   --merah: #c4452f;
+  --merah-tua: #a43826;
   --merah-pucat: #fbe4df;
   --biru: #2f6fb0;
   --biru-pucat: #e2edf8;
+  --fokus: #397bca;
   --putih: #ffffff;
 
   --radius-s: 10px;
-  --radius: 16px;
-  --radius-l: 24px;
+  --radius: 14px;
+  --radius-l: 16px;
+  --radius-tombol: 12px;
   --radius-pill: 999px;
 
-  --shadow-s: 0 2px 0 rgba(23, 54, 42, 0.12);
-  --shadow: 0 6px 18px rgba(23, 54, 42, 0.12);
+  --shadow-s: none;
+  --shadow: 0 1px 2px rgba(23, 54, 42, 0.06);
   --shadow-l: 0 14px 34px rgba(23, 54, 42, 0.18);
 
   --tap: 44px;
@@ -36,7 +45,10 @@
 
   --font: 'Segoe UI Variable', 'Segoe UI', system-ui, -apple-system, 'Helvetica Neue', Arial,
     'Noto Sans', sans-serif;
-  --font-judul: 'Baloo 2', 'Segoe UI Variable Display', 'Trebuchet MS', var(--font);
+  /* Sama dengan halaman pemain. (Dulu 'Baloo 2', yang tidak pernah dimuat: host jatuh ke
+     Trebuchet MS di Windows, tampil beda dari pemain.) */
+  --font-judul: 'Segoe UI Variable Display', 'Segoe UI', system-ui, -apple-system, 'Helvetica Neue',
+    Arial, 'Noto Sans', sans-serif;
 
   --dur-cepat: 140ms;
   --dur: 260ms;
@@ -75,9 +87,10 @@ h2,
 h3,
 h4 {
   font-family: var(--font-judul);
+  font-weight: 650;
   margin: 0 0 8px;
   line-height: 1.15;
-  letter-spacing: -0.01em;
+  letter-spacing: -0.02em;
 }
 h1 { font-size: clamp(24px, 6.4vw, 38px); }
 h2 { font-size: clamp(20px, 5vw, 28px); }
@@ -171,88 +184,100 @@ button {
   white-space: nowrap;
   border: 0;
 }
+/* Judul halaman yang menerima fokus setelah pindah halaman (ui/halaman.ts): hanya penanda posisi
+   untuk pembaca layar & Tab berikutnya, bukan kontrol, jadi tanpa cincin fokus. */
+h1[data-fokus-halaman]:focus,
+h1[data-fokus-halaman]:focus-visible {
+  outline: none;
+  box-shadow: none;
+}
 
 /* ------------------------------------------------------------------ tombol */
 
+/* Satu keluarga dengan .primary-action pemain (player.css): datar, hijau utama, sudut 12-13px,
+   tanpa bayangan 3D. Varian dibedakan oleh isi & garis, bukan hanya warna (teks tombol tetap
+   menjelaskan aksinya). Semua varian setinggi minimal 44px (target sentuh). */
 .btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
   min-height: var(--tap);
-  padding: 11px 20px;
-  border: 0;
-  border-radius: var(--radius-pill);
+  padding: 10px 18px;
+  border: 1px solid var(--hijau);
+  border-radius: var(--radius-tombol);
   background: var(--hijau);
   color: var(--putih);
-  font-weight: 800;
+  font-family: inherit;
+  font-weight: 600;
   font-size: 16px;
+  line-height: 1.25;
+  text-align: center;
   cursor: pointer;
-  box-shadow: 0 4px 0 var(--tinta);
-  transition: transform var(--dur-cepat) ease, box-shadow var(--dur-cepat) ease,
-    background var(--dur-cepat) ease;
+  transition: background var(--dur-cepat) ease, border-color var(--dur-cepat) ease,
+    color var(--dur-cepat) ease, transform var(--dur-cepat) ease;
   text-decoration: none;
   touch-action: manipulation;
 }
-.btn:active:not(:disabled) {
-  transform: translateY(3px);
-  box-shadow: 0 1px 0 var(--tinta);
-}
+.btn:hover:not(:disabled) { background: var(--hijau-tua); border-color: var(--hijau-tua); }
+.btn:active:not(:disabled) { transform: translateY(1px); }
 .btn:focus-visible {
-  outline: 3px solid var(--biru);
-  outline-offset: 2px;
+  outline: 3px solid var(--fokus);
+  outline-offset: 3px;
 }
 .btn:disabled {
-  opacity: 0.55;
+  opacity: 0.45;
   cursor: not-allowed;
-  box-shadow: 0 4px 0 rgba(23, 54, 42, 0.25);
 }
+/* Aksi utama: warna sama, hanya lebih besar (tidak lagi kuning). */
 .btn-utama {
-  background: var(--kuning);
-  color: var(--tinta);
-  box-shadow: 0 4px 0 var(--kuning-tua);
-  font-size: 18px;
-  padding: 13px 26px;
+  min-height: 52px;
+  padding: 13px 24px;
+  border-radius: 13px;
+  font-size: 17px;
 }
-.btn-utama:active:not(:disabled) { box-shadow: 0 1px 0 var(--kuning-tua); }
 .btn-garis {
   background: transparent;
   color: var(--hijau);
-  box-shadow: inset 0 0 0 2px var(--hijau);
+  border-color: var(--hijau);
 }
-.btn-garis:active:not(:disabled) { transform: translateY(2px); box-shadow: inset 0 0 0 2px var(--hijau); }
+.btn-garis:hover:not(:disabled) { background: var(--hijau-pucat); color: var(--hijau-tua); border-color: var(--hijau-tua); }
+.btn-netral {
+  background: #eef1e9;
+  color: var(--tinta);
+  border-color: #d9dfd2;
+}
+.btn-netral:hover:not(:disabled) { background: #e2e8db; border-color: #c3cdbb; }
 .btn-bahaya {
   background: var(--merah);
-  box-shadow: 0 4px 0 #8f2f1f;
+  border-color: var(--merah);
+  color: var(--putih);
 }
-.btn-bahaya:active:not(:disabled) { box-shadow: 0 1px 0 #8f2f1f; }
-.btn-netral {
-  background: var(--putih);
-  color: var(--tinta);
-  box-shadow: 0 3px 0 var(--krem-tua);
-}
+.btn-bahaya:hover:not(:disabled) { background: var(--merah-tua); border-color: var(--merah-tua); }
 .btn-blok {
   width: 100%;
 }
 .btn-kecil {
-  min-height: 38px;
+  min-height: var(--tap);
   padding: 8px 14px;
+  border-radius: 10px;
   font-size: 14px;
-  box-shadow: 0 3px 0 rgba(23, 54, 42, 0.3);
 }
 
 /* ------------------------------------------------------------------ kartu */
 
+/* Panel = kartu bergaris tipis seperti halaman pemain (bukan kotak putih berbayang tebal). */
 .panel {
   background: var(--putih);
+  border: 1px solid var(--garis);
   border-radius: var(--radius-l);
   padding: 16px;
   box-shadow: var(--shadow);
 }
 .panel-krem {
-  background: var(--krem);
-  border: 2px solid var(--krem-tua);
-  border-radius: var(--radius);
+  background: #f4f5ed;
+  border: 1px solid var(--garis);
+  border-radius: 12px;
   padding: 14px;
 }
 
@@ -264,9 +289,9 @@ button {
   min-height: var(--tap);
   padding: 12px 14px;
   text-align: left;
-  background: var(--putih);
-  border: 2px solid var(--krem-tua);
-  border-radius: var(--radius);
+  background: #fffefa;
+  border: 1px solid #d9dfd2;
+  border-radius: 12px;
   color: var(--tinta);
   font-weight: 600;
   cursor: pointer;
@@ -274,15 +299,17 @@ button {
   transition: transform var(--dur-cepat) ease, border-color var(--dur-cepat) ease,
     background var(--dur-cepat) ease;
 }
+.kartu:hover:not(:disabled) { border-color: #839879; }
 .kartu:active { transform: scale(0.985); }
 .kartu:focus-visible {
-  outline: 3px solid var(--biru);
+  outline: 3px solid var(--fokus);
   outline-offset: 2px;
 }
-/* Status TIDAK hanya dibedakan oleh warna: ada ikon/tanda + tebal. */
+/* Status TIDAK hanya dibedakan oleh warna: ada ikon/tanda + tebal + cincin garis. */
 .kartu.terpilih {
   border-color: var(--hijau);
   background: var(--hijau-pucat);
+  box-shadow: 0 0 0 1px var(--hijau);
   font-weight: 800;
 }
 .kartu.benar {
@@ -314,7 +341,7 @@ button {
   display: grid;
   place-items: center;
   border-radius: 50%;
-  border: 2px solid var(--krem-tua);
+  border: 1px solid #c3cdbb;
   font-size: 14px;
   font-weight: 900;
   background: var(--putih);
@@ -335,7 +362,7 @@ button {
   padding: 6px 12px;
   border-radius: var(--radius-pill);
   background: var(--krem);
-  border: 2px solid var(--krem-tua);
+  border: 1px solid #d9dfd2;
   font-size: 13px;
   font-weight: 700;
   color: var(--tinta);
@@ -369,8 +396,89 @@ button {
   color: var(--kuning);
 }
 
+/* ------------------------------------------------------------------ merek & header bersama */
+
+/* Wordmark "RAKSA | GAME" (components/Merek.tsx) - sama dengan header pemain. */
+.mrk {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 10px;
+  min-height: var(--tap);
+  color: var(--hijau);
+  text-decoration: none;
+  font-family: var(--font-judul);
+  font-size: 22px;
+  font-weight: 850;
+  letter-spacing: -0.06em;
+  line-height: 1;
+  white-space: nowrap;
+}
+.mrk-game {
+  font-family: var(--font);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  border-left: 1px solid #a8b8a7;
+  padding: 3px 0 3px 10px;
+}
+a.mrk:hover { color: var(--hijau-tua); }
+a.mrk:focus-visible { outline: 3px solid var(--fokus); outline-offset: 4px; border-radius: 6px; }
+.mrk img { display: block; max-width: 150px; max-height: 40px; }
+.mrk-besar { font-size: clamp(34px, 4.6vw, 52px); gap: 16px; }
+.mrk-besar .mrk-game { font-size: 0.36em; padding: 0.3em 0 0.3em 16px; }
+/* Latar gelap (proyektor). */
+.mrk-gelap { color: var(--krem); }
+.mrk-gelap .mrk-game { color: #cfe3d5; border-left-color: rgba(255, 249, 233, 0.45); }
+
+/* Header ringkas layar panitia (host): wordmark + label konteks | bahasa + status koneksi.
+   Krem bergaris tipis (bukan bilah hijau tebal); tetap lengket supaya status koneksi terlihat. */
+.mrk-kepala {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 64px;
+  /* Isi header sejajar dengan isi halaman (.wrap-lebar: 1180px - 2 x gutter). */
+  padding: 8px max(var(--gutter), env(safe-area-inset-right), calc((100% - 1148px) / 2))
+    8px max(var(--gutter), env(safe-area-inset-left), calc((100% - 1148px) / 2));
+  background: var(--krem);
+  border-bottom: 1px solid var(--krem-tua);
+}
+.mrk-kepala-kiri { display: flex; align-items: center; gap: 14px; min-width: 0; }
+.mrk-kepala-kanan { display: flex; align-items: center; justify-content: flex-end; gap: 10px; flex: 0 0 auto; }
+.mrk-konteks {
+  min-width: 0;
+  padding-left: 14px;
+  border-left: 1px solid #d5dccf;
+  color: #5f6f64;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.2;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+@media (max-width: 560px) {
+  /* HP: label konteks turun ke bawah wordmark supaya bahasa & status tetap satu baris. */
+  .mrk-kepala { min-height: 60px; gap: 8px; }
+  .mrk-kepala-kiri { flex-direction: column; align-items: flex-start; gap: 0; }
+  .mrk-kepala-kiri .mrk { min-height: 30px; font-size: 20px; }
+  .mrk-konteks { padding-left: 0; border-left: 0; font-size: 12px; }
+  .mrk-kepala-kanan { gap: 6px; }
+  /* Layar sangat sempit (~320px): bahasa & status turun ke baris kedua (rata kanan) daripada
+     wordmark terjepit dan "GAME" tertindih pemilih bahasa. */
+  .mrk-kepala { flex-wrap: wrap; row-gap: 2px; }
+  .mrk-kepala-kiri { flex-shrink: 0; max-width: 100%; }
+  .mrk-kepala-kanan { margin-left: auto; }
+}
+
 /* ------------------------------------------------------------------ bar atas & timer */
 
+/* .topbar lama (bilah hijau). Tidak dipakai lagi oleh host; disimpan untuk kompatibilitas. */
 .topbar {
   position: sticky;
   top: 0;
@@ -415,38 +523,43 @@ button {
 
 /* ------------------------------------------------------------------ status */
 
+/* Status koneksi (ConnectionBadge) di header terang: titik + teks (warna hanya penguat). */
 .status-koneksi {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  font-size: 12px;
-  font-weight: 700;
-  padding: 4px 10px;
+  gap: 7px;
+  min-height: 36px;
+  font-size: 13px;
+  font-weight: 600;
+  padding: 4px 12px;
   border-radius: var(--radius-pill);
-  background: rgba(255, 255, 255, 0.18);
+  background: #fffefa;
+  border: 1px solid #dce2d7;
+  color: var(--tinta);
+  white-space: nowrap;
 }
 .titik {
   width: 9px;
   height: 9px;
   border-radius: 50%;
-  background: var(--kuning);
+  background: var(--kuning-tua);
   flex: 0 0 auto;
 }
-.titik.ok { background: #6fd39a; }
+.titik.ok { background: var(--hijau-muda); }
 .titik.putus { background: var(--merah); }
 
 .pesan {
   padding: 12px 14px;
-  border-radius: var(--radius);
+  border-radius: 12px;
   font-weight: 600;
   display: flex;
   gap: 10px;
   align-items: flex-start;
 }
-.pesan-error { background: var(--merah-pucat); color: #7d2718; border: 2px solid var(--merah); }
-.pesan-info { background: var(--biru-pucat); color: #1d4a78; border: 2px solid var(--biru); }
-.pesan-sukses { background: var(--hijau-pucat); color: #12563a; border: 2px solid var(--hijau-muda); }
-.pesan-kuning { background: #fdf1cf; color: #6d520a; border: 2px solid var(--kuning); }
+.pesan-error { background: var(--merah-pucat); color: #7d2718; border: 1px solid #e3a597; }
+.pesan-info { background: var(--biru-pucat); color: #1d4a78; border: 1px solid #a9c3e0; }
+.pesan-sukses { background: var(--hijau-pucat); color: #12563a; border: 1px solid #b9cdb7; }
+.pesan-kuning { background: #fdf6df; color: #6d520a; border: 1px solid #ecd48d; }
 
 .kosong {
   padding: 28px 16px;
@@ -478,14 +591,14 @@ button {
   font-size: 17px;
   font-family: inherit;
   color: var(--tinta);
-  background: var(--putih);
-  border: 2px solid var(--krem-tua);
-  border-radius: var(--radius);
+  background: #fffefa;
+  border: 1px solid #c9d2c2;
+  border-radius: 12px;
 }
 .kolom:focus-visible {
-  outline: 3px solid var(--biru);
+  outline: 3px solid var(--fokus);
   outline-offset: 1px;
-  border-color: var(--biru);
+  border-color: var(--fokus);
 }
 .kolom-kode {
   text-transform: uppercase;
@@ -496,7 +609,7 @@ button {
   padding: 14px;
 }
 .label-kolom {
-  font-weight: 800;
+  font-weight: 600;
   font-size: 14px;
   display: block;
   margin-bottom: 6px;
@@ -636,6 +749,10 @@ button {
 .proyektor .papan-baris.r1 { background: rgba(246, 196, 69, 0.22); border-color: var(--kuning); }
 .proyektor .kecil,
 .proyektor .lembut { color: #cfe3d5; }
+/* Tombol hijau di latar hijau gelap: garis krem tipis supaya bentuknya tetap terlihat (tetap datar). */
+.proyektor .btn:not(.btn-netral):not(.btn-garis) { border-color: rgba(255, 249, 233, 0.55); }
+.proyektor .btn-garis { color: var(--krem); border-color: rgba(255, 249, 233, 0.7); }
+.proyektor .btn-garis:hover:not(:disabled) { background: rgba(255, 249, 233, 0.1); color: var(--krem); }
 
 /* ------------------------------------------------------------------ utilitas */
 

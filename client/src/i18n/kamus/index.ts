@@ -14,7 +14,10 @@ import server from './server';
 import alur from './alur';
 import solo from './solo';
 import bank from './bank';
+import cerita from './cerita';
+import ceritaAkhir from './ceritaAkhir';
+import ceritaAkt from './ceritaAkt';
 
 export type KamusRuang = Record<Bahasa, Record<string, string>>;
 
-export const KAMUS: Record<string, KamusRuang> = { umum, tokoh, adegan, pemain, misi, layar, host, server, alur, solo, bank };
+export const KAMUS: Record<string, KamusRuang> = { umum, tokoh, adegan, pemain, misi, layar, host, server, alur, solo, bank, cerita, ceritaAkhir, ceritaAkt };

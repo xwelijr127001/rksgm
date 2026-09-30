@@ -9,6 +9,9 @@ const kamus: KamusRuang = {
   id: {
     // kepala halaman & pesan umum
     layarHost: 'Layar Host',
+    // judul tab browser & judul halaman (h1, khusus pembaca layar) layar masuk panitia
+    judulHalaman: 'Panitia',
+    judulMasuk: 'Panitia: kelola permainan',
     koneksiBelumStabil:
       'Koneksi ke server belum stabil. Tombol kendali bisa gagal sampai status kembali "Tersambung".',
     chipRoom: 'Room {kode}',
@@ -141,6 +144,8 @@ const kamus: KamusRuang = {
 
   en: {
     layarHost: 'Host Screen',
+    judulHalaman: 'Host',
+    judulMasuk: 'Host: manage the game',
     koneksiBelumStabil:
       'The connection to the server is not stable yet. Control buttons may fail until the status shows "Connected" again.',
     chipRoom: 'Room {kode}',
@@ -264,6 +269,8 @@ const kamus: KamusRuang = {
 
   zh: {
     layarHost: '主持人页面',
+    judulHalaman: '主持人',
+    judulMasuk: '主持人：管理游戏',
     koneksiBelumStabil: '与服务器的连接还不稳定。在状态恢复为“已连接”之前，控制按钮可能会失效。',
     chipRoom: '房间 {kode}',
 

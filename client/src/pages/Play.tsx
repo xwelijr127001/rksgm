@@ -149,16 +149,18 @@ function PanelStatus({ mode, mission, bantu, submitted, total, answer, sent, rev
   answered: boolean;
 }) {
   useBahasa();
-  const punyaDokumen = Boolean(mission.policyCards?.length || mission.tables?.length);
   if (mode === 'intro') {
-    // Gambar di atas; di sini cukup kasusnya (dibawakan Miss Raksa) dan satu kalimat tugas.
+    // Briefing (waktu dari server, tidak diubah): kasus (dibawakan Miss Raksa), satu kalimat tugas, dan
+    // cara main ringkas sesuai mode adegan, supaya pemain paham SEBELUM ronde berjalan. Di HP panel ini
+    // tampil di atas adegan (stage.css). Dokumen/checklist bisa dibuka sejak briefing.
     const raki = mission.id === 'tutorial' || !TOKOH.missRaksa.aktif;
     return <div className="status-panel">
       {raki
         ? <div className="pemandu-kata"><Raki size={48} mood="sapa" /><p><b>Raki</b>{mission.story}</p></div>
         : <SapaanPemandu tokoh="missRaksa" label={TOKOH.missRaksa.nama ?? undefined} teks={mission.story} ukuran={48} />}
       <div className="status-tugas"><span className="status-label">{t('misi.tugasmu')}</span><h2>{mission.instruction}</h2></div>
-      {punyaDokumen ? <button type="button" className="tombol-dokumen" onClick={() => bantu.bukaDokumen()}><Icon name="polis" size={18} /> {t('misi.lihatDokumen')}</button> : null}
+      <div className="misi-mulai-cara"><span className="status-label">{t('misi.caraMain')}</span>{bantu.caraRingkas}</div>
+      {bantu.tombolInfo}
     </div>;
   }
   if (mode === 'paused') {

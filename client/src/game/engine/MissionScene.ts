@@ -10,7 +10,7 @@
 import type Phaser from 'phaser';
 import type { MissionPublic } from '@shared/types';
 import { objectStates } from '../draft';
-import type { ArtRef, ObjectState, SceneObjectSpec, SceneSpec, StageView } from '../types';
+import type { ArtRef, ObjectState, PropSpec, SceneObjectSpec, SceneSpec, StageView } from '../types';
 import { WORLD_H, WORLD_W } from '../types';
 import type { HeroProp } from '../art/characters';
 
@@ -102,6 +102,8 @@ export function defineMissionScene(P: Ph) {
     ketukTerakhir = new Map<string, number>();
     introSelesai = false;
     boards = new Map<string, Phaser.GameObjects.Text[]>();
+    /** Properti seni piksel (ArtRef.piksel): ukuran & letak dihitung ulang setiap zoom berubah. */
+    propPiksel: { img: Phaser.GameObjects.Image; p: PropSpec }[] = [];
 
     constructor() {
       super({ key: 'misi' });
@@ -117,9 +119,32 @@ export function defineMissionScene(P: Ph) {
     tex(a: ArtRef): string {
       if (!this.textures.exists(a.key)) {
         const c = this.cfg.canvases.get(a.key);
-        if (c) this.textures.addCanvas(a.key, c);
+        if (c) {
+          const t = this.textures.addCanvas(a.key, c);
+          // Seni piksel (raster.ts rasterPiksel): nearest-neighbour, bukan dihaluskan.
+          if (t && this.teksturPiksel(a)) t.setFilter(P.Textures.FilterMode.NEAREST);
+        }
       }
       return a.key;
+    }
+
+    /** true bila tekstur gambar ini seni piksel 1:1 (bukan SVG cadangan saat atlas gagal). */
+    teksturPiksel(a: ArtRef): boolean {
+      return !!a.piksel && this.cfg.canvases.get(a.key)?.dataset.piksel === '1';
+    }
+
+    /**
+     * Letak properti seni piksel: n piksel PERANGKAT bulat per piksel seni (bulat terdekat ke tinggi rancangan
+     * `art.h`, minimal 1), titik pijak di tengah tepi bawah kotak rancangan, pojok kiri-atas di piksel perangkat
+     * bulat (kamera: 1 satuan dunia = zoom piksel perangkat, scroll 0).
+     */
+    letakPiksel(img: Phaser.GameObjects.Image, p: PropSpec): void {
+      const q = p.art.piksel!;
+      const n = Math.max(1, Math.round((p.art.h * this.zoom) / q.h));
+      const s = n / this.zoom;
+      const j = q.jangkar ?? { x: q.w / 2, y: q.h };
+      const bulat = (v: number) => Math.round(v * this.zoom) / this.zoom;
+      img.setOrigin(0, 0).setDisplaySize(q.w * s, q.h * s).setPosition(bulat(p.x - j.x * s), bulat(p.y + p.art.h / 2 - j.y * s));
     }
 
     teks(x: number, y: number, s: string, size: number, color = '#17362a', bold = true): Phaser.GameObjects.Text {
@@ -159,7 +184,11 @@ export function defineMissionScene(P: Ph) {
       this.add.image(0, 0, this.tex(spec.background)).setOrigin(0, 0).setDisplaySize(WORLD_W, WORLD_H).setDepth(0);
 
       for (const p of spec.props ?? []) {
-        const img = this.add.image(p.x, p.y, this.tex(p.art)).setDisplaySize(p.art.w, p.art.h).setDepth(p.depth ?? 5);
+        const img = this.add.image(p.x, p.y, this.tex(p.art)).setDepth(p.depth ?? 5);
+        if (this.teksturPiksel(p.art)) {
+          this.letakPiksel(img, p);
+          this.propPiksel.push({ img, p });
+        } else img.setDisplaySize(p.art.w, p.art.h);
         this.gerakProp(img, p.motion);
       }
 
@@ -187,6 +216,15 @@ export function defineMissionScene(P: Ph) {
       if (motion === 'bob') this.tweens.add({ targets: img, y: img.y - 5, duration: 1600, yoyo: true, repeat: -1, ease: 'Sine.easeInOut' });
       if (motion === 'sway') this.tweens.add({ targets: img, angle: 3, duration: 2200, yoyo: true, repeat: -1, ease: 'Sine.easeInOut' });
       if (motion === 'blink') this.tweens.add({ targets: img, alpha: 0.55, duration: 900, yoyo: true, repeat: -1, ease: 'Sine.easeInOut' });
+    }
+
+    /**
+     * Ketukan hanya dihitung bila sasaran DOM-nya kanvas ini. Tombol HTML yang kebetulan berada di atas
+     * kanvas (bar aksi lengket, kartu) tidak boleh ikut mengenai objek adegan di bawahnya.
+     */
+    dariKanvas(p: Phaser.Input.Pointer): boolean {
+      const e = p.event as Event | undefined;
+      return !e || !e.target || e.target === this.game.canvas;
     }
 
     buatObjek(o: SceneObjectSpec): void {
@@ -217,6 +255,7 @@ export function defineMissionScene(P: Ph) {
       const zone = this.add.zone(o.x, o.y, hitW, hitH).setDepth(depth + 100);
       zone.setInteractive({ useHandCursor: true });
       zone.on('pointerdown', (p: Phaser.Input.Pointer) => {
+        if (!this.dariKanvas(p)) return;
         this.tekan = { id: o.id, x: p.x, y: p.y, t: this.time.now };
         const v = this.objs.get(o.id);
         if (v && v.state?.interactive !== false && !this.reduced()) {
@@ -226,7 +265,7 @@ export function defineMissionScene(P: Ph) {
       zone.on('pointerup', (p: Phaser.Input.Pointer) => {
         const t = this.tekan;
         this.tekan = null;
-        if (!t || t.id !== o.id) return;
+        if (!t || t.id !== o.id || !this.dariKanvas(p)) return;
         // Geser jari (scroll) bukan ketukan.
         if (Math.hypot(p.x - t.x, p.y - t.y) > 16 * Math.max(1, this.zoom) || this.time.now - t.t > 900) return;
         // Cegah ketukan ganda (mis. klik tiruan setelah sentuhan di Safari).
@@ -720,6 +759,7 @@ export function defineMissionScene(P: Ph) {
       this.zoom = pixelW / WORLD_W;
       this.cameras.main.setZoom(this.zoom);
       this.cameras.main.centerOn(WORLD_W / 2, WORLD_H / 2);
+      for (const { img, p } of this.propPiksel) this.letakPiksel(img, p);
     }
   };
 }

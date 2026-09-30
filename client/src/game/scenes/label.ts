@@ -8,6 +8,7 @@ import type { BahasaLain } from '@shared/bahasa';
 import { LABEL_EN } from './label.en';
 import { LABEL_ZH } from './label.zh';
 import { LABEL_ACARA } from './acara';
+import { LABEL_CERITA } from './cerita';
 
 export interface LabelAdegan {
   /** Per id objek adegan (SceneObjectSpec.id). */
@@ -21,6 +22,6 @@ export interface LabelAdegan {
 export type KamusLabel = Record<string, LabelAdegan>;
 
 export const LABEL: Record<BahasaLain, KamusLabel> = {
-  en: { ...LABEL_EN, ...LABEL_ACARA.en },
-  zh: { ...LABEL_ZH, ...LABEL_ACARA.zh },
+  en: { ...LABEL_EN, ...LABEL_ACARA.en, ...LABEL_CERITA.en },
+  zh: { ...LABEL_ZH, ...LABEL_ACARA.zh, ...LABEL_CERITA.zh },
 };

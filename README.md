@@ -10,6 +10,10 @@ mengendalikan pertandingan dari laptop, dan perkembangan pertandingan ditampilka
 Produk yang dikenalkan: **AUTO** (kendaraan bermotor), **HVC** (alat berat),
 **FIRE/PROPERTY** (kebakaran & harta benda), **CARGO** (pengangkutan barang).
 
+Di luar acara, pemain juga bisa main sendiri dari HP. Halaman awal punya tiga pintu: **Main cerita**
+(mode cerita: berperan sebagai petugas layanan klaim, bagian 7b), **Latihan misi** (10 misi singkat,
+bagian 7c), dan **Gabung acara** (punya kode dari panitia, bagian 7).
+
 > **Semua kasus di dalam game adalah simulasi edukasi.** Penanganan klaim yang sebenarnya
 > mengikuti ketentuan polis dan hasil pemeriksaan Raksa. Pemberitahuan ini juga ditampilkan
 > di tutorial dan mode latihan.
@@ -87,7 +91,8 @@ Perintah lain:
 npm run dev:server     # hanya backend (tsx watch)
 npm run dev:client     # hanya frontend (vite --host)
 npm run typecheck      # pemeriksaan tipe server + client
-npm test               # pengujian server (unit + smoke test multiplayer)
+npm test               # pengujian server (unit + smoke test multiplayer) lalu client (npm run test:client)
+npm run test:client    # hanya tes client: draft, adegan, terjemahan, mesin & episode cerita, dialog, bintang
 ```
 
 ## 4. Build dan menjalankan hasil build
@@ -100,6 +105,67 @@ npm start               # satu proses menyajikan game + API di port 4000
 Setelah `npm run build`, server otomatis menyajikan hasil build client, sehingga seluruh
 game diakses dari **satu port saja** (4000). Ini mode yang disarankan saat acara: lebih
 sederhana untuk dibagikan ke HP peserta.
+
+## 4c. Deploy satu perintah (`deploy.sh`)
+
+Di server (Linux) atau laptop acara (Windows + Git Bash), setelah `git clone` sekali:
+
+```bash
+./deploy.sh            # git pull -> npm ci (bila dependensi berubah) -> build -> cadangkan data -> restart -> cek kesehatan
+./deploy.sh status     # versi terpasang, server hidup/tidak, jumlah room
+./deploy.sh stop       # hentikan server        ./deploy.sh start   # jalankan dari build yang ada
+./deploy.sh log        # ikuti log server
+```
+
+| Pilihan | Arti |
+| --- | --- |
+| `--tes` | jalankan `npm test` sebelum build; gagal = deploy dibatalkan |
+| `--paksa` | tetap deploy/stop walau masih ada room hidup (**semua pemain terputus**) |
+| `--build-ulang` | build & restart walau tidak ada commit baru |
+| `--stash` | simpan perubahan lokal ke `git stash` alih-alih menolak deploy |
+| `--cabang NAMA` | cabang yang ditarik (bawaan: cabang aktif) |
+| `--tanpa-rollback` | jangan kembali ke versi lama bila build/start gagal |
+
+Yang dijaga skrip:
+
+- **Room hidup di memori server.** Restart = semua room hilang, jadi deploy **ditolak bila masih ada room
+  hidup** (kecuali `--paksa`). Jangan deploy saat acara berjalan.
+- **Rollback otomatis.** Bila install, tes, build, atau cek kesehatan gagal, kode dikembalikan ke commit
+  sebelum deploy, di-build ulang, dan server lama dijalankan lagi; skrip keluar dengan kode 1. Deploy
+  berikutnya akan menarik commit yang sama lagi, jadi perbaiki dulu commit-nya.
+- **Cadangan data.** Sebelum restart, database (`DB_FILE`) dan folder `gambar-soal/` disalin ke
+  `<folder data>/cadangan/<waktu>/`; 5 cadangan terakhir disimpan.
+- **Hanya server game yang dimatikan.** Bila port dipakai program lain, skrip berhenti dan tidak mematikannya.
+- Perubahan lokal yang belum di-commit membuat deploy ditolak (pakai `--stash` bila memang mau disisihkan).
+- `.env` dibuat dari `.env.example` bila belum ada. Port dibaca dari `PORT` di `.env`.
+
+Pengelola proses dipilih otomatis: unit systemd `raksa-game.service` bila ada, lalu `pm2` bila terpasang,
+selain itu mode latar (log di `.deploy/server.log`; di Windows server diluncurkan terlepas dari jendela
+Git Bash sehingga tetap hidup setelah jendela ditutup). Paksa dengan `RAKSA_PENGELOLA=systemd|pm2|latar`.
+Mode latar **tidak menyala lagi setelah komputer reboot**; untuk server Linux pasang unit systemd sekali:
+
+```ini
+# /etc/systemd/system/raksa-game.service   (sesuaikan User & folder), lalu:
+#   sudo systemctl daemon-reload && sudo systemctl enable raksa-game
+[Unit]
+Description=RAKSA GAME
+After=network.target
+
+[Service]
+User=raksa
+WorkingDirectory=/opt/rksgm/server
+Environment=NODE_ENV=production
+ExecStart=/usr/bin/node dist/server/src/index.js
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target
+```
+
+Dengan systemd, `deploy.sh` memakai `sudo systemctl stop/start raksa-game` (pengguna deploy butuh izin sudo
+untuk itu). Diuji 19 September 2026 di Windows + Git Bash dengan remote lokal: deploy pertama dari nol,
+deploy ulang tanpa perubahan, commit baru, penolakan saat ada room hidup, cadangan data, port dipakai
+program lain, dan **commit rusak -> rollback**. Jalur Linux (nohup/pm2/systemd) **belum dijalankan di server sungguhan**.
 
 ## 4a. Adegan 2D (Phaser)
 
@@ -129,8 +195,8 @@ pembahasan tidak memuat ulang adegan dan tidak menghilangkan pilihan.
 | Menjawab | Kartu tugas (pertanyaan + petunjuk satu kalimat + tombol Cerita/Dokumen/Cara main) → adegan → "Pilihanmu: … · Tersimpan" + daftar pilihan → bar aksi lengket | Adegan kiri (lengket), kartu tugas & jawaban kanan. Desktop: tombol kirim ikut alur (tidak menutupi pilihan). HP mendatar: header & bar aksi ringkas, cerita terlipat |
 | Menjawab misi hitung (6, 9) | Kartu tugas → jawaban → adegan (ruang membaca dulu) | Panel jawaban lebih lebar |
 | Jeda | Tata letak menjawab tetap, adegan & pilihan terkunci, pemberitahuan di atas pilihan | sama |
-| Briefing / terkirim / waktu habis | **Gambar dulu**, lalu sesedikit mungkin teks: Miss Raksa membawakan kasus + satu kalimat "Tugasmu"; "Terkirim!" + jumlah pemain (ringkasan jawaban dilipat); "Waktu habis." | Adegan kiri (diperkecil), status kanan |
-| Pembahasan | **Gambar bertanda ✓ ✕ ! di atas** + legenda satu baris → juri (Bu Isti) membacakan satu kalimat hasil ("Jawabanmu tepat!" / "Belum tepat." / "Sebagian sudah tepat.") → poin → paling banyak tiga baris per pertanyaan (✕ Kamu pilih, ✓ Sudah tepat, ! Yang tepat / Masih terlewat) → lipatan "Kenapa begitu?" → satu tombol. Pertandingan (±14 detik, proyektor memuat pembahasan lengkap): misi berlangkah banyak cukup satu baris status per pertanyaan, rincian dilipat; semua tepat = tanpa daftar | Adegan kiri (diperkecil), hasil kanan |
+| Briefing / "Siap mulai" / terkirim / waktu habis | **Kartu dulu, gambar diperkecil di bawahnya** (sejak 26 September, temuan D): Miss Raksa membawakan kasus + satu kalimat "Tugasmu" + cara main ringkas + tombol "Lihat checklist"/dokumen (solo: tombol **Siap mulai**, bagian 7c); "Terkirim!" + jumlah pemain (ringkasan jawaban dilipat); "Waktu habis." | Adegan kiri (diperkecil), status kanan |
+| Pembahasan | **Hasil dulu**: juri (Bu Isti) membacakan satu kalimat hasil ("Jawabanmu tepat!" / "Belum tepat." / "Sebagian sudah tepat.") → (solo) bintang + artinya → poin → paling banyak tiga baris per pertanyaan (✕ Kamu pilih, ✓ Sudah tepat, ! Yang tepat / Masih terlewat) → alasan singkat yang langsung terlihat → satu tombol → lipatan "Kenapa begitu?"; **gambar bertanda ✓ ✕ ! (diperkecil) + legenda di bawahnya**. Pertandingan (±14 detik, proyektor memuat pembahasan lengkap): misi berlangkah banyak cukup satu baris status per pertanyaan, rincian dilipat; semua tepat = tanpa daftar | Adegan kiri (diperkecil), hasil kanan |
 
 Aturan yang dijaga:
 
@@ -203,9 +269,9 @@ Tiap tokoh diberi peran sesuai perannya di Raksa:
 
 | Tokoh | Peran di game | Tempat |
 | --- | --- | --- |
-| **Mr Roger**, CEO Asuransi Raksa | Pembuka & penutup | Halaman awal (papan nama), lobby pemain & proyektor (sapaan), hasil akhir pemain (ucapan selamat) |
-| **Miss Raksa**, ikon Raksa CS | "Pembawa kasus": laporan nasabah masuk lewat CS | Halaman gabung (sapaan), **kalimat briefing tiap misi** di HP & proyektor, potret di kartu tugas saat menjawab (menggantikan Raki; pemanasan tetap Raki karena teksnya "Aku Raki") |
-| **Bu Isti**, Direktur IT | **Juri** & "urusan sistem" | **Membacakan hasil tiap misi** di HP ("Bu Isti · Juri", potret dengan lencana ✓/✕/!) dan "Yang dibawa pulang" di proyektor; lobby proyektor (cara bergabung lewat QR), papan peringkat proyektor (ringkasan data ronde), pesan saat koneksi HP terputus |
+| **Mr Roger**, CEO Asuransi Raksa | Pembuka & penutup | Halaman awal (potret bulat + sapaan di ilustrasi kota), lobby pemain & proyektor (sapaan), hasil akhir pemain (ucapan selamat) |
+| **Miss Raksa**, ikon Raksa CS | "Pembawa kasus": laporan nasabah masuk lewat CS; di mode cerita **mentor** (Senior Layanan Klaim) | Pintu **Main cerita** di halaman awal, halaman gabung (sapaan), **kalimat briefing tiap misi** di HP & proyektor, potret di kartu tugas saat menjawab (menggantikan Raki; pemanasan tetap Raki karena teksnya "Aku Raki"), mode cerita (membuka, memberi isyarat, pelajaran di akhir) |
+| **Bu Isti**, Direktur IT | **Juri** & "urusan sistem" | Pintu **Gabung acara** di halaman awal; **membacakan hasil tiap misi** di HP ("Bu Isti · Juri", potret dengan lencana ✓/✕/!) dan "Yang dibawa pulang" di proyektor; lobby proyektor (cara bergabung lewat QR), papan peringkat proyektor (ringkasan data ronde), pesan saat koneksi HP terputus |
 | Ketiganya | Penutup | Podium proyektor: berdiri bersama, Mr Roger memberi ucapan selamat |
 
 Pengaturan di `shared/brand.ts` -> `TOKOH` (`ceo`, `missRaksa`, `isti`):
@@ -313,7 +379,7 @@ Perilaku audio saat acara:
    ```
 
 4. Peserta memindai QR pada layar host/proyektor, atau membuka alamat jaringan itu lalu
-   menekan **Gabung Permainan** dan memasukkan kode room.
+   menekan **Gabung acara** dan memasukkan kode room.
 5. Bila HP tidak bisa membuka alamat tersebut, biasanya penyebabnya:
    - Firewall Windows memblokir Node.js -> izinkan pada jaringan privat.
    - Laptop tersambung VPN -> matikan VPN atau isi `PUBLIC_BASE_URL` (lihat bagian berikut).
@@ -370,16 +436,20 @@ Variabel lain: `PORT`, `HOST`, `CLIENT_PORT`, `DB_FILE`, `MAX_PLAYERS`, `VITE_SE
 
 | Peran | Alamat |
 | --- | --- |
-| Pemain ikut acara | `/` -> **Punya kode acara?** -> `/join` -> `/lobby` -> `/tutorial` -> `/main` -> `/hasil` |
-| Pemain main sendiri (mode solo, tanpa room) | `/` -> **Ayo, main!** -> `/kenalan` -> `/solo` -> `/solo/main?misi=N` -> `/solo/hasil` |
+| Pemain ikut acara | `/` -> **Gabung acara** -> `/join` -> `/lobby` -> `/tutorial` -> `/main` -> `/hasil` |
+| Pemain main cerita (mode cerita, tanpa room) | `/` -> **Main cerita** -> `/kenalan` (sekali) -> `/cerita` -> `/cerita/auto-1` |
+| Pemain latihan sendiri (mode solo, tanpa room) | `/` -> **Latihan misi** -> `/kenalan` (sekali) -> `/solo` -> `/solo/main?misi=N` -> `/solo/hasil` |
 | Host (panitia) | `/host` |
 | Layar proyektor / penonton | `/projector` (atau `/projector?room=KODE`) |
 | Alamat lama mode latihan | `/latihan` dialihkan ke `/solo` (`/latihan?misi=N` -> `/solo/main?misi=N`) |
 
-**"Ayo, main!" tidak pernah buntu:** pemain berkenalan dulu dengan Miss Raksa (nama + karakter,
-tersimpan di HP itu saja), lalu masuk **peta misi solo**: 10 misi paket latihan, bintang per misi,
-total poin, rekor pribadi, boleh diulang. Di mode solo waktu hanya menentukan bonus cepat (tidak
-pernah mengunci) dan ada tombol jeda. Kunjungan berikutnya langsung "Main sebagai X · ubah".
+**Halaman awal = tiga pintu** dengan bingkai potret bulat yang sama: **Main cerita** (Miss Raksa, pintu
+utama bertanda "Mulai di sini"), **Latihan misi** (Raki), dan **Gabung acara** (Bu Isti). Cerita dan
+latihan tidak pernah buntu: pemain berkenalan dulu dengan Miss Raksa (nama + karakter, tersimpan di HP
+itu saja), lalu masuk daftar cerita (bagian 7b) atau **peta misi solo** (bagian 7c): 10 misi paket
+latihan, bintang per misi, total poin, rekor pribadi, boleh diulang. Di mode solo waktu hanya
+menentukan bonus cepat (tidak pernah mengunci) dan ada tombol jeda. Kunjungan berikutnya langsung
+"Main sebagai X · ubah".
 **Kode acara diperiksa langsung di langkah pertama** `/join` ("Kode ditemukan · nama acara · N pemain
 menunggu"); kode salah atau pertandingan sudah mulai diberi tahu di situ, bukan setelah mengisi
 nama. Bila tepat satu acara sedang dibuka, halaman awal menampilkan spanduk **Gabung**
@@ -496,6 +566,160 @@ Di HP peserta musik **nonaktif secara default**; efek suara bersifat opsional da
 dimatikan lewat tombol suara. Audio baru mulai setelah interaksi pengguna pertama
 (mengikuti aturan browser).
 
+## 7b. Mode Cerita (visual novel role play)
+
+Rancangan & kontrak (termasuk **Catatan implementasi** dan **revisi v2** alur belajar & layar akhir, bagian 11):
+[`docs/rancangan-mode-cerita.md`](docs/rancangan-mode-cerita.md). Menambah episode (termasuk kartu akhir, makna
+alasan, istilah): [`docs/cerita/PANDUAN-EPISODE.md`](docs/cerita/PANDUAN-EPISODE.md). Tinjauan materi klaim:
+[`docs/cerita/TINJAUAN-PIC-CLAIM.md`](docs/cerita/TINJAUAN-PIC-CLAIM.md). Uji pemula & checklist HP fisik (belum
+dijalankan): [`docs/cerita/UJI-PEMULA.md`](docs/cerita/UJI-PEMULA.md). Kebutuhan aset seni:
+[`docs/cerita/KEBUTUHAN-ASET.md`](docs/cerita/KEBUTUHAN-ASET.md). Tangkapan layar:
+[`docs/tangkapan-cerita/README.md`](docs/tangkapan-cerita/README.md).
+
+**Apa.** Pemain berperan sebagai **petugas layanan klaim Raksa** di meja layanan Raksa Silver Club dan melayani satu
+nasabah dari datang sampai pulang. Tidak ada timer, poin, atau peringkat. Yang dinilai dua hal, **dipisah**:
+**komunikasi** (nasabah merasa didengar dan paham) dan **ketepatan langkah klaim**. Pilihan mengubah jalan cerita
+dan akhirnya; nasabah yang senang belum tentu berarti langkahnya benar. Lingkaran intinya: situasi → pilihan atau
+tindakan → akibat yang terlihat → satu penjelasan singkat.
+
+| Alamat | Isi |
+| --- | --- |
+| `/cerita` | Daftar episode: satu baris pengantar, satu kartu per episode (produk, ± durasi, ringkasan, status Baru / Sedang berjalan · Bagian n/5 / Selesai, "Akhir ditemukan n/5"), lalu tautan Latihan misi & Gabung acara |
+| `/cerita/auto-1` | Pemain episode 1 |
+
+Tanpa profil pemain diarahkan ke `/kenalan` dulu lalu kembali; id episode yang tidak dikenal kembali ke `/cerita`.
+
+| Tokoh | Peran di mode cerita |
+| --- | --- |
+| **Kamu** (nama & karakter dari profil) | Petugas Layanan Klaim |
+| **Miss Raksa** | Senior Layanan Klaim (mentor): membuka episode, memberi isyarat saat langkahmu perlu diperbaiki tanpa membocorkan jawaban, menutup dengan pelajaran |
+| **Bu Rina** (tokoh fiktif) | Nasabah episode 1: pemilik usaha katering rumahan, cemas dan diburu waktu |
+
+Raki (latihan & tutorial), Bu Isti (juri), dan Mr Roger (tuan rumah) tidak tampil di dalam episode.
+
+**Episode 1 — AUTO "Baret di Parkiran"** (± 8 menit, 5 bagian). Pagi tadi mobil Bu Rina disenggol di parkiran
+pasar dan pelakunya pergi; bemper & lampu belakang rusak, padahal besok pagi 150 kotak katering harus diantar.
+Bagian: Menyambut → Menggali Cerita → Mengumpulkan Bukti (aktivitas: potret tiga bukti di parkiran kantor) →
+Membaca Polis (aktivitas: baca kartu polis Comprehensive simulasi lalu pilih penjelasan yang tepat) → Menutup
+Layanan. Lima akhir: **Didengar dan Jelas** (baik: mobil belum beres, tetapi Bu Rina tahu langkahnya),
+**Lega Sesaat** (senang karena dijanjikan, kecewa kemudian), **Benar, tapi Berjarak**, **Laporan Tertunda**
+(bukti kurang), **Nasabah Pergi**. Kesalahan penting punya jalur pemulihan: meminta maaf, meralat saran,
+menambah foto, membaca ulang kartu, meralat janji atau penjelasan kartu. Materi klaim hanya dari misi latihan
+1, 2, 5, 9 + catatan simulasi; "Lihat perjalananku" di akhir menyarankan paling banyak satu dari misi itu (tidak wajib).
+Istilah yang dijelaskan di tempat: nasabah, klaim, polis, Comprehensive, risiko sendiri.
+
+**Cara main.**
+
+- Ketuk kotak dialog (atau Enter/Spasi) untuk menampilkan kalimat utuh, ketuk lagi untuk lanjut. Bila perangkat
+  meminta gerak dikurangi, kalimat langsung tampil utuh. Petunjuk "Ketuk kotak ini…" tampil sekali per perangkat;
+  sesudahnya ada di tombol **Bantuan**.
+- Di titik keputusan pilih apa yang kamu katakan (2–3 pilihan dengan panjang yang mirip). Sesudahnya nasabah
+  bereaksi, lalu tampil paling banyak **satu kalimat ajar** bergaya netral ("Bu Rina mulai tenang karena kamu
+  menanyakan keadaannya lebih dulu."), tanpa warna hijau/merah dan tanpa gema "Kamu: …" (pilihanmu tetap ada di
+  Riwayat). Angka tidak pernah ditampilkan; panggung hanya menunjukkan label suasana ("Bu Rina · Cemas") yang ditulis
+  dari **wajah yang sedang tampil**.
+- Istilah asuransi dijelaskan di tempat: baris yang pertama kali memakainya punya tombol **"Apa itu polis?"** yang
+  membuka arti 1–2 kalimat (tanpa hover, tanpa halaman glosarium, tidak wajib dibuka).
+- Aktivitas klaim memakai layar misi yang sama dengan latihan (adegan 2D + daftar HTML + dokumen), **tanpa
+  waktu**: kartu pengantar satu tugas → Mulai → kirim → umpan balik (vonis langkah, reaksi, tiap pilihan dengan
+  alasan singkat; pembahasan panjang di "Kenapa begitu?") → Lanjutkan cerita. Foto: penghitung "n/3 foto" dan
+  konfirmasi "Baru 1 dari 3 foto dipilih" tanpa kata poin. Kartu polis tampil di atas pilihan dan barisnya bisa
+  diketuk untuk arti awam. Mode ringan dan engine gagal tetap bisa dikerjakan lewat daftar.
+- Header: Daftar cerita, "Bagian n/5 · judul", bahasa, suara; baris kedua: tujuan bagian + **Riwayat**
+  (percakapan & pilihanmu) + **Catatan kasus** (yang sudah diketahui, hasil aktivitas, kartu polis, yang sudah
+  dipahami nasabah) + **Bantuan** (cara bermain).
+- **Layar akhir = satu kartu**. Epilog dibaca sekali di dialog (tidak diulang), lalu kartu: wajah akhir Bu Rina +
+  perasaannya ("Sesudahnya: Kesal" bila berubah kemudian), nama akhir, judul hasil ("Bu Rina tahu langkah
+  berikutnya"), satu kalimat sebab-akibat dari keputusanmu, satu pelajaran dari Miss Raksa, dan dua aksi: akhir baik
+  **Selesai** + **Coba jalur lain**; akhir lain **Coba lagi dari bagian X** (bagian tempat keputusan penyebabnya) +
+  **Selesai**. Di HP 390×844 dan 360×740 judul, pelajaran, dan kedua aksi terlihat tanpa gulir (terukur di emulasi).
+- **Lihat perjalananku** (tombol teks di kartu, dialog terpisah, tidak wajib): Yang membantu / Yang perlu
+  diperhatikan / Kenapa berakhir begini, dengan perasaan Bu Rina, langkah klaim (Tepat / Diperbaiki / Keliru / Belum
+  dilakukan), dan yang ia pahami dipisah; akhir yang ditemukan n/5 (yang belum tersamar); paling banyak satu latihan
+  terkait; tombol ke pemilih bagian.
+- "Langkah berikutnya" baru dianggap dipahami Bu Rina bila kamu **menutup dengan ringkasan** dan ia menerimanya;
+  menutup dengan "nanti dikabari" tidak pernah berakhir "Didengar dan Jelas".
+
+**Simpan & lanjut.**
+
+- Progres tersimpan otomatis setiap langkah di perangkat itu (`localStorage['raksa:cerita']`). Membuka lagi =
+  lanjut dari kalimat terakhir, termasuk saat umpan balik aktivitas (tidak dinilai ulang, efek tidak berlipat).
+- "Ulang dari awal" (kartu akhir / pemilih bagian, dengan konfirmasi) dan "Main lagi dari awal" (daftar cerita):
+  perjalanan lama diarsipkan (maks 5 per episode; bila penuh, yang terlama dirotasi). "Coba jalur lain" / "Coba lagi
+  dari bagian X" melanjutkan perjalanan yang sama dari awal bagian itu (tanpa arsip; pilihan sesudahnya diganti).
+  Akhir yang sudah ditemukan tetap tercatat. Membuka "Lihat perjalananku" atau pemilih bagian tidak mengubah progres.
+- Bila episode diperbarui sehingga progres lama tidak cocok, atau datanya tidak terbaca, pemain memilih **Mulai
+  ulang** (progres lama diarsipkan dengan `sebab` = alasannya, dan arsip seperti ini **tidak pernah dirotasi**) atau
+  **Kembali ke daftar**. Tidak ada yang dihapus diam-diam; data yang tidak terbaca dicadangkan ke
+  `raksa:cerita:rusak:<waktu>`.
+- Bagian yang dimuat terpisah gagal diunduh (jaringan putus sesaat, deploy baru): aktivitas cerita menampilkan
+  pesan + **Muat ulang** (progres sudah tersimpan, jadi kembali ke titik yang sama); halaman lain menampilkan pesan
+  serupa dari penangkap galat rute, bukan layar putih.
+- Penyimpanan diblokir/penuh: permainan tetap jalan, progres hanya bertahan selama halaman terbuka, dan pemain
+  diberi tahu.
+- Mode cerita sepenuhnya di klien: tidak ada room, progres tidak pindah antar HP, dan panitia tidak bisa melihatnya.
+
+**Bahasa.** ID / EN / 中文 lewat tombol bahasa yang sama; boleh diganti di tengah episode tanpa mengubah progres
+(state hanya menyimpan kunci teks). Teks antarmuka di kamus `client/src/i18n/kamus/cerita.ts`, `ceritaAkhir.ts`
+(kartu akhir), dan `ceritaAkt.ts` (aktivitas); naskah di
+`client/src/cerita/episode/auto-1/teks.{id,en,zh}.ts`. Kunci, parameter `{nama}`, dan angka dijaga sama oleh tes
+validasi episode. Nama tokoh tidak diterjemahkan, kecuali sapaan "Bu" untuk tokoh fiktif (Mrs Rina / Rina 女士).
+
+**Batasan** (lengkap di bagian 11): baru satu episode; episode berikutnya masih usulan (peta di
+`PANDUAN-EPISODE.md` bagian 9) dan butuh seni nasabah & latar baru; naskah, kalimat kartu akhir, arti istilah, dan
+terjemahannya **DRAF, belum ditinjau PIC Claim maupun penutur asli**; belum diuji di HP fisik; **efektivitas belajar
+belum terverifikasi** (uji pemula tanpa pendamping belum dijalankan, `docs/cerita/UJI-PEMULA.md`); gaya gambar Bu
+Rina belum setara Miss Raksa (`KEBUTUHAN-ASET.md`).
+
+**Kode.** `client/src/cerita/`: `tipe.ts` (kontrak), `mesin.ts` (reducer murni), `validasi.ts`, `simpan.ts`,
+`episode/`, `ui/` (termasuk `LayarAkhir.tsx`, `PemilihBagian.tsx`, `PerjalananKu.tsx`, dan pembantu murni
+`tinjauan.ts`), `seni/`, `uji/` (fixture & pembantu tes); halaman `client/src/pages/Cerita.tsx` dan
+`CeritaMain.tsx`; adegan aktivitas `client/src/game/scenes/cerita/`.
+
+## 7c. Latihan misi (solo): "Siap mulai" dan arti bintang
+
+- **Gerbang "Siap mulai".** Setiap misi solo dibuka dengan kartu: kasus (dibawakan Miss Raksa), tugas, cara main
+  ringkas sesuai mode adegan, dan tombol checklist/dokumen. Bonus waktu baru berjalan setelah **Siap mulai**
+  ditekan dan adegan siap; bila adegan tak kunjung siap, hitungan mulai 8 detik kemudian (pemain sudah bisa
+  menjawab lewat daftar). Waktu membaca kartu tidak dihitung. Kunjungan pertama: satu baris petunjuk yang bisa
+  ditutup; contoh lengkap tetap di **Cara main**.
+- **Bintang = ketepatan terbaik** per misi: 3 = semua tepat, 2 = sebagian besar (≥ 60%), 1 = ada yang tepat,
+  0 = belum ada yang tepat. **"Sudah dicoba"** adalah tanda terpisah (centang + teks). Arti bintang dijelaskan di
+  peta, hasil misi, dan hasil akhir. Sebelumnya mencoba saja sudah memberi 1 bintang (review 26 September,
+  temuan E).
+- **Migrasi otomatis.** Progres lama (`raksa:solo` tanpa versi) dibaca sekali lalu ditulis ulang sebagai versi 2:
+  bintang dihitung ulang dari ketepatan tersimpan; poin, rekor, dan jumlah main tidak berubah. Teks mentah lama
+  dicadangkan sekali ke `raksa:solo:cadangan-v1` (data tak terbaca: `raksa:solo:cadangan-rusak`). Akibatnya misi
+  yang dulu dijawab salah semua kini bernilai 0 bintang, tetapi tetap "sudah dicoba".
+- **Pertandingan tidak berubah**: deadline tetap dari server. Kartu briefing di HP kini juga menampilkan cara main
+  ringkas + tombol checklist/dokumen.
+
+## 7d. Dialog, checklist, dan aksesibilitas
+
+- **Satu perilaku dialog** untuk dokumen, checklist, Riwayat, Catatan kasus, konfirmasi, dan editor soal host
+  (`Modal` di `client/src/ui/kit.tsx`, logika di `client/src/ui/modal.ts`): fokus masuk ke dialog saat dibuka,
+  Tab/Shift+Tab berputar di dalamnya, latar tidak bisa dijangkau (`inert`), Escape hanya menutup dialog teratas
+  (dialog bertumpuk aman), dan saat ditutup fokus kembali ke tombol pembuka, atau ke tombol "Dokumen"/"Checklist"
+  bila dialog dibuka dari ketukan di gambar. Isi panjang bisa digulir dengan keyboard dan sentuhan; tombol aksi
+  tetap terlihat.
+- **Informasi tidak bergantung pada adegan.** Checklist (misi 3), dokumen, dan keterangan objek "info" di adegan
+  (mis. kalender misi 7) selalu punya tombol HTML ("Lihat checklist", "Dokumen") di mode penuh, mode ringan, dan
+  saat engine gagal. Dijaga `client/src/game/aksesInfo.test.ts` untuk semua misi.
+- **Cara main sadar mode**: bila gambar belum/tidak bisa disentuh (memuat, mode ringan, gagal), petunjuk memakai
+  daftar, bukan "ketuk gambar".
+- **Mode cerita**: kalimat yang "diketik" dibacakan utuh sekali lewat live region (bukan huruf demi huruf);
+  Enter/Spasi = ketuk; tombol pilihan ≥ 52 px, tombol lain ≥ 44 px; status selalu ikon + kata (tidak hanya
+  warna); pengaturan gerak dikurangi dihormati.
+- **Judul tab & fokus saat pindah halaman** (`client/src/ui/halaman.ts`, `useHalaman`): tiap halaman punya judul tab
+  sendiri ("Baret di Parkiran · Bagian 2/5 – RAKSA GAME"), dan setelah pengguna berpindah halaman fokus pindah ke
+  judul halaman baru, bukan ke `<body>`.
+- **Ketukan tidak tembus ke adegan**: tombol HTML di atas kanvas (bar aksi lengket) tidak ikut mengenai objek adegan
+  di bawahnya (Phaser `windowEvents: false` + ketukan hanya dihitung bila sasarannya kanvas itu sendiri).
+- **Tampilan seragam** (temuan F): wordmark "RAKSA GAME" (`client/src/components/Merek.tsx`) di header pemain,
+  cerita, host, dan proyektor (di host & proyektor tidak bisa diketuk supaya panitia tidak keluar dari layar
+  kendali); bentuk tombol dan bingkai potret bulat sama.
+- Pembaca layar sungguhan (TalkBack/VoiceOver) belum dicoba.
+
 ## 8. Mengganti logo, warna, hadiah, dan konten
 
 Semua konfigurasi terpusat di dua file.
@@ -581,7 +805,11 @@ raksa-game/
 │   ├── config.ts            env + deteksi IP LAN untuk QR
 │   └── *.test.ts            unit test + smoke test multiplayer
 ├── character/               gambar sumber tokoh Mr Roger, Miss Raksa, Bu Isti (pixel art 4 frame)
+├── docs/                    rancangan (mode cerita, bank soal), silabus paket acara, cerita/ (panduan episode,
+│                            tinjauan PIC Claim), tangkapan layar
 ├── tools/
+│   ├── uji-cerita.mjs       uji browser mode cerita (npm run test:cerita)
+│   ├── uji-temuan-review.mjs uji browser temuan review A–F (npm run test:review)
 │   ├── siapkan-karakter.mjs character/ -> sprite CEO WebP/PNG di client/public/karakter
 │   ├── gen-unity-data.ts    shared/missions.ts -> data & ID untuk proyek Unity
 │   └── make-music.mjs       menghasilkan musik latar (MP3) secara prosedural
@@ -590,7 +818,9 @@ raksa-game/
 │   ├── Assets/Editor/       generator scene + build Web
 │   └── build.ps1 / build.sh build CLI
 └── client/src/
-    ├── game/                ADEGAN 2D (Phaser) + layar misi
+    ├── cerita/              MODE CERITA: tipe.ts (kontrak), mesin.ts (reducer murni), validasi.ts, simpan.ts,
+    │                        episode/<id>/ (graf, naskah id/en/zh, aktivitas), ui/, seni/, uji/ (fixture & pembantu tes)
+    ├── game/                ADEGAN 2D (Phaser) + layar misi (scenes/cerita/ = adegan aktivitas mode cerita)
     │   ├── MissionPlay.tsx  satu layar misi: kartu tugas + adegan + jawaban HTML + bar aksi + hasil
     │   ├── GameStage.tsx    memasang/membersihkan engine, gambar sederhana bila gagal
     │   ├── draft.ts         aturan draft jawaban (dipakai adegan & HTML) - murni & teruji
@@ -613,11 +843,32 @@ raksa-game/
     ├── art/                 ilustrasi SVG: ikon, avatar, Raki, 10 adegan, peta kota
     ├── interactions/        renderer tiap jenis mini game
     ├── components/          pemilih karakter, panggung misi
-    └── pages/               Landing, Join, Lobby, Tutorial, Play, Result, Practice,
-                             Host, Projector
+    └── pages/               Landing (tiga pintu), Kenalan, Cerita, CeritaMain, Solo, SoloMain, SoloHasil,
+                             Join, Lobby, Tutorial, Play, Result, Host, Projector
 ```
 
 ## 11. Batasan yang masih ada
+
+### Mode Cerita & perbaikan review (26 September 2026)
+
+- **Baru satu episode** (AUTO-1 "Baret di Parkiran"). Episode lain **belum dibuat dan tidak terdaftar**; peta
+  usulan (HVC excavator/forklift, FIRE ruko, CARGO pelabuhan, banjir gudang/kompleks) ada di
+  `docs/cerita/PANDUAN-EPISODE.md` bagian 9.
+- **Episode kedua butuh perluasan kontrak seni**: seni nasabah saat ini hanya Bu Rina dan latar panggung hanya
+  `kantor` & `parkiran` (panduan bagian 4.3).
+- **Naskah dan kalimat materi klaim AUTO-1 adalah DRAF, belum ditinjau PIC Claim**, termasuk pilihan ralat
+  `ralat-polis`, pengecoh aktivitas bukti (foto ban depan & dasbor), dan sebutan jabatan Miss Raksa "Senior Layanan
+  Klaim" (kini dipakai di seluruh UI). Daftar kalimat, sumber, dan pertanyaannya:
+  `docs/cerita/TINJAUAN-PIC-CLAIM.md`. Jangan dipakai sebagai materi resmi sebelum ditandatangani.
+- **Terjemahan EN/ZH** naskah & antarmuka cerita dibuat dengan bantuan AI dan **belum ditinjau penutur asli**
+  (istilah yang perlu dicek: tinjauan bagian J).
+- **Belum diuji di HP fisik.** Semua pemeriksaan tampilan (mode cerita, "Siap mulai", hasil di HP, dialog) memakai
+  emulasi Chrome.
+- Progres cerita & solo hanya ada di perangkat itu (localStorage); tidak ada sinkronisasi atau rekap untuk panitia.
+- Seni Bu Rina dan latar panggung adalah vektor buatan kode (gaya NPC adegan), bukan karya ilustrator.
+- Rubrik aktivitas cerita ada di bundel client dan bisa dibaca; materinya turunan Paket Latihan yang kuncinya memang
+  terbuka lewat latihan solo. Kunci Paket Acara & soal panitia tetap server-only.
+- Migrasi bintang mengubah angka bintang lama (misi yang dulu dijawab salah semua kini 0 bintang).
 
 ### Adegan 2D — kondisi sebenarnya (18 September 2026)
 
@@ -759,6 +1010,54 @@ nyata, sehingga diganti adegan 2D. Semua catatan teknisnya ada di
 
 ## 12. Hasil pengujian
 
+**27 September 2026 — Mode Cerita v2 (alur belajar & layar akhir, `docs/rancangan-mode-cerita.md` bagian 11).**
+Build produksi final di server uji lokal (Windows 11 + Node 22 + Chrome headless). **Emulasi browser, bukan HP fisik;
+efektivitas belajar belum diuji** (rencana: `docs/cerita/UJI-PEMULA.md`).
+
+- `npm run typecheck`: 0 error. `npm test`: **412 lulus, 0 gagal** (server 77, client 335; termasuk kartu akhir
+  `tinjauan.test.ts` atas SEMUA keadaan akhir yang terjangkau). `npm run build`: sukses (bundel utama 638 KB / 208 KB
+  gzip, +7 KB teks antarmuka baru; kode cerita & aktivitas tetap chunk lazy).
+- `npm run test:cerita`: **2694/2694** (gerak aktif) dan **2645/2645** (`RAKSA_GERAK=kurang`), termasuk grup `kartu`
+  (kelima akhir + dua jalur pemulihan di 390×844, 360×740, 1440×900, 844×390, zoom 200 %, en/zh).
+- `npm run test:review`: **140/140** (dengan `--cerita`, tangkapan di `docs/tangkapan-cerita/`) dan **122/122** dengan
+  `RAKSA_GERAK=kurang`.
+- `npm run test:e2e`: **0 kegagalan** (gerak aktif & dikurangi): solo & pertandingan tidak terpengaruh prop baru
+  MissionPlay. `npm run test:acara`: **semua lulus**.
+- Layar akhir (7 simpanan akhir): 309–392 → **60–78 kata**, tinggi 2.882–3.284 px → **satu layar** di HP (740–844 px),
+  11–14 → **3 kontrol**; judul, pelajaran, dan kedua aksi terlihat tanpa gulir di 390×844 & 360×740. Profil baru sampai
+  masalah Bu Rina: 8 → 6 ketukan. "Pilih lewat daftar" tidak lagi tertutup bar aksi. Kinerja aktivitas lama vs baru
+  dalam kondisi sama: tanpa selisih terukur. Rincian: `docs/rancangan-mode-cerita.md` 11.7.
+- Tinjauan independen 4 sudut (kepatuhan brief, materi klaim, aksesibilitas, regresi) dengan verifikator: 12 temuan,
+  8 dikonfirmasi & diperbaiki (mis. petunjuk foto yang tidak tampil, kalimat akhir `tertunda-bengkel`, label tombol
+  "tiga foto", klik ganda pemilih bagian, dokumen PIC yang rusak oleh suntingan skrip), 4 ditolak verifikator.
+
+**26 September 2026 — Mode Cerita & perbaikan temuan review A–F.** Semua perintah di bawah BENAR-BENAR dijalankan
+terhadap build produksi lokal (server terisolasi, DB sementara) di Windows 11 + Node 22 + Chrome headless.
+**Emulasi browser, bukan HP fisik.**
+
+- `npm run typecheck`: server + client 0 error.
+- `npm test`: **381 lulus, 0 gagal** (server 77, client 304). `npm run build`: sukses (bundel utama ±631 KB / 206 KB
+  gzip; naskah episode di chunk terpisah yang hanya dimuat halaman cerita).
+- `npm run test:cerita`: **1131/1131** pemeriksaan lulus dengan gerak aktif dan **1131/1131** dengan
+  `RAKSA_GERAK=kurang` (9 jalur sampai kelima akhir termasuk pemulihan komunikasi, muat ulang, ganti bahasa, progres
+  rusak/versi lama, mode ringan & engine gagal, teks mengetik, 5 viewport, fokus vs bar aksi).
+- `npm run test:review`: **130/130** lulus (dengan tangkapan `--cerita`) dan **122/122** dengan `RAKSA_GERAK=kurang`;
+  0 catatan di luar ambang.
+- `npm run test:e2e` (10 misi, 4 pemain + proyektor, tutorial, latihan solo, rotasi): **0 kegagalan**, 0 galat
+  console/HTTP, baik gerak aktif maupun dikurangi. `npm run test:acara`: **semua lulus** (44 pemeriksaan; 11 catatan
+  visual label "Kaca" a08 = temuan kotak pembatas yang sama seperti 19 September, bukan tumpukan nyata).
+- Tinjauan independen 4 sudut (materi klaim & terjemahan, UX cerita di HP, kode, aksesibilitas): 42 temuan, semuanya
+  diverifikasi lalu diperbaiki (rincian di `docs/rancangan-mode-cerita.md` bagian 10 dan `docs/cerita/TINJAUAN-PIC-CLAIM.md`).
+- Tangkapan layar sebelum/sesudah & mode cerita: [`docs/tangkapan-cerita/README.md`](docs/tangkapan-cerita/README.md)
+
+Tes client yang berkaitan dengan perubahan ini: `client/src/cerita/mesin.test.ts` (percabangan, efek sekali,
+aksi tidak sah = no-op, cadangan bab, ringkasan dua sisi), `simpan.test.ts` (versi, migrasi, arsip, data rusak,
+penyimpanan diblokir/penuh), `validasi.test.ts` (aturan validasi + penjelajahan semua jalur pada fixture),
+`episode/auto-1/episode.test.ts` (jalur uji wajib, konsekuensi keputusan, tanpa cabang palsu, muat ulang, bahasa,
+aktivitas), `client/src/game/scenes/cerita/cerita.test.ts` (adegan cerita), `client/src/state/profil.test.ts`
+(bintang & migrasi), `client/src/ui/modal.test.ts` (perangkap fokus, inert, tumpukan dialog), dan
+`client/src/game/aksesInfo.test.ts` (jalur HTML untuk dokumen, checklist, dan info adegan).
+
 **19 September 2026 (sore) — alur main baru, mode solo, bank soal, Paket Acara.** Dijalankan ulang:
 `npm run typecheck` 0 error; `npm test` **217 tes lulus** (server 77, client 140: termasuk bank soal,
 playlist, soal panitia, unggah gambar, PIN, serta penjaga konten/kunci/terjemahan/adegan **per misi**
@@ -808,7 +1107,7 @@ Tampilan ketiga tokoh (halaman awal, gabung, lobby, briefing, pembahasan misi 1/
 peringkat, podium, hasil, koneksi putus)
 diperiksa lewat tangkapan layar di `docs/tangkapan-2d/`.
 
-### Pengujian otomatis (`npm test` — 217 tes)
+### Pengujian otomatis (`npm test` — 217 tes per 19 September 2026; tes 26 September: lihat awal bagian ini)
 
 Semua tes lama tetap lulus. Tes baru:
 
@@ -910,4 +1209,28 @@ npm install --no-save puppeteer-core   # socket.io-client sudah ada di workspace
 npm run build && npm start        # server di http://127.0.0.1:4000
 npm run test:e2e                  # pertandingan penuh, keluar 1 bila ada yang gagal
 npm run check:audio               # ukur isi musik
+npm run test:cerita               # mode cerita; "npm run test:cerita -- akhir,muat" = sebagian uji
+npm run test:review               # temuan review A–F; "-- A,C" = sebagian, "-- --cerita" = + tangkapan mode cerita
 ```
+
+- **`test:cerita`** (`tools/uji-cerita.mjs`): sembilan jalur lewat UI sampai kelima akhir (termasuk pemulihan,
+  "terbaik tapi menutup singkat" → Benar, tapi Berjarak, bukti kurang + lengkapi/cukup dengan pengecoh ban/dasbor),
+  node yang dilewati sesuai naskah, label suasana = wajah yang tampil, umpan balik bukti menyebut yang terlewat &
+  pengecoh, arsip perjalanan maks 5 (yang terlama dirotasi); muat ulang di tengah dialog / setelah memilih / saat
+  umpan balik aktivitas / di akhir (tanpa penilaian ulang atau efek ganda); ganti bahasa di tengah (state identik,
+  wajah tetap); progres lama/rusak (dialog pemulihan, tidak dihapus diam-diam, arsip dengan `sebab`); aktivitas di
+  mode ringan & saat engine gagal; teks mengetik & Enter/Spasi, Riwayat & Catatan kasus; lima viewport tanpa luber,
+  klik tembus, dan fokus keyboard tidak tertutup bar aksi. Mode cerita sepenuhnya di klien: skrip ini tidak
+  membuat room.
+- **`test:review`** (`tools/uji-temuan-review.mjs`): target terukur temuan A–F (checklist misi 3 di semua mode,
+  fokus dialog, "Siap mulai" & posisi opsi pertama, hasil HP, bintang & migrasi, konsistensi visual) + tangkapan
+  sesudah perbaikan. Temuan C **membuat room uji** lewat socket: arahkan ke server uji, jangan ke server acara yang
+  sedang dipakai.
+- Keduanya memakai `UI_BASE` (bawaan `http://127.0.0.1:4000`; boleh Vite dev), `RAKSA_CHROME` (lokasi chrome.exe),
+  `RAKSA_SHOTS` (folder tangkapan), dan `RAKSA_GERAK=kurang` (uji gerak dikurangi; bawaan animasi menyala).
+  `test:review` juga memakai `RAKSA_SERVER` (alamat socket) dan `RAKSA_PIN` (bila server memakai `PANITIA_PIN`).
+  Rincian di komentar kepala tiap skrip. Keduanya keluar dengan kode 1 bila ada pemeriksaan yang gagal.
+- Terhadap Vite dev (`cd client`, `VITE_SERVER_URL=http://localhost:<port server>`, `npx vite --port <port>`):
+  matikan HMR (`server.hmr: false`) bila ada yang menyunting berkas selama uji, supaya halaman tidak dipasang ulang
+  di tengah alur. Teks yang diharapkan dibaca skrip dari naskah saat skrip DIMULAI, jadi jalankan ulang setelah
+  naskah berubah.

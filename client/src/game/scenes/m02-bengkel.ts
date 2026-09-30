@@ -56,7 +56,7 @@ function plat(): string {
     ${text(40, 27, 'B 2026 RK', 14, P.tinta, 900)}`;
 }
 
-function kucing(): string {
+export function kucing(): string {
   return `${shadow(36, 64, 26, 5)}
     ${path('M12 62 C8 44 14 30 30 28 C46 26 58 36 58 52 C58 60 54 64 48 64 L18 64 Z', P.oranye, INK)}
     ${path('M58 56 C68 54 72 44 66 36', 'none', `stroke="${P.tinta}" stroke-width="9" stroke-linecap="round"`)}
@@ -81,7 +81,7 @@ function makanSiang(): string {
     ${line('M36 18 q-2 -6 2 -12 M46 16 q-2 -6 2 -12', P.besiMuda, 2.4)}`;
 }
 
-function selfie(): string {
+export function selfie(): string {
   return `${shadow(36, 106, 22, 4)}
     ${line('M36 104 L36 40', P.tinta, 7)}${line('M36 104 L36 40', P.besi, 3)}
     ${line('M22 106 L36 86 L50 106', P.tinta, 5)}

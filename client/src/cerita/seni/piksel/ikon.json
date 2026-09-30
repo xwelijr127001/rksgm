@@ -1,0 +1,121 @@
+{
+ "versi": 1,
+ "dibuat": "tools/piksel/bangun-ikon.mjs",
+ "catatan": "Ikon kepala mini digambar tangan untuk potret bulat < 44 px CSS: 1 piksel ikon = 1 px CSS pada slot 32 (x dpr bulat). Kepala utuh + kerah/bros di dalam lingkaran isi.",
+ "sisi": 32,
+ "isi": 28,
+ "tokoh": {
+  "missRaksa": {
+   "gambar": "ikon-miss-raksa.png",
+   "ukuranAtlas": [
+    164,
+    32
+   ],
+   "wajah": [
+    8,
+    13,
+    14,
+    11
+   ],
+   "ekspresi": {
+    "netral": [
+     0,
+     0
+    ],
+    "senyum": [
+     33,
+     0
+    ],
+    "prihatin": [
+     66,
+     0
+    ],
+    "serius": [
+     99,
+     0
+    ],
+    "lega": [
+     132,
+     0
+    ]
+   },
+   "ekspresiDari": {
+    "netral": "netral",
+    "tersenyum": "senyum",
+    "senang": "senyum",
+    "cemas": "prihatin",
+    "bingung": "prihatin",
+    "serius": "serius",
+    "kesal": "serius",
+    "lega": "lega"
+   },
+   "berkas": {
+    "byte": 509,
+    "warna": 27,
+    "sha256": "98a08daee96033a7"
+   }
+  },
+  "buRina": {
+   "gambar": "ikon-bu-rina.png",
+   "ukuranAtlas": [
+    263,
+    32
+   ],
+   "wajah": [
+    12,
+    11,
+    10,
+    11
+   ],
+   "ekspresi": {
+    "netral": [
+     0,
+     0
+    ],
+    "cemas": [
+     33,
+     0
+    ],
+    "kesal": [
+     66,
+     0
+    ],
+    "bingung": [
+     99,
+     0
+    ],
+    "lega": [
+     132,
+     0
+    ],
+    "senang": [
+     165,
+     0
+    ],
+    "serius": [
+     198,
+     0
+    ],
+    "tersenyum": [
+     231,
+     0
+    ]
+   },
+   "ekspresiDari": {
+    "netral": "netral",
+    "cemas": "cemas",
+    "kesal": "kesal",
+    "bingung": "bingung",
+    "lega": "lega",
+    "senang": "senang",
+    "serius": "serius",
+    "tersenyum": "tersenyum"
+   },
+   "berkas": {
+    "byte": 534,
+    "warna": 21,
+    "sha256": "c8fce72e7fe3ec97"
+   }
+  }
+ }
+}

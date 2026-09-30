@@ -8,13 +8,17 @@ import { PlayerShell, Arrow } from '../components/PlayerShell';
 import { prefetchAdegan } from '../game/prefetch';
 import { misiDalamBahasa, t, useBahasa } from '../i18n';
 import { totalPoin, useProfil } from '../state/profil';
-import { BarisBintang, SatuBintang, TOTAL_BINTANG, TOTAL_MISI, TandaTingkat, angka, bintangMisi, ikonMisi, jumlahBintang, jumlahDicoba, misiSaran, tingkatMisi } from './soloBagian';
+import { BarisBintang, LegendaBintang, SatuBintang, TOTAL_BINTANG, TOTAL_MISI, TandaDicoba, TandaTingkat, angka, bintangMisi, ikonMisi, jumlahBintang, jumlahDicoba, misiSaran, tingkatMisi } from './soloBagian';
 import './solo.css';
 
 /**
  * PETA MISI mode solo: 10 misi paket latihan sebagai jalur berkelok (bukan tabel).
  * Semua titik boleh dibuka kapan saja dan diulang; satu tombol utama menunjuk misi berikutnya
  * yang disarankan, atau hasil akhir bila semua misi sudah dicoba.
+ *
+ * Tiap misi punya dua tanda TERPISAH: bintang = ketepatan terbaik (0-3) dan "Sudah dicoba"
+ * (centang + teks). Angka di kepala mengikuti tanda yang sama: bintang n/30 dan dicoba n/10;
+ * legenda arti bintang ada tepat di bawahnya.
  *
  * Peta kota lama (art/CityMap.tsx) tidak dipakai ulang: itu satu gambar SVG `role="img"` untuk
  * layar proyektor dengan simpul beradius 16px, jadi titiknya bukan tombol dan terlalu kecil untuk jari.
@@ -33,7 +37,7 @@ export default function Solo() {
   const dicoba = jumlahDicoba(progres);
   const bintang = jumlahBintang(progres);
 
-  return <PlayerShell back="/" label={t('solo.labelPeta')} className="solo-layar">
+  return <PlayerShell back="/" label={t('solo.labelPeta')} judul={t('solo.labelPeta')} className="solo-layar">
     <main className="solo-peta">
       <div className="solo-sisi">
         <section className="solo-kepala" aria-label={t('solo.eyebrowSolo')}>
@@ -47,7 +51,8 @@ export default function Solo() {
           </div>
           <dl className="solo-angka">
             <div><dt>{t('solo.totalPoin')}</dt><dd>{angka(totalPoin(progres))}</dd></div>
-            <div><dt>{t('solo.bintang')}</dt><dd><SatuBintang isi={bintang > 0} ukuran={18} />{bintang}<small>/{TOTAL_BINTANG}</small></dd></div>
+            <div><dt>{t('solo.bintang')}</dt><dd><SatuBintang isi={bintang > 0} ukuran={16} />{bintang}<small>/{TOTAL_BINTANG}</small></dd></div>
+            <div><dt>{t('solo.dicoba')}</dt><dd><TandaDicoba ikonSaja ukuran={16} />{dicoba}<small>/{TOTAL_MISI}</small></dd></div>
             <div><dt>{t('solo.rekorPribadi')}</dt><dd>{angka(progres.rekor)}</dd></div>
           </dl>
         </section>
@@ -65,6 +70,10 @@ export default function Solo() {
         </div>
       </div>
 
+      {/* Legenda tepat di atas jalur (HP tegak: sesudah kepala; layar lebar: puncak kolom jalur,
+          di luar kolom kiri yang lengket supaya tombol utama tetap muat di HP mendatar). */}
+      <LegendaBintang className="solo-legenda-peta" />
+
       <ol className="solo-jalur" aria-label={t('solo.jalurAria', { total: TOTAL_MISI })}>
         {daftar.map((m, i) => {
           const catatan = progres.misi[m.id];
@@ -73,7 +82,8 @@ export default function Solo() {
           const kelas = 'solo-titik' + (i % 2 ? ' solo-kanan' : '') + (catatan ? ' solo-dicoba' : '') + (disarankan ? ' solo-saran' : '');
           return <li key={m.id} className={kelas}>
             <Link className="solo-titik-tombol" to={'/solo/main?misi=' + m.number} aria-current={disarankan ? 'step' : undefined}>
-              <span className="solo-no" aria-hidden="true">{m.number}{b === 3 ? <i className="solo-no-cek"><Icon name="cek" size={20} /></i> : null}</span>
+              {/* Centang di titik = sudah dicoba (sama dengan tanda di kartu), bukan "semua tepat". */}
+              <span className="solo-no" aria-hidden="true">{m.number}{catatan ? <i className="solo-no-cek"><Icon name="cek" size={20} /></i> : null}</span>
               <span className="solo-kartu">
                 <span className="solo-kartu-teks">
                   {disarankan ? <span className="solo-chip-saran">{t('solo.berikutnya')}</span> : null}
@@ -81,7 +91,9 @@ export default function Solo() {
                   <span className="solo-meta"><span>{m.productLabel.split(' - ')[0]}</span><TandaTingkat tingkat={tingkatMisi(m)} /></span>
                   <span className="solo-capai">
                     <BarisBintang n={b} />
-                    <small>{catatan ? t('pemain.nPoin', { n: angka(catatan.poin) }) : t('solo.belumDicoba')}</small>
+                    {catatan
+                      ? <span className="solo-capai-dicoba"><TandaDicoba ukuran={16} /><small>· {t('pemain.nPoin', { n: angka(catatan.poin) })}</small></span>
+                      : <small>{t('solo.belumDicoba')}</small>}
                   </span>
                 </span>
                 <span className="solo-ikon" aria-hidden="true"><Icon name={ikonMisi(m)} size={26} /></span>

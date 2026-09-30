@@ -5,16 +5,21 @@
  *   kanvas engine muncul di atasnya setelah siap.
  * - Bila engine gagal (HP lama, WebGL & kanvas bermasalah, unduhan gagal, waktu
  *   habis), ilustrasi statis tetap tampil dan pemain menjawab lewat kontrol HTML.
+ * - Aktivitas mode cerita ('cerita-*') tidak punya gambar ringan lama yang sesuai: tampilan
+ *   sederhananya disusun dari SceneSpec-nya sendiri (latar + seni objek + label, tanpa interaksi),
+ *   atau bingkai netral berjudul bila adegannya tidak ada. Misi latihan/acara tetap memakai art/Scene.
  * - Setiap mount = instance baru dengan token baru; ketukan dari instance/ronde
  *   lama dibuang. Unmount = destroy (kanvas, listener, konteks GPU).
  */
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import type { MissionPublic, PlayerLook } from '@shared/types';
+import { Icon } from '../art/Icon';
 import { Scene } from '../art/Scene';
 import { t, useBahasa } from '../i18n';
 
-import type { SceneSpec, StageStats, StageView } from './types';
+import { LABEL_STATIS, gambarStatisDariSpec, lapisanStatis } from './aksesInfo';
+import { WORLD_H, WORLD_W, type SceneSpec, type StageStats, type StageView } from './types';
 import type { StageHandle } from './engine/stage';
 
 export type StageStatus = 'static' | 'loading' | 'ready' | 'failed';
@@ -137,12 +142,13 @@ export function GameStage({
   }, [view]);
 
   const siap = status === 'ready';
+  const dariSpec = gambarStatisDariSpec(mission.id);
   return (
     <div className={`adegan adegan-${status}`} data-status={status}>
       <div className="adegan-kanvas" ref={host} role="img" aria-label={label} />
       {!siap ? (
         <div className="adegan-statis" aria-hidden="true">
-          <Scene scene={mission.scene} />
+          {!dariSpec ? <Scene scene={mission.scene} /> : spec ? <AdeganSusun spec={spec} /> : <BingkaiNetral judul={mission.title} />}
         </div>
       ) : null}
       {status === 'loading' ? (
@@ -150,6 +156,40 @@ export function GameStage({
           <i className="adegan-spinner" aria-hidden="true" /> {t('layar.menyiapkanAdegan')}
         </span>
       ) : null}
+    </div>
+  );
+}
+
+const uriSvg = (svg: string): string => 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg);
+
+/**
+ * Gambar statis dari SceneSpec (aksesInfo.lapisanStatis): seni yang sama dengan kanvas engine, pada
+ * posisinya, tanpa interaksi, tanda, atau petugas. Hiasan: nama objeknya juga ada di daftar HTML.
+ */
+function AdeganSusun({ spec }: { spec: SceneSpec }) {
+  const { latar, lapisan, label } = useMemo(() => lapisanStatis(spec), [spec]);
+  const h = LABEL_STATIS.tinggi;
+  return (
+    <svg className="adegan-susun" viewBox={`0 0 ${WORLD_W} ${WORLD_H}`} preserveAspectRatio="xMidYMid meet" data-sumber="spec" focusable="false">
+      {[latar, ...lapisan].map((l) => (
+        <image key={l.kunci} href={uriSvg(l.svg)} x={l.x} y={l.y} width={l.w} height={l.h} preserveAspectRatio="none" />
+      ))}
+      {label.map((l) => (
+        <g key={l.kunci} transform={`translate(${l.x} ${l.y})`}>
+          <rect x={-l.w / 2} y={-h / 2} width={l.w} height={h} rx={14} fill="#ffffff" fillOpacity={0.96} stroke="#17362a" strokeOpacity={0.85} strokeWidth={2} />
+          <text y={1} textAnchor="middle" dominantBaseline="middle" fontSize={LABEL_STATIS.huruf} fontWeight={700} fill="#17362a">{l.teks}</text>
+        </g>
+      ))}
+    </svg>
+  );
+}
+
+/** Aktivitas cerita tanpa adegan terdaftar: bingkai netral berjudul (gaya bingkai netral misi bergambar). */
+function BingkaiNetral({ judul }: { judul: string }) {
+  return (
+    <div className="adegan-gambar-netral">
+      <span className="adegan-gambar-lencana"><Icon name="daftar" size={26} /></span>
+      <strong>{judul}</strong>
     </div>
   );
 }

@@ -16,6 +16,7 @@ import { t, useBahasa } from '../../i18n';
 import { JENIS_GAMBAR, pesanGalatBank, pinSalah, simpanSoal, unggahGambar, type GagalBank } from '../../state/bank';
 import { lupakanPin } from '../../state/store';
 import { Modal, Pesan, TombolKonfirmasi } from '../../ui/kit';
+import { useLapisanDialog } from '../../ui/modal';
 import {
   BATAS_LAIN,
   DAFTAR_JENIS,
@@ -433,29 +434,12 @@ export function EditorSoal({
   const mintaTutupRef = useRef(mintaTutup);
   mintaTutupRef.current = mintaTutup;
 
-  // Panel penuh: halaman di belakangnya tidak ikut bergulir / terfokus selama editor terbuka.
-  useEffect(() => {
-    const akar = document.getElementById('root');
-    const gulirLama = document.body.style.overflow;
-    const pemicu = document.activeElement instanceof HTMLElement ? document.activeElement : null;
-    document.body.style.overflow = 'hidden';
-    akar?.setAttribute('inert', '');
-    judulRef.current?.focus();
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key !== 'Escape') return;
-      // Dialog konfirmasi di atas editor (Modal) menangani Escape-nya sendiri.
-      if (document.querySelector('.bank-editor [role="dialog"]')) return;
-      mintaTutupRef.current();
-    };
-    window.addEventListener('keydown', onKey);
-    return () => {
-      document.body.style.overflow = gulirLama;
-      akar?.removeAttribute('inert');
-      window.removeEventListener('keydown', onKey);
-      // Kembalikan fokus ke tombol yang membuka editor (bila masih ada di halaman).
-      if (pemicu?.isConnected) pemicu.focus();
-    };
-  }, []);
+  // Panel penuh = satu lapisan di tumpukan dialog bersama (ui/modal.ts): halaman di belakangnya inert &
+  // tidak ikut bergulir, fokus masuk ke judul, Tab berputar di dalam editor, dan fokus kembali ke tombol
+  // pembuka saat ditutup. Dialog di atas editor (konfirmasi) adalah lapisan berikutnya, jadi Escape di
+  // sana hanya menutup dialog itu; Escape di editor sendiri = minta tutup (tanya dulu bila ada perubahan).
+  const editorRef = useRef<HTMLDivElement>(null);
+  useLapisanDialog(editorRef, { onEscape: () => mintaTutupRef.current(), fokusAwal: () => judulRef.current });
 
   // Pratinjau lokal gambar yang baru diunggah (tidak menunggu server menyajikannya).
   useEffect(() => {
@@ -536,7 +520,7 @@ export function EditorSoal({
   const judulPanel = draf.id ? t('bank.editorUbah') : t('bank.editorBaru');
 
   return createPortal(
-    <div className="bank-editor" role="dialog" aria-modal="true" aria-labelledby="bank-editor-judul">
+    <div ref={editorRef} className="bank-editor" role="dialog" aria-modal="true" aria-labelledby="bank-editor-judul">
       <div className="bank-editor-atas">
         <h2 id="bank-editor-judul" ref={judulRef} tabIndex={-1} style={{ outline: 'none' }}>
           {judulPanel}

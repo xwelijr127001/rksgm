@@ -5,11 +5,14 @@
    pernah berpindah, jadi adegan tidak dimuat ulang saat rotasi/resize/pembahasan.
    - Menjawab (HP)      : tugas -> adegan -> pilihanmu & daftar -> bar aksi
    - Menjawab, misi hitung (HP): tugas -> jawaban -> adegan (ruang membaca dulu)
-   - Selain menjawab    : GAMBAR dulu (adegan, saat pembahasan bertanda ✓ ✕ !), lalu satu
-                          kalimat status/hasil dan paling banyak beberapa baris; rincian dilipat
+   - Selain menjawab (HP & tablet tegak): TEKS dulu - kartu briefing/"Siap mulai" atau vonis,
+                          pilihanmu & yang tepat, alasan singkat, tombol aksi - lalu adegan yang
+                          lebih kecil (saat pembahasan bertanda ✓ ✕ ! + legenda) di bawahnya
+   - Selain menjawab (HP mendatar): panel kiri (lebar), adegan kecil kanan (lengket)
    Warna di panel status/hasil: hijau + SATU aksen merah bata (hanya ikon ✕ & kata statusnya);
    tidak ada kotak berlatar warna. Kuning hanya berarti "pilihan tersimpan" saat menjawab.
-   - Desktop & HP mendatar: adegan kiri (lengket), tugas/panel/aksi kanan
+   - Desktop: adegan kiri (lengket), tugas/panel/aksi kanan
+   - HP mendatar saat menjawab: adegan kiri (lengket), tugas/panel/aksi kanan
    Karakter & balon tidak pernah digambar di atas adegan: tempatnya slot pemandu di panel.
    ========================================================================== */
 
@@ -27,8 +30,12 @@
   grid-template-areas: "tugas" "adegan" "panel" "aksi";
 }
 .misi[data-fokus="baca"]:is([data-mode="play"], [data-mode="paused"]) { grid-template-areas: "tugas" "panel" "adegan" "aksi"; }
-/* Briefing, terkirim, waktu habis, pembahasan: gambar dulu, lalu status/hasil yang ringkas. */
-.misi:is([data-mode="intro"], [data-mode="sent"], [data-mode="locked"], [data-mode="reveal"]) { grid-template-areas: "adegan" "panel"; }
+/* Briefing/"Siap mulai", terkirim, waktu habis, pembahasan: kartu/hasil & tombolnya dulu (terlihat
+   tanpa gulir), lalu adegan yang diperkecil sebagai pendukung. */
+.misi:is([data-mode="intro"], [data-mode="sent"], [data-mode="locked"], [data-mode="reveal"]) { grid-template-areas: "panel" "adegan"; }
+.misi:is([data-mode="intro"], [data-mode="sent"], [data-mode="locked"], [data-mode="reveal"]) .misi-adegan { width: min(100% - 32px, 440px); margin: 0 auto 8px; }
+.misi:is([data-mode="intro"], [data-mode="sent"], [data-mode="locked"], [data-mode="reveal"]) .adegan { border-radius: 14px; border: 1px solid #e3e7dc; }
+.misi:is([data-mode="intro"], [data-mode="sent"], [data-mode="locked"], [data-mode="reveal"]) :is(.adegan-ket, .adegan-catatan) { margin-left: 0; margin-right: 0; }
 .misi-tugas { grid-area: tugas; }
 .misi-adegan { grid-area: adegan; min-width: 0; scroll-margin-top: 8px; }
 .misi-panel { grid-area: panel; min-width: 0; }
@@ -47,6 +54,16 @@
 .alat:hover { background: #ebf1e4; }
 .alat[aria-expanded="true"] { background: #e1eedb; border-color: #9fbf95; }
 .tugas-cerita { margin: 0; padding: 8px 12px; border-radius: 12px; background: #f1f4ea; font-size: 14px; line-height: 1.5; color: #2f4637; }
+/* Petunjuk kunjungan pertama: satu baris yang bisa ditutup (contoh lengkap tetap di "Cara main"). Letaknya di
+   akhir panel jawaban, tepat di atas bar aksi yang dirujuknya: tidak mendorong pilihan pertama ke bawah. */
+.misi-kiat {
+  display: flex; align-items: center; gap: 8px; margin: 12px 0 0; padding: 0 0 0 10px; min-height: 44px; border-radius: 12px;
+  background: #f1f4ea; border: 1px solid #dfe6d7; color: #2f4637; font-size: 13.5px; line-height: 1.35;
+}
+.misi-kiat-ikon { flex: 0 0 auto; display: grid; place-items: center; color: #215c40; }
+.misi-kiat-teks { flex: 1; min-width: 0; padding: 4px 0; }
+.misi-kiat-tutup { flex: 0 0 44px; width: 44px; height: 44px; display: grid; place-items: center; border: 0; border-radius: 12px; background: transparent; color: #3f5245; cursor: pointer; }
+.misi-kiat-tutup:hover { background: #e4ebdc; }
 .tugas-inti { display: flex; gap: 10px; align-items: flex-start; }
 .tugas-pemandu { flex: 0 0 auto; display: grid; place-items: center; width: 44px; height: 44px; }
 .misi-tanya { font-size: 20px; line-height: 1.3; margin: 0 0 4px; font-weight: 650; letter-spacing: -.02em; scroll-margin-top: 12px; }
@@ -65,6 +82,8 @@
 .adegan-kanvas canvas { display: block; }
 .adegan-statis { position: absolute; inset: 0; display: grid; place-items: center; background: #eef3e7; }
 .adegan-statis > div { width: 100%; }
+/* Aktivitas cerita tanpa kanvas: gambar statis disusun dari SceneSpec (GameStage AdeganSusun), rasio sama 4:3. */
+.adegan-statis > .adegan-susun { display: block; width: 100%; height: 100%; font-family: inherit; }
 .adegan-ready .adegan-kanvas { animation: adegan-masuk .28s ease-out; }
 @keyframes adegan-masuk { from { opacity: 0; } to { opacity: 1; } }
 .adegan-chip { position: absolute; left: 10px; bottom: 10px; display: inline-flex; align-items: center; gap: 8px; padding: 6px 12px; border-radius: 999px; background: rgba(255, 249, 233, .95); border: 1px solid #d9dfd2; font-size: 13px; color: #365a40; }
@@ -123,7 +142,8 @@
 .pilihan-label { font-size: 13px; color: #5c6f58; font-weight: 600; margin-right: 2px; }
 .pilihan-label::after { content: ':'; }
 .pilihan-teks b { font-weight: 650; }
-.pilihan-status:not(.terisi) .pilihan-teks b { color: #6a7867; font-weight: 500; }
+/* 'Belum ada' di atas #f1f4ea: 5,1:1 (teks 15px wajib >= 4,5:1). */
+.pilihan-status:not(.terisi) .pilihan-teks b { color: #5a6b5e; font-weight: 500; }
 .pilihan-chip { flex: 0 0 auto; font-size: 12px; font-weight: 700; padding: 3px 9px; border-radius: 999px; background: #fffefa; color: #6b5413; border: 1px solid #e8cf7c; }
 
 .misi-pesan { display: flex; gap: 8px; align-items: flex-start; margin: 12px 0 0; padding: 10px 12px; border-radius: 12px; background: #fff4d6; border: 1px solid #ecd48d; color: #5d4a12; font-size: 14px; line-height: 1.45; }
@@ -133,6 +153,11 @@
 /* Baki bukti: status pengumpulan (nomor + batal), selalu terlihat. */
 .baki { border: 2px solid #e2d6ad; background: #fffaf0; border-radius: 14px; padding: 10px 12px; }
 .baki-kepala { display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; font-size: 15px; }
+/* Misi ber-checklist: "Folder laporan 0/4 · Lihat checklist" (tombol HTML, juga di mode ringan/engine gagal). */
+.baki-kepala.misi-baki-cek { flex-wrap: wrap; gap: 6px 10px; }
+.misi-baki-judul { display: inline-flex; align-items: center; gap: 8px; min-width: 0; }
+.misi-cek-baki { display: inline-flex; align-items: center; gap: 6px; min-height: 44px; padding: 6px 12px 6px 10px; border-radius: 999px; border: 1px solid #d7dfd0; background: #f5f7ef; color: #2f5439; font-size: 14px; font-weight: 600; cursor: pointer; }
+.misi-cek-baki:hover { background: #ebf1e4; }
 .baki-hitung { font-weight: 700; font-size: 14px; padding: 3px 10px; border-radius: 999px; background: #f3e7c9; color: #6b5413; }
 .baki-hitung.lengkap { background: #f6c445; color: #17362a; }
 .baki-slot { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
@@ -141,7 +166,8 @@
 .slot.slot-isi { background: #fff; border: 2px solid #d8a41f; animation: slot-masuk .22s ease-out; }
 @keyframes slot-masuk { from { transform: scale(.96); opacity: .4; } to { transform: none; opacity: 1; } }
 .slot-no { width: 26px; height: 26px; flex: 0 0 26px; border-radius: 50%; display: grid; place-items: center; font-size: 13px; font-weight: 800; background: #f6c445; color: #17362a; }
-.slot.slot-kosong .slot-no { background: #f3ead0; color: #9a8a5a; }
+/* Nomor slot kosong tetap lebih lembut dari slot terisi, tetapi terbaca: 5,2:1 di atas #f3ead0. */
+.slot.slot-kosong .slot-no { background: #f3ead0; color: #6f5f30; }
 .slot-teks { flex: 1; min-width: 0; line-height: 1.3; }
 .slot-hapus { display: inline-flex; align-items: center; gap: 4px; min-height: 44px; min-width: 44px; padding: 6px 10px; border: 0; border-radius: 10px; background: #f4f1e6; color: #5a4a2a; font-size: 13px; font-weight: 600; cursor: pointer; }
 .slot-hapus:hover { background: #ebe4cf; }
@@ -170,7 +196,7 @@
    ikon cek/silang dari data misi dibuat abu-abu tinta. */
 .kontrol .opsi-ikon, .kontrol .item-chip { --hijau-muda: #6f7d73; --hijau: #5b6b60; --merah: #6f7d73; }
 .opsi-teks { flex: 1; min-width: 0; font-weight: 500; }
-.opsi-teks small { display: block; font-size: 13px; color: #6a7867; font-weight: 400; margin-top: 2px; }
+.opsi-teks small { display: block; font-size: 13px; color: #5a6b5e; font-weight: 400; margin-top: 2px; }
 .opsi-kata { flex: 0 0 auto; font-size: 12px; font-weight: 700; color: #6b5413; background: #fffefa; border: 1px solid #e8cf7c; border-radius: 999px; padding: 2px 8px; }
 .opsi-tanda { width: 26px; height: 26px; flex: 0 0 26px; border-radius: 50%; border: 2px solid #9aa996; display: grid; place-items: center; font-size: 13px; font-weight: 800; }
 .opsi-tanda.kotak { border-radius: 8px; }
@@ -178,6 +204,8 @@
 .opsi-tanda i { width: 10px; height: 10px; border-radius: 50%; background: #17362a; }
 
 .item-tab { display: flex; flex-wrap: wrap; gap: 8px; }
+/* Panel tab bagian aktif: "Kategori untuk ..." + pilihan kategorinya. */
+.item-panel { display: flex; flex-direction: column; gap: 10px; }
 .item-chip { display: inline-flex; align-items: center; gap: 6px; min-height: 44px; padding: 6px 12px; border-radius: 999px; border: 2px solid #dfe4d8; background: #fffefa; color: #36523e; font-size: 14px; font-weight: 600; cursor: pointer; }
 .item-chip.kini { border-color: #17362a; background: #17362a; color: #fff; }
 .item-chip.sudah:not(.kini) { border-color: #d8a41f; background: #fff4cf; }
@@ -194,6 +222,10 @@
 /* ------------------------------------------------------------------ bar aksi
    Lengket di bawah layar HP, tetapi bagian dari alur halaman: saat digulir sampai
    habis ia berada di bawah pilihan terakhir, jadi tidak ada konten yang tertutup. */
+/* Selama bar lengket, tingginya (+12px) = batas bawah area baca dokumen: elemen yang difokus lewat Tab/panah
+   dan scrollIntoView digulir ke ATAS bar, tidak berhenti di baliknya (WCAG 2.4.11). Diukur MissionPlay
+   (ResizeObserver) hanya saat bar benar-benar lengket; desktop (bar ikut alur) & halaman lain = auto. */
+:root { scroll-padding-bottom: var(--misi-aksi-lengket, auto); }
 .misi-aksi {
   position: sticky; bottom: 0; z-index: 5; margin-top: 16px;
   padding: 10px 16px calc(8px + env(safe-area-inset-bottom));
@@ -219,14 +251,26 @@
 @keyframes cara-ketuk { 0%, 15% { transform: translate(24px, 18px); } 30%, 45% { transform: translate(0, 0) scale(.85); } 60%, 100% { transform: translate(24px, 18px); } }
 @keyframes cara-chip { 0%, 35% { opacity: 0; transform: translateY(6px); } 45%, 85% { opacity: 1; transform: none; } 100% { opacity: 0; } }
 
-.misi-catatan { padding: 8px 16px 0; color: #6b7866; line-height: 1.5; }
+/* Pemberitahuan simulasi (konten wajib, 12px): 5,4:1 di atas krem #faf9f5. */
+.misi-catatan { padding: 8px 16px 0; color: #5a6b5e; line-height: 1.5; }
 .adegan-layar .adegan { border-radius: 16px; border: 1px solid rgba(255, 255, 255, .25); }
 
 .koneksi-putus { position: sticky; top: 0; z-index: 20; display: flex; align-items: center; gap: 10px; padding: 8px 16px; background: #fff4cf; border-bottom: 1px solid #ecd48d; color: #5d4a12; font-size: 14px; font-weight: 600; }
 .btn-utama { background: #215c40; color: #fff; border: 1px solid #215c40; }
 .konfirmasi-daftar { margin: 0 0 6px; padding-left: 20px; }
-.dokumen-isi { display: grid; gap: 10px; max-height: min(64vh, 560px); overflow: auto; padding-right: 2px; }
+/* Isi dialog dokumen. Kotak gulirnya milik Modal (.mdl-isi, bisa difokus & digulir keyboard/sentuh). */
+.dokumen-isi { display: grid; gap: 10px; }
 .dokumen-sorot > * { outline: 3px solid #d8a41f; outline-offset: 2px; border-radius: 14px; }
+/* Checklist yang dibuka lewat "Lihat checklist": sorotan pada kotaknya sendiri (bukan anak-anaknya). */
+.misi-dok-checklist.dokumen-sorot { outline: 3px solid #d8a41f; outline-offset: -1px; }
+.misi-dok-checklist.dokumen-sorot > * { outline: none; }
+.misi-dok-checklist ul { margin: 6px 0 0; padding-left: 20px; display: grid; gap: 4px; }
+/* Keterangan objek `info` di adegan (mis. kalender misi 7), terbaca tanpa kanvas. */
+.misi-catatan-adegan ul { list-style: none; margin: 8px 0 0; padding: 0; display: grid; gap: 10px; }
+.misi-catatan-adegan li { display: grid; gap: 2px; line-height: 1.45; }
+.misi-catatan-label { font-size: 12px; font-weight: 700; letter-spacing: .02em; color: #5c6f58; }
+/* Tombol dokumen/checklist di panel briefing & kartu "Siap mulai". */
+.misi-info-tombol { display: flex; flex-wrap: wrap; gap: 8px; }
 
 /* ------------------------------------------------------------------ panel status (briefing/terkirim/waktu habis/jeda)
    Tanpa kotak berwarna: potret pemandu + satu-dua kalimat. */
@@ -251,6 +295,16 @@
 .ringkasan { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
 .ringkasan li { font-size: 15px; line-height: 1.4; display: grid; gap: 2px; }
 .ringkasan li b { font-size: 13px; color: #5c6f58; font-weight: 600; }
+/* Cara main ringkas (briefing pertandingan & kartu "Siap mulai"): satu kalimat per mekanik. */
+.misi-cara-ringkas { margin: 2px 0 0; padding-left: 20px; display: grid; gap: 4px; font-size: 15px; line-height: 1.45; color: #2f4637; }
+.misi-cara-ringkas li::marker { color: #6f8a68; }
+/* Kartu "Siap mulai" (solo): bonus waktu belum berjalan sampai tombol ditekan. */
+.misi-mulai { gap: 12px; }
+.misi-mulai .status-tugas h2 { font-size: 20px; }
+.misi-mulai-aksi { display: grid; gap: 8px; }
+.misi-mulai-aksi .primary-action { width: 100%; min-height: 52px; padding: 12px 18px; }
+.status-panel .misi-mulai-bonus { display: flex; align-items: flex-start; gap: 8px; margin: 0; font-size: 14px; line-height: 1.45; color: #4f6254; }
+.misi-mulai-bonus > svg { flex: 0 0 auto; margin-top: 1px; color: #6b5413; }
 
 /* ------------------------------------------------------------------ pembahasan
    Juri (Bu Isti) membacakan satu kalimat hasil; di bawahnya paling banyak tiga baris per
@@ -286,8 +340,28 @@
 /* "Yang seharusnya": sama dengan tanda di gambar (putih bertepi hijau, tanda seru hijau). */
 .tanda-terlewat { background: #fff; color: #176b45; box-shadow: inset 0 0 0 2px #176b45; }
 .hasil-inti { margin: 0; padding-left: 12px; border-left: 3px solid #215c40; font-size: 15px; line-height: 1.5; color: #2f4637; }
+/* Alasan singkat: langsung terlihat (tidak dilipat), sebelum tombol aksi. */
+.hasil-alasan { margin: 0; font-size: 15px; line-height: 1.5; color: #2f4637; }
+.hasil-alasan b { font-weight: 650; }
+/* Raihan solo (bintang + arti bintang) tepat di bawah vonis. */
+.hasil-raihan { display: grid; gap: 6px; }
+.hasil-raihan > .solo-raih { margin: 0; padding: 0; border: 0; }
 .hasil-aksi { display: flex; flex-direction: column; gap: 4px; align-items: stretch; }
 .hasil-aksi .primary-action { width: 100%; }
+/* HP & tablet tegak: tombol aksi utama hasil ("Coba lagi"/"Lanjut") selalu terjangkau.
+   Bila rinciannya panjang (misi berlangkah banyak, layar pendek), tombol menempel di bawah layar
+   selama panel hasil digulir - seperti bar aksi saat menjawab - lalu kembali ke tempatnya; tidak
+   pernah menutupi adegan di bawah panel. `display: contents` membuat panel hasil jadi batas tempelnya.
+   HP mendatar (tinggi <= 540px) TIDAK menempel (lihat blok mendatar di bawah): tingginya hanya cukup untuk
+   vonis & raihan, jadi tombol yang menempel selalu menutupi baris "Kamu pilih / Yang tepat". */
+@media (max-width: 899px) {
+  .hasil-aksi { display: contents; }
+  .hasil-aksi > .primary-action {
+    position: sticky; bottom: calc(10px + env(safe-area-inset-bottom));
+    box-shadow: 0 0 0 10px var(--krem, #faf9f5);
+  }
+  .hasil-aksi > .primary-action + * { margin-top: -10px; }
+}
 @keyframes hasil-pop { 0% { transform: scale(.4); opacity: 0; } 70% { transform: scale(1.12); opacity: 1; } 100% { transform: none; } }
 
 @media (min-width: 560px) {
@@ -303,6 +377,7 @@
   .misi-adegan { padding: 0 20px; }
   .adegan { border-radius: 18px; border: 1px solid #e3e7dc; }
   .adegan-ket, .adegan-catatan { margin-left: 0; margin-right: 0; }
+  .misi:is([data-mode="intro"], [data-mode="sent"], [data-mode="locked"], [data-mode="reveal"]) .misi-adegan { padding: 0; width: min(100% - 40px, 460px); }
 }
 
 /* HP mendatar (layar pendek): adegan kiri setinggi layar, tugas/panel kanan; header & aksi ringkas. */
@@ -314,16 +389,28 @@
     grid-template-columns: min(56vw, calc((100dvh - 48px) * 4 / 3)) minmax(0, 1fr); column-gap: 14px;
     grid-template-areas: "adegan tugas" "adegan panel" "adegan aksi"; grid-template-rows: auto auto 1fr;
   }
-  .misi:is([data-mode="intro"], [data-mode="sent"], [data-mode="locked"], [data-mode="reveal"]) { grid-template-areas: "adegan panel"; grid-template-rows: auto; }
   .misi-adegan { position: sticky; top: 0; align-self: start; }
   .adegan { border-radius: 0 0 14px 0; }
   .adegan-ket { display: none; }
+  /* Selain menjawab: panel (kartu/hasil & tombolnya) kiri dan lebar, adegan kecil kanan dengan legenda. */
+  .misi:is([data-mode="intro"], [data-mode="sent"], [data-mode="locked"], [data-mode="reveal"]) {
+    grid-template-columns: minmax(0, 1fr) min(40vw, calc((100dvh - 64px) * 4 / 3)); column-gap: 16px;
+    grid-template-areas: "panel adegan"; grid-template-rows: auto;
+  }
+  .misi:is([data-mode="intro"], [data-mode="sent"], [data-mode="locked"], [data-mode="reveal"]) .misi-adegan { width: auto; margin: 8px max(12px, env(safe-area-inset-right)) 0 0; top: 8px; }
+  .misi:is([data-mode="intro"], [data-mode="sent"], [data-mode="locked"], [data-mode="reveal"]) .misi-panel { padding: 8px 0 0 max(16px, env(safe-area-inset-left)); }
+  .misi[data-mode="reveal"] .adegan-ket { display: flex; margin: 6px 0 0; gap: 2px 10px; font-size: 12px; }
+  /* Hasil: tombol aksi ikut alur tepat sesudah pilihanmu & yang tepat (tidak menempel, tidak menutupi baris). */
+  .hasil-aksi { display: flex; }
+  .hasil-aksi > .primary-action { position: static; box-shadow: none; }
+  .hasil-aksi > .primary-action + * { margin-top: 0; }
   .misi-tugas { margin: 0 12px 8px 0; padding: 8px 12px 10px; gap: 6px; }
   .tugas-pemandu { display: none; }
   .misi-tanya { font-size: 17px; }
   .misi-petunjuk { font-size: 14px; }
   .alat { min-height: 44px; padding: 4px 10px; font-size: 13px; }
   .misi-panel { padding: 4px 12px 0 0; }
+  .pilihan-status { margin-bottom: 8px; }
   .misi-aksi { margin-top: 8px; padding: 6px 12px calc(6px + env(safe-area-inset-bottom)) 0; }
   .aksi-baris .primary-action, .aksi-kembali { min-height: 46px; }
   .aksi-baris .primary-action { padding: 8px 16px; font-size: 16px; }
@@ -345,6 +432,8 @@
   .misi[data-fokus="baca"]:is([data-mode="play"], [data-mode="paused"]) { grid-template-columns: minmax(0, 1fr) minmax(420px, 1.15fr); grid-template-areas: "adegan tugas" "adegan panel" "adegan aksi"; }
   /* Selain menjawab: hasil/status jadi fokus, adegan diperkecil. */
   .misi:is([data-mode="intro"], [data-mode="sent"], [data-mode="locked"], [data-mode="reveal"]) { grid-template-columns: minmax(0, .85fr) minmax(420px, 1.15fr); grid-template-areas: "adegan panel"; grid-template-rows: auto; }
+  .misi:is([data-mode="intro"], [data-mode="sent"], [data-mode="locked"], [data-mode="reveal"]) .misi-adegan { width: auto; margin: 0; }
+  .misi:is([data-mode="intro"], [data-mode="sent"], [data-mode="locked"], [data-mode="reveal"]) .adegan { border-radius: 20px; }
   .misi-adegan { position: sticky; top: 16px; align-self: start; }
   .adegan { border-radius: 20px; border: 1px solid #e3e7dc; }
   .adegan-ket { margin: 10px 0 0; }
@@ -357,8 +446,16 @@
   .misi-catatan { padding: 12px 0 0; }
 }
 
+/* HP: tombol alat sedikit lebih rapat supaya "Cerita · Lihat checklist · Cara main" muat satu baris di 390px. */
+@media (max-width: 420px) {
+  .tugas-alat { gap: 6px; }
+  .alat { gap: 5px; padding: 6px 10px 6px 8px; }
+}
 @media (max-width: 380px) {
   .misi-tanya { font-size: 19px; }
+  /* "Folder laporan 0/4 · Lihat checklist" tetap satu baris di 360 px. */
+  .baki-kepala.misi-baki-cek { column-gap: 8px; }
+  .misi-cek-baki { padding: 6px 10px 6px 8px; font-size: 13px; }
   .opsi { font-size: 14px; min-height: 54px; padding: 9px 10px; gap: 10px; }
   .opsi-ikon { width: 34px; height: 34px; flex-basis: 34px; }
   .alat { padding: 6px 10px; font-size: 13px; }

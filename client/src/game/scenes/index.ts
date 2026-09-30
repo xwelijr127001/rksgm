@@ -22,6 +22,7 @@ import { sceneKotaBanjir } from './m10-kota';
 import { scenePenentuan } from './m11-penentuan';
 import { sceneTutorial } from './tutorial';
 import { ADEGAN_ACARA } from './acara';
+import { ADEGAN_CERITA } from './cerita';
 
 type Pembuat = () => SceneSpec | null;
 
@@ -40,6 +41,8 @@ export const ADEGAN: Record<string, Pembuat> = {
   'm11-penentuan': scenePenentuan,
   // Paket acara (a01-a10): lihat ./acara/
   ...ADEGAN_ACARA,
+  // Aktivitas mode cerita (misi sintetis): lihat ./cerita/
+  ...ADEGAN_CERITA,
 };
 
 const cache = new Map<string, SceneSpec | null>();

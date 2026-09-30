@@ -1,11 +1,18 @@
 /**
  * Bagian kecil yang dipakai bersama tiga layar mode solo (Solo, SoloMain, SoloHasil):
- * tingkat misi, hitungan bintang, misi yang disarankan, dan baris bintang.
- * Rancangan: docs/rancangan-bank-soal.md bagian 2.
+ * tingkat misi, hitungan bintang, misi yang disarankan, baris bintang, tanda "sudah dicoba",
+ * dan arti bintang. Rancangan: docs/rancangan-bank-soal.md bagian 2 & docs/rancangan-mode-cerita.md 5E.
+ *
+ * Dua tanda yang TERPISAH:
+ *  - bintang 0..3 = ketepatan terbaik (state/profil.ts bintangUntuk): 3 semua tepat, 2 sebagian besar,
+ *    1 ada yang tepat, 0 belum ada yang tepat;
+ *  - "sudah dicoba" (ikon centang + teks) = misi punya catatan, berapa pun bintangnya.
  */
+import { Fragment, useId } from 'react';
 import { MISSIONS } from '@shared/missions';
 import type { IconKey, MissionPublic } from '@shared/types';
 import type { Tingkat } from '@shared/bankSoal';
+import { Icon } from '../art/Icon';
 import { t, useBahasa } from '../i18n';
 import type { ProgresSolo } from '../state/profil';
 
@@ -18,19 +25,29 @@ export function tingkatMisi(m: Pick<MissionPublic, 'level' | 'number'>): Tingkat
   return m.number <= 3 ? 1 : m.number <= 7 ? 2 : 3;
 }
 
-/** Bintang tersimpan satu misi, dijepit 0..3 (isi localStorage tidak dipercaya begitu saja). */
-export function bintangMisi(p: ProgresSolo, missionId: string): number {
-  const n = Math.trunc(Number(p.misi[missionId]?.bintang ?? 0));
-  return Number.isFinite(n) ? Math.min(3, Math.max(0, n)) : 0;
+/** Jumlah bintang 0..3 (angka apa pun dari luar dijepit; NaN = 0). */
+function jepitBintang(n: number): number {
+  const b = Math.trunc(Number(n));
+  return Number.isFinite(b) ? Math.min(3, Math.max(0, b)) : 0;
 }
 
-/** Hanya 10 misi paket latihan yang dihitung (catatan id lain diabaikan). */
+/** Bintang (ketepatan terbaik) satu misi, dijepit 0..3 (isi localStorage tidak dipercaya begitu saja). */
+export function bintangMisi(p: ProgresSolo, missionId: string): number {
+  return jepitBintang(p.misi[missionId]?.bintang ?? 0);
+}
+
+/** Misi sudah dicoba = punya catatan (berapa pun bintangnya, termasuk 0). */
+export function sudahDicoba(p: ProgresSolo, missionId: string): boolean {
+  return Boolean(p.misi[missionId]);
+}
+
+/** Hanya 10 misi paket latihan yang dihitung (catatan id lain diabaikan), sama dengan jumlahDicoba. */
 export function jumlahBintang(p: ProgresSolo): number {
   return MISSIONS.reduce((n, m) => n + bintangMisi(p, m.id), 0);
 }
 
 export function jumlahDicoba(p: ProgresSolo): number {
-  return MISSIONS.filter((m) => p.misi[m.id]).length;
+  return MISSIONS.filter((m) => sudahDicoba(p, m.id)).length;
 }
 
 /** Misi berikutnya yang disarankan = misi pertama yang belum dicoba; null bila semua sudah dicoba. */
@@ -62,14 +79,17 @@ export function angka(n: number): string {
   return Math.round(Number.isFinite(n) ? n : 0).toLocaleString('id-ID');
 }
 
-/** Satu bintang hiasan (tanpa teks): terisi = kuning bertepi tinta; kosong = garis tipis tanpa isi (beda bentuk, bukan hanya warna). */
+/**
+ * Satu bintang hiasan (tanpa teks): terisi = kuning bertepi tinta; kosong = garis tanpa isi (beda
+ * bentuk, bukan hanya warna; garis kosong >= 3:1 terhadap kartu krem supaya "0 bintang" tetap terlihat).
+ */
 export function SatuBintang({ isi = true, ukuran = 18 }: { isi?: boolean; ukuran?: number }) {
   return (
     <svg className={isi ? 'solo-bintang-isi' : 'solo-bintang-kosong'} width={ukuran} height={ukuran} viewBox="0 0 24 24" aria-hidden="true" focusable="false">
       <path
         d="M12 3.2l2.7 5.6 6.1.9-4.4 4.3 1.1 6.1L12 17.2l-5.5 2.9 1.1-6.1L3.2 9.7l6.1-.9Z"
         fill={isi ? '#f6c445' : 'none'}
-        stroke={isi ? '#17362a' : '#9aa996'}
+        stroke={isi ? '#17362a' : '#7a8c76'}
         strokeWidth={isi ? 1.8 : 1.5}
         strokeLinejoin="round"
       />
@@ -77,16 +97,91 @@ export function SatuBintang({ isi = true, ukuran = 18 }: { isi?: boolean; ukuran
   );
 }
 
-/** Tiga bintang (ikon) + teks untuk pembaca layar. `diam` = tanpa teks (induknya sudah menyebut jumlahnya). */
-export function BarisBintang({ n, ukuran = 18, diam = false, className = '' }: { n: number; ukuran?: number; diam?: boolean; className?: string }) {
+/**
+ * Tiga bintang (ikon) + teks "n dari 3 bintang" (juga untuk 0: tiga garis kosong + "0 dari 3 bintang").
+ * Teks bawaan hanya untuk pembaca layar; `teks` = tampilkan juga di layar; `diam` = tanpa teks sama
+ * sekali (induknya sudah menyebut jumlahnya).
+ */
+export function BarisBintang({ n, ukuran = 18, diam = false, teks = false, className = '' }: { n: number; ukuran?: number; diam?: boolean; teks?: boolean; className?: string }) {
   useBahasa();
-  const jumlah = Math.min(3, Math.max(0, Math.trunc(n)));
+  const jumlah = jepitBintang(n);
   return (
     <span className={'solo-bintang ' + className} data-jumlah={jumlah}>
       {[0, 1, 2].map((i) => <SatuBintang key={i} isi={i < jumlah} ukuran={ukuran} />)}
-      {diam ? null : <span className="sr-only">{t('solo.nBintang', { n: jumlah })}</span>}
+      {diam ? null : <span className={teks ? 'solo-bintang-teks' : 'sr-only'}>{t('solo.nBintang', { n: jumlah })}</span>}
     </span>
   );
+}
+
+/**
+ * Tanda "Sudah dicoba": ikon centang + teks (bukan warna saja), TERPISAH dari bintang ketepatan.
+ * `ikonSaja` = hanya ikon (teksnya disebut induk, mis. angka "dicoba 3/10"); ikon selalu hiasan.
+ */
+export function TandaDicoba({ ukuran = 16, ikonSaja = false, className = '' }: { ukuran?: number; ikonSaja?: boolean; className?: string }) {
+  useBahasa();
+  return (
+    <span className={'solo-tanda-dicoba ' + className}>
+      <Icon name="cek" size={ukuran} />
+      {ikonSaja ? null : <span>{t('solo.sudahDicoba')}</span>}
+    </span>
+  );
+}
+
+/** "Bintang = ketepatan terbaikmu: 3 semua tepat · 2 sebagian besar · 1 ada yang tepat"; tingkat `tebal` ditebalkan. */
+function KalimatArti({ tebal }: { tebal: number }) {
+  return <>
+    {t('solo.artiBintang')}{' '}
+    {[3, 2, 1].map((k, i) => <Fragment key={k}>
+      {i ? ' · ' : null}
+      {k === tebal ? <strong>{t(`solo.arti.${k}`)}</strong> : t(`solo.arti.${k}`)}
+    </Fragment>)}
+  </>;
+}
+
+/**
+ * Arti bintang dalam satu-dua kalimat (bintang = ketepatan terbaik, terpisah dari "sudah dicoba").
+ * `n` = jumlah bintang yang sedang dijelaskan (0..3): tingkatnya ditebalkan (bukan warna saja).
+ *  - ringkas: satu paragraf kecil (cocok di panel hasil misi); untuk 0 bintang ditambah kalimat
+ *    bahwa percobaan tetap tercatat.
+ *  - penuh  : "n dari 3 bintang · artinya", kalimat arti, dan tanda "Sudah dicoba" yang terpisah.
+ * Dipakai panel hasil misi (SoloMain) dan boleh dipakai layar lain; peta & hasil akhir memakai LegendaBintang.
+ */
+export function KeteranganBintang({ n, ringkas = false }: { n: number; ringkas?: boolean }) {
+  useBahasa();
+  const jumlah = jepitBintang(n);
+  if (ringkas) {
+    return <p className="solo-arti solo-arti-ringkas" data-jumlah={jumlah}>
+      <KalimatArti tebal={jumlah} />
+      {jumlah === 0 ? <span className="solo-arti-nol"> {t('solo.artiNol')}</span> : null}
+    </p>;
+  }
+  return <div className="solo-arti" data-jumlah={jumlah}>
+    <p className="solo-arti-kini"><b>{t('solo.nBintang', { n: jumlah })}</b> · {t(`solo.artiKini.${jumlah}`)}</p>
+    <p><KalimatArti tebal={jumlah} /></p>
+    <p className="solo-arti-dicoba"><TandaDicoba ukuran={16} /> <span>{t('solo.dicobaTerpisah')}</span></p>
+  </div>;
+}
+
+/**
+ * Legenda arti tanda di peta & hasil akhir: contoh bintang 3/2/1/0 dengan artinya, lalu tanda
+ * "Sudah dicoba" yang terpisah. Contoh bintang disebut lengkap untuk pembaca layar ("2 dari 3 bintang").
+ */
+export function LegendaBintang({ className = '' }: { className?: string }) {
+  useBahasa();
+  const idJudul = useId();
+  return <section className={'solo-legenda ' + className} aria-labelledby={idJudul}>
+    <h2 id={idJudul} className="solo-legenda-judul">{t('solo.legendaJudul')}</h2>
+    <ul className="solo-legenda-daftar">
+      {[3, 2, 1, 0].map((k) => <li key={k}>
+        <BarisBintang n={k} ukuran={14} />
+        <span><span className="sr-only">: </span>{t(`solo.legenda.${k}`)}</span>
+      </li>)}
+      <li className="solo-legenda-dicoba">
+        <TandaDicoba ukuran={16} />
+        <span className="solo-legenda-ket">{t('solo.dicobaTerpisah')}</span>
+      </li>
+    </ul>
+  </section>;
 }
 
 /** Tingkat kesulitan: tiga balok (terisi sesuai tingkat) + kata. */

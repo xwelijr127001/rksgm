@@ -1,0 +1,3631 @@
+{
+ "versi": 1,
+ "dibuat": "tools/piksel/bangun-miss.mjs",
+ "tokoh": "miss-raksa",
+ "piksel": 4,
+ "gambar": "miss-raksa.png",
+ "ukuranAtlas": [
+  768,
+  229
+ ],
+ "satuan": {
+  "dunia": "piksel seni x 4",
+  "catatan": "koordinat = piksel seni relatif pojok kiri-atas frame (rect trim); titik di batas piksel; tampilkan dengan skala bulat & nearest-neighbour"
+ },
+ "skala": {
+  "unitDuniaPerPikselSeni": 4,
+  "pxSumberPerPikselSeni": {
+   "master": 7.34,
+   "gestur": 4.57,
+   "ekspresi": 6.5
+  },
+  "kepala": "puncak sanggul -> dagu = 54 piksel seni (skala native master 7,34 px sumber/px seni)"
+ },
+ "palet": [
+  "#0f0b11",
+  "#1d1015",
+  "#28191e",
+  "#362223",
+  "#452b29",
+  "#5c352a",
+  "#6e453a",
+  "#8c7877",
+  "#340d03",
+  "#461605",
+  "#581f08",
+  "#7b3914",
+  "#8f4c26",
+  "#ad5c2e",
+  "#cb6942",
+  "#da7d51",
+  "#e78c5d",
+  "#f29a69",
+  "#f9a474",
+  "#fcaf7d",
+  "#fdbb88",
+  "#cc4038",
+  "#b87228",
+  "#ca812d",
+  "#d98f35",
+  "#e49b3d",
+  "#eda544",
+  "#f3ae4b",
+  "#f8b754",
+  "#fbc05d",
+  "#fdc765",
+  "#fdd172",
+  "#afa7aa",
+  "#cdc8ce",
+  "#e1dee2",
+  "#f7f2ea",
+  "#23281d",
+  "#313b2c",
+  "#656662"
+ ],
+ "ekspresi": [
+  "netral",
+  "senyum",
+  "prihatin",
+  "serius",
+  "lega"
+ ],
+ "varian": [
+  "dasar",
+  "kedip",
+  "bawah",
+  "bicara"
+ ],
+ "ekspresiDari": {
+  "netral": "netral",
+  "tersenyum": "senyum",
+  "senang": "senyum",
+  "cemas": "prihatin",
+  "bingung": "prihatin",
+  "serius": "serius",
+  "kesal": "serius",
+  "lega": "lega"
+ },
+ "urutanGambar": [
+  "tubuh (frame.rect; wajah netral terpanggang)",
+  "wajah ekspresi dasar (frame.ekspresi[e].dasar di frame.wajah.kotak)",
+  "kedip ATAU bawah (di frame.wajah.mata)",
+  "bicara (di frame.wajah.mulut)",
+  "duduk: gambar tubuh yang SAMA dipotong ke frame.diAtasMeja, sesudah permukaan meja & prop"
+ ],
+ "frame": {
+  "berdiri-kiri": {
+   "rect": [
+    222,
+    0,
+    61,
+    184
+   ],
+   "hadap": "kiri",
+   "jenisJangkar": "kaki",
+   "jangkar": {
+    "x": 28,
+    "y": 183
+   },
+   "kaki": {
+    "x": 28,
+    "y": 183
+   },
+   "kepala": {
+    "x": 28.5,
+    "y": 28
+   },
+   "kepalaTinggi": 54,
+   "leher": {
+    "x": 27,
+    "y": 56
+   },
+   "titikWajah": {
+    "x": 25,
+    "y": 39
+   },
+   "teleponTergambar": false,
+   "wajah": {
+    "kotak": [
+     13,
+     28,
+     24,
+     22
+    ],
+    "mata": [
+     14,
+     32,
+     23,
+     8
+    ],
+    "mulut": [
+     21,
+     47,
+     7,
+     3
+    ]
+   },
+   "ekspresi": {
+    "netral": {
+     "dasar": [
+      75,
+      185,
+      24,
+      22
+     ],
+     "kedip": [
+      168,
+      208,
+      23,
+      8
+     ],
+     "bawah": [
+      144,
+      208,
+      23,
+      8
+     ],
+     "bicara": [
+      760,
+      24,
+      7,
+      3
+     ]
+    },
+    "senyum": {
+     "dasar": [
+      125,
+      185,
+      24,
+      22
+     ],
+     "kedip": [
+      168,
+      208,
+      23,
+      8
+     ],
+     "bawah": [
+      144,
+      208,
+      23,
+      8
+     ],
+     "bicara": [
+      760,
+      32,
+      7,
+      3
+     ]
+    },
+    "prihatin": {
+     "dasar": [
+      100,
+      185,
+      24,
+      22
+     ],
+     "kedip": [
+      216,
+      208,
+      23,
+      8
+     ],
+     "bawah": [
+      192,
+      208,
+      23,
+      8
+     ],
+     "bicara": [
+      760,
+      28,
+      7,
+      3
+     ]
+    },
+    "serius": {
+     "dasar": [
+      150,
+      185,
+      24,
+      22
+     ],
+     "kedip": [
+      264,
+      208,
+      23,
+      8
+     ],
+     "bawah": [
+      240,
+      208,
+      23,
+      8
+     ],
+     "bicara": [
+      760,
+      36,
+      7,
+      3
+     ]
+    },
+    "lega": {
+     "dasar": [
+      50,
+      185,
+      24,
+      22
+     ],
+     "kedip": [
+      168,
+      208,
+      23,
+      8
+     ],
+     "bawah": [
+      144,
+      208,
+      23,
+      8
+     ],
+     "bicara": [
+      760,
+      20,
+      7,
+      3
+     ]
+    }
+   },
+   "kanvas": {
+    "x": 28,
+    "y": -1
+   },
+   "asal": {
+    "sel": "g-dengar",
+    "kepala": "e-netral (lembar ekspresi; fitur master dipertahankan) + cangkok sel ekspresi terdaftar + suntingan tangan tercatat",
+    "bawah": "master (rok, kaki, sepatu)"
+   }
+  },
+  "berdiri-kanan": {
+   "rect": [
+    160,
+    0,
+    61,
+    184
+   ],
+   "hadap": "kanan",
+   "jenisJangkar": "kaki",
+   "jangkar": {
+    "x": 33,
+    "y": 183
+   },
+   "kaki": {
+    "x": 33,
+    "y": 183
+   },
+   "kepala": {
+    "x": 32.5,
+    "y": 28
+   },
+   "kepalaTinggi": 54,
+   "leher": {
+    "x": 38,
+    "y": 56
+   },
+   "titikWajah": {
+    "x": 36,
+    "y": 39
+   },
+   "teleponTergambar": false,
+   "wajah": {
+    "kotak": [
+     24,
+     28,
+     24,
+     22
+    ],
+    "mata": [
+     24,
+     32,
+     23,
+     8
+    ],
+    "mulut": [
+     33,
+     47,
+     7,
+     3
+    ]
+   },
+   "ekspresi": {
+    "netral": {
+     "dasar": [
+      524,
+      140,
+      24,
+      22
+     ],
+     "kedip": [
+      24,
+      208,
+      23,
+      8
+     ],
+     "bawah": [
+      0,
+      208,
+      23,
+      8
+     ],
+     "bicara": [
+      760,
+      4,
+      7,
+      3
+     ]
+    },
+    "senyum": {
+     "dasar": [
+      0,
+      185,
+      24,
+      22
+     ],
+     "kedip": [
+      24,
+      208,
+      23,
+      8
+     ],
+     "bawah": [
+      0,
+      208,
+      23,
+      8
+     ],
+     "bicara": [
+      760,
+      12,
+      7,
+      3
+     ]
+    },
+    "prihatin": {
+     "dasar": [
+      524,
+      163,
+      24,
+      22
+     ],
+     "kedip": [
+      72,
+      208,
+      23,
+      8
+     ],
+     "bawah": [
+      48,
+      208,
+      23,
+      8
+     ],
+     "bicara": [
+      760,
+      8,
+      7,
+      3
+     ]
+    },
+    "serius": {
+     "dasar": [
+      25,
+      185,
+      24,
+      22
+     ],
+     "kedip": [
+      120,
+      208,
+      23,
+      8
+     ],
+     "bawah": [
+      96,
+      208,
+      23,
+      8
+     ],
+     "bicara": [
+      760,
+      16,
+      7,
+      3
+     ]
+    },
+    "lega": {
+     "dasar": [
+      524,
+      117,
+      24,
+      22
+     ],
+     "kedip": [
+      24,
+      208,
+      23,
+      8
+     ],
+     "bawah": [
+      0,
+      208,
+      23,
+      8
+     ],
+     "bicara": [
+      760,
+      0,
+      7,
+      3
+     ]
+    }
+   },
+   "kanvas": {
+    "x": 32,
+    "y": -1
+   },
+   "asal": {
+    "sel": "g-dengar",
+    "kepala": "e-netral (lembar ekspresi; fitur master dipertahankan) + cangkok sel ekspresi terdaftar + suntingan tangan tercatat",
+    "bawah": "master (rok, kaki, sepatu)",
+    "cermin": "badan dicermin di sumbu kerah + detail depan jas diperbaiki; kepala kanan (belahan dipindah)"
+   }
+  },
+  "berdiri-sambut-kiri": {
+   "rect": [
+    345,
+    0,
+    60,
+    184
+   ],
+   "hadap": "kiri",
+   "jenisJangkar": "kaki",
+   "jangkar": {
+    "x": 28,
+    "y": 183
+   },
+   "kaki": {
+    "x": 28,
+    "y": 183
+   },
+   "kepala": {
+    "x": 28.5,
+    "y": 28
+   },
+   "kepalaTinggi": 54,
+   "leher": {
+    "x": 27,
+    "y": 56
+   },
+   "titikWajah": {
+    "x": 25,
+    "y": 39
+   },
+   "teleponTergambar": false,
+   "wajah": {
+    "kotak": [
+     13,
+     28,
+     24,
+     22
+    ],
+    "mata": [
+     14,
+     32,
+     23,
+     8
+    ],
+    "mulut": [
+     21,
+     47,
+     7,
+     3
+    ]
+   },
+   "ekspresi": {
+    "netral": {
+     "dasar": [
+      75,
+      185,
+      24,
+      22
+     ],
+     "kedip": [
+      168,
+      208,
+      23,
+      8
+     ],
+     "bawah": [
+      144,
+      208,
+      23,
+      8
+     ],
+     "bicara": [
+      760,
+      24,
+      7,
+      3
+     ]
+    },
+    "senyum": {
+     "dasar": [
+      125,
+      185,
+      24,
+      22
+     ],
+     "kedip": [
+      168,
+      208,
+      23,
+      8
+     ],
+     "bawah": [
+      144,
+      208,
+      23,
+      8
+     ],
+     "bicara": [
+      760,
+      32,
+      7,
+      3
+     ]
+    },
+    "prihatin": {
+     "dasar": [
+      100,
+      185,
+      24,
+      22
+     ],
+     "kedip": [
+      216,
+      208,
+      23,
+      8
+     ],
+     "bawah": [
+      192,
+      208,
+      23,
+      8
+     ],
+     "bicara": [
+      760,
+      28,
+      7,
+      3
+     ]
+    },
+    "serius": {
+     "dasar": [
+      150,
+      185,
+      24,
+      22
+     ],
+     "kedip": [
+      264,
+      208,
+      23,
+      8
+     ],
+     "bawah": [
+      240,
+      208,
+      23,
+      8
+     ],
+     "bicara": [
+      760,
+      36,
+      7,
+      3
+     ]
+    },
+    "lega": {
+     "dasar": [
+      50,
+      185,
+      24,
+      22
+     ],
+     "kedip": [
+      168,
+      208,
+      23,
+      8
+     ],
+     "bawah": [
+      144,
+      208,
+      23,
+      8
+     ],
+     "bicara": [
+      760,
+      20,
+      7,
+      3
+     ]
+    }
+   },
+   "kanvas": {
+    "x": 28,
+    "y": -1
+   },
+   "asal": {
+    "sel": "g-sambut",
+    "kepala": "e-netral (lembar ekspresi; fitur master dipertahankan) + cangkok sel ekspresi terdaftar + suntingan tangan tercatat",
+    "bawah": "master (rok, kaki, sepatu)"
+   }
+  },
+  "berdiri-sambut-kanan": {
+   "rect": [
+    284,
+    0,
+    60,
+    184
+   ],
+   "hadap": "kanan",
+   "jenisJangkar": "kaki",
+   "jangkar": {
+    "x": 32,
+    "y": 183
+   },
+   "kaki": {
+    "x": 32,
+    "y": 183
+   },
+   "kepala": {
+    "x": 31.5,
+    "y": 28
+   },
+   "kepalaTinggi": 54,
+   "leher": {
+    "x": 37,
+    "y": 56
+   },
+   "titikWajah": {
+    "x": 35,
+    "y": 39
+   },
+   "teleponTergambar": false,
+   "wajah": {
+    "kotak": [
+     23,
+     28,
+     24,
+     22
+    ],
+    "mata": [
+     23,
+     32,
+     23,
+     8
+    ],
+    "mulut": [
+     32,
+     47,
+     7,
+     3
+    ]
+   },
+   "ekspresi": {
+    "netral": {
+     "dasar": [
+      524,
+      140,
+      24,
+      22
+     ],
+     "kedip": [
+      24,
+      208,
+      23,
+      8
+     ],
+     "bawah": [
+      0,
+      208,
+      23,
+      8
+     ],
+     "bicara": [
+      760,
+      4,
+      7,
+      3
+     ]
+    },
+    "senyum": {
+     "dasar": [
+      0,
+      185,
+      24,
+      22
+     ],
+     "kedip": [
+      24,
+      208,
+      23,
+      8
+     ],
+     "bawah": [
+      0,
+      208,
+      23,
+      8
+     ],
+     "bicara": [
+      760,
+      12,
+      7,
+      3
+     ]
+    },
+    "prihatin": {
+     "dasar": [
+      524,
+      163,
+      24,
+      22
+     ],
+     "kedip": [
+      72,
+      208,
+      23,
+      8
+     ],
+     "bawah": [
+      48,
+      208,
+      23,
+      8
+     ],
+     "bicara": [
+      760,
+      8,
+      7,
+      3
+     ]
+    },
+    "serius": {
+     "dasar": [
+      25,
+      185,
+      24,
+      22
+     ],
+     "kedip": [
+      120,
+      208,
+      23,
+      8
+     ],
+     "bawah": [
+      96,
+      208,
+      23,
+      8
+     ],
+     "bicara": [
+      760,
+      16,
+      7,
+      3
+     ]
+    },
+    "lega": {
+     "dasar": [
+      524,
+      117,
+      24,
+      22
+     ],
+     "kedip": [
+      24,
+      208,
+      23,
+      8
+     ],
+     "bawah": [
+      0,
+      208,
+      23,
+      8
+     ],
+     "bicara": [
+      760,
+      0,
+      7,
+      3
+     ]
+    }
+   },
+   "kanvas": {
+    "x": 33,
+    "y": -1
+   },
+   "asal": {
+    "sel": "g-sambut",
+    "kepala": "e-netral (lembar ekspresi; fitur master dipertahankan) + cangkok sel ekspresi terdaftar + suntingan tangan tercatat",
+    "bawah": "master (rok, kaki, sepatu)",
+    "cermin": "badan dicermin di sumbu kerah + detail depan jas diperbaiki; kepala kanan (belahan dipindah)"
+   }
+  },
+  "berdiri-persilakan-kanan": {
+   "rect": [
+    0,
+    0,
+    79,
+    184
+   ],
+   "hadap": "kanan",
+   "jenisJangkar": "kaki",
+   "jangkar": {
+    "x": 32,
+    "y": 183
+   },
+   "kaki": {
+    "x": 32,
+    "y": 183
+   },
+   "kepala": {
+    "x": 31.5,
+    "y": 28
+   },
+   "kepalaTinggi": 54,
+   "leher": {
+    "x": 37,
+    "y": 56
+   },
+   "titikWajah": {
+    "x": 35,
+    "y": 39
+   },
+   "tangan": {
+    "telapak": {
+     "x": 71,
+     "y": 73
+    }
+   },
+   "teleponTergambar": false,
+   "wajah": {
+    "kotak": [
+     23,
+     28,
+     24,
+     22
+    ],
+    "mata": [
+     23,
+     32,
+     23,
+     8
+    ],
+    "mulut": [
+     32,
+     47,
+     7,
+     3
+    ]
+   },
+   "ekspresi": {
+    "netral": {
+     "dasar": [
+      524,
+      140,
+      24,
+      22
+     ],
+     "kedip": [
+      24,
+      208,
+      23,
+      8
+     ],
+     "bawah": [
+      0,
+      208,
+      23,
+      8
+     ],
+     "bicara": [
+      760,
+      4,
+      7,
+      3
+     ]
+    },
+    "senyum": {
+     "dasar": [
+      0,
+      185,
+      24,
+      22
+     ],
+     "kedip": [
+      24,
+      208,
+      23,
+      8
+     ],
+     "bawah": [
+      0,
+      208,
+      23,
+      8
+     ],
+     "bicara": [
+      760,
+      12,
+      7,
+      3
+     ]
+    },
+    "prihatin": {
+     "dasar": [
+      524,
+      163,
+      24,
+      22
+     ],
+     "kedip": [
+      72,
+      208,
+      23,
+      8
+     ],
+     "bawah": [
+      48,
+      208,
+      23,
+      8
+     ],
+     "bicara": [
+      760,
+      8,
+      7,
+      3
+     ]
+    },
+    "serius": {
+     "dasar": [
+      25,
+      185,
+      24,
+      22
+     ],
+     "kedip": [
+      120,
+      208,
+      23,
+      8
+     ],
+     "bawah": [
+      96,
+      208,
+      23,
+      8
+     ],
+     "bicara": [
+      760,
+      16,
+      7,
+      3
+     ]
+    },
+    "lega": {
+     "dasar": [
+      524,
+      117,
+      24,
+      22
+     ],
+     "kedip": [
+      24,
+      208,
+      23,
+      8
+     ],
+     "bawah": [
+      0,
+      208,
+      23,
+      8
+     ],
+     "bicara": [
+      760,
+      0,
+      7,
+      3
+     ]
+    }
+   },
+   "kanvas": {
+    "x": 33,
+    "y": -1
+   },
+   "asal": {
+    "sel": "g-jelaskan",
+    "kepala": "e-netral (lembar ekspresi; fitur master dipertahankan) + cangkok sel ekspresi terdaftar + suntingan tangan tercatat",
+    "bawah": "master (rok, kaki, sepatu)",
+    "cermin": "badan dicermin di sumbu kerah + detail depan jas diperbaiki; kepala kanan (belahan dipindah)"
+   }
+  },
+  "berdiri-persilakan-kiri": {
+   "rect": [
+    80,
+    0,
+    79,
+    184
+   ],
+   "hadap": "kiri",
+   "jenisJangkar": "kaki",
+   "jangkar": {
+    "x": 47,
+    "y": 183
+   },
+   "kaki": {
+    "x": 47,
+    "y": 183
+   },
+   "kepala": {
+    "x": 47.5,
+    "y": 28
+   },
+   "kepalaTinggi": 54,
+   "leher": {
+    "x": 46,
+    "y": 56
+   },
+   "titikWajah": {
+    "x": 44,
+    "y": 39
+   },
+   "tangan": {
+    "telapak": {
+     "x": 7,
+     "y": 73
+    }
+   },
+   "teleponTergambar": false,
+   "wajah": {
+    "kotak": [
+     32,
+     28,
+     24,
+     22
+    ],
+    "mata": [
+     33,
+     32,
+     23,
+     8
+    ],
+    "mulut": [
+     40,
+     47,
+     7,
+     3
+    ]
+   },
+   "ekspresi": {
+    "netral": {
+     "dasar": [
+      75,
+      185,
+      24,
+      22
+     ],
+     "kedip": [
+      168,
+      208,
+      23,
+      8
+     ],
+     "bawah": [
+      144,
+      208,
+      23,
+      8
+     ],
+     "bicara": [
+      760,
+      24,
+      7,
+      3
+     ]
+    },
+    "senyum": {
+     "dasar": [
+      125,
+      185,
+      24,
+      22
+     ],
+     "kedip": [
+      168,
+      208,
+      23,
+      8
+     ],
+     "bawah": [
+      144,
+      208,
+      23,
+      8
+     ],
+     "bicara": [
+      760,
+      32,
+      7,
+      3
+     ]
+    },
+    "prihatin": {
+     "dasar": [
+      100,
+      185,
+      24,
+      22
+     ],
+     "kedip": [
+      216,
+      208,
+      23,
+      8
+     ],
+     "bawah": [
+      192,
+      208,
+      23,
+      8
+     ],
+     "bicara": [
+      760,
+      28,
+      7,
+      3
+     ]
+    },
+    "serius": {
+     "dasar": [
+      150,
+      185,
+      24,
+      22
+     ],
+     "kedip": [
+      264,
+      208,
+      23,
+      8
+     ],
+     "bawah": [
+      240,
+      208,
+      23,
+      8
+     ],
+     "bicara": [
+      760,
+      36,
+      7,
+      3
+     ]
+    },
+    "lega": {
+     "dasar": [
+      50,
+      185,
+      24,
+      22
+     ],
+     "kedip": [
+      168,
+      208,
+      23,
+      8
+     ],
+     "bawah": [
+      144,
+      208,
+      23,
+      8
+     ],
+     "bicara": [
+      760,
+      20,
+      7,
+      3
+     ]
+    }
+   },
+   "kanvas": {
+    "x": 9,
+    "y": -1
+   },
+   "asal": {
+    "sel": "g-jelaskan",
+    "kepala": "e-netral (lembar ekspresi; fitur master dipertahankan) + cangkok sel ekspresi terdaftar + suntingan tangan tercatat",
+    "bawah": "master (rok, kaki, sepatu)"
+   }
+  },
+  "duduk-turun-kanan": {
+   "rect": [
+    556,
+    116,
+    61,
+    113
+   ],
+   "hadap": "kanan",
+   "jenisJangkar": "kaki",
+   "jangkar": {
+    "x": 33,
+    "y": 173
+   },
+   "kaki": {
+    "x": 33,
+    "y": 173
+   },
+   "kepala": {
+    "x": 32.5,
+    "y": 28
+   },
+   "kepalaTinggi": 54,
+   "leher": {
+    "x": 38,
+    "y": 56
+   },
+   "titikWajah": {
+    "x": 36,
+    "y": 39
+   },
+   "teleponTergambar": false,
+   "wajah": {
+    "kotak": [
+     24,
+     28,
+     24,
+     22
+    ],
+    "mata": [
+     24,
+     32,
+     23,
+     8
+    ],
+    "mulut": [
+     33,
+     47,
+     7,
+     3
+    ]
+   },
+   "ekspresi": {
+    "netral": {
+     "dasar": [
+      524,
+      140,
+      24,
+      22
+     ],
+     "kedip": [
+      24,
+      208,
+      23,
+      8
+     ],
+     "bawah": [
+      0,
+      208,
+      23,
+      8
+     ],
+     "bicara": [
+      760,
+      4,
+      7,
+      3
+     ]
+    },
+    "senyum": {
+     "dasar": [
+      0,
+      185,
+      24,
+      22
+     ],
+     "kedip": [
+      24,
+      208,
+      23,
+      8
+     ],
+     "bawah": [
+      0,
+      208,
+      23,
+      8
+     ],
+     "bicara": [
+      760,
+      12,
+      7,
+      3
+     ]
+    },
+    "prihatin": {
+     "dasar": [
+      524,
+      163,
+      24,
+      22
+     ],
+     "kedip": [
+      72,
+      208,
+      23,
+      8
+     ],
+     "bawah": [
+      48,
+      208,
+      23,
+      8
+     ],
+     "bicara": [
+      760,
+      8,
+      7,
+      3
+     ]
+    },
+    "serius": {
+     "dasar": [
+      25,
+      185,
+      24,
+      22
+     ],
+     "kedip": [
+      120,
+      208,
+      23,
+      8
+     ],
+     "bawah": [
+      96,
+      208,
+      23,
+      8
+     ],
+     "bicara": [
+      760,
+      16,
+      7,
+      3
+     ]
+    },
+    "lega": {
+     "dasar": [
+      524,
+      117,
+      24,
+      22
+     ],
+     "kedip": [
+      24,
+      208,
+      23,
+      8
+     ],
+     "bawah": [
+      0,
+      208,
+      23,
+      8
+     ],
+     "bicara": [
+      760,
+      0,
+      7,
+      3
+     ]
+    }
+   },
+   "garisMeja": 112,
+   "turun": {
+    "dariBerdiri": 10,
+    "keDuduk": 10,
+    "catatan": "bingkai antara berdiri <-> duduk: jangkar kaki di y lantai tempat.mentorBerdiri; badan 10 px seni lebih rendah dari berdiri, 10 di atas duduk; x kaki = x kaki berdiri arah sama (kepala tepat di tengah bila x dipilih seperti bingkaiTurun Bu Rina); badan di bawah garisMeja tidak digambar (tertutup meja): gambar DI BALIK meja"
+   },
+   "kanvas": {
+    "x": 32,
+    "y": -1
+   },
+   "asal": {
+    "sel": "g-dengar",
+    "kepala": "e-netral (lembar ekspresi; fitur master dipertahankan) + cangkok sel ekspresi terdaftar + suntingan tangan tercatat",
+    "bawah": "tidak digambar (tertutup meja)",
+    "cermin": "badan dicermin di sumbu kerah + detail depan jas diperbaiki; kepala kanan (belahan dipindah)"
+   }
+  },
+  "duduk-turun-kiri": {
+   "rect": [
+    618,
+    116,
+    61,
+    113
+   ],
+   "hadap": "kiri",
+   "jenisJangkar": "kaki",
+   "jangkar": {
+    "x": 28,
+    "y": 173
+   },
+   "kaki": {
+    "x": 28,
+    "y": 173
+   },
+   "kepala": {
+    "x": 28.5,
+    "y": 28
+   },
+   "kepalaTinggi": 54,
+   "leher": {
+    "x": 27,
+    "y": 56
+   },
+   "titikWajah": {
+    "x": 25,
+    "y": 39
+   },
+   "teleponTergambar": false,
+   "wajah": {
+    "kotak": [
+     13,
+     28,
+     24,
+     22
+    ],
+    "mata": [
+     14,
+     32,
+     23,
+     8
+    ],
+    "mulut": [
+     21,
+     47,
+     7,
+     3
+    ]
+   },
+   "ekspresi": {
+    "netral": {
+     "dasar": [
+      75,
+      185,
+      24,
+      22
+     ],
+     "kedip": [
+      168,
+      208,
+      23,
+      8
+     ],
+     "bawah": [
+      144,
+      208,
+      23,
+      8
+     ],
+     "bicara": [
+      760,
+      24,
+      7,
+      3
+     ]
+    },
+    "senyum": {
+     "dasar": [
+      125,
+      185,
+      24,
+      22
+     ],
+     "kedip": [
+      168,
+      208,
+      23,
+      8
+     ],
+     "bawah": [
+      144,
+      208,
+      23,
+      8
+     ],
+     "bicara": [
+      760,
+      32,
+      7,
+      3
+     ]
+    },
+    "prihatin": {
+     "dasar": [
+      100,
+      185,
+      24,
+      22
+     ],
+     "kedip": [
+      216,
+      208,
+      23,
+      8
+     ],
+     "bawah": [
+      192,
+      208,
+      23,
+      8
+     ],
+     "bicara": [
+      760,
+      28,
+      7,
+      3
+     ]
+    },
+    "serius": {
+     "dasar": [
+      150,
+      185,
+      24,
+      22
+     ],
+     "kedip": [
+      264,
+      208,
+      23,
+      8
+     ],
+     "bawah": [
+      240,
+      208,
+      23,
+      8
+     ],
+     "bicara": [
+      760,
+      36,
+      7,
+      3
+     ]
+    },
+    "lega": {
+     "dasar": [
+      50,
+      185,
+      24,
+      22
+     ],
+     "kedip": [
+      168,
+      208,
+      23,
+      8
+     ],
+     "bawah": [
+      144,
+      208,
+      23,
+      8
+     ],
+     "bicara": [
+      760,
+      20,
+      7,
+      3
+     ]
+    }
+   },
+   "garisMeja": 112,
+   "turun": {
+    "dariBerdiri": 10,
+    "keDuduk": 10,
+    "catatan": "bingkai antara berdiri <-> duduk: jangkar kaki di y lantai tempat.mentorBerdiri; badan 10 px seni lebih rendah dari berdiri, 10 di atas duduk; x kaki = x kaki berdiri arah sama (kepala tepat di tengah bila x dipilih seperti bingkaiTurun Bu Rina); badan di bawah garisMeja tidak digambar (tertutup meja): gambar DI BALIK meja"
+   },
+   "kanvas": {
+    "x": 28,
+    "y": -1
+   },
+   "asal": {
+    "sel": "g-dengar",
+    "kepala": "e-netral (lembar ekspresi; fitur master dipertahankan) + cangkok sel ekspresi terdaftar + suntingan tangan tercatat",
+    "bawah": "tidak digambar (tertutup meja)"
+   }
+  },
+  "duduk-dengar-kiri": {
+   "rect": [
+    618,
+    0,
+    61,
+    115
+   ],
+   "hadap": "kiri",
+   "jenisJangkar": "pinggul",
+   "jangkar": {
+    "x": 30,
+    "y": 136
+   },
+   "pinggul": {
+    "x": 30,
+    "y": 136
+   },
+   "kepala": {
+    "x": 28.5,
+    "y": 28
+   },
+   "kepalaTinggi": 54,
+   "leher": {
+    "x": 27,
+    "y": 56
+   },
+   "titikWajah": {
+    "x": 25,
+    "y": 39
+   },
+   "teleponTergambar": false,
+   "wajah": {
+    "kotak": [
+     13,
+     28,
+     24,
+     22
+    ],
+    "mata": [
+     14,
+     32,
+     23,
+     8
+    ],
+    "mulut": [
+     21,
+     47,
+     7,
+     3
+    ]
+   },
+   "ekspresi": {
+    "netral": {
+     "dasar": [
+      75,
+      185,
+      24,
+      22
+     ],
+     "kedip": [
+      168,
+      208,
+      23,
+      8
+     ],
+     "bawah": [
+      144,
+      208,
+      23,
+      8
+     ],
+     "bicara": [
+      760,
+      24,
+      7,
+      3
+     ]
+    },
+    "senyum": {
+     "dasar": [
+      125,
+      185,
+      24,
+      22
+     ],
+     "kedip": [
+      168,
+      208,
+      23,
+      8
+     ],
+     "bawah": [
+      144,
+      208,
+      23,
+      8
+     ],
+     "bicara": [
+      760,
+      32,
+      7,
+      3
+     ]
+    },
+    "prihatin": {
+     "dasar": [
+      100,
+      185,
+      24,
+      22
+     ],
+     "kedip": [
+      216,
+      208,
+      23,
+      8
+     ],
+     "bawah": [
+      192,
+      208,
+      23,
+      8
+     ],
+     "bicara": [
+      760,
+      28,
+      7,
+      3
+     ]
+    },
+    "serius": {
+     "dasar": [
+      150,
+      185,
+      24,
+      22
+     ],
+     "kedip": [
+      264,
+      208,
+      23,
+      8
+     ],
+     "bawah": [
+      240,
+      208,
+      23,
+      8
+     ],
+     "bicara": [
+      760,
+      36,
+      7,
+      3
+     ]
+    },
+    "lega": {
+     "dasar": [
+      50,
+      185,
+      24,
+      22
+     ],
+     "kedip": [
+      168,
+      208,
+      23,
+      8
+     ],
+     "bawah": [
+      144,
+      208,
+      23,
+      8
+     ],
+     "bicara": [
+      760,
+      20,
+      7,
+      3
+     ]
+    }
+   },
+   "garisMeja": 102,
+   "diAtasMeja": [
+    [
+     0,
+     102,
+     61,
+     13
+    ],
+    [
+     5,
+     101,
+     52,
+     1
+    ]
+   ],
+   "garisMata": 36.5,
+   "mataDiAtasMeja": 65.5,
+   "tanganMeja": [
+    {
+     "x": 27,
+     "y": 106
+    }
+   ],
+   "kanvas": {
+    "x": 28,
+    "y": -1
+   },
+   "asal": {
+    "sel": "g-dengar",
+    "kepala": "e-netral (lembar ekspresi; fitur master dipertahankan) + cangkok sel ekspresi terdaftar + suntingan tangan tercatat"
+   }
+  },
+  "duduk-dengar-kanan": {
+   "rect": [
+    556,
+    0,
+    61,
+    115
+   ],
+   "hadap": "kanan",
+   "jenisJangkar": "pinggul",
+   "jangkar": {
+    "x": 30,
+    "y": 136
+   },
+   "pinggul": {
+    "x": 30,
+    "y": 136
+   },
+   "kepala": {
+    "x": 32.5,
+    "y": 28
+   },
+   "kepalaTinggi": 54,
+   "leher": {
+    "x": 38,
+    "y": 56
+   },
+   "titikWajah": {
+    "x": 36,
+    "y": 39
+   },
+   "teleponTergambar": false,
+   "wajah": {
+    "kotak": [
+     24,
+     28,
+     24,
+     22
+    ],
+    "mata": [
+     24,
+     32,
+     23,
+     8
+    ],
+    "mulut": [
+     33,
+     47,
+     7,
+     3
+    ]
+   },
+   "ekspresi": {
+    "netral": {
+     "dasar": [
+      524,
+      140,
+      24,
+      22
+     ],
+     "kedip": [
+      24,
+      208,
+      23,
+      8
+     ],
+     "bawah": [
+      0,
+      208,
+      23,
+      8
+     ],
+     "bicara": [
+      760,
+      4,
+      7,
+      3
+     ]
+    },
+    "senyum": {
+     "dasar": [
+      0,
+      185,
+      24,
+      22
+     ],
+     "kedip": [
+      24,
+      208,
+      23,
+      8
+     ],
+     "bawah": [
+      0,
+      208,
+      23,
+      8
+     ],
+     "bicara": [
+      760,
+      12,
+      7,
+      3
+     ]
+    },
+    "prihatin": {
+     "dasar": [
+      524,
+      163,
+      24,
+      22
+     ],
+     "kedip": [
+      72,
+      208,
+      23,
+      8
+     ],
+     "bawah": [
+      48,
+      208,
+      23,
+      8
+     ],
+     "bicara": [
+      760,
+      8,
+      7,
+      3
+     ]
+    },
+    "serius": {
+     "dasar": [
+      25,
+      185,
+      24,
+      22
+     ],
+     "kedip": [
+      120,
+      208,
+      23,
+      8
+     ],
+     "bawah": [
+      96,
+      208,
+      23,
+      8
+     ],
+     "bicara": [
+      760,
+      16,
+      7,
+      3
+     ]
+    },
+    "lega": {
+     "dasar": [
+      524,
+      117,
+      24,
+      22
+     ],
+     "kedip": [
+      24,
+      208,
+      23,
+      8
+     ],
+     "bawah": [
+      0,
+      208,
+      23,
+      8
+     ],
+     "bicara": [
+      760,
+      0,
+      7,
+      3
+     ]
+    }
+   },
+   "garisMeja": 102,
+   "diAtasMeja": [
+    [
+     0,
+     102,
+     61,
+     13
+    ],
+    [
+     4,
+     101,
+     52,
+     1
+    ]
+   ],
+   "garisMata": 36.5,
+   "mataDiAtasMeja": 65.5,
+   "tanganMeja": [
+    {
+     "x": 34,
+     "y": 106
+    }
+   ],
+   "kanvas": {
+    "x": 32,
+    "y": -1
+   },
+   "asal": {
+    "sel": "g-dengar",
+    "kepala": "e-netral (lembar ekspresi; fitur master dipertahankan) + cangkok sel ekspresi terdaftar + suntingan tangan tercatat",
+    "cermin": "badan dicermin di sumbu kerah + detail depan jas diperbaiki; kepala kanan (belahan dipindah)"
+   }
+  },
+  "duduk-jelaskan-kiri": {
+   "rect": [
+    680,
+    114,
+    79,
+    113
+   ],
+   "hadap": "kiri",
+   "jenisJangkar": "pinggul",
+   "jangkar": {
+    "x": 49,
+    "y": 136
+   },
+   "pinggul": {
+    "x": 49,
+    "y": 136
+   },
+   "kepala": {
+    "x": 47.5,
+    "y": 28
+   },
+   "kepalaTinggi": 54,
+   "leher": {
+    "x": 46,
+    "y": 56
+   },
+   "titikWajah": {
+    "x": 44,
+    "y": 39
+   },
+   "tangan": {
+    "telapak": {
+     "x": 7,
+     "y": 73
+    }
+   },
+   "teleponTergambar": false,
+   "wajah": {
+    "kotak": [
+     32,
+     28,
+     24,
+     22
+    ],
+    "mata": [
+     33,
+     32,
+     23,
+     8
+    ],
+    "mulut": [
+     40,
+     47,
+     7,
+     3
+    ]
+   },
+   "ekspresi": {
+    "netral": {
+     "dasar": [
+      75,
+      185,
+      24,
+      22
+     ],
+     "kedip": [
+      168,
+      208,
+      23,
+      8
+     ],
+     "bawah": [
+      144,
+      208,
+      23,
+      8
+     ],
+     "bicara": [
+      760,
+      24,
+      7,
+      3
+     ]
+    },
+    "senyum": {
+     "dasar": [
+      125,
+      185,
+      24,
+      22
+     ],
+     "kedip": [
+      168,
+      208,
+      23,
+      8
+     ],
+     "bawah": [
+      144,
+      208,
+      23,
+      8
+     ],
+     "bicara": [
+      760,
+      32,
+      7,
+      3
+     ]
+    },
+    "prihatin": {
+     "dasar": [
+      100,
+      185,
+      24,
+      22
+     ],
+     "kedip": [
+      216,
+      208,
+      23,
+      8
+     ],
+     "bawah": [
+      192,
+      208,
+      23,
+      8
+     ],
+     "bicara": [
+      760,
+      28,
+      7,
+      3
+     ]
+    },
+    "serius": {
+     "dasar": [
+      150,
+      185,
+      24,
+      22
+     ],
+     "kedip": [
+      264,
+      208,
+      23,
+      8
+     ],
+     "bawah": [
+      240,
+      208,
+      23,
+      8
+     ],
+     "bicara": [
+      760,
+      36,
+      7,
+      3
+     ]
+    },
+    "lega": {
+     "dasar": [
+      50,
+      185,
+      24,
+      22
+     ],
+     "kedip": [
+      168,
+      208,
+      23,
+      8
+     ],
+     "bawah": [
+      144,
+      208,
+      23,
+      8
+     ],
+     "bicara": [
+      760,
+      20,
+      7,
+      3
+     ]
+    }
+   },
+   "garisMeja": 102,
+   "diAtasMeja": [
+    [
+     0,
+     102,
+     79,
+     11
+    ],
+    [
+     40,
+     101,
+     35,
+     1
+    ]
+   ],
+   "garisMata": 36.5,
+   "mataDiAtasMeja": 65.5,
+   "tanganMeja": [
+    {
+     "x": 45,
+     "y": 106
+    }
+   ],
+   "kanvas": {
+    "x": 9,
+    "y": -1
+   },
+   "asal": {
+    "sel": "g-jelaskan",
+    "kepala": "e-netral (lembar ekspresi; fitur master dipertahankan) + cangkok sel ekspresi terdaftar + suntingan tangan tercatat"
+   }
+  },
+  "duduk-jelaskan-kanan": {
+   "rect": [
+    680,
+    0,
+    79,
+    113
+   ],
+   "hadap": "kanan",
+   "jenisJangkar": "pinggul",
+   "jangkar": {
+    "x": 29,
+    "y": 136
+   },
+   "pinggul": {
+    "x": 29,
+    "y": 136
+   },
+   "kepala": {
+    "x": 31.5,
+    "y": 28
+   },
+   "kepalaTinggi": 54,
+   "leher": {
+    "x": 37,
+    "y": 56
+   },
+   "titikWajah": {
+    "x": 35,
+    "y": 39
+   },
+   "tangan": {
+    "telapak": {
+     "x": 71,
+     "y": 73
+    }
+   },
+   "teleponTergambar": false,
+   "wajah": {
+    "kotak": [
+     23,
+     28,
+     24,
+     22
+    ],
+    "mata": [
+     23,
+     32,
+     23,
+     8
+    ],
+    "mulut": [
+     32,
+     47,
+     7,
+     3
+    ]
+   },
+   "ekspresi": {
+    "netral": {
+     "dasar": [
+      524,
+      140,
+      24,
+      22
+     ],
+     "kedip": [
+      24,
+      208,
+      23,
+      8
+     ],
+     "bawah": [
+      0,
+      208,
+      23,
+      8
+     ],
+     "bicara": [
+      760,
+      4,
+      7,
+      3
+     ]
+    },
+    "senyum": {
+     "dasar": [
+      0,
+      185,
+      24,
+      22
+     ],
+     "kedip": [
+      24,
+      208,
+      23,
+      8
+     ],
+     "bawah": [
+      0,
+      208,
+      23,
+      8
+     ],
+     "bicara": [
+      760,
+      12,
+      7,
+      3
+     ]
+    },
+    "prihatin": {
+     "dasar": [
+      524,
+      163,
+      24,
+      22
+     ],
+     "kedip": [
+      72,
+      208,
+      23,
+      8
+     ],
+     "bawah": [
+      48,
+      208,
+      23,
+      8
+     ],
+     "bicara": [
+      760,
+      8,
+      7,
+      3
+     ]
+    },
+    "serius": {
+     "dasar": [
+      25,
+      185,
+      24,
+      22
+     ],
+     "kedip": [
+      120,
+      208,
+      23,
+      8
+     ],
+     "bawah": [
+      96,
+      208,
+      23,
+      8
+     ],
+     "bicara": [
+      760,
+      16,
+      7,
+      3
+     ]
+    },
+    "lega": {
+     "dasar": [
+      524,
+      117,
+      24,
+      22
+     ],
+     "kedip": [
+      24,
+      208,
+      23,
+      8
+     ],
+     "bawah": [
+      0,
+      208,
+      23,
+      8
+     ],
+     "bicara": [
+      760,
+      0,
+      7,
+      3
+     ]
+    }
+   },
+   "garisMeja": 102,
+   "diAtasMeja": [
+    [
+     0,
+     102,
+     79,
+     11
+    ],
+    [
+     4,
+     101,
+     35,
+     1
+    ]
+   ],
+   "garisMata": 36.5,
+   "mataDiAtasMeja": 65.5,
+   "tanganMeja": [
+    {
+     "x": 34,
+     "y": 106
+    }
+   ],
+   "kanvas": {
+    "x": 33,
+    "y": -1
+   },
+   "asal": {
+    "sel": "g-jelaskan",
+    "kepala": "e-netral (lembar ekspresi; fitur master dipertahankan) + cangkok sel ekspresi terdaftar + suntingan tangan tercatat",
+    "cermin": "badan dicermin di sumbu kerah + detail depan jas diperbaiki; kepala kanan (belahan dipindah)"
+   }
+  },
+  "duduk-tunjuk-kanan": {
+   "rect": [
+    406,
+    0,
+    74,
+    116
+   ],
+   "hadap": "kanan",
+   "jenisJangkar": "pinggul",
+   "jangkar": {
+    "x": 30,
+    "y": 136
+   },
+   "pinggul": {
+    "x": 30,
+    "y": 136
+   },
+   "kepala": {
+    "x": 32.5,
+    "y": 28
+   },
+   "kepalaTinggi": 54,
+   "leher": {
+    "x": 38,
+    "y": 56
+   },
+   "titikWajah": {
+    "x": 36,
+    "y": 39
+   },
+   "ujungTelunjuk": {
+    "x": 70,
+    "y": 115
+   },
+   "tangan": {
+    "telunjuk": {
+     "x": 70,
+     "y": 115
+    }
+   },
+   "teleponTergambar": false,
+   "wajah": {
+    "kotak": [
+     24,
+     28,
+     24,
+     22
+    ],
+    "mata": [
+     24,
+     32,
+     23,
+     8
+    ],
+    "mulut": [
+     33,
+     47,
+     7,
+     3
+    ]
+   },
+   "ekspresi": {
+    "netral": {
+     "dasar": [
+      524,
+      140,
+      24,
+      22
+     ],
+     "kedip": [
+      24,
+      208,
+      23,
+      8
+     ],
+     "bawah": [
+      0,
+      208,
+      23,
+      8
+     ],
+     "bicara": [
+      760,
+      4,
+      7,
+      3
+     ]
+    },
+    "senyum": {
+     "dasar": [
+      0,
+      185,
+      24,
+      22
+     ],
+     "kedip": [
+      24,
+      208,
+      23,
+      8
+     ],
+     "bawah": [
+      0,
+      208,
+      23,
+      8
+     ],
+     "bicara": [
+      760,
+      12,
+      7,
+      3
+     ]
+    },
+    "prihatin": {
+     "dasar": [
+      524,
+      163,
+      24,
+      22
+     ],
+     "kedip": [
+      72,
+      208,
+      23,
+      8
+     ],
+     "bawah": [
+      48,
+      208,
+      23,
+      8
+     ],
+     "bicara": [
+      760,
+      8,
+      7,
+      3
+     ]
+    },
+    "serius": {
+     "dasar": [
+      25,
+      185,
+      24,
+      22
+     ],
+     "kedip": [
+      120,
+      208,
+      23,
+      8
+     ],
+     "bawah": [
+      96,
+      208,
+      23,
+      8
+     ],
+     "bicara": [
+      760,
+      16,
+      7,
+      3
+     ]
+    },
+    "lega": {
+     "dasar": [
+      524,
+      117,
+      24,
+      22
+     ],
+     "kedip": [
+      24,
+      208,
+      23,
+      8
+     ],
+     "bawah": [
+      0,
+      208,
+      23,
+      8
+     ],
+     "bicara": [
+      760,
+      0,
+      7,
+      3
+     ]
+    }
+   },
+   "garisMeja": 102,
+   "diAtasMeja": [
+    [
+     0,
+     102,
+     74,
+     14
+    ],
+    [
+     4,
+     101,
+     27,
+     1
+    ],
+    [
+     54,
+     101,
+     12,
+     1
+    ]
+   ],
+   "garisMata": 36.5,
+   "mataDiAtasMeja": 65.5,
+   "tanganMeja": [
+    {
+     "x": 32,
+     "y": 106
+    }
+   ],
+   "kanvas": {
+    "x": 32,
+    "y": -1
+   },
+   "asal": {
+    "sel": "g-dengar",
+    "kepala": "e-netral (lembar ekspresi; fitur master dipertahankan) + cangkok sel ekspresi terdaftar + suntingan tangan tercatat",
+    "cermin": "badan dicermin di sumbu kerah + detail depan jas diperbaiki; kepala kanan (belahan dipindah)"
+   }
+  },
+  "duduk-tunjuk-kiri": {
+   "rect": [
+    481,
+    0,
+    74,
+    116
+   ],
+   "hadap": "kiri",
+   "jenisJangkar": "pinggul",
+   "jangkar": {
+    "x": 30,
+    "y": 136
+   },
+   "pinggul": {
+    "x": 30,
+    "y": 136
+   },
+   "kepala": {
+    "x": 28.5,
+    "y": 28
+   },
+   "kepalaTinggi": 54,
+   "leher": {
+    "x": 27,
+    "y": 56
+   },
+   "titikWajah": {
+    "x": 25,
+    "y": 39
+   },
+   "ujungTelunjuk": {
+    "x": 70,
+    "y": 115
+   },
+   "tangan": {
+    "telunjuk": {
+     "x": 70,
+     "y": 115
+    }
+   },
+   "teleponTergambar": false,
+   "wajah": {
+    "kotak": [
+     13,
+     28,
+     24,
+     22
+    ],
+    "mata": [
+     14,
+     32,
+     23,
+     8
+    ],
+    "mulut": [
+     21,
+     47,
+     7,
+     3
+    ]
+   },
+   "ekspresi": {
+    "netral": {
+     "dasar": [
+      75,
+      185,
+      24,
+      22
+     ],
+     "kedip": [
+      168,
+      208,
+      23,
+      8
+     ],
+     "bawah": [
+      288,
+      208,
+      23,
+      8
+     ],
+     "bicara": [
+      760,
+      24,
+      7,
+      3
+     ]
+    },
+    "senyum": {
+     "dasar": [
+      125,
+      185,
+      24,
+      22
+     ],
+     "kedip": [
+      168,
+      208,
+      23,
+      8
+     ],
+     "bawah": [
+      288,
+      208,
+      23,
+      8
+     ],
+     "bicara": [
+      760,
+      32,
+      7,
+      3
+     ]
+    },
+    "prihatin": {
+     "dasar": [
+      100,
+      185,
+      24,
+      22
+     ],
+     "kedip": [
+      216,
+      208,
+      23,
+      8
+     ],
+     "bawah": [
+      312,
+      208,
+      23,
+      8
+     ],
+     "bicara": [
+      760,
+      28,
+      7,
+      3
+     ]
+    },
+    "serius": {
+     "dasar": [
+      150,
+      185,
+      24,
+      22
+     ],
+     "kedip": [
+      264,
+      208,
+      23,
+      8
+     ],
+     "bawah": [
+      336,
+      208,
+      23,
+      8
+     ],
+     "bicara": [
+      760,
+      36,
+      7,
+      3
+     ]
+    },
+    "lega": {
+     "dasar": [
+      50,
+      185,
+      24,
+      22
+     ],
+     "kedip": [
+      168,
+      208,
+      23,
+      8
+     ],
+     "bawah": [
+      288,
+      208,
+      23,
+      8
+     ],
+     "bicara": [
+      760,
+      20,
+      7,
+      3
+     ]
+    }
+   },
+   "garisMeja": 102,
+   "diAtasMeja": [
+    [
+     0,
+     102,
+     74,
+     14
+    ],
+    [
+     5,
+     101,
+     18,
+     1
+    ],
+    [
+     54,
+     101,
+     12,
+     1
+    ]
+   ],
+   "garisMata": 36.5,
+   "mataDiAtasMeja": 65.5,
+   "tanganMeja": [
+    {
+     "x": 24,
+     "y": 106
+    }
+   ],
+   "mataBawah": {
+    "sprite": "lirikKanan",
+    "catatan": "varian bawah frame ini = mata melirik kanan-bawah (ke kartu di kanan gambar); kepala tetap menghadap pemain"
+   },
+   "kanvas": {
+    "x": 28,
+    "y": -1
+   },
+   "asal": {
+    "sel": "g-dengar",
+    "kepala": "e-netral (lembar ekspresi; fitur master dipertahankan) + cangkok sel ekspresi terdaftar + suntingan tangan tercatat"
+   }
+  },
+  "telepon-kiri": {
+   "rect": [
+    465,
+    117,
+    58,
+    112
+   ],
+   "hadap": "kiri",
+   "jenisJangkar": "pinggul",
+   "jangkar": {
+    "x": 30,
+    "y": 136
+   },
+   "pinggul": {
+    "x": 30,
+    "y": 136
+   },
+   "kepala": {
+    "x": 28.5,
+    "y": 28
+   },
+   "kepalaTinggi": 54,
+   "leher": {
+    "x": 27,
+    "y": 56
+   },
+   "titikWajah": {
+    "x": 25,
+    "y": 39
+   },
+   "tangan": {
+    "telepon": {
+     "x": 42,
+     "y": 34
+    }
+   },
+   "teleponTergambar": true,
+   "wajah": {
+    "kotak": [
+     13,
+     28,
+     24,
+     22
+    ],
+    "mata": [
+     14,
+     32,
+     23,
+     8
+    ],
+    "mulut": [
+     21,
+     47,
+     7,
+     3
+    ]
+   },
+   "ekspresi": {
+    "netral": {
+     "dasar": [
+      325,
+      185,
+      24,
+      22
+     ],
+     "kedip": [
+      168,
+      208,
+      23,
+      8
+     ],
+     "bawah": [
+      144,
+      208,
+      23,
+      8
+     ],
+     "bicara": [
+      760,
+      24,
+      7,
+      3
+     ]
+    },
+    "senyum": {
+     "dasar": [
+      375,
+      185,
+      24,
+      22
+     ],
+     "kedip": [
+      168,
+      208,
+      23,
+      8
+     ],
+     "bawah": [
+      144,
+      208,
+      23,
+      8
+     ],
+     "bicara": [
+      760,
+      32,
+      7,
+      3
+     ]
+    },
+    "prihatin": {
+     "dasar": [
+      350,
+      185,
+      24,
+      22
+     ],
+     "kedip": [
+      216,
+      208,
+      23,
+      8
+     ],
+     "bawah": [
+      192,
+      208,
+      23,
+      8
+     ],
+     "bicara": [
+      760,
+      28,
+      7,
+      3
+     ]
+    },
+    "serius": {
+     "dasar": [
+      524,
+      186,
+      24,
+      22
+     ],
+     "kedip": [
+      264,
+      208,
+      23,
+      8
+     ],
+     "bawah": [
+      240,
+      208,
+      23,
+      8
+     ],
+     "bicara": [
+      760,
+      36,
+      7,
+      3
+     ]
+    },
+    "lega": {
+     "dasar": [
+      300,
+      185,
+      24,
+      22
+     ],
+     "kedip": [
+      168,
+      208,
+      23,
+      8
+     ],
+     "bawah": [
+      144,
+      208,
+      23,
+      8
+     ],
+     "bicara": [
+      760,
+      20,
+      7,
+      3
+     ]
+    }
+   },
+   "garisMeja": 102,
+   "diAtasMeja": [
+    [
+     0,
+     102,
+     58,
+     10
+    ],
+    [
+     5,
+     101,
+     18,
+     1
+    ]
+   ],
+   "garisMata": 36.5,
+   "mataDiAtasMeja": 65.5,
+   "tanganMeja": [
+    {
+     "x": 24,
+     "y": 106
+    }
+   ],
+   "kanvas": {
+    "x": 28,
+    "y": -1
+   },
+   "asal": {
+    "sel": "g-dengar",
+    "kepala": "e-netral (lembar ekspresi; fitur master dipertahankan) + cangkok sel ekspresi terdaftar + suntingan tangan tercatat"
+   },
+   "wajahTertutup": {
+    "piksel": 29,
+    "catatan": "piksel wajah.kotak yang tertutup tangan/gagang; lapisan wajah frame ini transparan di sana"
+   }
+  },
+  "telepon-kanan": {
+   "rect": [
+    406,
+    117,
+    58,
+    112
+   ],
+   "hadap": "kanan",
+   "jenisJangkar": "pinggul",
+   "jangkar": {
+    "x": 27,
+    "y": 136
+   },
+   "pinggul": {
+    "x": 27,
+    "y": 136
+   },
+   "kepala": {
+    "x": 29.5,
+    "y": 28
+   },
+   "kepalaTinggi": 54,
+   "leher": {
+    "x": 35,
+    "y": 56
+   },
+   "titikWajah": {
+    "x": 33,
+    "y": 39
+   },
+   "tangan": {
+    "telepon": {
+     "x": 15,
+     "y": 34
+    }
+   },
+   "teleponTergambar": true,
+   "wajah": {
+    "kotak": [
+     21,
+     28,
+     24,
+     22
+    ],
+    "mata": [
+     21,
+     32,
+     23,
+     8
+    ],
+    "mulut": [
+     30,
+     47,
+     7,
+     3
+    ]
+   },
+   "ekspresi": {
+    "netral": {
+     "dasar": [
+      200,
+      185,
+      24,
+      22
+     ],
+     "kedip": [
+      24,
+      208,
+      23,
+      8
+     ],
+     "bawah": [
+      0,
+      208,
+      23,
+      8
+     ],
+     "bicara": [
+      760,
+      4,
+      7,
+      3
+     ]
+    },
+    "senyum": {
+     "dasar": [
+      250,
+      185,
+      24,
+      22
+     ],
+     "kedip": [
+      24,
+      208,
+      23,
+      8
+     ],
+     "bawah": [
+      0,
+      208,
+      23,
+      8
+     ],
+     "bicara": [
+      760,
+      12,
+      7,
+      3
+     ]
+    },
+    "prihatin": {
+     "dasar": [
+      225,
+      185,
+      24,
+      22
+     ],
+     "kedip": [
+      72,
+      208,
+      23,
+      8
+     ],
+     "bawah": [
+      48,
+      208,
+      23,
+      8
+     ],
+     "bicara": [
+      760,
+      8,
+      7,
+      3
+     ]
+    },
+    "serius": {
+     "dasar": [
+      275,
+      185,
+      24,
+      22
+     ],
+     "kedip": [
+      120,
+      208,
+      23,
+      8
+     ],
+     "bawah": [
+      96,
+      208,
+      23,
+      8
+     ],
+     "bicara": [
+      760,
+      16,
+      7,
+      3
+     ]
+    },
+    "lega": {
+     "dasar": [
+      175,
+      185,
+      24,
+      22
+     ],
+     "kedip": [
+      24,
+      208,
+      23,
+      8
+     ],
+     "bawah": [
+      0,
+      208,
+      23,
+      8
+     ],
+     "bicara": [
+      760,
+      0,
+      7,
+      3
+     ]
+    }
+   },
+   "garisMeja": 102,
+   "diAtasMeja": [
+    [
+     0,
+     102,
+     58,
+     10
+    ],
+    [
+     35,
+     101,
+     18,
+     1
+    ]
+   ],
+   "garisMata": 36.5,
+   "mataDiAtasMeja": 65.5,
+   "tanganMeja": [
+    {
+     "x": 34,
+     "y": 106
+    }
+   ],
+   "kanvas": {
+    "x": 35,
+    "y": -1
+   },
+   "asal": {
+    "sel": "g-dengar",
+    "kepala": "e-netral (lembar ekspresi; fitur master dipertahankan) + cangkok sel ekspresi terdaftar + suntingan tangan tercatat",
+    "cermin": "badan dicermin di sumbu kerah + detail depan jas diperbaiki; kepala kanan (belahan dipindah)"
+   },
+   "wajahTertutup": {
+    "piksel": 29,
+    "catatan": "piksel wajah.kotak yang tertutup tangan/gagang; lapisan wajah frame ini transparan di sana"
+   }
+  }
+ },
+ "pose": {
+  "berdiri": {
+   "kiri": "berdiri-kiri",
+   "kanan": "berdiri-kanan"
+  },
+  "berdiri-sambut": {
+   "kiri": "berdiri-sambut-kiri",
+   "kanan": "berdiri-sambut-kanan",
+   "catatan": "pembuka: kiri (menghadap pemain)"
+  },
+  "berdiri-persilakan": {
+   "kanan": "berdiri-persilakan-kanan",
+   "kiri": "berdiri-persilakan-kiri",
+   "catatan": "kanan: telapak terbuka ke kursi pengunjung (kanan gambar)"
+  },
+  "duduk-turun": {
+   "kanan": "duduk-turun-kanan",
+   "kiri": "duduk-turun-kiri",
+   "bawaan": "kanan",
+   "catatan": "bingkai antara berdiri <-> duduk (hanya animasi panggung, seperti duduk-turun Bu Rina): kanan = kedatangan (berdiri-persilakan-kanan -> duduk-turun-kanan -> duduk-dengar-kanan); kiri = sama ke arah pemain. Jangkar kaki di y lantai tempat.mentorBerdiri, x sehingga kepala di tengah kepala berdiri & duduk; gambar DI BALIK meja"
+  },
+  "duduk-dengar": {
+   "kiri": "duduk-dengar-kiri",
+   "kanan": "duduk-dengar-kanan"
+  },
+  "duduk-jelaskan": {
+   "kiri": "duduk-jelaskan-kiri",
+   "kanan": "duduk-jelaskan-kanan"
+  },
+  "duduk-tunjuk": {
+   "kanan": "duduk-tunjuk-kanan",
+   "kiri": "duduk-tunjuk-kiri",
+   "bawaan": "kanan",
+   "kartu": {
+    "arah": "kanan",
+    "varian": "bawah",
+    "catatan": "momen kartu: telunjuk DAN pandangan ke kartu (kartuMeja, kanan gambar)"
+   },
+   "catatan": "bawaan/momen kartu = kanan + varian bawah. kiri HANYA untuk bicara ke pemain sambil menunjuk (kepala & mata ke pemain); varian bawah frame kiri = mata melirik kanan-bawah ke kartu (frame.mataBawah = lirikKanan), kepala tetap ke pemain"
+  },
+  "telepon": {
+   "kiri": "telepon-kiri",
+   "kanan": "telepon-kanan",
+   "catatan": "satu gagang di tangan dekat, di telinga dekat; panggung hanya menggambar pesawat tanpa gagang"
+  }
+ },
+ "pandang": {
+  "lawan": {
+   "arah": "kanan",
+   "catatan": "menatap Bu Rina"
+  },
+  "pemain": {
+   "arah": "kiri"
+  },
+  "depan": {
+   "arah": "kiri"
+  },
+  "bawah": {
+   "varian": "bawah",
+   "catatan": "lirik ke bawah (membaca kartu/dokumen): garis bulu mata turun 1 baris, iris 2 baris tetap terlihat di antara putih mata (bukan mata terpejam); arah mengikuti pose. duduk-tunjuk: arah kanan (pose.duduk-tunjuk.kartu); bila tetap kiri, frame kiri melirik kanan-bawah ke kartu"
+  }
+ },
+ "animasi": {
+  "duduk": [
+   "berdiri-persilakan",
+   "duduk-turun",
+   "duduk-dengar"
+  ],
+  "berdiriDariDuduk": [
+   "duduk-dengar",
+   "duduk-turun",
+   "berdiri"
+  ],
+  "catatan": "pose (arah sama, bawaan kanan); duduk-turun ditahan singkat (seperti TAHAN_TURUN Bu Rina) supaya kepala turun dua langkah, bukan satu lompatan"
+ },
+ "potret": {
+  "frame": "duduk-dengar-kiri",
+  "catatan": "tubuh duduk + wajah ekspresi, potong jendela (koordinat frame duduk-dengar-kiri); skala bulat",
+  "jendela": {
+   "32": {
+    "frame": "duduk-dengar-kiri",
+    "x": 9,
+    "y": 20,
+    "sisi": 32,
+    "skala": 1,
+    "tampil": 32
+   },
+   "44": {
+    "frame": "duduk-dengar-kiri",
+    "x": 3,
+    "y": 11,
+    "sisi": 44,
+    "skala": 1,
+    "tampil": 44
+   },
+   "52": {
+    "frame": "duduk-dengar-kiri",
+    "x": 3,
+    "y": 4,
+    "sisi": 52,
+    "skala": 1,
+    "tampil": 52
+   },
+   "64": {
+    "frame": "duduk-dengar-kiri",
+    "x": -3,
+    "y": 3,
+    "sisi": 64,
+    "skala": 1,
+    "tampil": 64
+   },
+   "96": {
+    "frame": "duduk-dengar-kiri",
+    "x": 5,
+    "y": 5,
+    "sisi": 48,
+    "skala": 2,
+    "tampil": 96
+   }
+  },
+  "dekat": {
+   "52": {
+    "frame": "duduk-dengar-kiri",
+    "x": 12,
+    "y": 26,
+    "sisi": 26,
+    "skala": 2,
+    "tampil": 52
+   },
+   "64": {
+    "frame": "duduk-dengar-kiri",
+    "x": 9,
+    "y": 22,
+    "sisi": 32,
+    "skala": 2,
+    "tampil": 64
+   },
+   "96": {
+    "frame": "duduk-dengar-kiri",
+    "x": 9,
+    "y": 22,
+    "sisi": 32,
+    "skala": 3,
+    "tampil": 96
+   }
+  },
+  "saran": "avatar 52-96 px: jendela dekat (wajah x2/x3) paling terbaca; 32-44 px hanya x1 (fitur 1 px)"
+ },
+ "telepon": {
+  "frame": "telepon-kiri",
+  "jendela": {
+   "frame": "telepon-kiri",
+   "x": 1,
+   "y": 0,
+   "sisi": 56,
+   "skala": 1,
+   "tampil": 56
+  },
+  "catatan": "kepala UTUH (sanggul) + gagang + tangan + mulut, sama dengan sisipan Bu Rina (56 px, y 0); skala bulat (x1 = 56 px, x2 = 112 px)"
+ },
+ "aktivitas": {
+  "frame": "berdiri-kiri",
+  "ekspresi": "senyum",
+  "catatan": "berdiri, tangan bertaut; wajah senyum ditempel dari lapisan ekspresi"
+ },
+ "berkas": {
+  "byte": 19972,
+  "warna": 39,
+  "format": "PNG terindeks 8-bit + tRNS (indeks 0 transparan)"
+ }
+}

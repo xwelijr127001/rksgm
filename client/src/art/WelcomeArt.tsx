@@ -1,13 +1,27 @@
-﻿import { useState } from 'react';
-import { Raki } from './Raki';
-import { playSfx } from '../audio/audio';
-import { KarakterTokoh } from '../game/KarakterTokoh';
+import { TOKOH } from '@shared/brand';
+import { PotretTokoh, namaTokoh } from '../game/KarakterTokoh';
 import { t, useBahasa } from '../i18n';
+
+/**
+ * Ukuran potret bulat tokoh di halaman awal. SAMA untuk Mr Roger (ilustrasi kota) dan tokoh di
+ * tiap pintu (Landing.tsx), supaya gaya & skala tokoh seragam (review 26 Sep, temuan F).
+ */
+export const POTRET_AWAL = 60;
+
+/**
+ * Ilustrasi kota halaman awal. Tokoh TIDAK digambar di dalam kota (dulu sprite piksel Mr Roger +
+ * burung hantu besar menumpuk di gambar geometris): Mr Roger, tuan rumah, menyapa lewat potret
+ * bulat + balon di BAWAH gambar, dalam alur halaman, jadi tidak pernah menutupi gambar atau teks
+ * dalam bahasa apa pun. Raki, Miss Raksa, dan Bu Isti tampil di pintu masing-masing.
+ */
 export function WelcomeArt() {
-  useBahasa();
-  const [wave, setWave] = useState(false);
-  return <div className="welcome-world">
-    <svg className="world-drawing" viewBox="0 0 560 510" fill="none" aria-hidden="true">
+  const { bahasa } = useBahasa();
+  const roger = TOKOH.ceo.aktif;
+  // Mandarin tidak memakai spasi antarkalimat.
+  const sela = bahasa === 'zh' ? '' : ' ';
+  return <figure className="lp-kota">
+    {/* viewBox dipotong ke isi gambar (lingkaran y 38-464) supaya tidak ada ruang kosong di atas/bawah. */}
+    <svg className="lp-kota-gambar" viewBox="0 30 560 444" fill="none" aria-hidden="true" focusable="false">
       <circle cx="280" cy="251" r="213" fill="#F7D45B" />
       <path d="M78 343c42-86 141-90 241-64s135 6 174-62" stroke="#E8BC3A" strokeWidth="85" />
       <path d="M78 339c42-86 141-90 241-64s135 6 174-62" stroke="#FCF8EB" strokeWidth="64" />
@@ -32,12 +46,18 @@ export function WelcomeArt() {
         <path d="M-2 30h10m77 0h8" stroke="#F7D45B" strokeWidth="4" />
       </g>
       <g stroke="#214C3C" strokeWidth="2.5" strokeLinecap="round"><path d="M285 176v-34m-9 12 9 9 10-11" /><path d="M267 139c-10-37 46-40 39 0-7 18-32 18-39 0Z" fill="#6CA887" /><path d="M485 312v-35m-8 12 8 9 9-11" /><path d="M469 274c-12-35 45-38 33 0-5 17-29 17-33 0Z" fill="#6CA887" /></g>
-      {/* Bintang hijau di kanan (dulu di kiri atas, area itu kini untuk catatan kota). */}<path d="m512 136 4 11 12 3-12 4-4 11-3-11-12-4 12-3 3-11Z" fill="#287451" /><path d="m443 44 3 9 9 3-9 3-3 9-3-9-9-3 9-3 3-9Z" fill="#E7946E" />
+      <path d="m512 136 4 11 12 3-12 4-4 11-3-11-12-4 12-3 3-11Z" fill="#287451" /><path d="m443 44 3 9 9 3-9 3-3 9-3-9-9-3 9-3 3-9Z" fill="#E7946E" />
+      <path d="m96 118 3 8 8 3-8 3-3 8-3-8-8-3 8-3 3-8Z" fill="#287451" />
       <path d="M470 96h40m-28-13h33" stroke="#E9BA3F" strokeWidth="4" strokeLinecap="round" />
     </svg>
-    <KarakterTokoh tokoh="ceo" className="welcome-ceo" tinggi={150} />
-    <div className="world-caption">{t('pemain.sambutKota')}<span>{t('pemain.sambutKamu')}</span></div>
-    <button className="welcome-raki" aria-label={t('pemain.sapaRaki')} onClick={() => { setWave(v => !v); playSfx('pilih'); }}><Raki size={170} mood={wave ? 'senang' : 'sapa'} /><span className="raki-greeting" aria-live="polite">{wave ? t('pemain.rakiYuk') : t('pemain.rakiHai')}</span></button>
-  </div>;
+    {/* Catatan kota = sapaan Mr Roger (tuan rumah). Potret disembunyikan dari pembaca layar: namanya
+        sudah dibacakan di balon. */}
+    <figcaption className="lp-kota-sapa">
+      {roger ? <span className="lp-kota-potret" aria-hidden="true"><PotretTokoh tokoh="ceo" ukuran={POTRET_AWAL} /></span> : null}
+      <p className="lp-kota-balon">
+        {roger ? <b>{namaTokoh('ceo')}</b> : null}
+        <span>{t('pemain.sambutKota')}{sela}{t('pemain.sambutKamu')}</span>
+      </p>
+    </figcaption>
+  </figure>;
 }
-

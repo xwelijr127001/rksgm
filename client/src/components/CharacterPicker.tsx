@@ -23,12 +23,17 @@ function labelAksesori(a: { id: string; label: string }): string {
   const teks = t(kunci);
   return teks === kunci ? a.label : teks;
 }
-export function CharacterPicker({ nickname, look, onNickname, onLook, showNickname = true }: { nickname: string; look: PlayerLook; onNickname: (v: string) => void; onLook: (v: PlayerLook) => void; showNickname?: boolean }) {
+/** Isian nama panggilan (label + kolom). Dipakai CharacterPicker dan /kenalan versi cerita (nama dulu, tampilan opsional). */
+export function KolomNama({ nickname, onNickname }: { nickname: string; onNickname: (v: string) => void }) {
   useBahasa();
   const uid = useId();
+  return <div><label className="label-kolom" htmlFor={uid + '-nama'}>{t('pemain.mauDipanggil')}</label><input id={uid + '-nama'} className="kolom" value={nickname} maxLength={16} autoComplete="nickname" placeholder={t('pemain.namaPanggilan')} onChange={e => onNickname(e.target.value)} /></div>;
+}
+export function CharacterPicker({ nickname, look, onNickname, onLook, showNickname = true }: { nickname: string; look: PlayerLook; onNickname: (v: string) => void; onLook: (v: PlayerLook) => void; showNickname?: boolean }) {
+  useBahasa();
   function change(next: PlayerLook) { playSfx('pilih'); onLook(next); }
   return <div className="character-picker stack">
-    {showNickname ? <div><label className="label-kolom" htmlFor={uid + '-nama'}>{t('pemain.mauDipanggil')}</label><input id={uid + '-nama'} className="kolom" value={nickname} maxLength={16} autoComplete="nickname" placeholder={t('pemain.namaPanggilan')} onChange={e => onNickname(e.target.value)} /></div> : null}
+    {showNickname ? <KolomNama nickname={nickname} onNickname={onNickname} /> : null}
     <fieldset className="avatar-presets"><legend>{t('pemain.pilihTeman')}</legend><div className="avatar-options">{PRESETS.map(p => {
       const selected = (Object.keys(p.look) as (keyof PlayerLook)[]).every(k => look[k] === p.look[k]);
       return <button key={p.name} type="button" className={'avatar-option ' + (selected ? 'selected' : '')} aria-pressed={selected} onClick={() => change(p.look)}><Avatar look={p.look} size={72} mood="senang" /><span>{t('pemain.' + p.name)}</span>{selected ? <i aria-hidden="true">✓</i> : null}</button>;

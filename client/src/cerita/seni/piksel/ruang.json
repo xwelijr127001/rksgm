@@ -1,0 +1,634 @@
+{
+ "versi": 1,
+ "dibuat": "tools/piksel/bangun-ruang.mjs",
+ "piksel": 4,
+ "dunia": {
+  "w": 1600,
+  "h": 900,
+  "pw": 400,
+  "ph": 225
+ },
+ "palet": [
+  "#3a2620",
+  "#e9c46a",
+  "#26120a",
+  "#b8892f",
+  "#d5b788",
+  "#dabd90",
+  "#dfc499",
+  "#cbac7c",
+  "#ad7546",
+  "#c69162",
+  "#9c978e",
+  "#8f8a82",
+  "#553019",
+  "#8c5634",
+  "#361c0d",
+  "#dcaaa2",
+  "#c9948d",
+  "#b27d7b",
+  "#98645f",
+  "#76484b",
+  "#e8841c",
+  "#fbe6b4",
+  "#8f8878",
+  "#b9bec4",
+  "#37332f",
+  "#3e433a",
+  "#395336",
+  "#694229",
+  "#3e653e",
+  "#585d37",
+  "#784e2f",
+  "#4e7247",
+  "#5d7f52",
+  "#646766",
+  "#8f6541",
+  "#718851",
+  "#7f945b",
+  "#9c7047",
+  "#98736c",
+  "#b18355",
+  "#92b5bc",
+  "#abccda",
+  "#ddceb3",
+  "#88a46b",
+  "#e2b362",
+  "#cde2ea",
+  "#ecd9b2",
+  "#f7f2e5"
+ ],
+ "warnaTepi": "#2b1d14",
+ "teksPapan": "Raksa Silver Club",
+ "lokasi": {
+  "pintu-luar": {
+   "lapisan": [
+    {
+     "id": "latar",
+     "berkas": "ruang-pintu-luar-latar.png",
+     "x": 0,
+     "y": 0,
+     "w": 1600,
+     "h": 900,
+     "pw": 400,
+     "ph": 225,
+     "z": 10,
+     "alpha": false
+    },
+    {
+     "id": "koridor",
+     "berkas": "ruang-pintu-luar-koridor.png",
+     "x": 1008,
+     "y": 148,
+     "w": 272,
+     "h": 632,
+     "pw": 68,
+     "ph": 158,
+     "z": 20,
+     "alpha": false
+    },
+    {
+     "id": "daun",
+     "berkas": "ruang-pintu-luar-daun.png",
+     "x": 1008,
+     "y": 148,
+     "w": 272,
+     "h": 632,
+     "pw": 68,
+     "ph": 158,
+     "z": 30,
+     "alpha": false,
+     "engsel": {
+      "x": 1008,
+      "y": 464
+     }
+    }
+   ],
+   "bukaan": {
+    "x": 1008,
+    "y": 148,
+    "w": 272,
+    "h": 632
+   },
+   "papan": {
+    "teks": "Raksa Silver Club",
+    "kotak": {
+     "x": 410,
+     "y": 262,
+     "w": 510,
+     "h": 78
+    },
+    "baris": [
+     {
+      "teks": "Raksa Silver Club",
+      "tebal": true,
+      "x": 480,
+      "y": 288,
+      "w": 368,
+      "h": 28
+     }
+    ]
+   },
+   "tempat": {
+    "mentor": {
+     "x": 760,
+     "y": 1000
+    },
+    "mentorBerdiri": {
+     "x": 760,
+     "y": 1000
+    },
+    "skalaMentor": 1,
+    "nasabahDuduk": {
+     "x": 1220,
+     "y": 1000
+    },
+    "skalaNasabah": 1,
+    "nasabahBerdiri": {
+     "x": 1220,
+     "y": 1000
+    },
+    "jalurMasuk": []
+   }
+  },
+  "meja": {
+   "lapisan": [
+    {
+     "id": "latar",
+     "berkas": "ruang-meja-latar.png",
+     "x": 0,
+     "y": 0,
+     "w": 1600,
+     "h": 900,
+     "pw": 400,
+     "ph": 225,
+     "z": 10,
+     "alpha": false
+    },
+    {
+     "id": "koridor",
+     "berkas": "ruang-meja-koridor.png",
+     "x": 1376,
+     "y": 0,
+     "w": 224,
+     "h": 900,
+     "pw": 56,
+     "ph": 225,
+     "z": 20,
+     "alpha": false
+    },
+    {
+     "id": "daun",
+     "berkas": "ruang-meja-daun.png",
+     "x": 1376,
+     "y": 0,
+     "w": 224,
+     "h": 900,
+     "pw": 56,
+     "ph": 225,
+     "z": 30,
+     "alpha": false,
+     "engsel": {
+      "x": 1376,
+      "y": 450
+     }
+    },
+    {
+     "id": "belakangMeja",
+     "berkas": "ruang-meja-belakang-meja.png",
+     "x": 64,
+     "y": 488,
+     "w": 1224,
+     "h": 296,
+     "pw": 306,
+     "ph": 74,
+     "z": 50,
+     "alpha": true
+    },
+    {
+     "id": "depanMeja",
+     "berkas": "ruang-meja-depan-meja.png",
+     "x": 64,
+     "y": 768,
+     "w": 1224,
+     "h": 132,
+     "pw": 306,
+     "ph": 33,
+     "z": 60,
+     "alpha": true
+    },
+    {
+     "id": "kursiBelakang",
+     "berkas": "ruang-meja-kursi-belakang.png",
+     "x": 928,
+     "y": 448,
+     "w": 480,
+     "h": 452,
+     "pw": 120,
+     "ph": 113,
+     "z": 70,
+     "alpha": true
+    }
+   ],
+   "bukaan": {
+    "x": 1376,
+    "y": 0,
+    "w": 224,
+    "h": 900
+   },
+   "papan": {
+    "teks": "Raksa Silver Club",
+    "kotak": {
+     "x": 772,
+     "y": 228,
+     "w": 200,
+     "h": 76
+    },
+    "baris": [
+     {
+      "teks": "Raksa",
+      "tebal": true,
+      "x": 812,
+      "y": 232,
+      "w": 120,
+      "h": 28
+     },
+     {
+      "teks": "Silver Club",
+      "tebal": false,
+      "x": 780,
+      "y": 272,
+      "w": 180,
+      "h": 28
+     }
+    ]
+   },
+   "tempat": {
+    "mentor": {
+     "x": 656,
+     "y": 776
+    },
+    "mentorBerdiri": {
+     "x": 656,
+     "y": 884
+    },
+    "skalaMentor": 1,
+    "nasabahDuduk": {
+     "x": 1148,
+     "y": 744
+    },
+    "skalaNasabah": 1,
+    "nasabahBerdiri": {
+     "x": 1276,
+     "y": 904
+    },
+    "jalurMasuk": [
+     {
+      "titik": {
+       "x": 1536,
+       "y": 904
+      },
+      "skala": 1
+     },
+     {
+      "titik": {
+       "x": 1428,
+       "y": 904
+      },
+      "skala": 1
+     },
+     {
+      "titik": {
+       "x": 1276,
+       "y": 904
+      },
+      "skala": 1
+     }
+    ],
+    "kartuSimpan": {
+     "x": 640,
+     "y": 748
+    },
+    "kartuMeja": {
+     "x": 800,
+     "y": 704
+    },
+    "kunciMeja": {
+     "x": 904,
+     "y": 700
+    },
+    "telepon": {
+     "x": 508,
+     "y": 724
+    },
+    "garisMejaMentor": 640
+   }
+  },
+  "parkiran": {
+   "lapisan": [
+    {
+     "id": "latar",
+     "berkas": "ruang-parkiran-latar.png",
+     "x": 0,
+     "y": 0,
+     "w": 1600,
+     "h": 900,
+     "pw": 400,
+     "ph": 225,
+     "z": 10,
+     "alpha": false
+    }
+   ],
+   "tempat": {
+    "mentor": {
+     "x": 560,
+     "y": 1000
+    },
+    "mentorBerdiri": {
+     "x": 560,
+     "y": 1000
+    },
+    "skalaMentor": 1,
+    "nasabahDuduk": {
+     "x": 1040,
+     "y": 1000
+    },
+    "skalaNasabah": 1,
+    "nasabahBerdiri": {
+     "x": 1040,
+     "y": 1000
+    },
+    "jalurMasuk": []
+   }
+  },
+  "telepon": {
+   "lapisan": [
+    {
+     "id": "latar",
+     "berkas": "ruang-meja-latar.png",
+     "x": 0,
+     "y": 0,
+     "w": 1600,
+     "h": 900,
+     "pw": 400,
+     "ph": 225,
+     "z": 10,
+     "alpha": false
+    },
+    {
+     "id": "koridor",
+     "berkas": "ruang-meja-koridor.png",
+     "x": 1376,
+     "y": 0,
+     "w": 224,
+     "h": 900,
+     "pw": 56,
+     "ph": 225,
+     "z": 20,
+     "alpha": false
+    },
+    {
+     "id": "daun",
+     "berkas": "ruang-meja-daun.png",
+     "x": 1376,
+     "y": 0,
+     "w": 224,
+     "h": 900,
+     "pw": 56,
+     "ph": 225,
+     "z": 30,
+     "alpha": false,
+     "engsel": {
+      "x": 1376,
+      "y": 450
+     }
+    },
+    {
+     "id": "belakangMeja",
+     "berkas": "ruang-telepon-belakang-meja.png",
+     "x": 64,
+     "y": 488,
+     "w": 1224,
+     "h": 296,
+     "pw": 306,
+     "ph": 74,
+     "z": 50,
+     "alpha": true
+    },
+    {
+     "id": "depanMeja",
+     "berkas": "ruang-meja-depan-meja.png",
+     "x": 64,
+     "y": 768,
+     "w": 1224,
+     "h": 132,
+     "pw": 306,
+     "ph": 33,
+     "z": 60,
+     "alpha": true
+    },
+    {
+     "id": "kursiBelakang",
+     "berkas": "ruang-meja-kursi-belakang.png",
+     "x": 928,
+     "y": 448,
+     "w": 480,
+     "h": 452,
+     "pw": 120,
+     "ph": 113,
+     "z": 70,
+     "alpha": true
+    }
+   ],
+   "bukaan": {
+    "x": 1376,
+    "y": 0,
+    "w": 224,
+    "h": 900
+   },
+   "papan": {
+    "teks": "Raksa Silver Club",
+    "kotak": {
+     "x": 772,
+     "y": 228,
+     "w": 200,
+     "h": 76
+    },
+    "baris": [
+     {
+      "teks": "Raksa",
+      "tebal": true,
+      "x": 812,
+      "y": 232,
+      "w": 120,
+      "h": 28
+     },
+     {
+      "teks": "Silver Club",
+      "tebal": false,
+      "x": 780,
+      "y": 272,
+      "w": 180,
+      "h": 28
+     }
+    ]
+   },
+   "tempat": {
+    "mentor": {
+     "x": 656,
+     "y": 776
+    },
+    "mentorBerdiri": {
+     "x": 656,
+     "y": 884
+    },
+    "skalaMentor": 1,
+    "nasabahDuduk": {
+     "x": 1148,
+     "y": 744
+    },
+    "skalaNasabah": 1,
+    "nasabahBerdiri": {
+     "x": 1276,
+     "y": 904
+    },
+    "jalurMasuk": [
+     {
+      "titik": {
+       "x": 1536,
+       "y": 904
+      },
+      "skala": 1
+     },
+     {
+      "titik": {
+       "x": 1428,
+       "y": 904
+      },
+      "skala": 1
+     },
+     {
+      "titik": {
+       "x": 1276,
+       "y": 904
+      },
+      "skala": 1
+     }
+    ],
+    "kartuSimpan": {
+     "x": 640,
+     "y": 748
+    },
+    "kartuMeja": {
+     "x": 800,
+     "y": 704
+    },
+    "kunciMeja": {
+     "x": 904,
+     "y": 700
+    },
+    "telepon": {
+     "x": 508,
+     "y": 724
+    },
+    "garisMejaMentor": 640
+   }
+  }
+ },
+ "prop": {
+  "kartu": {
+   "berkas": "ruang-prop-kartu.png",
+   "w": 120,
+   "h": 64,
+   "pw": 30,
+   "ph": 16,
+   "jangkar": {
+    "x": 60,
+    "y": 32
+   }
+  },
+  "kartuTangan": {
+   "berkas": "ruang-prop-kartu-tangan.png",
+   "w": 88,
+   "h": 64,
+   "pw": 22,
+   "ph": 16,
+   "jangkar": {
+    "x": 44,
+    "y": 56
+   }
+  },
+  "kunci": {
+   "berkas": "ruang-prop-kunci.png",
+   "w": 72,
+   "h": 40,
+   "pw": 18,
+   "ph": 10,
+   "jangkar": {
+    "x": 36,
+    "y": 24
+   }
+  },
+  "telepon": {
+   "berkas": "ruang-prop-telepon.png",
+   "w": 136,
+   "h": 88,
+   "pw": 34,
+   "ph": 22,
+   "jangkar": {
+    "x": 68,
+    "y": 64
+   }
+  },
+  "teleponTanpaGagang": {
+   "berkas": "ruang-prop-telepon-tanpa-gagang.png",
+   "w": 136,
+   "h": 88,
+   "pw": 34,
+   "ph": 22,
+   "jangkar": {
+    "x": 68,
+    "y": 64
+   }
+  },
+  "gagang": {
+   "berkas": "ruang-prop-gagang.png",
+   "w": 48,
+   "h": 156,
+   "pw": 12,
+   "ph": 39,
+   "jangkar": {
+    "x": 24,
+    "y": 72
+   }
+  },
+  "map": {
+   "berkas": "ruang-prop-map.png",
+   "w": 188,
+   "h": 68,
+   "pw": 47,
+   "ph": 17,
+   "jangkar": {
+    "x": 92,
+    "y": 36
+   }
+  },
+  "cangkir": {
+   "berkas": "ruang-prop-cangkir.png",
+   "w": 72,
+   "h": 44,
+   "pw": 18,
+   "ph": 11,
+   "jangkar": {
+    "x": 36,
+    "y": 32
+   },
+   "diLapisan": {
+    "lapisan": "belakangMeja",
+    "lokasi": [
+     "telepon"
+    ]
+   }
+  }
+ }
+}

@@ -19,5 +19,13 @@ unity/Assets/Scenes/
 
 data/*.db-shm
 shots-acara/
+shots-review/
 # Gambar soal buatan panitia (data acara, bukan kode; repo ini publik)
 data/gambar-soal/
+
+# deploy.sh: log server mode latar & cadangan data sebelum restart
+.deploy/
+data/cadangan/
+
+# ekspor PNG/WebP tokoh & ruang mode cerita (dibuat ulang: npm run ekspor:aset-cerita)
+aset-ekspor/

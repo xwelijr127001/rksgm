@@ -1,0 +1,188 @@
+/* ==========================================================================
+   LAYAR AKHIR CERITA v2 (LayarAkhir.tsx, PemilihBagian.tsx, PerjalananKu.tsx). Awalan kelas: akh-
+   Kontrak: docs/rancangan-mode-cerita.md bagian 11.1.
+
+   - Satu kartu: di HP 390x844 & 360x740 judul hasil, pelajaran, dan KEDUA aksi terlihat tanpa gulir (di bawah
+     header ±56 px + bilah alat ±48 px). Teks isi 16 px; target sentuh >= 44 px.
+   - HP: tanpa bingkai kartu (hemat ruang); >= 600 px: kartu berbingkai di tengah (tidak melebar).
+   - Perasaan nasabah = label netral (tanpa hijau/merah); status langkah klaim selalu ikon + kata.
+   - Masuk: pudar + geser 6 px, 180 ms; gerak dikurangi = tampil langsung.
+   Gaya potongan bersama (.cer-proses dari TandaProses) tetap di cerita.css.
+   ========================================================================== */
+
+/* ------------------------------------------------------------------ kartu */
+.akh-kartu {
+  box-sizing: border-box; width: min(640px, 100%); margin: 0 auto;
+  display: flex; flex-direction: column; gap: 12px;
+  padding: 4px max(16px, env(safe-area-inset-right)) 0 max(16px, env(safe-area-inset-left));
+  color: #243d30;
+  animation: akh-masuk 180ms ease-out both;
+}
+@keyframes akh-masuk {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: none; }
+}
+
+.akh-kepala { display: flex; align-items: center; gap: 12px; }
+.akh-potret { flex: 0 0 auto; }
+.akh-kepala-teks { flex: 1; min-width: 0; display: flex; flex-direction: column; align-items: flex-start; gap: 6px; }
+/* Label perasaan: netral seperti label suasana di panggung (bukan penilaian). */
+.akh-perasaan {
+  margin: 0; max-width: 100%; padding: 3px 11px; border-radius: 999px; background: #f5f7ef; border: 1px solid #d9dfd2;
+  font-size: 14px; font-weight: 650; line-height: 1.35; color: #243d30; overflow-wrap: anywhere;
+}
+.akh-nama-akhir {
+  margin: 0; display: flex; align-items: center; gap: 8px;
+  font-size: 13.5px; font-weight: 600; line-height: 1.35; color: #3f5245;
+}
+.akh-nama-akhir > span:last-child { min-width: 0; }
+.akh-nama-akhir b { font-weight: 700; color: #17362a; }
+
+/* Ikon nada akhir: bentuk berbeda per nada (✓ ~ !), selalu bersama kata/judul. */
+.akh-nada {
+  flex: 0 0 22px; width: 22px; height: 22px; border-radius: 50%; display: inline-grid; place-items: center;
+  color: #fff; background: #6f7d73; font-size: 13px; font-weight: 800; line-height: 1;
+}
+.akh-nada-baik { background: #248a5a; }
+.akh-nada-campuran { background: #b07a12; }
+.akh-nada-buruk { background: #a13a24; }
+.akh-nada-samar { background: #e6e8df; color: #5c6f58; }
+
+.akh-judul { margin: 2px 0 0; font-size: clamp(22px, 6.2vw, 30px); line-height: 1.2; letter-spacing: -.01em; color: #17362a; overflow-wrap: anywhere; text-wrap: balance; }
+/* Penerima fokus (pembaca layar), bukan kontrol. */
+.akh-judul:focus, .akh-judul:focus-visible { outline: none; }
+.akh-sebab { margin: 0; font-size: 16px; line-height: 1.5; color: #2f4637; }
+
+.akh-pelajaran { display: grid; gap: 4px; padding: 11px 14px 12px; border-radius: 14px; background: #eef5e9; border: 1px solid #d6e6cc; }
+.akh-pelajaran-label {
+  margin: 0; display: flex; align-items: center; gap: 8px;
+  font-size: 12.5px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: #215c40;
+}
+.akh-pelajaran-label .tokoh-potret { flex: 0 0 auto; }
+.akh-pelajaran-teks { margin: 0; font-size: 16px; line-height: 1.5; color: #243d30; }
+
+/* ------------------------------------------------------------------ aksi */
+.akh-aksi { display: flex; flex-wrap: wrap; gap: 8px 12px; margin-top: 2px; }
+.akh-aksi .akh-utama { flex: 1 1 260px; min-height: 52px; padding: 12px 18px; gap: 14px; font-size: 16.5px; line-height: 1.3; text-align: left; }
+.akh-aksi .akh-utama > svg { flex: 0 0 auto; }
+.akh-kedua {
+  flex: 1 1 160px; display: inline-flex; align-items: center; justify-content: center; min-height: 48px; padding: 10px 16px;
+  border-radius: 13px; border: 1px solid #b9cdb7; background: #fffefa; color: #215c40;
+  font: inherit; font-size: 16px; font-weight: 600; line-height: 1.3; text-align: center; text-decoration: none; cursor: pointer;
+}
+.akh-kedua:hover { background: #eef5e9; }
+.akh-ket { margin: -2px 0 0; font-size: 13.5px; line-height: 1.4; color: #4f6254; }
+
+.akh-kaki {
+  display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 0 16px;
+  padding-top: 2px; border-top: 1px solid #e3e7dc;
+}
+.akh-lihat.text-button {
+  min-height: 44px; padding: 8px 0; font-size: 15px; font-weight: 600; color: #215c40;
+  text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 4px;
+}
+.akh-simulasi { flex: 1 1 220px; margin: 0 0 8px; color: #5f6b5d; }
+
+/* ------------------------------------------------------------------ pemilih bagian (Modal) */
+.akh-pemilih-ket { margin: 0; font-size: 15px; line-height: 1.5; color: #3f5245; }
+.akh-pemilih-daftar { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.akh-pemilih-bab {
+  display: grid; justify-items: start; gap: 2px; width: 100%; min-height: 52px; padding: 9px 14px; text-align: left;
+  border: 1px solid #b9cdb7; border-radius: 13px; background: #fffefa; color: #215c40; font: inherit; cursor: pointer;
+}
+.akh-pemilih-bab:hover { background: #eef5e9; }
+.akh-pemilih-bab b { font-size: 16px; font-weight: 650; line-height: 1.3; color: #17362a; }
+.akh-pemilih-bab small { font-size: 13.5px; line-height: 1.35; color: #4f6254; }
+.akh-pemilih-bab .akh-tag { margin-bottom: 2px; }
+.akh-pemilih-kaki { padding-top: 6px; border-top: 1px solid #e3e7dc; }
+.akh-ulang-baru {
+  display: inline-flex; align-items: center; gap: 8px; min-height: 44px; padding: 8px 2px; border: 0; background: none;
+  color: #215c40; font: inherit; font-size: 15px; font-weight: 600; line-height: 1.35; text-align: left; cursor: pointer;
+  text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 4px;
+}
+.akh-ulang-baru > svg { flex: 0 0 auto; }
+.akh-ulang-baru:hover { color: #163e2b; }
+.akh-tag {
+  flex: 0 0 auto; display: inline-flex; align-items: center; gap: 4px; padding: 2px 9px; border-radius: 999px;
+  background: #f1f4ea; border: 1px solid #d9dfd2; color: #2f4637; font-size: 12.5px; font-weight: 700; line-height: 1.4; white-space: nowrap;
+}
+
+/* ------------------------------------------------------------------ Lihat perjalananku (Modal) */
+.akh-tinjauan { display: grid; gap: 16px; }
+.akh-kelompok { display: grid; gap: 8px; }
+.akh-kelompok + .akh-kelompok { padding-top: 14px; border-top: 1px solid #e3e7dc; }
+.akh-kelompok h4 { margin: 0; font-size: 17px; line-height: 1.3; color: #17362a; }
+.akh-sub { display: grid; gap: 2px; }
+.akh-sub h5 { margin: 4px 0 0; font-size: 12.5px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: #5c6f58; }
+.akh-kosong, .akh-kenapa { margin: 0; font-size: 15px; line-height: 1.5; color: #2f4637; }
+.akh-kosong { color: #4f6254; }
+.akh-daftar { list-style: none; margin: 0; padding: 0; display: grid; }
+.akh-daftar li {
+  display: flex; flex-wrap: wrap; align-items: flex-start; justify-content: space-between; gap: 4px 10px;
+  padding: 7px 0; border-top: 1px solid #eef0e8; font-size: 15px; line-height: 1.45; color: #243d30;
+}
+.akh-daftar li:first-child { border-top: 0; }
+.akh-daftar-teks { flex: 1 1 180px; min-width: 0; }
+/* Perasaan & pemahaman: butir netral (titik abu), tanpa warna benar/salah. */
+.akh-daftar-rasa .akh-daftar-teks { position: relative; padding-left: 16px; }
+.akh-daftar-rasa .akh-daftar-teks::before {
+  content: ''; position: absolute; left: 2px; top: .62em; width: 6px; height: 6px; border-radius: 50%; background: #8a9887;
+}
+.akh-daftar-langkah .cer-proses { margin-top: 1px; }
+.akh-tag-ralat { color: #2f4637; }
+
+.akh-temuan { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; grid-template-columns: repeat(auto-fill, minmax(min(100%, 220px), 1fr)); }
+.akh-temuan li {
+  display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 6px 10px; border-radius: 12px;
+  border: 1px solid #e3e7dc; background: #fffefa; font-size: 14.5px; line-height: 1.35;
+}
+.akh-temuan li[data-ada="tidak"] { border-style: dashed; background: transparent; }
+.akh-temuan li[aria-current="true"] { border-color: #215c40; box-shadow: 0 0 0 1px #215c40; }
+.akh-temuan small { font-size: 13px; font-weight: 600; color: #5c6f58; }
+.akh-samar { color: #5c6f58; }
+
+.akh-tautan {
+  display: flex; align-items: center; justify-content: space-between; gap: 10px; min-height: 44px; padding: 6px 2px;
+  border-bottom: 1px solid #eef0e8; color: #215c40; font-size: 15px; font-weight: 600; text-decoration: none;
+}
+.akh-tautan:hover { text-decoration: underline; text-underline-offset: 4px; }
+.akh-tautan > svg { flex: 0 0 auto; }
+
+/* ------------------------------------------------------------------ ukuran layar */
+@media (max-width: 380px) {
+  .akh-kartu { gap: 10px; }
+  .akh-pelajaran { padding: 10px 12px 11px; }
+}
+
+/* Tablet & desktop: kartu berbingkai di tengah, potret lebih besar. */
+@media (min-width: 600px) {
+  .akh-kartu {
+    width: min(640px, calc(100% - 32px)); margin-top: 4px; padding: 24px 28px 10px; gap: 14px;
+    border-radius: 20px; background: #fffefa; border: 1px solid #dfe4d8;
+  }
+  .akh-potret { width: 80px !important; height: 80px !important; }
+  .akh-potret > svg { width: 100%; height: 100%; }
+  .akh-kepala { gap: 16px; }
+  .akh-judul { font-size: 30px; }
+  /* Aksi kedua selebar isinya: aksi utama (label panjang "Coba lagi dari bagian …") tetap satu baris. */
+  .akh-aksi .akh-kedua { flex: 0 1 auto; min-width: 160px; }
+  .akh-sebab, .akh-pelajaran-teks { font-size: 17px; }
+}
+
+/* Desktop: kartu sedikit turun dari bilah alat (tidak menempel), lebar tetap dibatasi. */
+@media (min-width: 900px) and (min-height: 541px) {
+  .akh-kartu { margin-top: clamp(8px, 4vh, 40px); padding: 28px 32px 12px; }
+  .akh-potret { width: 88px !important; height: 88px !important; }
+}
+
+/* HP mendatar (layar pendek): kartu berbingkai tipis, potret kecil; halaman boleh digulir. */
+@media (orientation: landscape) and (max-height: 540px) {
+  .akh-kartu { padding: 16px 22px 8px; gap: 10px; }
+  .akh-potret { width: 56px !important; height: 56px !important; }
+  .akh-judul { font-size: 24px; }
+  .akh-sebab, .akh-pelajaran-teks { font-size: 16px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root:not([data-gerak="penuh"]) .akh-kartu { animation: none; }
+}

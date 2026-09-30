@@ -17,6 +17,9 @@
   background-image: url('/karakter/miss-raksa-besar.png');
   background-image: image-set(url('/karakter/miss-raksa-besar.webp') type('image/webp'), url('/karakter/miss-raksa-besar.png') type('image/png'));
 }
+/* Miss Raksa = seni piksel v4 (sheet nearest-neighbour x2 dari atlas cerita): ditampilkan pada piksel perangkat bulat
+   per piksel seni (KarakterTokoh.tsx), jadi tepi piksel harus nearest-neighbour, bukan dihaluskan. */
+.tokoh-sprite.tokoh-missRaksa, .tokoh-potret-isi.tokoh-missRaksa { image-rendering: pixelated; }
 .tokoh-sprite.tokoh-isti, .tokoh-potret-isi.tokoh-isti {
   background-image: url('/karakter/isti-besar.png');
   background-image: image-set(url('/karakter/isti-besar.webp') type('image/webp'), url('/karakter/isti-besar.png') type('image/png'));
@@ -37,6 +40,19 @@
 /* Tokoh yang berdiri bersama tidak melambai serempak. */
 .tokoh-trio .tokoh:nth-child(1) .tokoh-sprite.lambai { animation-delay: -1.4s; }
 .tokoh-trio .tokoh:nth-child(3) .tokoh-sprite.lambai { animation-delay: -2.7s; }
+/* Miss Raksa menyapa dengan telapak bertemu di dada (sheet: 0 berdiri, 1 sambut, 2 sambut kedip, 3 berdiri kedip):
+   berdiri -> sambut ± 2 dtk (sekali kedip) -> berdiri -> kedip, 6 dtk; kedip 150 ms. Hanya nama & durasi yang diganti,
+   jadi jeda berbeda di .tokoh-trio dan "kurangi gerak" (animation: none) tetap berlaku. */
+.tokoh-sprite.tokoh-missRaksa.lambai { animation-name: tokoh-sambut-mr; animation-duration: 6s; }
+@keyframes tokoh-sambut-mr {
+  0% { background-position-x: 0%; }
+  12% { background-position-x: 33.333%; }
+  30% { background-position-x: 66.667%; }
+  32.5% { background-position-x: 33.333%; }
+  46% { background-position-x: 0%; }
+  80% { background-position-x: 100%; }
+  82.5% { background-position-x: 0%; }
+}
 @keyframes tokoh-lambai {
   0% { background-position-x: 0%; }
   6% { background-position-x: 33.333%; }

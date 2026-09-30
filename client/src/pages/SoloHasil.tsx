@@ -13,7 +13,7 @@ import { bahasaKini, misiDalamBahasa, t, useBahasa } from '../i18n';
 import { rekorLalu, totalPoin, ulangSolo, useProfil, type ProgresSolo } from '../state/profil';
 import { savedLook } from '../state/store';
 import { Confetti } from '../ui/kit';
-import { BarisBintang, SatuBintang, TOTAL_BINTANG, TOTAL_MISI, angka, bintangMisi, jumlahBintang, jumlahDicoba } from './soloBagian';
+import { BarisBintang, LegendaBintang, SatuBintang, TOTAL_BINTANG, TOTAL_MISI, TandaDicoba, angka, bintangMisi, jumlahBintang, jumlahDicoba } from './soloBagian';
 import './solo.css';
 
 /**
@@ -60,9 +60,11 @@ function KartuLencana({ b, terbuka }: { b: Badge; terbuka: boolean }) {
 }
 
 /**
- * HASIL AKHIR mode solo: karakter pemain, total poin, bintang dari 30, lencana, rekor pribadi di
+ * HASIL AKHIR mode solo: karakter pemain, total poin, bintang n/30 (ketepatan terbaik) dan misi
+ * dicoba n/10 (tanda terpisah, sama dengan peta), legenda arti bintang, lencana, rekor pribadi di
  * perangkat ini, dan sapaan Mr Roger. Satu tombol utama: "Main lagi" (atau kembali ke peta bila
- * masih ada misi yang belum dicoba).
+ * masih ada misi yang belum dicoba). Belum ada bintang sama sekali = judul berterima kasih sudah
+ * mencoba, bukan "Hebat".
  */
 export default function SoloHasil() {
   const { bahasa } = useBahasa();
@@ -105,17 +107,21 @@ export default function SoloHasil() {
     ulangSolo();
   }
 
-  return <PlayerShell back="/solo" label={t('solo.labelHasil')} className="solo-layar">
+  return <PlayerShell back="/solo" label={t('solo.labelHasil')} judul={t('solo.labelHasil')} className="solo-layar">
     {rayakan ? <Confetti jumlah={36} /> : null}
     <main className="solo-hasil">
       <section className="solo-hasil-diri">
         <div className="solo-avatar solo-avatar-besar"><Avatar look={look} size={120} mood="senang" /></div>
-        <span className="eyebrow">{t('solo.eyebrowHasil', { n: dicoba, total: TOTAL_MISI })}</span>
-        <h1>{profil ? t('solo.hebat', { nama: profil.nickname }) : t('solo.hebatTanpaNama')}</h1>
+        <span className="eyebrow">{t('solo.eyebrowSolo')}</span>
+        <h1>{bintang > 0
+          ? profil ? t('solo.hebat', { nama: profil.nickname }) : t('solo.hebatTanpaNama')
+          : profil ? t('solo.terimaKasih', { nama: profil.nickname }) : t('solo.terimaKasihTanpaNama')}</h1>
         <dl className="solo-hasil-angka">
           <div><dt>{t('solo.totalPoin')}</dt><dd>{angka(total)}</dd></div>
-          <div><dt>{t('solo.bintangDari', { total: TOTAL_BINTANG })}</dt><dd><SatuBintang ukuran={26} />{bintang}</dd></div>
+          <div><dt>{t('solo.bintang')}</dt><dd><SatuBintang isi={bintang > 0} ukuran={24} />{bintang}<small>/{TOTAL_BINTANG}</small></dd></div>
+          <div><dt>{t('solo.misiDicoba')}</dt><dd><TandaDicoba ikonSaja ukuran={24} />{dicoba}<small>/{TOTAL_MISI}</small></dd></div>
         </dl>
+        <LegendaBintang className="solo-legenda-hasil" />
         <div className="solo-rekor" data-baru={rekorBaru || undefined}>
           {rekorBaru ? <strong className="solo-rekor-baru"><Icon name="medali" size={20} /> {t('solo.rekorBaru')}</strong> : null}
           <p>{t('solo.rekorPerangkat', { n: angka(progres.rekor) })}</p>
@@ -150,7 +156,9 @@ export default function SoloHasil() {
                 <span className="solo-rincian-no" aria-hidden="true">{m.number}</span>
                 <span className="solo-rincian-judul"><span className="sr-only">{t('solo.misiKe', { n: m.number })} </span>{m.title}</span>
                 <BarisBintang n={bintangMisi(progres, m.id)} ukuran={16} />
-                <small>{c ? t('pemain.nPoin', { n: angka(c.poin) }) : t('solo.belumDicoba')}</small>
+                {c
+                  ? <span className="solo-rincian-poin"><TandaDicoba ukuran={14} /><small>· {t('pemain.nPoin', { n: angka(c.poin) })}</small></span>
+                  : <small className="solo-rincian-poin">{t('solo.belumDicoba')}</small>}
               </li>;
             })}
           </ol>

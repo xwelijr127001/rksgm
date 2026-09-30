@@ -1,0 +1,2 @@
+# Skrip shell harus tetap LF: dengan core.autocrlf=true di Windows, CRLF membuat bash gagal ("$'\r': command not found").
+*.sh text eol=lf

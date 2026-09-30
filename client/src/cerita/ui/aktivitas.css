@@ -1,0 +1,79 @@
+/* ==========================================================================
+   Aktivitas cerita v2 (docs/rancangan-mode-cerita.md 11.5): album foto ringkas (MissionPlay albumRingkas, hanya
+   dipakai mode cerita), kartu polis yang bisa diperiksa (KartuPolisPeriksa, juga di Catatan kasus), dan umpan
+   balik per pilihan. Palet sama dengan stage.css/cerita.css. Kuning tetap hanya "pilihan tersimpan"; hijau ✓,
+   merah bata ✕, dan ! selalu bersama kata. Perasaan nasabah ditulis netral (tanpa kotak berwarna).
+   ========================================================================== */
+
+/* ------------------------------------------------------------------ album ringkas */
+/* Tanpa slot kosong setinggi kartu: kepala (judul + "0/3 foto"), foto terpilih sebagai baris ringkas yang bisa
+   dibatalkan, lalu satu baris sisa. Pembuka "Pilih lewat daftar" di bawahnya tetap di atas bar aksi. */
+.baki.baki-ringkas { padding: 8px 10px 8px 12px; }
+.baki-ringkas .baki-kepala { margin-bottom: 0; min-height: 28px; gap: 8px; }
+.baki-ringkas .baki-slot { margin-top: 6px; gap: 4px; }
+.baki-ringkas .slot.slot-isi { min-height: 44px; gap: 8px; padding: 0 0 0 8px; font-size: 14.5px; border-width: 1.5px; animation-duration: .16s; }
+.baki-ringkas .slot-no { width: 22px; height: 22px; flex-basis: 22px; font-size: 12px; }
+.baki-ringkas .slot-hapus { padding: 6px 10px; }
+.baki-sisa { margin: 4px 0 0; font-size: 14px; line-height: 1.4; color: #6f5f30; }
+
+/* ------------------------------------------------------------------ kartu polis yang bisa diperiksa */
+.cer-akt-sisipan { margin: 0 0 10px; }
+.kpp { display: grid; gap: 4px; min-width: 0; padding: 8px 10px; border-radius: 14px; background: #f4f5ed; border: 1px solid #dfe4d8; }
+.kpp-kepala { display: flex; align-items: flex-start; gap: 10px; }
+.kpp-ikon { flex: 0 0 36px; width: 36px; height: 36px; border-radius: 10px; display: grid; place-items: center; background: #fffefa; border: 1px solid #dfe4d8; }
+.kpp-kepala-teks { flex: 1; min-width: 0; display: grid; gap: 2px; }
+.kpp-judul { font-family: var(--font-judul); font-size: 17px; line-height: 1.25; color: #17362a; }
+.kpp-sub { font-size: 14px; line-height: 1.4; color: #4f6254; }
+.kpp .kpp-ket { margin: 0; font-size: 13.5px; line-height: 1.4; color: #4f6254; }
+.kpp-baris { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; }
+.kpp-tombol {
+  display: flex; align-items: center; gap: 10px; width: 100%; min-height: 44px; padding: 4px 8px 4px 12px; text-align: left;
+  border: 1px solid #d7dfd0; border-radius: 10px; background: #fffefa; color: #243d30; font: inherit; cursor: pointer;
+  transition: border-color .12s, background .12s;
+}
+.kpp-tombol:hover { border-color: #9fbf95; background: #f7faf2; }
+.kpp-tombol[aria-expanded="true"] { border-color: #9fbf95; border-bottom-left-radius: 0; border-bottom-right-radius: 0; }
+.kpp-sub-periksa .kpp-tombol { min-height: 44px; padding-top: 4px; padding-bottom: 4px; }
+.kpp-sub-periksa .kpp-nilai { font-size: 14px; font-weight: 600; color: #2f4637; }
+.kpp-isi { flex: 1; min-width: 0; display: grid; gap: 1px; }
+.kpp-isi-diam { padding: 4px 12px; }
+.kpp-label { font-size: 12.5px; font-weight: 700; line-height: 1.25; color: #5c6f58; }
+.kpp-nilai { font-size: 15px; font-weight: 650; line-height: 1.3; color: #243d30; }
+.kpp-tanda { flex: 0 0 28px; width: 28px; height: 28px; border-radius: 50%; display: grid; place-items: center; background: #eef3e7; color: #215c40; }
+.kpp .kpp-arti {
+  margin: 0; padding: 8px 12px 10px; border: 1px solid #9fbf95; border-top: 0; border-radius: 0 0 10px 10px;
+  background: #fffefa; font-size: 14.5px; line-height: 1.45; color: #2f4637;
+}
+.kpp .kpp-arti[hidden] { display: none; }
+.kpp .kpp-catatan { margin: 0; font-size: 12.5px; line-height: 1.45; color: #5a6b5e; }
+
+/* ------------------------------------------------------------------ umpan balik aktivitas */
+/* Kelompok pilihan setelah dikirim: ikon + kata (Yang membantu / Yang terlewat / Kurang membantu), lalu tiap
+   pilihan dengan alasan singkatnya. */
+.cer-opsi-kelompok { display: grid; gap: 6px; }
+.cer-umpan .cer-opsi-kelompok-judul { margin: 0; display: flex; align-items: center; gap: 10px; font-size: 14px; font-weight: 700; line-height: 1.35; color: #2f4637; }
+.cer-opsi-kelompok ul { list-style: none; margin: 0; padding: 0 0 0 32px; display: grid; gap: 6px; }
+.cer-opsi-kelompok li { display: grid; gap: 1px; font-size: 15px; line-height: 1.4; color: #243d30; }
+.cer-opsi-kelompok li > b { font-weight: 650; }
+.cer-opsi-kelompok li > span { font-size: 14px; line-height: 1.45; color: #4f6254; }
+.cer-opsi-kelompok[data-kelompok="kurang"] li > b { color: #5a4a44; }
+
+/* "Kenapa begitu?": tombol pengungkap (aria-expanded) bergaya lipatan misi; isinya dipisah per sisi. */
+.cer-kenapa { border-top: 1px solid #e3e7dc; border-bottom: 1px solid #e3e7dc; }
+.cer-kenapa-tombol {
+  display: flex; align-items: center; gap: 8px; width: 100%; min-height: 48px; padding: 0; border: 0; background: none;
+  color: #3f6049; font: inherit; font-size: 15px; font-weight: 600; text-align: left; cursor: pointer;
+}
+.cer-kenapa-tombol .kpp-tanda { flex-basis: 24px; width: 24px; height: 24px; }
+.cer-kenapa-isi { display: grid; gap: 10px; padding: 0 0 14px; font-size: 15px; line-height: 1.5; color: #2f4637; }
+.cer-kenapa-isi[hidden] { display: none; }
+.cer-kenapa-isi > div { display: grid; gap: 2px; }
+.cer-kenapa-isi b { font-size: 13px; font-weight: 700; letter-spacing: .02em; color: #5c6f58; }
+.cer-umpan .cer-kenapa-isi p { margin: 0; font-size: 15px; line-height: 1.5; }
+
+@media (prefers-reduced-motion: reduce) {
+  :root:not([data-gerak="penuh"]) .kpp-tombol { transition: none; }
+}
+
+/* Beberapa kalimat berturut-turut dari pembicara yang sama: satu potret & nama, kalimat sebagai paragraf. */
+.cer-ucap .cer-ucap-lanjut { display: block; margin-top: 6px; }

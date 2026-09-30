@@ -6,6 +6,7 @@
  * saat ditampilkan (terjemahkanBawaan). Kolom isian selalu memuat nilai aslinya.
  */
 
+import { Merek } from '../components/Merek';
 import { PilihBahasa } from '../components/PilihBahasa';
 import { TombolGerak } from '../components/TombolGerak';
 import { useEffect, useMemo, useState } from 'react';
@@ -19,13 +20,13 @@ import { misiDalamBahasa, t, useBahasa } from '../i18n';
 import { terjemahkanBawaan, terjemahkanGalat } from '../i18n/galat';
 import kamusHost from '../i18n/kamus/host';
 import { useKonfigBank } from '../state/bank';
+import { useHalaman } from '../ui/halaman';
 import { actions, savedHostToken, savedLastHostRoom, savedPin, useGame } from '../state/store';
 import { AturSoal } from './host/AturSoal';
 import { PaketAwal } from './host/PaketAwal';
 import { KolomPin } from './host/PinPanitia';
 import {
   AudioControls,
-  BrandTitle,
   ConnectionBadge,
   KodeRoom,
   Leaderboard,
@@ -643,6 +644,8 @@ function DaftarPeserta({ room }: { room: RoomPublicState }) {
 export default function Host() {
   useBahasa();
   const { room, hostToken, status, error } = useGame();
+  // Judul tab: "Panitia – RAKSA GAME" (dengan nama acara bila room sudah ada); fokus ke h1 saat dibuka dari tautan.
+  useHalaman(room ? `${t('host.judulHalaman')} · ${terjemahkanBawaan(room.eventName)}` : t('host.judulHalaman'));
 
   useEffect(() => {
     preferMusicOn();
@@ -654,15 +657,17 @@ export default function Host() {
   return (
     <div className="layar">
       <style>{GAYA}</style>
-      <header className="topbar">
-        <span className="baris baris-rapat">
-          <BrandTitle size="kecil" />
-          <span className="judul-kecil">{t('host.layarHost')}</span>
-        </span>
-        <span className="baris baris-rapat" style={{ justifyContent: 'flex-end' }}>
+      {/* Header bersama (sama dengan pemain): wordmark + label konteks | bahasa + status koneksi.
+          Wordmark bukan tautan: panitia tidak keluar dari layar kendali karena salah ketuk. */}
+      <header className="mrk-kepala">
+        <div className="mrk-kepala-kiri">
+          <Merek tautan={false} />
+          <span className="mrk-konteks">{t('host.layarHost')}</span>
+        </div>
+        <div className="mrk-kepala-kanan">
           <PilihBahasa />
           <ConnectionBadge />
-        </span>
+        </div>
       </header>
 
       <main className="isi wrap-lebar stack-l" style={{ paddingTop: 16 }}>
@@ -676,7 +681,11 @@ export default function Host() {
         ) : null}
 
         {!room ? (
-          <MulaiHost />
+          <>
+            {/* Judul halaman untuk pembaca layar; secara visual header (Merek + "Layar Host") sudah jelas. */}
+            <h1 className="sr-only">{t('host.judulMasuk')}</h1>
+            <MulaiHost />
+          </>
         ) : (
           <>
             <div className="baris-antara">

@@ -38,5 +38,13 @@ export default defineConfig({
       '/unity': { target: serverTarget, changeOrigin: true },
     },
   },
-  build: { outDir: 'dist', emptyOutDir: true, chunkSizeWarningLimit: 900 },
+  build: {
+    outDir: 'dist',
+    emptyOutDir: true,
+    chunkSizeWarningLimit: 900,
+    // Seni piksel cerita (atlas tokoh, lapisan ruang, prop, ikon) SELALU berkas terpisah, tidak di-inline sebagai data URL:
+    // panggung melacak dekode per URL, PNG di-cache terpisah dari JS, dan uji browser mengenali lapisan dari nama
+    // berkasnya (sama dengan Vite dev). Aset lain tetap memakai ambang bawaan Vite.
+    assetsInlineLimit: (berkas: string) => (/[\\/]cerita[\\/]seni[\\/]piksel[\\/][^\\/]+\.png$/.test(berkas) ? false : undefined),
+  },
 });

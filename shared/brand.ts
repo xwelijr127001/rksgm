@@ -66,7 +66,8 @@ export const TOKOH = {
   missRaksa: {
     aktif: true,
     nama: 'Miss Raksa' as string | null,
-    jabatan: 'Ikon Raksa CS',
+    /** Sama dengan kamus tokoh (`tokoh.missRaksa.jabatan`) & perannya di mode cerita; menunggu konfirmasi PIC (T13). */
+    jabatan: 'Senior Layanan Klaim',
     tampilJabatan: true,
     sapaan: {
       /** Halaman gabung: langkah kode, lalu langkah kenalan. Briefing misi memakai teks misi. */

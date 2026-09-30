@@ -20,6 +20,7 @@ import { RakiBubble } from '../art/Raki';
 import { AdeganLayar } from '../game/AdeganLayar';
 import { misiBergambar } from '../game/gambar';
 import { KarakterTokoh } from '../game/KarakterTokoh';
+import { Merek } from '../components/Merek';
 import { PilihBahasa } from '../components/PilihBahasa';
 import { TombolGerak } from '../components/TombolGerak';
 import { TOKOH } from '@shared/brand';
@@ -28,9 +29,9 @@ import { useOnChange } from '../hooks';
 import { misiDalamBahasa, revealDalamBahasa, t, useBahasa } from '../i18n';
 import { terjemahkanBawaan, terjemahkanGalat } from '../i18n/galat';
 import { actions, useGame } from '../state/store';
+import { useHalaman } from '../ui/halaman';
 import {
   AudioControls,
-  BrandTitle,
   Confetti,
   KodeRoom,
   Leaderboard,
@@ -155,6 +156,8 @@ function rataKetepatan(rows: readonly LeaderRow[]): number | null {
 export default function Projector() {
   const { room, status } = useGame();
   const { bahasa } = useBahasa();
+  // Judul tab "Layar Acara – RAKSA GAME" (bukan <h1>: h1 hanya ada di gerbang kode).
+  useHalaman(t('layar.layarAcara'));
   const [params, setParams] = useSearchParams();
   const kodeUrl = (params.get('room') ?? '').trim().toUpperCase();
 
@@ -216,7 +219,7 @@ export default function Projector() {
       <div className="proyektor">
         <style>{CSS}</style>
         <div className="wrap-lebar stack stack-l" style={{ maxWidth: 620, paddingTop: 24 }}>
-          <BrandTitle size="besar" />
+          <Merek ukuran="besar" nada="gelap" tautan={false} />
           <h1 className="pj-judul">{t('layar.layarAcara')}</h1>
           {gagal ? (
             <Pesan jenis="error">
@@ -610,7 +613,7 @@ export default function Projector() {
       <style>{CSS}</style>
       <header className="wrap-lebar pj-lebar baris-antara" style={{ flexWrap: 'wrap', gap: 12 }}>
         <div className="baris">
-          <BrandTitle size="kecil" />
+          <Merek nada="gelap" tautan={false} />
           <span className="pj-acara">{namaAcara}</span>
           <PhaseBadge phase={room.phase} />
         </div>

@@ -18,6 +18,12 @@ const kamus: KamusRuang = {
     gerakNyalakanPanjang: 'Animasi dimatikan perangkat ini · Nyalakan',
     gerakKet: 'Perangkat ini meminta animasi dikurangi (pengaturan sistem). Tombol ini hanya berlaku di perangkat ini.',
     menyiapkanGame: 'Menyiapkan game...',
+    dialogIsi: 'Isi {judul}, bisa digulir',
+    // Pesan saat halaman gagal dimuat/dirender (App.tsx BatasRute).
+    gagalHalamanJudul: 'Halaman ini belum bisa dibuka',
+    gagalHalamanIsi: 'Mungkin koneksi sempat terputus, atau game baru saja diperbarui. Muat ulang halaman untuk mencoba lagi.',
+    muatUlangHalaman: 'Muat ulang halaman',
+    keHalamanAwal: 'Ke halaman awal',
   },
   en: {
     kembali: 'Back',
@@ -35,6 +41,11 @@ const kamus: KamusRuang = {
     gerakNyalakanPanjang: 'Animation is off on this device · Turn on',
     gerakKet: 'This device asks for reduced motion (system setting). This button only affects this device.',
     menyiapkanGame: 'Getting the game ready...',
+    dialogIsi: '{judul} content, scrollable',
+    gagalHalamanJudul: 'This page couldn’t be opened',
+    gagalHalamanIsi: 'The connection may have dropped for a moment, or the game was just updated. Reload the page to try again.',
+    muatUlangHalaman: 'Reload the page',
+    keHalamanAwal: 'Go to the home page',
   },
   zh: {
     kembali: '返回',
@@ -52,6 +63,11 @@ const kamus: KamusRuang = {
     gerakNyalakanPanjang: '此设备已关闭动画 · 点击开启',
     gerakKet: '此设备的系统设置要求减少动画。此按钮只对本设备生效。',
     menyiapkanGame: '正在准备游戏……',
+    dialogIsi: '{judul}内容，可滚动',
+    gagalHalamanJudul: '此页面暂时无法打开',
+    gagalHalamanIsi: '可能是网络短暂中断，或游戏刚刚更新。请重新加载页面再试一次。',
+    muatUlangHalaman: '重新加载页面',
+    keHalamanAwal: '返回首页',
   },
 };
 export default kamus;

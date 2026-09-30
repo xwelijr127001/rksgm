@@ -4,6 +4,11 @@ import type { KamusRuang } from '.';
  * Jabatan & kalimat sapaan tokoh (teks `id` sama dengan shared/brand.ts TOKOH; semuanya USULAN
  * dan perlu disetujui yang bersangkutan). Nama tokoh (Mr Roger, Miss Raksa, Bu Isti, Raki)
  * tidak diterjemahkan.
+ *
+ * Jabatan Miss Raksa SAMA di semua layar (kenalan, gabung acara, proyektor, mode cerita:
+ * `pemeran.missRaksa.peran` episode AUTO-1), supaya perannya konsisten: senior yang membimbing
+ * petugas layanan klaim. Dulu "Ikon Raksa CS" di sini tetapi "Senior Layanan Klaim" di cerita.
+ * Sebutan ini masih menunggu konfirmasi PIC (docs/cerita/TINJAUAN-PIC-CLAIM.md, istilah T13).
  */
 const kamus: KamusRuang = {
   id: {
@@ -11,7 +16,7 @@ const kamus: KamusRuang = {
     'ceo.awal': 'Selamat datang di Misi Lindungi Kota!',
     'ceo.lobby': 'Terima kasih sudah bergabung. Selamat bermain!',
     'ceo.podium': 'Selamat untuk para juara. Terima kasih sudah ikut bermain!',
-    'missRaksa.jabatan': 'Ikon Raksa CS',
+    'missRaksa.jabatan': 'Senior Layanan Klaim',
     'missRaksa.gabungKode': 'Halo, selamat datang di Raksa!',
     'missRaksa.gabungKenalan': 'Senang berkenalan denganmu!',
     'isti.jabatan': 'Direktur IT',
@@ -25,7 +30,7 @@ const kamus: KamusRuang = {
     'ceo.awal': 'Welcome to Mission: Protect the City!',
     'ceo.lobby': 'Thanks for joining. Have fun!',
     'ceo.podium': 'Congratulations to the winners. Thank you all for playing!',
-    'missRaksa.jabatan': 'Raksa CS Icon',
+    'missRaksa.jabatan': 'Senior Claims Officer',
     'missRaksa.gabungKode': 'Hello, welcome to Raksa!',
     'missRaksa.gabungKenalan': 'Nice to meet you!',
     'isti.jabatan': 'IT Director',
@@ -39,7 +44,7 @@ const kamus: KamusRuang = {
     'ceo.awal': '欢迎来到“守护城市”任务！',
     'ceo.lobby': '感谢你的加入，祝你玩得开心！',
     'ceo.podium': '恭喜各位获胜者，感谢大家的参与！',
-    'missRaksa.jabatan': 'Raksa 客服形象大使',
+    'missRaksa.jabatan': '资深理赔专员',
     'missRaksa.gabungKode': '你好，欢迎来到 Raksa！',
     'missRaksa.gabungKenalan': '很高兴认识你！',
     'isti.jabatan': 'IT 总监',

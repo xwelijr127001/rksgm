@@ -18,7 +18,10 @@
  *   proyektor 1366x768
  * Pemeriksaan: kunci saat briefing, jeda mengunci ketukan, refresh memulihkan draft,
  * kirim ganda tetap satu, kanvas tidak tertinggal, console/HTTP bersih, tanpa scroll
- * horizontal, CSV, reconnect, mode latihan. Keluar dengan kode 1 bila ada kegagalan.
+ * horizontal, CSV, reconnect, mode latihan (kartu "Siap mulai": bonus belum berjalan sebelum ditekan),
+ * keyboard di latihan 360x740 & 720x450 (fokus Tab/Spasi tidak tertutup bar aksi lengket; grup radio = satu
+ * tab stop dan panah memilih; misi 5: panah kategori tetap di bagian yang sama, baris bagian = tablist).
+ * Keluar dengan kode 1 bila ada kegagalan.
  */
 
 import puppeteer from 'puppeteer-core';
@@ -156,6 +159,131 @@ async function klikUtama(page) {
   });
 }
 
+/**
+ * Solo (/solo/main, alamat lama /latihan?misi=N): misi dibuka kartu "Siap mulai" (MissionPlay mode 'intro')
+ * dan bonus waktu belum berjalan. Tekan "Siap mulai", lalu tunggu mode menjawab.
+ */
+async function siapMulai(page, label) {
+  if (!periksa(await tunggu(page, () => document.querySelector('.misi')?.getAttribute('data-mode') === 'intro', `kartu Siap mulai ${label}`), `${label}: kartu "Siap mulai" tampil`)) return false;
+  periksa(await page.evaluate(() => !document.querySelector('.misi-panel button.opsi, .misi-panel button.angka')), `${label}: pilihan jawaban belum tampil sebelum "Siap mulai"`);
+  periksa(await page.evaluate(() => document.querySelector('.solo-bonus')?.getAttribute('data-status') === 'siap'), `${label}: bonus waktu belum berjalan sebelum "Siap mulai"`);
+  periksa(await page.evaluate(() => {
+    const b = document.querySelector('.misi-mulai-aksi .primary-action');
+    if (!b || b.disabled) return false;
+    b.click();
+    return true;
+  }), `${label}: tombol "Siap mulai" bisa ditekan`);
+  const ok = periksa(await tunggu(page, () => document.querySelector('.misi')?.getAttribute('data-mode') === 'play', `mode menjawab ${label}`), `${label}: mode menjawab setelah "Siap mulai"`);
+  // Setelah mulai, halaman digeser halus supaya pilihan pertama terlihat: tunggu gulir diam sebelum mengetuk
+  // (pemain manusia tidak mengetuk dalam 100 md; tanpa ini koordinat ketukan dihitung sebelum halaman berhenti).
+  await tungguGulirDiam(page);
+  return ok;
+}
+
+/** Tunggu posisi gulir stabil (3 bacaan sama berturut-turut, maks 2,5 dtk). */
+async function tungguGulirDiam(page, ms = 2500) {
+  const t0 = Date.now();
+  let lama = null;
+  let sama = 0;
+  while (Date.now() - t0 < ms) {
+    const y = await page.evaluate(() => Math.round(window.scrollY));
+    if (y === lama) { if (++sama >= 3) return; } else { sama = 0; lama = y; }
+    await tidur(100);
+  }
+}
+
+/**
+ * Fokus keyboard tidak tertutup bar aksi lengket (WCAG 2.4.11). Mulai dari pertanyaan, Tab melewati kartu tugas &
+ * panel jawaban (daftar terlipat dibuka dengan Enter seperti pemain): kotak setiap elemen yang difokus tidak boleh
+ * beririsan dengan .misi-aksi yang sedang lengket dan tidak boleh di luar layar. Opsi pertama juga dipilih dengan
+ * Spasi (album/pilihan bertambah = tata letak bergeser) lalu diukur lagi. Mengubah jawaban: pakai halaman sendiri.
+ */
+async function periksaFokusBar(page, label) {
+  // Seperti pemain: layar tenang dulu (setelah "Siap mulai" pertanyaan difokus & halaman digeser pada frame berikutnya).
+  await tidur(600);
+  await page.evaluate(() => { window.scrollTo(0, 0); document.querySelector('.misi-tanya')?.focus({ preventScroll: true }); });
+  const ukur = () => page.evaluate(() => {
+    const a = document.activeElement;
+    if (!a || a === document.body || !a.closest('.misi-tugas, .misi-panel')) return null;
+    const r = a.getBoundingClientRect();
+    const bar = document.querySelector('.misi-aksi');
+    const b = bar && getComputedStyle(bar).position === 'sticky' ? bar.getBoundingClientRect() : null;
+    return {
+      teks: (a.getAttribute('aria-label') || a.textContent || '').replace(/\s+/g, ' ').trim().slice(0, 30),
+      tag: a.tagName, tutup: a.tagName === 'SUMMARY' && !a.closest('details')?.open, opsi: a.classList.contains('opsi'),
+      y: `${Math.round(r.top)}..${Math.round(r.bottom)}`, bar: b ? Math.round(b.top) : null,
+      iris: b ? Math.max(0, Math.min(r.bottom, b.bottom) - Math.max(r.top, b.top)) : 0,
+      luar: r.top < -0.5 || r.bottom > innerHeight + 0.5,
+    };
+  });
+  const masalah = [];
+  const cekSatu = (f, apa) => { if (f && (f.iris > 0.5 || f.luar)) masalah.push(`${apa} "${f.teks}" y=${f.y} bar=${f.bar}${f.luar ? ' di luar layar' : ''}`); };
+  let stop = 0;
+  let spasi = false;
+  for (let i = 0; i < 40; i++) {
+    await page.keyboard.press('Tab');
+    await tidur(140);
+    let f = await ukur();
+    if (!f) break;
+    stop++;
+    cekSatu(f, `Tab ${i + 1}`);
+    if (f.tutup) { await page.keyboard.press('Enter'); await tidur(300); f = await ukur(); cekSatu(f, 'Enter (buka daftar)'); }
+    else if (f.opsi && !spasi) { spasi = true; await page.keyboard.press('Space'); await tidur(450); cekSatu(await ukur(), 'Spasi (memilih)'); }
+  }
+  periksa(stop > 0 && spasi, `${label}: Tab mencapai pilihan jawaban (${stop} tab stop)`);
+  periksa(masalah.length === 0, `${label}: fokus keyboard tidak tertutup bar aksi / keluar layar${masalah.length ? ': ' + masalah.join(' | ') : ''}`);
+}
+
+/** Pola radio ARIA: grup = satu tab stop; panah bawah memindah fokus SEKALIGUS memilih opsi berikutnya. */
+async function periksaPanahRadio(page, label) {
+  await tidur(600);
+  const r = await page.evaluate(() => {
+    const radio = [...(document.querySelector('.misi-panel [role="radiogroup"]')?.querySelectorAll('[role="radio"]') ?? [])];
+    const stop = radio.filter((x) => x.tabIndex === 0);
+    stop[0]?.focus();
+    return { n: radio.length, stop: stop.length, awal: radio.indexOf(stop[0]) };
+  });
+  periksa(r.n > 1 && r.stop === 1, `${label}: grup radio = satu tab stop (${r.stop} dari ${r.n})`);
+  await page.keyboard.press('ArrowDown');
+  await tidur(250);
+  const s = await page.evaluate(() => {
+    const a = document.activeElement;
+    const radio = [...(a?.closest('[role="radiogroup"]')?.querySelectorAll('[role="radio"]') ?? [])];
+    return { idx: radio.indexOf(a), checked: a?.getAttribute('aria-checked'), stop: radio.filter((x) => x.tabIndex === 0).length };
+  });
+  periksa(s.idx === (r.awal + 1) % r.n && s.checked === 'true' && s.stop === 1, `${label}: panah bawah memindah fokus & memilih opsi berikutnya (${JSON.stringify(s)})`);
+}
+
+/**
+ * Misi berkategori (langkah assign): panah di grup kategori memilih kategori bagian YANG SAMA (tidak melompat ke
+ * bagian berikutnya); baris bagian = tablist satu tab stop, panah kanan memindah ke bagian berikutnya & panelnya ikut.
+ */
+async function periksaPanahKategori(page, label) {
+  await tidur(600);
+  const bagian = () => page.evaluate(() => document.querySelector('.misi-panel [role="tab"][aria-selected="true"]')?.id ?? null);
+  const awal = await bagian();
+  await page.evaluate(() => document.querySelector('.misi-panel [role="tabpanel"] [role="radio"][tabindex="0"]')?.focus());
+  await page.keyboard.press('ArrowDown');
+  await tidur(300);
+  const k = await page.evaluate(() => ({ checked: document.activeElement?.getAttribute('aria-checked'), sudah: document.querySelectorAll('.item-chip.sudah').length }));
+  periksa(awal && (await bagian()) === awal && k.checked === 'true' && k.sudah === 1, `${label}: panah di kategori memilih untuk bagian yang sama (${JSON.stringify({ ...k, awal, kini: await bagian() })})`);
+  const t = await page.evaluate(() => {
+    const tabs = [...document.querySelectorAll('.misi-panel [role="tab"]')];
+    const panel = document.querySelector('.misi-panel [role="tabpanel"]');
+    tabs.find((x) => x.tabIndex === 0)?.focus();
+    return { n: tabs.length, stop: tabs.filter((x) => x.tabIndex === 0).length, controls: tabs.every((x) => x.getAttribute('aria-controls') === panel?.id), idx: tabs.findIndex((x) => x.tabIndex === 0) };
+  });
+  periksa(t.n > 1 && t.stop === 1 && t.controls, `${label}: bagian = tablist satu tab stop dengan aria-controls (${JSON.stringify(t)})`);
+  await page.keyboard.press('ArrowRight');
+  await tidur(300);
+  const s = await page.evaluate(() => {
+    const a = document.activeElement;
+    const tabs = [...document.querySelectorAll('.misi-panel [role="tab"]')];
+    return { idx: tabs.indexOf(a), sel: a?.getAttribute('aria-selected'), panel: document.querySelector('.misi-panel [role="tabpanel"]')?.getAttribute('aria-labelledby') === a?.id };
+  });
+  periksa(s.idx === (t.idx + 1) % t.n && s.sel === 'true' && s.panel, `${label}: panah kanan pindah ke bagian berikutnya & panel mengikuti (${JSON.stringify(s)})`);
+}
+
 const rupiah = (n) => 'Rp' + Math.round(n).toLocaleString('id-ID');
 
 function teksAngka(step, n) { return step.format === 'rupiah' ? rupiah(n) : `${n}${step.unit ? ' ' + step.unit : ''}`; }
@@ -243,8 +371,11 @@ const TUTORIAL = data.tutorial;
 
 const host = ioClient(BASE, { transports: ['websocket'], forceNew: true, reconnection: false });
 await new Promise((r) => host.once('connect', r));
-const dibuat = await rpc(host, 'host:create', { eventName: 'Uji E2E Adegan 2D' });
+// Paket LATIHAN secara eksplisit: sejak paket acara ada, room baru bawaannya memakai paket acara
+// (RAKSA_PAKET), sedangkan kunci uji BENAR di atas milik 10 misi latihan.
+const dibuat = await rpc(host, 'host:create', { eventName: 'Uji E2E Adegan 2D', paket: 'latihan' });
 const { code, hostToken } = dibuat.data;
+periksa(JSON.stringify(dibuat.data.playlist) === JSON.stringify(MISI.map((m) => m.id)), `room memakai 10 misi latihan (playlist ${JSON.stringify(dibuat.data.playlist)})`);
 await rpc(host, 'host:settings', { code, hostToken, autoAdvance: false });
 const aksi = async (action, extra = {}) => { const r = await rpc(host, 'host:action', { code, hostToken, action, ...extra }); periksa(r.ok, `host ${action}: ${r.error}`); if (r.data?.state) S = r.data.state; await tidur(250); };
 let S = dibuat.data.state;
@@ -480,15 +611,27 @@ try {
   }
   await kecil.goto(`${BASE}/latihan?misi=4`, { waitUntil: 'networkidle2' });
   await tunggu(kecil, stageSiap, 'adegan latihan', 25000);
+  await siapMulai(kecil, 'latihan m04');
   await jawabMisi(kecil, MISI[3], BENAR[4], true, true, async () => { await tangkap(kecil, 'latihan-m04-360.png'); });
   periksa(await tunggu(kecil, () => document.querySelector('.misi')?.getAttribute('data-mode') === 'reveal', 'hasil latihan'), 'latihan: pembahasan tampil');
   periksa(await kecil.evaluate(() => /Jawabanmu tepat/.test(document.body.innerText)), 'latihan: jawaban benar = "Jawabanmu tepat"');
   periksa(await kecil.evaluate(() => !/Makin paham/.test(document.body.innerText)), 'latihan: tanpa kalimat lama "Makin paham"');
   await tangkap(kecil, 'latihan-m04-360-hasil.png');
 
+  // Keyboard di HP kecil: fokus tidak tertutup bar aksi lengket, juga setelah album bertambah (misi 2 = foto).
+  await kecil.goto(`${BASE}/latihan?misi=2`, { waitUntil: 'networkidle2' });
+  await tunggu(kecil, stageSiap, 'adegan latihan m02', 25000);
+  if (await siapMulai(kecil, 'latihan m02')) await periksaFokusBar(kecil, 'keyboard m02 360');
+  await kecil.goto(`${BASE}/latihan?misi=5`, { waitUntil: 'networkidle2' });
+  await tunggu(kecil, stageSiap, 'adegan latihan m05', 25000);
+  if (await siapMulai(kecil, 'latihan m05')) await periksaPanahKategori(kecil, 'keyboard m05 360');
+
   // Rotasi/resize: pilihan tetap & adegan tidak dimuat ulang. Pilihan terakhir terjangkau di atas bar aksi.
   await kecil.goto(`${BASE}/latihan?misi=1`, { waitUntil: 'networkidle2' });
   await tunggu(kecil, stageSiap, 'adegan latihan m01', 25000);
+  await siapMulai(kecil, 'latihan m01');
+  await periksaFokusBar(kecil, 'keyboard m01 360');
+  await periksaPanahRadio(kecil, 'keyboard m01 360');
   periksa(await klikTeks(kecil, 'button.opsi', 'Dokumentasikan'), 'rotasi: pilih lewat daftar');
   await tidur(300);
   const dibuat = await kecil.evaluate(() => window.__raksaStage?.created ?? 0);
@@ -505,6 +648,12 @@ try {
     const a = document.querySelector('.misi-aksi')?.getBoundingClientRect();
     return Boolean(o && a && o.bottom <= a.top + 1);
   }), 'pilihan terakhir terlihat di atas bar aksi');
+
+  // Laptop 1440x900 dengan zoom 200% (= 720x450 CSS px): bar aksi lengket di layar pendek, keyboard tetap terlihat.
+  await kecil.setViewport({ width: 720, height: 450, deviceScaleFactor: 2 });
+  await kecil.goto(`${BASE}/latihan?misi=2`, { waitUntil: 'networkidle2' });
+  await tunggu(kecil, stageSiap, 'adegan latihan m02 720', 25000);
+  if (await siapMulai(kecil, 'latihan m02 720')) await periksaFokusBar(kecil, 'keyboard m02 720x450');
 } finally {
   console.log('\n================ RINGKASAN E2E ADEGAN 2D ================');
   for (const r of ringkas) console.log(`  misi ${String(r.no).padStart(2)} | ketuk adegan ${String(r.adegan).padStart(2)} | HTML ${String(r.html).padStart(2)} | ack ${r.ack} | pembahasan ${r.reveal} | +${r.poin}`);

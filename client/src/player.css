@@ -1,8 +1,7 @@
-﻿/* Player experience: calm space, one clear action, progressive disclosure. */
+﻿/* Player experience: calm space, one clear action, progressive disclosure.
+   Warna, huruf judul, dan tombol (.btn) kini diatur SEKALI di theme.css (:root) dan sama dengan
+   host/proyektor; di sini hanya yang khas pemain (tanpa bayangan sama sekali). */
 .player-ui {
-  --krem: #faf9f5; --krem-tua: #e6e8df; --tinta: #243d30;
-  --tinta-lembut: #667469; --hijau: #215c40; --hijau-pucat: #eef5e9;
-  --font-judul: 'Segoe UI Variable Display', 'Segoe UI', system-ui, sans-serif;
   --shadow: none; --shadow-s: none;
   min-height: 100dvh; display: flex; flex-direction: column;
   background: var(--krem); color: var(--tinta); font-size: 16px; line-height: 1.55;
@@ -10,38 +9,45 @@
 .player-ui h1,.player-ui h2,.player-ui h3 { font-weight: 650; letter-spacing: -.045em; }
 .player-ui button,.player-ui a,.player-ui input,.player-ui select,.player-ui summary { touch-action: manipulation; }
 .player-ui :focus-visible { outline: 3px solid #397bca; outline-offset: 4px; }
+/* Header bersama: wordmark (components/Merek.tsx, gaya .mrk di theme.css) atau tombol kembali,
+   label konteks, bahasa, suara. */
 .player-header { width: min(1200px,100%); margin: 0 auto; padding: 30px 40px; min-height: 100px; display: flex; align-items: center; justify-content: space-between; gap: 16px; }
-.player-wordmark { display: flex; align-items: center; gap: 7px; color: #215c40; text-decoration: none; font-size: 22px; font-weight: 850; letter-spacing: -.07em; }
-.player-wordmark span { font-size: 11px; font-weight: 700; letter-spacing: .1em; border-left: 1px solid #a8b8a7; padding: 2px 0 2px 9px; margin-left: 3px; }
-.player-wordmark img { max-width: 150px; max-height: 40px; }
+.player-header-kiri { display: flex; align-items: center; gap: 22px; min-width: 0; }
 .player-header-right { display: flex; align-items: center; gap: 16px; }
 .header-label { color: #65756b; font-size: 14px; }
 .sound-button { border: 1px solid #dce2d7; background: transparent; color: #48634e; border-radius: 50%; width: 44px; height: 44px; display: grid; place-items: center; cursor: pointer; }
 .sound-button:hover { background: #edf1e8; }
 .back-link { display: flex; align-items: center; gap: 10px; font-size: 15px; text-decoration: none; min-height: 44px; }
-.player-footer { width: min(1200px,100%); margin: auto auto 0; padding: 25px 40px; display: flex; justify-content: space-between; align-items: center; gap: 16px; font-size: 12px; color: #768074; }
-/* Pemilih bahasa (header pemain, host, proyektor). Latar terang supaya terbaca juga di layar gelap. */
-.pilih-bahasa { display: inline-flex; flex: 0 0 auto; align-items: center; gap: 4px; min-height: 44px; padding: 0 8px 0 10px; border: 1px solid #dce2d7; border-radius: 999px; background: #fffefa; color: #2f5439; cursor: pointer; }
+/* #5f6b5d: teks 12px tetap >= 4.5:1 di atas krem (dulu #768074 = 3.9:1). */
+.player-footer { width: min(1200px,100%); margin: auto auto 0; padding: 25px 40px; display: flex; justify-content: space-between; align-items: center; gap: 16px; font-size: 12px; color: #5f6b5d; }
+/* Pemilih bahasa (header pemain, host, proyektor). Latar terang supaya terbaca juga di layar gelap.
+   <select> mengisi SELURUH pil (ikon bola dunia hanya lukisan di atas padding kirinya), jadi ketukan
+   di mana pun pada pil langsung membuka pilihan; lebar minimal 44px juga saat ikon disembunyikan. */
+.pilih-bahasa { position: relative; display: inline-flex; flex: 0 0 auto; align-items: stretch; min-height: 44px; padding: 0; border: 1px solid #dce2d7; border-radius: 999px; background: #fffefa; color: #2f5439; cursor: pointer; }
 .pilih-bahasa:focus-within { outline: 3px solid #397bca; outline-offset: 2px; }
-.pilih-bahasa select { appearance: none; -webkit-appearance: none; border: 0; background: transparent; color: inherit; font: inherit; font-size: 14px; font-weight: 700; min-height: 44px; padding: 0 2px; cursor: pointer; outline: none; }
+.pilih-bahasa svg { position: absolute; left: 10px; top: 50%; margin-top: -9px; pointer-events: none; }
+.pilih-bahasa select { appearance: none; -webkit-appearance: none; border: 0; border-radius: 0; background: transparent; color: inherit; font: inherit; font-size: 14px; font-weight: 700; min-height: 44px; min-width: 44px; padding: 0 10px 0 32px; text-align: center; text-align-last: center; cursor: pointer; outline: none; }
 .pilih-bahasa select option { color: #17362a; background: #fff; }
-@media (max-width: 420px) { .pilih-bahasa { padding: 0 6px 0 8px; } .pilih-bahasa svg { display: none; } }
+@media (max-width: 420px) { .pilih-bahasa svg { display: none; } .pilih-bahasa select { padding: 0 11px; } }
 /* Header tidak boleh luber: label boleh mengecil/terpotong, tombol tidak. */
 .player-header-right { min-width: 0; }
 .header-label { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .player-header > :first-child { flex: 0 1 auto; min-width: 0; }
 .tombol-gerak { font-size: 12px; padding: 0 8px; text-align: center; }
 .host-links { position: relative; }
-.host-links summary { cursor: pointer; padding: 12px 0; }
+.host-links summary { cursor: pointer; padding: 12px 0; min-height: 44px; min-width: 44px; white-space: nowrap; }
 .host-links nav { position: absolute; bottom: 50px; right: 0; width: 240px; padding: 10px; border: 1px solid #dce2d7; background: #fff; border-radius: 14px; z-index: 10; box-shadow: 0 10px 30px #17362a12; }
 .host-links nav a { display: flex; align-items: center; justify-content: space-between; padding: 12px; text-decoration: none; font-size: 14px; }
-.eyebrow { display: block; font-size: 11px; font-weight: 700; letter-spacing: .17em; color: #6a7a68; }
-.welcome-main { flex: 1; width: min(1160px,100%); padding: 30px 40px 60px; margin: 0 auto; display: grid; grid-template-columns: .96fr 1.04fr; align-items: center; gap: 10px; }
-.welcome-copy { padding-bottom: 14px; }
-.welcome-copy h1 { font-size: clamp(64px,6.5vw,94px); line-height: 1.03; margin: 22px 0 25px; font-weight: 650; letter-spacing: -.065em; }
-.welcome-copy h1 span { color: #277248; }
-.welcome-copy p { font-size: 18px; line-height: 1.65; color: #667469; margin-bottom: 30px; }
-.welcome-actions { display: flex; gap: 22px; align-items: center; flex-wrap: wrap; }
+/* HP sempit: tombol animasi (hanya ada bila perangkat mengurangi gerak) mendapat baris sendiri;
+   nama perusahaan & "Untuk panitia" berbagi baris di bawahnya. Dulu ketiganya berdesakan dalam satu
+   baris di 320px: "Untuk panitia" terlipat dua baris dengan lebar ketuk 40px. */
+@media (max-width: 480px) {
+  .player-footer { flex-wrap: wrap; row-gap: 0; }
+  .player-footer .tombol-gerak { order: -1; flex: 1 0 100%; }
+  .player-footer > span { flex: 1 1 0; min-width: 0; }
+}
+/* #5d6d5b: huruf 10-12px tetap >= 4.5:1 di atas krem (dulu #6a7a68 = 4.3:1). */
+.eyebrow { display: block; font-size: 11px; font-weight: 700; letter-spacing: .17em; color: #5d6d5b; }
 .primary-action { display: inline-flex; align-items: center; justify-content: space-between; gap: 28px; padding: 17px 23px; min-height: 58px; border: 1px solid #215c40; background: #215c40; color: #fff; border-radius: 13px; font-size: 17px; font-weight: 600; text-decoration: none; cursor: pointer; transition: background .16s,transform .16s; }
 .primary-action:hover:not(:disabled) { background: #163e2b; }
 .primary-action:active:not(:disabled) { transform: translateY(2px); }
@@ -49,17 +55,6 @@
 .quiet-link,.text-button { display: inline-flex; align-items: center; justify-content: center; gap: 10px; background: transparent; border: 0; padding: 11px 0; min-height: 44px; color: #47654e; text-decoration: none; font-size: 14px; cursor: pointer; }
 .quiet-link:hover,.text-button:hover { color: #163e2b; text-decoration: underline; text-underline-offset: 4px; }
 .centered { justify-content: center; text-align: center; }
-.welcome-note { display: block; margin-top: 22px; font-size: 12px; color: #7d877b; }
-/* container-type: ukuran huruf catatan kota mengikuti lebar gambar (cqw), bukan layar. */
-.welcome-world { position: relative; width: 100%; max-width: 570px; aspect-ratio: 560 / 510; container-type: inline-size; }
-.world-drawing { width: 100%; height: 100%; }
-/* Catatan kota di pojok kiri atas gambar: satu-satunya area tanpa pohon/gedung/tokoh, dan cukup
-   lebar untuk kalimat Inggris/Mandarin yang lebih panjang. Huruf mengecil bersama gambar. */
-.world-caption { position: absolute; top: 9%; left: 1%; width: 45%; font-size: 13px; font-size: clamp(10.5px, 2.7cqw, 15px); line-height: 1.35; text-align: left; text-wrap: balance; transform: rotate(-6deg); transform-origin: left center; color: #746331; }
-.world-caption span { display: block; }
-.welcome-raki { position: absolute; right: 11%; bottom: 7%; padding: 0; background: transparent; border: 0; cursor: pointer; }
-.welcome-raki > svg { filter: drop-shadow(0 10px 0 #17362a0c); }
-.raki-greeting { position: absolute; bottom: -17px; left: -27px; display: block; white-space: nowrap; padding: 8px 15px; border: 1px solid #dfe4d6; background: #fffefb; font-size: 13px; border-radius: 10px; color: #48634e; transform: rotate(-5deg); }
 .join-main { width: min(470px,100%); margin: auto; padding: 28px 24px 65px; }
 .join-heading { text-align: center; margin-bottom: 27px; }
 .join-heading svg { margin-bottom: 15px; }
@@ -125,8 +120,6 @@
 .player-ui .panel { box-shadow: none; border: 1px solid #dfe4d8; border-radius: 15px; }
 .player-ui .chip { border: 0; background: #ecf1e6; color: #45673e; font-weight: 500; font-size: 12px; border-radius: 8px; }
 .player-ui .chip-tap { min-height: 44px; }
-.player-ui .btn { box-shadow: none; border-radius: 12px; font-weight: 500; }
-.player-ui .btn-garis { border: 1px solid #91a585; }
 .mission-reference { margin-top: 22px; border-bottom: 1px solid #dfe5d8; }
 .mission-reference > summary { font-weight: 600; }
 .mission-reference > summary > span { display: block; margin-left: 16px; font-size: 12px; font-weight: 400; color: #75806c; margin-top: 3px; }
@@ -175,23 +168,12 @@
 .player-ui .papan-baris.saya { border-color: #6c945f; }
 @media (max-width: 700px) {
   .player-header { min-height: 76px; padding: 16px 22px; }
-  .player-wordmark { font-size: 21px; }
+  .player-ui .mrk { font-size: 21px; }
+  /* HP: dengan tombol kembali, wordmark disembunyikan (header tidak boleh luber). */
+  .player-ui .mrk-lebar-saja { display: none; }
   .player-footer { padding: 16px 22px; font-size: 10px; gap: 8px; }
   .header-label { font-size: 12px; }
   .player-header-right { gap: 10px; }
-  .welcome-main { display: flex; flex-direction: column; padding: 18px 24px 25px; gap: 12px; text-align: center; justify-content: center; }
-  .welcome-copy { display: contents; }
-  .welcome-copy .eyebrow { order: 0; font-size: 10px; }
-  .welcome-copy h1 { order: 1; font-size: 52px; line-height: 1.02; margin: 0; }
-  .welcome-copy p { order: 2; font-size: 15px; line-height: 1.5; margin: 0; max-width: 270px; }
-  .desktop-break { display: none; }
-  .welcome-world { order: 3; width: 290px; max-width: 100%; height: 239px; margin: -6px 0 0; }
-  .welcome-raki { right: 11%; bottom: 6%; }
-  .welcome-raki > svg { height: 90px; width: 90px; }
-  .raki-greeting { font-size: 10px; padding: 5px 9px; bottom: -14px; left: -12px; }
-  .welcome-actions { order: 4; flex-direction: column; gap: 3px; width: min(320px,100%); margin-top: 5px; }
-  .welcome-actions .primary-action { width: 100%; }
-  .welcome-note { order: 5; margin-top: -2px; font-size: 11px; }
   .join-main { padding-top: 12px; padding-bottom: 40px; }
   .join-heading h1 { font-size: 31px; }
   .join-heading svg { height: 68px; width: 68px; margin-bottom: 10px; }
@@ -247,6 +229,76 @@
 .podium-rank { display: flex; align-items: center; gap: 4px; font-size: 12px; }
 @media (max-width: 700px) { .final-main { grid-template-columns: 1fr; padding: 20px 22px 50px; gap: 35px; }.number-option { font-size: 15px; }.final-personal h1 { font-size: 31px; } }
 
+/* ==================================================================== HALAMAN AWAL: TIGA PINTU
+   pages/Landing.tsx + art/WelcomeArt.tsx. Semua kelas berawalan "lp-". Rancangan:
+   docs/rancangan-mode-cerita.md bagian 1 & 5F. Layar lebar: teks + pintu di kiri, kota di kanan.
+   <= 900px: satu kolom, pintu langsung di bawah judul, kota di bawah pintu (judul + pintu cerita
+   terlihat di layar pertama HP). Semua tokoh = potret bulat SAMA (.tokoh-potret, 60px). */
+.lp-utama { flex: 1; width: min(1160px,100%); margin: 0 auto; padding: 4px 40px 28px; display: grid; grid-template-columns: minmax(0,1fr) minmax(0,1fr); align-items: center; gap: 56px; }
+.lp-kiri { display: flex; flex-direction: column; min-width: 0; max-width: 540px; }
+.lp-judul { font-size: clamp(52px,4.6vw,68px); line-height: 1.02; margin: 14px 0 16px; font-weight: 650; letter-spacing: -.06em; text-wrap: balance; }
+.lp-judul span { color: #277248; }
+.lp-isi { font-size: 18px; line-height: 1.55; color: #5f6f64; margin: 0 0 22px; max-width: 470px; }
+/* Pintu: seluruh kartu adalah tautan (target sentuh >= 80px). Status/arti tidak hanya lewat warna:
+   pintu utama punya tanda "Mulai di sini" + ukuran lebih besar. */
+.lp-pintu-daftar { display: flex; flex-direction: column; gap: 12px; }
+.lp-pintu-lain { display: flex; flex-direction: column; gap: 12px; }
+.lp-pintu { display: flex; align-items: center; gap: 14px; min-height: 84px; padding: 12px 16px 12px 12px; border: 1px solid #dfe4d8; border-radius: 16px; background: #fffefa; color: #243d30; text-decoration: none; transition: background .16s, border-color .16s, transform .16s; }
+.lp-pintu:hover { border-color: #839879; background: #f3f6ee; }
+.lp-pintu:active { transform: translateY(1px); }
+.lp-pintu-potret { flex: 0 0 auto; display: inline-flex; }
+.lp-pintu-teks { flex: 1; min-width: 0; display: flex; flex-direction: column; align-items: flex-start; gap: 2px; }
+.lp-pintu-judul { font-family: var(--font-judul); font-size: 18px; font-weight: 650; letter-spacing: -.02em; line-height: 1.25; color: #215c40; }
+.lp-pintu-isi { font-size: 14px; line-height: 1.4; color: #55665a; }
+.lp-pintu-panah { flex: 0 0 auto; display: inline-flex; color: #47654e; }
+.lp-pintu-cerita { min-height: 104px; padding: 16px 18px 16px 14px; background: #215c40; border-color: #215c40; color: #fff; }
+.lp-pintu-cerita:hover { background: #163e2b; border-color: #163e2b; }
+.lp-pintu-cerita .lp-pintu-judul { color: #fff; font-size: 22px; }
+.lp-pintu-cerita .lp-pintu-isi { color: #e3ede0; font-size: 15px; }
+.lp-pintu-cerita .lp-pintu-panah { color: #fff; }
+.lp-pintu-tanda { display: inline-block; margin-bottom: 4px; padding: 1px 9px; border-radius: 999px; background: #f6c445; color: #17362a; font-size: 11px; font-weight: 700; letter-spacing: .04em; line-height: 1.6; }
+/* Raki di bingkai .tokoh-potret: kepala & badan atas di tengah lingkaran, diam seperti potret lain. */
+.lp-potret-raki > svg { position: absolute; left: 50%; top: 5%; transform: translateX(-50%); animation: none; }
+.lp-catatan { display: block; margin-top: 10px; font-size: 12px; color: #5f6b5d; }
+/* Ilustrasi kota: gambar datar + sapaan Mr Roger (potret + balon) DI BAWAH gambar, dalam alur. */
+.lp-seni { min-width: 0; display: flex; justify-content: center; }
+.lp-kota { margin: 0; width: 100%; max-width: 540px; }
+.lp-kota-gambar { display: block; width: 100%; height: auto; aspect-ratio: 560 / 444; }
+.lp-kota-sapa { display: flex; align-items: center; gap: 16px; margin-top: 8px; padding-left: 4%; }
+.lp-kota-potret { flex: 0 0 auto; display: inline-flex; }
+.lp-kota-balon { position: relative; margin: 0; min-width: 0; max-width: 340px; padding: 10px 14px; border: 1px solid #dfe4d8; border-radius: 14px; background: #fffefa; color: #243d30; font-size: 15px; line-height: 1.4; }
+.lp-kota-balon b { display: block; font-size: 12px; font-weight: 700; letter-spacing: .02em; color: #176b45; }
+.lp-kota-balon::before { content: ''; position: absolute; left: -7px; top: 50%; width: 12px; height: 12px; margin-top: -6px; background: #fffefa; border-left: 1px solid #dfe4d8; border-bottom: 1px solid #dfe4d8; transform: rotate(45deg); }
+@media (max-width: 900px) {
+  .lp-utama { display: flex; flex-direction: column; align-items: center; gap: 32px; padding: 8px 32px 36px; }
+  .lp-kiri { width: min(560px,100%); max-width: none; }
+  .lp-sapa { text-align: center; }
+  .lp-isi { margin: 0 auto 18px; }
+  .lp-sebagai { justify-content: center; }
+  .lp-catatan { text-align: center; }
+  .lp-seni { width: min(420px,100%); }
+}
+@media (max-width: 700px) {
+  .lp-utama { gap: 26px; padding: 2px 20px 28px; }
+  .lp-sapa .eyebrow { font-size: 10px; }
+  .lp-judul { font-size: 44px; margin: 6px 0 8px; }
+  .lp-isi { font-size: 15px; line-height: 1.45; max-width: 320px; margin-bottom: 14px; }
+  .lp-pintu-daftar, .lp-pintu-lain { gap: 10px; }
+  .lp-pintu { min-height: 80px; padding: 10px 12px 10px 10px; gap: 12px; }
+  .lp-pintu-cerita { min-height: 0; padding: 14px 12px 14px 12px; }
+  .lp-pintu-cerita .lp-pintu-judul { font-size: 20px; }
+  .lp-pintu-isi, .lp-pintu-cerita .lp-pintu-isi { font-size: 14px; }
+  .lp-seni { width: min(340px,100%); }
+  .lp-kota-sapa { padding-left: 0; gap: 12px; }
+  .lp-kota-balon { font-size: 14px; }
+}
+/* HP mendatar (mis. 844x390): header & judul dirapatkan supaya pintu cepat terlihat. */
+@media (orientation: landscape) and (max-height: 500px) {
+  .lp-halaman .player-header { min-height: 64px; padding-top: 10px; padding-bottom: 10px; }
+  .lp-judul { font-size: 40px; margin: 4px 0 8px; }
+  .lp-isi { margin-bottom: 14px; }
+}
+
 /* ==================================================================== ALUR MASUK PEMAIN
    Halaman awal (baris profil + spanduk acara), /kenalan, dan /join (pemeriksaan kode, kartu diri).
    Semua kelas di bagian ini berawalan "alur-". Rancangan: docs/rancangan-bank-soal.md bagian 2. */
@@ -259,7 +311,7 @@
 .alur-sebagai-ubah:hover { color: #163e2b; }
 
 /* --- Halaman awal: spanduk "Acara «N» sedang dibuka". MELAYANG (fixed), bukan di dalam alur halaman:
-   jawaban server datang setelah halaman tampil, dan tombol "Ayo, main!" tidak boleh bergeser tepat
+   jawaban server datang setelah halaman tampil, dan pintu halaman awal tidak boleh bergeser tepat
    saat hendak diketuk. Wadahnya selalu ada (kosong, tembus ketukan) untuk pembaca layar. */
 .alur-spanduk-wadah { position: fixed; z-index: 8; left: 0; right: 0; bottom: 0; display: flex; justify-content: center; padding: 0 max(16px, env(safe-area-inset-right)) calc(14px + env(safe-area-inset-bottom)) max(16px, env(safe-area-inset-left)); pointer-events: none; }
 .alur-spanduk { pointer-events: auto; display: flex; align-items: center; gap: 12px; width: min(560px, 100%); padding: 9px 9px 9px 16px; border: 1px solid #b9cdb7; border-radius: 16px; background: #fffefa; box-shadow: 0 10px 30px #17362a24; color: #243d30; animation: alur-naik .32s ease both; }
@@ -329,9 +381,9 @@
 .player-ui .alur-judul-fokus:focus-visible, .player-ui .alur-isian:focus-visible { outline: none; }
 
 @media (max-width: 700px) {
-  /* .welcome-copy memakai display: contents + order; baris profil duduk tepat di bawah tombol (order 4). */
-  .alur-sebagai { order: 4; justify-content: center; margin-top: -2px; }
-  /* Spanduk dibuat ringkas supaya tidak menyentuh tautan "Punya kode acara?" di HP 360x740. */
+  /* Halaman awal HP: baris profil di tengah, tepat di bawah pintu. */
+  .alur-sebagai { justify-content: center; margin-top: 2px; }
+  /* Spanduk dibuat ringkas supaya menutupi sesedikit mungkin isi halaman di HP 360x740. */
   .alur-spanduk-wadah { padding-bottom: calc(10px + env(safe-area-inset-bottom)); }
   .alur-spanduk { gap: 10px; padding: 8px 8px 8px 14px; }
   .alur-spanduk p { font-size: 13px; }
