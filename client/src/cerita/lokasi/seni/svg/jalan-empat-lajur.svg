@@ -1,0 +1,67 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 360" width="360" height="360">
+<defs>
+<pattern id="rk-road-grain" width="14" height="14" patternUnits="userSpaceOnUse">
+<circle cx="2" cy="3" r="0.8" fill="#F8F7F2" opacity="0.10"></circle>
+<circle cx="8.5" cy="9" r="0.7" fill="#1B1F22" opacity="0.16"></circle>
+<circle cx="11" cy="2.5" r="0.6" fill="#F8F7F2" opacity="0.07"></circle>
+<circle cx="4.5" cy="11" r="0.9" fill="#1B1F22" opacity="0.10"></circle>
+<circle cx="12.5" cy="12.5" r="0.5" fill="#F8F7F2" opacity="0.08"></circle>
+</pattern>
+<pattern id="rk-verge-grain" width="16" height="16" patternUnits="userSpaceOnUse">
+<circle cx="3" cy="4" r="1" fill="#215C40" opacity="0.10"></circle>
+<circle cx="11" cy="12" r="0.9" fill="#F8F7F2" opacity="0.32"></circle>
+<circle cx="13" cy="3" r="0.7" fill="#215C40" opacity="0.07"></circle>
+</pattern>
+</defs>
+
+<rect width="360" height="360" fill="#B9C9A4"></rect>
+<rect width="360" height="360" fill="url(#rk-verge-grain)"></rect>
+
+<g>
+<circle cx="19" cy="104" r="13" fill="#1B1F22" opacity="0.10"></circle>
+<circle cx="17" cy="101" r="13" fill="#7E9E6B"></circle>
+<circle cx="24" cy="94" r="8" fill="#93B080"></circle>
+<circle cx="12" cy="97" r="4" fill="#A8C095"></circle>
+<circle cx="18" cy="262" r="10" fill="#1B1F22" opacity="0.10"></circle>
+<circle cx="16" cy="259" r="10" fill="#7E9E6B"></circle>
+<circle cx="21" cy="254" r="5.5" fill="#93B080"></circle>
+<path d="M10 182l2-6 2 6M15 184l2-7 2 7M22 30l2-6 2 6M27 32l2-5 2 5M8 330l2-6 2 6" fill="none" stroke="#7E9E6B" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"></path>
+</g>
+
+<g>
+<circle cx="343" cy="196" r="13" fill="#1B1F22" opacity="0.10"></circle>
+<circle cx="341" cy="193" r="13" fill="#7E9E6B"></circle>
+<circle cx="347" cy="186" r="7.5" fill="#93B080"></circle>
+<circle cx="336" cy="189" r="4" fill="#A8C095"></circle>
+<circle cx="344" cy="52" r="9" fill="#1B1F22" opacity="0.10"></circle>
+<circle cx="342" cy="50" r="9" fill="#7E9E6B"></circle>
+<circle cx="345" cy="46" r="4.5" fill="#93B080"></circle>
+<path d="M334 120l2-6 2 6M340 122l2-7 2 7M336 300l2-6 2 6M343 302l2-5 2 5" fill="none" stroke="#7E9E6B" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"></path>
+</g>
+
+<rect x="37" y="0" width="7" height="360" fill="#E4E2D8"></rect>
+<rect x="316" y="0" width="7" height="360" fill="#E4E2D8"></rect>
+<line x1="40.5" y1="0" x2="40.5" y2="360" stroke="#C9C7BC" stroke-width="7" stroke-dasharray="1.5 22.5"></line>
+<line x1="319.5" y1="0" x2="319.5" y2="360" stroke="#C9C7BC" stroke-width="7" stroke-dasharray="1.5 22.5"></line>
+
+<rect x="44" y="0" width="272" height="360" fill="#5A6066"></rect>
+<rect x="44" y="0" width="272" height="360" fill="url(#rk-road-grain)"></rect>
+<rect x="44" y="0" width="8" height="360" fill="#1B1F22" opacity="0.10"></rect>
+<rect x="308" y="0" width="8" height="360" fill="#1B1F22" opacity="0.10"></rect>
+
+<line x1="51" y1="0" x2="51" y2="360" stroke="#F8F7F2" stroke-width="3" opacity="0.85"></line>
+<line x1="309" y1="0" x2="309" y2="360" stroke="#F8F7F2" stroke-width="3" opacity="0.85"></line>
+
+<g stroke="#F8F7F2" stroke-width="3" stroke-dasharray="20 16" opacity="0.88">
+<line x1="112" y1="-6" x2="112" y2="360"></line>
+<line x1="180" y1="-6" x2="180" y2="360"></line>
+<line x1="248" y1="-6" x2="248" y2="360"></line>
+</g>
+
+<g fill="#F8F7F2" opacity="0.55" stroke="#F8F7F2" stroke-width="1.5" stroke-linejoin="round">
+<path d="M74 66V46H67L78 30L89 46H82V66Z"></path>
+<path d="M142 66V46H135L146 30L157 46H150V66Z"></path>
+<path d="M210 66V46H203L214 30L225 46H218V66Z"></path>
+<path d="M278 66V46H271L282 30L293 46H286V66Z"></path>
+</g>
+</svg>

@@ -10,7 +10,7 @@ import type { MissionPublic, OptionDef, StepDef } from '../../../shared/types';
 import { MISSION_KEYS, TIEBREAK_KEY, TUTORIAL_KEY, buildReveal, keyForMissionId } from '../../../server/src/answerKeys';
 import { PEMBAHASAN_I18N as PEMBAHASAN_LATIHAN } from '../../../server/src/answerKeys.i18n';
 import { KUNCI_ACARA, PEMBAHASAN_ACARA_I18N } from '../../../server/src/acara';
-import { KAMUS } from './kamus';
+import { KAMUS, KAMUS_MVP } from './kamus';
 import { sceneFor } from '../game/scenes';
 import { LABEL } from '../game/scenes/label';
 
@@ -40,11 +40,15 @@ function samaAngka(terjemahan: string, sumber: string): boolean {
   return sisa.every((n) => n.length <= 2 && Number(n) >= 1 && Number(n) <= 12);
 }
 
+// Kontrak PRD v0.2 (DECISIONS.md D-03): Mandarin = fitur mode lama, jadi ruang KAMUS_MVP wajib id + en saja dan zh-nya
+// boleh kosong (t() memakai teks Indonesia). Ruang lain tetap wajib lengkap dalam tiga bahasa.
 test('kamus UI: kunci & parameter en/zh sama persis dengan id, tanpa teks kosong', () => {
   for (const [ruang, k] of Object.entries(KAMUS)) {
     const kunciId = Object.keys(k.id).sort();
     assert.ok(kunciId.length > 0, `kamus ${ruang} kosong`);
+    if (KAMUS_MVP.has(ruang)) assert.equal(Object.keys(k.zh).length, 0, `kamus ${ruang}: MVP tanpa zh (hapus dari KAMUS_MVP bila zh dilengkapi)`);
     for (const b of LAIN) {
+      if (b === 'zh' && KAMUS_MVP.has(ruang)) continue;
       assert.deepEqual(Object.keys(k[b]).sort(), kunciId, `kamus ${ruang}.${b}: himpunan kunci berbeda dari id`);
       for (const kunci of kunciId) {
         assert.ok(k[b][kunci]!.trim().length > 0, `${ruang}.${kunci} (${b}) kosong`);

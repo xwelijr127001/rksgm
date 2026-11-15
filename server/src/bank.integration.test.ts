@@ -18,6 +18,8 @@ process.env.HOST = '127.0.0.1';
 process.env.DB_FILE = path.join(DIR, 'bank.db');
 process.env.PUBLIC_BASE_URL = `http://127.0.0.1:${PORT}`;
 process.env.NODE_ENV = 'test';
+// PRD v0.2: legacy modes are off by default (docs/prd-v02/DECISIONS.md D-03); these tests exercise them.
+process.env.RAKSA_LEGACY = 'on';
 process.env.RAKSA_PAKET = 'latihan';
 process.env.RAKSA_IKLAN_ROOM = 'on';
 // String kosong (bukan delete) supaya PANITIA_PIN di .env tidak ikut terbaca oleh config.ts.

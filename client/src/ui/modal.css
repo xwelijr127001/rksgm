@@ -71,3 +71,18 @@ body > .mdl-latar {
 
 /* Panel menerima fokus hanya agar klik pada isi yang tidak bisa difokus tidak melempar fokus ke body; tanpa cincin. */
 .mdl-panel:focus { outline: none; }
+
+/* Lembar bawah (Modal gaya="lembar", mis. panel meja kasus): di layar sempit panel menempel di tepi bawah dan selebar
+   layar, jadi benda yang sedang dibuka tetap terlihat di atasnya; di layar lebar tetap panel di tengah. */
+@media (max-width: 599px) {
+  body > .mdl-latar[data-gaya="lembar"] {
+    justify-content: flex-end;
+    padding: max(16px, env(safe-area-inset-top)) 0 0;
+  }
+  body > .mdl-latar[data-gaya="lembar"] > .mdl-panel {
+    max-width: none !important;
+    max-height: 82%;
+    border-radius: 18px 18px 0 0;
+    padding-bottom: max(16px, env(safe-area-inset-bottom));
+  }
+}

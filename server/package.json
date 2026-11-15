@@ -8,8 +8,11 @@
     "build": "tsc -p tsconfig.json",
     "start": "node dist/server/src/index.js",
     "typecheck": "tsc -p tsconfig.json --noEmit",
-    "test": "tsx --test src/scoring.test.ts src/rooms.test.ts src/bankSoal.test.ts src/unity.test.ts src/integration.test.ts src/bank.integration.test.ts",
-    "loadtest": "tsx src/loadtest.ts"
+    "test": "tsx --test src/scoring.test.ts src/rooms.test.ts src/bankSoal.test.ts src/unity.test.ts src/integration.test.ts src/bank.integration.test.ts src/story/domain.test.ts src/story/room.test.ts src/story/demo.test.ts src/story/story.integration.test.ts src/hosting.test.ts",
+    "loadtest": "tsx src/loadtest.ts",
+    "staff": "tsx src/story/cli/staff.ts",
+    "story:dev-setup": "tsx src/story/cli/devSetup.ts",
+    "story:loadtest": "tsx src/story/loadtest.ts"
   },
   "dependencies": {
     "better-sqlite3": "^11.10.0",

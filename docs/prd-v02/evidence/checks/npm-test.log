@@ -1,0 +1,3938 @@
+﻿
+> raksa-game@1.0.0 test
+> npm run test:server && npm run test:client
+
+
+> raksa-game@1.0.0 test:server
+> npm -w @raksa/server run test
+
+
+> @raksa/server@1.0.0 test
+> tsx --test src/scoring.test.ts src/rooms.test.ts src/bankSoal.test.ts src/unity.test.ts src/integration.test.ts src/bank.integration.test.ts src/story/domain.test.ts src/story/room.test.ts src/story/demo.test.ts src/story/story.integration.test.ts src/hosting.test.ts
+
+TAP version 13
+# [static] menyajikan C:\\Users\\User\\Desktop\\rksgm-main\\client\\dist
+#   RAKSA GAME - server aktif
+#   Lokal    : http://localhost:43921
+#   Jaringan : http://127.0.0.1:43921
+#   Host     : http://127.0.0.1:43921/host
+#   Proyektor: http://127.0.0.1:43921/projector
+# [room] dibuat GAQK - Gathering Info (10 soal)
+# [room] dibuat W9VH - Room Kedua (10 soal)
+# Subtest: config, info room, dan iklan room di lobby
+ok 1 - config, info room, dan iklan room di lobby
+  ---
+  duration_ms: 142.2324
+  type: 'test'
+  ...
+# [room] dibuat L3ET - Bank (10 soal)
+# Subtest: bank: izin, validasi, CRUD soal kustom, kunci tidak bocor
+ok 2 - bank: izin, validasi, CRUD soal kustom, kunci tidak bocor
+  ---
+  duration_ms: 622.1464
+  type: 'test'
+  ...
+# [room] dibuat RA9U - Gambar (10 soal)
+# Subtest: unggah gambar: PNG diterima; SVG & berkas terlalu besar ditolak; penyajian aman
+ok 3 - unggah gambar: PNG diterima; SVG & berkas terlalu besar ditolak; penyajian aman
+  ---
+  duration_ms: 374.0607
+  type: 'test'
+  ...
+# [room] dibuat M7V4 - Acara Kustom (10 soal)
+# Subtest: playlist kustom lewat socket: 3 soal sampai FINISHED, kunci baru keluar saat REVEAL
+ok 4 - playlist kustom lewat socket: 3 soal sampai FINISHED, kunci baru keluar saat REVEAL
+  ---
+  duration_ms: 371.6668
+  type: 'test'
+  ...
+# [room] dibuat GNLA - Pagar (10 soal)
+# Subtest: practice/grade & /api/missions: hanya paket latihan + tutorial
+ok 5 - practice/grade & /api/missions: hanya paket latihan + tutorial
+  ---
+  duration_ms: 248.85
+  type: 'test'
+  ...
+# [room] dibuat WLXM - Sebelum PIN (10 soal)
+# [room] dibuat JMN7 - Dengan PIN (10 soal)
+# [room] dibuat P9M4 - Raksa Claim - Misi Lindungi Kota (10 soal)
+# [room] dibuat 66EU - Terbuka lagi (10 soal)
+# Subtest: PIN panitia: wajib untuk membuat room & menulis bank; salah berulang -> ditahan
+ok 6 - PIN panitia: wajib untuk membuat room & menulis bank; salah berulang -> ditahan
+  ---
+  duration_ms: 187.4195
+  type: 'test'
+  ...
+# Subtest: registri: paket latihan lengkap dengan kunci & tingkat 1/2/3 menurut posisi
+ok 7 - registri: paket latihan lengkap dengan kunci & tingkat 1/2/3 menurut posisi
+  ---
+  duration_ms: 1.834
+  type: 'test'
+  ...
+# Subtest: registri: id tak dikenal, tutorial, dan ronde penentuan bukan soal bank
+ok 8 - registri: id tak dikenal, tutorial, dan ronde penentuan bukan soal bank
+  ---
+  duration_ms: 0.2225
+  type: 'test'
+  ...
+# Subtest: registri: paket acara kosong jatuh ke latihan; terisi -> dipakai apa adanya
+ok 9 - registri: paket acara kosong jatuh ke latihan; terisi -> dipakai apa adanya
+  ---
+  duration_ms: 0.3569
+  type: 'test'
+  ...
+# Subtest: soalLatihan: hanya paket latihan + tutorial; penentuan perlu izin; acara & kustom ditolak
+ok 10 - soalLatihan: hanya paket latihan + tutorial; penentuan perlu izin; acara & kustom ditolak
+  ---
+  duration_ms: 0.2067
+  type: 'test'
+  ...
+# Subtest: validasi: kiriman sah dirapikan (id s1/o1 dibuat server, id kiriman client diabaikan)
+ok 11 - validasi: kiriman sah dirapikan (id s1/o1 dibuat server, id kiriman client diabaikan)
+  ---
+  duration_ms: 0.9117
+  type: 'test'
+  ...
+# Subtest: validasi: teks wajib & batas panjang (BATAS_KUSTOM)
+ok 12 - validasi: teks wajib & batas panjang (BATAS_KUSTOM)
+  ---
+  duration_ms: 0.6261
+  type: 'test'
+  ...
+# Subtest: validasi: produk, tingkat, durasi
+ok 13 - validasi: produk, tingkat, durasi
+  ---
+  duration_ms: 0.8588
+  type: 'test'
+  ...
+# Subtest: validasi: gambar hanya hasil unggahan (/gambar-soal/<hash>.<ext>) atau null
+ok 14 - validasi: gambar hanya hasil unggahan (/gambar-soal/<hash>.<ext>) atau null
+  ---
+  duration_ms: 0.7106
+  type: 'test'
+  ...
+# Subtest: validasi: 1-4 pertanyaan, jenis dikenal, teks pertanyaan & penjelasan
+ok 15 - validasi: 1-4 pertanyaan, jenis dikenal, teks pertanyaan & penjelasan
+  ---
+  duration_ms: 1.254
+  type: 'test'
+  ...
+# Subtest: validasi: 2-6 pilihan, teks pilihan, id pilihan unik
+ok 16 - validasi: 2-6 pilihan, teks pilihan, id pilihan unik
+  ---
+  duration_ms: 1.0453
+  type: 'test'
+  ...
+# Subtest: validasi: single tepat 1 benar; multi >= 1 benar dan tidak semua pilihan
+ok 17 - validasi: single tepat 1 benar; multi >= 1 benar dan tidak semua pilihan
+  ---
+  duration_ms: 1.2809
+  type: 'test'
+  ...
+# Subtest: validasi: number butuh nilai terhingga; toleransi >= 0; bidang pilihan dibuang
+ok 18 - validasi: number butuh nilai terhingga; toleransi >= 0; bidang pilihan dibuang
+  ---
+  duration_ms: 0.5065
+  type: 'test'
+  ...
+# Subtest: validasi: kiriman yang bukan objek ditolak tanpa melempar
+ok 19 - validasi: kiriman yang bukan objek ditolak tanpa melempar
+  ---
+  duration_ms: 0.2076
+  type: 'test'
+  ...
+# Subtest: konversi: soal kustom -> MissionPublic (tanpa kunci) + MissionKey yang konsisten
+ok 20 - konversi: soal kustom -> MissionPublic (tanpa kunci) + MissionKey yang konsisten
+  ---
+  duration_ms: 13.8475
+  type: 'test'
+  ...
+# Subtest: konversi: hasilnya dinilai gradeMission seperti misi bawaan
+ok 21 - konversi: hasilnya dinilai gradeMission seperti misi bawaan
+  ---
+  duration_ms: 0.681
+  type: 'test'
+  ...
+# Subtest: konversi: pembahasan (buildReveal) berisi teks jawaban; tanpa terjemahan
+ok 22 - konversi: pembahasan (buildReveal) berisi teks jawaban; tanpa terjemahan
+  ---
+  duration_ms: 0.5272
+  type: 'test'
+  ...
+# Subtest: room: tanpa playlist = paket latihan 10 soal (perilaku lama)
+ok 23 - room: tanpa playlist = paket latihan 10 soal (perilaku lama)
+  ---
+  duration_ms: 1.4217
+  type: 'test'
+  ...
+# Subtest: room: playlist kustom 3 soal berjalan sampai FINISHED dengan totalRounds 3
+ok 24 - room: playlist kustom 3 soal berjalan sampai FINISHED dengan totalRounds 3
+  ---
+  duration_ms: 4.5056
+  type: 'test'
+  ...
+# Subtest: room: ronde penentuan setelah playlist pendek memakai indeks playlist.length
+ok 25 - room: ronde penentuan setelah playlist pendek memakai indeks playlist.length
+  ---
+  duration_ms: 2.0416
+  type: 'test'
+  ...
+# Subtest: room: setPlaylist hanya saat LOBBY; id tak dikenal, duplikat, dan jumlah di luar 1-20 ditolak
+ok 26 - room: setPlaylist hanya saat LOBBY; id tak dikenal, duplikat, dan jumlah di luar 1-20 ditolak
+  ---
+  duration_ms: 0.755
+  type: 'test'
+  ...
+# Subtest: room: soal kustom dibekukan saat pertandingan mulai; yang dihapus dibuang dari playlist
+ok 27 - room: soal kustom dibekukan saat pertandingan mulai; yang dihapus dibuang dari playlist
+  ---
+  duration_ms: 0.4716
+  type: 'test'
+  ...
+# Subtest: lencana: lencana per-misi bisa dimatikan; kilat menyesuaikan panjang playlist
+ok 28 - lencana: lencana per-misi bisa dimatikan; kilat menyesuaikan panjang playlist
+  ---
+  duration_ms: 0.3211
+  type: 'test'
+  ...
+# Subtest: gambar: jenis dikenali dari magic bytes; SVG & teks ditolak
+ok 29 - gambar: jenis dikenali dari magic bytes; SVG & teks ditolak
+  ---
+  duration_ms: 0.3232
+  type: 'test'
+  ...
+# Subtest: terjemahan misi: nomor mengikuti kiriman (tidak basi) dan objek stabil untuk isi yang sama
+ok 30 - terjemahan misi: nomor mengikuti kiriman (tidak basi) dan objek stabil untuk isi yang sama
+  ---
+  duration_ms: 0.5457
+  type: 'test'
+  ...
+# Subtest: frame-ancestors: default and invalid input fall back to 'self'
+ok 31 - frame-ancestors: default and invalid input fall back to 'self'
+  ---
+  duration_ms: 0.8988
+  type: 'test'
+  ...
+# Subtest: frame-ancestors: valid sources are kept, injection attempts are dropped
+ok 32 - frame-ancestors: valid sources are kept, injection attempts are dropped
+  ---
+  duration_ms: 0.2018
+  type: 'test'
+  ...
+# Subtest: client IP behind trusted proxies follows Express trust-proxy hop semantics; untrusted headers are ignored
+ok 33 - client IP behind trusted proxies follows Express trust-proxy hop semantics; untrusted headers are ignored
+  ---
+  duration_ms: 0.2155
+  type: 'test'
+  ...
+# [static] menyajikan C:\\Users\\User\\Desktop\\rksgm-main\\client\\dist
+#   RAKSA GAME - server aktif
+#   Lokal    : http://localhost:43917
+#   Jaringan : http://127.0.0.1:43917
+#   Host     : http://127.0.0.1:43917/host
+#   Proyektor: http://127.0.0.1:43917/projector
+# [socket] host:create ditolak: Cannot convert object to primitive value
+# [socket] host:attach ditolak: Cannot convert object to primitive value
+# [socket] player:join ditolak: Cannot convert object to primitive value
+# [socket] player:rejoin ditolak: Cannot convert object to primitive value
+# [socket] state:request ditolak: Cannot convert object to primitive value
+# [socket] spectator:join ditolak: Cannot convert object to primitive value
+# Subtest: paket socket cacat tidak menjatuhkan server
+ok 34 - paket socket cacat tidak menjatuhkan server
+  ---
+  duration_ms: 34.2676
+  type: 'test'
+  ...
+# [room] dibuat ATNY - Smoke Test Gathering (10 soal)
+# Subtest: pertandingan penuh: host + 2 pemain + penonton
+ok 35 - pertandingan penuh: host + 2 pemain + penonton
+  ---
+  duration_ms: 8638.9398
+  type: 'test'
+  ...
+# Subtest: sanitize: nama panggilan dipotong 16 karakter & karakter kontrol dibuang
+ok 36 - sanitize: nama panggilan dipotong 16 karakter & karakter kontrol dibuang
+  ---
+  duration_ms: 1.2925
+  type: 'test'
+  ...
+# Subtest: sanitize: look di luar rentang dikembalikan ke default
+ok 37 - sanitize: look di luar rentang dikembalikan ke default
+  ---
+  duration_ms: 1.2385
+  type: 'test'
+  ...
+# Subtest: sanitize: jawaban asing/berbahaya dibuang
+ok 38 - sanitize: jawaban asing/berbahaya dibuang
+  ---
+  duration_ms: 0.7731
+  type: 'test'
+  ...
+# Subtest: room: kode 4 karakter mudah diketik & token host terpisah
+ok 39 - room: kode 4 karakter mudah diketik & token host terpisah
+  ---
+  duration_ms: 1.6757
+  type: 'test'
+  ...
+# Subtest: room: peserta baru ditolak setelah pertandingan mulai (host cek di layer socket)
+ok 40 - room: peserta baru ditolak setelah pertandingan mulai (host cek di layer socket)
+  ---
+  duration_ms: 1.0591
+  type: 'test'
+  ...
+# Subtest: room: misi tidak dikirim saat LOBBY, dikirim saat BRIEFING
+ok 41 - room: misi tidak dikirim saat LOBBY, dikirim saat BRIEFING
+  ---
+  duration_ms: 0.506
+  type: 'test'
+  ...
+# Subtest: room: jawaban terkunci saat BRIEFING, diterima saat ACTIVE
+ok 42 - room: jawaban terkunci saat BRIEFING, diterima saat ACTIVE
+  ---
+  duration_ms: 1.1237
+  type: 'test'
+  ...
+# Subtest: room: pengiriman ganda tidak menggandakan skor
+ok 43 - room: pengiriman ganda tidak menggandakan skor
+  ---
+  duration_ms: 0.8222
+  type: 'test'
+  ...
+# Subtest: room: jawaban ronde lain & setelah deadline ditolak
+ok 44 - room: jawaban ronde lain & setelah deadline ditolak
+  ---
+  duration_ms: 0.6854
+  type: 'test'
+  ...
+# Subtest: room: pause menyimpan fase & sisa waktu, resume tidak menambah waktu menjawab
+ok 45 - room: pause menyimpan fase & sisa waktu, resume tidak menambah waktu menjawab
+  ---
+  duration_ms: 0.7336
+  type: 'test'
+  ...
+# Subtest: room: pause saat BRIEFING lalu resume tetap lanjut ke ACTIVE
+ok 46 - room: pause saat BRIEFING lalu resume tetap lanjut ke ACTIVE
+  ---
+  duration_ms: 0.3509
+  type: 'test'
+  ...
+# Subtest: room: REVEAL membuka kunci jawaban + leaderboard
+ok 47 - room: REVEAL membuka kunci jawaban + leaderboard
+  ---
+  duration_ms: 11.2078
+  type: 'test'
+  ...
+# Subtest: room: pertandingan penuh 10 ronde sampai FINISHED + podium
+ok 48 - room: pertandingan penuh 10 ronde sampai FINISHED + podium
+  ---
+  duration_ms: 2.2131
+  type: 'test'
+  ...
+# Subtest: room: reconnect mempertahankan identitas & skor
+ok 49 - room: reconnect mempertahankan identitas & skor
+  ---
+  duration_ms: 0.4035
+  type: 'test'
+  ...
+# Subtest: room: reset mengembalikan ke LOBBY dan menghapus skor
+ok 50 - room: reset mengembalikan ke LOBBY dan menghapus skor
+  ---
+  duration_ms: 0.3074
+  type: 'test'
+  ...
+# Subtest: room: host end lebih awal tetap membukukan ronde aktif
+ok 51 - room: host end lebih awal tetap membukukan ronde aktif
+  ---
+  duration_ms: 0.1553
+  type: 'test'
+  ...
+# Subtest: room: host end saat JEDA di tengah menjawab tetap membukukan jawaban ronde itu
+ok 52 - room: host end saat JEDA di tengah menjawab tetap membukukan jawaban ronde itu
+  ---
+  duration_ms: 0.1663
+  type: 'test'
+  ...
+# Subtest: room: ronde penentuan hanya bisa sekali dan hanya setelah selesai
+ok 53 - room: ronde penentuan hanya bisa sekali dan hanya setelah selesai
+  ---
+  duration_ms: 0.4794
+  type: 'test'
+  ...
+# Subtest: manager: sweep membersihkan room lama
+ok 54 - manager: sweep membersihkan room lama
+  ---
+  duration_ms: 0.1872
+  type: 'test'
+  ...
+# Subtest: kunci jawaban konsisten dengan definisi misi
+ok 55 - kunci jawaban konsisten dengan definisi misi
+  ---
+  duration_ms: 1.8126
+  type: 'test'
+  ...
+# Subtest: scoreRound: jawaban benar instan vs mepet vs salah
+ok 56 - scoreRound: jawaban benar instan vs mepet vs salah
+  ---
+  duration_ms: 0.6028
+  type: 'test'
+  ...
+# Subtest: multi-select: memilih semua opsi tidak menghasilkan skor penuh
+ok 57 - multi-select: memilih semua opsi tidak menghasilkan skor penuh
+  ---
+  duration_ms: 0.2214
+  type: 'test'
+  ...
+# Subtest: misi 2: memilih 6 kartu tidak lebih untung daripada memilih 3 yang benar
+ok 58 - misi 2: memilih 6 kartu tidak lebih untung daripada memilih 3 yang benar
+  ---
+  duration_ms: 0.2092
+  type: 'test'
+  ...
+# Subtest: assign: sebagian benar dinilai proporsional
+ok 59 - assign: sebagian benar dinilai proporsional
+  ---
+  duration_ms: 0.1983
+  type: 'test'
+  ...
+# Subtest: number: toleransi & jawaban kosong
+ok 60 - number: toleransi & jawaban kosong
+  ---
+  duration_ms: 0.1028
+  type: 'test'
+  ...
+# Subtest: rubric berbobot: misi 9 (bobot 1,1,2)
+ok 61 - rubric berbobot: misi 9 (bobot 1,1,2)
+  ---
+  duration_ms: 0.1481
+  type: 'test'
+  ...
+# Subtest: setiap misi punya jawaban sempurna yang menghasilkan ketepatan 1
+ok 62 - setiap misi punya jawaban sempurna yang menghasilkan ketepatan 1
+  ---
+  duration_ms: 0.2577
+  type: 'test'
+  ...
+# Subtest: urutan peringkat: poin -> ketepatan -> waktu, seri ditandai
+ok 63 - urutan peringkat: poin -> ketepatan -> waktu, seri ditandai
+  ---
+  duration_ms: 9.1695
+  type: 'test'
+  ...
+# Subtest: delta peringkat dihitung dari ronde sebelumnya
+ok 64 - delta peringkat dihitung dari ronde sebelumnya
+  ---
+  duration_ms: 0.38
+  type: 'test'
+  ...
+# Subtest: lencana: tuntas, tepat sasaran, juara
+ok 65 - lencana: tuntas, tepat sasaran, juara
+  ---
+  duration_ms: 0.5426
+  type: 'test'
+  ...
+# Subtest: buildReveal menghasilkan teks jawaban, bukan id
+ok 66 - buildReveal menghasilkan teks jawaban, bukan id
+  ---
+  duration_ms: 0.4821
+  type: 'test'
+  ...
+# Subtest: buildReveal juga memuat id jawaban benar yang sama persis dengan kunci
+ok 67 - buildReveal juga memuat id jawaban benar yang sama persis dengan kunci
+  ---
+  duration_ms: 6.2386
+  type: 'test'
+  ...
+# Subtest: demo scenario "baret": 15 rounds x 5 meaningful choices, publishable, labeled demo, best/poor paths reach different endings
+ok 68 - demo scenario "baret": 15 rounds x 5 meaningful choices, publishable, labeled demo, best/poor paths reach different endings
+  ---
+  duration_ms: 7.9285
+  type: 'test'
+  ...
+# Subtest: demo scenario "banjir": 15 rounds x 5 meaningful choices, publishable, labeled demo, best/poor paths reach different endings
+ok 69 - demo scenario "banjir": 15 rounds x 5 meaningful choices, publishable, labeled demo, best/poor paths reach different endings
+  ---
+  duration_ms: 2.7592
+  type: 'test'
+  ...
+# Subtest: score policy story-70-30-v1: brief fixtures (full accuracy at 0/15/30 s = 1000/850/700; zero accuracy = 0)
+ok 70 - score policy story-70-30-v1: brief fixtures (full accuracy at 0/15/30 s = 1000/850/700; zero accuracy = 0)
+  ---
+  duration_ms: 1.8134
+  type: 'test'
+  ...
+# Subtest: score policy: partial credit, clamping, rounding and invalid input
+ok 71 - score policy: partial credit, clamping, rounding and invalid input
+  ---
+  duration_ms: 0.6921
+  type: 'test'
+  ...
+# Subtest: appendix A: equal accuracy, different answer times -> different scores; max component split is 70:30
+ok 72 - appendix A: equal accuracy, different answer times -> different scores; max component split is 70:30
+  ---
+  duration_ms: 0.2066
+  type: 'test'
+  ...
+# Subtest: ranking: equal totals share a rank (1224); display order uses accuracy points, then time, then name
+ok 73 - ranking: equal totals share a rank (1224); display order uses accuracy points, then time, then name
+  ---
+  duration_ms: 0.4033
+  type: 'test'
+  ...
+# Subtest: names: empty/short/long/invalid/emoji/needs-letter rejected; Unicode names accepted
+ok 74 - names: empty/short/long/invalid/emoji/needs-letter rejected; Unicode names accepted
+  ---
+  duration_ms: 6.1777
+  type: 'test'
+  ...
+# Subtest: names: inappropriate words blocked, including leetspeak and spacing tricks
+ok 75 - names: inappropriate words blocked, including leetspeak and spacing tricks
+  ---
+  duration_ms: 0.2448
+  type: 'test'
+  ...
+# Subtest: names: duplicates are case/accent/spacing-insensitive within a room
+ok 76 - names: duplicates are case/accent/spacing-insensitive within a room
+  ---
+  duration_ms: 0.2093
+  type: 'test'
+  ...
+# Subtest: validation: the synthetic 15-round scenario is publishable
+ok 77 - validation: the synthetic 15-round scenario is publishable
+  ---
+  duration_ms: 4.3259
+  type: 'test'
+  ...
+# Subtest: validation: wrong round count, missing choices/consequences name the round and field
+ok 78 - validation: wrong round count, missing choices/consequences name the round and field
+  ---
+  duration_ms: 2.9714
+  type: 'test'
+  ...
+# Subtest: validation: classification/weight consistency, endings, markup, assets, categories
+ok 79 - validation: classification/weight consistency, endings, markup, assets, categories
+  ---
+  duration_ms: 1.6221
+  type: 'test'
+  ...
+# Subtest: validation: language completeness per declared locale; duplicate choice texts rejected
+ok 80 - validation: language completeness per declared locale; duplicate choice texts rejected
+  ---
+  duration_ms: 1.6844
+  type: 'test'
+  ...
+# Subtest: sanitize: untrusted JSON becomes typed content; control chars stripped; no throw on garbage
+ok 81 - sanitize: untrusted JSON becomes typed content; control chars stripped; no throw on garbage
+  ---
+  duration_ms: 0.7535
+  type: 'test'
+  ...
+# Subtest: engine: mood bands and clamping
+ok 82 - engine: mood bands and clamping
+  ---
+  duration_ms: 0.2012
+  type: 'test'
+  ...
+# Subtest: engine: timeout applies the authored default consequence once with zero points
+ok 83 - engine: timeout applies the authored default consequence once with zero points
+  ---
+  duration_ms: 0.3068
+  type: 'test'
+  ...
+# Subtest: engine: best path -> happy ending, poor path / timeouts -> resolution with notes; every path reaches round 15
+ok 84 - engine: best path -> happy ending, poor path / timeouts -> resolution with notes; every path reaches round 15
+  ---
+  duration_ms: 0.6136
+  type: 'test'
+  ...
+# Subtest: rate limiter: only recorded failures use the budget; the window resets
+ok 85 - rate limiter: only recorded failures use the budget; the window resets
+  ---
+  duration_ms: 0.3612
+  type: 'test'
+  ...
+# Subtest: names: oversized raw input is rejected before any normalization work
+ok 86 - names: oversized raw input is rejected before any normalization work
+  ---
+  duration_ms: 0.1077
+  type: 'test'
+  ...
+# Subtest: lobby: duplicate / inappropriate names rejected, capacity enforced with a clear message, no join after start
+ok 87 - lobby: duplicate / inappropriate names rejected, capacity enforced with a clear message, no join after start
+  ---
+  duration_ms: 10.5321
+  type: 'test'
+  ...
+# Subtest: one participant: answering closes immediately when the only eligible participant answers (staff \#17)
+ok 88 - one participant: answering closes immediately when the only eligible participant answers (staff \#17)
+  ---
+  duration_ms: 7.7433
+  type: 'test'
+  ...
+# Subtest: multiple participants: answering stays open until the LAST eligible participant answers
+ok 89 - multiple participants: answering stays open until the LAST eligible participant answers
+  ---
+  duration_ms: 2.969
+  type: 'test'
+  ...
+# Subtest: deadline boundary is inclusive; one ms later is rejected; the deadline settles the round exactly once
+ok 90 - deadline boundary is inclusive; one ms later is rejected; the deadline settles the round exactly once
+  ---
+  duration_ms: 1.8587
+  type: 'test'
+  ...
+# Subtest: race: last answer and deadline timer at the same instant settle once
+ok 91 - race: last answer and deadline timer at the same instant settle once
+  ---
+  duration_ms: 1.5306
+  type: 'test'
+  ...
+# Subtest: duplicate submissions return the original acknowledgement and never change the score; forged and stale answers rejected
+ok 92 - duplicate submissions return the original acknowledgement and never change the score; forged and stale answers rejected
+  ---
+  duration_ms: 2.4121
+  type: 'test'
+  ...
+# Subtest: host cannot shorten an answer window or skip feedback before the minimum; host-paced mode waits on the leaderboard
+ok 93 - host cannot shorten an answer window or skip feedback before the minimum; host-paced mode waits on the leaderboard
+  ---
+  duration_ms: 12.7318
+  type: 'test'
+  ...
+# Subtest: readiness: slow devices delay answering at most by the grace; disconnected devices never block
+ok 94 - readiness: slow devices delay answering at most by the grace; disconnected devices never block
+  ---
+  duration_ms: 1.0004
+  type: 'test'
+  ...
+# Subtest: reconnect: a disconnected participant resumes the CURRENT round with remaining time; missed rounds score 0
+ok 95 - reconnect: a disconnected participant resumes the CURRENT round with remaining time; missed rounds score 0
+  ---
+  duration_ms: 2.3808
+  type: 'test'
+  ...
+# Subtest: host removal: removed participants leave eligibility and rankings; the round closes if everyone else answered
+ok 96 - host removal: removed participants leave eligibility and rankings; the round closes if everyone else answered
+  ---
+  duration_ms: 1.4546
+  type: 'test'
+  ...
+# Subtest: full session: 15 shared rounds, private endings, final summary with all 15 decisions; the room closes for good (FR-B10)
+ok 97 - full session: 15 shared rounds, private endings, final summary with all 15 decisions; the room closes for good (FR-B10)
+  ---
+  duration_ms: 4.6649
+  type: 'test'
+  ...
+# Subtest: host close mid-session -> interrupted; partial summary, no ending, cannot reopen
+ok 98 - host close mid-session -> interrupted; partial summary, no ending, cannot reopen
+  ---
+  duration_ms: 0.7352
+  type: 'test'
+  ...
+# Subtest: privacy: public state never carries keys, weights, classifications or other participants' choices; options differ per participant
+ok 99 - privacy: public state never carries keys, weights, classifications or other participants' choices; options differ per participant
+  ---
+  duration_ms: 1.1004
+  type: 'test'
+  ...
+# Subtest: a persistence failure never freezes a live room: the round still settles and the session continues
+ok 100 - a persistence failure never freezes a live room: the round still settles and the session continues
+  ---
+  duration_ms: 0.7397
+  type: 'test'
+  ...
+# Subtest: host clicks are checked against the phase they were made in; auto-advance off clears the countdown
+ok 101 - host clicks are checked against the phase they were made in; auto-advance off clears the countdown
+  ---
+  duration_ms: 1.2648
+  type: 'test'
+  ...
+# Subtest: deadline timer firing early (real timers) never closes the window before the inclusive deadline
+ok 102 - deadline timer firing early (real timers) never closes the window before the inclusive deadline
+  ---
+  duration_ms: 0.5946
+  type: 'test'
+  ...
+# [static] menyajikan C:\\Users\\User\\Desktop\\rksgm-main\\client\\dist
+#   RAKSA GAME - server aktif
+#   Lokal    : http://localhost:43931
+#   Jaringan : http://127.0.0.1:43931
+#   Host     : http://127.0.0.1:43931/host
+#   Proyektor: http://127.0.0.1:43931/projector
+# Subtest: setup: staff identities and login; legacy APIs are refused in the MVP configuration
+ok 103 - setup: staff identities and login; legacy APIs are refused in the MVP configuration
+  ---
+  duration_ms: 564.4489
+  type: 'test'
+  ...
+# Subtest: role separation is enforced on the server (REST), not just hidden in the UI
+ok 104 - role separation is enforced on the server (REST), not just hidden in the UI
+  ---
+  duration_ms: 150.379
+  type: 'test'
+  ...
+# Subtest: CMS: blank scenario fails validation with round-specific messages; complete scenario goes draft -> review -> four-eyes publish
+ok 105 - CMS: blank scenario fails validation with round-specific messages; complete scenario goes draft -> review -> four-eyes publish
+  ---
+  duration_ms: 125.4881
+  type: 'test'
+  ...
+# Subtest: room: only hosts open rooms; join requires the name notice; names validated; capacity enforced
+ok 106 - room: only hosts open rooms; join requires the name notice; names validated; capacity enforced
+  ---
+  duration_ms: 14.6136
+  type: 'test'
+  ...
+# Subtest: 15 synchronized rounds: best/poor/partial/timeout participants, reconnect with missed rounds, private isolation, closed forever
+ok 107 - 15 synchronized rounds: best/poor/partial/timeout participants, reconnect with missed rounds, private isolation, closed forever
+  ---
+  duration_ms: 19996.62
+  type: 'test'
+  ...
+# Subtest: personal results are readable with the room-scoped credential only (and from the database)
+ok 108 - personal results are readable with the room-scoped credential only (and from the database)
+  ---
+  duration_ms: 5.2258
+  type: 'test'
+  ...
+# Subtest: reports: dashboard, cross-room results/export, round analytics reconcile with the played room; demo excluded by default
+ok 109 - reports: dashboard, cross-room results/export, round analytics reconcile with the played room; demo excluded by default
+  ---
+  duration_ms: 98.1621
+  type: 'test'
+  ...
+# Subtest: versions: a running room stays pinned while the scenario is revised, republished and archived
+ok 110 - versions: a running room stays pinned while the scenario is revised, republished and archived
+  ---
+  duration_ms: 99.1407
+  type: 'test'
+  ...
+# Subtest: restart policy: unfinished rooms are marked interrupted, never silently reset
+ok 111 - restart policy: unfinished rooms are marked interrupted, never silently reset
+  ---
+  duration_ms: 0.5993
+  type: 'test'
+  ...
+# Subtest: review fixes: legacy gate case, closed codes, asset limiter, session revocation, stale host clicks, admin close, expiry, reports
+ok 112 - review fixes: legacy gate case, closed codes, asset limiter, session revocation, stale host clicks, admin close, expiry, reports
+  ---
+  duration_ms: 1584.2671
+  type: 'test'
+  ...
+# [static] menyajikan C:\\Users\\User\\Desktop\\rksgm-main\\client\\dist
+#   RAKSA GAME - server aktif
+#   Lokal    : http://localhost:43919
+#   Jaringan : http://127.0.0.1:43919
+#   Host     : http://127.0.0.1:43919/host
+#   Proyektor: http://127.0.0.1:43919/projector
+# Subtest: MIME & Content-Encoding sesuai dokumentasi Unity
+ok 113 - MIME & Content-Encoding sesuai dokumentasi Unity
+  ---
+  duration_ms: 0.9506
+  type: 'test'
+  ...
+# Subtest: status build dibaca dari index.html hasil build, bukan dari tebakan nama file
+ok 114 - status build dibaca dari index.html hasil build, bukan dari tebakan nama file
+  ---
+  duration_ms: 1.181
+  type: 'test'
+  ...
+#     (dilewati: build Unity nyata belum ada)
+#     (dilewati: build Unity nyata belum ada di C:\\Users\\User\\Desktop\\rksgm-main\\unity\\Build\\Web)
+# Subtest: GET /api/unity/status mengembalikan status yang sama
+ok 115 - GET /api/unity/status mengembalikan status yang sama
+  ---
+  duration_ms: 25.4346
+  type: 'test'
+  ...
+# Subtest: .unityweb: Content-Encoding dipasang sesuai isi berkas, bukan ekstensi
+ok 116 - .unityweb: Content-Encoding dipasang sesuai isi berkas, bukan ekstensi
+  ---
+  duration_ms: 0.257
+  type: 'test'
+  ...
+# Subtest: sniff .unityweb mengenali gzip dari magic byte
+ok 117 - sniff .unityweb mengenali gzip dari magic byte
+  ---
+  duration_ms: 2.2588
+  type: 'test'
+  ...
+# Subtest: build Unity NYATA: berkas .unityweb ternyata gzip
+ok 118 - build Unity NYATA: berkas .unityweb ternyata gzip
+  ---
+  duration_ms: 0.2581
+  type: 'test'
+  ...
+# Subtest: build Unity yang tidak lengkap dilaporkan apa adanya
+ok 119 - build Unity yang tidak lengkap dilaporkan apa adanya
+  ---
+  duration_ms: 1.2564
+  type: 'test'
+  ...
+# Subtest: bila build Unity NYATA ada di repo, statusnya harus available
+ok 120 - bila build Unity NYATA ada di repo, statusnya harus available
+  ---
+  duration_ms: 0.3643
+  type: 'test'
+  ...
+# Subtest: file build Unity disajikan dengan header yang benar
+ok 121 - file build Unity disajikan dengan header yang benar
+  ---
+  duration_ms: 27.0383
+  type: 'test'
+  ...
+# Subtest: file Unity yang hilang -> 404 JSON, BUKAN halaman HTML SPA
+ok 122 - file Unity yang hilang -> 404 JSON, BUKAN halaman HTML SPA
+  ---
+  duration_ms: 15.759
+  type: 'test'
+  ...
+# Subtest: path traversal pada /unity ditolak
+ok 123 - path traversal pada /unity ditolak
+  ---
+  duration_ms: 14.1956
+  type: 'test'
+  ...
+# Subtest: kesiapan adegan: hanya ronde saat ini, dan tidak menambah waktu
+ok 124 - kesiapan adegan: hanya ronde saat ini, dan tidak menambah waktu
+  ---
+  duration_ms: 6.8859
+  type: 'test'
+  ...
+# Subtest: jumlah misi tetap 10 dan HVC berarti alat berat
+ok 125 - jumlah misi tetap 10 dan HVC berarti alat berat
+  ---
+  duration_ms: 0.1192
+  type: 'test'
+  ...
+1..125
+# tests 125
+# suites 0
+# pass 125
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 23285.9577
+
+> raksa-game@1.0.0 test:client
+> tsx --tsconfig client/tsconfig.json --test client/src/game/draft.test.ts client/src/ui/halaman.test.ts client/src/cerita/ui/tampilan.test.ts client/src/cerita/ui/tinjauan.test.ts client/src/cerita/ui/hasilAktivitas.test.ts client/src/cerita/seni/seni.test.ts client/src/cerita/ui/adegan.test.ts client/src/cerita/seni/ruang/ruang.test.ts client/src/cerita/seni/tokoh/missRaksa.test.ts client/src/cerita/seni/tokoh/buRina.test.ts client/src/cerita/ui/panggung/kamera.test.ts client/src/cerita/ui/panggung/piksel.test.ts client/src/cerita/ui/panggung/rencana.test.ts client/src/cerita/ui/panggung/sutradara.test.ts client/src/game/scenes/cerita/cerita.test.ts client/src/cerita/mesin.test.ts client/src/cerita/simpan.test.ts client/src/cerita/validasi.test.ts client/src/cerita/episode/auto-1/episode.test.ts client/src/state/profil.test.ts client/src/ui/modal.test.ts client/src/game/aksesInfo.test.ts client/src/game/gambar.test.ts client/src/pages/host/drafSoal.test.ts client/src/game/hasil.test.ts client/src/game/scenes.test.ts client/src/i18n/terjemahan.test.ts client/src/unity/bridge.test.ts client/src/unity/missionObjects.test.ts client/src/cerita/seni/piksel/susun.test.ts client/src/pages/cms/contentEdit.test.ts
+
+TAP version 13
+# Subtest: validasi: AUTO-1 sah; penjelajahan semua jalur tanpa masalah dan kelima akhir tercapai
+ok 1 - validasi: AUTO-1 sah; penjelajahan semua jalur tanpa masalah dan kelima akhir tercapai
+  ---
+  duration_ms: 383.7545
+  type: 'test'
+  ...
+# Subtest: jalur: terbaik -> tuntas
+ok 2 - jalur: terbaik -> tuntas
+  ---
+  duration_ms: 2.4382
+  type: 'test'
+  ...
+# Subtest: jalur: terbaik + singkat -> dingin (penutup menentukan kejelasan)
+ok 3 - jalur: terbaik + singkat -> dingin (penutup menentukan kejelasan)
+  ---
+  duration_ms: 0.9315
+  type: 'test'
+  ...
+# Subtest: jalur: pemulihan komunikasi (prosedur -> maaf -> ... ) -> tuntas
+ok 4 - jalur: pemulihan komunikasi (prosedur -> maaf -> ... ) -> tuntas
+  ---
+  duration_ms: 1.0832
+  type: 'test'
+  ...
+# Subtest: jalur: janji (janji, ..., janjikan) -> janji
+ok 5 - jalur: janji (janji, ..., janjikan) -> janji
+  ---
+  duration_ms: 0.7919
+  type: 'test'
+  ...
+# Subtest: jalur: janji awal lalu ralat-janji -> tuntas
+ok 6 - jalur: janji awal lalu ralat-janji -> tuntas
+  ---
+  duration_ms: 0.5914
+  type: 'test'
+  ...
+# Subtest: jalur: kartu "pasti-diganti" lalu ralat-polis -> tuntas (baca-polis dikoreksi)
+ok 7 - jalur: kartu "pasti-diganti" lalu ralat-polis -> tuntas (baca-polis dikoreksi)
+  ---
+  duration_ms: 0.668
+  type: 'test'
+  ...
+# Subtest: jalur: kartu "pasti-diganti" lalu ralat-polis + singkat -> dingin
+ok 8 - jalur: kartu "pasti-diganti" lalu ralat-polis + singkat -> dingin
+  ---
+  duration_ms: 0.4759
+  type: 'test'
+  ...
+# Subtest: jalur: dingin (prosedur -> tetap -> ... -> aturan) -> dingin
+ok 9 - jalur: dingin (prosedur -> tetap -> ... -> aturan) -> dingin
+  ---
+  duration_ms: 0.7733
+  type: 'test'
+  ...
+# Subtest: jalur: bukti kurang + cukup -> tertunda
+ok 10 - jalur: bukti kurang + cukup -> tertunda
+  ---
+  duration_ms: 0.8737
+  type: 'test'
+  ...
+# Subtest: jalur: bukti kurang + cukup + singkat -> tertunda (epilog tanpa janji kabar)
+ok 11 - jalur: bukti kurang + cukup + singkat -> tertunda (epilog tanpa janji kabar)
+  ---
+  duration_ms: 0.5247
+  type: 'test'
+  ...
+# Subtest: jalur: bukti kurang + lengkapi -> tuntas
+ok 12 - jalur: bukti kurang + lengkapi -> tuntas
+  ---
+  duration_ms: 0.536
+  type: 'test'
+  ...
+# Subtest: jalur: bengkel + biarkan -> tertunda (tanpa aktivitas bukti)
+ok 13 - jalur: bengkel + biarkan -> tertunda (tanpa aktivitas bukti)
+  ---
+  duration_ms: 1.8351
+  type: 'test'
+  ...
+# Subtest: jalur: ringan + tetap-ringan -> pergi
+ok 14 - jalur: ringan + tetap-ringan -> pergi
+  ---
+  duration_ms: 0.3743
+  type: 'test'
+  ...
+# Subtest: jalur: polis salah + bertahan -> pergi
+ok 15 - jalur: polis salah + bertahan -> pergi
+  ---
+  duration_ms: 0.6587
+  type: 'test'
+  ...
+# Subtest: jalur: polis: id opsi pensiun (ambang-tlo) = jawaban tak dikenal + bertahan -> pergi
+ok 16 - jalur: polis: id opsi pensiun (ambang-tlo) = jawaban tak dikenal + bertahan -> pergi
+  ---
+  duration_ms: 0.6847
+  type: 'test'
+  ...
+# Subtest: jalur: polis salah + baca-ulang -> tuntas (baca-polis dikoreksi)
+ok 17 - jalur: polis salah + baca-ulang -> tuntas (baca-polis dikoreksi)
+  ---
+  duration_ms: 0.6437
+  type: 'test'
+  ...
+# Subtest: jalur: ringan + lihat-dulu -> tuntas (dokumentasi-dulu dikoreksi)
+ok 18 - jalur: ringan + lihat-dulu -> tuntas (dokumentasi-dulu dikoreksi)
+  ---
+  duration_ms: 0.6837
+  type: 'test'
+  ...
+# Subtest: jalur: bengkel + koreksi -> tuntas (dokumentasi-dulu dikoreksi)
+ok 19 - jalur: bengkel + koreksi -> tuntas (dokumentasi-dulu dikoreksi)
+  ---
+  duration_ms: 0.655
+  type: 'test'
+  ...
+# Subtest: jalur: janji awal lalu aturan -> tetap janji (janji tidak pernah diluruskan)
+ok 20 - jalur: janji awal lalu aturan -> tetap janji (janji tidak pernah diluruskan)
+  ---
+  duration_ms: 0.4837
+  type: 'test'
+  ...
+# Subtest: jalur: kartu "pasti-diganti" lalu aturan -> janji (reaksi atas ringkasan: "pasti diganti, kan?")
+ok 21 - jalur: kartu "pasti-diganti" lalu aturan -> janji (reaksi atas ringkasan: "pasti diganti, kan?")
+  ---
+  duration_ms: 0.6042
+  type: 'test'
+  ...
+# Subtest: jalur: ralat-janji tanpa merangkum -> dingin (sudah jujur, tetapi penutupnya tidak menjelaskan langkah)
+ok 22 - jalur: ralat-janji tanpa merangkum -> dingin (sudah jujur, tetapi penutupnya tidak menjelaskan langkah)
+  ---
+  duration_ms: 0.4475
+  type: 'test'
+  ...
+# Subtest: jalur: dingin: sudah dirangkum & paham semuanya, tetapi awalnya tidak didengar -> pesan "belum merasa didengar"
+ok 23 - jalur: dingin: sudah dirangkum & paham semuanya, tetapi awalnya tidak didengar -> pesan "belum merasa didengar"
+  ---
+  duration_ms: 0.4448
+  type: 'test'
+  ...
+# Subtest: jalur: dingin: aturan + singkat -> dingin, nasabah kesal
+ok 24 - jalur: dingin: aturan + singkat -> dingin, nasabah kesal
+  ---
+  duration_ms: 0.4357
+  type: 'test'
+  ...
+# Subtest: jalur uji mencakup kelima akhir
+ok 25 - jalur uji mencakup kelima akhir
+  ---
+  duration_ms: 0.1331
+  type: 'test'
+  ...
+# Subtest: konsekuensi: dengar / prosedur / janji di b1-datang mengubah suasana, baris berikutnya, dan catatan kasus
+ok 26 - konsekuensi: dengar / prosedur / janji di b1-datang mengubah suasana, baris berikutnya, dan catatan kasus
+  ---
+  duration_ms: 0.7552
+  type: 'test'
+  ...
+# Subtest: konsekuensi: janji sebelumnya mengubah keberatan Bu Rina dan pilihan jawaban yang tersedia
+ok 27 - konsekuensi: janji sebelumnya mengubah keberatan Bu Rina dan pilihan jawaban yang tersedia
+  ---
+  duration_ms: 1.2225
+  type: 'test'
+  ...
+# Subtest: K4 bermakna: hanya ringkasan yang diterima memberi "langkah-berikut"; penutup "singkat" tidak pernah berakhir tuntas
+ok 28 - K4 bermakna: hanya ringkasan yang diterima memberi "langkah-berikut"; penutup "singkat" tidak pernah berakhir tuntas
+  ---
+  duration_ms: 88.7751
+  type: 'test'
+  ...
+# Subtest: b3-bukti-kurang: "lengkapi" dan "cukup" punya adegan & catatan kasus yang berbeda
+ok 29 - b3-bukti-kurang: "lengkapi" dan "cukup" punya adegan & catatan kasus yang berbeda
+  ---
+  duration_ms: 0.4556
+  type: 'test'
+  ...
+# Subtest: tanda hasil aktivitas hanya dibaca di node aktivitasnya sendiri (syarat penyederhanaan titikKeputusan)
+ok 30 - tanda hasil aktivitas hanya dibaca di node aktivitasnya sendiri (syarat penyederhanaan titikKeputusan)
+  ---
+  duration_ms: 2.3749
+  type: 'test'
+  ...
+# Subtest: tanpa cabang palsu: di SETIAP titik pilihan yang terjangkau, tiap pilihan memberi state yang berbeda
+ok 31 - tanpa cabang palsu: di SETIAP titik pilihan yang terjangkau, tiap pilihan memberi state yang berbeda
+  ---
+  duration_ms: 49.9211
+  type: 'test'
+  ...
+# Subtest: muat ulang di setiap langkah jalur terbaik: hasil identik, tanpa efek ganda
+ok 32 - muat ulang di setiap langkah jalur terbaik: hasil identik, tanpa efek ganda
+  ---
+  duration_ms: 28.2379
+  type: 'test'
+  ...
+# Subtest: aksi ganda & aksi di luar giliran mengembalikan objek state yang sama
+ok 33 - aksi ganda & aksi di luar giliran mengembalikan objek state yang sama
+  ---
+  duration_ms: 0.7007
+  type: 'test'
+  ...
+# Subtest: jalankan tidak mengubah state masukan (semua jalur dimainkan dengan state beku)
+ok 34 - jalankan tidak mengubah state masukan (semua jalur dimainkan dengan state beku)
+  ---
+  duration_ms: 7.0994
+  type: 'test'
+  ...
+# Subtest: bahasa: state & riwayat hanya berisi id dan kunci; tiap kunci yang dirujuk ada di id/en/zh
+ok 35 - bahasa: state & riwayat hanya berisi id dan kunci; tiap kunci yang dirujuk ada di id/en/zh
+  ---
+  duration_ms: 266.0773
+  type: 'test'
+  ...
+# Subtest: bahasa: menampilkan riwayat dalam bahasa lain di tengah episode tidak mengubah state
+ok 36 - bahasa: menampilkan riwayat dalam bahasa lain di tengah episode tidak mengubah state
+  ---
+  duration_ms: 1.3727
+  type: 'test'
+  ...
+# Subtest: aktivitas bukti: 3 tepat (urutan bebas) -> cabang tepat
+ok 37 - aktivitas bukti: 3 tepat (urutan bebas) -> cabang tepat
+  ---
+  duration_ms: 0.7745
+  type: 'test'
+  ...
+# Subtest: aktivitas bukti: 2 tepat + 1 salah -> cabang kurang, opsi terlewat tercatat sebagai lewat:<opsi>
+ok 38 - aktivitas bukti: 2 tepat + 1 salah -> cabang kurang, opsi terlewat tercatat sebagai lewat:<opsi>
+  ---
+  duration_ms: 0.921
+  type: 'test'
+  ...
+# Subtest: aktivitas polis: tiap opsi -> cabang sesuai kontrak 3.1
+ok 39 - aktivitas polis: tiap opsi -> cabang sesuai kontrak 3.1
+  ---
+  duration_ms: 0.7185
+  type: 'test'
+  ...
+# Subtest: aktivitas: jawaban kosong / tak dikenal -> cabang cadangan yang sah dan episode tetap bisa selesai
+ok 40 - aktivitas: jawaban kosong / tak dikenal -> cabang cadangan yang sah dan episode tetap bisa selesai
+  ---
+  duration_ms: 0.8822
+  type: 'test'
+  ...
+# Subtest: ulangBab "menggali" setelah selesai: kembali ke awal bab dengan state saat pertama masuk, lalu jalur lain ke akhir lain
+ok 41 - ulangBab "menggali" setelah selesai: kembali ke awal bab dengan state saat pertama masuk, lalu jalur lain ke akhir lain
+  ---
+  duration_ms: 2.5972
+  type: 'test'
+  ...
+# Subtest: aktivitas: bentuk jawaban yang tidak sah untuk jenis langkahnya tidak dihitung sebagai pilihan
+ok 42 - aktivitas: bentuk jawaban yang tidak sah untuk jenis langkahnya tidak dihitung sebagai pilihan
+  ---
+  duration_ms: 0.2672
+  type: 'test'
+  ...
+# Subtest: tinjauan PIC Claim: setiap kunci teks episode tercantum di docs/cerita/TINJAUAN-PIC-CLAIM.md
+ok 43 - tinjauan PIC Claim: setiap kunci teks episode tercantum di docs/cerita/TINJAUAN-PIC-CLAIM.md
+  ---
+  duration_ms: 5.4882
+  type: 'test'
+  ...
+# Subtest: v3 pembuka: satu perkenalan peran di b1-mentor yang menyebut tempat, tanpa istilah; masalah Bu Rina di baris ke-3; kata sehari-hari lebih dulu
+ok 44 - v3 pembuka: satu perkenalan peran di b1-mentor yang menyebut tempat, tanpa istilah; masalah Bu Rina di baris ke-3; kata sehari-hari lebih dulu
+  ---
+  duration_ms: 1.7072
+  type: 'test'
+  ...
+# Subtest: v3 istilah inti: "nasabah" & "klaim" bisa dibuka di SETIAP jalur uji sebelum bab 3 (bukan hanya di cabang/akhir tertentu)
+ok 45 - v3 istilah inti: "nasabah" & "klaim" bisa dibuka di SETIAP jalur uji sebelum bab 3 (bukan hanya di cabang/akhir tertentu)
+  ---
+  duration_ms: 0.5679
+  type: 'test'
+  ...
+# Subtest: v2 pilihan: 2-3 pilihan tampil, masing-masing 8-20 kata (Indonesia)
+ok 46 - v2 pilihan: 2-3 pilihan tampil, masing-masing 8-20 kata (Indonesia)
+  ---
+  duration_ms: 0.7931
+  type: 'test'
+  ...
+# Subtest: v2 pilihan: jawaban yang menolong TIDAK selalu yang terpanjang (paling banyak separuh titik pilihan)
+ok 47 - v2 pilihan: jawaban yang menolong TIDAK selalu yang terpanjang (paling banyak separuh titik pilihan)
+  ---
+  duration_ms: 1.7844
+  type: 'test'
+  ...
+# Subtest: v2 istilah: lima istilah, label tertulis di baris bertanda (id/en/zh), ditandai di baris PERTAMA pemakaiannya
+ok 48 - v2 istilah: lima istilah, label tertulis di baris bertanda (id/en/zh), ditandai di baris PERTAMA pemakaiannya
+  ---
+  duration_ms: 64.2594
+  type: 'test'
+  ...
+# Subtest: v2 aktivitas: satu kalimat tugas; instruksi/tanya/petunjuk/briefing/cerita/labelInteraksi (dan tujuan bab) tidak saling mengulang
+ok 49 - v2 aktivitas: satu kalimat tugas; instruksi/tanya/petunjuk/briefing/cerita/labelInteraksi (dan tujuan bab) tidak saling mengulang
+  ---
+  duration_ms: 2.1122
+  type: 'test'
+  ...
+# Subtest: v2 aktivitas: alasan per opsi (semua opsi bukti & polis), arti awam tiap baris kartu, tanpa ambang 75%/TLO
+ok 50 - v2 aktivitas: alasan per opsi (semua opsi bukti & polis), arti awam tiap baris kartu, tanpa ambang 75%/TLO
+  ---
+  duration_ms: 0.54
+  type: 'test'
+  ...
+# Subtest: v2 pensiun: kunci yang dihapus dari naskah tetap terbaca di id/en/zh dan tidak dirujuk naskah aktif
+ok 51 - v2 pensiun: kunci yang dihapus dari naskah tetap terbaca di id/en/zh dan tidak dirujuk naskah aktif
+  ---
+  duration_ms: 3.918
+  type: 'test'
+  ...
+# Subtest: v3 adegan: panggung Raksa Silver Club tanpa eksterior, versi tetap 1, aksi hanya di narasi tindakan fisik (kunci stabil)
+ok 52 - v3 adegan: panggung Raksa Silver Club tanpa eksterior, versi tetap 1, aksi hanya di narasi tindakan fisik (kunci stabil)
+  ---
+  duration_ms: 3.8064
+  type: 'test'
+  ...
+# Subtest: stateAwal: baris pertama tampil, bab & cadangan bab pertama tercatat, tanpa acak
+ok 53 - stateAwal: baris pertama tampil, bab & cadangan bab pertama tercatat, tanpa acak
+  ---
+  duration_ms: 6.1483
+  type: 'test'
+  ...
+# Subtest: lanjut: baris tampil satu per satu; efek dialog diterapkan SEKALI saat pindah node
+ok 54 - lanjut: baris tampil satu per satu; efek dialog diterapkan SEKALI saat pindah node
+  ---
+  duration_ms: 2.7323
+  type: 'test'
+  ...
+# Subtest: pilih hanya sah di node itu, setelah semua baris tampil, dan bila pilihan tersedia; selain itu objek yang sama
+ok 55 - pilih hanya sah di node itu, setelah semua baris tampil, dan bila pilihan tersedia; selain itu objek yang sama
+  ---
+  duration_ms: 1.027
+  type: 'test'
+  ...
+# Subtest: pilih: efek, keputusan, riwayat pilihan + alasan, ucapan terakhir; ketukan ganda = no-op
+ok 56 - pilih: efek, keputusan, riwayat pilihan + alasan, ucapan terakhir; ketukan ganda = no-op
+  ---
+  duration_ms: 0.6301
+  type: 'test'
+  ...
+# Subtest: baris bersyarat hanya tampil bila kondisinya terpenuhi
+ok 57 - baris bersyarat hanya tampil bila kondisinya terpenuhi
+  ---
+  duration_ms: 0.3878
+  type: 'test'
+  ...
+# Subtest: aktivitas: dinilai sekali, tanda hasil dipasang, cabang hasil pertama yang cocok, umpan balik lalu lanjut
+ok 58 - aktivitas: dinilai sekali, tanda hasil dipasang, cabang hasil pertama yang cocok, umpan balik lalu lanjut
+  ---
+  duration_ms: 0.6101
+  type: 'test'
+  ...
+# Subtest: aktivitas: cabang sebagian & lainnya; baris umpan balik bersyarat memakai tanda lewat
+ok 59 - aktivitas: cabang sebagian & lainnya; baris umpan balik bersyarat memakai tanda lewat
+  ---
+  duration_ms: 0.6369
+  type: 'test'
+  ...
+# Subtest: aktivitas tidak sah sebelum baris pengantar habis
+ok 60 - aktivitas tidak sah sebelum baris pengantar habis
+  ---
+  duration_ms: 0.3229
+  type: 'test'
+  ...
+# Subtest: nilaiAktivitas: akurasi rubrik klien & tanda deterministik (urutan opsi misi, bukan urutan ketukan)
+ok 61 - nilaiAktivitas: akurasi rubrik klien & tanda deterministik (urutan opsi misi, bukan urutan ketukan)
+  ---
+  duration_ms: 0.5633
+  type: 'test'
+  ...
+# Subtest: node cabang dilewati otomatis; setiap akhir tercapai sesuai jalurnya
+ok 62 - node cabang dilewati otomatis; setiap akhir tercapai sesuai jalurnya
+  ---
+  duration_ms: 1.4195
+  type: 'test'
+  ...
+# Subtest: ulangBab memulihkan cadangan bab itu, membuang cadangan sesudahnya; pilihan lain bisa dicoba
+ok 63 - ulangBab memulihkan cadangan bab itu, membuang cadangan sesudahnya; pilihan lain bisa dicoba
+  ---
+  duration_ms: 0.6572
+  type: 'test'
+  ...
+# Subtest: babBisaDiulang: urut cerita; bab yang langsung jatuh ke node akhir tidak ditawarkan
+ok 64 - babBisaDiulang: urut cerita; bab yang langsung jatuh ke node akhir tidak ditawarkan
+  ---
+  duration_ms: 2.3467
+  type: 'test'
+  ...
+# Subtest: mulaiUlang = state awal (langkah tetap naik)
+ok 65 - mulaiUlang = state awal (langkah tetap naik)
+  ---
+  duration_ms: 0.2957
+  type: 'test'
+  ...
+# Subtest: aksi untuk episode lain / aksi tak dikenal = objek yang sama
+ok 66 - aksi untuk episode lain / aksi tak dikenal = objek yang sama
+  ---
+  duration_ms: 0.1622
+  type: 'test'
+  ...
+# Subtest: jalankan MURNI: state masukan (dibekukan) tidak berubah
+ok 67 - jalankan MURNI: state masukan (dibekukan) tidak berubah
+  ---
+  duration_ms: 0.7221
+  type: 'test'
+  ...
+# Subtest: state & riwayat hanya berisi KUNCI teks, tidak pernah teks (ganti bahasa tidak mengubah state)
+ok 68 - state & riwayat hanya berisi KUNCI teks, tidak pernah teks (ganti bahasa tidak mengubah state)
+  ---
+  duration_ms: 1.4406
+  type: 'test'
+  ...
+# Subtest: ringkasanAkhir memisahkan komunikasi (alasan suasana) dari ketepatan langkah klaim (proses)
+ok 69 - ringkasanAkhir memisahkan komunikasi (alasan suasana) dari ketepatan langkah klaim (proses)
+  ---
+  duration_ms: 0.7635
+  type: 'test'
+  ...
+# Subtest: suasanaNasabah: batas bawah menurun (daftar tidak urut pun benar)
+ok 70 - suasanaNasabah: batas bawah menurun (daftar tidak urut pun benar)
+  ---
+  duration_ms: 0.1611
+  type: 'test'
+  ...
+# Subtest: kondisiTerpenuhi: tanda, tidak, semua, salahSatu, kepercayaan, paham, proses
+ok 71 - kondisiTerpenuhi: tanda, tidak, semua, salahSatu, kepercayaan, paham, proses
+  ---
+  duration_ms: 0.1793
+  type: 'test'
+  ...
+# Subtest: bantuan tampilan: babKini, latarKini (mewarisi latar node sebelumnya), bisaLanjut
+ok 72 - bantuan tampilan: babKini, latarKini (mewarisi latar node sebelumnya), bisaLanjut
+  ---
+  duration_ms: 0.385
+  type: 'test'
+  ...
+# Subtest: manifest nyata terbaca tanpa catatan; selisih skema kedua tokoh ditoleransi
+ok 73 - manifest nyata terbaca tanpa catatan; selisih skema kedua tokoh ditoleransi
+  ---
+  duration_ms: 2.474
+  type: 'test'
+  ...
+# Subtest: setiap pose cerita x ekspresi x arah x varian: susunan sah, lapisan di atlas & kotak wajah, varian tidak menggeser tubuh
+ok 74 - setiap pose cerita x ekspresi x arah x varian: susunan sah, lapisan di atlas & kotak wajah, varian tidak menggeser tubuh
+  ---
+  duration_ms: 120.3137
+  type: 'test'
+  ...
+# Subtest: pemetaan cerita -> seni: wajah Miss, tubuh gestur Bu Rina, arah bawaan, mata bawah tunjuk-kiri
+ok 75 - pemetaan cerita -> seni: wajah Miss, tubuh gestur Bu Rina, arah bawaan, mata bawah tunjuk-kiri
+  ---
+  duration_ms: 0.8718
+  type: 'test'
+  ...
+# Subtest: opsiDariCerita: pandang -> arah & mata (Miss), Bu Rina tetap ke meja; kedip menang atas bawah
+ok 76 - opsiDariCerita: pandang -> arah & mata (Miss), Bu Rina tetap ke meja; kedip menang atas bawah
+  ---
+  duration_ms: 1.566
+  type: 'test'
+  ...
+# Subtest: cadangan: manifest dipangkas/cacat tetap menghasilkan susunan tanpa melempar, dengan catatan
+ok 77 - cadangan: manifest dipangkas/cacat tetap menghasilkan susunan tanpa melempar, dengan catatan
+  ---
+  duration_ms: 7.5316
+  type: 'test'
+  ...
+# Subtest: potret: jendela manifest dipakai persis; 28/36/48/56/112 turunan dengan skala bulat yang memenuhi lingkaran
+ok 78 - potret: jendela manifest dipakai persis; 28/36/48/56/112 turunan dengan skala bulat yang memenuhi lingkaran
+  ---
+  duration_ms: 8.62
+  type: 'test'
+  ...
+# Subtest: sisipan telepon: jendela 56 manifest, ukuran HP/desktop skala bulat, kepala/wajah tidak terpotong
+ok 79 - sisipan telepon: jendela 56 manifest, ukuran HP/desktop skala bulat, kepala/wajah tidak terpotong
+  ---
+  duration_ms: 3.0548
+  type: 'test'
+  ...
+# Subtest: keGambarTokoh = GambarTokoh raster panggung (piksel.ts): potongan, tempelan, meja, kepala, kisi
+ok 80 - keGambarTokoh = GambarTokoh raster panggung (piksel.ts): potongan, tempelan, meja, kepala, kisi
+  ---
+  duration_ms: 2.6451
+  type: 'test'
+  ...
+# Subtest: keSvg / svgPotret / svgTokoh: <image> pixelated memotong atlas, tanpa id kecuali diminta, URL di-escape
+ok 81 - keSvg / svgPotret / svgTokoh: <image> pixelated memotong atlas, tanpa id kecuali diminta, URL di-escape
+  ---
+  duration_ms: 13.6717
+  type: 'test'
+  ...
+# Subtest: komposisi piksel nyata: ekspresi hanya mengubah kotak wajah, kedip/bawah/bicara hanya kotak mata/mulut; alpha biner; netral = tubuh
+ok 82 - komposisi piksel nyata: ekspresi hanya mengubah kotak wajah, kedip/bawah/bicara hanya kotak mata/mulut; alpha biner; netral = tubuh
+  ---
+  duration_ms: 717.9049
+  type: 'test'
+  ...
+# Subtest: pintu masuk index.ts: manifest nyata terpasang, URL atlas, fungsi terikat
+ok 83 - pintu masuk index.ts: manifest nyata terpasang, URL atlas, fungsi terikat
+  ---
+  duration_ms: 0.7395
+  type: 'test'
+  ...
+# Subtest: bingkai antara duduk-turun Miss Raksa: frame duduk-turun-<arah> dipakai (dengan ATAU tanpa entri pose), tanpa frame = cadangan berdiri
+ok 84 - bingkai antara duduk-turun Miss Raksa: frame duduk-turun-<arah> dipakai (dengan ATAU tanpa entri pose), tanpa frame = cadangan berdiri
+  ---
+  duration_ms: 4.0836
+  type: 'test'
+  ...
+# Subtest: semua lokasi: generator final, lapisan valid & rapi, kotak kelipatan 4, tanpa teks/gambar/tautan luar, di-cache
+ok 85 - semua lokasi: generator final, lapisan valid & rapi, kotak kelipatan 4, tanpa teks/gambar/tautan luar, di-cache
+  ---
+  duration_ms: 19.4106
+  type: 'test'
+  ...
+# Subtest: id gradien/klip: berawalan rg-, unik lintas SEMUA lapisan & lokasi, dan setiap url(\#…) merujuk id di lapisan yang sama
+ok 86 - id gradien/klip: berawalan rg-, unik lintas SEMUA lapisan & lokasi, dan setiap url(\#…) merujuk id di lapisan yang sama
+  ---
+  duration_ms: 0.8814
+  type: 'test'
+  ...
+# Subtest: grid piksel: semua titik tempat, jalur, prop, kotak penting & bingkai saran kelipatan 4; tokoh skala 1
+ok 87 - grid piksel: semua titik tempat, jalur, prop, kotak penting & bingkai saran kelipatan 4; tokoh skala 1
+  ---
+  duration_ms: 0.946
+  type: 'test'
+  ...
+# Subtest: meja: wajah piksel kedua tokoh duduk bebas dari monitor, meja, kursi, pintu & plakat; muat di bingkai HP bersama teks
+ok 88 - meja: wajah piksel kedua tokoh duduk bebas dari monitor, meja, kursi, pintu & plakat; muat di bingkai HP bersama teks
+  ---
+  duration_ms: 0.4473
+  type: 'test'
+  ...
+# Subtest: jalur masuk SKALA 1: dari bukaan pintu sekat kanan ke samping kursi, mendatar di satu garis lantai, tanpa LOD
+ok 89 - jalur masuk SKALA 1: dari bukaan pintu sekat kanan ke samping kursi, mendatar di satu garis lantai, tanpa LOD
+  ---
+  duration_ms: 0.2799
+  type: 'test'
+  ...
+# Subtest: parkiran & pintu-luar: tanpa meja; tokoh skala 1; kerusakan mobil di antara kedua tokoh di bingkai HP; plakat pembuka di bingkai HP
+ok 90 - parkiran & pintu-luar: tanpa meja; tokoh skala 1; kerusakan mobil di antara kedua tokoh di bingkai HP; plakat pembuka di bingkai HP
+  ---
+  duration_ms: 0.226
+  type: 'test'
+  ...
+# Subtest: plakat: lilin di antara kepala & di bawah plakat; tokoh berdiri tidak menutupi teks
+ok 91 - plakat: lilin di antara kepala & di bawah plakat; tokoh berdiri tidak menutupi teks
+  ---
+  duration_ms: 0.2176
+  type: 'test'
+  ...
+# Subtest: meja: landasan kartu kosong & terlihat; kunci di kanannya, bebas pangkuan Bu Rina; map tidak mirip kartu
+ok 92 - meja: landasan kartu kosong & terlihat; kunci di kanannya, bebas pangkuan Bu Rina; map tidak mirip kartu
+  ---
+  duration_ms: 0.4767
+  type: 'test'
+  ...
+# Subtest: kartu polis disodorkan PEMAIN: titik awal di tepi dekat meja, kiri kamera, utuh di bingkai HP, bebas monitor & telepon
+ok 93 - kartu polis disodorkan PEMAIN: titik awal di tepi dekat meja, kiri kamera, utuh di bingkai HP, bebas monitor & telepon
+  ---
+  duration_ms: 0.6716
+  type: 'test'
+  ...
+# Subtest: telepon meja: utuh di bingkai HP dengan jarak dari tepi kiri, di atas permukaan meja
+ok 94 - telepon meja: utuh di bingkai HP dengan jarak dari tepi kiri, di atas permukaan meja
+  ---
+  duration_ms: 0.4075
+  type: 'test'
+  ...
+# Subtest: bayang kontak: kursi pengunjung (kolong, bayang jatuh, lipatan) & meja (bayang lantai kanan) tersedia
+ok 95 - bayang kontak: kursi pengunjung (kolong, bayang jatuh, lipatan) & meja (bayang lantai kanan) tersedia
+  ---
+  duration_ms: 0.2429
+  type: 'test'
+  ...
+# Subtest: kursi pengunjung: titik duduk = pinggul Bu Rina, bentuk di kotak lapisan, jauh dari kunci/landasan/cangkir & di bawah wajah
+ok 96 - kursi pengunjung: titik duduk = pinggul Bu Rina, bentuk di kotak lapisan, jauh dari kunci/landasan/cangkir & di bawah wajah
+  ---
+  duration_ms: 0.9339
+  type: 'test'
+  ...
+# Subtest: pintu: isi koridor DIPOTONG ke bukaan (meja, telepon, pintu-luar)
+ok 97 - pintu: isi koridor DIPOTONG ke bukaan (meja, telepon, pintu-luar)
+  ---
+  duration_ms: 0.4744
+  type: 'test'
+  ...
+# Subtest: prop: ukuran & jangkar valid, tanpa teks; telepon dengan/tanpa gagang berbeda
+ok 98 - prop: ukuran & jangkar valid, tanpa teks; telepon dengan/tanpa gagang berbeda
+  ---
+  duration_ms: 0.4889
+  type: 'test'
+  ...
+# Subtest: manifest piksel SEGAR: kotak lapisan, tempat, bukaan, engsel, prop = geometri kini (bangun ulang bila gagal)
+ok 99 - manifest piksel SEGAR: kotak lapisan, tempat, bukaan, engsel, prop = geometri kini (bangun ulang bila gagal)
+  ---
+  duration_ms: 1.0979
+  type: 'test'
+  ...
+# Subtest: PNG piksel: ukuran native, alpha tepat 0/255 (buram penuh untuk latar/koridor/daun), warna hanya dari palet <= 48
+ok 100 - PNG piksel: ukuran native, alpha tepat 0/255 (buram penuh untuk latar/koridor/daun), warna hanya dari palet <= 48
+  ---
+  duration_ms: 220.3319
+  type: 'test'
+  ...
+# Subtest: teks plakat piksel = LOKASI_AUTO_1.nama, di kotak papan, tinta emas benar-benar tergambar & tidak ditutup lapisan lain
+ok 101 - teks plakat piksel = LOKASI_AUTO_1.nama, di kotak papan, tinta emas benar-benar tergambar & tidak ditutup lapisan lain
+  ---
+  duration_ms: 9.3683
+  type: 'test'
+  ...
+# Subtest: potret piksel: skala BULAT, satu piksel seni = piksel perangkat bulat di dpr 1/2/3/1.25/1.5/1.75, viewBox pas
+ok 102 - potret piksel: skala BULAT, satu piksel seni = piksel perangkat bulat di dpr 1/2/3/1.25/1.5/1.75, viewBox pas
+  ---
+  duration_ms: 32.129
+  type: 'test'
+  ...
+# Subtest: potret piksel: ekspresi berbeda di ukuran dialog, wajah & kepala di dalam jendela 44-96
+ok 103 - potret piksel: ekspresi berbeda di ukuran dialog, wajah & kepala di dalam jendela 44-96
+  ---
+  duration_ms: 1.3613
+  type: 'test'
+  ...
+# Subtest: ikon kepala mini: slot < 44 px = ikon gambar tangan, skala BULAT di dpr 1/2/3/1.25/1.5/1.75/2.625, ikon utuh di slot 32
+ok 104 - ikon kepala mini: slot < 44 px = ikon gambar tangan, skala BULAT di dpr 1/2/3/1.25/1.5/1.75/2.625, ikon utuh di slot 32
+  ---
+  duration_ms: 4.4018
+  type: 'test'
+  ...
+# Subtest: ikon kepala mini: kepala UTUH di lingkaran isi 28, wajah beda per ekspresi hanya di kotak wajah, PNG sah
+ok 105 - ikon kepala mini: kepala UTUH di lingkaran isi 28, wajah beda per ekspresi hanya di kotak wajah, PNG sah
+  ---
+  duration_ms: 17.1088
+  type: 'test'
+  ...
+# Subtest: komponen potret: PotretPiksel bersama, ukuran tampil terukur, dpr, cadangan huruf saat atlas gagal & SVG v3 tanpa manifest
+ok 106 - komponen potret: PotretPiksel bersama, ukuran tampil terukur, dpr, cadangan huruf saat atlas gagal & SVG v3 tanpa manifest
+  ---
+  duration_ms: 1.382
+  type: 'test'
+  ...
+# Subtest: Bu Rina setengah badan piksel: frame berdiri + wajah ekspresi, kepala sampai kunci di dalam potongan, tanpa id
+ok 107 - Bu Rina setengah badan piksel: frame berdiri + wajah ekspresi, kepala sampai kunci di dalam potongan, tanpa id
+  ---
+  duration_ms: 1.182
+  type: 'test'
+  ...
+# Subtest: aktivitas bukti: Bu Rina = frame aktivitas manifest (berdiri) piksel, potongan di dalam atlas, cadangan SVG di kotak lama
+ok 108 - aktivitas bukti: Bu Rina = frame aktivitas manifest (berdiri) piksel, potongan di dalam atlas, cadangan SVG di kotak lama
+  ---
+  duration_ms: 21.8815
+  type: 'test'
+  ...
+# Subtest: sprite Miss Raksa: sheet 4 frame dari atlas piksel (x2 nearest), kepala terkunci, alpha 0/255, frame = susunan penyusun
+ok 109 - sprite Miss Raksa: sheet 4 frame dari atlas piksel (x2 nearest), kepala terkunci, alpha 0/255, frame = susunan penyusun
+  ---
+  duration_ms: 57.9741
+  type: 'test'
+  ...
+# Subtest: ukuran tampil seni piksel global: piksel perangkat bulat per piksel seni, minimal floor(dpr) (HP tidak mengecil), potret kepala-bahu di jendela
+ok 110 - ukuran tampil seni piksel global: piksel perangkat bulat per piksel seni, minimal floor(dpr) (HP tidak mengecil), potret kepala-bahu di jendela
+  ---
+  duration_ms: 2.0426
+  type: 'test'
+  ...
+# Subtest: cadangan setengah badan SVG v3: polos (tanpa id/gradien), delapan ekspresi berbeda, versi kecil berbeda, di-cache
+ok 111 - cadangan setengah badan SVG v3: polos (tanpa id/gradien), delapan ekspresi berbeda, versi kecil berbeda, di-cache
+  ---
+  duration_ms: 133.6177
+  type: 'test'
+  ...
+# Subtest: cadangan potret SVG v3: aturan ukuran & jendela sama dengan Miss Raksa v3 (kecil, sedang, biasa)
+ok 112 - cadangan potret SVG v3: aturan ukuran & jendela sama dengan Miss Raksa v3 (kecil, sedang, biasa)
+  ---
+  duration_ms: 41.9406
+  type: 'test'
+  ...
+# Subtest: cadangan SVG: awalan per salinan dari satu gambar tanpa id, rujukan url(\#…) tetap terpenuhi
+ok 113 - cadangan SVG: awalan per salinan dari satu gambar tanpa id, rujukan url(\#…) tetap terpenuhi
+  ---
+  duration_ms: 3.3712
+  type: 'test'
+  ...
+# Subtest: cadangan SVG: galat generator Bu Rina → siluet pengganti (sprite aktivitas cadangan, potret cadangan), tidak melempar
+ok 114 - cadangan SVG: galat generator Bu Rina → siluet pengganti (sprite aktivitas cadangan, potret cadangan), tidak melempar
+  ---
+  duration_ms: 0.8629
+  type: 'test'
+  ...
+# Subtest: ganti ekspresi TokohNasabah <= 200 ms dan instan saat gerak dikurangi
+ok 115 - ganti ekspresi TokohNasabah <= 200 ms dan instan saat gerak dikurangi
+  ---
+  duration_ms: 0.4594
+  type: 'test'
+  ...
+# Subtest: setiap pose tipe.ts PoseNasabah digambar sendiri (bukan jatuh ke pose lain)
+ok 116 - setiap pose tipe.ts PoseNasabah digambar sendiri (bukan jatuh ke pose lain)
+  ---
+  duration_ms: 146.9097
+  type: 'test'
+  ...
+# Subtest: semua kombinasi: SVG sah, kanvas & jangkar kontrak, id berawalan, rujukan terpenuhi
+ok 117 - semua kombinasi: SVG sah, kanvas & jangkar kontrak, id berawalan, rujukan terpenuhi
+  ---
+  duration_ms: 1752.5101
+  type: 'test'
+  ...
+# Subtest: id bawaan berawalan, deterministik, dan cache mengembalikan salinan
+ok 118 - id bawaan berawalan, deterministik, dan cache mengembalikan salinan
+  ---
+  duration_ms: 1.6894
+  type: 'test'
+  ...
+# Subtest: versi polos: tanpa id, gradien, atau rujukan url (aman disisipkan inline berulang)
+ok 119 - versi polos: tanpa id, gradien, atau rujukan url (aman disisipkan inline berulang)
+  ---
+  duration_ms: 19.4785
+  type: 'test'
+  ...
+# Subtest: delapan ekspresi = delapan wajah berbeda; bicara/kedip/pandang mengubah wajah
+ok 120 - delapan ekspresi = delapan wajah berbeda; bicara/kedip/pandang mengubah wajah
+  ---
+  duration_ms: 23.9893
+  type: 'test'
+  ...
+# Subtest: gestur tangan ikut ekspresi (bukan simbol); pose menentukan gestur khusus
+ok 121 - gestur tangan ikut ekspresi (bukan simbol); pose menentukan gestur khusus
+  ---
+  duration_ms: 3.3326
+  type: 'test'
+  ...
+# Subtest: jalan dua langkah berbeda; hadap kanan tanpa cermin CSS: kunci tetap di tangan kiri anatomis (kanan layar)
+ok 122 - jalan dua langkah berbeda; hadap kanan tanpa cermin CSS: kunci tetap di tangan kiri anatomis (kanan layar)
+  ---
+  duration_ms: 72.3077
+  type: 'test'
+  ...
+# Subtest: celemek krem bertepi & bertali jingga di SEMUA pose (identitas katering), juga versi kecil & polos
+ok 123 - celemek krem bertepi & bertali jingga di SEMUA pose (identitas katering), juga versi kecil & polos
+  ---
+  duration_ms: 36.6972
+  type: 'test'
+  ...
+# Subtest: duduk: celemek kain tipis di pangkuan (bukan bantal), condong 10-12° dari pinggul, kaki lebih pendek
+ok 124 - duduk: celemek kain tipis di pangkuan (bukan bantal), condong 10-12° dari pinggul, kaki lebih pendek
+  ---
+  duration_ms: 4.0633
+  type: 'test'
+  ...
+# Subtest: duduk-turun: bingkai antara berdiri ↔ duduk di kanvas berdiri (telapak di jangkar), pinggul setengah turun
+ok 125 - duduk-turun: bingkai antara berdiri ↔ duduk di kanvas berdiri (telapak di jangkar), pinggul setengah turun
+  ---
+  duration_ms: 14.4572
+  type: 'test'
+  ...
+# Subtest: bersedekap (kesal): tangan jauh terselip dengan ujung jari tampak, bukan ujung lengan runcing
+ok 126 - bersedekap (kesal): tangan jauh terselip dengan ujung jari tampak, bukan ujung lengan runcing
+  ---
+  duration_ms: 2.7108
+  type: 'test'
+  ...
+# Subtest: tangan berjari (bukan sarung tangan)
+ok 127 - tangan berjari (bukan sarung tangan)
+  ---
+  duration_ms: 1.412
+  type: 'test'
+  ...
+# Subtest: versi kecil menebalkan garis (terbaca di potret 32–52 px)
+ok 128 - versi kecil menebalkan garis (terbaca di potret 32–52 px)
+  ---
+  duration_ms: 2.9278
+  type: 'test'
+  ...
+# Subtest: semua pose × 8 ekspresi × 4 pandang × bicara/kedip/kecil: SVG sah, kanvas & jangkar kontrak, id berawalan
+ok 129 - semua pose × 8 ekspresi × 4 pandang × bicara/kedip/kecil: SVG sah, kanvas & jangkar kontrak, id berawalan
+  ---
+  duration_ms: 1774.3528
+  type: 'test'
+  ...
+# Subtest: lapisan tangan di atas meja: hanya pose duduk, id sendiri (tidak kembar dengan SVG utama), kelas lapis-tangan
+ok 130 - lapisan tangan di atas meja: hanya pose duduk, id sendiri (tidak kembar dengan SVG utama), kelas lapis-tangan
+  ---
+  duration_ms: 5.3398
+  type: 'test'
+  ...
+# Subtest: dua salinan dengan id berbeda tidak berbagi id; id bawaan tetap berawalan; deterministik
+ok 131 - dua salinan dengan id berbeda tidak berbagi id; id bawaan tetap berawalan; deterministik
+  ---
+  duration_ms: 2.7515
+  type: 'test'
+  ...
+# Subtest: hasil cache tidak rusak bila objek hasil diubah pemanggil
+ok 132 - hasil cache tidak rusak bila objek hasil diubah pemanggil
+  ---
+  duration_ms: 0.8071
+  type: 'test'
+  ...
+# Subtest: 8 ekspresi naskah → tepat 5 wajah yang berbeda; pandang, bicara, kedip, kecil mengubah gambar
+ok 133 - 8 ekspresi naskah → tepat 5 wajah yang berbeda; pandang, bicara, kedip, kecil mengubah gambar
+  ---
+  duration_ms: 29.878
+  type: 'test'
+  ...
+# Subtest: titik tangan untuk prop: semua pose duduk punya titik tangan di meja/telinga; tunjuk menunjuk kartu
+ok 134 - titik tangan untuk prop: semua pose duduk punya titik tangan di meja/telinga; tunjuk menunjuk kartu
+  ---
+  duration_ms: 4.5718
+  type: 'test'
+  ...
+# Subtest: dua kaki + dua sepatu di semua pose (sprite duduk tanpa meja tidak berkaki satu)
+ok 135 - dua kaki + dua sepatu di semua pose (sprite duduk tanpa meja tidak berkaki satu)
+  ---
+  duration_ms: 4.9766
+  type: 'test'
+  ...
+# Subtest: anggaran ukuran: SVG utama ≤ 54 KB per pose (sasaran ≤ 60), lapisan meja ≤ 14 KB
+ok 136 - anggaran ukuran: SVG utama ≤ 54 KB per pose (sasaran ≤ 60), lapisan meja ≤ 14 KB
+  ---
+  duration_ms: 22.2538
+  type: 'test'
+  ...
+# Subtest: bicara & kedip hanya mengubah wajah: badan, lengan, tangan & lapisan meja identik
+ok 137 - bicara & kedip hanya mengubah wajah: badan, lengan, tangan & lapisan meja identik
+  ---
+  duration_ms: 55.2524
+  type: 'test'
+  ...
+# Subtest: aturan potret: <= 52 px jendela kecil (kontrak dinaikkan 6) + kecil, <= 36 px mini; 53–75 px jendela sedang + kecil; 76+ px V3 normal
+ok 138 - aturan potret: <= 52 px jendela kecil (kontrak dinaikkan 6) + kecil, <= 36 px mini; 53–75 px jendela sedang + kecil; 76+ px V3 normal
+  ---
+  duration_ms: 10.7845
+  type: 'test'
+  ...
+# Subtest: potret per salinan: gambar TANPA id (satu entri cache) lalu awalanId → id unik per salinan, rujukan utuh
+ok 139 - potret per salinan: gambar TANPA id (satu entri cache) lalu awalanId → id unik per salinan, rujukan utuh
+  ---
+  duration_ms: 9.6409
+  type: 'test'
+  ...
+# Subtest: mata tetap punya iris + sorot di setiap wajah & pandang (juga lega/senyum + pandang bawah, versi normal & kecil)
+ok 140 - mata tetap punya iris + sorot di setiap wajah & pandang (juga lega/senyum + pandang bawah, versi normal & kecil)
+  ---
+  duration_ms: 74.9323
+  type: 'test'
+  ...
+# Subtest: potret: jendela JENDELA_POTRET_V3 dari pose duduk, versi kecil berbeda
+ok 141 - potret: jendela JENDELA_POTRET_V3 dari pose duduk, versi kecil berbeda
+  ---
+  duration_ms: 2.4119
+  type: 'test'
+  ...
+# Subtest: belum ada simpanan -> baru; simpan lalu muat bolak-balik utuh
+ok 142 - belum ada simpanan -> baru; simpan lalu muat bolak-balik utuh
+  ---
+  duration_ms: 5.214
+  type: 'test'
+  ...
+# Subtest: muatProgres tidak pernah menulis
+ok 143 - muatProgres tidak pernah menulis
+  ---
+  duration_ms: 0.7074
+  type: 'test'
+  ...
+# Subtest: JSON rusak / bentuk rusak -> tidakCocok rusak; data mentah tetap di tempat sampai Mulai ulang (dicadangkan)
+ok 144 - JSON rusak / bentuk rusak -> tidakCocok rusak; data mentah tetap di tempat sampai Mulai ulang (dicadangkan)
+  ---
+  duration_ms: 0.6784
+  type: 'test'
+  ...
+# Subtest: versi beda: tanpa migrasi -> tidakCocok versi; dengan migrasi -> lanjut (state dipetakan)
+ok 145 - versi beda: tanpa migrasi -> tidakCocok versi; dengan migrasi -> lanjut (state dipetakan)
+  ---
+  duration_ms: 25.9248
+  type: 'test'
+  ...
+# Subtest: node tersimpan tidak ada lagi -> tidakCocok node-hilang; titik cadangan yang hilang dilewati
+ok 146 - node tersimpan tidak ada lagi -> tidakCocok node-hilang; titik cadangan yang hilang dilewati
+  ---
+  duration_ms: 1.0451
+  type: 'test'
+  ...
+# Subtest: mulaiBaru mengarsipkan progres lama (tidak menghapus); maks 5 perjalanan biasa per episode; arsip episode lain utuh
+ok 147 - mulaiBaru mengarsipkan progres lama (tidak menghapus); maks 5 perjalanan biasa per episode; arsip episode lain utuh
+  ---
+  duration_ms: 6.7909
+  type: 'test'
+  ...
+# Subtest: progres yang tidak cocok diarsipkan, bukan ditimpa, oleh mulaiBaru maupun simpanProgres
+ok 148 - progres yang tidak cocok diarsipkan, bukan ditimpa, oleh mulaiBaru maupun simpanProgres
+  ---
+  duration_ms: 0.8908
+  type: 'test'
+  ...
+# Subtest: progres tidak cocok yang diarsipkan tidak pernah ikut dirotasi oleh perjalanan biasa (janji dialog pemulihan)
+ok 149 - progres tidak cocok yang diarsipkan tidak pernah ikut dirotasi oleh perjalanan biasa (janji dialog pemulihan)
+  ---
+  duration_ms: 5.874
+  type: 'test'
+  ...
+# Subtest: akhir yang ditemukan: tanpa duplikat, bertahan setelah mulai ulang
+ok 150 - akhir yang ditemukan: tanpa duplikat, bertahan setelah mulai ulang
+  ---
+  duration_ms: 0.7236
+  type: 'test'
+  ...
+# Subtest: localStorage diblokir total -> cadangan memori tetap berlaku selama tab terbuka
+ok 151 - localStorage diblokir total -> cadangan memori tetap berlaku selama tab terbuka
+  ---
+  duration_ms: 1.4739
+  type: 'test'
+  ...
+# Subtest: localStorage penuh: tulisan terbaru di memori yang dibaca, bukan data lama di disk
+ok 152 - localStorage penuh: tulisan terbaru di memori yang dibaca, bukan data lama di disk
+  ---
+  duration_ms: 0.6901
+  type: 'test'
+  ...
+# Subtest: berlangganan: pendengar dipanggil setiap penyimpanan berubah; berhenti setelah lepas
+ok 153 - berlangganan: pendengar dipanggil setiap penyimpanan berubah; berhenti setelah lepas
+  ---
+  duration_ms: 1.5467
+  type: 'test'
+  ...
+# Subtest: baris tersimpan melebihi baris terlihat node (naskah dipangkas) -> dijepit saat dimuat, cadangan juga; state lain utuh
+ok 154 - baris tersimpan melebihi baris terlihat node (naskah dipangkas) -> dijepit saat dimuat, cadangan juga; state lain utuh
+  ---
+  duration_ms: 0.4822
+  type: 'test'
+  ...
+# Subtest: AUTO-1 v2: simpanan lama di node yang kini lebih pendek dimuat, baris dijepit, dan "lanjut" maju (tidak macet)
+ok 155 - AUTO-1 v2: simpanan lama di node yang kini lebih pendek dimuat, baris dijepit, dan "lanjut" maju (tidak macet)
+  ---
+  duration_ms: 1.3213
+  type: 'test'
+  ...
+# Subtest: AUTO-1 v2: simpanan lama yang sempat memilih opsi pensiun ambang-tlo (umpan balik cabang 4) tetap dimuat & berlanjut
+ok 156 - AUTO-1 v2: simpanan lama yang sempat memilih opsi pensiun ambang-tlo (umpan balik cabang 4) tetap dimuat & berlanjut
+  ---
+  duration_ms: 2.4805
+  type: 'test'
+  ...
+# Subtest: AUTO-1 v2: kunci pensiun (baris & opsi yang dihapus) tetap terbaca di Riwayat lama, di id/en/zh
+ok 157 - AUTO-1 v2: kunci pensiun (baris & opsi yang dihapus) tetap terbaca di Riwayat lama, di id/en/zh
+  ---
+  duration_ms: 0.4647
+  type: 'test'
+  ...
+# Subtest: semua keadaan: Miss Raksa hadir; lokasi dikenal; pembicara selalu hadir (di bingkai atau lewat telepon)
+ok 158 - semua keadaan: Miss Raksa hadir; lokasi dikenal; pembicara selalu hadir (di bingkai atau lewat telepon)
+  ---
+  duration_ms: 1313.6475
+  type: 'test'
+  ...
+# Subtest: Bu Rina tidak ada sebelum narasi pintu, masuk tepat di narasi pintu, dan tetap di meja sampai naskah membuatnya pergi
+ok 159 - Bu Rina tidak ada sebelum narasi pintu, masuk tepat di narasi pintu, dan tetap di meja sampai naskah membuatnya pergi
+  ---
+  duration_ms: 32.048
+  type: 'test'
+  ...
+# Subtest: narasi pintu: aksi masuk, keduanya duduk berhadapan, kunci di meja, Miss Raksa menoleh ke Bu Rina
+ok 160 - narasi pintu: aksi masuk, keduanya duduk berhadapan, kunci di meja, Miss Raksa menoleh ke Bu Rina
+  ---
+  duration_ms: 0.9741
+  type: 'test'
+  ...
+# Subtest: adegan akhir: pergi lewat pintu, waktu berlalu, dan telepon beberapa hari kemudian (kursi kosong)
+ok 161 - adegan akhir: pergi lewat pintu, waktu berlalu, dan telepon beberapa hari kemudian (kursi kosong)
+  ---
+  duration_ms: 0.96
+  type: 'test'
+  ...
+# Subtest: lokasi: parkiran hanya di node parkiran bab 3; lokasi selalu sesuai latar node
+ok 162 - lokasi: parkiran hanya di node parkiran bab 3; lokasi selalu sesuai latar node
+  ---
+  duration_ms: 4.6857
+  type: 'test'
+  ...
+# Subtest: aksi: hanya di baris bercue aksi, kunci unik per (node, baris, langkah), tidak diputar lagi di baris berikutnya
+ok 163 - aksi: hanya di baris bercue aksi, kunci unik per (node, baris, langkah), tidak diputar lagi di baris berikutnya
+  ---
+  duration_ms: 26.5387
+  type: 'test'
+  ...
+# Subtest: aksi: ulang bab memutar aksi bab itu lagi dengan kunci baru; muat ulang tidak mengubah kunci
+ok 164 - aksi: ulang bab memutar aksi bab itu lagi dengan kunci baru; muat ulang tidak mengubah kunci
+  ---
+  duration_ms: 0.8163
+  type: 'test'
+  ...
+# Subtest: pembuka hanya pada awal episode baru; mulai ulang & ulang bab 1 langsung ke komposisi awal tanpa pembuka
+ok 165 - pembuka hanya pada awal episode baru; mulai ulang & ulang bab 1 langsung ke komposisi awal tanpa pembuka
+  ---
+  duration_ms: 2.5185
+  type: 'test'
+  ...
+# Subtest: ulang bab: tiap bab mulai dengan komposisi yang masuk akal (riwayat bab sebelumnya tetap menentukan kehadiran)
+ok 166 - ulang bab: tiap bab mulai dengan komposisi yang masuk akal (riwayat bab sebelumnya tetap menentukan kehadiran)
+  ---
+  duration_ms: 2.0767
+  type: 'test'
+  ...
+# Subtest: muat ulang: komposisi sama setelah JSON (simpan + muat) dan tidak bergantung bahasa (hanya id, tanpa teks)
+ok 167 - muat ulang: komposisi sama setelah JSON (simpan + muat) dan tidak bergantung bahasa (hanya id, tanpa teks)
+  ---
+  duration_ms: 621.0636
+  type: 'test'
+  ...
+# Subtest: pose: menyambut hanya di pembuka; duduk mendengar / menjelaskan (serius) / menunjuk kartu; bingkai aksi tidak pernah jadi komposisi
+ok 168 - pose: menyambut hanya di pembuka; duduk mendengar / menjelaskan (serius) / menunjuk kartu; bingkai aksi tidak pernah jadi komposisi
+  ---
+  duration_ms: 31.3646
+  type: 'test'
+  ...
+# Subtest: ekspresi: Bu Rina = ekspresiNasabah (netral sesudah lompatan waktu sampai ia bicara); Miss Raksa bicara = ekspresi barisnya, mendengarkan = cermin wajah Bu Rina
+ok 169 - ekspresi: Bu Rina = ekspresiNasabah (netral sesudah lompatan waktu sampai ia bicara); Miss Raksa bicara = ekspresi barisnya, mendengarkan = cermin wajah Bu Rina
+  ---
+  duration_ms: 22.4479
+  type: 'test'
+  ...
+# Subtest: arah pandang: pembicara menatap lawan bicaranya; pemain bicara -> keduanya ke pemain; narasi -> tatapan tetap
+ok 170 - arah pandang: pembicara menatap lawan bicaranya; pemain bicara -> keduanya ke pemain; narasi -> tatapan tetap
+  ---
+  duration_ms: 15.2802
+  type: 'test'
+  ...
+# Subtest: prop: kartu polis di meja sejak dibuka sampai waktu berlalu; kunci di meja selama Bu Rina duduk di meja
+ok 171 - prop: kartu polis di meja sejak dibuka sampai waktu berlalu; kunci di meja selama Bu Rina duduk di meja
+  ---
+  duration_ms: 26.9925
+  type: 'test'
+  ...
+# Subtest: episode tanpa panggung: perilaku v2 (nasabah hadir sejak bicara, pergi dari meja sesudah narasi epilog), tanpa aksi
+ok 172 - episode tanpa panggung: perilaku v2 (nasabah hadir sejak bicara, pergi dari meja sesudah narasi epilog), tanpa aksi
+  ---
+  duration_ms: 0.735
+  type: 'test'
+  ...
+# opsi polis kini: pasti-diganti, tidak-tercakup, bisa-dinilai | label ambang-tlo: Sesuai syarat kartu, kerusakan ini baru dijamin bila mencapai 75% nilai mobil.
+# Subtest: rincianOpsi: foto membantu / terlewat / kurang membantu + alasan
+ok 173 - rincianOpsi: foto membantu / terlewat / kurang membantu + alasan
+  ---
+  duration_ms: 2.1782
+  type: 'test'
+  ...
+# Subtest: rincianOpsi pilih-satu: tepat / keliru
+ok 174 - rincianOpsi pilih-satu: tepat / keliru
+  ---
+  duration_ms: 0.5499
+  type: 'test'
+  ...
+# Subtest: opsi yang sudah dihapus (ambang-tlo) tetap berlabel kalimat, bukan id
+ok 175 - opsi yang sudah dihapus (ambang-tlo) tetap berlabel kalimat, bukan id
+  ---
+  duration_ms: 0.8987
+  type: 'test'
+  ...
+# Subtest: perjalanan lama dengan ambang-tlo: umpan balik & Catatan kasus terbaca
+ok 176 - perjalanan lama dengan ambang-tlo: umpan balik & Catatan kasus terbaca
+  ---
+  duration_ms: 3.72
+  type: 'test'
+  ...
+# Subtest: artiKartu: kartu polis punya arti per baris (bila data v2 ada), kunci hilang = null
+ok 177 - artiKartu: kartu polis punya arti per baris (bila data v2 ada), kunci hilang = null
+  ---
+  duration_ms: 0.4169
+  type: 'test'
+  ...
+# Subtest: tokoh piksel: setiap pose x ekspresi x pandang cerita = gambar raster (frame atlas), satuan kanvas kelipatan 4, skala 1 & kisi di tempatnya
+ok 178 - tokoh piksel: setiap pose x ekspresi x pandang cerita = gambar raster (frame atlas), satuan kanvas kelipatan 4, skala 1 & kisi di tempatnya
+  ---
+  duration_ms: 35.1344
+  type: 'test'
+  ...
+# Subtest: Miss Raksa: pandang lawan/bawah = frame hadap kanan (ke Bu Rina / kartu), pemain/depan = hadap kiri (pemain), semua pose
+ok 179 - Miss Raksa: pandang lawan/bawah = frame hadap kanan (ke Bu Rina / kartu), pemain/depan = hadap kiri (pemain), semua pose
+  ---
+  duration_ms: 6.1448
+  type: 'test'
+  ...
+# Subtest: Miss Raksa duduk: garis meja frame di y garisMejaMentor (640, v5) di tempat duduknya; tangan di atas meja = kotak frame yang SAMA
+ok 180 - Miss Raksa duduk: garis meja frame di y garisMejaMentor (640, v5) di tempat duduknya; tangan di atas meja = kotak frame yang SAMA
+  ---
+  duration_ms: 17.1531
+  type: 'test'
+  ...
+# Subtest: percakapan setara (v5 komposisi meja): garis mata Miss Raksa duduk & Bu Rina duduk (semua gestur, condong) berselisih <= 4 piksel seni, di sekitar cakrawala
+ok 181 - percakapan setara (v5 komposisi meja): garis mata Miss Raksa duduk & Bu Rina duduk (semua gestur, condong) berselisih <= 4 piksel seni, di sekitar cakrawala
+  ---
+  duration_ms: 2.2326
+  type: 'test'
+  ...
+# Subtest: kamera: tangan Miss Raksa di atas meja (frame tanpa titik tangan di manifest) ikut kotak penting, jadi tidak jatuh ke pita label
+ok 182 - kamera: tangan Miss Raksa di atas meja (frame tanpa titik tangan di manifest) ikut kotak penting, jadi tidak jatuh ke pita label
+  ---
+  duration_ms: 1.3142
+  type: 'test'
+  ...
+# Subtest: kedip, mulut bicara & mata bawah hanya menambah lapisan wajah (kepala, tubuh, frame, jangkar tetap)
+ok 183 - kedip, mulut bicara & mata bawah hanya menambah lapisan wajah (kepala, tubuh, frame, jangkar tetap)
+  ---
+  duration_ms: 35.3421
+  type: 'test'
+  ...
+# Subtest: Bu Rina duduk: tubuh gestur per ekspresi (kesal lipat tangan, cemas genggam, bingung dagu, lega dada, lainnya duduk)
+ok 184 - Bu Rina duduk: tubuh gestur per ekspresi (kesal lipat tangan, cemas genggam, bingung dagu, lega dada, lainnya duduk)
+  ---
+  duration_ms: 0.9369
+  type: 'test'
+  ...
+# Subtest: kartu: ujung telunjuk Miss Raksa (duduk-tunjuk, mata ke kartu) di landasan kartu untuk setiap ekspresi
+ok 185 - kartu: ujung telunjuk Miss Raksa (duduk-tunjuk, mata ke kartu) di landasan kartu untuk setiap ekspresi
+  ---
+  duration_ms: 0.3638
+  type: 'test'
+  ...
+# Subtest: telepon: frame Miss Raksa memegang gagangnya sendiri -> pesawat di meja tanpa gagang (tempat tangan), juga bila cue menyebut meja
+ok 186 - telepon: frame Miss Raksa memegang gagangnya sendiri -> pesawat di meja tanpa gagang (tempat tangan), juga bila cue menyebut meja
+  ---
+  duration_ms: 37.9552
+  type: 'test'
+  ...
+# Subtest: jalan & pergi raster: jalan-a/jalan-b frame berbeda, hadap kanan dengan frame sendiri, berdiri-pergi = berdiri-kanan, bingkai duduk-turun
+ok 187 - jalan & pergi raster: jalan-a/jalan-b frame berbeda, hadap kanan dengan frame sendiri, berdiri-pergi = berdiri-kanan, bingkai duduk-turun
+  ---
+  duration_ms: 1.3982
+  type: 'test'
+  ...
+# Subtest: rencana masuk & pergi dengan tokoh raster: pose antara skala 1 di kisi piksel seni, salinan jalan raster pada jalur skala 1
+ok 188 - rencana masuk & pergi dengan tokoh raster: pose antara skala 1 di kisi piksel seni, salinan jalan raster pada jalur skala 1
+  ---
+  duration_ms: 4.1336
+  type: 'test'
+  ...
+# Subtest: cadangan: atlas GAGAL didekode / generator diganti / raster dimatikan / hasil null -> siluet seragam atau SVG, cerita tetap punya gambar
+ok 189 - cadangan: atlas GAGAL didekode / generator diganti / raster dimatikan / hasil null -> siluet seragam atau SVG, cerita tetap punya gambar
+  ---
+  duration_ms: 15.8326
+  type: 'test'
+  ...
+# Subtest: kamera tidak pernah memperlihatkan area di luar dunia, di semua ukuran kotak
+ok 190 - kamera tidak pernah memperlihatkan area di luar dunia, di semua ukuran kotak
+  ---
+  duration_ms: 1.4185
+  type: 'test'
+  ...
+# Subtest: jenis bingkai: <= 520 px = HP (dua tokoh dirapatkan), selain itu lebar
+ok 191 - jenis bingkai: <= 520 px = HP (dua tokoh dirapatkan), selain itu lebar
+  ---
+  duration_ms: 0.369
+  type: 'test'
+  ...
+# Subtest: bingkai lebar desktop memperlihatkan ruangan utuh dari panel bambu sampai pintu
+ok 192 - bingkai lebar desktop memperlihatkan ruangan utuh dari panel bambu sampai pintu
+  ---
+  duration_ms: 0.4868
+  type: 'test'
+  ...
+# Subtest: bingkai HP dirapatkan pada dua tokoh: skala lebih besar daripada seluruh dunia yang diperkecil
+ok 193 - bingkai HP dirapatkan pada dua tokoh: skala lebih besar daripada seluruh dunia yang diperkecil
+  ---
+  duration_ms: 0.6134
+  type: 'test'
+  ...
+# Subtest: kepala & tangan kedua tokoh utuh di atas pita bawah (label/tombol) pada semua ukuran
+ok 194 - kepala & tangan kedua tokoh utuh di atas pita bawah (label/tombol) pada semua ukuran
+  ---
+  duration_ms: 6.0261
+  type: 'test'
+  ...
+# Subtest: inti lebih besar dari bingkai: skala diperkecil supaya inti muat, atas (kepala) diutamakan
+ok 195 - inti lebih besar dari bingkai: skala diperkecil supaya inti muat, atas (kepala) diutamakan
+  ---
+  duration_ms: 0.1476
+  type: 'test'
+  ...
+# Subtest: bingkai dengan pintu memperluas ke kanan untuk kedatangan (HP), tanpa mengubah bingkai lebar
+ok 196 - bingkai dengan pintu memperluas ke kanan untuk kedatangan (HP), tanpa mengubah bingkai lebar
+  ---
+  duration_ms: 0.1455
+  type: 'test'
+  ...
+# Subtest: transform kamera: translate lalu scale dengan origin 0 0
+ok 197 - transform kamera: translate lalu scale dengan origin 0 0
+  ---
+  duration_ms: 0.124
+  type: 'test'
+  ...
+# Subtest: piksel bulat: k per DPR 1/1,25/1,5/2/3 pada kotak 1440x900, 1920x1080, 390x844, 360x740, 844x390 (kotak sintetis)
+ok 198 - piksel bulat: k per DPR 1/1,25/1,5/2/3 pada kotak 1440x900, 1920x1080, 390x844, 360x740, 844x390 (kotak sintetis)
+  ---
+  duration_ms: 0.6418
+  type: 'test'
+  ...
+# Subtest: piksel bulat: skala x 4 x dpr bulat >= 1, wajib utuh di atas pita, terjemahan di piksel perangkat, k terbesar yang sah
+ok 199 - piksel bulat: skala x 4 x dpr bulat >= 1, wajib utuh di atas pita, terjemahan di piksel perangkat, k terbesar yang sah
+  ---
+  duration_ms: 1.0106
+  type: 'test'
+  ...
+# Subtest: piksel bulat: letterbox hanya bila k bulat membuat pandangan lebih besar daripada dunia (1440x900 dpr 1 vs 1,25)
+ok 200 - piksel bulat: letterbox hanya bila k bulat membuat pandangan lebih besar daripada dunia (1440x900 dpr 1 vs 1,25)
+  ---
+  duration_ms: 0.1878
+  type: 'test'
+  ...
+# Subtest: piksel bulat: tanpa opsi piksel kamera tidak berubah; kameraUntuk ruang SVG + tokoh SVG mengabaikan dpr
+ok 201 - piksel bulat: tanpa opsi piksel kamera tidak berubah; kameraUntuk ruang SVG + tokoh SVG mengabaikan dpr
+  ---
+  duration_ms: 33.2934
+  type: 'test'
+  ...
+# Subtest: piksel bulat: ruang SVG (PNG ruang gagal) + tokoh RASTER = kamera tetap k bulat, kepala & tangan utuh
+ok 202 - piksel bulat: ruang SVG (PNG ruang gagal) + tokoh RASTER = kamera tetap k bulat, kepala & tangan utuh
+  ---
+  duration_ms: 1.4526
+  type: 'test'
+  ...
+# Subtest: piksel bulat: kameraUntuk ruang raster = k bulat, kepala + tangan + papan nama utuh; bingkai kedatangan memuat pintu
+ok 203 - piksel bulat: kameraUntuk ruang raster = k bulat, kepala + tangan + papan nama utuh; bingkai kedatangan memuat pintu
+  ---
+  duration_ms: 1.3686
+  type: 'test'
+  ...
+# Subtest: piksel bulat: asal kotak panggung di pecahan piksel perangkat (mis. tepi 1 px pada dpr 1,5): asal + terjemahan bulat
+ok 204 - piksel bulat: asal kotak panggung di pecahan piksel perangkat (mis. tepi 1 px pada dpr 1,5): asal + terjemahan bulat
+  ---
+  duration_ms: 0.9887
+  type: 'test'
+  ...
+# Subtest: qPiksel & pikselPerSeni
+ok 205 - qPiksel & pikselPerSeni
+  ---
+  duration_ms: 0.1479
+  type: 'test'
+  ...
+# Subtest: kedatangan & kepergian (mode piksel): skala piksel = kamera percakapan, tidak pernah menjauh ke seluruh ruangan
+ok 206 - kedatangan & kepergian (mode piksel): skala piksel = kamera percakapan, tidak pernah menjauh ke seluruh ruangan
+  ---
+  duration_ms: 2.3325
+  type: 'test'
+  ...
+# Subtest: kedatangan (mode piksel): kepala Miss Raksa mempersilakan + Bu Rina berdiri utuh (rapat), sebagian pintu tampak di HP; desktop = kamera percakapan
+ok 207 - kedatangan (mode piksel): kepala Miss Raksa mempersilakan + Bu Rina berdiri utuh (rapat), sebagian pintu tampak di HP; desktop = kamera percakapan
+  ---
+  duration_ms: 1.6974
+  type: 'test'
+  ...
+# Subtest: kepergian (mode piksel): Miss Raksa yang tetap duduk (kepala + tangan di meja) utuh
+ok 208 - kepergian (mode piksel): Miss Raksa yang tetap duduk (kepala + tangan di meja) utuh
+  ---
+  duration_ms: 0.86
+  type: 'test'
+  ...
+# Subtest: letterbox mendatar ruang layanan RATA KANAN: tepi kanan dunia (pintu) = tepi kanan panggung, perpanjangan tepi hanya di kiri
+ok 209 - letterbox mendatar ruang layanan RATA KANAN: tepi kanan dunia (pintu) = tepi kanan panggung, perpanjangan tepi hanya di kiri
+  ---
+  duration_ms: 0.3189
+  type: 'test'
+  ...
+# Subtest: rencana kedatangan HP (390/360/844 dpr 2, 390 dpr 3): skala kamera tidak pernah di bawah skala percakapan & tidak bolak-balik
+ok 210 - rencana kedatangan HP (390/360/844 dpr 2, 390 dpr 3): skala kamera tidak pernah di bawah skala percakapan & tidak bolak-balik
+  ---
+  duration_ms: 3.3706
+  type: 'test'
+  ...
+# Subtest: kedatangan HP sempit (mode piksel): bingkai PINTU dulu = seluruh bukaan tampak, skala & tinggi sama dengan bingkai kedatangan; desktop & HP lebar tanpa bingkai pintu
+ok 211 - kedatangan HP sempit (mode piksel): bingkai PINTU dulu = seluruh bukaan tampak, skala & tinggi sama dengan bingkai kedatangan; desktop & HP lebar tanpa bingkai pintu
+  ---
+  duration_ms: 2.0368
+  type: 'test'
+  ...
+# Subtest: rencana kedatangan HP sempit: sambutan -> bingkai pintu (pintu masih tertutup) -> hanya ke kiri: bingkai kedatangan -> percakapan, skala sama; desktop tanpa bingkai pintu
+ok 212 - rencana kedatangan HP sempit: sambutan -> bingkai pintu (pintu masih tertutup) -> hanya ke kiri: bingkai kedatangan -> percakapan, skala sama; desktop tanpa bingkai pintu
+  ---
+  duration_ms: 4.2523
+  type: 'test'
+  ...
+# Subtest: kepergian HP (v5.1): satu geser ke bingkai kepergian lalu DIAM (tanpa kembali di ujung gerak); bingkai percakapan kembali di baris berikutnya; desktop tanpa perubahan
+ok 213 - kepergian HP (v5.1): satu geser ke bingkai kepergian lalu DIAM (tanpa kembali di ujung gerak); bingkai percakapan kembali di baris berikutnya; desktop tanpa perubahan
+  ---
+  duration_ms: 36.8463
+  type: 'test'
+  ...
+# Subtest: percakapan di meja (mode piksel): SATU kamera untuk semua baris duduk (tunjuk kartu, condong, kursi kosong), k percakapan tetap
+ok 214 - percakapan di meja (mode piksel): SATU kamera untuk semua baris duduk (tunjuk kartu, condong, kursi kosong), k percakapan tetap
+  ---
+  duration_ms: 2.451
+  type: 'test'
+  ...
+# Subtest: percakapan di meja (mode piksel): Miss Raksa + landasan kartu di atas pita label; Bu Rina utuh di panggung & tidak di bawah label suasana (kiri)
+ok 215 - percakapan di meja (mode piksel): Miss Raksa + landasan kartu di atas pita label; Bu Rina utuh di panggung & tidak di bawah label suasana (kiri)
+  ---
+  duration_ms: 2.9171
+  type: 'test'
+  ...
+# Subtest: manifest ruang: lapisan raster (dunia & piksel), pintu, kursi, papan nama, URL & warna tepi
+ok 216 - manifest ruang: lapisan raster (dunia & piksel), pintu, kursi, papan nama, URL & warna tepi
+  ---
+  duration_ms: 2.9644
+  type: 'test'
+  ...
+# Subtest: manifest ruang: data cacat dilewati dengan catatan, tidak pernah melempar
+ok 217 - manifest ruang: data cacat dilewati dengan catatan, tidak pernah melempar
+  ---
+  duration_ms: 0.7316
+  type: 'test'
+  ...
+# Subtest: pikselDari: hanya potongan yang lengkap; sidikGambar membedakan raster (svg kosong)
+ok 218 - pikselDari: hanya potongan yang lengkap; sidikGambar membedakan raster (svg kosong)
+  ---
+  duration_ms: 0.3893
+  type: 'test'
+  ...
+# Subtest: tokoh raster: skala 1, sudut kiri-atas di kisi 4 satuan; kepala memakai kepalaTinggi gambar
+ok 219 - tokoh raster: skala 1, sudut kiri-atas di kisi 4 satuan; kepala memakai kepalaTinggi gambar
+  ---
+  duration_ms: 0.4524
+  type: 'test'
+  ...
+# Subtest: klip tangan di atas meja: jalur gabungan kotak; tanpa kotak = null
+ok 220 - klip tangan di atas meja: jalur gabungan kotak; tanpa kotak = null
+  ---
+  duration_ms: 0.3236
+  type: 'test'
+  ...
+# Subtest: URL yang didekode sebelum tampil: ruang + tokoh raster + varian di PNG lain, tanpa duplikat
+ok 221 - URL yang didekode sebelum tampil: ruang + tokoh raster + varian di PNG lain, tanpa duplikat
+  ---
+  duration_ms: 0.5002
+  type: 'test'
+  ...
+# Subtest: markup potongan (kartu episode): viewBox = sumber, nearest-neighbour atribut + CSS, URL di-escape
+ok 222 - markup potongan (kartu episode): viewBox = sumber, nearest-neighbour atribut + CSS, URL di-escape
+  ---
+  duration_ms: 0.2408
+  type: 'test'
+  ...
+# Subtest: manifest bentuk A (satu PNG per lapisan): lapisan, pintu + engsel, papan dipanggang, tempat, prop
+ok 223 - manifest bentuk A (satu PNG per lapisan): lapisan, pintu + engsel, papan dipanggang, tempat, prop
+  ---
+  duration_ms: 0.7831
+  type: 'test'
+  ...
+# Subtest: manifest bentuk A: lapisan berskala pecahan (w != pw x 4) dilewati
+ok 224 - manifest bentuk A: lapisan berskala pecahan (w != pw x 4) dilewati
+  ---
+  duration_ms: 0.632
+  type: 'test'
+  ...
+# Subtest: manifest seni/piksel/ruang.json yang terpasang (bila ada) terbaca utuh tanpa catatan
+ok 225 - manifest seni/piksel/ruang.json yang terpasang (bila ada) terbaca utuh tanpa catatan
+  ---
+  duration_ms: 5.2444
+  type: 'test'
+  ...
+# Subtest: tempelan (lapisan wajah) gambar raster: dibaca aman, ikut sidik, URL, dan markup
+ok 226 - tempelan (lapisan wajah) gambar raster: dibaca aman, ikut sidik, URL, dan markup
+  ---
+  duration_ms: 4.3974
+  type: 'test'
+  ...
+# Subtest: kf: titik 0 & T ditambahkan, lompatan di waktu sama dipertahankan, easing per segmen
+ok 227 - kf: titik 0 & T ditambahkan, lompatan di waktu sama dipertahankan, easing per segmen
+  ---
+  duration_ms: 1.8141
+  type: 'test'
+  ...
+# Subtest: titik jalur mengikuti jarak (bukan jumlah titik) dan skala diinterpolasi
+ok 228 - titik jalur mengikuti jarak (bukan jumlah titik) dan skala diinterpolasi
+  ---
+  duration_ms: 0.3312
+  type: 'test'
+  ...
+# Subtest: jalan: pose a/b bergantian (tidak pernah keduanya terlihat), berakhir di ujung jalur
+ok 229 - jalan: pose a/b bergantian (tidak pernah keduanya terlihat), berakhir di ujung jalur
+  ---
+  duration_ms: 0.6953
+  type: 'test'
+  ...
+# Subtest: kedatangan: pintu, jalan, pindah lapisan, duduk, mentor mempersilakan lalu duduk, tombol lewati
+ok 230 - kedatangan: pintu, jalan, pindah lapisan, duduk, mentor mempersilakan lalu duduk, tombol lewati
+  ---
+  duration_ms: 13.0799
+  type: 'test'
+  ...
+# Subtest: kedatangan: mentor yang sudah duduk berdiri mempersilakan lalu duduk lagi, tanpa badan ganda
+ok 231 - kedatangan: mentor yang sudah duduk berdiri mempersilakan lalu duduk lagi, tanpa badan ganda
+  ---
+  duration_ms: 22.9369
+  type: 'test'
+  ...
+# Subtest: kedatangan tanpa jalur/pintu (lokasi tanpa pintu) = silang-pudar biasa, tanpa tombol lewati
+ok 232 - kedatangan tanpa jalur/pintu (lokasi tanpa pintu) = silang-pudar biasa, tanpa tombol lewati
+  ---
+  duration_ms: 0.8766
+  type: 'test'
+  ...
+# Subtest: kepergian: berdiri, berjalan ke pintu (hadap kanan; cermin hanya cadangan), keluar, pintu menutup, kursi kosong
+ok 233 - kepergian: berdiri, berjalan ke pintu (hadap kanan; cermin hanya cadangan), keluar, pintu menutup, kursi kosong
+  ---
+  duration_ms: 7.4105
+  type: 'test'
+  ...
+# Subtest: kartu polis muncul di tepi dekat meja di sisi pemain, meluncur ke tengah meja; Miss Raksa menunjuk SESUDAH kartu mendarat
+ok 234 - kartu polis muncul di tepi dekat meja di sisi pemain, meluncur ke tengah meja; Miss Raksa menunjuk SESUDAH kartu mendarat
+  ---
+  duration_ms: 3.2297
+  type: 'test'
+  ...
+# Subtest: kartu: titik simpan ruang v3 di sisi pemain (tepi dekat meja, kiri kamera, di dalam potongan HP x >= 430)
+ok 235 - kartu: titik simpan ruang v3 di sisi pemain (tepi dekat meja, kiri kamera, di dalam potongan HP x >= 430)
+  ---
+  duration_ms: 12.1851
+  type: 'test'
+  ...
+# Subtest: kartu (ruang & tokoh PIKSEL): tidak melintas di bawah tangan Miss Raksa yang bertumpu di meja, bingkai demi bingkai
+ok 236 - kartu (ruang & tokoh PIKSEL): tidak melintas di bawah tangan Miss Raksa yang bertumpu di meja, bingkai demi bingkai
+  ---
+  duration_ms: 969.6356
+  type: 'test'
+  ...
+# Subtest: kartu di baris yang juga pindah lokasi (parkiran -> meja): larut dulu, lalu kartu meluncur dari sisi pemain & Miss Raksa menunjuk sesudah mendarat
+ok 237 - kartu di baris yang juga pindah lokasi (parkiran -> meja): larut dulu, lalu kartu meluncur dari sisi pemain & Miss Raksa menunjuk sesudah mendarat
+  ---
+  duration_ms: 2.2345
+  type: 'test'
+  ...
+# Subtest: ganti antarbaris: ekspresi/pose di tempat = langsung berganti + angguk <= 240 ms (tanpa badan lama); tidak berubah = tanpa rencana
+ok 238 - ganti antarbaris: ekspresi/pose di tempat = langsung berganti + angguk <= 240 ms (tanpa badan lama); tidak berubah = tanpa rencana
+  ---
+  duration_ms: 0.8699
+  type: 'test'
+  ...
+# Subtest: epilog telepon: kursi kosong, sisipan panggilan muncul, Bu Rina tidak duduk di kantor
+ok 239 - epilog telepon: kursi kosong, sisipan panggilan muncul, Bu Rina tidak duduk di kantor
+  ---
+  duration_ms: 0.9259
+  type: 'test'
+  ...
+# Subtest: pindah lokasi di ruang yang sama (meja -> telepon): Miss Raksa tetap di kursinya, tidak ikut larut, pose ditukar saat larut selesai
+ok 240 - pindah lokasi di ruang yang sama (meja -> telepon): Miss Raksa tetap di kursinya, tidak ikut larut, pose ditukar saat larut selesai
+  ---
+  duration_ms: 2.1553
+  type: 'test'
+  ...
+# Subtest: tukar berdiri <-> duduk di tempat berbeda: jarak mendatar dibagi dua (pose lama bergeser, pose baru meluncur masuk), tanpa lompatan
+ok 241 - tukar berdiri <-> duduk di tempat berbeda: jarak mendatar dibagi dua (pose lama bergeser, pose baru meluncur masuk), tanpa lompatan
+  ---
+  duration_ms: 0.257
+  type: 'test'
+  ...
+# Subtest: penggal: tepat satu badan terlihat, antisipasi di akhir penggal, menetap ke posisi di awal penggal berikutnya
+ok 242 - penggal: tepat satu badan terlihat, antisipasi di akhir penggal, menetap ke posisi di awal penggal berikutnya
+  ---
+  duration_ms: 0.3094
+  type: 'test'
+  ...
+# Subtest: pembuka: dorongan kamera ± 1,65 dtk + larut ± 0,45 dtk, eksterior opsional menambah 1,3 dtk, bisa dilewati
+ok 243 - pembuka: dorongan kamera ± 1,65 dtk + larut ± 0,45 dtk, eksterior opsional menambah 1,3 dtk, bisa dilewati
+  ---
+  duration_ms: 0.2407
+  type: 'test'
+  ...
+# Subtest: komposisiBerikut: pratinjau murni sesudah Lanjut / tiap pilihan tersedia; state tidak berubah
+ok 244 - komposisiBerikut: pratinjau murni sesudah Lanjut / tiap pilihan tersedia; state tidak berubah
+  ---
+  duration_ms: 2.016
+  type: 'test'
+  ...
+# Subtest: kunciOpsi: tidak bergantung urutan properti; false/undefined = tidak ada
+ok 245 - kunciOpsi: tidak bergantung urutan properti; false/undefined = tidak ada
+  ---
+  duration_ms: 0.1383
+  type: 'test'
+  ...
+# Subtest: opsiPanas: memuat SEMUA gambar yang diminta transisi kedatangan sungguhan (pose akhir, rencana, pejalan, kedip)
+ok 246 - opsiPanas: memuat SEMUA gambar yang diminta transisi kedatangan sungguhan (pose akhir, rencana, pejalan, kedip)
+  ---
+  duration_ms: 1.9656
+  type: 'test'
+  ...
+# Subtest: opsiPanas: epilog telepon memanaskan potret sisipan (versi kecil sesuai aturan ukuran)
+ok 247 - opsiPanas: epilog telepon memanaskan potret sisipan (versi kecil sesuai aturan ukuran)
+  ---
+  duration_ms: 1.4462
+  type: 'test'
+  ...
+# Subtest: pabrikTransisi: aksi dari komposisi KINI, bukan dari susunan yang dimemo (baris beraksi dengan gambar sama tetap memutar aksinya)
+ok 248 - pabrikTransisi: aksi dari komposisi KINI, bukan dari susunan yang dimemo (baris beraksi dengan gambar sama tetap memutar aksinya)
+  ---
+  duration_ms: 0.7059
+  type: 'test'
+  ...
+# Subtest: kedatangan dengan bingkai antara: berdiri -> duduk-turun (± 140 md) -> duduk, satu badan, kunci ke meja bersama duduk-turun
+ok 249 - kedatangan dengan bingkai antara: berdiri -> duduk-turun (± 140 md) -> duduk, satu badan, kunci ke meja bersama duduk-turun
+  ---
+  duration_ms: 5.0647
+  type: 'test'
+  ...
+# Subtest: kepergian dengan bingkai antara: duduk -> duduk-turun -> berdiri berbalik, satu badan, kunci diambil saat bangkit
+ok 250 - kepergian dengan bingkai antara: duduk -> duduk-turun -> berdiri berbalik, satu badan, kunci diambil saat bangkit
+  ---
+  duration_ms: 4.7544
+  type: 'test'
+  ...
+# Subtest: pabrikTransisi: dukungan duduk-turun dicek hanya untuk aksi masuk/pergi, lalu diteruskan ke rencana
+ok 251 - pabrikTransisi: dukungan duduk-turun dicek hanya untuk aksi masuk/pergi, lalu diteruskan ke rencana
+  ---
+  duration_ms: 0.7829
+  type: 'test'
+  ...
+# Subtest: kedatangan dengan bingkai antara Miss Raksa: persilakan -> duduk-turun (tahan singkat) -> duduk, satu badan, kepala bersambung
+ok 252 - kedatangan dengan bingkai antara Miss Raksa: persilakan -> duduk-turun (tahan singkat) -> duduk, satu badan, kepala bersambung
+  ---
+  duration_ms: 5.608
+  type: 'test'
+  ...
+# Subtest: kartu episode (/cerita): potongan ruang v3 memuat papan nama utuh + kepala Bu Rina, HP lebar & kolom desktop; SVG diam
+ok 253 - kartu episode (/cerita): potongan ruang v3 memuat papan nama utuh + kepala Bu Rina, HP lebar & kolom desktop; SVG diam
+  ---
+  duration_ms: 4.504
+  type: 'test'
+  ...
+# Subtest: rencana berjalan dengan durasi sama & fill both, lalu selesai sendiri tepat sekali
+ok 254 - rencana berjalan dengan durasi sama & fill both, lalu selesai sendiri tepat sekali
+  ---
+  duration_ms: 1.685
+  type: 'test'
+  ...
+# Subtest: selesaikan di tengah (Lanjut / Lewati pembuka) = komposisi akhir seketika, selesai sekali, timer lama mati
+ok 255 - selesaikan di tengah (Lanjut / Lewati pembuka) = komposisi akhir seketika, selesai sekali, timer lama mati
+  ---
+  duration_ms: 0.2977
+  type: 'test'
+  ...
+# Subtest: rencana baru menggantikan: yang lama dibatalkan TANPA memanggil selesai-nya; timer lama tidak menyelesaikan yang baru
+ok 256 - rencana baru menggantikan: yang lama dibatalkan TANPA memanggil selesai-nya; timer lama tidak menyelesaikan yang baru
+  ---
+  duration_ms: 0.9206
+  type: 'test'
+  ...
+# Subtest: dipaskan ulang (tinggi kotak berubah sedikit): rencana dilanjutkan dari posisinya, selesai tepat sekali di akhir durasi
+ok 257 - dipaskan ulang (tinggi kotak berubah sedikit): rencana dilanjutkan dari posisinya, selesai tepat sekali di akhir durasi
+  ---
+  duration_ms: 0.3981
+  type: 'test'
+  ...
+# Subtest: hentikan (unmount) membersihkan tanpa callback; animator yang melempar tidak menghentikan panggung
+ok 258 - hentikan (unmount) membersihkan tanpa callback; animator yang melempar tidak menghentikan panggung
+  ---
+  duration_ms: 0.2037
+  type: 'test'
+  ...
+# Subtest: kedip: terjadwal 3-6 dtk per tokoh, tidak serempak, 120 md; dijeda saat tab tersembunyi; henti melepas timer
+ok 259 - kedip: terjadwal 3-6 dtk per tokoh, tidak serempak, 120 md; dijeda saat tab tersembunyi; henti melepas timer
+  ---
+  duration_ms: 0.7347
+  type: 'test'
+  ...
+# Subtest: mulut bicara: bergantian hanya selama bicara, tokoh yang bicara tidak berkedip, berhenti = mulut tertutup
+ok 260 - mulut bicara: bergantian hanya selama bicara, tokoh yang bicara tidak berkedip, berhenti = mulut tertutup
+  ---
+  duration_ms: 0.4873
+  type: 'test'
+  ...
+# Subtest: pola mulut: salinan terbuka & tertutup tidak pernah terlihat bersamaan
+ok 261 - pola mulut: salinan terbuka & tertutup tidak pernah terlihat bersamaan
+  ---
+  duration_ms: 0.1096
+  type: 'test'
+  ...
+# Subtest: jalankanSaatIdle: satu langkah per giliran sempit, beberapa bila longgar, selesai = tanpa giliran lagi
+ok 262 - jalankanSaatIdle: satu langkah per giliran sempit, beberapa bila longgar, selesai = tanpa giliran lagi
+  ---
+  duration_ms: 0.5252
+  type: 'test'
+  ...
+# Subtest: jalankanSaatIdle: batal menghentikan langkah berikutnya; langkah yang melempar menghentikan tanpa galat
+ok 263 - jalankanSaatIdle: batal menghentikan langkah berikutnya; langkah yang melempar menghentikan tanpa galat
+  ---
+  duration_ms: 0.5822
+  type: 'test'
+  ...
+# Subtest: kedip: salinan kedip yang basi (data-basi, belum diperbarui untuk pose kini) tidak pernah dikedipkan
+ok 264 - kedip: salinan kedip yang basi (data-basi, belum diperbarui untuk pose kini) tidak pernah dikedipkan
+  ---
+  duration_ms: 1.832
+  type: 'test'
+  ...
+# Subtest: kedip yang sedang berjalan dibatalkan saat gambar berganti (batalKedip); jadwal kedip tetap
+ok 265 - kedip yang sedang berjalan dibatalkan saat gambar berganti (batalKedip); jadwal kedip tetap
+  ---
+  duration_ms: 0.3023
+  type: 'test'
+  ...
+# Subtest: rencana ditahan (tunggu): keadaan awal sampai dua bingkai berturut-turut < SELA_LANCAR, baru jam animasi & timer selesai berjalan
+ok 266 - rencana ditahan (tunggu): keadaan awal sampai dua bingkai berturut-turut < SELA_LANCAR, baru jam animasi & timer selesai berjalan
+  ---
+  duration_ms: 0.4031
+  type: 'test'
+  ...
+# Subtest: rencana ditahan: batas TUNGGU_MAKS; selesaikan/hentikan saat ditahan membatalkan permintaan bingkai
+ok 267 - rencana ditahan: batas TUNGGU_MAKS; selesaikan/hentikan saat ditahan membatalkan permintaan bingkai
+  ---
+  duration_ms: 0.2569
+  type: 'test'
+  ...
+# Subtest: ringkasan akhir: perasaan akhir = ucapan terakhir nasabah di epilog; akhir campuran/buruk tidak berwajah lega
+ok 268 - ringkasan akhir: perasaan akhir = ucapan terakhir nasabah di epilog; akhir campuran/buruk tidak berwajah lega
+  ---
+  duration_ms: 132.7079
+  type: 'test'
+  ...
+# Subtest: akhir "janji" & "tertunda": dua keadaan (tenang saat pulang, kesal sesudahnya), bukan "Tenang" saja
+ok 269 - akhir "janji" & "tertunda": dua keadaan (tenang saat pulang, kesal sesudahnya), bukan "Tenang" saja
+  ---
+  duration_ms: 1.3725
+  type: 'test'
+  ...
+# Subtest: panggung: nasabah tidak lagi berdiri di meja sesudah narasi di epilog (telepon beberapa hari kemudian)
+ok 270 - panggung: nasabah tidak lagi berdiri di meja sesudah narasi di epilog (telepon beberapa hari kemudian)
+  ---
+  duration_ms: 2.4821
+  type: 'test'
+  ...
+# Subtest: panggung (v3): Bu Rina hadir sejak narasi pintu terbuka (cue masuk), bukan baru saat ia mulai bicara
+ok 271 - panggung (v3): Bu Rina hadir sejak narasi pintu terbuka (cue masuk), bukan baru saat ia mulai bicara
+  ---
+  duration_ms: 1.3392
+  type: 'test'
+  ...
+# Subtest: panggung: label suasana mengikuti wajah yang tampil (ralat-polis: kesal, bukan "Tenang")
+ok 272 - panggung: label suasana mengikuti wajah yang tampil (ralat-polis: kesal, bukan "Tenang")
+  ---
+  duration_ms: 0.672
+  type: 'test'
+  ...
+# Subtest: catatan kasus: aktivitas berstatus; pilihan keliru ditandai salah; ralat & kelengkapan ditandai diperbaiki
+ok 273 - catatan kasus: aktivitas berstatus; pilihan keliru ditandai salah; ralat & kelengkapan ditandai diperbaiki
+  ---
+  duration_ms: 2.4129
+  type: 'test'
+  ...
+# Subtest: catatan kasus: kartu polis terbaca sejak aktivitasnya dimulai, juga setelah salah membaca
+ok 274 - catatan kasus: kartu polis terbaca sejak aktivitasnya dimulai, juga setelah salah membaca
+  ---
+  duration_ms: 0.8298
+  type: 'test'
+  ...
+# Subtest: kartu akhir: jalur janjikan menonjolkan janji waktu (kalimat brief), wajah kecewa sesudahnya, ulang dari Menutup
+ok 275 - kartu akhir: jalur janjikan menonjolkan janji waktu (kalimat brief), wajah kecewa sesudahnya, ulang dari Menutup
+  ---
+  duration_ms: 7.9205
+  type: 'test'
+  ...
+# Subtest: kartu akhir: tiap akhir & jalur pemulihan memakai aturan yang sesuai keputusannya
+ok 276 - kartu akhir: tiap akhir & jalur pemulihan memakai aturan yang sesuai keputusannya
+  ---
+  duration_ms: 4.6588
+  type: 'test'
+  ...
+# Subtest: kartu akhir: tidak bergantung pada angka kepercayaan atau urutan alasan
+ok 277 - kartu akhir: tidak bergantung pada angka kepercayaan atau urutan alasan
+  ---
+  duration_ms: 3.5416
+  type: 'test'
+  ...
+# Subtest: tinjauan: janji yang menenangkan tetap perlu diperhatikan; langkah keliru tidak dimaafkan
+ok 278 - tinjauan: janji yang menenangkan tetap perlu diperhatikan; langkah keliru tidak dimaafkan
+  ---
+  duration_ms: 1.4074
+  type: 'test'
+  ...
+# Subtest: tinjauan: kekeliruan yang sudah diperbaiki tampil sebagai ralat, bukan belum beres
+ok 279 - tinjauan: kekeliruan yang sudah diperbaiki tampil sebagai ralat, bukan belum beres
+  ---
+  duration_ms: 7.858
+  type: 'test'
+  ...
+# Subtest: tinjauan: bukti yang kurang tidak tampil lengkap; langkah yang tidak dilakukan tampil belum dilakukan
+ok 280 - tinjauan: bukti yang kurang tidak tampil lengkap; langkah yang tidak dilakukan tampil belum dilakukan
+  ---
+  duration_ms: 0.7368
+  type: 'test'
+  ...
+# Subtest: kartu akhir: semua keadaan akhir terjangkau punya aturan, titik ulang, dan tinjauan yang jujur
+ok 281 - kartu akhir: semua keadaan akhir terjangkau punya aturan, titik ulang, dan tinjauan yang jujur
+  ---
+  duration_ms: 659.0299
+  type: 'test'
+  ...
+# Subtest: kartu akhir: pelajaran 15-25 kata, kalimat sebab & judul ringkas (bahasa Indonesia)
+ok 282 - kartu akhir: pelajaran 15-25 kata, kalimat sebab & judul ringkas (bahasa Indonesia)
+  ---
+  duration_ms: 1.7855
+  type: 'test'
+  ...
+# Subtest: tinjauan: akhir yang belum baik tidak pernah ditulis "tidak ada yang tertinggal"
+ok 283 - tinjauan: akhir yang belum baik tidak pernah ditulis "tidak ada yang tertinggal"
+  ---
+  duration_ms: 243.8183
+  type: 'test'
+  ...
+# Subtest: fixture sah: validasiEpisode = []
+ok 284 - fixture sah: validasiEpisode = []
+  ---
+  duration_ms: 14.6424
+  type: 'test'
+  ...
+# Subtest: rujukan node hilang
+ok 285 - rujukan node hilang
+  ---
+  duration_ms: 3.6608
+  type: 'test'
+  ...
+# Subtest: rujukan lain: pembicara, ekspresi, latar, bab, paham, proses, catatan, aktivitas, akhir, id node
+ok 286 - rujukan lain: pembicara, ekspresi, latar, bab, paham, proses, catatan, aktivitas, akhir, id node
+  ---
+  duration_ms: 0.9326
+  type: 'test'
+  ...
+# Subtest: node tidak terjangkau dari mulai
+ok 287 - node tidak terjangkau dari mulai
+  ---
+  duration_ms: 1.8844
+  type: 'test'
+  ...
+# Subtest: jalan buntu: node tanpa jalan ke akhir
+ok 288 - jalan buntu: node tanpa jalan ke akhir
+  ---
+  duration_ms: 0.9976
+  type: 'test'
+  ...
+# Subtest: cabang palsu: dua pilihan dengan lanjut & efek sama (teks alasan beda tidak dihitung)
+ok 289 - cabang palsu: dua pilihan dengan lanjut & efek sama (teks alasan beda tidak dihitung)
+  ---
+  duration_ms: 1.6327
+  type: 'test'
+  ...
+# Subtest: node pilihan wajib >= 2 pilihan
+ok 290 - node pilihan wajib >= 2 pilihan
+  ---
+  duration_ms: 0.9093
+  type: 'test'
+  ...
+# Subtest: efek kepercayaan tanpa alasan
+ok 291 - efek kepercayaan tanpa alasan
+  ---
+  duration_ms: 2.1141
+  type: 'test'
+  ...
+# Subtest: kunci teks hilang / belum diterjemahkan / kosong
+ok 292 - kunci teks hilang / belum diterjemahkan / kosong
+  ---
+  duration_ms: 2.7386
+  type: 'test'
+  ...
+# Subtest: parameter {x} harus sama di tiga bahasa
+ok 293 - parameter {x} harus sama di tiga bahasa
+  ---
+  duration_ms: 1.99
+  type: 'test'
+  ...
+# Subtest: angka di teks id wajib ada di terjemahan; hanya zh boleh menambah angka bulan 1-12
+ok 294 - angka di teks id wajib ada di terjemahan; hanya zh boleh menambah angka bulan 1-12
+  ---
+  duration_ms: 1.4673
+  type: 'test'
+  ...
+# Subtest: tanda di kondisi harus bisa dipasang; tanda akt: merujuk aktivitas & opsi yang ada
+ok 295 - tanda di kondisi harus bisa dipasang; tanda akt: merujuk aktivitas & opsi yang ada
+  ---
+  duration_ms: 0.6227
+  type: 'test'
+  ...
+# Subtest: opsi pensiun (v2): tanda akt:<id>:pilih:<opsi pensiun> sah di kondisi, tetapi opsi itu tidak boleh masih ada di misi
+ok 296 - opsi pensiun (v2): tanda akt:<id>:pilih:<opsi pensiun> sah di kondisi, tetapi opsi itu tidak boleh masih ada di misi
+  ---
+  duration_ms: 1.9847
+  type: 'test'
+  ...
+# Subtest: alasanOpsi & kartuArti (v2): opsi / kartu / jumlah baris / kunci teks harus ada
+ok 297 - alasanOpsi & kartuArti (v2): opsi / kartu / jumlah baris / kunci teks harus ada
+  ---
+  duration_ms: 0.5709
+  type: 'test'
+  ...
+# Subtest: aktivitas: def.id, rubrik vs misi, penjelasan, misi terjemahan, cabang hasil cadangan
+ok 298 - aktivitas: def.id, rubrik vs misi, penjelasan, misi terjemahan, cabang hasil cadangan
+  ---
+  duration_ms: 1.8706
+  type: 'test'
+  ...
+# Subtest: panggung v3: fixture dengan panggung & cue sah = []; {lokasi} diisi dari panggung
+ok 299 - panggung v3: fixture dengan panggung & cue sah = []; {lokasi} diisi dari panggung
+  ---
+  duration_ms: 5.8683
+  type: 'test'
+  ...
+# Subtest: panggung v3: konfigurasi (nama, tema, eksterior, awal), cue tanpa panggung, parameter teks
+ok 300 - panggung v3: konfigurasi (nama, tema, eksterior, awal), cue tanpa panggung, parameter teks
+  ---
+  duration_ms: 2.1333
+  type: 'test'
+  ...
+# Subtest: cue v3: nilai lokasi, pose, pandang, prop, aksi, dan bidang harus dikenal
+ok 301 - cue v3: nilai lokasi, pose, pandang, prop, aksi, dan bidang harus dikenal
+  ---
+  duration_ms: 0.8682
+  type: 'test'
+  ...
+# Subtest: cue v3: aksi hanya di baris dialog; pose gerak hanya per baris; bingkai animasi bukan nilai cue; aksi harus konsisten
+ok 302 - cue v3: aksi hanya di baris dialog; pose gerak hanya per baris; bingkai animasi bukan nilai cue; aksi harus konsisten
+  ---
+  duration_ms: 1.3394
+  type: 'test'
+  ...
+# Subtest: alur adegan v3: tidak duduk lagi sesudah pergi tanpa masuk, tidak bicara saat tidak hadir, kursi kosong saat telepon
+ok 303 - alur adegan v3: tidak duduk lagi sesudah pergi tanpa masuk, tidak bicara saat tidak hadir, kursi kosong saat telepon
+  ---
+  duration_ms: 3.0479
+  type: 'test'
+  ...
+# Subtest: jelajahiSemuaJalur: fixture mencapai SEMUA akhir tanpa masalah; jumlah jalur = semua kombinasi
+ok 304 - jelajahiSemuaJalur: fixture mencapai SEMUA akhir tanpa masalah; jumlah jalur = semua kombinasi
+  ---
+  duration_ms: 22.518
+  type: 'test'
+  ...
+# Subtest: jelajahiSemuaJalur melaporkan jalan buntu, putaran, pilihan < 2, dan batas langkah
+ok 305 - jelajahiSemuaJalur melaporkan jalan buntu, putaran, pilihan < 2, dan batas langkah
+  ---
+  duration_ms: 4.4409
+  type: 'test'
+  ...
+# Subtest: akses info (id): tiap objek adegan doc/info punya jalur HTML, dokumen misi punya tombol
+ok 306 - akses info (id): tiap objek adegan doc/info punya jalur HTML, dokumen misi punya tombol
+  ---
+  duration_ms: 55.2884
+  type: 'test'
+  ...
+# Subtest: akses info (en): tiap objek adegan doc/info punya jalur HTML, dokumen misi punya tombol
+ok 307 - akses info (en): tiap objek adegan doc/info punya jalur HTML, dokumen misi punya tombol
+  ---
+  duration_ms: 6.999
+  type: 'test'
+  ...
+# Subtest: akses info (zh): tiap objek adegan doc/info punya jalur HTML, dokumen misi punya tombol
+ok 308 - akses info (zh): tiap objek adegan doc/info punya jalur HTML, dokumen misi punya tombol
+  ---
+  duration_ms: 5.0542
+  type: 'test'
+  ...
+# Subtest: misi 3: checklist "Folder laporan" terbuka lewat tombol Lihat checklist, juga tanpa adegan
+ok 309 - misi 3: checklist "Folder laporan" terbuka lewat tombol Lihat checklist, juga tanpa adegan
+  ---
+  duration_ms: 0.3483
+  type: 'test'
+  ...
+# Subtest: misi 7: kalender "Tanggal kejadian" terbaca di HTML dalam tiga bahasa
+ok 310 - misi 7: kalender "Tanggal kejadian" terbaca di HTML dalam tiga bahasa
+  ---
+  duration_ms: 0.5001
+  type: 'test'
+  ...
+# Subtest: misi bergambar (tanpa adegan): dokumen tetap punya tombol, tanpa catatan adegan
+ok 311 - misi bergambar (tanpa adegan): dokumen tetap punya tombol, tanpa catatan adegan
+  ---
+  duration_ms: 0.2207
+  type: 'test'
+  ...
+# Subtest: teksSebaris: baris baru di teks adegan jadi satu kalimat
+ok 312 - teksSebaris: baris baru di teks adegan jadi satu kalimat
+  ---
+  duration_ms: 0.1956
+  type: 'test'
+  ...
+# Subtest: legenda tanda: tampil tepat bila pembahasan memberi tanda di adegan (semua misi)
+ok 313 - legenda tanda: tampil tepat bila pembahasan memberi tanda di adegan (semua misi)
+  ---
+  duration_ms: 2.1305
+  type: 'test'
+  ...
+# Subtest: petunjuk (id): "ketuk di gambar" hanya untuk langkah yang punya objek jawaban di adegan
+ok 314 - petunjuk (id): "ketuk di gambar" hanya untuk langkah yang punya objek jawaban di adegan
+  ---
+  duration_ms: 1.0795
+  type: 'test'
+  ...
+# Subtest: petunjuk (en): "ketuk di gambar" hanya untuk langkah yang punya objek jawaban di adegan
+ok 315 - petunjuk (en): "ketuk di gambar" hanya untuk langkah yang punya objek jawaban di adegan
+  ---
+  duration_ms: 0.8764
+  type: 'test'
+  ...
+# Subtest: petunjuk (zh): "ketuk di gambar" hanya untuk langkah yang punya objek jawaban di adegan
+ok 316 - petunjuk (zh): "ketuk di gambar" hanya untuk langkah yang punya objek jawaban di adegan
+  ---
+  duration_ms: 0.5128
+  type: 'test'
+  ...
+# Subtest: petunjuk aktivitas cerita: polis lewat daftar (kartu polis hanya dokumen), bukti lewat foto di gambar
+ok 317 - petunjuk aktivitas cerita: polis lewat daftar (kartu polis hanya dokumen), bukti lewat foto di gambar
+  ---
+  duration_ms: 0.5081
+  type: 'test'
+  ...
+# Subtest: gambar statis mode ringan: aktivitas cerita disusun dari SceneSpec, misi latihan/acara tetap gambar lama
+ok 318 - gambar statis mode ringan: aktivitas cerita disusun dari SceneSpec, misi latihan/acara tetap gambar lama
+  ---
+  duration_ms: 1.4109
+  type: 'test'
+  ...
+# Subtest: multi: ketuk = masuk, ketuk lagi = keluar, batas sesuai requiredSelections
+ok 319 - multi: ketuk = masuk, ketuk lagi = keluar, batas sesuai requiredSelections
+  ---
+  duration_ms: 1.5616
+  type: 'test'
+  ...
+# Subtest: single: memilih opsi lain mengganti pilihan; memilih yang sama tidak berubah
+ok 320 - single: memilih opsi lain mengganti pilihan; memilih yang sama tidak berubah
+  ---
+  duration_ms: 0.2341
+  type: 'test'
+  ...
+# Subtest: assign: tempatkan, ganti, dan kosongkan item
+ok 321 - assign: tempatkan, ganti, dan kosongkan item
+  ---
+  duration_ms: 0.25
+  type: 'test'
+  ...
+# Subtest: kelengkapan: sebagian boleh dikirim (dengan konfirmasi), bukan diblokir
+ok 322 - kelengkapan: sebagian boleh dikirim (dengan konfirmasi), bukan diblokir
+  ---
+  duration_ms: 4.3146
+  type: 'test'
+  ...
+# Subtest: missingParts: teks bawaan = kamus Indonesia; dengan penerjemah mengikuti bahasa aktif
+ok 323 - missingParts: teks bawaan = kamus Indonesia; dengan penerjemah mengikuti bahasa aktif
+  ---
+  duration_ms: 1.001
+  type: 'test'
+  ...
+# Subtest: keterangan objek info di adegan: kamus misi.info.<misi>.<objek> lengkap, teks id = teks adegan
+ok 324 - keterangan objek info di adegan: kamus misi.info.<misi>.<objek> lengkap, teks id = teks adegan
+  ---
+  duration_ms: 9.1529
+  type: 'test'
+  ...
+# Subtest: sanitizeDraft membuang id asing & memotong kelebihan pilihan dari draft lama
+ok 325 - sanitizeDraft membuang id asing & memotong kelebihan pilihan dari draft lama
+  ---
+  duration_ms: 0.2908
+  type: 'test'
+  ...
+# Subtest: ketukan adegan memakai aturan draft yang sama dengan kontrol HTML
+ok 326 - ketukan adegan memakai aturan draft yang sama dengan kontrol HTML
+  ---
+  duration_ms: 0.3561
+  type: 'test'
+  ...
+# Subtest: ketukan di luar mode bermain (briefing/jeda/terkirim/pembahasan) diabaikan
+ok 327 - ketukan di luar mode bermain (briefing/jeda/terkirim/pembahasan) diabaikan
+  ---
+  duration_ms: 0.4164
+  type: 'test'
+  ...
+# Subtest: tampilan objek NETRAL sebelum pembahasan, walau data reveal sudah ada
+ok 328 - tampilan objek NETRAL sebelum pembahasan, walau data reveal sudah ada
+  ---
+  duration_ms: 0.9061
+  type: 'test'
+  ...
+# Subtest: status objek mengikuti draft: urutan pilihan & interaktif hanya saat bermain
+ok 329 - status objek mengikuti draft: urutan pilihan & interaktif hanya saat bermain
+  ---
+  duration_ms: 0.3001
+  type: 'test'
+  ...
+# Subtest: urutan tampil diacak deterministik: sama untuk semua pemain, tanpa kehilangan opsi
+ok 330 - urutan tampil diacak deterministik: sama untuk semua pemain, tanpa kehilangan opsi
+  ---
+  duration_ms: 0.2938
+  type: 'test'
+  ...
+# Subtest: misi bawaan (tutorial, m01-m10, penentuan) tetap memakai adegan 2D
+ok 331 - misi bawaan (tutorial, m01-m10, penentuan) tetap memakai adegan 2D
+  ---
+  duration_ms: 3.4639
+  type: 'test'
+  ...
+# Subtest: soal kustom dengan gambar: gambar + alt dari data
+ok 332 - soal kustom dengan gambar: gambar + alt dari data
+  ---
+  duration_ms: 0.1947
+  type: 'test'
+  ...
+# Subtest: alt kosong jatuh ke judul misi (gambar tidak pernah bisu)
+ok 333 - alt kosong jatuh ke judul misi (gambar tidak pernah bisu)
+  ---
+  duration_ms: 0.1027
+  type: 'test'
+  ...
+# Subtest: gambar menang atas adegan: image terisi walau scene adegan vektor
+ok 334 - gambar menang atas adegan: image terisi walau scene adegan vektor
+  ---
+  duration_ms: 0.1836
+  type: 'test'
+  ...
+# Subtest: tanpa gambar: scene "gambar" = bingkai netral (tanpa engine), scene vektor = adegan
+ok 335 - tanpa gambar: scene "gambar" = bingkai netral (tanpa engine), scene vektor = adegan
+  ---
+  duration_ms: 0.1378
+  type: 'test'
+  ...
+# Subtest: data gambar yang rusak tidak melempar galat
+ok 336 - data gambar yang rusak tidak melempar galat
+  ---
+  duration_ms: 0.093
+  type: 'test'
+  ...
+# Subtest: status ke host: hanya "memuat" yang berarti belum siap (gagal muat tetap dilaporkan selesai)
+ok 337 - status ke host: hanya "memuat" yang berarti belum siap (gagal muat tetap dilaporkan selesai)
+  ---
+  duration_ms: 0.1879
+  type: 'test'
+  ...
+# Subtest: bacaAngka bawaan: hanya digit, persis perilaku lama
+ok 338 - bacaAngka bawaan: hanya digit, persis perilaku lama
+  ---
+  duration_ms: 0.2597
+  type: 'test'
+  ...
+# Subtest: bacaAngka bebas (soal kustom): koma desimal, titik ribuan, negatif
+ok 339 - bacaAngka bebas (soal kustom): koma desimal, titik ribuan, negatif
+  ---
+  duration_ms: 0.5552
+  type: 'test'
+  ...
+# Subtest: penilaian per langkah di pembahasan sama persis dengan penilaian server (semua misi)
+ok 340 - penilaian per langkah di pembahasan sama persis dengan penilaian server (semua misi)
+  ---
+  duration_ms: 22.5829
+  type: 'test'
+  ...
+# Subtest: jawaban salah menampilkan Pilihanmu (salah) dan Langkah yang tepat (terlewat)
+ok 341 - jawaban salah menampilkan Pilihanmu (salah) dan Langkah yang tepat (terlewat)
+  ---
+  duration_ms: 0.8211
+  type: 'test'
+  ...
+# Subtest: multi: bukti yang tidak dipilih ditandai terlewat, pilihan pengecoh ditandai salah
+ok 342 - multi: bukti yang tidak dipilih ditandai terlewat, pilihan pengecoh ditandai salah
+  ---
+  duration_ms: 0.2182
+  type: 'test'
+  ...
+# Subtest: status misi & kalimat utama: tidak ada lagi "Makin paham" untuk 0%
+ok 343 - status misi & kalimat utama: tidak ada lagi "Makin paham" untuk 0%
+  ---
+  duration_ms: 0.3568
+  type: 'test'
+  ...
+# Subtest: kalimat utama hasil mengikuti bahasa aktif (en, zh) dan kembali ke Indonesia
+ok 344 - kalimat utama hasil mengikuti bahasa aktif (en, zh) dan kembali ke Indonesia
+  ---
+  duration_ms: 0.2935
+  type: 'test'
+  ...
+# Subtest: setiap misi (termasuk tutorial & penentuan) terdaftar
+ok 345 - setiap misi (termasuk tutorial & penentuan) terdaftar
+  ---
+  duration_ms: 1.1334
+  type: 'test'
+  ...
+# Subtest: adegan tutorial: id objek cocok dengan konten misi
+ok 346 - adegan tutorial: id objek cocok dengan konten misi
+  ---
+  duration_ms: 1.8054
+  type: 'test'
+  ...
+# Subtest: adegan m01-parkir: id objek cocok dengan konten misi
+ok 347 - adegan m01-parkir: id objek cocok dengan konten misi
+  ---
+  duration_ms: 1.301
+  type: 'test'
+  ...
+# Subtest: adegan m02-detektif-penyok: id objek cocok dengan konten misi
+ok 348 - adegan m02-detektif-penyok: id objek cocok dengan konten misi
+  ---
+  duration_ms: 1.295
+  type: 'test'
+  ...
+# Subtest: adegan m03-berkas-ruko: id objek cocok dengan konten misi
+ok 349 - adegan m03-berkas-ruko: id objek cocok dengan konten misi
+  ---
+  duration_ms: 1.248
+  type: 'test'
+  ...
+# Subtest: adegan m04-excavator: id objek cocok dengan konten misi
+ok 350 - adegan m04-excavator: id objek cocok dengan konten misi
+  ---
+  duration_ms: 1.4813
+  type: 'test'
+  ...
+# Subtest: adegan m05-polis-mana: id objek cocok dengan konten misi
+ok 351 - adegan m05-polis-mana: id objek cocok dengan konten misi
+  ---
+  duration_ms: 1.1578
+  type: 'test'
+  ...
+# Subtest: adegan m06-paket-penyok: id objek cocok dengan konten misi
+ok 352 - adegan m06-paket-penyok: id objek cocok dengan konten misi
+  ---
+  duration_ms: 3.8785
+  type: 'test'
+  ...
+# Subtest: adegan m07-banjir-gudang: id objek cocok dengan konten misi
+ok 353 - adegan m07-banjir-gudang: id objek cocok dengan konten misi
+  ---
+  duration_ms: 1.3997
+  type: 'test'
+  ...
+# Subtest: adegan m08-benturan-keausan: id objek cocok dengan konten misi
+ok 354 - adegan m08-benturan-keausan: id objek cocok dengan konten misi
+  ---
+  duration_ms: 1.5327
+  type: 'test'
+  ...
+# Subtest: adegan m09-hitung-teliti: id objek cocok dengan konten misi
+ok 355 - adegan m09-hitung-teliti: id objek cocok dengan konten misi
+  ---
+  duration_ms: 0.7273
+  type: 'test'
+  ...
+# Subtest: adegan m10-grand-mission: id objek cocok dengan konten misi
+ok 356 - adegan m10-grand-mission: id objek cocok dengan konten misi
+  ---
+  duration_ms: 0.967
+  type: 'test'
+  ...
+# Subtest: adegan m11-penentuan: id objek cocok dengan konten misi
+ok 357 - adegan m11-penentuan: id objek cocok dengan konten misi
+  ---
+  duration_ms: 0.569
+  type: 'test'
+  ...
+# Subtest: adegan a01-api-padam: id objek cocok dengan konten misi
+ok 358 - adegan a01-api-padam: id objek cocok dengan konten misi
+  ---
+  duration_ms: 1.0415
+  type: 'test'
+  ...
+# Subtest: adegan a02-jepret-kiriman: id objek cocok dengan konten misi
+ok 359 - adegan a02-jepret-kiriman: id objek cocok dengan konten misi
+  ---
+  duration_ms: 0.9068
+  type: 'test'
+  ...
+# Subtest: adegan a03-tugas-foto: id objek cocok dengan konten misi
+ok 360 - adegan a03-tugas-foto: id objek cocok dengan konten misi
+  ---
+  duration_ms: 0.4858
+  type: 'test'
+  ...
+# Subtest: adegan a04-peti-kurang: id objek cocok dengan konten misi
+ok 361 - adegan a04-peti-kurang: id objek cocok dengan konten misi
+  ---
+  duration_ms: 0.7013
+  type: 'test'
+  ...
+# Subtest: adegan a05-nasib-beda: id objek cocok dengan konten misi
+ok 362 - adegan a05-nasib-beda: id objek cocok dengan konten misi
+  ---
+  duration_ms: 0.6915
+  type: 'test'
+  ...
+# Subtest: adegan a06-urutan-gudang: id objek cocok dengan konten misi
+ok 363 - adegan a06-urutan-gudang: id objek cocok dengan konten misi
+  ---
+  duration_ms: 0.7429
+  type: 'test'
+  ...
+# Subtest: adegan a07-tiga-polis: id objek cocok dengan konten misi
+ok 364 - adegan a07-tiga-polis: id objek cocok dengan konten misi
+  ---
+  duration_ms: 0.5275
+  type: 'test'
+  ...
+# Subtest: adegan a08-linimasa-ex: id objek cocok dengan konten misi
+ok 365 - adegan a08-linimasa-ex: id objek cocok dengan konten misi
+  ---
+  duration_ms: 0.8954
+  type: 'test'
+  ...
+# Subtest: adegan a09-hitung-lapis: id objek cocok dengan konten misi
+ok 366 - adegan a09-hitung-lapis: id objek cocok dengan konten misi
+  ---
+  duration_ms: 0.3892
+  type: 'test'
+  ...
+# Subtest: adegan a10-banjir-susulan: id objek cocok dengan konten misi
+ok 367 - adegan a10-banjir-susulan: id objek cocok dengan konten misi
+  ---
+  duration_ms: 0.797
+  type: 'test'
+  ...
+# Subtest: kunci gambar unik antar adegan (tidak saling menimpa cache tekstur)
+ok 368 - kunci gambar unik antar adegan (tidak saling menimpa cache tekstur)
+  ---
+  duration_ms: 5.5803
+  type: 'test'
+  ...
+# Subtest: kode adegan tidak pernah menyentuh kunci jawaban
+ok 369 - kode adegan tidak pernah menyentuh kunci jawaban
+  ---
+  duration_ms: 7.7828
+  type: 'test'
+  ...
+# Subtest: acak posisi slot hanya menukar slot seragam, tidak menambah/menghapus posisi
+ok 370 - acak posisi slot hanya menukar slot seragam, tidak menambah/menghapus posisi
+  ---
+  duration_ms: 17.5698
+  type: 'test'
+  ...
+# Subtest: kedua adegan cerita terdaftar di ADEGAN_CERITA dan registri adegan utama
+ok 371 - kedua adegan cerita terdaftar di ADEGAN_CERITA dan registri adegan utama
+  ---
+  duration_ms: 37.5192
+  type: 'test'
+  ...
+# Subtest: cerita-auto1-bukti: objek di dalam dunia, id unik, label id <= 18, latar 640 x 480
+ok 372 - cerita-auto1-bukti: objek di dalam dunia, id unik, label id <= 18, latar 640 x 480
+  ---
+  duration_ms: 0.669
+  type: 'test'
+  ...
+# Subtest: cerita-auto1-bukti (id): label tidak bertumpuk, tidak keluar tepi, dan tidak menutupi titik tengah objek lain
+ok 373 - cerita-auto1-bukti (id): label tidak bertumpuk, tidak keluar tepi, dan tidak menutupi titik tengah objek lain
+  ---
+  duration_ms: 0.9756
+  type: 'test'
+  ...
+# Subtest: cerita-auto1-bukti (en): label tidak bertumpuk, tidak keluar tepi, dan tidak menutupi titik tengah objek lain
+ok 374 - cerita-auto1-bukti (en): label tidak bertumpuk, tidak keluar tepi, dan tidak menutupi titik tengah objek lain
+  ---
+  duration_ms: 0.5217
+  type: 'test'
+  ...
+# Subtest: cerita-auto1-bukti (zh): label tidak bertumpuk, tidak keluar tepi, dan tidak menutupi titik tengah objek lain
+ok 375 - cerita-auto1-bukti (zh): label tidak bertumpuk, tidak keluar tepi, dan tidak menutupi titik tengah objek lain
+  ---
+  duration_ms: 0.4625
+  type: 'test'
+  ...
+# Subtest: cerita-auto1-polis: objek di dalam dunia, id unik, label id <= 18, latar 640 x 480
+ok 376 - cerita-auto1-polis: objek di dalam dunia, id unik, label id <= 18, latar 640 x 480
+  ---
+  duration_ms: 0.1952
+  type: 'test'
+  ...
+# Subtest: cerita-auto1-polis (id): label tidak bertumpuk, tidak keluar tepi, dan tidak menutupi titik tengah objek lain
+ok 377 - cerita-auto1-polis (id): label tidak bertumpuk, tidak keluar tepi, dan tidak menutupi titik tengah objek lain
+  ---
+  duration_ms: 0.2435
+  type: 'test'
+  ...
+# Subtest: cerita-auto1-polis (en): label tidak bertumpuk, tidak keluar tepi, dan tidak menutupi titik tengah objek lain
+ok 378 - cerita-auto1-polis (en): label tidak bertumpuk, tidak keluar tepi, dan tidak menutupi titik tengah objek lain
+  ---
+  duration_ms: 0.2633
+  type: 'test'
+  ...
+# Subtest: cerita-auto1-polis (zh): label tidak bertumpuk, tidak keluar tepi, dan tidak menutupi titik tengah objek lain
+ok 379 - cerita-auto1-polis (zh): label tidak bertumpuk, tidak keluar tepi, dan tidak menutupi titik tengah objek lain
+  ---
+  duration_ms: 0.5219
+  type: 'test'
+  ...
+# Subtest: cerita-auto1-bukti: enam opsi foto sesuai kontrak (langkah bukti, fx photo)
+ok 380 - cerita-auto1-bukti: enam opsi foto sesuai kontrak (langkah bukti, fx photo)
+  ---
+  duration_ms: 0.8104
+  type: 'test'
+  ...
+# Subtest: cerita-auto1-bukti: area ketuk >= 86 (>= 44 px pada adegan 328 px di HP 360) dan objek bersarang tidak saling menumpuk
+ok 381 - cerita-auto1-bukti: area ketuk >= 86 (>= 44 px pada adegan 328 px di HP 360) dan objek bersarang tidak saling menumpuk
+  ---
+  duration_ms: 0.6633
+  type: 'test'
+  ...
+# Subtest: cerita-auto1-bukti: pengecoh bagian mobil (ban depan, dasbor) bersarang di mobil Bu Rina, di atas mobil
+ok 382 - cerita-auto1-bukti: pengecoh bagian mobil (ban depan, dasbor) bersarang di mobil Bu Rina, di atas mobil
+  ---
+  duration_ms: 1.8628
+  type: 'test'
+  ...
+# Subtest: cerita-auto1-bukti: petugas & properti tidak menutupi objek
+ok 383 - cerita-auto1-bukti: petugas & properti tidak menutupi objek
+  ---
+  duration_ms: 0.8397
+  type: 'test'
+  ...
+# Subtest: cerita-auto1-polis: satu kartu polis 'polis-rina' (doc), tanpa objek pilihan
+ok 384 - cerita-auto1-polis: satu kartu polis 'polis-rina' (doc), tanpa objek pilihan
+  ---
+  duration_ms: 0.258
+  type: 'test'
+  ...
+# Subtest: label en/zh lengkap untuk semua objek & dalam batas (en <= 20, zh <= 9)
+ok 385 - label en/zh lengkap untuk semua objek & dalam batas (en <= 20, zh <= 9)
+  ---
+  duration_ms: 0.6363
+  type: 'test'
+  ...
+# Subtest: kunci tekstur adegan cerita tidak bertabrakan dengan gambar lain
+ok 386 - kunci tekstur adegan cerita tidak bertabrakan dengan gambar lain
+  ---
+  duration_ms: 13.6021
+  type: 'test'
+  ...
+# Subtest: seni & adegan cerita tidak mengimpor kode pertandingan atau kunci jawaban
+ok 387 - seni & adegan cerita tidak mengimpor kode pertandingan atau kunci jawaban
+  ---
+  duration_ms: 16.5474
+  type: 'test'
+  ...
+# Subtest: Bu Rina: delapan ekspresi berbeda satu sama lain; latar panggung tanpa teks
+ok 388 - Bu Rina: delapan ekspresi berbeda satu sama lain; latar panggung tanpa teks
+  ---
+  duration_ms: 90.0303
+  type: 'test'
+  ...
+# Subtest: adegan cocok dengan misi sintetis episode yang terdaftar (opsi & dokumen)
+ok 389 - adegan cocok dengan misi sintetis episode yang terdaftar (opsi & dokumen)
+  ---
+  duration_ms: 13.9993
+  type: 'test'
+  ...
+# Subtest: kamus UI: kunci & parameter en/zh sama persis dengan id, tanpa teks kosong
+ok 390 - kamus UI: kunci & parameter en/zh sama persis dengan id, tanpa teks kosong
+  ---
+  duration_ms: 13.1166
+  type: 'test'
+  ...
+# Subtest: konten misi tutorial: langkah, opsi, dan dokumen punya terjemahan; angka tidak berubah
+ok 391 - konten misi tutorial: langkah, opsi, dan dokumen punya terjemahan; angka tidak berubah
+  ---
+  duration_ms: 0.6975
+  type: 'test'
+  ...
+# Subtest: konten misi m01-parkir: langkah, opsi, dan dokumen punya terjemahan; angka tidak berubah
+ok 392 - konten misi m01-parkir: langkah, opsi, dan dokumen punya terjemahan; angka tidak berubah
+  ---
+  duration_ms: 0.6129
+  type: 'test'
+  ...
+# Subtest: konten misi m02-detektif-penyok: langkah, opsi, dan dokumen punya terjemahan; angka tidak berubah
+ok 393 - konten misi m02-detektif-penyok: langkah, opsi, dan dokumen punya terjemahan; angka tidak berubah
+  ---
+  duration_ms: 0.2824
+  type: 'test'
+  ...
+# Subtest: konten misi m03-berkas-ruko: langkah, opsi, dan dokumen punya terjemahan; angka tidak berubah
+ok 394 - konten misi m03-berkas-ruko: langkah, opsi, dan dokumen punya terjemahan; angka tidak berubah
+  ---
+  duration_ms: 0.1837
+  type: 'test'
+  ...
+# Subtest: konten misi m04-excavator: langkah, opsi, dan dokumen punya terjemahan; angka tidak berubah
+ok 395 - konten misi m04-excavator: langkah, opsi, dan dokumen punya terjemahan; angka tidak berubah
+  ---
+  duration_ms: 0.1641
+  type: 'test'
+  ...
+# Subtest: konten misi m05-polis-mana: langkah, opsi, dan dokumen punya terjemahan; angka tidak berubah
+ok 396 - konten misi m05-polis-mana: langkah, opsi, dan dokumen punya terjemahan; angka tidak berubah
+  ---
+  duration_ms: 0.3269
+  type: 'test'
+  ...
+# Subtest: konten misi m06-paket-penyok: langkah, opsi, dan dokumen punya terjemahan; angka tidak berubah
+ok 397 - konten misi m06-paket-penyok: langkah, opsi, dan dokumen punya terjemahan; angka tidak berubah
+  ---
+  duration_ms: 0.282
+  type: 'test'
+  ...
+# Subtest: konten misi m07-banjir-gudang: langkah, opsi, dan dokumen punya terjemahan; angka tidak berubah
+ok 398 - konten misi m07-banjir-gudang: langkah, opsi, dan dokumen punya terjemahan; angka tidak berubah
+  ---
+  duration_ms: 0.4238
+  type: 'test'
+  ...
+# Subtest: konten misi m08-benturan-keausan: langkah, opsi, dan dokumen punya terjemahan; angka tidak berubah
+ok 399 - konten misi m08-benturan-keausan: langkah, opsi, dan dokumen punya terjemahan; angka tidak berubah
+  ---
+  duration_ms: 0.4933
+  type: 'test'
+  ...
+# Subtest: konten misi m09-hitung-teliti: langkah, opsi, dan dokumen punya terjemahan; angka tidak berubah
+ok 400 - konten misi m09-hitung-teliti: langkah, opsi, dan dokumen punya terjemahan; angka tidak berubah
+  ---
+  duration_ms: 1.297
+  type: 'test'
+  ...
+# Subtest: konten misi m10-grand-mission: langkah, opsi, dan dokumen punya terjemahan; angka tidak berubah
+ok 401 - konten misi m10-grand-mission: langkah, opsi, dan dokumen punya terjemahan; angka tidak berubah
+  ---
+  duration_ms: 0.1923
+  type: 'test'
+  ...
+# Subtest: konten misi m11-penentuan: langkah, opsi, dan dokumen punya terjemahan; angka tidak berubah
+ok 402 - konten misi m11-penentuan: langkah, opsi, dan dokumen punya terjemahan; angka tidak berubah
+  ---
+  duration_ms: 0.0762
+  type: 'test'
+  ...
+# Subtest: konten misi a01-api-padam: langkah, opsi, dan dokumen punya terjemahan; angka tidak berubah
+ok 403 - konten misi a01-api-padam: langkah, opsi, dan dokumen punya terjemahan; angka tidak berubah
+  ---
+  duration_ms: 0.1013
+  type: 'test'
+  ...
+# Subtest: konten misi a02-jepret-kiriman: langkah, opsi, dan dokumen punya terjemahan; angka tidak berubah
+ok 404 - konten misi a02-jepret-kiriman: langkah, opsi, dan dokumen punya terjemahan; angka tidak berubah
+  ---
+  duration_ms: 0.0758
+  type: 'test'
+  ...
+# Subtest: konten misi a03-tugas-foto: langkah, opsi, dan dokumen punya terjemahan; angka tidak berubah
+ok 405 - konten misi a03-tugas-foto: langkah, opsi, dan dokumen punya terjemahan; angka tidak berubah
+  ---
+  duration_ms: 0.0683
+  type: 'test'
+  ...
+# Subtest: konten misi a04-peti-kurang: langkah, opsi, dan dokumen punya terjemahan; angka tidak berubah
+ok 406 - konten misi a04-peti-kurang: langkah, opsi, dan dokumen punya terjemahan; angka tidak berubah
+  ---
+  duration_ms: 2.1162
+  type: 'test'
+  ...
+# Subtest: konten misi a05-nasib-beda: langkah, opsi, dan dokumen punya terjemahan; angka tidak berubah
+ok 407 - konten misi a05-nasib-beda: langkah, opsi, dan dokumen punya terjemahan; angka tidak berubah
+  ---
+  duration_ms: 0.1764
+  type: 'test'
+  ...
+# Subtest: konten misi a06-urutan-gudang: langkah, opsi, dan dokumen punya terjemahan; angka tidak berubah
+ok 408 - konten misi a06-urutan-gudang: langkah, opsi, dan dokumen punya terjemahan; angka tidak berubah
+  ---
+  duration_ms: 0.0949
+  type: 'test'
+  ...
+# Subtest: konten misi a07-tiga-polis: langkah, opsi, dan dokumen punya terjemahan; angka tidak berubah
+ok 409 - konten misi a07-tiga-polis: langkah, opsi, dan dokumen punya terjemahan; angka tidak berubah
+  ---
+  duration_ms: 1.9241
+  type: 'test'
+  ...
+# Subtest: konten misi a08-linimasa-ex: langkah, opsi, dan dokumen punya terjemahan; angka tidak berubah
+ok 410 - konten misi a08-linimasa-ex: langkah, opsi, dan dokumen punya terjemahan; angka tidak berubah
+  ---
+  duration_ms: 0.1727
+  type: 'test'
+  ...
+# Subtest: konten misi a09-hitung-lapis: langkah, opsi, dan dokumen punya terjemahan; angka tidak berubah
+ok 411 - konten misi a09-hitung-lapis: langkah, opsi, dan dokumen punya terjemahan; angka tidak berubah
+  ---
+  duration_ms: 0.1135
+  type: 'test'
+  ...
+# Subtest: konten misi a10-banjir-susulan: langkah, opsi, dan dokumen punya terjemahan; angka tidak berubah
+ok 412 - konten misi a10-banjir-susulan: langkah, opsi, dan dokumen punya terjemahan; angka tidak berubah
+  ---
+  duration_ms: 0.1748
+  type: 'test'
+  ...
+# Subtest: terjemahkanMisi tidak mengubah id, urutan, durasi, ikon, atau flag (draft, kunci, skor aman)
+ok 413 - terjemahkanMisi tidak mengubah id, urutan, durasi, ikon, atau flag (draft, kunci, skor aman)
+  ---
+  duration_ms: 2.0986
+  type: 'test'
+  ...
+# Subtest: pembahasan (server) tutorial: ringkasan & penjelasan tiap langkah ada untuk en & zh; angka tidak berubah
+ok 414 - pembahasan (server) tutorial: ringkasan & penjelasan tiap langkah ada untuk en & zh; angka tidak berubah
+  ---
+  duration_ms: 0.1592
+  type: 'test'
+  ...
+# Subtest: pembahasan (server) m01-parkir: ringkasan & penjelasan tiap langkah ada untuk en & zh; angka tidak berubah
+ok 415 - pembahasan (server) m01-parkir: ringkasan & penjelasan tiap langkah ada untuk en & zh; angka tidak berubah
+  ---
+  duration_ms: 0.052
+  type: 'test'
+  ...
+# Subtest: pembahasan (server) m02-detektif-penyok: ringkasan & penjelasan tiap langkah ada untuk en & zh; angka tidak berubah
+ok 416 - pembahasan (server) m02-detektif-penyok: ringkasan & penjelasan tiap langkah ada untuk en & zh; angka tidak berubah
+  ---
+  duration_ms: 0.387
+  type: 'test'
+  ...
+# Subtest: pembahasan (server) m03-berkas-ruko: ringkasan & penjelasan tiap langkah ada untuk en & zh; angka tidak berubah
+ok 417 - pembahasan (server) m03-berkas-ruko: ringkasan & penjelasan tiap langkah ada untuk en & zh; angka tidak berubah
+  ---
+  duration_ms: 0.0786
+  type: 'test'
+  ...
+# Subtest: pembahasan (server) m04-excavator: ringkasan & penjelasan tiap langkah ada untuk en & zh; angka tidak berubah
+ok 418 - pembahasan (server) m04-excavator: ringkasan & penjelasan tiap langkah ada untuk en & zh; angka tidak berubah
+  ---
+  duration_ms: 0.0492
+  type: 'test'
+  ...
+# Subtest: pembahasan (server) m05-polis-mana: ringkasan & penjelasan tiap langkah ada untuk en & zh; angka tidak berubah
+ok 419 - pembahasan (server) m05-polis-mana: ringkasan & penjelasan tiap langkah ada untuk en & zh; angka tidak berubah
+  ---
+  duration_ms: 0.054
+  type: 'test'
+  ...
+# Subtest: pembahasan (server) m06-paket-penyok: ringkasan & penjelasan tiap langkah ada untuk en & zh; angka tidak berubah
+ok 420 - pembahasan (server) m06-paket-penyok: ringkasan & penjelasan tiap langkah ada untuk en & zh; angka tidak berubah
+  ---
+  duration_ms: 0.0599
+  type: 'test'
+  ...
+# Subtest: pembahasan (server) m07-banjir-gudang: ringkasan & penjelasan tiap langkah ada untuk en & zh; angka tidak berubah
+ok 421 - pembahasan (server) m07-banjir-gudang: ringkasan & penjelasan tiap langkah ada untuk en & zh; angka tidak berubah
+  ---
+  duration_ms: 0.0461
+  type: 'test'
+  ...
+# Subtest: pembahasan (server) m08-benturan-keausan: ringkasan & penjelasan tiap langkah ada untuk en & zh; angka tidak berubah
+ok 422 - pembahasan (server) m08-benturan-keausan: ringkasan & penjelasan tiap langkah ada untuk en & zh; angka tidak berubah
+  ---
+  duration_ms: 0.0423
+  type: 'test'
+  ...
+# Subtest: pembahasan (server) m09-hitung-teliti: ringkasan & penjelasan tiap langkah ada untuk en & zh; angka tidak berubah
+ok 423 - pembahasan (server) m09-hitung-teliti: ringkasan & penjelasan tiap langkah ada untuk en & zh; angka tidak berubah
+  ---
+  duration_ms: 0.0672
+  type: 'test'
+  ...
+# Subtest: pembahasan (server) m10-grand-mission: ringkasan & penjelasan tiap langkah ada untuk en & zh; angka tidak berubah
+ok 424 - pembahasan (server) m10-grand-mission: ringkasan & penjelasan tiap langkah ada untuk en & zh; angka tidak berubah
+  ---
+  duration_ms: 0.0468
+  type: 'test'
+  ...
+# Subtest: pembahasan (server) m11-penentuan: ringkasan & penjelasan tiap langkah ada untuk en & zh; angka tidak berubah
+ok 425 - pembahasan (server) m11-penentuan: ringkasan & penjelasan tiap langkah ada untuk en & zh; angka tidak berubah
+  ---
+  duration_ms: 0.0481
+  type: 'test'
+  ...
+# Subtest: pembahasan (server) a01-api-padam: ringkasan & penjelasan tiap langkah ada untuk en & zh; angka tidak berubah
+ok 426 - pembahasan (server) a01-api-padam: ringkasan & penjelasan tiap langkah ada untuk en & zh; angka tidak berubah
+  ---
+  duration_ms: 0.0419
+  type: 'test'
+  ...
+# Subtest: pembahasan (server) a02-jepret-kiriman: ringkasan & penjelasan tiap langkah ada untuk en & zh; angka tidak berubah
+ok 427 - pembahasan (server) a02-jepret-kiriman: ringkasan & penjelasan tiap langkah ada untuk en & zh; angka tidak berubah
+  ---
+  duration_ms: 0.043
+  type: 'test'
+  ...
+# Subtest: pembahasan (server) a03-tugas-foto: ringkasan & penjelasan tiap langkah ada untuk en & zh; angka tidak berubah
+ok 428 - pembahasan (server) a03-tugas-foto: ringkasan & penjelasan tiap langkah ada untuk en & zh; angka tidak berubah
+  ---
+  duration_ms: 0.0437
+  type: 'test'
+  ...
+# Subtest: pembahasan (server) a04-peti-kurang: ringkasan & penjelasan tiap langkah ada untuk en & zh; angka tidak berubah
+ok 429 - pembahasan (server) a04-peti-kurang: ringkasan & penjelasan tiap langkah ada untuk en & zh; angka tidak berubah
+  ---
+  duration_ms: 0.0592
+  type: 'test'
+  ...
+# Subtest: pembahasan (server) a05-nasib-beda: ringkasan & penjelasan tiap langkah ada untuk en & zh; angka tidak berubah
+ok 430 - pembahasan (server) a05-nasib-beda: ringkasan & penjelasan tiap langkah ada untuk en & zh; angka tidak berubah
+  ---
+  duration_ms: 0.0908
+  type: 'test'
+  ...
+# Subtest: pembahasan (server) a06-urutan-gudang: ringkasan & penjelasan tiap langkah ada untuk en & zh; angka tidak berubah
+ok 431 - pembahasan (server) a06-urutan-gudang: ringkasan & penjelasan tiap langkah ada untuk en & zh; angka tidak berubah
+  ---
+  duration_ms: 0.0511
+  type: 'test'
+  ...
+# Subtest: pembahasan (server) a07-tiga-polis: ringkasan & penjelasan tiap langkah ada untuk en & zh; angka tidak berubah
+ok 432 - pembahasan (server) a07-tiga-polis: ringkasan & penjelasan tiap langkah ada untuk en & zh; angka tidak berubah
+  ---
+  duration_ms: 0.1241
+  type: 'test'
+  ...
+# Subtest: pembahasan (server) a08-linimasa-ex: ringkasan & penjelasan tiap langkah ada untuk en & zh; angka tidak berubah
+ok 433 - pembahasan (server) a08-linimasa-ex: ringkasan & penjelasan tiap langkah ada untuk en & zh; angka tidak berubah
+  ---
+  duration_ms: 0.0928
+  type: 'test'
+  ...
+# Subtest: pembahasan (server) a09-hitung-lapis: ringkasan & penjelasan tiap langkah ada untuk en & zh; angka tidak berubah
+ok 434 - pembahasan (server) a09-hitung-lapis: ringkasan & penjelasan tiap langkah ada untuk en & zh; angka tidak berubah
+  ---
+  duration_ms: 0.1091
+  type: 'test'
+  ...
+# Subtest: pembahasan (server) a10-banjir-susulan: ringkasan & penjelasan tiap langkah ada untuk en & zh; angka tidak berubah
+ok 435 - pembahasan (server) a10-banjir-susulan: ringkasan & penjelasan tiap langkah ada untuk en & zh; angka tidak berubah
+  ---
+  duration_ms: 0.0917
+  type: 'test'
+  ...
+# Subtest: pembahasan (server): terjemahan ikut terkirim dan tampil dalam bahasa terpilih
+ok 436 - pembahasan (server): terjemahan ikut terkirim dan tampil dalam bahasa terpilih
+  ---
+  duration_ms: 0.5694
+  type: 'test'
+  ...
+# Subtest: label adegan tutorial: semua objek, stiker kategori, dan papan punya terjemahan yang cukup pendek
+ok 437 - label adegan tutorial: semua objek, stiker kategori, dan papan punya terjemahan yang cukup pendek
+  ---
+  duration_ms: 1.7158
+  type: 'test'
+  ...
+# Subtest: label adegan m01-parkir: semua objek, stiker kategori, dan papan punya terjemahan yang cukup pendek
+ok 438 - label adegan m01-parkir: semua objek, stiker kategori, dan papan punya terjemahan yang cukup pendek
+  ---
+  duration_ms: 1.6837
+  type: 'test'
+  ...
+# Subtest: label adegan m02-detektif-penyok: semua objek, stiker kategori, dan papan punya terjemahan yang cukup pendek
+ok 439 - label adegan m02-detektif-penyok: semua objek, stiker kategori, dan papan punya terjemahan yang cukup pendek
+  ---
+  duration_ms: 0.7333
+  type: 'test'
+  ...
+# Subtest: label adegan m03-berkas-ruko: semua objek, stiker kategori, dan papan punya terjemahan yang cukup pendek
+ok 440 - label adegan m03-berkas-ruko: semua objek, stiker kategori, dan papan punya terjemahan yang cukup pendek
+  ---
+  duration_ms: 1.4177
+  type: 'test'
+  ...
+# Subtest: label adegan m04-excavator: semua objek, stiker kategori, dan papan punya terjemahan yang cukup pendek
+ok 441 - label adegan m04-excavator: semua objek, stiker kategori, dan papan punya terjemahan yang cukup pendek
+  ---
+  duration_ms: 1.7992
+  type: 'test'
+  ...
+# Subtest: label adegan m05-polis-mana: semua objek, stiker kategori, dan papan punya terjemahan yang cukup pendek
+ok 442 - label adegan m05-polis-mana: semua objek, stiker kategori, dan papan punya terjemahan yang cukup pendek
+  ---
+  duration_ms: 1.0253
+  type: 'test'
+  ...
+# Subtest: label adegan m06-paket-penyok: semua objek, stiker kategori, dan papan punya terjemahan yang cukup pendek
+ok 443 - label adegan m06-paket-penyok: semua objek, stiker kategori, dan papan punya terjemahan yang cukup pendek
+  ---
+  duration_ms: 1.4865
+  type: 'test'
+  ...
+# Subtest: label adegan m07-banjir-gudang: semua objek, stiker kategori, dan papan punya terjemahan yang cukup pendek
+ok 444 - label adegan m07-banjir-gudang: semua objek, stiker kategori, dan papan punya terjemahan yang cukup pendek
+  ---
+  duration_ms: 0.9761
+  type: 'test'
+  ...
+# Subtest: label adegan m08-benturan-keausan: semua objek, stiker kategori, dan papan punya terjemahan yang cukup pendek
+ok 445 - label adegan m08-benturan-keausan: semua objek, stiker kategori, dan papan punya terjemahan yang cukup pendek
+  ---
+  duration_ms: 1.2063
+  type: 'test'
+  ...
+# Subtest: label adegan m09-hitung-teliti: semua objek, stiker kategori, dan papan punya terjemahan yang cukup pendek
+ok 446 - label adegan m09-hitung-teliti: semua objek, stiker kategori, dan papan punya terjemahan yang cukup pendek
+  ---
+  duration_ms: 0.8413
+  type: 'test'
+  ...
+# Subtest: label adegan m10-grand-mission: semua objek, stiker kategori, dan papan punya terjemahan yang cukup pendek
+ok 447 - label adegan m10-grand-mission: semua objek, stiker kategori, dan papan punya terjemahan yang cukup pendek
+  ---
+  duration_ms: 1.5276
+  type: 'test'
+  ...
+# Subtest: label adegan m11-penentuan: semua objek, stiker kategori, dan papan punya terjemahan yang cukup pendek
+ok 448 - label adegan m11-penentuan: semua objek, stiker kategori, dan papan punya terjemahan yang cukup pendek
+  ---
+  duration_ms: 0.9823
+  type: 'test'
+  ...
+# Subtest: label adegan a01-api-padam: semua objek, stiker kategori, dan papan punya terjemahan yang cukup pendek
+ok 449 - label adegan a01-api-padam: semua objek, stiker kategori, dan papan punya terjemahan yang cukup pendek
+  ---
+  duration_ms: 0.9309
+  type: 'test'
+  ...
+# Subtest: label adegan a02-jepret-kiriman: semua objek, stiker kategori, dan papan punya terjemahan yang cukup pendek
+ok 450 - label adegan a02-jepret-kiriman: semua objek, stiker kategori, dan papan punya terjemahan yang cukup pendek
+  ---
+  duration_ms: 0.9317
+  type: 'test'
+  ...
+# Subtest: label adegan a03-tugas-foto: semua objek, stiker kategori, dan papan punya terjemahan yang cukup pendek
+ok 451 - label adegan a03-tugas-foto: semua objek, stiker kategori, dan papan punya terjemahan yang cukup pendek
+  ---
+  duration_ms: 0.6419
+  type: 'test'
+  ...
+# Subtest: label adegan a04-peti-kurang: semua objek, stiker kategori, dan papan punya terjemahan yang cukup pendek
+ok 452 - label adegan a04-peti-kurang: semua objek, stiker kategori, dan papan punya terjemahan yang cukup pendek
+  ---
+  duration_ms: 4.9597
+  type: 'test'
+  ...
+# Subtest: label adegan a05-nasib-beda: semua objek, stiker kategori, dan papan punya terjemahan yang cukup pendek
+ok 453 - label adegan a05-nasib-beda: semua objek, stiker kategori, dan papan punya terjemahan yang cukup pendek
+  ---
+  duration_ms: 2.1024
+  type: 'test'
+  ...
+# Subtest: label adegan a06-urutan-gudang: semua objek, stiker kategori, dan papan punya terjemahan yang cukup pendek
+ok 454 - label adegan a06-urutan-gudang: semua objek, stiker kategori, dan papan punya terjemahan yang cukup pendek
+  ---
+  duration_ms: 1.2407
+  type: 'test'
+  ...
+# Subtest: label adegan a07-tiga-polis: semua objek, stiker kategori, dan papan punya terjemahan yang cukup pendek
+ok 455 - label adegan a07-tiga-polis: semua objek, stiker kategori, dan papan punya terjemahan yang cukup pendek
+  ---
+  duration_ms: 0.9825
+  type: 'test'
+  ...
+# Subtest: label adegan a08-linimasa-ex: semua objek, stiker kategori, dan papan punya terjemahan yang cukup pendek
+ok 456 - label adegan a08-linimasa-ex: semua objek, stiker kategori, dan papan punya terjemahan yang cukup pendek
+  ---
+  duration_ms: 1.3031
+  type: 'test'
+  ...
+# Subtest: label adegan a09-hitung-lapis: semua objek, stiker kategori, dan papan punya terjemahan yang cukup pendek
+ok 457 - label adegan a09-hitung-lapis: semua objek, stiker kategori, dan papan punya terjemahan yang cukup pendek
+  ---
+  duration_ms: 0.7573
+  type: 'test'
+  ...
+# Subtest: label adegan a10-banjir-susulan: semua objek, stiker kategori, dan papan punya terjemahan yang cukup pendek
+ok 458 - label adegan a10-banjir-susulan: semua objek, stiker kategori, dan papan punya terjemahan yang cukup pendek
+  ---
+  duration_ms: 1.0503
+  type: 'test'
+  ...
+# Subtest: scaffold creates exactly 15 rounds with 5 choices and unique stable IDs
+ok 459 - scaffold creates exactly 15 rounds with 5 choices and unique stable IDs
+  ---
+  duration_ms: 1.8627
+  type: 'test'
+  ...
+# Subtest: editing is immutable and setText with an empty value removes the key
+ok 460 - editing is immutable and setText with an empty value removes the key
+  ---
+  duration_ms: 0.2247
+  type: 'test'
+  ...
+# Subtest: removing a round removes its texts in every locale; other rounds keep theirs
+ok 461 - removing a round removes its texts in every locale; other rounds keep theirs
+  ---
+  duration_ms: 0.5496
+  type: 'test'
+  ...
+# Subtest: lines and choices are edited by ID; order moves keep IDs
+ok 462 - lines and choices are edited by ID; order moves keep IDs
+  ---
+  duration_ms: 1.2094
+  type: 'test'
+  ...
+# Subtest: default endings keep the unconditional fallback last when endings are added/removed
+ok 463 - default endings keep the unconditional fallback last when endings are added/removed
+  ---
+  duration_ms: 0.505
+  type: 'test'
+  ...
+# Subtest: bacaAngka: cara tulis Indonesia dan desimal
+ok 464 - bacaAngka: cara tulis Indonesia dan desimal
+  ---
+  duration_ms: 1.316
+  type: 'test'
+  ...
+# Subtest: idBaru: id pertama yang belum dipakai
+ok 465 - idBaru: id pertama yang belum dipakai
+  ---
+  duration_ms: 0.1938
+  type: 'test'
+  ...
+# Subtest: soal sah: bolak-balik draf tidak mengubah isi, dan lolos validasi
+ok 466 - soal sah: bolak-balik draf tidak mengubah isi, dan lolos validasi
+  ---
+  duration_ms: 1.8392
+  type: 'test'
+  ...
+# Subtest: draf kosong: isian wajib, tanda benar, dan penjelasan ditandai
+ok 467 - draf kosong: isian wajib, tanda benar, dan penjelasan ditandai
+  ---
+  duration_ms: 0.2552
+  type: 'test'
+  ...
+# Subtest: aturan kunci: single tepat 1, multi tidak boleh semua, angka harus terhingga, alt wajib
+ok 468 - aturan kunci: single tepat 1, multi tidak boleh semua, angka harus terhingga, alt wajib
+  ---
+  duration_ms: 0.4331
+  type: 'test'
+  ...
+# Subtest: panjang teks & pilihan kembar
+ok 469 - panjang teks & pilihan kembar
+  ---
+  duration_ms: 0.3656
+  type: 'test'
+  ...
+# Subtest: langkah angka tidak mengirim opsi; langkah pilihan tidak mengirim nilai
+ok 470 - langkah angka tidak mengirim opsi; langkah pilihan tidak mengirim nilai
+  ---
+  duration_ms: 0.3126
+  type: 'test'
+  ...
+# Subtest: bintangUntuk: bintang = ketepatan (0 bila tidak ada yang tepat)
+ok 471 - bintangUntuk: bintang = ketepatan (0 bila tidak ada yang tepat)
+  ---
+  duration_ms: 3.1056
+  type: 'test'
+  ...
+# Subtest: migrasi v1: bintang dihitung ulang dari akurasi; akurasi/poin/kali tetap; 0 bintang tetap tercatat dicoba
+ok 472 - migrasi v1: bintang dihitung ulang dari akurasi; akurasi/poin/kali tetap; 0 bintang tetap tercatat dicoba
+  ---
+  duration_ms: 1.251
+  type: 'test'
+  ...
+# Subtest: migrasi v1: rekor & total poin tidak berubah
+ok 473 - migrasi v1: rekor & total poin tidak berubah
+  ---
+  duration_ms: 0.4692
+  type: 'test'
+  ...
+# Subtest: migrasi v1: teks mentah lama dicadangkan persis, sebelum ditimpa
+ok 474 - migrasi v1: teks mentah lama dicadangkan persis, sebelum ditimpa
+  ---
+  duration_ms: 0.3316
+  type: 'test'
+  ...
+# Subtest: migrasi v1: cadangan yang sudah ada tidak ditimpa
+ok 475 - migrasi v1: cadangan yang sudah ada tidak ditimpa
+  ---
+  duration_ms: 0.5665
+  type: 'test'
+  ...
+# Subtest: migrasi idempoten: dibaca berkali-kali hasilnya sama dan tidak menulis lagi
+ok 476 - migrasi idempoten: dibaca berkali-kali hasilnya sama dan tidak menulis lagi
+  ---
+  duration_ms: 0.3984
+  type: 'test'
+  ...
+# Subtest: versi 2 dibaca apa adanya: tanpa cadangan, tanpa tulis
+ok 477 - versi 2 dibaca apa adanya: tanpa cadangan, tanpa tulis
+  ---
+  duration_ms: 0.2062
+  type: 'test'
+  ...
+# Subtest: versi lebih baru (sesudah rollback build) tidak dimigrasi dan tidak dicadangkan
+ok 478 - versi lebih baru (sesudah rollback build) tidak dimigrasi dan tidak dicadangkan
+  ---
+  duration_ms: 0.1308
+  type: 'test'
+  ...
+# Subtest: JSON rusak: aman (tanpa lempar), tampil kosong, tidak ditimpa saat dibaca
+ok 479 - JSON rusak: aman (tanpa lempar), tampil kosong, tidak ditimpa saat dibaca
+  ---
+  duration_ms: 0.3696
+  type: 'test'
+  ...
+# Subtest: JSON rusak lalu main: teks mentah dicadangkan sekali sebelum ditimpa
+ok 480 - JSON rusak lalu main: teks mentah dicadangkan sekali sebelum ditimpa
+  ---
+  duration_ms: 0.4132
+  type: 'test'
+  ...
+# Subtest: entri misi rusak dilewati tanpa lempar, tetapi tidak dihapus dari penyimpanan
+ok 481 - entri misi rusak dilewati tanpa lempar, tetapi tidak dihapus dari penyimpanan
+  ---
+  duration_ms: 1.041
+  type: 'test'
+  ...
+# Subtest: catatHasilSolo: 0 tepat = 0 bintang tetapi tercatat dicoba; terbaik disimpan
+ok 482 - catatHasilSolo: 0 tepat = 0 bintang tetapi tercatat dicoba; terbaik disimpan
+  ---
+  duration_ms: 0.3463
+  type: 'test'
+  ...
+# Subtest: catatHasilSolo pada progres lama: cadangkan, migrasi, lalu catat
+ok 483 - catatHasilSolo pada progres lama: cadangkan, migrasi, lalu catat
+  ---
+  duration_ms: 0.1894
+  type: 'test'
+  ...
+# Subtest: rekor: naik bila total melampaui, tidak pernah turun
+ok 484 - rekor: naik bila total melampaui, tidak pernah turun
+  ---
+  duration_ms: 0.2548
+  type: 'test'
+  ...
+# Subtest: ulangSolo: misi dikosongkan, rekor tetap, progres lama dicadangkan dulu
+ok 485 - ulangSolo: misi dikosongkan, rekor tetap, progres lama dicadangkan dulu
+  ---
+  duration_ms: 0.1601
+  type: 'test'
+  ...
+# Subtest: penyimpanan diblokir: migrasi & catat tetap berjalan di memori tanpa lempar
+ok 486 - penyimpanan diblokir: migrasi & catat tetap berjalan di memori tanpa lempar
+  ---
+  duration_ms: 0.2673
+  type: 'test'
+  ...
+# Subtest: cadangan gagal tersimpan (kuota): data lama tidak ditimpa saat dibaca, tampilan tetap bermakna baru
+ok 487 - cadangan gagal tersimpan (kuota): data lama tidak ditimpa saat dibaca, tampilan tetap bermakna baru
+  ---
+  duration_ms: 0.1975
+  type: 'test'
+  ...
+# Subtest: fokus judul: muat awal & muat ulang tidak memindah fokus (urutan baca normal dari atas)
+ok 488 - fokus judul: muat awal & muat ulang tidak memindah fokus (urutan baca normal dari atas)
+  ---
+  duration_ms: 0.672
+  type: 'test'
+  ...
+# Subtest: fokus judul: pengalihan otomatis sebelum pengguna menyentuh apa pun tidak dianggap pindah halaman
+ok 489 - fokus judul: pengalihan otomatis sebelum pengguna menyentuh apa pun tidak dianggap pindah halaman
+  ---
+  duration_ms: 0.0847
+  type: 'test'
+  ...
+# Subtest: fokus judul: pindah halaman oleh pengguna memindah fokus ke judul
+ok 490 - fokus judul: pindah halaman oleh pengguna memindah fokus ke judul
+  ---
+  duration_ms: 0.0714
+  type: 'test'
+  ...
+# Subtest: fokus judul: PhaseRouter (host mengganti fase, navigate replace) tidak merebut fokus pemain
+ok 491 - fokus judul: PhaseRouter (host mengganti fase, navigate replace) tidak merebut fokus pemain
+  ---
+  duration_ms: 0.1342
+  type: 'test'
+  ...
+# Subtest: fokus judul: halaman yang sama dipasang ulang (entri riwayat sama) tidak memindah fokus lagi
+ok 492 - fokus judul: halaman yang sama dipasang ulang (entri riwayat sama) tidak memindah fokus lagi
+  ---
+  duration_ms: 0.0685
+  type: 'test'
+  ...
+# Subtest: judul dokumen: "<judul> – RAKSA GAME"; kosong/null = judul dasar; teks h1 dirapikan
+ok 493 - judul dokumen: "<judul> – RAKSA GAME"; kosong/null = judul dasar; teks h1 dirapikan
+  ---
+  duration_ms: 0.2651
+  type: 'test'
+  ...
+# Subtest: fokusBerikut: Tab maju & mundur berputar di ujung daftar
+ok 494 - fokusBerikut: Tab maju & mundur berputar di ujung daftar
+  ---
+  duration_ms: 1.1892
+  type: 'test'
+  ...
+# Subtest: fokusBerikut: fokus di luar daftar memakai posisi dokumen bila diketahui
+ok 495 - fokusBerikut: fokus di luar daftar memakai posisi dokumen bila diketahui
+  ---
+  duration_ms: 0.2415
+  type: 'test'
+  ...
+# Subtest: terapkanInert: dua lapis dicatat sekali lalu dipulihkan persis
+ok 496 - terapkanInert: dua lapis dicatat sekali lalu dipulihkan persis
+  ---
+  duration_ms: 0.397
+  type: 'test'
+  ...
+# Subtest: buka: fokus masuk ke judul, latar inert, gulir dikunci sekali
+ok 497 - buka: fokus masuk ke judul, latar inert, gulir dikunci sekali
+  ---
+  duration_ms: 1.4477
+  type: 'test'
+  ...
+# Subtest: Tab & Shift+Tab berputar di dalam dialog teratas
+ok 498 - Tab & Shift+Tab berputar di dalam dialog teratas
+  ---
+  duration_ms: 0.7059
+  type: 'test'
+  ...
+# Subtest: Escape hanya untuk dialog teratas; propagasi dihentikan
+ok 499 - Escape hanya untuk dialog teratas; propagasi dihentikan
+  ---
+  duration_ms: 0.5193
+  type: 'test'
+  ...
+# Subtest: dua lapis: tutup atas -> fokus ke pembukanya di editor; tutup semua -> inert pulih & fokus ke tombol awal
+ok 500 - dua lapis: tutup atas -> fokus ke pembukanya di editor; tutup semua -> inert pulih & fokus ke tombol awal
+  ---
+  duration_ms: 0.5594
+  type: 'test'
+  ...
+# Subtest: editor ditutup bersama konfirmasinya (urutan lepas terbalik): fokus tetap ke tombol pembuka editor
+ok 501 - editor ditutup bersama konfirmasinya (urutan lepas terbalik): fokus tetap ke tombol pembuka editor
+  ---
+  duration_ms: 0.261
+  type: 'test'
+  ...
+# Subtest: kembaliKe menang atas pembuka; tujuan yang hilang jatuh ke pembuka lalu kontrol wajar
+ok 502 - kembaliKe menang atas pembuka; tujuan yang hilang jatuh ke pembuka lalu kontrol wajar
+  ---
+  duration_ms: 0.7714
+  type: 'test'
+  ...
+# Subtest: pasang ulang (StrictMode): pemulihan fokus yang tertunda tidak mencuri fokus dari dialog baru
+ok 503 - pasang ulang (StrictMode): pemulihan fokus yang tertunda tidak mencuri fokus dari dialog baru
+  ---
+  duration_ms: 0.581
+  type: 'test'
+  ...
+# Subtest: fokus yang lolos ke luar dialog dikembalikan ke dalam
+ok 504 - fokus yang lolos ke luar dialog dikembalikan ke dalam
+  ---
+  duration_ms: 1.1554
+  type: 'test'
+  ...
+# Subtest: dialog tanpa kontrol: fokus ke wadahnya dan Tab tetap di sana
+ok 505 - dialog tanpa kontrol: fokus ke wadahnya dan Tab tetap di sana
+  ---
+  duration_ms: 0.3006
+  type: 'test'
+  ...
+# Subtest: gulirUntukTombol: tombol gulir dari judul
+ok 506 - gulirUntukTombol: tombol gulir dari judul
+  ---
+  duration_ms: 0.1401
+  type: 'test'
+  ...
+# Subtest: pesan sebelum unityReady diantrekan lalu terkirim berurutan
+ok 507 - pesan sebelum unityReady diantrekan lalu terkirim berurutan
+  ---
+  duration_ms: 2.383
+  type: 'test'
+  ...
+# Subtest: initialize adalah jabat tangan: dikirim tanpa menunggu unityReady
+ok 508 - initialize adalah jabat tangan: dikirim tanpa menunggu unityReady
+  ---
+  duration_ms: 0.2036
+  type: 'test'
+  ...
+# Subtest: antrean window.__raksaUnityQueue dikuras saat handler dipasang
+ok 509 - antrean window.__raksaUnityQueue dikuras saat handler dipasang
+  ---
+  duration_ms: 0.1689
+  type: 'test'
+  ...
+# Subtest: pesan dari misi/ronde lama diabaikan
+ok 510 - pesan dari misi/ronde lama diabaikan
+  ---
+  duration_ms: 0.4572
+  type: 'test'
+  ...
+# Subtest: pesan berbentuk salah diabaikan dan dicatat
+ok 511 - pesan berbentuk salah diabaikan dan dicatat
+  ---
+  duration_ms: 0.8704
+  type: 'test'
+  ...
+# Subtest: objectSelected & evidenceToggled yang sah diteruskan ke handler
+ok 512 - objectSelected & evidenceToggled yang sah diteruskan ke handler
+  ---
+  duration_ms: 0.4095
+  type: 'test'
+  ...
+# Subtest: ping/pong, sfx, dan interactionError tidak membuat crash
+ok 513 - ping/pong, sfx, dan interactionError tidak membuat crash
+  ---
+  duration_ms: 1.515
+  type: 'test'
+  ...
+# Subtest: handler yang melempar tidak menghentikan handler lain
+ok 514 - handler yang melempar tidak menghentikan handler lain
+  ---
+  duration_ms: 0.4555
+  type: 'test'
+  ...
+# Subtest: dispose() melepas handler & window.RaksaUnityReceive
+ok 515 - dispose() melepas handler & window.RaksaUnityReceive
+  ---
+  duration_ms: 0.5504
+  type: 'test'
+  ...
+# Subtest: anchor 10 misi identik dengan raksa-missions.json
+ok 516 - anchor 10 misi identik dengan raksa-missions.json
+  ---
+  duration_ms: 1.8036
+  type: 'test'
+  ...
+# Subtest: selectionsFromAnswer mengikuti bentuk jawaban tiap langkah
+ok 517 - selectionsFromAnswer mengikuti bentuk jawaban tiap langkah
+  ---
+  duration_ms: 1.2231
+  type: 'test'
+  ...
+# Subtest: langkah kosong tetap dikirim supaya penanda lama terhapus
+ok 518 - langkah kosong tetap dikirim supaya penanda lama terhapus
+  ---
+  duration_ms: 0.1547
+  type: 'test'
+  ...
+1..518
+# tests 518
+# suites 0
+# pass 518
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 2389.4862

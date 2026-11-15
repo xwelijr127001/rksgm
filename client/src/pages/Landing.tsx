@@ -1,23 +1,27 @@
 import { useEffect, useId, useState } from 'react';
 import { Link } from 'react-router-dom';
 import type { AcaraTerbuka } from '@shared/bankSoal';
-import { TOKOH, type IdTokoh } from '@shared/brand';
+import { TOKOH } from '@shared/brand';
 import { Avatar } from '../art/Avatar';
 import { Raki } from '../art/Raki';
 import { POTRET_AWAL, WelcomeArt } from '../art/WelcomeArt';
+import { JoinGame } from '../components/JoinGame';
 import { Arrow, PlayerShell } from '../components/PlayerShell';
 import { PotretTokoh } from '../game/KarakterTokoh';
 import { t, useBahasa } from '../i18n';
 import { terjemahkanBawaan } from '../i18n/galat';
+import { useLegacyEnabled } from '../story/appConfig';
 import { useProfil } from '../state/profil';
+
 type Acara = NonNullable<AcaraTerbuka['acara']>;
 /**
- * Acara yang sedang dibuka (tepat satu room di lobby), ditanya sekali saat halaman dibuka.
- * Gagal, null, atau bentuk jawaban tak dikenal = null: spanduk tidak tampil sama sekali.
+ * Mode lama: room kuis acara yang sedang dibuka (tepat satu room di lobby), ditanya sekali saat halaman dibuka.
+ * Mode lama nonaktif, gagal, null, atau bentuk jawaban tak dikenal = null: spanduk tidak tampil sama sekali.
  */
-function useAcaraTerbuka(): Acara | null {
+function useAcaraTerbuka(aktif: boolean): Acara | null {
   const [acara, setAcara] = useState<Acara | null>(null);
   useEffect(() => {
+    if (!aktif) return;
     const ctrl = new AbortController();
     fetch('/api/acara-terbuka', { signal: ctrl.signal, headers: { accept: 'application/json' } })
       .then(r => (r.ok ? r.json() as Promise<AcaraTerbuka> : null))
@@ -27,60 +31,61 @@ function useAcaraTerbuka(): Acara | null {
       })
       .catch(() => { /* server lama / jaringan putus: tanpa spanduk */ });
     return () => ctrl.abort();
-  }, []);
-  return acara;
+  }, [aktif]);
+  return aktif ? acara : null;
 }
 /** Raki di bingkai potret bulat yang SAMA dengan PotretTokoh (kelas .tokoh-potret dari game/tokoh.css). */
 function PotretRaki() {
   return <span className="tokoh-potret lp-potret-raki" style={{ width: POTRET_AWAL, height: POTRET_AWAL }}><Raki size={Math.round(POTRET_AWAL * 1.2)} mood="sapa" /></span>;
 }
-/** Potret pintu. Tokoh yang dinonaktifkan (TOKOH.x.aktif = false) diganti Raki di bingkai yang sama. */
-function PotretPintu({ tokoh }: { tokoh: IdTokoh | 'raki' }) {
-  return <span className="lp-pintu-potret" aria-hidden="true">{tokoh !== 'raki' && TOKOH[tokoh].aktif ? <PotretTokoh tokoh={tokoh} ukuran={POTRET_AWAL} hias /> : <PotretRaki />}</span>;
-}
+
 /**
- * Satu pintu: potret bulat + judul + satu kalimat + panah. Seluruh kartu adalah tautan (target sentuh besar).
- * Nama tautan = judul pintu, keterangannya = tanda + kalimat, lewat id (aria-labelledby/-describedby).
- * Tanpa itu Chrome menghitung nama dari seluruh isi, TERMASUK label potret role="img" meski
- * pembungkusnya aria-hidden: "Bu Isti, Direktur IT Gabung acara…" (review aksesibilitas 26 Sep).
+ * Mode Cerita (review staf #2): satu pintu dengan tindakan "Mulai", di bawah Join Game. Latihan misi tidak ditawarkan
+ * lagi di halaman awal (arahan pemilik; rute lama tetap ada bila mode lama aktif). Tanpa profil -> kenalan dulu.
+ * Seluruh kartu = tautan (target sentuh besar); nama tautan = judul + label aksi "Mulai" yang terlihat (perintah suara
+ * "klik Mulai" berfungsi), keterangannya = kalimat (aria-labelledby/-describedby).
  */
-function Pintu({ ke, kelas, tokoh, judul, isi, tanda }: { ke: string; kelas: string; tokoh: IdTokoh | 'raki'; judul: string; isi: string; tanda?: string }) {
+function ModeCerita() {
+  const { profil } = useProfil();
   const id = useId();
-  return <Link className={'lp-pintu ' + kelas} to={ke} aria-labelledby={id + 'j'} aria-describedby={(tanda ? id + 't ' : '') + id + 'i'}>
-    <PotretPintu tokoh={tokoh} />
-    <span className="lp-pintu-teks">{tanda ? <span className="lp-pintu-tanda" id={id + 't'}>{tanda}</span> : null}<b className="lp-pintu-judul" id={id + 'j'}>{judul}</b><span className="lp-pintu-isi" id={id + 'i'}>{isi}</span></span>
-    <span className="lp-pintu-panah"><Arrow /></span>
-  </Link>;
+  const ke = profil ? '/cerita' : '/kenalan?lanjut=/cerita';
+  return <section className="lp-sendiri" aria-labelledby={id + 's'}>
+    <h2 className="lp-sendiri-judul" id={id + 's'}>{t('pemain.mainSendiri')}</h2>
+    <Link className="lp-pintu lp-pintu-cerita-solo" to={ke} aria-labelledby={`${id}j ${id}m`} aria-describedby={id + 'i'} data-pintu-cerita="">
+      <span className="lp-pintu-potret" aria-hidden="true">
+        {TOKOH.missRaksa.aktif ? <PotretTokoh tokoh="missRaksa" ukuran={POTRET_AWAL} hias /> : <PotretRaki />}
+      </span>
+      <span className="lp-pintu-teks"><b className="lp-pintu-judul" id={id + 'j'}>{t('pemain.pintuCeritaJudul')}</b><span className="lp-pintu-isi" id={id + 'i'}>{t('pemain.pintuCeritaIsi')}</span></span>
+      <span className="lp-pintu-aksi" id={id + 'm'}>{t('pemain.pintuCeritaMulai')} <Arrow /></span>
+    </Link>
+    {profil ? <div className="alur-sebagai lp-sebagai"><span className="alur-sebagai-avatar" aria-hidden="true"><Avatar look={profil.look} size={30} mood="senang" /></span><span className="alur-sebagai-nama">{t('alur.mainSebagai', { nama: profil.nickname })}</span><span aria-hidden="true">·</span><Link className="alur-sebagai-ubah" to="/kenalan?ubah=1" aria-label={t('alur.ubahProfilAria')}>{t('alur.ubahKecil')}</Link></div> : null}
+  </section>;
 }
+
 /**
- * Halaman awal: tiga pintu dengan bahasa pengguna (docs/rancangan-mode-cerita.md bagian 1, temuan F):
- * Main cerita (utama) · Latihan misi · Gabung acara. Tanpa profil, cerita & latihan lewat /kenalan dulu.
- * Di HP judul + pintu cerita terlihat di layar pertama; ilustrasi kota turun ke bawah pintu.
+ * Halaman awal: Join Game paling atas (room acara bersama, review staf #4/#6), lalu Mode Cerita (main sendiri) dan sapaan
+ * Miss Raksa di ilustrasi (review staf #1). Spanduk acara kuis lama (hanya bila mode lama aktif) tidak menjadi ajakan
+ * gabung kedua: tombolnya mengisi kode ke Join Game.
  */
 export default function Landing() {
   useBahasa();
-  const { profil } = useProfil();
-  const acara = useAcaraTerbuka();
-  const lewatKenalan = (tujuan: string) => (profil ? tujuan : '/kenalan?lanjut=' + tujuan);
-  // Spanduk melayang (fixed), jadi kemunculannya tidak menggeser pintu yang hendak diketuk.
-  return <PlayerShell className={'lp-halaman alur-landing' + (acara ? ' alur-ada-spanduk' : '')} footer judul={null}><main className="lp-utama"><div className="lp-kiri">
+  const legacy = useLegacyEnabled();
+  const acara = useAcaraTerbuka(legacy);
+  const [kodeSaran, setKodeSaran] = useState<string | null>(null);
+  // Spanduk melayang (fixed), jadi kemunculannya tidak menggeser kartu yang hendak diketuk.
+  // T-003 D-01: ilustrasi + sapaan (.lp-seni) DULUAN di DOM supaya di HP tampil paling atas & urutan baca = urutan lihat;
+  // di desktop (>900px) grid menaruhnya kembali di kolom kanan (player.css, D-09).
+  return <PlayerShell className={'lp-halaman alur-landing' + (acara ? ' alur-ada-spanduk' : '')} footer judul={null}><main className="lp-utama"><div className="lp-seni"><WelcomeArt /></div><div className="lp-kiri">
     <div className="lp-sapa">
       <span className="eyebrow">{t('pemain.landingEyebrow')}</span>
-      <h1 className="lp-judul">{t('pemain.landingJudul1')}<br /><span>{t('pemain.landingJudul2')}</span></h1>
+      <h1 className="lp-judul">{t('pemain.landingJudul1')}<br />{' '}<span>{t('pemain.landingJudul2')}</span></h1>
       <p className="lp-isi">{t('pemain.landingPilih')}</p>
     </div>
-    <nav className="lp-pintu-daftar" aria-label={t('pemain.pilihCaraMain')}>
-      <Pintu ke={lewatKenalan('/cerita')} kelas="lp-pintu-cerita" tokoh="missRaksa" judul={t('pemain.pintuCeritaJudul')} isi={t('pemain.pintuCeritaIsi')} tanda={t('pemain.pintuMulai')} />
-      <div className="lp-pintu-lain">
-        <Pintu ke={lewatKenalan('/solo')} kelas="lp-pintu-latihan" tokoh="raki" judul={t('pemain.pintuLatihanJudul')} isi={t('pemain.pintuLatihanIsi')} />
-        <Pintu ke="/join" kelas="lp-pintu-acara" tokoh="isti" judul={t('pemain.pintuAcaraJudul')} isi={t('pemain.pintuAcaraIsi')} />
-      </div>
-    </nav>
-    {/* div, bukan p: baris ini bukan paragraf sambutan. */}
-    {profil ? <div className="alur-sebagai lp-sebagai"><span className="alur-sebagai-avatar" aria-hidden="true"><Avatar look={profil.look} size={30} mood="senang" /></span><span className="alur-sebagai-nama">{t('alur.mainSebagai', { nama: profil.nickname })}</span><span aria-hidden="true">·</span><Link className="alur-sebagai-ubah" to="/kenalan?ubah=1" aria-label={t('alur.ubahProfilAria')}>{t('alur.ubahKecil')}</Link></div> : null}
+    <JoinGame kodeSaran={kodeSaran} />
+    <ModeCerita />
     <span className="lp-catatan">{t('pemain.landingCatatan')}</span>
-  </div><div className="lp-seni"><WelcomeArt /></div></main>
+  </div></main>
     {/* Wadah status selalu ada (kosong) supaya pembaca layar mengumumkan spanduk saat muncul. */}
-    <div className="alur-spanduk-wadah" role="status">{acara ? <div className="alur-spanduk"><span className="alur-spanduk-titik" aria-hidden="true" /><p>{t('alur.acaraDibuka', { nama: terjemahkanBawaan(acara.eventName) })}</p><Link className="alur-spanduk-gabung" to={'/join?room=' + acara.code}>{t('alur.gabung')} <Arrow /></Link></div> : null}</div>
+    <div className="alur-spanduk-wadah" role="status">{acara ? <div className="alur-spanduk"><span className="alur-spanduk-titik" aria-hidden="true" /><p>{t('alur.acaraDibuka', { nama: terjemahkanBawaan(acara.eventName) })}</p><button type="button" className="alur-spanduk-gabung" onClick={() => setKodeSaran(acara.code)}>{t('alur.gabung')} <Arrow /></button></div> : null}</div>
   </PlayerShell>;
 }

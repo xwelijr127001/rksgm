@@ -1,0 +1,185 @@
+
+--- temuan A
+ok    [A] misi 3 penuh: status adegan 'ready'
+ok    [A] misi 3 penuh: kartu "Siap mulai" punya tombol "Lihat checklist"
+ok    [A] misi 3 penuh: tombol HTML "Lihat checklist" terlihat saat menjawab (2)
+ok    [A] misi 3 penuh: "Lihat checklist" di kepala Folder laporan (dekat folder)
+ok    [A] misi 3 penuh: "Lihat checklist" dicapai dengan Tab (2x dari awal halaman)
+ok    [A] misi 3 penuh: dialog berisi checklist 4 butir (4)
+ok    [A] misi 3 penuh: fokus di dalam dialog (h3 "Dokumen kasus")
+ok    [A] misi 3 penuh: Escape menutup checklist & fokus kembali ke tombolnya
+ok    [A] misi 3 penuh: objek "Folder laporan" (doc) ada di adegan
+ok    [A] misi 3 penuh: ketuk folder di kanvas membuka checklist 4 butir, fokus di dialog (4, h3 "Dokumen kasus")
+ok    [A] misi 3 penuh: dari kanvas, fokus kembali ke tombol HTML "Checklist"
+ok    [A] misi 3 ringan: status adegan 'static'
+ok    [A] misi 3 ringan: kartu "Siap mulai" punya tombol "Lihat checklist"
+ok    [A] misi 3 ringan: cara main di kartu tidak meminta mengetuk gambar ("Cara mainPilih dari daftar. Ketuk lagi untuk membatalkan.Setelah yakin, tekan “Periksa jaw")
+ok    [A] misi 3 ringan: tanpa kanvas (0)
+ok    [A] misi 3 ringan: tombol HTML "Lihat checklist" terlihat saat menjawab (2)
+ok    [A] misi 3 ringan: "Lihat checklist" di kepala Folder laporan (dekat folder)
+ok    [A] misi 3 ringan: petunjuk pertanyaan memakai daftar ("Pilih dari daftar. Ketuk lagi untuk membatalkan.")
+ok    [A] misi 3 ringan: "Lihat checklist" dicapai dengan Tab (2x dari awal halaman)
+ok    [A] misi 3 ringan: dialog berisi checklist 4 butir (4)
+ok    [A] misi 3 ringan: fokus di dalam dialog (h3 "Dokumen kasus")
+ok    [A] misi 3 ringan: Escape menutup checklist & fokus kembali ke tombolnya
+ok    [A] misi 3 ringan: Cara main memakai petunjuk daftar, bukan ketuk gambar ("DipilihPilih dari daftarAmati gambarnya, lalu ketuk jawaban di daftar. Salah pilih? Ketuk ")
+ok    [A] misi 3 gagal: status adegan 'failed'
+ok    [A] misi 3 gagal: request chunk Phaser dicegat (1x)
+ok    [A] misi 3 gagal: kartu "Siap mulai" punya tombol "Lihat checklist"
+ok    [A] misi 3 gagal: cara main di kartu tidak meminta mengetuk gambar ("Cara mainPilih dari daftar. Ketuk lagi untuk membatalkan.Setelah yakin, tekan “Periksa jaw")
+ok    [A] misi 3 gagal: tanpa kanvas (0)
+ok    [A] misi 3 gagal: tombol HTML "Lihat checklist" terlihat saat menjawab (2)
+ok    [A] misi 3 gagal: "Lihat checklist" di kepala Folder laporan (dekat folder)
+ok    [A] misi 3 gagal: petunjuk pertanyaan memakai daftar ("Pilih dari daftar. Ketuk lagi untuk membatalkan.")
+ok    [A] misi 3 gagal: "Lihat checklist" dicapai dengan Tab (2x dari awal halaman)
+ok    [A] misi 3 gagal: dialog berisi checklist 4 butir (4)
+ok    [A] misi 3 gagal: fokus di dalam dialog (h3 "Dokumen kasus")
+ok    [A] misi 3 gagal: Escape menutup checklist & fokus kembali ke tombolnya
+ok    [A] misi 3 gagal: Cara main memakai petunjuk daftar, bukan ketuk gambar ("DipilihPilih dari daftarAmati gambarnya, lalu ketuk jawaban di daftar. Salah pilih? Ketuk ")
+ok    [A] misi 7 ringan: tombol Dokumen ada
+ok    [A] misi 7 ringan: "Tanggal kejadian: 05 Sep 2026" terbaca di dialog HTML
+ok    [A] misi 7 ringan: tanpa kanvas
+
+--- temuan B
+ok    [B] misi 10: tombol Dokumen di baris alat
+ok    [B] misi 10: fokus masuk ke dialog saat dibuka (h3 "Dokumen kasus")
+ok    [B] misi 10: #root inert selama dialog terbuka
+ok    [B] misi 10 390x844: sisa isi dialog terjangkau dengan panah/PageDown (0 -> 12px dari maks 12)
+ok    [B] misi 10: Tab 10x & Shift+Tab 10x tetap di dalam dialog
+ok    [B] misi 10: #root tetap inert setelah Tab berputar
+ok    [B] misi 10: Escape menutup dialog
+ok    [B] misi 10: fokus kembali ke tombol Dokumen pembuka ("Dokumen")
+ok    [B] misi 10: #root tidak inert lagi setelah ditutup
+ok    [B] misi 10 844x390: isi dialog panjang (704 > 234px)
+ok    [B] misi 10 844x390: panah bawah menggulir isi (0 -> 40px)
+ok    [B] misi 10 844x390: PageDown menggulir isi satu halaman (40 -> 251px)
+ok    [B] misi 10 844x390: wilayah isi dialog bisa difokus dengan Tab
+ok    [B] misi 10 844x390: PageDown di wilayah isi menggulir (251 -> 455px)
+ok    [B] misi 10 844x390: geser jari menggulir isi dialog (0 -> 102px)
+ok    [B] misi 5: objek dokumen (kartu polis) ada di adegan (kartu-a)
+ok    [B] misi 5: ketuk kartu polis di kanvas membuka dialog, latar inert
+ok    [B] misi 5: fokus di dalam dialog (div "Dokumen kasusKartu Polis AComp")
+ok    [B] misi 5: setelah ditutup fokus ke tombol HTML "Dokumen" (bukan body/kanvas)
+
+--- temuan C
+ok    [C] misi 1 390x844 kunjungan pertama: "Siap mulai" terlihat tanpa gulir (y 489-541, viewport 844)
+ok    [C] misi 1 390x844: bonus tidak berkurang sebelum "Siap mulai" (20 -> 20 dtk setelah 3,5 dtk, status siap)
+ok    [C] misi 1 390x844: setelah mulai, opsi pertama terlihat penuh di atas bar aksi (opsi 677-739, bar aksi 747, gulir 22)
+ok    [C] misi 1 390x844: petunjuk kunjungan pertama tampil satu baris dengan tombol tutup
+ok    [C] misi 1 390x844: petunjuk kunjungan pertama bisa ditutup
+ok    [C] misi 1 390x844: bonus mulai berjalan setelah "Siap mulai" (20 -> 19 dtk)
+ok    [C] misi 1 360x740 kunjungan pertama: "Siap mulai" terlihat tanpa gulir (y 489-541, viewport 740)
+ok    [C] misi 1 360x740: bonus tidak berkurang sebelum "Siap mulai" (20 -> 20 dtk setelah 3,5 dtk, status siap)
+ok    [C] misi 1 360x740: setelah mulai, opsi pertama terlihat penuh di atas bar aksi (opsi 579-635, bar aksi 643, gulir 97)
+ok    [C] misi 1 360x740: petunjuk kunjungan pertama tampil satu baris dengan tombol tutup
+ok    [C] misi 1 360x740: petunjuk kunjungan pertama bisa ditutup
+ok    [C] misi 1 360x740: bonus mulai berjalan setelah "Siap mulai" (20 -> 19 dtk)
+ok    [C] multiplayer: room uji dibuat di http://127.0.0.1:4850
+ok    [C] multiplayer: pemain Weli bergabung ke room V6G7
+ok    [C] multiplayer: host memulai pertandingan -> BRIEFING (BRIEFING)
+ok    [C] multiplayer: durasi BRIEFING tetap dari data misi a01-api-padam (10000 ms = 10000 ms)
+ok    [C] multiplayer: briefing menampilkan cara main ringkas (2 baris: "Ketuk pilihan di gambar: masuk Pilihanmu. Ketuk lagi untuk membatalkan. / Setelah yakin, t")
+ok    [C] multiplayer: tanpa tombol "Siap mulai" (waktu ronde sama untuk semua pemain)
+ok    [C] multiplayer: ronde ACTIVE mulai sesuai jadwal server, durasi 45 dtk (ACTIVE, 45000 ms)
+ok    [C] multiplayer: pemain langsung masuk mode menjawab (tanpa gerbang)
+
+--- temuan D & E
+ok    [D] misi 1: pilih jawaban salah "Langsung memperbaiki tanpa dokumentasi atau koordinasi"
+ok    [D] misi 1 salah 390x844: vonis "Belum tepat." di atas adegan (vonis y 156, adegan y 825)
+ok    [D] misi 1 salah 390x844: vonis di layar pertama (y 156-184, viewport 844)
+ok    [D] misi 1 salah 390x844: tombol aksi utama "Coba lagi" terlihat tanpa gulir (y 597-655)
+ok    [E] misi 1 0%: 0 bintang di hasil (data-jumlah 0)
+ok    [E] misi 1 0%: hasil menyebut percobaan tercatat "sudah dicoba"
+ok    [E] misi 1 0%: arti bintang dijelaskan di hasil ("Bintang = ketepatan terbaikmu: 3 semua tepat · 2 sebagian besar · 1 ada yang tepat Belum a")
+ok    [E] misi 1 0%: tersimpan bintang 0, kali 1, versi 2
+ok    [E] peta: misi 1 = 0 bintang + "Sudah dicoba" ({"bintang":0,"dicoba":true})
+ok    [E] peta: arti bintang dijelaskan (legenda)
+ok    [E] misi 1: pilih jawaban tepat
+ok    [E] misi 1 100%: 3 bintang di hasil (data-jumlah 3)
+ok    [E] misi 1 100%: tersimpan 3 bintang, kali 2 ({"akurasi":1,"poin":1281,"bintang":3,"kali":2})
+ok    [D] misi 2: pilih "Foto keseluruhan kendaraan" lewat daftar
+ok    [D] misi 2: pilih "Foto detail kerusakan depan kiri" lewat daftar
+ok    [D] misi 2: pilih "Foto kucing di kap mobil" lewat daftar
+ok    [D] misi 2: hasil "sebagian" (sebagian)
+ok    [D] misi 2 sebagian: baris "Kamu pilih: Foto kucing di kap mobil" terlihat di layar pertama, di atas adegan (y 367)
+ok    [D] misi 2 sebagian: baris jawaban tepat "Masih terlewat: Foto identitas kendaraan (plat & nomor rangka)" terlihat di layar pertama (y 449)
+ok    [D] misi 2 sebagian: baris "Sudah tepat: Foto keseluruhan kendaraan · Foto detail kerusakan depan kiri" terlihat (y 397)
+ok    [D] misi 2 sebagian: alasan singkat terlihat tanpa membuka lipatan (y 506-619: "Alasannya: Foto keseluruhan menunjukkan kondisi kendaraan, foto detail depan kiri menunjuk")
+ok    [D] misi 2 sebagian: tombol aksi utama terlihat tanpa gulir (y 633-691)
+ok    [E] progres lama (kontrak): peta misi 1 = 0 bintang + "Sudah dicoba" ({"bintang":0,"dicoba":true})
+ok    [E] progres lama (kontrak): 'raksa:solo:cadangan-v1' berisi data mentah lama
+ok    [E] progres lama (kontrak): dimigrasi ke versi 2, bintang 0, akurasi/poin/kali tetap ({"akurasi":0,"poin":0,"bintang":0,"kali":1})
+ok    [E] progres lama (review): peta misi 1 = 0 bintang + "Sudah dicoba" ({"bintang":0,"dicoba":true})
+ok    [E] progres lama (review): 'raksa:solo:cadangan-v1' berisi data mentah lama
+ok    [E] progres lama (review): dimigrasi ke versi 2, bintang 0, akurasi/poin/kali tetap ({"akurasi":0,"poin":0,"bintang":0,"kali":1})
+ok    [E] progres lama (review): misi 2 & 9 tetap 3 bintang, 3 misi dicoba (total poin 2.278 | bintang 6/30 | dicoba 3/10 | rekor pribadi 2.278)
+
+--- temuan F
+ok    [F] halaman awal awal-hp: Join Game + mode lama Mini Games / cerita solo (/cerita, /solo, /join)
+ok    [F] halaman awal awal-hp: kartu "Join Game" terlihat di layar pertama (y 257-423, viewport 844)
+ok    [F] halaman awal awal-desktop: Join Game + mode lama Mini Games / cerita solo (/cerita, /solo, /join)
+ok    [F] halaman awal awal-desktop: kartu "Join Game" terlihat di layar pertama (y 370-548, viewport 900)
+ok    [F] wordmark bersama (Merek) di header host ("RAKSA GAME")
+ok    [F] wordmark bersama (Merek) di header awal-hp ("RAKSA GAME")
+ok    [F] wordmark bersama (Merek) di header awal-desktop ("RAKSA GAME")
+ok    [F] wordmark bersama (Merek) di header solo ("RAKSA GAME")
+ok    [F] wordmark bersama (Merek) di header misi ("RAKSA GAME")
+ok    [F] wordmark bersama (Merek) di layar proyektor
+ok    [F] font wordmark sama di host & pemain ("Segoe UI Variable Display", "Segoe UI", system-ui, -apple-system, "Helvetica Neue", Arial, "Noto Sans", sans-serif)
+ok    [F] tombol utama host "Buat Room Baru" berlatar hijau, bukan kuning (rgb(33, 92, 64))
+ok    [F] tombol utama host & pemain berwarna sama (rgb(33, 92, 64) / rgb(33, 92, 64))
+ok    [F] bentuk tombol utama host & pemain sama (sudut 13px / 13px)
+ok    [F] font judul sama: host "Buat Room" / halaman awal / peta solo ("Segoe UI Variable Display", "Segoe UI", system-ui, -apple-system, "Helvetica Neue", Arial, "Noto Sans", sans-serif)
+
+================ RINGKASAN UJI TEMUAN REVIEW ================
+alamat http://127.0.0.1:4850 | socket http://127.0.0.1:4850 | gerak no-preference | 75 dtk
+  A       39/39 lulus
+  B       19/19 lulus
+  C       20/20 lulus
+  D       13/13 lulus
+  E       16/16 lulus
+  F       15/15 lulus
+
+angka terukur (sesudah) | sebelum (review 26 Sep, kontrak bagian 9):
+  B 390 isi dialog misi 10 (tinggi isi / kotak): 704 / 692px
+  B tujuan fokus Tab di dialog: div "Isi Dokumen kasus, bisa diguli" | button "Tutup"
+  C 390x844 "Siap mulai" y: 489-541   | sebelum tanpa gerbang, bonus langsung berjalan
+  C bonus sebelum interaksi: 20 -> 20 dtk (3,5 dtk)   | sebelum 18 -> 16 dtk tanpa interaksi
+  C 390x844 setelah mulai: opsi pertama y / bar aksi y / adegan y / gulir: 677-739 / 747 / 317 / 22   | sebelum 968 / 747 / 608 / 0
+  C 360x740 "Siap mulai" y: 489-541
+  C 360x740 setelah mulai: opsi pertama y / bar aksi y / adegan y / gulir: 579-635 / 643 / 241 / 97
+  C multiplayer: misi ronde 1: a01-api-padam (briefing 10000 ms, ronde 45000 ms)
+  C multiplayer: cara main di briefing y: 398
+  C multiplayer: fase & durasi: LOBBY:null BRIEFING:10000 ACTIVE:45000
+  D 390 vonis y: 156   | sebelum 539
+  D 390 tombol aksi y: 597-655 ("Coba lagi")   | sebelum 807 ("Coba lagi")
+  D 390 adegan y: 825
+  E bintang 0%: 0   | sebelum 1
+  D 390 misi 2 sebagian: Kamu pilih / jawaban tepat / alasan / aksi / adegan y: 367 / 449 / 506 / 633 / 860
+  E peta progres review (angka kepala): total poin 2.278 | bintang 6/30 | dicoba 3/10 | rekor pribadi 2.278
+  F awal-hp: kartu Join Game y: 257-423 / 844
+  F awal-desktop: kartu Join Game y: 370-548 / 900
+  F tombol utama host: Buat Room Baru: rgb(33, 92, 64), sudut 13px
+
+tangkapan: C:\Users\User\Desktop\rksgm-main\docs\prd-v02\evidence\legacy\temuan-semua
+  sesudah-mission3-light.png (100 KB)
+  sesudah-mission3-light-help.png (109 KB)
+  sesudah-modal-focus-behind.png (52 KB)
+  sesudah-dialog-panjang-mendatar.png (60 KB)
+  sesudah-mission1-mobile-viewport.png (72 KB)
+  sesudah-mission1-mobile-mulai.png (81 KB)
+  sesudah-briefing-acara-hp.png (70 KB)
+  sesudah-mission1-wrong-mobile.png (90 KB)
+  sesudah-mission2-sebagian-mobile.png (55 KB)
+  sesudah-progress-persisted.png (135 KB)
+  sesudah-host-desktop.png (64 KB)
+  sesudah-home-mobile.png (55 KB)
+  sesudah-home-desktop.png (97 KB)
+
+console error / pageerror / HTTP 5xx (info, di luar skenario engine gagal): 0
+
+catatan di luar ambang (tidak menggagalkan): 0
+
+pemeriksaan: 122/122 lulus, GAGAL 0
+=============================================================
+

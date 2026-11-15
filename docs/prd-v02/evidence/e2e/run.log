@@ -1,0 +1,200 @@
+﻿11:31:26 == landing
+LULUS  landing hp390: Join Game + tombol Mulai (review #2, #4)  — {"joinTitle":"Join Game","mulai":"Mulai","joinBottom":423.125,"vh":844,"slogan":"Miss Raksa · Senior Layanan Klaimanytime anywhere with our smile","caraLain":false,"legacyDoors":false,"surveyor":true,
+LULUS  landing hp390: Join Game utuh di layar pertama HP (review #4)  — bawah=423.125 tinggi=844
+LULUS  landing hp390: ikon surveyor, bukan Bu Isti (review #6)
+LULUS  landing hp390: sapaan Miss Raksa "anytime anywhere with our smile" (review #1)  — Miss Raksa · Senior Layanan Klaimanytime anywhere with our smile
+LULUS  landing hp390: tanpa "Cara main lain"; mode lama tidak tampil di MVP (review #3, D-03)
+LULUS  landing hp390: tanpa luapan horizontal
+LULUS  landing hp390: tanpa galat JS
+LULUS  landing hp360: Join Game + tombol Mulai (review #2, #4)  — {"joinTitle":"Join Game","mulai":"Mulai","joinBottom":423.125,"vh":740,"slogan":"Miss Raksa · Senior Layanan Klaimanytime anywhere with our smile","caraLain":false,"legacyDoors":false,"surveyor":true,
+LULUS  landing hp360: Join Game utuh di layar pertama HP (review #4)  — bawah=423.125 tinggi=740
+LULUS  landing hp360: ikon surveyor, bukan Bu Isti (review #6)
+LULUS  landing hp360: sapaan Miss Raksa "anytime anywhere with our smile" (review #1)  — Miss Raksa · Senior Layanan Klaimanytime anywhere with our smile
+LULUS  landing hp360: tanpa "Cara main lain"; mode lama tidak tampil di MVP (review #3, D-03)
+LULUS  landing hp360: tanpa luapan horizontal
+LULUS  landing hp360: tanpa galat JS
+LULUS  landing mendatar: Join Game + tombol Mulai (review #2, #4)  — {"joinTitle":"Join Game","mulai":"Mulai","joinBottom":330.40625,"vh":390,"slogan":"Miss Raksa · Senior Layanan Klaimanytime anywhere with our smile","caraLain":false,"legacyDoors":false,"surveyor":tru
+LULUS  landing mendatar: Join Game utuh di layar pertama HP (review #4)  — bawah=330.40625 tinggi=390
+LULUS  landing mendatar: ikon surveyor, bukan Bu Isti (review #6)
+LULUS  landing mendatar: sapaan Miss Raksa "anytime anywhere with our smile" (review #1)  — Miss Raksa · Senior Layanan Klaimanytime anywhere with our smile
+LULUS  landing mendatar: tanpa "Cara main lain"; mode lama tidak tampil di MVP (review #3, D-03)
+LULUS  landing mendatar: tanpa luapan horizontal
+LULUS  landing mendatar: tanpa galat JS
+LULUS  landing desktop: Join Game + tombol Mulai (review #2, #4)  — {"joinTitle":"Join Game","mulai":"Mulai","joinBottom":648.5625,"vh":900,"slogan":"Miss Raksa · Senior Layanan Klaimanytime anywhere with our smile","caraLain":false,"legacyDoors":false,"surveyor":true
+LULUS  landing desktop: ikon surveyor, bukan Bu Isti (review #6)
+LULUS  landing desktop: sapaan Miss Raksa "anytime anywhere with our smile" (review #1)  — Miss Raksa · Senior Layanan Klaimanytime anywhere with our smile
+LULUS  landing desktop: tanpa "Cara main lain"; mode lama tidak tampil di MVP (review #3, D-03)
+LULUS  landing desktop: tanpa luapan horizontal
+LULUS  landing desktop: tanpa galat JS
+LULUS  rute mode lama /solo tertutup (kembali ke /)  — http://127.0.0.1:4820/
+LULUS  rute mode lama /cerita tertutup (kembali ke /)  — http://127.0.0.1:4820/
+LULUS  rute mode lama /kenalan tertutup (kembali ke /)  — http://127.0.0.1:4820/
+LULUS  rute mode lama /acara/join tertutup (kembali ke /)  — http://127.0.0.1:4820/
+LULUS  rute mode lama /acara/host tertutup (kembali ke /)  — http://127.0.0.1:4820/
+LULUS  rute mode lama /lobby tertutup (kembali ke /)  — http://127.0.0.1:4820/
+LULUS  rute mode lama /main tertutup (kembali ke /)  — http://127.0.0.1:4820/
+LULUS  API mode lama /api/missions ditolak server (404) saat RAKSA_LEGACY=off  — 404
+LULUS  kode 4 karakter di MVP: tidak diteruskan ke kuis lama  — http://127.0.0.1:4820/join?room=AB12
+11:31:37 == main: dua room bersamaan
+LULUS  dua skenario demo terbit tersedia untuk host  — [DEMO] Baret di Parkiran Pasar, [DEMO] Mobil Terendam Banjir
+LULUS  skenario A: 15 babak × 5 pilihan
+LULUS  skenario B: 15 babak × 5 pilihan
+LULUS  dua room terpisah dengan kode 6 karakter  — PVUC3J 29CSC6
+LULUS  pemberitahuan nama tampil di papan peringkat & pengumuman pemenang sebelum masuk (FR-E7, #19)  — Pemberitahuan data pribadiNama yang kamu isi akan tampil di papan peringkat room ini dan di layar acara, dan dapat dipak
+LULUS  tanpa centang persetujuan: tidak bisa masuk
+LULUS  nama kosong ditolak
+LULUS  nama tidak pantas ditolak
+LULUS  nama kembar (beda huruf besar/spasi) ditolak
+LULUS  room penuh: peserta ke-5 ditolak dengan pesan jelas  — Kembali
+Bahasa
+ID
+EN
+Join Game
+
+Masukkan kode room dari host. Tanpa akun: cukup kode dan nama.
+
+PVUC3J
+[DEMO] Baret di Parkiran Pasar
+Kategori Auto · 4 dari 4 p
+LULUS  layar acara lobi menampilkan nama peserta  — Ani Best,Budi Poor,Citra Mix,Dodi Putus
+LULUS  room scene-hp390: tanpa luapan horizontal
+LULUS  room scene-hp360: tanpa luapan horizontal
+LULUS  room scene-mendatar: tanpa luapan horizontal
+LULUS  room scene-desktop: tanpa luapan horizontal
+LULUS  room answering-hp390: tanpa luapan horizontal
+LULUS  room answering-hp390: 5 pilihan terlihat
+LULUS  room answering-hp390: tombol "Kunci jawaban" tidak tertutup
+LULUS  room answering-hp390: timer 30 detik terlihat (#11–#14)  — Sisa waktu menjawab 30 detik
+LULUS  room answering-hp360: tanpa luapan horizontal
+LULUS  room answering-hp360: 5 pilihan terlihat
+LULUS  room answering-hp360: tombol "Kunci jawaban" tidak tertutup
+LULUS  room answering-hp360: timer 30 detik terlihat (#11–#14)  — Sisa waktu menjawab 30 detik
+LULUS  room answering-mendatar: tanpa luapan horizontal
+LULUS  room answering-mendatar: 5 pilihan terlihat
+LULUS  room answering-mendatar: tombol "Kunci jawaban" tidak tertutup
+LULUS  room answering-mendatar: timer 30 detik terlihat (#11–#14)  — Sisa waktu menjawab 30 detik
+LULUS  room answering-desktop: tanpa luapan horizontal
+LULUS  room answering-desktop: 5 pilihan terlihat
+LULUS  room answering-desktop: tombol "Kunci jawaban" tidak tertutup
+LULUS  room answering-desktop: timer 30 detik terlihat (#11–#14)  — Sisa waktu menjawab 30 detik
+LULUS  room consequence-hp390: tanpa luapan horizontal
+LULUS  room consequence-hp360: tanpa luapan horizontal
+LULUS  room consequence-mendatar: tanpa luapan horizontal
+LULUS  room consequence-desktop: tanpa luapan horizontal
+LULUS  room leaderboard-hp390: tanpa luapan horizontal
+LULUS  room leaderboard-hp360: tanpa luapan horizontal
+LULUS  room leaderboard-mendatar: tanpa luapan horizontal
+LULUS  room leaderboard-desktop: tanpa luapan horizontal
+11:32:33 Dodi terputus di babak 2
+11:33:02 Host B menutup konsol (terputus) di peringkat babak 3
+LULUS  host terputus: room tetap hidup dan menunggu (tidak direset)
+LULUS  host masuk lagi di tab baru dan mengambil alih room yang sama
+LULUS  peserta yang putus kembali ke babak BERJALAN dengan kredensial room (bukan nama)  — babak 5
+11:35:29 Dodi kembali di babak 5
+11:42:52 kedua room selesai dalam 656 detik
+LULUS  semua peserta mencapai ringkasan akhir di kedua room  — Ani Best:true Budi Poor:true Citra Mix:true Dodi Putus:true Eko Terbaik:true Fani Campur:true Gilang Lambat:true
+LULUS  Ani Best: ringkasan berisi 15 keputusan + akhir + rincian 70:30 + peringkat  — {"decisions":15,"ending":"Happy ending penuh","total":"14.587","explain":true,"rank":"Peringkatmu: 1 dari 4","timeouts":"0"}
+LULUS  Ani Best: ringkasan tanpa luapan horizontal (hp390)
+LULUS  Budi Poor: ringkasan berisi 15 keputusan + akhir + rincian 70:30 + peringkat  — {"decisions":15,"ending":"Selesai dengan catatan","total":"0","explain":true,"rank":"Peringkatmu: 4 dari 4","timeouts":"0"}
+LULUS  Budi Poor: ringkasan tanpa luapan horizontal (hp360)
+LULUS  Citra Mix: ringkasan berisi 15 keputusan + akhir + rincian 70:30 + peringkat  — {"decisions":15,"ending":"Selesai dengan catatan","total":"6.990","explain":true,"rank":"Peringkatmu: 3 dari 4","timeouts":"5"}
+LULUS  Citra Mix: ringkasan tanpa luapan horizontal (mendatar)
+LULUS  Dodi Putus: ringkasan berisi 15 keputusan + akhir + rincian 70:30 + peringkat  — {"decisions":15,"ending":"Happy ending penuh","total":"11.587","explain":true,"rank":"Peringkatmu: 2 dari 4","timeouts":"3"}
+LULUS  Dodi Putus: ringkasan tanpa luapan horizontal (desktop)
+LULUS  jalur terbaik (Ani) mendapat happy ending penuh  — Happy ending penuh
+LULUS  jalur terburuk (Budi) tidak mendapat happy ending  — Selesai dengan catatan
+LULUS  Citra: 5 babak waktu habis tercatat 0 poin  — 5
+LULUS  Dodi: babak yang terlewat saat putus tercatat waktu habis  — 3
+LULUS  layar acara menampilkan peringkat akhir room A
+LULUS  Ani Best: payload publik tanpa kunci/status pribadi
+LULUS  Ani Best: tidak ada kunci jawaban/bobot di payload mana pun
+LULUS  Ani Best: hanya menerima status pribadinya sendiri  — 42b791aa-137
+LULUS  Ani Best: tanpa galat JS
+LULUS  Budi Poor: payload publik tanpa kunci/status pribadi
+LULUS  Budi Poor: tidak ada kunci jawaban/bobot di payload mana pun
+LULUS  Budi Poor: hanya menerima status pribadinya sendiri  — db5e4037-6db
+LULUS  Budi Poor: tanpa galat JS
+LULUS  Citra Mix: payload publik tanpa kunci/status pribadi
+LULUS  Citra Mix: tidak ada kunci jawaban/bobot di payload mana pun
+LULUS  Citra Mix: hanya menerima status pribadinya sendiri  — 8ea93a94-9a5
+LULUS  Citra Mix: tanpa galat JS
+LULUS  Dodi Putus: payload publik tanpa kunci/status pribadi
+LULUS  Dodi Putus: tidak ada kunci jawaban/bobot di payload mana pun
+LULUS  Dodi Putus: hanya menerima status pribadinya sendiri  — 5f87b61f-23f
+LULUS  Dodi Putus: tanpa galat JS
+LULUS  Eko Terbaik: payload publik tanpa kunci/status pribadi
+LULUS  Eko Terbaik: tidak ada kunci jawaban/bobot di payload mana pun
+LULUS  Eko Terbaik: hanya menerima status pribadinya sendiri  — fcbbc4c3-767
+LULUS  Eko Terbaik: tanpa galat JS
+LULUS  Fani Campur: payload publik tanpa kunci/status pribadi
+LULUS  Fani Campur: tidak ada kunci jawaban/bobot di payload mana pun
+LULUS  Fani Campur: hanya menerima status pribadinya sendiri  — c38c6a5b-2c2
+LULUS  Fani Campur: tanpa galat JS
+LULUS  Gilang Lambat: payload publik tanpa kunci/status pribadi
+LULUS  Gilang Lambat: tidak ada kunci jawaban/bobot di payload mana pun
+LULUS  Gilang Lambat: hanya menerima status pribadinya sendiri  — b3fb455b-370
+LULUS  Gilang Lambat: tanpa galat JS
+LULUS  pilihan dan konsekuensi tidak pernah dikirim bersamaan (benar/salah tidak bocor saat menjawab)
+LULUS  room selesai tidak bisa dimasuki lagi (tanpa reset/ulang)  — Kembali
+Bahasa
+ID
+EN
+Join Game
+
+Masukkan kode room dari host. Tanpa akun: cukup kode dan nama.
+
+PVUC3J
+[DEMO] Baret di Parkiran Pasar
+Kategori Auto · 4 dari 4 p
+LULUS  host tidak bisa memulai ulang room yang selesai (socket)  — {"ok":false,"code":"closed","error":"Room sudah ditutup. Satu room hanya memainkan satu sesi; buka room baru."}
+LULUS  hasil pribadi tetap terbuka setelah muat ulang
+LULUS  room A: 15 babak tercatat  — 15
+LULUS  babak tertutup otomatis begitu semua menjawab (FR-B6, review #17), tanpa menunggu timer  — babak all_answered=8 jeda maks=1ms
+LULUS  babak dengan waktu habis ditutup tepat di batas 30 detik  — 30015,30010,30005,30015,30003,30002,30009
+LULUS  durasi sesi room A diukur (target ±14 menit, bukan jaminan)  — 10.9 menit
+11:42:57 == cms
+LULUS  admin sistem mengunggah aset latar dengan metadata sumber/lisensi lewat UI
+LULUS  unggahan tanpa berkas gambar valid ditolak  — 400
+LULUS  skenario kosong gagal validasi dengan pesan spesifik  — Jumlah babak harus 15 (sekarang 0). rounds | Minimal dua akhir cerita (happy ending penuh dan penyelesaian dengan catatan). endings | Belum ada akhir "happy ending penuh". endings
+LULUS  skenario lengkap dari UI lolos validasi  — Tidak ada masalah. Skenario siap diajukan ke review.
+LULUS  pratinjau memainkan 15 babak sampai akhir dengan aturan yang sama  — Semua dianjurkan, langsung15.000100Happy ending penuh: Akhir 1 | Semua dianjurkan, detik ke-1512.750100Happy ending penuh: Akhir 1 | Selang-seling dianjurkan/terlemah7.20035Selesai dengan catatan: Akh
+LULUS  pratinjau tidak membuat room/hasil kompetisi  — 2 -> 2
+LULUS  draf terkunci saat review (409)  — 409
+LULUS  reviewer menerbitkan versi 1 lewat UI
+LULUS  skenario terbit langsung tersedia di host tanpa build/restart
+LULUS  revisi draf
+LULUS  versi 2 terbit  — 200
+LULUS  room yang berjalan tetap memakai versi 1 setelah revisi/terbit/arsip  — Skenario UI Uji Terima wl1kj – RAKSA GAME
+LULUS  skenario diarsipkan tidak bisa membuka room baru
+LULUS  host menutup room: peserta melihat sesi dihentikan
+11:43:10 == admin
+LULUS  rekap lintas room memuat 7 peserta dari dua room uji  — 7
+LULUS  dasbor: rata-rata nilai = rata-rata hasil selesai di rekap  — 8889 vs 8889
+LULUS  dasbor: peserta = baris rekap dari room yang sudah selesai/terhenti  — 8 vs 8
+LULUS  konten DEMO dikecualikan dari angka kompetisi secara bawaan
+LULUS  ekspor CSV ber-BOM UTF-8 berisi nama peserta
+LULUS  analisis babak tersedia per skenario/versi (15 babak)
+LULUS  periode baru dibuat; periode bentrok ditolak  — 200 409
+LULUS  halaman admin tanpa galat JS
+11:43:17 == peran
+LULUS  uji.host GET /api/cms/scenarios -> 403  — 403
+LULUS  uji.host GET /api/admin/dashboard -> 403  — 403
+LULUS  uji.penulis GET /api/host/scenarios -> 403  — 403
+LULUS  uji.penulis GET /api/admin/results -> 403  — 403
+LULUS  uji.penulis POST /api/admin/periods -> 403  — 403
+LULUS  uji.reviewer POST /api/cms/scenarios -> 403  — 403
+LULUS  uji.reviewer GET /api/admin/users -> 403  — 403
+LULUS  uji.panitia GET /api/cms/scenarios -> 403  — 403
+LULUS  uji.panitia GET /api/admin/users -> 403  — 403
+LULUS  uji.admin GET /api/admin/results -> 403  — 403
+LULUS  uji.admin GET /api/host/scenarios -> 403  — 403
+LULUS  tanpa sesi -> 401
+LULUS  penulis tidak bisa membuka room lewat socket  — {"ok":false,"code":"forbidden","error":"Hanya akun dengan peran host yang bisa mengendalikan room."}
+LULUS  UI /cms untuk uji.host: akses ditolak dengan pesan
+LULUS  UI /host untuk uji.penulis: akses ditolak dengan pesan
+LULUS  UI /admin untuk uji.penulis: akses ditolak dengan pesan
+11:43:21 == aset gagal
+LULUS  gambar gagal dimuat: panggung jatuh ke gambar SVG/teks, dialog tetap terbaca
+LULUS  tetap bisa menjawab dan menerima konsekuensi tanpa gambar
+
+168/168 lulus; 0 gagal. Bukti: C:\Users\User\Desktop\rksgm-main\docs\prd-v02\evidence\e2e

@@ -243,6 +243,7 @@ export function Modal({
   aksi,
   kembaliKe,
   lebar,
+  gaya,
 }: {
   judul: string;
   children?: ReactNode;
@@ -251,6 +252,8 @@ export function Modal({
   aksi?: ReactNode;
   kembaliKe?: KembaliKe;
   lebar?: number | string;
+  /** 'lembar' = panel menempel di tepi bawah layar sempit (lembar bawah HP); bawaan = panel di tengah. */
+  gaya?: 'lembar';
 }) {
   useBahasa();
   const idJudul = useId();
@@ -269,6 +272,7 @@ export function Modal({
     <div
       ref={latarRef}
       className={'mdl-latar' + (konteks ? ` ${konteks}` : '')}
+      data-gaya={gaya}
       onPointerDown={(e) => {
         tekanDiLatar.current = e.target === e.currentTarget;
       }}

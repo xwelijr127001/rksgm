@@ -9,17 +9,23 @@ import { Avatar } from '../../art/Avatar';
 import { bahasaKini, t } from '../../i18n';
 import { PotretNasabah } from '../seni';
 import { PotretMissRaksa } from '../seni/tokoh/PotretMissRaksa';
-import type { Ekspresi, Episode, KunciTeks, NilaiProses } from '../tipe';
+import type { Ekspresi, Episode, KunciTeks, NilaiProses, VarianGambar } from '../tipe';
+import { PotretIlustrasi } from './gambarIlustrasi';
+import { asetTokoh, avatarTokoh } from './latar/ilustrasi';
 import { kunciLabelEkspresi } from './tampilan';
 
 export type Arah = 'naik' | 'turun' | 'tetap';
-export type JenisPembicara = 'nasabah' | 'missRaksa' | 'pemain' | 'narasi';
+export type JenisPembicara = 'nasabah' | 'missRaksa' | 'pemain' | 'tokoh' | 'narasi';
+/** Avatar ilustrasi pembicara untuk ekspresi tertentu (episode berpanggung latar), atau null. */
+export type AvatarPotret = (ekspresi: Ekspresi) => readonly VarianGambar[] | null;
 
 export interface Pembicara {
   jenis: JenisPembicara;
   /** Kosong untuk narasi. */
   nama: string;
   peran: string;
+  /** Episode berpanggung latar: avatar ilustrasi tokoh itu per ekspresi (wajah sama dengan panggung). */
+  potret?: AvatarPotret;
 }
 
 /** Nama & peran pembicara dalam bahasa aktif. `tx` = teks episode (teksCerita dengan {nama}). */
@@ -27,7 +33,8 @@ export function infoPembicara(ep: Episode, siapa: string, tx: (k: KunciTeks) => 
   if (siapa === 'pemain') return { jenis: 'pemain', nama: namaPemain, peran: t('cerita.peranPemain') };
   const p = Object.prototype.hasOwnProperty.call(ep.pemeran, siapa) ? ep.pemeran[siapa] : undefined;
   if (!p) return { jenis: 'narasi', nama: '', peran: '' };
-  return { jenis: p.potret, nama: tx(p.nama), peran: tx(p.peran) };
+  const potret: AvatarPotret | undefined = asetTokoh(ep, siapa) ? (e) => avatarTokoh(ep, siapa, e) : undefined;
+  return { jenis: p.potret, nama: tx(p.nama), peran: tx(p.peran), ...(potret ? { potret } : {}) };
 }
 
 /** Kata perasaan untuk ekspresi yang tampil (label suasana episode bila ada, selain itu kamus cerita.ekspresi.*). */
@@ -42,13 +49,17 @@ export function labelPerasaan(ep: Episode, e: Ekspresi, tx: (k: KunciTeks) => st
  * manifest, skala bulat, piksel perangkat bulat) dengan ekspresi barisnya; kotak dialog, Riwayat, dan aktivitas
  * cerita memakai potret yang sama. Atlas gagal dimuat = huruf awal di bingkai yang sama.
  */
-export function PotretPembicara({ jenis, ekspresi, look, ukuran = 48, nama = '' }: {
+export function PotretPembicara({ jenis, ekspresi, look, ukuran = 48, nama = '', potret }: {
   jenis: JenisPembicara;
   ekspresi?: Ekspresi;
   look: PlayerLook;
   ukuran?: number;
   nama?: string;
+  /** Episode berpanggung latar: avatar ilustrasi (lihat Pembicara.potret) menggantikan seni Episode 1. */
+  potret?: AvatarPotret;
 }) {
+  const v = potret?.(ekspresi ?? 'netral');
+  if (v) return <PotretIlustrasi varian={v} ukuran={ukuran} nama={nama} />;
   if (jenis === 'nasabah') return <PotretNasabah ekspresi={ekspresi ?? 'netral'} ukuran={ukuran} className="cer-potret" />;
   if (jenis === 'pemain') {
     return <span className="cer-potret cer-potret-pemain" aria-hidden="true" style={{ width: ukuran, height: ukuran }}><Avatar look={look} size={ukuran} mood="netral" /></span>;
@@ -57,7 +68,7 @@ export function PotretPembicara({ jenis, ekspresi, look, ukuran = 48, nama = '' 
     return <PotretMissRaksa ekspresi={ekspresi ?? 'netral'} ukuran={ukuran} className="cer-potret" />;
   }
   if (jenis === 'narasi') return null;
-  // Tokoh dinonaktifkan: inisial di bingkai yang sama.
+  // Tokoh dinonaktifkan / tanpa seni: inisial di bingkai yang sama.
   return <span className="tokoh-potret cer-potret cer-inisial" aria-hidden="true" style={{ width: ukuran, height: ukuran }}>{nama.slice(0, 1)}</span>;
 }
 

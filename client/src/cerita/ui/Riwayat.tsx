@@ -11,6 +11,8 @@ import type { PlayerLook } from '@shared/types';
 import { t } from '../../i18n';
 import type { Episode, KunciTeks, StateCerita } from '../tipe';
 import { CatatanAlasan, PotretPembicara, infoPembicara } from './bagian';
+import { ringkasTindakan } from '../hp/arena/ringkas';
+import { aktivitasLangsung } from './hasilAktivitas';
 import { nomorBab } from './tampilan';
 
 export function IsiRiwayat({ ep, state, bahasa, tx, namaPemain, look }: {
@@ -42,7 +44,7 @@ export function IsiRiwayat({ ep, state, bahasa, tx, namaPemain, look }: {
           const p = infoPembicara(ep, e.siapa, tx, namaPemain);
           return (
             <li key={i} className="cer-rw-baris" data-jenis={p.jenis}>
-              {p.jenis !== 'narasi' ? <PotretPembicara jenis={p.jenis} ekspresi={e.ekspresi} look={look} ukuran={32} nama={p.nama} /> : null}
+              {p.jenis !== 'narasi' ? <PotretPembicara jenis={p.jenis} ekspresi={e.ekspresi} look={look} ukuran={32} nama={p.nama} potret={p.potret} /> : null}
               <p>{p.jenis !== 'narasi' ? <b className="cer-rw-nama">{p.nama}</b> : null}{tx(e.teks)}</p>
             </li>
           );
@@ -59,11 +61,15 @@ export function IsiRiwayat({ ep, state, bahasa, tx, namaPemain, look }: {
         // aktivitas
         const def = Object.prototype.hasOwnProperty.call(ep.aktivitas, e.aktivitas) ? ep.aktivitas[e.aktivitas] : undefined;
         const judul = def ? def.misi(bahasa).title : e.aktivitas;
-        const status = e.akurasi >= 0.999 ? 'tepat' : e.akurasi > 0 ? 'sebagian' : 'belum';
+        // Aktivitas berakibat langsung: tanpa vonis (akibatnya sudah di baris berikut; saran di ringkasan akhir).
+        // Apa yang kamu lakukan (mis. "Rambu 1: lajur 3 dan 4"): hanya aktivitas berarena (Episode 2); Episode 1 tanpa ringkasan ini.
+        const ringkas = ringkasTindakan(ep, e.aktivitas, state.aktivitas[e.aktivitas]?.jawaban, tx);
+        const status = aktivitasLangsung(ep, e.aktivitas) ? 'dijalankan' : e.akurasi >= 0.999 ? 'tepat' : e.akurasi > 0 ? 'sebagian' : 'belum';
         return (
           <li key={i} className="cer-rw-akt" data-status={status}>
             <span className="cer-rw-tanda">{t('cerita.riwayatAktivitas', { judul })}</span>
-            <p>{t(`cerita.hasil.${status}`)}</p>
+            <p>{status === 'dijalankan' ? t('cerita.riwayatDijalankan') : t(`cerita.hasil.${status}`)}</p>
+            {ringkas ? <p className="cer-rw-ringkas">{ringkas}</p> : null}
           </li>
         );
       })}

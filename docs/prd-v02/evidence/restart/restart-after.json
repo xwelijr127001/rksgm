@@ -1,0 +1,64 @@
+{
+  "at": "2026-10-30T11:44:53.872Z",
+  "rooms": [
+    {
+      "code": "QNF8M9",
+      "status": "interrupted",
+      "closedReason": "server_restart",
+      "participants": 1
+    },
+    {
+      "code": "BDL227",
+      "status": "interrupted",
+      "closedReason": "host_closed",
+      "participants": 1
+    },
+    {
+      "code": "JW9DJW",
+      "status": "interrupted",
+      "closedReason": "host_closed",
+      "participants": 1
+    },
+    {
+      "code": "CLRBJ5",
+      "status": "interrupted",
+      "closedReason": "host_closed",
+      "participants": 1
+    },
+    {
+      "code": "29CSC6",
+      "status": "finished",
+      "closedReason": "finished",
+      "participants": 3
+    },
+    {
+      "code": "PVUC3J",
+      "status": "finished",
+      "closedReason": "finished",
+      "participants": 4
+    }
+  ],
+  "results": 11,
+  "completed": 7,
+  "totals": [
+    "29CSC6:Eko Terbaik:14653",
+    "29CSC6:Fani Campur:3790",
+    "29CSC6:Gilang Lambat:10615",
+    "BDL227:Pengguna Keyboard:0",
+    "CLRBJ5:Pemain Uji CMS:0",
+    "JW9DJW:Uji Aset Gagal:400",
+    "PVUC3J:Ani Best:14587",
+    "PVUC3J:Budi Poor:0",
+    "PVUC3J:Citra Mix:6990",
+    "PVUC3J:Dodi Putus:11587",
+    "QNF8M9:Uji Restart:0"
+  ],
+  "dashboard": {
+    "roomsStarted": 6,
+    "roomsFinished": 2,
+    "roomsInterrupted": 4,
+    "participants": 11,
+    "completionRate": 0.6363636363636364,
+    "averageScore": 8889
+  }
+}

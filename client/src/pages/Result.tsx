@@ -38,7 +38,7 @@ export default function Result() {
     const id = window.setTimeout(() => setCelebrate(false), 3500);
     return () => window.clearTimeout(id);
   }, [reduced]);
-  if (!room || !me || !identity) return <PlayerShell back="/"><main className="result-focus"><h1>{t('pemain.hasilMenunggu')}</h1><p>{t('pemain.gabungKembaliKet')}</p><Link className="primary-action" to="/join">{t('pemain.gabungKembali')} <Arrow /></Link></main></PlayerShell>;
+  if (!room || !me || !identity) return <PlayerShell back="/"><main className="result-focus"><h1>{t('pemain.hasilMenunggu')}</h1><p>{t('pemain.gabungKembaliKet')}</p><Link className="primary-action" to="/acara/join">{t('pemain.gabungKembali')} <Arrow /></Link></main></PlayerShell>;
   const podium = (room.podium ?? []).filter(row => row.rank <= 3);
   const accuracy = me.rounds.length ? Math.round(me.totalAccuracy / me.rounds.length * 100) : 0;
   // Judul & pelajaran misi dalam bahasa aktif (id misi tidak berubah).

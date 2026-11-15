@@ -1,0 +1,120 @@
+/*
+ * MEJA KASUS (PROTOTIPE K11, D-68). Satu kolom HP: kepala ringkas, panggung meja (Phaser, rasio 360:400), bar "Berikutnya"
+ * yang lengket di bawah (tombol utama = langkah berikutnya, selalu terjangkau walau toolbar peramban berubah), tautan
+ * tampilan daftar. Lapisan tombol HTML di atas kanvas hanya untuk keyboard / pembaca layar (pointer tembus ke kanvas).
+ */
+.meja { display: grid; gap: 8px; }
+.meja-kepala { display: flex; align-items: center; gap: 8px; min-width: 0; }
+.meja-kepala .hp-arena-tugas { margin: 0 6px 0 0; font-size: 12px; }
+.meja-kembali {
+  display: grid; place-items: center; flex: 0 0 auto; width: 44px; height: 44px; border: 1.5px solid var(--hp-garis, #dfe4d8);
+  border-radius: 22px; background: #fff; color: var(--hp-hijau, #1f5c40); cursor: pointer;
+}
+.meja-judul { min-width: 0; margin: 0; font-size: 18px; line-height: 1.2; }
+.meja-judul:focus { outline: none; }
+
+/* ---------------------------------------------------------------- panggung */
+.meja-panggung {
+  position: relative; width: 100%; max-width: min(520px, max(288px, calc((100dvh - 230px) * 0.9))); margin: 0 auto; aspect-ratio: 360 / 400; border-radius: 14px; overflow: hidden;
+  background: #c99862; box-shadow: 0 1px 0 rgba(30, 45, 36, .12);
+}
+.meja-kanvas, .meja-kanvas canvas { display: block; width: 100%; }
+.meja-kanvas canvas { height: auto; }
+.meja-muat {
+  position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); display: inline-flex; align-items: center; gap: 8px;
+  padding: 8px 14px; border-radius: 18px; background: rgba(255, 255, 255, .92); font-size: 15px; font-weight: 700; color: #1e2d24;
+}
+.meja-muat-halaman { margin: 24px 0; text-align: center; color: var(--hp-redup, #4b5b51); }
+.meja-lapis { position: absolute; inset: 0; pointer-events: none; }
+/* Sasaran keyboard: tak terlihat sampai difokus; ketukan/klik tembus ke kanvas (Phaser menangani pointer). */
+.meja-sasaran {
+  position: absolute; margin: 0; padding: 0; border: 0; border-radius: 16px; background: transparent; pointer-events: none; cursor: pointer;
+}
+.meja-sasaran:focus-visible { outline: 3px solid #1f5c40; outline-offset: -3px; box-shadow: inset 0 0 0 6px rgba(255, 255, 255, .85); }
+
+/* Layar hasil: meja lebih kecil supaya akibat & "Kenapa" mulai terlihat tanpa menggulir jauh. */
+.meja-hasil-layar .meja-panggung { max-width: min(100%, 300px, calc(44dvh * 0.9)); }
+
+/* ---------------------------------------------------------------- bar langkah berikutnya */
+.meja-bar {
+  position: sticky; bottom: 0; z-index: 15; display: flex; align-items: center; gap: 10px; margin: 0 -12px; padding: 8px 12px calc(8px + env(safe-area-inset-bottom));
+  background: var(--hp-kertas, #fffefa); border-top: 1px solid #e6e3d6; box-shadow: 0 -6px 14px rgba(30, 45, 36, .07);
+}
+.meja-bar[data-daftar] { display: grid; gap: 4px; }
+.meja-bar-teks { flex: 1 1 auto; min-width: 0; display: flex; flex-wrap: wrap; align-items: center; column-gap: 8px; }
+.meja-petunjuk { flex: 1 1 100%; margin: 0; font-size: 14.5px; line-height: 1.35; color: var(--hp-tinta, #1e2d24); }
+.meja-bar-teks .hp-tautan { min-height: 40px; padding: 0; font-size: 14.5px; }
+.meja-bar > .meja-utama { flex: 0 0 auto; max-width: 52%; min-height: 48px; padding-inline: 14px; font-size: 16px; line-height: 1.2; }
+.meja-bar[data-daftar] > .meja-utama { max-width: none; width: 100%; }
+.meja-bar > .meja-utama:disabled { opacity: .5; cursor: not-allowed; }
+.meja-petunjuk b { color: var(--hp-hijau, #1f5c40); }
+.meja-sekunder { flex: 0 0 auto; }
+.meja .hp-arena-alih { margin: 0; text-align: center; }
+
+/* ---------------------------------------------------------------- panel (lembar bawah) */
+/* Lembar dirender lewat portal di luar .hp-layar: bawa variabel warna HP supaya pilihan & pratinjau tetap bergaya. */
+body > .mdl-latar[data-gaya="lembar"] {
+  --hp-tinta: #1e2d24; --hp-redup: #4b5b51; --hp-hijau: #1f5c40; --hp-hijau-muda: #eef6ef; --hp-garis: #dfe4d8;
+  --hp-kertas: #fffefa; --hp-latar: #f6f4ec;
+}
+.meja-catatan { margin: 0; font-size: 14px; line-height: 1.45; color: var(--hp-redup, #4b5b51); }
+.meja-tempat, .meja-berkas { display: grid; grid-template-columns: 88px minmax(0, 1fr); gap: 12px; align-items: start; }
+.meja-tempat p, .meja-berkas p { margin: 0 0 6px; font-size: 16px; line-height: 1.45; }
+.meja-tempat-label { font-size: 14px !important; color: var(--hp-redup, #4b5b51); }
+.meja-berkas-status { font-size: 14.5px !important; }
+.meja-berkas[data-kosong] .meja-berkas-status b { color: #5b4a1a; }
+.meja-berkas-slot { display: block; width: 84px; height: 64px; border: 2.5px dashed #6f7d73; border-radius: 6px; background: #f7f3e8; }
+.meja-kontak { display: grid; gap: 12px; }
+.meja-kontak-kepala { display: flex; align-items: center; gap: 10px; }
+.meja-kontak-kepala img { flex: 0 0 auto; border-radius: 50%; background: #dff0e4; }
+.meja-kontak-kepala p { margin: 0; font-size: 16px; line-height: 1.4; }
+.meja-ringkas { display: grid; gap: 14px; }
+.meja-ringkas section { display: grid; gap: 6px; padding: 10px 12px; border: 1.5px solid var(--hp-garis, #dfe4d8); border-radius: 12px; background: #fff; }
+.meja-ringkas h4 { margin: 0; font-size: 13px; font-weight: 800; letter-spacing: .05em; text-transform: uppercase; color: #5c6f58; }
+.meja-ringkas p { margin: 0; font-size: 16px; line-height: 1.45; }
+.meja-ringkas .hp-tautan { justify-self: start; padding-left: 0; }
+.meja-ringkas .hp-pratinjau { margin: 0; }
+
+/* ---------------------------------------------------------------- tampilan daftar */
+.meja-daftar { display: grid; gap: 16px; }
+.meja-daftar section { display: grid; gap: 8px; }
+.meja-daftar h3 { margin: 0; font-size: 17px; }
+.meja-daftar p { margin: 0; }
+.meja-daftar-berkas { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+.meja-daftar-berkas button {
+  display: flex; align-items: center; justify-content: space-between; gap: 10px; width: 100%; min-height: 48px; padding: 8px 12px;
+  border: 1.5px solid var(--hp-garis, #dfe4d8); border-radius: 10px; background: #fff; font: inherit; font-size: 15.5px; text-align: left; color: inherit; cursor: pointer;
+}
+.meja-daftar-berkas b { flex: 0 0 auto; font-size: 13.5px; color: var(--hp-redup, #4b5b51); }
+.meja-daftar-berkas [data-status="belum-tersedia"] button { border-style: dashed; border-color: #6f7d73; background: #f7f3e8; }
+.meja-daftar-berkas [data-status="belum-tersedia"] b { color: #5b4a1a; }
+.meja-daftar .btn { justify-self: start; min-height: 44px; }
+
+/* ---------------------------------------------------------------- hasil */
+.meja-status-teks { margin: 0; padding: 10px 12px; border-radius: 12px; background: #fff; border: 1.5px solid var(--hp-garis, #dfe4d8); }
+.meja-hasil { display: grid; gap: 10px; }
+.meja-hasil h3 { margin: 0; font-size: 17px; }
+.meja-hasil h3:focus { outline: none; }
+.meja-akibat { display: grid; gap: 8px; padding: 10px 12px; border-radius: 12px; background: #fff; border: 1.5px solid var(--hp-garis, #dfe4d8); }
+.meja-akibat p { margin: 0; font-size: 16px; line-height: 1.5; }
+.meja-akibat .meja-akibat-topik { font-size: 13px; font-weight: 800; letter-spacing: .05em; text-transform: uppercase; color: #5c6f58; }
+.meja-pesan { display: grid; gap: 4px; justify-items: end; }
+.meja-pesan q { display: block; max-width: 92%; padding: 8px 12px; border-radius: 14px 4px 14px 14px; background: #d9fdd3; quotes: none; }
+.meja-pesan-label { font-size: 12.5px; color: var(--hp-redup, #4b5b51); }
+.meja-balas { display: flex; align-items: flex-end; gap: 8px; margin: 0; }
+.meja-balas figcaption { display: grid; gap: 2px; padding: 8px 12px; border-radius: 4px 14px 14px 14px; background: #f1efe7; font-size: 16px; line-height: 1.45; }
+.meja-balas b { font-size: 13px; color: var(--hp-redup, #4b5b51); }
+.meja-balas q { quotes: none; }
+.meja-akibat-lain { margin: 0; font-size: 16px; line-height: 1.5; }
+.meja-bar-hasil { margin-top: 2px; }
+
+/* ---------------------------------------------------------------- halaman prototipe /meja */
+.proto-meja { display: grid; gap: 12px; max-width: 560px; margin: 0 auto; padding: 8px 16px 32px; }
+.proto-meja h1 { margin: 0; }
+.proto-meja p { margin: 0; line-height: 1.5; }
+.proto-meja-tombol { display: grid; gap: 10px; }
+.proto-meja-tombol .btn { min-height: 48px; }
+
+@media (prefers-reduced-motion: reduce) {
+  .meja-muat .adegan-spinner { animation: none; }
+}

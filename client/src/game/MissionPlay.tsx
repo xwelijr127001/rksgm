@@ -146,6 +146,16 @@ export interface MissionPlayProps {
    * = potret sprite bawaan; tidak dipakai bila pemandunya Raki (tutorial / Miss Raksa nonaktif).
    */
   potretPemandu?: ReactNode;
+  /**
+   * Visual pengganti untuk misi TANPA adegan 2D (scene 'gambar'): mis. panggung latar episode cerita yang sama dengan
+   * dialognya. Tidak bisa diketuk (jawaban lewat daftar); diabaikan untuk misi beradegan.
+   */
+  visual?: ReactNode;
+  /**
+   * true = jawaban yang belum lengkap TIDAK bisa dikirim: dialog kekurangan hanya menawarkan kembali melengkapi (cerita
+   * yang memetakan susunan lengkap ke akibat naskah). Tanpa prop ini = "kirim apa adanya" tetap tersedia.
+   */
+  wajibLengkap?: boolean;
 }
 
 // ------------------------------------------------------------------ teks bantu
@@ -345,6 +355,14 @@ export function MissionPlay(props: MissionPlayProps) {
   viewRef.current = view;
 
   useEffect(() => { setCursor(0); setFokusItem({}); setUmumkan(''); setPesan(''); }, [mission.id, roundIndex]);
+  // Visual milik pemanggil (cerita) menggantikan bingkai gambar: laporkan selesai dimuat seperti gambar netral.
+  const visualPemanggil = Boolean(props.visual) && bergambar;
+  const onSceneStatus = props.onSceneStatus;
+  useEffect(() => {
+    if (!visualPemanggil) return;
+    setStatus('static');
+    onSceneStatus?.('static');
+  }, [visualPemanggil, mission.id, roundIndex, onSceneStatus]);
   // Pesan yang sedang tampil masih dalam bahasa lama: kosongkan saat bahasa berganti (jawaban tidak disentuh).
   useEffect(() => { setUmumkan(''); setPesan(''); }, [bahasa]);
 
@@ -600,7 +618,10 @@ export function MissionPlay(props: MissionPlayProps) {
       ) : null}
 
       <div ref={adeganRef} className="misi-adegan">
-        {bergambar ? (
+        {props.visual && bergambar ? (
+          // Visual milik pemanggil (cerita: panggung latar episode); seperti gambar, tidak bisa diketuk.
+          props.visual
+        ) : bergambar ? (
           // Tanpa engine. Status tetap diteruskan (siap ATAU gagal) supaya host tidak menunggu selamanya.
           <AdeganGambar
             key={`${mission.id}:${roundIndex}:${props.sceneNonce ?? 0}`}
@@ -730,8 +751,10 @@ export function MissionPlay(props: MissionPlayProps) {
             ?? akar.current?.querySelector<HTMLElement>('.misi-aksi .primary-action') ?? null}
           onTutup={() => setKonfirmasi(null)}
           aksi={<>
-            <button type="button" className="btn btn-netral" onClick={() => setKonfirmasi(null)}>{kurangKustom?.kembali ?? t('misi.periksaLagi')}</button>
-            <button type="button" className="btn btn-utama" onClick={() => { setKonfirmasi(null); onSubmit?.(); }}>{kurangKustom?.kirim ?? t('misi.kirimSekarang')}</button>
+            <button type="button" className={props.wajibLengkap ? 'btn btn-utama' : 'btn btn-netral'} onClick={() => setKonfirmasi(null)}>{kurangKustom?.kembali ?? t('misi.periksaLagi')}</button>
+            {props.wajibLengkap ? null : (
+              <button type="button" className="btn btn-utama" onClick={() => { setKonfirmasi(null); onSubmit?.(); }}>{kurangKustom?.kirim ?? t('misi.kirimSekarang')}</button>
+            )}
           </>}
         >
           {kurangKustom ? kurangKustom.isi : (

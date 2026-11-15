@@ -154,7 +154,8 @@ function salinJawaban(jawaban: unknown): MissionAnswer {
  * Menilai jawaban aktivitas dengan rubrik klien (`def.kunci`, aturan sama dengan server: gradeMission/gradeStep).
  * Tanda (urut tetap, tidak bergantung urutan pilihan pemain):
  *   akt:<id>:tepat (akurasi >= 0,999) | :sebagian (> 0) | :belum,
- *   lalu per langkah single/multi: akt:<id>:pilih:<opsi> (opsi dipilih), akt:<id>:lewat:<opsi> (opsi benar tak dipilih).
+ *   lalu per langkah single/multi: akt:<id>:pilih:<opsi> (opsi dipilih), akt:<id>:lewat:<opsi> (opsi benar tak dipilih),
+ *   dan per langkah assign: akt:<id>:taruh:<item>:<wadah> (susunan pemain; dibaca kondisi cabang aktivitas langsung).
  * Opsi diurutkan menurut urutan opsi di misi; id opsi yang tidak ada di misi diabaikan.
  */
 export function nilaiAktivitas(ep: Episode, def: DefAktivitas, jawaban: MissionAnswer | null | undefined): HasilAktivitas {
@@ -170,6 +171,10 @@ export function nilaiAktivitas(ep: Episode, def: DefAktivitas, jawaban: MissionA
     misi = null;
   }
   for (const k of def.kunci) {
+    if (k.assign !== undefined) {
+      tanda.push(...tandaTaruh(def.id, misi, k.stepId, bersih[k.stepId]));
+      continue;
+    }
     const benar = k.single !== undefined ? [k.single] : k.multi !== undefined ? k.multi : null;
     if (!benar) continue;
     const mentah = bersih[k.stepId];
@@ -187,6 +192,21 @@ export function nilaiAktivitas(ep: Episode, def: DefAktivitas, jawaban: MissionA
     for (const o of urut(new Set(benar.filter((b) => !dipilih.has(b))))) tanda.push(`akt:${def.id}:lewat:${o}`);
   }
   return { jawaban: bersih, akurasi, tanda: [...new Set(tanda)] };
+}
+
+/**
+ * Tanda langkah susun (assign): akt:<id>:taruh:<item>:<wadah> untuk tiap item yang ditaruh di wadah yang ADA di misi,
+ * urut item misi. Item yang tidak ditaruh tidak bertanda (cabang episode membacanya sebagai "tidak diminta" lewat
+ * kondisi `tidak`). Bentuk jawaban lain diabaikan, sama dengan penilaian (gradeStep hanya membaca rekaman item -> wadah).
+ */
+function tandaTaruh(idAkt: string, misi: MissionPublic | null, stepId: string, mentah: unknown): string[] {
+  const langkah = misi?.steps.find((st) => st.id === stepId);
+  if (!langkah || langkah.kind !== 'assign' || !mentah || typeof mentah !== 'object' || Array.isArray(mentah)) return [];
+  const wadah = new Set(langkah.buckets.map((b) => b.id));
+  const jawaban = mentah as Record<string, unknown>;
+  return langkah.items
+    .filter((it) => Object.prototype.hasOwnProperty.call(jawaban, it.id) && typeof jawaban[it.id] === 'string' && wadah.has(jawaban[it.id] as string))
+    .map((it) => `akt:${idAkt}:taruh:${it.id}:${jawaban[it.id] as string}`);
 }
 
 // ------------------------------------------------------------------ transisi (internal)
@@ -230,16 +250,25 @@ const tambahUnik = (daftar: string[], baru: string[] | undefined): void => {
   for (const x of baru ?? []) if (!daftar.includes(x)) daftar.push(x);
 };
 
-/** Terapkan efek ke draf; kembalikan entri alasan (belum dimasukkan ke riwayat) bila efek punya alasan. */
-function terapkanEfek(d: StateCerita, efek: Efek | undefined, node: IdNode): Extract<EntriRiwayat, { jenis: 'alasan' }> | null {
+/** Kepercayaan dijepit ke `Episode.kepercayaanBatas` bila ada (status nasabah 0-100); tanpa batas = apa adanya. */
+function jepitKepercayaan(ep: Episode, nilai: number): number {
+  const b = ep.kepercayaanBatas;
+  return b ? Math.min(b.maks, Math.max(b.min, nilai)) : nilai;
+}
+
+/**
+ * Terapkan efek ke draf; kembalikan entri alasan (belum dimasukkan ke riwayat) bila efek punya alasan. Entri alasan
+ * membawa kepercayaan SESUDAH efek (`nilai`, sudah dijepit) untuk grafik status di layar akhir.
+ */
+function terapkanEfek(ep: Episode, d: StateCerita, efek: Efek | undefined, node: IdNode): Extract<EntriRiwayat, { jenis: 'alasan' }> | null {
   if (!efek) return null;
   tambahUnik(d.tanda, efek.pasang);
   if (efek.cabut?.length) d.tanda = d.tanda.filter((t) => !efek.cabut!.includes(t));
-  if (typeof efek.kepercayaan === 'number' && Number.isFinite(efek.kepercayaan)) d.kepercayaan += efek.kepercayaan;
+  if (typeof efek.kepercayaan === 'number' && Number.isFinite(efek.kepercayaan)) d.kepercayaan = jepitKepercayaan(ep, d.kepercayaan + efek.kepercayaan);
   tambahUnik(d.paham, efek.paham);
   tambahUnik(d.catatan, efek.catat);
   for (const [id, nilai] of Object.entries(efek.proses ?? {})) d.proses[id] = nilai;
-  return efek.alasan ? { jenis: 'alasan', node, teks: efek.alasan, arah: arahDari(efek.kepercayaan) } : null;
+  return efek.alasan ? { jenis: 'alasan', node, teks: efek.alasan, arah: arahDari(efek.kepercayaan), nilai: d.kepercayaan } : null;
 }
 
 /** Tampilkan baris terlihat berikutnya; false bila sudah habis. */
@@ -341,7 +370,7 @@ export function jalankan(ep: Episode, s: StateCerita, aksi: AksiCerita): StateCe
       }
       if (barisBerikut(ep, d)) return d;
       if (n.jenis !== 'dialog') return s;
-      const alasan = terapkanEfek(d, n.efek, s.node);
+      const alasan = terapkanEfek(ep, d, n.efek, s.node);
       if (alasan) d.riwayat.push(alasan);
       d.terakhir = null;
       return masuk(ep, d, n.lanjut) ? d : s;
@@ -355,7 +384,7 @@ export function jalankan(ep: Episode, s: StateCerita, aksi: AksiCerita): StateCe
       if (!p) return s;
       const d = draf(s);
       d.riwayat.push({ jenis: 'pilihan', node: s.node, pilihan: p.id, teks: p.teks });
-      const alasan = terapkanEfek(d, p.efek, s.node);
+      const alasan = terapkanEfek(ep, d, p.efek, s.node);
       if (alasan) d.riwayat.push(alasan);
       d.keputusan.push({ node: s.node, pilihan: p.id, langkah: d.langkah });
       d.terakhir = alasan ? { teks: p.teks, alasan: alasan.teks, arah: alasan.arah } : { teks: p.teks };
@@ -376,10 +405,18 @@ export function jalankan(ep: Episode, s: StateCerita, aksi: AksiCerita): StateCe
       if (i < 0) return s;
       const cabang = n.hasil[i]!;
       d.aktivitas[n.aktivitas] = hasil;
+      d.riwayat.push({ jenis: 'aktivitas', node: s.node, aktivitas: n.aktivitas, akurasi: hasil.akurasi });
+      if (n.langsung) {
+        // Akibat langsung: sama dengan memilih (alasan -> [bab baru] -> baris pertama node akibat), tanpa pembahasan.
+        const alasan = terapkanEfek(ep, d, cabang.efek, s.node);
+        if (alasan) d.riwayat.push(alasan);
+        d.umpanBalik = null;
+        d.terakhir = alasan ? { teks: def.labelKirim, alasan: alasan.teks, arah: alasan.arah } : null;
+        return masuk(ep, d, cabang.lanjut) ? d : s;
+      }
       d.umpanBalik = { node: s.node, cabang: i };
       d.terakhir = null;
-      d.riwayat.push({ jenis: 'aktivitas', node: s.node, aktivitas: n.aktivitas, akurasi: hasil.akurasi });
-      const alasan = terapkanEfek(d, cabang.efek, s.node);
+      const alasan = terapkanEfek(ep, d, cabang.efek, s.node);
       for (const b of (cabang.umpanBalik ?? []).filter((x) => cocok(x.jika, d))) {
         d.riwayat.push({ jenis: 'baris', node: s.node, siapa: b.siapa, ...(b.ekspresi ? { ekspresi: b.ekspresi } : {}), teks: b.teks });
       }

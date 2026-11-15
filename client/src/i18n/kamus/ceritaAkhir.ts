@@ -13,6 +13,16 @@ import type { KamusRuang } from './index';
  */
 const kamus: KamusRuang = {
   id: {
+    ringkasanJudul: 'Ringkasan {n} keputusanmu',
+    statusJudul: 'Status {nama} dari awal sampai akhir',
+    statusAlt: 'Status {nama}: awal {awal}, akhir {akhir}, terendah {min}, tertinggi {maks} (skala 0-100).',
+    // Legenda grafik = rentang SUASANA (label panggung), bukan ambang akhir (akhir ditentukan kartu akhir episode).
+    pitaJudul: 'Rentang suasana:',
+    pilihanmu: 'Pilihanmu',
+    alasanMentor: 'Alasan {nama}',
+    'nilai.tepat': 'Tepat',
+    'nilai.kurang': 'Kurang tepat',
+    'nilai.keliru': 'Keliru',
     // --- Kartu akhir
     perasaanAkhir: '{nama}: {suasana}',
     perasaanSesudah: 'Sesudahnya: {suasana}',
@@ -53,6 +63,15 @@ const kamus: KamusRuang = {
     cobaBagianLain: 'Coba dari bagian lain',
   },
   en: {
+    ringkasanJudul: 'Your {n} decisions',
+    statusJudul: 'Status of {nama} from start to finish',
+    statusAlt: 'Status of {nama}: start {awal}, end {akhir}, lowest {min}, highest {maks} (scale 0-100).',
+    pitaJudul: 'Mood ranges:',
+    pilihanmu: 'Your choice',
+    alasanMentor: 'Why, from {nama}',
+    'nilai.tepat': 'Right call',
+    'nilai.kurang': 'Not quite',
+    'nilai.keliru': 'Mistake',
     perasaanAkhir: '{nama}: {suasana}',
     perasaanSesudah: 'Afterwards: {suasana}',
     pelajaranLabel: 'Takeaway',
@@ -90,6 +109,15 @@ const kamus: KamusRuang = {
     cobaBagianLain: 'Try from another part',
   },
   zh: {
+    ringkasanJudul: '你的 {n} 个决定',
+    statusJudul: '{nama} 从头到尾的状态',
+    statusAlt: '{nama} 的状态：开始 {awal}，结束 {akhir}，最低 {min}，最高 {maks}（0-100）。',
+    pitaJudul: '心情区间：',
+    pilihanmu: '你的选择',
+    alasanMentor: '{nama} 的理由',
+    'nilai.tepat': '恰当',
+    'nilai.kurang': '不够恰当',
+    'nilai.keliru': '错误',
     perasaanAkhir: '{nama}：{suasana}',
     perasaanSesudah: '之后：{suasana}',
     pelajaranLabel: '要点',

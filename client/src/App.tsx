@@ -1,12 +1,16 @@
 /**
- * Router RAKSA GAME.
+ * Router RAKSA GAME (docs/prd-v02/ARCHITECTURE.md §2).
  *
- * Alur acara   : / -> /join -> /lobby -> /tutorial -> /main -> /hasil
- * Alur solo    : / -> /kenalan -> /solo -> /solo/main?misi=N -> /solo/hasil
- * Mode cerita  : / -> /cerita -> /cerita/:episode (visual novel; docs/rancangan-mode-cerita.md)
- * Alur host    : /host
- * Layar besar  : /projector
- * /latihan (alamat lama) dialihkan ke mode solo. Rancangan: docs/rancangan-bank-soal.md
+ * Selalu ada:
+ *   Join Game    : / -> /join?room=KODE (nama + pemberitahuan) -> /room/:kode (room cerita PRD: 15 babak, hasil pribadi)
+ *   Layar acara  : /projector?room=KODE
+ *   Staf         : /host (host room) · /cms (konten) · /admin (laporan, periode, pengguna)
+ *   Mode Cerita  : /kenalan -> /cerita (daftar episode) -> /cerita/:episode (main sendiri, progres di perangkat)
+ *                  Arahan pemilik 2 Nov 2026: pengalaman cerita solo kembali menjadi jalur utama di samping Join Game.
+ * Mode lama — HANYA bila server RAKSA_LEGACY=on (rute tidak terdaftar bila nonaktif, server juga menolak API-nya):
+ *   Kuis acara   : /acara/join -> /lobby -> /tutorial -> /main -> /hasil · host /acara/host · layar /acara/layar
+ *   Latihan misi : /solo -> /solo/main?misi=N -> /solo/hasil (tidak ditautkan dari permukaan mana pun; tombol kembali ada)
+ *   /latihan (alamat lama) dialihkan ke /solo. Kode room 4 karakter di /join & /projector diteruskan ke kuis acara.
  */
 
 import { Component, Suspense, lazy, useEffect, useRef, type ErrorInfo, type ReactNode } from 'react';
@@ -16,8 +20,21 @@ import { AudioUnlocker, Memuat } from './ui/kit';
 import { useHalaman } from './ui/halaman';
 import { t, useBahasa } from './i18n';
 import { bootstrapHost, bootstrapPlayer, initConnection, useGame } from './state/store';
+import { ROUTER_BASENAME } from './story/base';
+import { useAppConfig } from './story/appConfig';
+// Before the router mounts: its popstate listener comes first, so unsaved work can hold a back/forward move (LeaveGuard).
+import './historyHold';
+
+import { MEJA_KASUS } from './cerita/hp/meja/bendera';
+import { KEJADIAN } from './cerita/kejadian/bendera';
 
 const Landing = lazy(() => import('./pages/Landing'));
+const StoryJoin = lazy(() => import('./pages/story/StoryJoin'));
+const StoryRoom = lazy(() => import('./pages/story/StoryRoom'));
+const StoryProjector = lazy(() => import('./pages/story/StoryProjector'));
+const StoryHost = lazy(() => import('./pages/story/StoryHost'));
+const CmsApp = lazy(() => import('./pages/cms/CmsApp'));
+const AdminApp = lazy(() => import('./pages/admin/AdminApp'));
 const Join = lazy(() => import('./pages/Join'));
 const Lobby = lazy(() => import('./pages/Lobby'));
 const Tutorial = lazy(() => import('./pages/Tutorial'));
@@ -31,6 +48,11 @@ const Cerita = lazy(() => import('./pages/Cerita'));
 const CeritaMain = lazy(() => import('./pages/CeritaMain'));
 const Host = lazy(() => import('./pages/Host'));
 const Projector = lazy(() => import('./pages/Projector'));
+// PROTOTIPE meja kasus K11 (D-68): halaman lompat /meja hanya ada di build VITE_MEJA_KASUS=1.
+const ProtoMeja = MEJA_KASUS ? lazy(() => import('./pages/ProtoMeja')) : null;
+// PROTOTIPE "Kejadian" (irisan K10): halaman /kejadian hanya ada di build VITE_KEJADIAN=1.
+const ProtoKejadian = KEJADIAN ? lazy(() => import('./pages/ProtoKejadian')) : null;
+const ProtoLokasi = KEJADIAN ? lazy(() => import('./pages/ProtoLokasi')) : null;
 
 /** Halaman pemain yang boleh dipindah otomatis mengikuti fase pertandingan. */
 const RUTE_PEMAIN = ['/lobby', '/tutorial', '/main', '/hasil'];
@@ -64,10 +86,8 @@ function PhaseRouter() {
   return null;
 }
 
-/** Sambungkan socket & pulihkan identitas saat aplikasi dibuka. */
-function Bootstrap() {
-  const loc = useLocation();
-
+/** Mode lama: sambungkan socket kuis acara & pulihkan identitas saat aplikasi dibuka (tidak dipasang di mode MVP). */
+function LegacyBootstrap() {
   useEffect(() => {
     initConnection();
   }, []);
@@ -75,19 +95,25 @@ function Bootstrap() {
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const room = params.get('room');
-    if (window.location.pathname.startsWith('/host')) {
+    const rute = window.location.pathname.slice(ROUTER_BASENAME.length) || '/';
+    if (rute.startsWith('/acara/host')) {
       void bootstrapHost(room);
-    } else if (RUTE_PEMAIN.includes(window.location.pathname)) {
+    } else if (RUTE_PEMAIN.includes(rute)) {
       void bootstrapPlayer(room);
     }
     // sengaja hanya sekali saat mount
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  return null;
+}
+
+/** Penanda rute di <body> (dipakai CSS & uji browser). */
+function RouteMarker() {
+  const loc = useLocation();
   useEffect(() => {
     document.body.dataset.rute = loc.pathname;
   }, [loc.pathname]);
-
   return null;
 }
 
@@ -167,30 +193,51 @@ function BatasRuteAlamat({ children }: { children: ReactNode }) {
   return <BatasRute alamat={loc.pathname + loc.search}>{children}</BatasRute>;
 }
 
+/** Rute mode lama, hanya didaftarkan bila server mengaktifkan RAKSA_LEGACY (alamat langsung pun tidak terbuka). */
+function legacyRoutes() {
+  return [
+    <Route key="acara-join" path="/acara/join" element={<Join />} />,
+    <Route key="acara-host" path="/acara/host" element={<Host />} />,
+    <Route key="acara-layar" path="/acara/layar" element={<Projector />} />,
+    <Route key="lobby" path="/lobby" element={<Lobby />} />,
+    <Route key="tutorial" path="/tutorial" element={<Tutorial />} />,
+    <Route key="main" path="/main" element={<Play />} />,
+    <Route key="hasil" path="/hasil" element={<Result />} />,
+    <Route key="solo" path="/solo" element={<Solo />} />,
+    <Route key="solo-main" path="/solo/main" element={<SoloMain />} />,
+    <Route key="solo-hasil" path="/solo/hasil" element={<SoloHasil />} />,
+    <Route key="latihan" path="/latihan" element={<AlihkanLatihan />} />,
+  ];
+}
+
 export default function App() {
+  const config = useAppConfig();
+  // Rute bergantung pada konfigurasi server (mode lama): tunggu jawabannya sekali. Server tak terjangkau = mode MVP.
+  if (config.status === 'loading') return <Menyiapkan />;
+  const legacy = config.config.legacy;
   return (
-    <BrowserRouter>
+    <BrowserRouter basename={ROUTER_BASENAME}>
       <AudioUnlocker />
-      <Bootstrap />
-      <PhaseRouter />
+      <RouteMarker />
+      {legacy ? <LegacyBootstrap /> : null}
+      {legacy ? <PhaseRouter /> : null}
       <BatasRuteAlamat>
         <Suspense fallback={<Menyiapkan />}>
           <Routes>
             <Route path="/" element={<Landing />} />
-            <Route path="/join" element={<Join />} />
-            <Route path="/lobby" element={<Lobby />} />
-            <Route path="/tutorial" element={<Tutorial />} />
-            <Route path="/main" element={<Play />} />
-            <Route path="/hasil" element={<Result />} />
+            <Route path="/join" element={<StoryJoin />} />
+            <Route path="/room/:code" element={<StoryRoom />} />
+            <Route path="/projector" element={<StoryProjector />} />
+            <Route path="/host" element={<StoryHost />} />
+            <Route path="/cms/*" element={<CmsApp />} />
+            <Route path="/admin/*" element={<AdminApp />} />
             <Route path="/kenalan" element={<Kenalan />} />
-            <Route path="/solo" element={<Solo />} />
-            <Route path="/solo/main" element={<SoloMain />} />
-            <Route path="/solo/hasil" element={<SoloHasil />} />
             <Route path="/cerita" element={<Cerita />} />
             <Route path="/cerita/:episode" element={<CeritaMain />} />
-            <Route path="/latihan" element={<AlihkanLatihan />} />
-            <Route path="/host" element={<Host />} />
-            <Route path="/projector" element={<Projector />} />
+            {ProtoMeja ? <Route path="/meja" element={<ProtoMeja />} /> : null}
+            {ProtoKejadian ? <Route path="/kejadian" element={<ProtoKejadian />} /> : null}
+            {ProtoLokasi ? <Route path="/lokasi" element={<ProtoLokasi />} /> : null}
+            {legacy ? legacyRoutes() : null}
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </Suspense>

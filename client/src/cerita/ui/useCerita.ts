@@ -24,6 +24,8 @@ export interface KendaliCerita {
   mulaiDariAwal: () => void;
   /** true bila simpanan terakhir hanya masuk memori tab (localStorage diblokir/penuh). */
   hanyaMemori: boolean;
+  /** State TERBARU (ref), untuk aksi berurutan dalam satu kejadian (antarmuka HP memajukan ketukan sampai utuh). */
+  baca: () => StateCerita | null;
 }
 
 export function useCerita(ep: Episode): KendaliCerita {
@@ -55,5 +57,7 @@ export function useCerita(ep: Episode): KendaliCerita {
     setState(s);
   }, [ep]);
 
-  return { state, muat, kirim, mulaiDariAwal, hanyaMemori };
+  const baca = useCallback(() => ref.current, []);
+
+  return { state, muat, kirim, mulaiDariAwal, hanyaMemori, baca };
 }

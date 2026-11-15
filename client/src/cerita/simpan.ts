@@ -8,6 +8,9 @@
  *    arsip:   [{ episode, versi, state, diarsipkan, sebab }], progres lama (lihat "Arsip" di bawah)
  *  }
  *  raksa:cerita:rusak:<waktu> = data mentah lama yang tidak terbaca, dicadangkan sebelum ditimpa.
+ *  raksa:cerita:draf = { [idEpisode]: { kunjungan, jawaban } }  susunan aktivitas yang BELUM dikirim (satu per episode;
+ *    kunjungan = "<node>#<langkah>", jadi hanya kunjungan aktivitas yang sama yang memulihkannya). Dihapus saat dikirim
+ *    dan saat "Mulai ulang". Bukan bagian progres: progres hanya berubah lewat mesin (kirim = satu aksi).
  *
  * Tidak ada penghapusan diam-diam: progres yang tidak cocok (versi beda tanpa migrasi, node hilang, rusak)
  * hanya dilaporkan oleh muatProgres; data mentahnya tetap di tempat sampai pemain memilih "Mulai ulang"
@@ -28,6 +31,7 @@ import { barisTerlihat, stateAwal } from './mesin';
 import type { Episode, HasilMuat, IdAkhir, NilaiProses, StateCerita } from './tipe';
 
 const KUNCI = 'raksa:cerita';
+const KUNCI_DRAF = 'raksa:cerita:draf';
 const AWALAN_RUSAK = 'raksa:cerita:rusak:';
 /** Batas arsip PERJALANAN BIASA per episode (progres tidak cocok tidak ikut dihitung dan tidak dirotasi). */
 export const MAKS_ARSIP_PER_EPISODE = 5;
@@ -317,6 +321,7 @@ export function simpanProgres(ep: Episode, s: StateCerita): boolean {
  * cocok disematkan dengan alasannya.
  */
 export function mulaiBaru(ep: Episode): StateCerita {
+  hapusDrafAktivitas(ep.id);
   const b = bacaAkar();
   const perlu = b.status === 'rusak' || (b.status === 'ok' && ada(b.akar.episode, ep.id) && b.akar.episode[ep.id] != null);
   if (perlu) {
@@ -356,4 +361,42 @@ export function arsipProgres(idEp: string): EntriArsipCerita[] {
   const b = bacaAkar();
   if (b.status !== 'ok') return [];
   return b.akar.arsip.filter((a): a is EntriArsipCerita => obj(a) && a.episode === idEp);
+}
+
+// ------------------------------------------------------------------ draf aktivitas (belum dikirim)
+
+function bacaSemuaDraf(): Record<string, unknown> {
+  try {
+    const v: unknown = JSON.parse(bacaMentah(KUNCI_DRAF) ?? '{}');
+    return obj(v) ? v : {};
+  } catch {
+    return {};
+  }
+}
+
+/** Kunci satu kunjungan aktivitas: node + langkah (kunjungan ulang lewat jalur lain = kunci lain). */
+export function kunjunganAktivitas(s: Pick<StateCerita, 'node' | 'langkah'>): string {
+  return `${s.node}#${s.langkah}`;
+}
+
+/** Susunan aktivitas yang belum dikirim untuk kunjungan ini (mentah; saring dengan sanitizeDraft), atau null. */
+export function bacaDrafAktivitas(idEp: string, kunjungan: string): unknown {
+  const semua = bacaSemuaDraf();
+  const d = ada(semua, idEp) ? semua[idEp] : null;
+  return obj(d) && d.kunjungan === kunjungan && obj(d.jawaban) ? d.jawaban : null;
+}
+
+/** Simpan susunan yang sedang dikerjakan (gagal diam-diam: hanya kenyamanan, bukan progres). */
+export function simpanDrafAktivitas(idEp: string, kunjungan: string, jawaban: Record<string, unknown>): void {
+  const semua = bacaSemuaDraf();
+  if (Object.keys(jawaban).length) semua[idEp] = { kunjungan, jawaban };
+  else delete semua[idEp];
+  tulisMentah(KUNCI_DRAF, JSON.stringify(semua));
+}
+
+export function hapusDrafAktivitas(idEp: string): void {
+  const semua = bacaSemuaDraf();
+  if (!ada(semua, idEp)) return;
+  delete semua[idEp];
+  tulisMentah(KUNCI_DRAF, JSON.stringify(semua));
 }

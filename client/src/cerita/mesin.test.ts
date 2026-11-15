@@ -130,7 +130,8 @@ test('pilih: efek, keputusan, riwayat pilihan + alasan, ucapan terakhir; ketukan
   assert.deepEqual(s1.terakhir, { teks: 'n1-pilih.dengar', alasan: 'alasan.dengar', arah: 'naik' });
   assert.deepEqual(s1.riwayat.slice(s0.riwayat.length), [
     { jenis: 'pilihan', node: 'n1-pilih', pilihan: 'dengar', teks: 'n1-pilih.dengar' },
-    { jenis: 'alasan', node: 'n1-pilih', teks: 'alasan.dengar', arah: 'naik' },
+    // `nilai` = kepercayaan sesudah efek (grafik status di layar akhir).
+    { jenis: 'alasan', node: 'n1-pilih', teks: 'alasan.dengar', arah: 'naik', nilai: 2 },
     { jenis: 'bab', bab: 'tengah' },
     { jenis: 'baris', node: 'n2-cerita', siapa: 'nasabah', teks: 'n2-cerita.1' },
   ]);
@@ -175,7 +176,7 @@ test('aktivitas: dinilai sekali, tanda hasil dipasang, cabang hasil pertama yang
   assert.deepEqual(s.riwayat.slice(siap.riwayat.length), [
     { jenis: 'aktivitas', node: 'n2-foto', aktivitas: 'foto', akurasi: 1 },
     { jenis: 'baris', node: 'n2-foto', siapa: 'nasabah', ekspresi: 'senang', teks: 'n2-foto.tepat' },
-    { jenis: 'alasan', node: 'n2-foto', teks: 'alasan.foto-tepat', arah: 'naik' },
+    { jenis: 'alasan', node: 'n2-foto', teks: 'alasan.foto-tepat', arah: 'naik', nilai: 3 },
   ]);
   const ub = umpanBalikKini(ep, s);
   assert.deepEqual(ub?.baris.map((b) => b.teks), ['n2-foto.tepat']);

@@ -219,7 +219,7 @@ function Undang({ room }: { room: RoomPublicState }) {
         </button>
         <button
           className="btn btn-garis"
-          onClick={() => window.open(`/projector?room=${room.code}`, '_blank', 'noopener')}
+          onClick={() => window.open(`/acara/layar?room=${room.code}`, '_blank', 'noopener')}
         >
           {t('host.bukaProyektor')}
         </button>

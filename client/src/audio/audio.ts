@@ -13,7 +13,7 @@
  * - Berkas musik gagal dimuat (404/offline) -> mode senyap, dicatat sekali saja.
  */
 
-export type Track = 'lobby' | 'game' | 'podium' | null;
+export type Track = 'lobby' | 'game' | 'podium' | 'cerita-kantor' | 'cerita-periksa' | 'cerita-penutup' | null;
 export type Sfx =
   | 'pilih'
   | 'bukti'
@@ -23,7 +23,15 @@ export type Sfx =
   | 'tik'
   | 'papan'
   | 'confetti'
-  | 'masuk';
+  | 'masuk'
+  | 'taruh'
+  // Mode cerita (Episode 2): konfirmasi tindakan yang lembut, tidak membedakan benar/salah.
+  | 'kertas'
+  | 'pesanKirim'
+  | 'pesanTerima'
+  | 'ketuk'
+  | 'konfirmasi'
+  | 'batal';
 
 export interface AudioPrefs {
   muted: boolean;
@@ -32,13 +40,22 @@ export interface AudioPrefs {
   sfxVolume: number;
   /** true bila pengguna sudah memilih sendiri (jangan ditimpa default halaman). */
   chosen: boolean;
+  /** Efek suara aktif (master mute tetap di atasnya). Bawaan: aktif. */
+  sfxEnabled: boolean;
+  /** Musik & suasana MODE CERITA. undefined = bawaan (aktif bila tidak dibisukan). Tidak memengaruhi mode lain. */
+  musikCerita?: boolean;
 }
 
 /** Ganti musik = timpa berkas ini, atau ubah satu baris di sini. */
+// Berawal BASE_URL (bukan '/'): ikut prefiks hosting saat dibangun dengan VITE_BASE_PATH (story/base.ts).
 const MUSIC_FILES: Record<Exclude<Track, null>, string> = {
-  lobby: '/audio/lobby.mp3',
-  game: '/audio/gameplay.mp3',
-  podium: '/audio/podium.mp3',
+  lobby: (import.meta.env?.BASE_URL ?? '/') + 'audio/lobby.mp3',
+  game: (import.meta.env?.BASE_URL ?? '/') + 'audio/gameplay.mp3',
+  podium: (import.meta.env?.BASE_URL ?? '/') + 'audio/podium.mp3',
+  // Mode cerita Episode 2 (tools/make-music-ep2.mjs): tenang, untuk dibaca berulang.
+  'cerita-kantor': (import.meta.env?.BASE_URL ?? '/') + 'audio/cerita-kantor.mp3',
+  'cerita-periksa': (import.meta.env?.BASE_URL ?? '/') + 'audio/cerita-periksa.mp3',
+  'cerita-penutup': (import.meta.env?.BASE_URL ?? '/') + 'audio/cerita-penutup.mp3',
 };
 
 /** Lobby & gameplay berulang; jingle podium hanya sekali. */
@@ -46,7 +63,18 @@ const MUSIC_LOOP: Record<Exclude<Track, null>, boolean> = {
   lobby: true,
   game: true,
   podium: false,
+  'cerita-kantor': true,
+  'cerita-periksa': true,
+  'cerita-penutup': true,
 };
+
+/** Trek cerita: lebih pelan dari musik acara (di belakang teks & SFX) dan crossfade lebih panjang. */
+const TREK_CERITA = new Set<string>(['cerita-kantor', 'cerita-periksa', 'cerita-penutup']);
+const GAIN_CERITA = 0.55;
+const FADE_CERITA_MS = 1600;
+function volTrek(track: Exclude<Track, null>): number {
+  return musicVolume() * (TREK_CERITA.has(track) ? GAIN_CERITA : 1);
+}
 
 const FADE_IN_MS = 450;
 const FADE_OUT_MS = 280;
@@ -60,6 +88,7 @@ const DEFAULT_PREFS: AudioPrefs = {
   musicVolume: 0.45,
   sfxVolume: 0.6,
   chosen: false,
+  sfxEnabled: true,
 };
 
 function loadPrefs(): AudioPrefs {
@@ -129,6 +158,7 @@ export function releaseMusicOwner(id: string): void {
 let ctx: AudioContext | null = null;
 let master: GainNode | null = null;
 let sfxBus: GainNode | null = null;
+let ambBus: GainNode | null = null;
 
 /** Interaksi pengguna sudah terjadi (syarat autoplay). */
 let userGesture = false;
@@ -143,7 +173,7 @@ function ready(): boolean {
 export function initAudio(): void {
   userGesture = true;
   if (ctx) {
-    if (ctx.state === 'suspended') void ctx.resume();
+    if (ctx.state === 'suspended') ctx.resume().catch(() => { /* ditolak browser: dicoba lagi pada interaksi berikutnya */ });
     applyMusic();
     return;
   }
@@ -156,18 +186,23 @@ export function initAudio(): void {
     master.gain.value = prefs.muted ? 0 : 1;
     master.connect(ctx.destination);
     sfxBus = ctx.createGain();
-    sfxBus.gain.value = prefs.sfxVolume;
+    sfxBus.gain.value = prefs.sfxEnabled ? prefs.sfxVolume : 0;
     sfxBus.connect(master);
-    if (ctx.state === 'suspended') void ctx.resume();
+    ambBus = ctx.createGain();
+    ambBus.gain.value = 1;
+    ambBus.connect(master);
+    if (ctx.state === 'suspended') ctx.resume().catch(() => { /* ditolak browser: dicoba lagi pada interaksi berikutnya */ });
   } else {
     catatSekali('Web Audio tidak tersedia - efek suara dimatikan.');
   }
   applyMusic();
+  applyAmbience();
 }
 
 function applyPrefs() {
   if (master) master.gain.value = prefs.muted ? 0 : 1;
-  if (sfxBus) sfxBus.gain.value = prefs.sfxVolume;
+  if (sfxBus) sfxBus.gain.value = prefs.sfxEnabled ? prefs.sfxVolume : 0;
+  applyAmbience();
   savePrefs(prefs);
   notify();
   applyMusic();
@@ -245,45 +280,76 @@ function musicVolume(): number {
  * saat pertandingan sungguhan.
  */
 let paksaMusik = false;
+/** Halaman cerita aktif (Episode 2): trek cerita boleh berbunyi tanpa menyalakan musik mode lain. */
+let modeCerita = false;
 export function forceMusic(on: boolean): void {
   paksaMusik = on;
   applyMusic();
 }
 
-/** Trek yang benar-benar boleh berbunyi sekarang. */
+/**
+ * Trek yang benar-benar boleh berbunyi sekarang.
+ * Urutan prioritas: master mute > (trek cerita: halaman cerita aktif & sakelar musik cerita) / (trek lain: musicEnabled atau
+ * paksa musik) > interaksi pengguna > tab terlihat > berkas tidak rusak. Preferensi mode lain tidak bisa menyalakan trek cerita
+ * yang dimatikan, dan sakelar cerita tidak memengaruhi trek mode lain.
+ */
 function targetTrack(): Track {
   if (!desired) return null;
-  if (prefs.muted || !(prefs.musicEnabled || paksaMusik)) return null;
+  if (prefs.muted) return null;
+  if (TREK_CERITA.has(desired)) {
+    if (!modeCerita || prefs.musikCerita === false) return null;
+  } else if (!(prefs.musicEnabled || paksaMusik)) return null;
   if (!userGesture) return null;
   if (typeof document !== 'undefined' && document.hidden) return null;
   if (rusak.has(MUSIC_FILES[desired])) return null;
   return desired;
 }
 
+/** Elemen yang sedang dituju (satu-satunya yang boleh naik volumenya). */
+let targetEl: HTMLAudioElement | null = null;
+/** Elemen tujuan sebelumnya: satu-satunya yang boleh memudar bersama tujuan (crossfade = paling banyak dua trek). */
+let sebelumEl: HTMLAudioElement | null = null;
+
+function hentikan(el: HTMLAudioElement) {
+  cancelFade(el);
+  el.volume = 0;
+  el.pause();
+}
+
 function applyMusic() {
   if (typeof window === 'undefined') return;
   const want = targetTrack();
+  const hidden = typeof document !== 'undefined' && document.hidden;
 
-  // Matikan yang sedang berbunyi bila bukan yang diinginkan.
-  if (playing !== null && playing !== want) {
-    const lama = els.get(MUSIC_FILES[playing]);
+  // Bisu / tab tersembunyi: SEMUA elemen musik berhenti seketika (musik memakai <audio>, tidak ikut gain master Web Audio).
+  if (prefs.muted || hidden) {
+    for (const el of els.values()) hentikan(el);
+    targetEl = null;
+    sebelumEl = null;
     playing = null;
-    if (lama) {
-      fade(lama, 0, FADE_OUT_MS, () => {
-        lama.pause();
-      });
-    }
-  }
-  if (!want) return;
-
-  const el = element(want);
-  if (!el) return;
-  if (playing === want && !el.paused) {
-    fade(el, musicVolume(), FADE_QUICK_MS); // hanya menyesuaikan volume
     return;
   }
 
-  playing = want;
+  const el = want ? element(want) : null;
+  if (el !== targetEl) {
+    // Trek tujuan berganti: tujuan lama memudar (crossfade); trek lain yang masih memudar dihentikan agar paling banyak dua.
+    for (const lain of els.values()) if (lain !== el && lain !== targetEl) hentikan(lain);
+    const lama = targetEl;
+    sebelumEl = lama;
+    targetEl = el;
+    if (lama && lama !== el) {
+      const pindahCerita = !!want && TREK_CERITA.has(want) && [...TREK_CERITA].some((t) => els.get(MUSIC_FILES[t as Exclude<Track, null>]) === lama);
+      fade(lama, 0, pindahCerita ? FADE_CERITA_MS : FADE_OUT_MS, () => { if (targetEl !== lama) lama.pause(); });
+    }
+  }
+  playing = want && el ? want : null;
+  if (!want || !el) return;
+
+  if (!el.paused) {
+    // Sudah berbunyi (termasuk yang sempat memudar keluar lalu dipilih lagi): cukup arahkan volumenya.
+    fade(el, volTrek(want), TREK_CERITA.has(want) ? FADE_CERITA_MS : FADE_QUICK_MS);
+    return;
+  }
   if (!MUSIC_LOOP[want]) {
     try {
       el.currentTime = 0; // jingle selalu dari awal
@@ -293,24 +359,28 @@ function applyMusic() {
   }
   cancelFade(el);
   el.volume = 0;
-  const p: Promise<void> | undefined = el.play();
+  let p: Promise<void> | undefined;
+  try { p = el.play(); } catch { p = undefined; }
+  const masihRelevan = () => targetEl === el && targetTrack() === want;
   if (p && typeof p.then === 'function') {
     p.then(
       () => {
         blocked = false;
-        if (playing === want) fade(el, musicVolume(), FADE_IN_MS);
+        // play() bisa selesai sesudah pemain keluar, membisukan, atau berganti tema: jangan hidupkan trek yang tidak relevan.
+        if (!masihRelevan()) { if (targetEl !== el) hentikan(el); return; }
+        fade(el, volTrek(want), TREK_CERITA.has(want) ? FADE_CERITA_MS : FADE_IN_MS);
       },
       () => {
         // Ditolak browser (autoplay) atau berkas bermasalah: jangan melempar.
         blocked = true;
         userGesture = false;
-        if (playing === want) playing = null;
+        if (targetEl === el) { targetEl = null; playing = null; }
         el.pause();
         catatSekali('Musik menunggu interaksi pengguna (kebijakan autoplay browser).');
       },
     );
-  } else {
-    fade(el, musicVolume(), FADE_IN_MS);
+  } else if (masihRelevan()) {
+    fade(el, volTrek(want), TREK_CERITA.has(want) ? FADE_CERITA_MS : FADE_IN_MS);
   }
 }
 
@@ -334,6 +404,7 @@ if (typeof document !== 'undefined') {
   // Elemen audio-nya dipakai ulang, jadi tidak ada instance yang menumpuk.
   document.addEventListener('visibilitychange', () => {
     applyMusic();
+    applyAmbience();
   });
 }
 
@@ -381,9 +452,17 @@ function noise(bus: GainNode, start: number, dur: number, gain: number, hp = 240
   src.start(start);
 }
 
+const sfxTerakhir = new Map<Sfx, number>();
+const SFX_REDAM = new Set<Sfx>(['taruh', 'kertas', 'pesanKirim', 'pesanTerima', 'ketuk', 'konfirmasi', 'batal']);
 export function playSfx(name: Sfx): void {
-  if (!ctx || !sfxBus || prefs.muted) return;
-  if (ctx.state === 'suspended') void ctx.resume();
+  if (!ctx || !sfxBus || prefs.muted || !prefs.sfxEnabled) return;
+  const kini = typeof performance !== 'undefined' ? performance.now() : Date.now();
+  // Peredam ketukan beruntun HANYA untuk efek mode cerita (mode lain tidak berubah).
+  if (SFX_REDAM.has(name)) {
+    if (kini - (sfxTerakhir.get(name) ?? -1e9) < 80) return;
+    sfxTerakhir.set(name, kini);
+  }
+  if (ctx.state === 'suspended') ctx.resume().catch(() => { /* ditolak browser: dicoba lagi pada interaksi berikutnya */ });
   const t = ctx.currentTime;
   switch (name) {
     case 'pilih':
@@ -417,6 +496,41 @@ export function playSfx(name: Sfx): void {
         tone(sfxBus, N(19 + (i % 4) * 5), t + i * 0.05, 0.14, 0.14, 'sine', i * 8);
         noise(sfxBus, t + i * 0.05, 0.05, 0.04, 5000);
       }
+      break;
+    case 'taruh':
+      // Kertas masuk baki: desis kertas pendek teredam + ketuk kayu rendah. Netral: sama untuk semua baki.
+      noise(sfxBus, t, 0.06, 0.07, 1500);
+      tone(sfxBus, N(-5), t + 0.01, 0.07, 0.1, 'sine');
+      break;
+    case 'kertas':
+      // Berkas dibuka: desis kertas singkat dua lapis, tanpa nada.
+      noise(sfxBus, t, 0.08, 0.05, 2200);
+      noise(sfxBus, t + 0.05, 0.05, 0.03, 3200);
+      break;
+    case 'pesanKirim':
+      // Balasan terkirim: dua nada naik pendek & lembut (beda dari pesan diterima).
+      tone(sfxBus, N(19), t, 0.07, 0.11, 'sine');
+      tone(sfxBus, N(26), t + 0.05, 0.1, 0.09, 'sine');
+      break;
+    case 'pesanTerima':
+      // Pesan masuk: dua nada turun yang hangat.
+      tone(sfxBus, N(21), t, 0.13, 0.09, 'sine');
+      tone(sfxBus, N(14), t + 0.08, 0.18, 0.08, 'sine');
+      break;
+    case 'ketuk':
+      // Tanda lajur / buka pilihan: tick lembut.
+      tone(sfxBus, N(31), t, 0.03, 0.06, 'sine');
+      noise(sfxBus, t, 0.015, 0.02, 4200);
+      break;
+    case 'konfirmasi':
+      // Tindakan dijalankan (bukan hadiah, bukan penilaian).
+      tone(sfxBus, N(16), t, 0.1, 0.09, 'triangle');
+      tone(sfxBus, N(23), t + 0.06, 0.14, 0.07, 'sine');
+      break;
+    case 'batal':
+      // Pembatalan: dua nada turun pelan, netral.
+      tone(sfxBus, N(14), t, 0.07, 0.07, 'sine');
+      tone(sfxBus, N(9), t + 0.05, 0.09, 0.06, 'sine');
       break;
     case 'masuk':
       tone(sfxBus, N(9), t, 0.1, 0.22, 'sine');
@@ -484,6 +598,135 @@ export function setMusicEnabled(musicEnabled: boolean): void {
 export function setMusicVolume(v: number): void {
   prefs = { ...prefs, musicVolume: Math.min(1, Math.max(0, v)), chosen: true };
   applyPrefs();
+}
+
+export function setSfxEnabled(on: boolean): void {
+  prefs = { ...prefs, sfxEnabled: on, chosen: true };
+  applyPrefs();
+}
+
+/** Musik & suasana mode cerita (pilihan pemain; tersimpan). */
+export function setMusikCerita(on: boolean): void {
+  prefs = { ...prefs, musikCerita: on, chosen: true };
+  applyPrefs();
+}
+
+/** Halaman cerita aktif/tidak (runtime, tidak disimpan). Keluar dari cerita = trek & suasana cerita berhenti. */
+export function setModeCerita(on: boolean): void {
+  modeCerita = on;
+  if (!on) suasanaDiminta = null;
+  applyMusic();
+  applyAmbience();
+}
+
+/** Musik & suasana cerita akan berbunyi bila diizinkan sekarang (untuk tampilan menu). */
+export function musikCeritaAktif(): boolean {
+  return !prefs.muted && prefs.musikCerita !== false;
+}
+
+// ------------------------------------------------------------ suasana (ambience) cerita
+
+/**
+ * SUASANA tempat, disintesis (noise ter-filter, tanpa berkas): dekorasi suasana yang sangat tipis, BUKAN bukti kasus.
+ * 'bengkel' = aktivitas jauh teredam; 'jalan' = desir lalu lintas jauh yang naik-turun pelan (tanpa klakson/benturan).
+ * Kantor & obrolan: tanpa suasana (musik saja). Mengikuti sakelar musik cerita & master mute; berhenti saat tab tersembunyi.
+ */
+export type Suasana = 'bengkel' | 'jalan' | null;
+let suasanaDiminta: Suasana = null;
+let suasanaAktif: { jenis: Exclude<Suasana, null>; out: GainNode; src: AudioBufferSourceNode; lfo?: OscillatorNode; simpul: AudioNode[] } | null = null;
+
+/** Hentikan satu lapis suasana: `segera` = bisu/tab tersembunyi/keluar halaman (tanpa sisa); selain itu memudar ~1 s. Simpul dilepas. */
+function lepasSuasana(s: NonNullable<typeof suasanaAktif>, segera: boolean): void {
+  if (!ctx) return;
+  const lepas = () => { for (const n of s.simpul) { try { n.disconnect(); } catch { /* sudah lepas */ } } };
+  try {
+    s.out.gain.cancelScheduledValues(ctx.currentTime);
+    if (segera) {
+      s.out.gain.setValueAtTime(0, ctx.currentTime);
+      s.src.stop(); s.lfo?.stop();
+      lepas();
+    } else {
+      s.out.gain.setTargetAtTime(0, ctx.currentTime, 0.3);
+      const t = ctx.currentTime + 1.2;
+      s.src.onended = lepas;
+      s.src.stop(t); s.lfo?.stop(t);
+    }
+  } catch { lepas(); }
+}
+const GAIN_SUASANA: Record<Exclude<Suasana, null>, number> = { bengkel: 0.05, jalan: 0.07 };
+
+export function setSuasana(jenis: Suasana): void {
+  suasanaDiminta = jenis;
+  applyAmbience();
+}
+
+function bufferCoklat(detik: number): AudioBuffer | null {
+  if (!ctx) return null;
+  const n = Math.floor(ctx.sampleRate * detik);
+  const buf = ctx.createBuffer(1, n, ctx.sampleRate);
+  const ch = buf.getChannelData(0);
+  let last = 0;
+  for (let i = 0; i < n; i++) { last = (last + 0.02 * (Math.random() * 2 - 1)) / 1.02; ch[i] = last * 3.5; }
+  // Sambungan loop halus: ujung disilangkan ke awal.
+  const x = Math.floor(ctx.sampleRate * 0.3);
+  for (let i = 0; i < x; i++) { const k = i / x; ch[i] = ch[i] * k + ch[n - x + i] * (1 - k); }
+  return buf;
+}
+
+function applyAmbience(): void {
+  if (!ctx || !ambBus) return;
+  const hidden = typeof document !== 'undefined' && document.hidden;
+  const want: Suasana = !modeCerita || prefs.muted || prefs.musikCerita === false || hidden || !userGesture ? null : suasanaDiminta;
+  const vol = (j: Exclude<Suasana, null>) => GAIN_SUASANA[j] * Math.min(1, Math.max(0, prefs.musicVolume)) * 2;
+  if (suasanaAktif && suasanaAktif.jenis === want) {
+    suasanaAktif.out.gain.setTargetAtTime(vol(want), ctx.currentTime, 0.3);
+    return;
+  }
+  if (suasanaAktif) {
+    const lama = suasanaAktif;
+    suasanaAktif = null;
+    // Berganti tempat = memudar; bisu, tab tersembunyi, atau keluar halaman = berhenti seketika tanpa sisa.
+    lepasSuasana(lama, want === null);
+  }
+  if (!want) return;
+  const buf = bufferCoklat(8);
+  if (!buf) return;
+  const src = ctx.createBufferSource();
+  src.buffer = buf;
+  src.loop = true;
+  const lp = ctx.createBiquadFilter();
+  lp.type = 'lowpass';
+  lp.frequency.value = want === 'jalan' ? 650 : 900;
+  const out = ctx.createGain();
+  out.gain.value = 0;
+  const swell = ctx.createGain();
+  swell.gain.value = 0.75;
+  src.connect(lp).connect(swell).connect(out).connect(ambBus);
+  const simpul: AudioNode[] = [src, lp, swell, out];
+  let lfo: OscillatorNode | undefined;
+  if (want === 'jalan') {
+    // Kendaraan jauh lewat: amplitudo naik-turun sangat pelan (sekitar 11 detik), bukan suara tunggal yang menonjol.
+    lfo = ctx.createOscillator();
+    lfo.frequency.value = 0.09;
+    const dalam = ctx.createGain();
+    dalam.gain.value = 0.25;
+    lfo.connect(dalam).connect(swell.gain);
+    simpul.push(lfo, dalam);
+    lfo.start();
+  } else {
+    // Bengkel jauh: lapisan tengah tipis supaya terdengar 'ruang kerja', tanpa dentang.
+    const bp = ctx.createBiquadFilter();
+    bp.type = 'bandpass';
+    bp.frequency.value = 1800;
+    bp.Q.value = 0.8;
+    const tipis = ctx.createGain();
+    tipis.gain.value = 0.25;
+    lp.connect(bp).connect(tipis).connect(out);
+    simpul.push(bp, tipis);
+  }
+  src.start();
+  out.gain.setTargetAtTime(vol(want), ctx.currentTime, 0.8);
+  suasanaAktif = { jenis: want, out, src, lfo, simpul };
 }
 
 export function setSfxVolume(v: number): void {

@@ -13,16 +13,18 @@
 import { DAFTAR_BAHASA, type Bahasa } from '@shared/bahasa';
 import type { StepKey } from '@shared/scoring';
 import type { MissionAnswer, MissionPublic, StepAnswer, StepDef } from '@shared/types';
+import { JUMLAH_LAJUR as JUMLAH_LAJUR_ASET, LAJUR_TRUK as LAJUR_TRUK_ASET } from './lokasi/seni/geometri';
 import { jalankan, pilihanTersedia, semuaBarisTampil, stateAwal } from './mesin';
 import {
-  DAFTAR_EKSPRESI, DAFTAR_LATAR, DAFTAR_LOKASI_ADEGAN, type AksiCerita, type Baris, type CueAdegan, type DefAktivitas, type Efek, type Episode,
-  type IdAkhir, type IdLokasiAdegan, type IdNode, type Kondisi, type NilaiProses, type NodeCerita, type StateCerita,
+  DAFTAR_EKSPRESI, DAFTAR_LATAR, DAFTAR_LOKASI_ADEGAN, type AksiCerita, type Baris, type CueAdegan, type CueLatar, type DefAktivitas, type Efek, type Ekspresi, type Episode,
+  type GambarTokoh, type KotakSumber, type IdAkhir, type IdLokasiAdegan, type IdNode, type Kondisi, type NilaiProses, type NodeCerita, type StateCerita,
+  type VarianGambar,
 } from './tipe';
 import { DAFTAR_AKSI_ADEGAN, DAFTAR_PANDANG, DAFTAR_PROP_ADEGAN, DAFTAR_TEMPAT_PROP, JENIS_POSE_MENTOR, JENIS_POSE_NASABAH } from './ui/adegan';
 
 const NILAI_PROSES: readonly NilaiProses[] = ['tepat', 'dikoreksi', 'keliru'];
 const PRODUK = ['AUTO', 'HVC', 'FIRE', 'CARGO', 'MIX'];
-const POTRET = ['nasabah', 'missRaksa', 'pemain'];
+const POTRET = ['nasabah', 'missRaksa', 'pemain', 'tokoh'];
 const NADA = ['baik', 'campuran', 'buruk'];
 const PEMBICARA_BAWAAN = ['pemain', 'narasi'];
 
@@ -44,6 +46,8 @@ function tetangga(n: NodeCerita): IdNode[] {
 const parameter = (s: string): string[] => [...new Set(s.match(/\{(\w+)\}/g) ?? [])].sort();
 /** Parameter yang diisi teksCerita: {nama} dari pemanggil, {lokasi} dari `Episode.panggung.lokasi.nama` (v3). */
 const PARAMETER_SAH = ['{nama}', '{lokasi}'];
+/** Parameter tambahan HANYA untuk teks arena rambu (K08): nama rambu, daftar lajur yang ditandai/disebut, dan lajur truk; diisi komponen, bukan naskah. */
+const PARAMETER_ARENA_RAMBU = ['{rambu}', '{tanda}', '{tulisan}', '{truk}', '{lajur}'];
 const TEMA_PANGGUNG = ['silver'];
 
 // ------------------------------------------------------------------ cue adegan (v3)
@@ -268,6 +272,157 @@ function idOpsi(step: StepDef): string[] {
   return [];
 }
 
+// ------------------------------------------------------------------ arena antarmuka HP
+
+/**
+ * Konfigurasi arena (DefAktivitas.arena) harus cocok dengan misi sintetisnya: langkah ada & jenisnya sesuai pola, benda
+ * = semua item langkah (tanpa tambahan), wadah/tujuan/perlakuan = semua wadah langkah, pilihan bundel = semua opsi.
+ * Gambar, tokoh, tabel/dokumen fakta, dan kunci teks yang dirujuk harus ada. Arena dan antarmuka standar menilai
+ * jawaban yang sama, jadi ketidakcocokan berarti pilihan yang tidak bisa dipilih (atau dipilih tanpa dinilai).
+ */
+function periksaArena(
+  ep: Episode, def: DefAktivitas, misi: MissionPublic, tempat: string, salah: (p: string) => void, teks: (k: unknown, t: string) => void,
+): void {
+  const k = def.arena;
+  if (!k) return;
+  const t = `${tempat}.arena`;
+  const seni = (id: string | undefined, di: string) => {
+    if (id !== undefined && !ada(ep.seniArena ?? {}, id)) salah(`${di}: gambar "${id}" tidak ada di episode.seniArena`);
+  };
+  const sama = (a: string[], b: string[], apa: string, di: string) => {
+    const kurang = b.filter((x) => !a.includes(x));
+    const lebih = a.filter((x) => !b.includes(x));
+    if (kurang.length) salah(`${di}: ${apa} misi tidak ada di arena: ${kurang.join(', ')}`);
+    if (lebih.length) salah(`${di}: ${apa} arena tidak ada di misi: ${lebih.join(', ')}`);
+    if (new Set(a).size !== a.length) salah(`${di}: ${apa} arena dobel`);
+  };
+  const langkah = (id: string, jenis: 'assign' | 'single') => {
+    const st = misi.steps.find((x) => x.id === id);
+    if (!st) salah(`${t}: langkah "${id}" tidak ada di misi`);
+    else if (st.kind !== jenis) salah(`${t}: langkah "${id}" harus ${jenis} (misi: ${st.kind})`);
+    return st ?? null;
+  };
+  const tujuan = (x: { id: string; label: string; arti?: string; seni?: string }, di: string) => {
+    teks(x.label, `${di}.label`);
+    if (x.arti !== undefined) teks(x.arti, `${di}.arti`);
+    seni(x.seni, di);
+  };
+  const benda = (b: { id: string; nama?: string; keterangan?: string; seni?: string; tokoh?: { id: string } }, di: string) => {
+    if (b.nama !== undefined) teks(b.nama, `${di}.nama`);
+    if (b.keterangan !== undefined) teks(b.keterangan, `${di}.keterangan`);
+    seni(b.seni, di);
+    if (b.tokoh && !ada(ep.pemeran ?? {}, b.tokoh.id)) salah(`${di}: tokoh "${b.tokoh.id}" tidak ada di pemeran`);
+    if (!b.seni && !b.tokoh) salah(`${di}: benda tanpa gambar atau tokoh`);
+  };
+  teks(k.tanya, `${t}.tanya`);
+  if (k.catatan !== undefined) teks(k.catatan, `${t}.catatan`);
+  if (k.fakta?.tabel !== undefined && !(misi.tables ?? []).some((x) => x.id === k.fakta!.tabel)) salah(`${t}.fakta: tabel "${k.fakta.tabel}" tidak ada di misi`);
+  if (k.fakta?.dokumen !== undefined && !ada(ep.dokumen ?? {}, k.fakta.dokumen)) salah(`${t}.fakta: dokumen "${k.fakta.dokumen}" tidak ada di episode.dokumen`);
+  if (k.catatanBenda !== undefined && !(k.pola === 'susun' && k.benda.some((b) => b.id === k.catatanBenda))) salah(`${t}.catatanBenda: "${k.catatanBenda}" bukan benda arena susun ini`);
+  switch (k.pola) {
+    case 'susun': {
+      teks(k.satuan, `${t}.satuan`);
+      const st = langkah(k.langkah, 'assign');
+      k.benda.forEach((b, i) => benda(b, `${t}.benda[${i}]`));
+      k.wadah.forEach((w, i) => tujuan(w, `${t}.wadah[${i}]`));
+      if (st?.kind === 'assign') {
+        sama(k.benda.map((b) => b.id), st.items.map((x) => x.id), 'item', t);
+        sama(k.wadah.map((w) => w.id), st.buckets.map((x) => x.id), 'wadah', t);
+      }
+      break;
+    }
+    case 'tujuan': {
+      const st = langkah(k.langkah, 'assign');
+      benda(k.benda, `${t}.benda`);
+      k.tujuan.forEach((w, i) => tujuan(w, `${t}.tujuan[${i}]`));
+      if (st?.kind === 'assign') {
+        sama([k.benda.id], st.items.map((x) => x.id), 'item', t);
+        sama(k.tujuan.map((w) => w.id), st.buckets.map((x) => x.id), 'wadah', t);
+      }
+      break;
+    }
+    case 'bandingkan': {
+      const st = langkah(k.langkah, 'assign');
+      teks(k.sumber.kiri, `${t}.sumber.kiri`);
+      teks(k.sumber.kanan, `${t}.sumber.kanan`);
+      k.selisih.forEach((x, i) => { teks(x.label, `${t}.selisih[${i}].label`); if (x.catatan !== undefined) teks(x.catatan, `${t}.selisih[${i}].catatan`); });
+      k.perlakuan.forEach((w, i) => tujuan(w, `${t}.perlakuan[${i}]`));
+      if (st?.kind === 'assign') {
+        sama(k.selisih.map((x) => x.id), st.items.map((x) => x.id), 'item', t);
+        sama(k.perlakuan.map((w) => w.id), st.buckets.map((x) => x.id), 'wadah', t);
+      }
+      break;
+    }
+    case 'bundel': {
+      for (const [nama, bagian] of [['tindakan', k.tindakan], ['kabar', k.kabar]] as const) {
+        const st = langkah(bagian.langkah, 'single');
+        teks(bagian.tanya, `${t}.${nama}.tanya`);
+        bagian.pilihan.forEach((w, i) => tujuan(w, `${t}.${nama}.pilihan[${i}]`));
+        if (st?.kind === 'single') sama(bagian.pilihan.map((w) => w.id), st.options.map((x) => x.id), 'opsi', `${t}.${nama}`);
+      }
+      if (k.fakta?.tabel === undefined) salah(`${t}: pola bundel butuh fakta.tabel (isi bundel)`);
+      if (k.meja) {
+        // Meja kasus (prototipe D-68): berkas seurutan baris tabel fakta; tiap pilihan tindakan punya tempat sendiri.
+        const m = k.meja;
+        const tabel = (misi.tables ?? []).find((x) => x.id === k.fakta?.tabel);
+        if (tabel && tabel.rows.length !== m.berkas.length) salah(`${t}.meja: ${m.berkas.length} berkas, tabel fakta ${tabel.rows.length} baris`);
+        if (new Set(m.berkas.map((b) => b.id)).size !== m.berkas.length) salah(`${t}.meja: id berkas dobel`);
+        m.berkas.forEach((b, i) => {
+          teks(b.singkat, `${t}.meja.berkas[${i}].singkat`);
+          if (b.rincian !== undefined) teks(b.rincian, `${t}.meja.berkas[${i}].rincian`);
+          seni(b.seni, `${t}.meja.berkas[${i}]`);
+        });
+        for (const [n, v] of Object.entries(m.objek)) teks(v, `${t}.meja.objek.${n}`);
+        teks(m.statusAwal, `${t}.meja.statusAwal`);
+        sama(Object.keys(m.tindakan), k.tindakan.pilihan.map((p) => p.id), 'pilihan tindakan', `${t}.meja.tindakan`);
+        const tempat = Object.values(m.tindakan).map((x) => x.tempat);
+        if (new Set(tempat).size !== tempat.length) salah(`${t}.meja.tindakan: dua tindakan memakai tempat yang sama`);
+        for (const [id, x] of Object.entries(m.tindakan)) {
+          teks(x.status, `${t}.meja.tindakan.${id}.status`);
+          if (x.singkat !== undefined) teks(x.singkat, `${t}.meja.tindakan.${id}.singkat`);
+        }
+      }
+      break;
+    }
+    case 'rambu': {
+      if (k.jumlahLajur !== JUMLAH_LAJUR_ASET || k.lajurTruk !== LAJUR_TRUK_ASET) salah(`${t}: jumlah lajur/lajur truk harus sama dengan aset jalan (${JUMLAH_LAJUR_ASET}/${LAJUR_TRUK_ASET})`);
+      const ids = new Set<string>();
+      k.rambu.forEach((r, i) => {
+        const st = langkah(r.langkah, 'assign');
+        teks(r.label, `${t}.rambu[${i}].label`); teks(r.isi, `${t}.rambu[${i}].isi`); teks(r.petunjuk, `${t}.rambu[${i}].petunjuk`);
+        if (r.tulisan?.some((n) => !Number.isInteger(n) || n < 1 || n > k.jumlahLajur)) salah(`${t}.rambu[${i}].tulisan: nomor lajur di luar jalan`);
+        if (st?.kind === 'assign') {
+          const item = Array.from({ length: k.jumlahLajur }, (_, n) => `${r.awalanItem}${n + 1}`);
+          item.forEach((x) => { if (ids.has(x)) salah(`${t}.rambu[${i}]: item "${x}" dobel antar-rambu`); ids.add(x); });
+          sama(item, st.items.map((x) => x.id), 'item', `${t}.rambu[${i}]`);
+          sama([r.wadah], st.buckets.map((x) => x.id), 'wadah', `${t}.rambu[${i}]`);
+        }
+      });
+      const st = langkah(k.simpul.langkah, 'single');
+      teks(k.simpul.tanya, `${t}.simpul.tanya`);
+      k.simpul.pilihan.forEach((w, i) => tujuan(w, `${t}.simpul.pilihan[${i}]`));
+      if (st?.kind === 'single') sama(k.simpul.pilihan.map((w) => w.id), st.options.map((x) => x.id), 'opsi', `${t}.simpul`);
+      for (const id of Object.keys(k.simpul.sikap)) if (!k.simpul.pilihan.some((w) => w.id === id)) salah(`${t}.simpul.sikap: opsi "${id}" tidak ada`);
+      break;
+    }
+    case 'pesan': {
+      const st = langkah(k.langkah, 'assign');
+      k.benda.forEach((b, i) => {
+        if (b.nama !== undefined) teks(b.nama, `${t}.benda[${i}].nama`);
+        if (b.keterangan === undefined) salah(`${t}.benda[${i}]: bagian pesan butuh keterangan (kalimatnya)`);
+        else teks(b.keterangan, `${t}.benda[${i}].keterangan`);
+      });
+      if (st?.kind === 'assign') {
+        sama(k.benda.map((b) => b.id), st.items.map((x) => x.id), 'item', t);
+        const ember = st.buckets.map((x) => x.id);
+        for (const w of [k.masuk, k.tidak]) if (!ember.includes(w)) salah(`${t}: wadah "${w}" tidak ada di misi`);
+        if (ember.length !== 2) salah(`${t}: langkah pesan harus punya tepat dua wadah (masuk/tidak)`);
+      }
+      break;
+    }
+  }
+}
+
 // ------------------------------------------------------------------ validasiEpisode
 
 export function validasiEpisode(ep: Episode): string[] {
@@ -328,6 +483,13 @@ export function validasiEpisode(ep: Episode): string[] {
     for (const [id, k] of Object.entries(rec ?? {})) teks(k, `${ruang} "${id}"`);
   }
 
+  // ---- lampiran obrolan (foto/dokumen yang dikirim tokoh)
+  for (const [id, l] of Object.entries(ep.lampiran ?? {})) {
+    teks(l?.judul, `lampiran "${id}".judul`);
+    if (!ada(ep.seniArena ?? {}, l?.seni)) salah(`lampiran "${id}": gambar "${String(l?.seni)}" tidak ada di episode.seniArena`);
+    if (l?.dari !== undefined && !ada(pemeran, l.dari)) salah(`lampiran "${id}": pengirim "${l.dari}" tidak ada di pemeran`);
+  }
+
   // ---- suasana
   const suasana = ep.suasana ?? [];
   if (suasana.length === 0) salah('suasana nasabah kosong');
@@ -351,7 +513,7 @@ export function validasiEpisode(ep: Episode): string[] {
   }
 
   // ---- aktivitas (definisi) - dikumpulkan dulu karena kondisi 'akt:' merujuk opsinya
-  const infoAkt = new Map<string, { opsi: Set<string>; benar: Set<string>; pensiun: Set<string> }>();
+  const infoAkt = new Map<string, { opsi: Set<string>; benar: Set<string>; pensiun: Set<string>; taruh: Map<string, Set<string>> }>();
   const aktivitas = ep.aktivitas ?? {};
   for (const [kunci, def] of Object.entries(aktivitas)) {
     const tempat = `aktivitas "${kunci}"`;
@@ -362,7 +524,9 @@ export function validasiEpisode(ep: Episode): string[] {
     const opsi = new Set<string>();
     const benar = new Set<string>();
     const pensiun = new Set(def ? opsiPensiun(def) : []);
-    infoAkt.set(kunci, { opsi, benar, pensiun });
+    // Langkah susun: item -> wadah yang mungkin (tanda akt:<id>:taruh:<item>:<wadah>).
+    const taruh = new Map<string, Set<string>>();
+    infoAkt.set(kunci, { opsi, benar, pensiun, taruh });
     if (!misi) {
       salah(`${tempat}: misi('id') gagal atau tidak punya langkah`);
       continue;
@@ -370,6 +534,7 @@ export function validasiEpisode(ep: Episode): string[] {
     if (!teksSah(misi.id)) salah(`${tempat}: misi tanpa id`);
     if (misi.steps.length === 0) salah(`${tempat}: misi tidak punya langkah`);
     for (const st of misi.steps) for (const o of idOpsi(st)) opsi.add(o);
+    for (const st of misi.steps) if (st.kind === 'assign') for (const it of st.items) taruh.set(it.id, new Set(st.buckets.map((b) => b.id)));
     for (const p of pensiun) if (opsi.has(p)) salah(`${tempat}: opsi pensiun "${p}" masih ditawarkan di misi`);
     // (v2) Alasan per opsi & arti awam baris kartu: rujukan opsi / kartu / teks harus ada.
     for (const [o, k] of Object.entries(def?.alasanOpsi ?? {})) {
@@ -432,6 +597,9 @@ export function validasiEpisode(ep: Episode): string[] {
         if (st.kind !== 'number') salah(`${t2}: rubrik number tetapi langkah misi "${st.kind}"`);
       } else salah(`${t2}: rubrik tanpa jawaban benar`);
     }
+    // Antarmuka HP: tiap aktivitas punya arena yang cocok dengan misinya.
+    if (ep.antarmuka === 'hp' && !def.arena) salah(`${tempat}: episode antarmuka HP tetapi aktivitas tanpa arena`);
+    periksaArena(ep, def, misi, tempat, salah, teks);
     // Id tidak pernah diterjemahkan: struktur misi en/zh harus sama dengan id.
     const bentuk = (m: MissionPublic) => JSON.stringify([m.id, m.steps.map((st) => [st.id, st.kind, idOpsi(st)])]);
     for (const b of DAFTAR_BAHASA.map((x) => x.kode).filter((x) => x !== 'id')) {
@@ -465,7 +633,10 @@ export function validasiEpisode(ep: Episode): string[] {
           if (!info.opsi.has(opsi) && !info.pensiun.has(opsi)) salah(`${tempat}: tanda "${t}" merujuk opsi "${opsi}" yang tidak ada di misi`);
         } else if (jenis === 'lewat') {
           if (!info.benar.has(opsi)) salah(`${tempat}: tanda "${t}" tidak pernah dipasang ("${opsi}" bukan opsi benar di rubrik)`);
-        } else salah(`${tempat}: tanda "${t}" tidak sah (akt:<id>:tepat|sebagian|belum|pilih:<opsi>|lewat:<opsi>)`);
+        } else if (jenis === 'taruh') {
+          const [item = '', wadah = '', ...lebih] = sisa;
+          if (lebih.length || !info.taruh.get(item)?.has(wadah)) salah(`${tempat}: tanda "${t}" merujuk item/wadah susun yang tidak ada di misi`);
+        } else salah(`${tempat}: tanda "${t}" tidak sah (akt:<id>:tepat|sebagian|belum|pilih:<opsi>|lewat:<opsi>|taruh:<item>:<wadah>)`);
       } else if (!tandaDipasang.has(t)) salah(`${tempat}: tanda "${t}" diperiksa tetapi tidak pernah dipasang`);
     } else if ('tidak' in k) cekKondisi(k.tidak, tempat);
     else if ('semua' in k || 'salahSatu' in k) {
@@ -531,6 +702,8 @@ export function validasiEpisode(ep: Episode): string[] {
       if (b.istilah !== undefined && !Array.isArray(b.istilah)) salah(`${t}: istilah harus berupa daftar`);
       for (const i of Array.isArray(b.istilah) ? b.istilah : []) if (!ada(ep.istilah, i)) salah(`${t}: istilah "${String(i)}" tidak ada di episode.istilah`);
       cekCue(b.adegan, `${t}.adegan`, di);
+      if (b.lampiran !== undefined && !ada(ep.lampiran ?? {}, b.lampiran)) salah(`${t}: lampiran "${String(b.lampiran)}" tidak ada di episode.lampiran`);
+      if (b.topik !== undefined) teks(b.topik, `${t}.topik`);
     });
   };
 
@@ -540,7 +713,8 @@ export function validasiEpisode(ep: Episode): string[] {
 
   // ---- node
   if (!ada(node, ep.mulai)) salah(`mulai merujuk node "${String(ep.mulai)}" yang tidak ada`);
-  else if (node[ep.mulai]!.jenis !== 'cabang' && !node[ep.mulai]!.latar) salah(`node mulai "${ep.mulai}" wajib punya latar`);
+  // Panggung lama (v2/v3) butuh latar node mulai; episode berpanggung latar memakai `latar.awal` + `tata`.
+  else if (node[ep.mulai]!.jenis !== 'cabang' && !node[ep.mulai]!.latar && !ep.latar) salah(`node mulai "${ep.mulai}" wajib punya latar`);
   const pemakaiAkt = new Map<string, string[]>();
   const akhirDipakai = new Set<IdAkhir>();
   for (const [kunci, n] of semuaNode) {
@@ -590,6 +764,8 @@ export function validasiEpisode(ep: Episode): string[] {
           if (h.umpanBalik !== undefined) cekBaris(h.umpanBalik, `${t}.umpanBalik`, 'umpan');
           cekRujukan(h.lanjut, `${t}.lanjut`);
           if (h.jika === undefined && i < hasil.length - 1) salah(`${t}: cabang tanpa jika harus paling akhir (cabang sesudahnya tidak pernah terpilih)`);
+          // Akibat langsung: akibat tampil sebagai node `lanjut`, tidak ada layar umpan balik untuk barisnya.
+          if (n.langsung && h.umpanBalik?.length) salah(`${t}: node langsung tidak boleh punya umpanBalik (akibat = node lanjut)`);
         });
         if (hasil.length > 0 && hasil[hasil.length - 1]!.jika !== undefined) {
           salah(`${tempat}: cabang hasil terakhir harus tanpa jika (cadangan bila tidak ada yang cocok, mis. jawaban kosong)`);
@@ -728,11 +904,155 @@ export function validasiEpisode(ep: Episode): string[] {
     }
   }
 
-  // ---- teks tiga bahasa
+  // ---- panggung latar (Episode.latar): lokasi & aset tokoh yang dirujuk tata node/baris harus ada
+  const latar = ep.latar;
+  if (latar) {
+    const varianSah = (v: readonly VarianGambar[] | undefined, tempat: string) => {
+      if (!Array.isArray(v) || v.length === 0) salah(`${tempat}: varian gambar kosong`);
+      else for (const x of v) if (!(x.w > 0 && x.h > 0 && teksSah(x.src))) salah(`${tempat}: varian tanpa ukuran/URL`);
+    };
+    const gambarSah = (g: GambarTokoh | undefined, tempat: string) => {
+      if (!g) return;
+      varianSah(g.varian, tempat);
+      const k = g.kepala;
+      if (!(g.rasio > 0 && k && k.atas >= 0 && k.atas < k.bawah && k.bawah <= 1 && k.cx >= 0 && k.cx <= 1)) salah(`${tempat}: rasio/kepala tidak sah`);
+    };
+    for (const [idL, l] of Object.entries(latar.lokasi ?? {})) {
+      teks(l?.nama, `latar.lokasi "${idL}".nama`);
+      const il = l?.ilustrasi;
+      const t2 = `latar.lokasi "${idL}".ilustrasi`;
+      if (!il) { salah(`${t2}: wajib ada (gambar lokasi)`); continue; }
+      if (!(il.w > 0 && il.h > 0)) salah(`${t2}: ukuran gambar tidak sah`);
+      varianSah(il.latar, `${t2}.latar`);
+      if (il.depan) varianSah(il.depan, `${t2}.depan`);
+      const dalam = (k: KotakSumber | undefined) => !!k && k.w > 0 && k.h > 0 && k.x >= 0 && k.y >= 0 && k.x + k.w <= il.w + 0.5 && k.y + k.h <= il.h + 0.5;
+      const tk = il.tokoh;
+      for (const n of [1, 2, 3] as const) {
+        const s = tk?.slot?.[n] as readonly (number | { x: number; y: number })[] | undefined;
+        const sah = (p: number | { x: number; y: number }) => tk?.jenis === 'dekat'
+          ? typeof p === 'number' && p >= 0 && p <= il.w
+          : typeof p === 'object' && p.x >= 0 && p.x <= il.w && p.y > tk.cakrawala && p.y <= il.h;
+        if (!Array.isArray(s) || s.length !== n || !s.every(sah)) salah(`${t2}.tokoh.slot[${n}]: harus ${n} posisi di dalam gambar (berdiri: kaki di bawah cakrawala)`);
+      }
+      if (tk?.jenis === 'dekat') {
+        if (!(tk.tinggiKepala > 0 && tk.atasKepala >= 0 && tk.atasKepala < il.h)) salah(`${t2}.tokoh: kepala di luar gambar`);
+      } else if (tk?.jenis === 'berdiri') {
+        if (!(tk.cakrawala > 0 && tk.cakrawala < il.h && tk.mata > 0)) salah(`${t2}.tokoh: cakrawala/mata tidak sah`);
+      } else salah(`${t2}.tokoh: jenis harus "dekat" atau "berdiri"`);
+      for (const kelas of ['hp', 'lebar', ...(il.bingkai?.hpDekat ? ['hpDekat' as const] : [])] as const) {
+        const b = il.bingkai?.[kelas];
+        if (!(b && b.lebar > 0 && b.cx >= 0 && b.cx <= il.w && b.cy >= 0 && b.cy <= il.h)) salah(`${t2}.bingkai.${kelas}: pusat/lebar di luar gambar`);
+      }
+      for (const [idO, o] of Object.entries(il.objek ?? {})) if (!ada(ep.seniArena ?? {}, o.seni)) salah(`${t2}.objek "${idO}": seni "${o.seni}" tidak ada di episode.seniArena`);
+      (il.benda ?? []).forEach((b, i) => {
+        varianSah(b.varian, `${t2}.benda[${i}]`);
+        if (!dalam(b.fokus) || !(b.alas > (tk?.jenis === 'berdiri' ? tk.cakrawala : 0) && b.alas <= il.h)) salah(`${t2}.benda[${i}]: fokus/alas di luar gambar`);
+      });
+      (il.papan ?? []).forEach((p, i) => {
+        if (!dalam(p.kotak)) salah(`${t2}.papan[${i}]: kotak di luar gambar`);
+        if (!p.baris?.length) salah(`${t2}.papan[${i}]: tanpa tulisan`);
+        for (const b of p.baris ?? []) { teks(b.teks, `${t2}.papan[${i}]`); if (!(b.ukuran > 0)) salah(`${t2}.papan[${i}]: ukuran huruf tidak sah`); }
+      });
+      (il.tiang ?? []).forEach((k, i) => { if (!dalam(k)) salah(`${t2}.tiang[${i}]: di luar gambar`); });
+    }
+    for (const [idT, a] of Object.entries(latar.tokoh ?? {})) {
+      const t2 = `latar.tokoh "${idT}"`;
+      if (!ada(pemeran, idT)) salah(`${t2} bukan pemeran`);
+      if (!a) continue;
+      for (const [peta, nama] of [[a.avatar, 'avatar'], [a.dekat, 'dekat']] as const) {
+        if (!peta?.netral) salah(`${t2}.${nama}: netral wajib ada`);
+        for (const e of Object.keys(peta ?? {})) if (!DAFTAR_EKSPRESI.includes(e as Ekspresi)) salah(`${t2}.${nama}: ekspresi "${e}" tidak dikenal`);
+      }
+      for (const [e, v] of Object.entries(a.avatar ?? {})) varianSah(v, `${t2}.avatar.${e}`);
+      for (const [e, g] of Object.entries(a.dekat ?? {})) gambarSah(g, `${t2}.dekat.${e}`);
+      if (a.badan) {
+        gambarSah(a.badan, `${t2}.badan`);
+        if (!(a.badan.tinggi > 0)) salah(`${t2}.badan: tinggi dunia tidak sah`);
+      }
+    }
+    for (const idT of latar.tanpaAset ?? []) {
+      if (!ada(pemeran, idT)) salah(`latar.tanpaAset: "${idT}" bukan pemeran`);
+      if (ada(latar.tokoh ?? {}, idT)) salah(`latar.tanpaAset: "${idT}" punya aset di latar.tokoh`);
+    }
+    const punyaAset = (idT: string) => ada(latar.tokoh ?? {}, idT) || (latar.tanpaAset ?? []).includes(idT);
+    const cekTata = (c: CueLatar | undefined, tempat: string) => {
+      if (!c) return;
+      if (c.lokasi !== undefined && !ada(latar.lokasi ?? {}, c.lokasi)) salah(`${tempat}: lokasi "${c.lokasi}" tidak ada di latar.lokasi`);
+      for (const idT of [...(c.hadir ?? []), ...(c.telepon ? [c.telepon] : [])]) {
+        if (!punyaAset(idT)) salah(`${tempat}: tokoh "${idT}" tidak punya aset di latar.tokoh (atau latar.tanpaAset)`);
+      }
+      // Lokasi BERDIRI menampilkan badan penuh: tokoh yang hanya punya potret dekat tidak bisa berdiri di sana.
+      const lok = c.lokasi !== undefined ? latar.lokasi?.[c.lokasi] : undefined;
+      if (lok?.ilustrasi?.tokoh?.jenis === 'berdiri') {
+        for (const idT of c.hadir ?? []) if (latar.tokoh?.[idT] && !latar.tokoh[idT]!.badan) salah(`${tempat}: tokoh "${idT}" tanpa badan penuh di lokasi "${c.lokasi}"`);
+      }
+      // Panggung punya paling banyak tiga slot tokoh per lokasi; lebih dari itu akan hilang diam-diam.
+      if ((c.hadir?.length ?? 0) > 3) salah(`${tempat}: paling banyak 3 tokoh hadir (${c.hadir!.length})`);
+    };
+    cekTata(latar.awal, 'latar.awal');
+    cekTata({ lokasi: latar.sampul?.lokasi, hadir: latar.sampul?.hadir }, 'latar.sampul');
+    for (const [kunci, n] of semuaNode) {
+      cekTata(n.tata, `node "${kunci}".tata`);
+      const baris = n.jenis === 'cabang' ? [] : [...(n.baris ?? []), ...(n.jenis === 'aktivitas' ? (n.hasil ?? []).flatMap((h) => h.umpanBalik ?? []) : [])];
+      baris.forEach((b, i) => cekTata(b.tata, `node "${kunci}".baris[${i}].tata`));
+    }
+  }
+
+  // ---- dokumen di atas pilihan & titik keputusan bernomor (ringkasan akhir)
+  for (const [idD, d] of Object.entries(ep.dokumen ?? {})) {
+    teks(d?.judul, `dokumen "${idD}".judul`);
+    (d?.baris ?? []).forEach((b, i) => {
+      teks(b.label, `dokumen "${idD}".baris[${i}].label`);
+      if (b.nilai !== null) teks(b.nilai, `dokumen "${idD}".baris[${i}].nilai`);
+    });
+    if (d?.catatan !== undefined) teks(d.catatan, `dokumen "${idD}".catatan`);
+    const sk = d?.skema;
+    if (sk) {
+      const t2 = `dokumen "${idD}".skema`;
+      const barisAda = (i: number) => Number.isInteger(i) && i >= 0 && i < (d.baris ?? []).length;
+      if (sk.jenis !== 'lajur') salah(`${t2}: jenis "${String(sk.jenis)}" tidak dikenal`);
+      if (!(Number.isInteger(sk.jumlah) && sk.jumlah >= 1 && sk.jumlah <= 8)) salah(`${t2}: jumlah lajur 1-8`);
+      if (!(Number.isInteger(sk.posisi?.lajur) && sk.posisi.lajur >= 1 && sk.posisi.lajur <= sk.jumlah)) salah(`${t2}: posisi kendaraan di luar lajur 1-${sk.jumlah}`);
+      for (const i of [sk.penomoran, sk.posisi?.baris, ...(sk.rambu ?? []).map((r) => r.baris)]) if (!barisAda(i as number)) salah(`${t2}: baris ${String(i)} tidak ada di dokumen`);
+      teks(sk.kendaraan, `${t2}.kendaraan`);
+    }
+  }
+  // ---- cut-in obrolan: hanya baris ucapan nasabah yang ada di naskah
+  const barisNasabah = new Set(semuaNode.flatMap(([, n]) => (n.jenis === 'cabang' ? [] : [...n.baris, ...(n.jenis === 'aktivitas' ? n.hasil.flatMap((h) => h.umpanBalik ?? []) : [])]).filter((b) => b.siapa === ep.nasabah).map((b) => b.teks)));
+  for (const k of ep.cutIn ?? []) if (!barisNasabah.has(k)) salah(`cutIn: "${k}" bukan baris ucapan nasabah di naskah`);
+  for (const [kunci, n] of semuaNode) {
+    if (n.jenis === 'pilihan' && n.dokumen !== undefined && !ada(ep.dokumen ?? {}, n.dokumen)) salah(`node "${kunci}": dokumen "${n.dokumen}" tidak ada di episode.dokumen`);
+  }
+  const idTitik = new Set<string>();
+  for (const k of ep.titik ?? []) {
+    const tempat = `titik "${k.id}"`;
+    if (idTitik.has(k.id)) salah(`${tempat}: id dipakai lebih dari sekali`);
+    idTitik.add(k.id);
+    teks(k.judul, `${tempat}.judul`);
+    teks(k.alasan, `${tempat}.alasan`);
+    const alt = Object.entries(k.alternatif ?? {});
+    if (alt.length < 2) salah(`${tempat}: minimal 2 alternatif`);
+    for (const [a, v] of alt) {
+      teks(v?.label, `${tempat}.alternatif "${a}".label`);
+      if (!['tepat', 'kurang', 'keliru'].includes(v?.nilai)) salah(`${tempat}.alternatif "${a}": nilai "${String(v?.nilai)}" tidak dikenal`);
+      if (!tandaDipasang.has(`kep:${k.id}:${a}`)) salah(`${tempat}: alternatif "${a}" tidak pernah dipilih (tanda kep:${k.id}:${a} tidak dipasang efek mana pun)`);
+    }
+    if (k.alternatif?.[k.saran]?.nilai !== 'tepat') salah(`${tempat}: saran "${String(k.saran)}" harus alternatif bernilai tepat`);
+  }
+  if (ep.statusNaskah !== undefined) teks(ep.statusNaskah, 'statusNaskah');
+  if (ep.kepercayaanBatas) {
+    const b = ep.kepercayaanBatas;
+    if (!(b.min < b.maks) || ep.kepercayaanAwal < b.min || ep.kepercayaanAwal > b.maks) salah('kepercayaanBatas tidak sah atau kepercayaanAwal di luar batas');
+  }
+  if (ep.bahasa !== undefined && (!ep.bahasa.includes('id') || ep.bahasa.some((b) => !DAFTAR_BAHASA.some((x) => x.kode === b)))) {
+    salah('bahasa episode harus memuat "id" dan hanya kode bahasa aplikasi');
+  }
+
+  // ---- teks per bahasa episode (`Episode.bahasa`; tanpa nilai = semua bahasa aplikasi)
   const tabel = ep.teks ?? ({} as Episode['teks']);
   const id = tabel.id ?? {};
   for (const [kunci, tempat] of rujukanTeks) if (!ada(id, kunci)) salah(`${tempat}: kunci teks "${kunci}" tidak ada di teks id`);
-  for (const { kode } of DAFTAR_BAHASA) {
+  for (const { kode } of DAFTAR_BAHASA.filter((x) => !ep.bahasa || ep.bahasa.includes(x.kode))) {
     const t = tabel[kode];
     if (!t) {
       salah(`teks ${kode} belum ada`);
@@ -742,7 +1062,8 @@ export function validasiEpisode(ep: Episode): string[] {
     if (kode === 'id') {
       for (const [kunci, isi] of Object.entries(t)) {
         if (typeof isi !== 'string') continue;
-        for (const p of parameter(isi)) if (!PARAMETER_SAH.includes(p)) salah(`teks id "${kunci}": parameter ${p} tidak dikenal (hanya ${PARAMETER_SAH.join(', ')})`);
+        const sahUntuk = kunci.startsWith('arena.rambu.') ? [...PARAMETER_SAH, ...PARAMETER_ARENA_RAMBU] : PARAMETER_SAH;
+        for (const p of parameter(isi)) if (!sahUntuk.includes(p)) salah(`teks id "${kunci}": parameter ${p} tidak dikenal (hanya ${sahUntuk.join(', ')})`);
         if (parameter(isi).includes('{lokasi}') && !teksSah(ep.panggung?.lokasi?.nama)) salah(`teks id "${kunci}": memakai {lokasi} tetapi episode tanpa panggung.lokasi.nama`);
       }
       continue;

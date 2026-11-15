@@ -1,0 +1,6 @@
+/**
+ * Rintisan episode yang dikeluarkan dari build (VITE_CERITA_TANPA, lihat vite.config.ts & episode/index.ts). Semua
+ * nama ekspor episode bernilai null; registri menyaring null, jadi episode itu tidak terdaftar dan isinya tidak dibundel.
+ */
+export const EPISODE_AUTO_1 = null;
+export const EPISODE_AUTO_2 = null;

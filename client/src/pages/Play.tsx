@@ -1,10 +1,11 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import type { MissionPublic, Phase } from '@shared/types';
 import { Icon } from '../art/Icon';
 import { Raki } from '../art/Raki';
 import { playSfx, setTrack } from '../audio/audio';
 import { PlayerShell } from '../components/PlayerShell';
+import { TombolKeluar } from '../components/TombolKeluar';
 import { TOKOH } from '@shared/brand';
 import { PotretTokoh, SapaanPemandu, namaTokoh } from '../game/KarakterTokoh';
 import { HasilMisi, MissionPlay, TandaIkon, ringkas, sela, type PanelBantu, type SubmitState } from '../game/MissionPlay';
@@ -43,6 +44,7 @@ export default function Play() {
   const answer = sent && me?.submittedAnswer ? me.submittedAnswer : draft;
   const inFlight = useRef(false);
   const siapDilaporkan = useRef(-1);
+  const nav = useNavigate();
 
   useEffect(() => { prefetchAdegan(); }, []);
   useEffect(() => { setSubmission('idle'); setError(null); inFlight.current = false; }, [roundIndex, mission?.id]);
@@ -72,10 +74,13 @@ export default function Play() {
     else { setSubmission('failed'); setError(response.error ?? ''); }
   }
 
-  if (kicked) return <PlayerShell back="/"><main className="result-focus"><Raki size={120} mood="berpikir" /><h1>{t('misi.keluarJudul')}</h1><p>{t('misi.keluarTeks')}</p><Link className="primary-action" to="/join">{t('misi.gabungLagi')}</Link></main></PlayerShell>;
-  if (!room || !identity) return <PlayerShell back="/"><main className="result-focus">{status === 'connecting' ? <Memuat teks={t('misi.menyambungkan')} /> : <><Raki size={120} /><h1>{t('misi.ikutMain')}</h1><Link className="primary-action" to="/join">{t('misi.masukkanKode')}</Link></>}</main></PlayerShell>;
+  if (kicked) return <PlayerShell back="/"><main className="result-focus"><Raki size={120} mood="berpikir" /><h1>{t('misi.keluarJudul')}</h1><p>{t('misi.keluarTeks')}</p><Link className="primary-action" to="/acara/join">{t('misi.gabungLagi')}</Link></main></PlayerShell>;
+  if (!room || !identity) return <PlayerShell back="/"><main className="result-focus">{status === 'connecting' ? <Memuat teks={t('misi.menyambungkan')} /> : <><Raki size={120} /><h1>{t('misi.ikutMain')}</h1><Link className="primary-action" to="/acara/join">{t('misi.masukkanKode')}</Link></>}</main></PlayerShell>;
 
   const online = status === 'connected';
+  // Review staf #8: tombol kembali di layar permainan. Keluar saat misi berjalan meminta konfirmasi; room tidak direset
+  // dan identitas pemain tetap tersimpan, jadi tautan/QR yang sama membawanya kembali ke ronde yang sedang berjalan.
+  const keluar = <TombolKeluar perluKonfirmasi={phase !== 'FINISHED'} judul={t('misi.keluarKonfirmasiJudul')} pesan={t('misi.keluarKonfirmasiIsi')} labelSetuju={t('misi.keluarKonfirmasiYa')} onKeluar={() => nav('/')} />;
   const waktuHabis = fase === 'ACTIVE' && phase === 'ACTIVE' && remainingMs !== null && remainingMs <= 0;
   // Jeda hanya mengunci layar menjawab; briefing, pembahasan, dan laporan terkirim tetap tampil
   // apa adanya (dengan spanduk jeda) supaya isinya tidak hilang dari layar.
@@ -94,13 +99,13 @@ export default function Play() {
   const galatKirim = error === null ? null : error ? terjemahkanGalat(error) : t('misi.galatKirim');
 
   if (phase === 'LEADERBOARD' || (phase === 'PAUSED' && fase === 'LEADERBOARD')) {
-    return <PlayerShell label={label}>{putus}<main className="briefing-main"><span className="eyebrow">{phase === 'PAUSED' ? t('misi.eyebrowJeda') : t('misi.eyebrowSeru')}</span><h1>{t('misi.siapaTerdepan')}</h1><Leaderboard rows={room.leaderboard ?? []} highlightId={identity.playerId} limit={5} />{mine && mine.rank > 5 ? <p className="status-caption">{t('misi.posisimu', { peringkat: mine.rank, poin: mine.totalPoints.toLocaleString('id-ID') })}</p> : null}<p className="status-caption">{t('misi.misiBerikutnya')}</p></main></PlayerShell>;
+    return <PlayerShell label={label} keluar={keluar}>{putus}<main className="briefing-main"><span className="eyebrow">{phase === 'PAUSED' ? t('misi.eyebrowJeda') : t('misi.eyebrowSeru')}</span><h1>{t('misi.siapaTerdepan')}</h1><Leaderboard rows={room.leaderboard ?? []} highlightId={identity.playerId} limit={5} />{mine && mine.rank > 5 ? <p className="status-caption">{t('misi.posisimu', { peringkat: mine.rank, poin: mine.totalPoints.toLocaleString('id-ID') })}</p> : null}<p className="status-caption">{t('misi.misiBerikutnya')}</p></main></PlayerShell>;
   }
   if (!mission || !fase || !FASE_MISI.includes(fase)) {
-    return <PlayerShell label={label}>{putus}<main className="result-focus"><Memuat teks={t('misi.menyiapkanMisi')} /></main></PlayerShell>;
+    return <PlayerShell label={label} keluar={keluar}>{putus}<main className="result-focus"><Memuat teks={t('misi.menyiapkanMisi')} /></main></PlayerShell>;
   }
 
-  return <PlayerShell label={label} className="kompak">
+  return <PlayerShell label={label} keluar={keluar} className="kompak">
     {putus}{spandukJeda}
     <main className="misi-main">
       <div className="misi-judul"><div><span className="eyebrow">{t('misi.eyebrowMisi', { n: String(mission.number).padStart(2, '0'), total: room.totalRounds, produk: mission.productLabel.split(' - ')[0] ?? '' })}</span><h1>{mission.title}</h1></div></div>

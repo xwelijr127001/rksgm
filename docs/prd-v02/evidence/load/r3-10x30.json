@@ -1,0 +1,96 @@
+﻿{
+  "at": "2026-10-30T11:54:01.383Z",
+  "machine": {
+    "cpus": 16,
+    "cpuModel": "AMD Ryzen 7 9700X 8-Core Processor             ",
+    "memGb": 33,
+    "platform": "win32 10.0.26300",
+    "node": "v22.23.2"
+  },
+  "note": "Server and simulated clients on the SAME machine (loopback). Not a production capacity statement.",
+  "config": {
+    "rooms": 10,
+    "participantsPerRoom": 30,
+    "roundsPerRoom": 2,
+    "scenario": "[DEMO] Baret di Parkiran Pasar"
+  },
+  "durationSec": 37,
+  "rooms": [
+    {
+      "code": "RK6GNY",
+      "rounds": 2,
+      "participants": 30
+    },
+    {
+      "code": "XCFPQ7",
+      "rounds": 2,
+      "participants": 30
+    },
+    {
+      "code": "39CRXB",
+      "rounds": 2,
+      "participants": 30
+    },
+    {
+      "code": "44WZCZ",
+      "rounds": 2,
+      "participants": 30
+    },
+    {
+      "code": "D6WFXA",
+      "rounds": 2,
+      "participants": 30
+    },
+    {
+      "code": "KXVV65",
+      "rounds": 2,
+      "participants": 30
+    },
+    {
+      "code": "JWAFW8",
+      "rounds": 2,
+      "participants": 30
+    },
+    {
+      "code": "RAHERT",
+      "rounds": 2,
+      "participants": 30
+    },
+    {
+      "code": "CWBCWB",
+      "rounds": 2,
+      "participants": 30
+    },
+    {
+      "code": "E9T9R2",
+      "rounds": 2,
+      "participants": 30
+    }
+  ],
+  "joinMs": {
+    "n": 300,
+    "p50": 1,
+    "p95": 2,
+    "max": 10
+  },
+  "answerAckMs": {
+    "n": 600,
+    "p50": 0,
+    "p95": 4,
+    "max": 9
+  },
+  "answeringPhaseSkewMs": {
+    "n": 20,
+    "p50": 1,
+    "p95": 1,
+    "max": 1
+  },
+  "lastAnswerToConsequenceMs": {
+    "n": 19,
+    "p50": 1,
+    "p95": 15,
+    "max": 15
+  },
+  "errors": [],
+  "errorCount": 0
+}

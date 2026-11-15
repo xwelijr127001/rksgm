@@ -5,6 +5,8 @@
  *   npm install --no-save puppeteer-core     (socket.io-client sudah ada di workspace)
  *   npm run build && npm start               # server di http://127.0.0.1:4000 (ubah lewat UI_BASE)
  *   npm run test:e2e
+ * PRD v0.2: ini menguji kuis acara MODE LAMA -> server wajib RAKSA_LEGACY=on; host lama ada di /acara/host
+ * (kode 4 karakter di /join dan /projector diteruskan ke /acara/join dan /acara/layar).
  * Chrome: RAKSA_CHROME=<path chrome.exe> bila bukan lokasi standar.
  * Animasi: bawaan MENYALA; RAKSA_GERAK=kurang untuk menguji "kurangi gerak".
  *
@@ -411,7 +413,7 @@ try {
   await hostPage.setViewport({ width: 1366, height: 900 });
   await hostPage.goto(`${BASE}/`, { waitUntil: 'domcontentloaded' });
   await hostPage.evaluate((k, t) => { localStorage.setItem(`raksa:host:${k}`, JSON.stringify(t)); localStorage.setItem('raksa:host:last', JSON.stringify(k)); }, code, hostToken);
-  await hostPage.goto(`${BASE}/host?room=${code}`, { waitUntil: 'networkidle2' });
+  await hostPage.goto(`${BASE}/acara/host?room=${code}`, { waitUntil: 'networkidle2' });
   await tidur(1200);
   await periksaLayout(hostPage, 'host 1366');
 

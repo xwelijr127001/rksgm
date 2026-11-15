@@ -32,7 +32,7 @@ export const TEKS_ID: Record<string, string> = {
   'pemeran.nasabah.nama': 'Bu Rina',
   'pemeran.nasabah.peran': 'Nasabah',
   'pemeran.missRaksa.nama': 'Miss Raksa',
-  'pemeran.missRaksa.peran': 'Senior Layanan Klaim',
+  'pemeran.missRaksa.peran': 'Layanan Klaim',
 
   // ------------------------------------------------------------------ bab
   'bab.menyambut.judul': 'Menyambut',

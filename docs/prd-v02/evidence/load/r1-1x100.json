@@ -1,0 +1,51 @@
+﻿{
+  "at": "2026-10-30T11:52:25.736Z",
+  "machine": {
+    "cpus": 16,
+    "cpuModel": "AMD Ryzen 7 9700X 8-Core Processor             ",
+    "memGb": 33,
+    "platform": "win32 10.0.26300",
+    "node": "v22.23.2"
+  },
+  "note": "Server and simulated clients on the SAME machine (loopback). Not a production capacity statement.",
+  "config": {
+    "rooms": 1,
+    "participantsPerRoom": 100,
+    "roundsPerRoom": 3,
+    "scenario": "[DEMO] Baret di Parkiran Pasar"
+  },
+  "durationSec": 59,
+  "rooms": [
+    {
+      "code": "UJFESK",
+      "rounds": 3,
+      "participants": 100
+    }
+  ],
+  "joinMs": {
+    "n": 100,
+    "p50": 0,
+    "p95": 0,
+    "max": 1
+  },
+  "answerAckMs": {
+    "n": 300,
+    "p50": 1,
+    "p95": 4,
+    "max": 7
+  },
+  "answeringPhaseSkewMs": {
+    "n": 3,
+    "p50": 4,
+    "p95": 6,
+    "max": 6
+  },
+  "lastAnswerToConsequenceMs": {
+    "n": 2,
+    "p50": 0,
+    "p95": 0,
+    "max": 0
+  },
+  "errors": [],
+  "errorCount": 0
+}

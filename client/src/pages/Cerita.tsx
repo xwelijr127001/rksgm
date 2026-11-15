@@ -1,12 +1,12 @@
 /**
  * DAFTAR EPISODE MODE CERITA (/cerita). Kontrak: docs/rancangan-mode-cerita.md bagian 4.
  *
- * Judul + SATU kalimat pengantar (peran pemain TIDAK diulang di sini: perkenalan peran ada di baris pertama
- * episode, docs/rancangan-mode-cerita.md 11.3), satu kartu per episode di DAFTAR_EPISODE (judul, produk, durasi,
- * ringkas, status dari simpan.ts: Baru / Sedang berjalan · Bagian n / Selesai · akhir ditemukan n/5), lalu
- * tautan ke Latihan misi & Gabung acara. Episode yang belum siap TIDAK tampil sebagai kartu; cukup satu kalimat
- * "Episode berikutnya sedang disiapkan". Tanpa profil -> /kenalan. Kartu selesai: "Main lagi dari awal" (arsip)
- * dan "Lihat hasil" (membuka episode; node akhir yang tuntas langsung menampilkan kartu hasil).
+ * Judul + SATU kalimat pengantar, lalu Join Game (satu-satunya ajakan gabung acara, di ATAS daftar episode; review staf
+ * #4), lalu satu kartu per episode di DAFTAR_EPISODE (nomor = urutan daftar, produk, durasi, ringkas, status sendiri
+ * dari simpan.ts: Baru / Sedang berjalan · Bagian n / Selesai · akhir ditemukan n/m). Tidak ada blok "Cara main lain"
+ * dan tidak ada Latihan misi (arahan pemilik); episode yang belum siap tidak tampil. Tanpa profil -> /kenalan. Kartu
+ * selesai: "Main lagi dari awal" (arsip episode itu saja) dan "Lihat hasil". Seni kartu dari panggung episodenya:
+ * ruang piksel Episode 1, atau sampul panggung latar (`Episode.latar.sampul`).
  */
 import { useId, useLayoutEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react';
 import { Link, Navigate, useNavigate } from 'react-router-dom';
@@ -22,6 +22,8 @@ import { PotretMissRaksa } from '../cerita/seni/tokoh/PotretMissRaksa';
 import { akhirDitemukan, berlanggananCerita, muatProgres, mulaiBaru, versiPenyimpananCerita } from '../cerita/simpan';
 import { teksCerita } from '../cerita/teks';
 import type { Ekspresi, Episode } from '../cerita/tipe';
+import { JoinGame } from '../components/JoinGame';
+import { PanggungLatar } from '../cerita/ui/latar/PanggungLatar';
 import { idAman, kotakKepala, type Kotak } from '../cerita/ui/panggung/dunia';
 import { seniKartuRuang } from '../cerita/ui/panggung/kartuRuang';
 import { kotakPapan, ruangPiksel, SATUAN_PIKSEL } from '../cerita/ui/panggung/piksel';
@@ -56,6 +58,8 @@ export default function Cerita() {
           </div>
         </header>
 
+        <JoinGame className="cer-hub-join" />
+
         <ul className="cer-hub-daftar" aria-label={t('cerita.daftarEpisodeAria')}>
           {DAFTAR_EPISODE.map((ep, i) => (
             <KartuEpisode
@@ -72,23 +76,6 @@ export default function Cerita() {
             />
           ))}
         </ul>
-        <p className="cer-hub-segera">{t('cerita.segera')}</p>
-
-        <nav className="cer-hub-lain" aria-labelledby="cer-hub-lain-judul">
-          <h2 id="cer-hub-lain-judul">{t('cerita.caraLain')}</h2>
-          <div className="cer-hub-pintu-daftar">
-            <Link className="cer-hub-pintu" to="/solo">
-              <span className="cer-hub-pintu-ikon" aria-hidden="true"><Icon name="bintang" size={24} /></span>
-              <span className="cer-hub-pintu-teks"><b>{t('cerita.latihanMisi')}</b><small>{t('cerita.latihanMisiIsi')}</small></span>
-              <Arrow />
-            </Link>
-            <Link className="cer-hub-pintu" to="/join">
-              <span className="cer-hub-pintu-ikon" aria-hidden="true"><Icon name="medali" size={24} /></span>
-              <span className="cer-hub-pintu-teks"><b>{t('cerita.gabungAcara')}</b><small>{t('cerita.gabungAcaraIsi')}</small></span>
-              <Arrow />
-            </Link>
-          </div>
-        </nav>
         <p className="cer-hub-catatan">{t('cerita.catatanPerangkat')}</p>
       </main>
     </PlayerShell>
@@ -211,6 +198,23 @@ function SeniRuangKartu({ nama, ekspresi }: { nama: string; ekspresi: Ekspresi }
   );
 }
 
+/** Sampul kartu episode berpanggung latar: lokasi & tokoh `latar.sampul` (gambar diam, tanpa label suasana). */
+function SampulLatar({ ep, ekspresi, tx }: { ep: Episode; ekspresi: Ekspresi; tx: (k: string) => string }) {
+  const s = ep.latar!.sampul;
+  const komposisi = {
+    lokasi: s.lokasi,
+    hadir: s.hadir.map((id) => ({ id, ekspresi: id === ep.nasabah ? ekspresi : s.ekspresi ?? 'netral', bicara: false })),
+    telepon: null,
+    objek: [],
+  };
+  const nama = (id: string) => (ep.pemeran[id] ? tx(ep.pemeran[id]!.nama) : id);
+  return (
+    <div className="cer-ep-seni cer-ep-latar" aria-hidden="true">
+      <PanggungLatar ep={ep} komposisi={komposisi} tx={tx} nama={nama} suasana={null} />
+    </div>
+  );
+}
+
 function KartuEpisode({ ep, nomor, bahasa, nama, onMainLagi }: { ep: Episode; nomor: number; bahasa: Bahasa; nama: string; onMainLagi: () => void }) {
   const tx = (k: string) => teksCerita(ep, k, bahasa, { nama });
   const status = statusEpisode(ep, muatProgres(ep));
@@ -224,6 +228,8 @@ function KartuEpisode({ ep, nomor, bahasa, nama, onMainLagi }: { ep: Episode; no
     <li className="cer-ep" data-status={status.jenis}>
       {ep.panggung ? (
         <SeniRuangKartu nama={ep.panggung.lokasi.nama} ekspresi={ekspresi} />
+      ) : ep.latar ? (
+        <SampulLatar ep={ep} ekspresi={ekspresi} tx={tx} />
       ) : (
         <div className="cer-ep-seni" aria-hidden="true">
           <LatarPanggung latar={latar} />

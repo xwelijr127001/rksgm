@@ -42,7 +42,7 @@ import { Memuat, Modal } from '../ui/kit';
 import { adaDialogTerbuka } from '../ui/modal';
 import { cariEpisode } from '../cerita/episode';
 import {
-  babKini, bisaLanjut, nodeKini, pilihanTersedia, semuaBarisTampil,
+  babKini, bisaLanjut, nodeKini, pilihanTersedia, semuaBarisTampil, suasanaNasabah,
 } from '../cerita/mesin';
 import { akhirDitemukan, berlanggananCerita, versiPenyimpananCerita } from '../cerita/simpan';
 import { teksCerita } from '../cerita/teks';
@@ -58,6 +58,10 @@ import { komposisiBerikut } from '../cerita/ui/panggung/panas';
 import { IsiRiwayat } from '../cerita/ui/Riwayat';
 import { barisKini, ekspresiNasabah, kunciBaris } from '../cerita/ui/tampilan';
 import { useCerita, type KendaliCerita } from '../cerita/ui/useCerita';
+import { KartuDokumen } from '../cerita/ui/KartuDokumen';
+import { komposisiLatar as hitungKomposisiLatar, nasabahDiPanggung } from '../cerita/ui/latar/komposisi';
+import { PanggungLatar } from '../cerita/ui/latar/PanggungLatar';
+import { PemainHP } from '../cerita/hp/PemainHP';
 import '../cerita/ui/cerita.css';
 
 /**
@@ -109,8 +113,11 @@ function SesiCerita({ ep, profilAwal }: { ep: Episode; profilAwal: Profil }) {
   const nama = profil.nickname;
   const kendali = useCerita(ep);
   const tx = useCallback((k: KunciTeks) => teksCerita(ep, k, bahasa, { nama }), [ep, bahasa, nama]);
+  const txParam = useCallback((k: KunciTeks, param?: Record<string, string | number>) => teksCerita(ep, k, bahasa, { nama, ...param }), [ep, bahasa, nama]);
 
   if (!kendali.state) return <LayarPemulihan ep={ep} muat={kendali.muat} tx={tx} onMulai={kendali.mulaiDariAwal} />;
+  // Episode mobile-first (Episode 2): pemain HP (cerita/hp). Episode lain: halaman cerita standar di bawah.
+  if (ep.antarmuka === 'hp') return <PemainHP ep={ep} state={kendali.state} kendali={kendali} profil={profil} bahasa={bahasa} tx={txParam} />;
   return <PemainCerita ep={ep} state={kendali.state} kendali={kendali} profil={profil} bahasa={bahasa} tx={tx} />;
 }
 
@@ -193,6 +200,8 @@ function PemainCerita({ ep, state, kendali, profil, bahasa, tx }: {
 
   // ---- panggung v3: komposisi adegan (murni) + kendali gerak (hanya tampilan)
   const komposisi = useMemo(() => adeganKini(ep, state), [ep, state]);
+  // Episode berpanggung latar (Episode 2): komposisi latar menggantikan panggung dunia Episode 1.
+  const komposisiLatar = useMemo(() => (ep.latar ? hitungKomposisiLatar(ep, state) : null), [ep, state]);
   const panggung = useRef<KendaliPanggung | null>(null);
   // Sel baris kaki kotak dialog untuk tombol "Lewati pembuka" panggung (portal; v5.1: di luar gambar, di samping Lanjut).
   const [slotLewati, setSlotLewati] = useState<HTMLDivElement | null>(null);
@@ -238,7 +247,10 @@ function PemainCerita({ ep, state, kendali, profil, bahasa, tx }: {
       playSfx('pilih');
     }
   };
-  const kirimAktivitas = useCallback((jawaban: MissionAnswer) => { kirim({ jenis: 'aktivitas', node: state.node, jawaban }); }, [kirim, state.node]);
+  // Aktivitas berakibat langsung = sama dengan memilih: Enter beruntun sesaat sesudahnya tidak melompati akibatnya.
+  const kirimAktivitas = useCallback((jawaban: MissionAnswer) => {
+    if (kirim({ jenis: 'aktivitas', node: state.node, jawaban })) pilihPada.current = performance.now();
+  }, [kirim, state.node]);
   const lanjutAktivitas = useCallback(() => { kirim({ jenis: 'lanjut' }); }, [kirim]);
   const ulangBab = (b: IdBab) => { kirim({ jenis: 'ulangBab', bab: b }); };
   const ulangEpisode = () => { kendali.mulaiDariAwal(); setPutaran((p) => p + 1); setAkhirDibuka(null); };
@@ -307,7 +319,16 @@ function PemainCerita({ ep, state, kendali, profil, bahasa, tx }: {
   // Satu sumber kebenaran untuk suasana di panggung: wajah yang tampil (komposisi adegan), dan labelnya ditulis
   // dari wajah itu. Potret kotak dialog tetap memakai ekspresi baris / suasana seperti sebelumnya.
   const ekspresiPanggung = ekspresiNasabah(ep, state);
-  const labelPanggung = labelPerasaan(ep, komposisi.nasabah?.ekspresi ?? ekspresiPanggung, tx);
+  // Panggung latar: wajah nasabah yang tampil (di lokasi atau di layar ponsel), sama dengan sprite-nya.
+  const wajahLatar = komposisiLatar ? nasabahDiPanggung(ep, komposisiLatar)?.ekspresi : undefined;
+  // Episode berlabel status: label = pita status kumulatif (tidak ikut berganti dengan ekspresi sesaat di wajah).
+  const labelStatus = ep.labelSuasana === 'status';
+  const labelPanggung = labelStatus
+    ? tx(suasanaNasabah(ep, state).label)
+    : labelPerasaan(ep, wajahLatar ?? komposisi.nasabah?.ekspresi ?? ekspresiPanggung, tx);
+  const namaPemeran = useCallback((id: string) => (Object.prototype.hasOwnProperty.call(ep.pemeran, id) ? tx(ep.pemeran[id]!.nama) : id), [ep, tx]);
+  // Naskah episode belum tersedia di bahasa aktif: teks Indonesia + catatan (tidak diterjemahkan diam-diam).
+  const bahasaBelum = !!ep.bahasa && !ep.bahasa.includes(bahasa);
   // Baris pertama sesudah memilih = reaksi tokoh; kalimat ajar (alasan) ikut tampil di bawahnya, netral.
   const barisPertama = state.baris <= 1;
   const terakhir = tampilan === 'dialog' && barisPertama ? state.terakhir : null;
@@ -398,20 +419,25 @@ function PemainCerita({ ep, state, kendali, profil, bahasa, tx }: {
       <main ref={mainRef} className="cer-main" data-tampilan={tampilan} data-node={state.node}>
         {tampilan === 'dialog' ? (
           <>
-            <Panggung
-              ep={ep}
-              komposisi={komposisi}
-              mengetik={!selesai}
-              namaMentor={namaMentor}
-              namaNasabah={namaNasabah}
-              suasana={labelPanggung}
-              sesi={sesiPanggung}
-              kendali={panggung}
-              berikut={berikut}
-              slotLewati={slotLewati}
-              onLewati={catatLewati}
-            />
+            {komposisiLatar ? (
+              <PanggungLatar ep={ep} komposisi={komposisiLatar} tx={tx} nama={namaPemeran} suasana={labelPanggung} status={labelStatus} />
+            ) : (
+              <Panggung
+                ep={ep}
+                komposisi={komposisi}
+                mengetik={!selesai}
+                namaMentor={namaMentor}
+                namaNasabah={namaNasabah}
+                suasana={labelPanggung}
+                sesi={sesiPanggung}
+                kendali={panggung}
+                berikut={berikut}
+                slotLewati={slotLewati}
+                onLewati={catatLewati}
+              />
+            )}
             <div className="cer-cerita">
+              {bahasaBelum ? <p className="cer-bahasa-belum" role="note">{t('cerita.bahasaBelumTersedia')}</p> : null}
               {kini && pembicara ? (
                 <KotakDialog
                   kunci={kunci}
@@ -434,7 +460,10 @@ function PemainCerita({ ep, state, kendali, profil, bahasa, tx }: {
               {pilihan.length && node.jenis === 'pilihan' ? (
                 <section ref={pilihanRef} className="cer-pilihan" aria-labelledby="cer-tanya">
                   <h2 id="cer-tanya" className="cer-tanya" tabIndex={-1} data-cer-fokus="">{tx(node.tanya)}</h2>
-                  <div className="cer-pilihan-daftar" role="group" aria-label={t('cerita.pilihanAria')}>
+                  {/* Fakta yang perlu dibaca sebelum menjawab: SESUDAH pertanyaan (yang menerima fokus), sebelum pilihan,
+                      jadi pembaca layar & keyboard melewatinya dalam urutan baca yang sama dengan mata. */}
+                  {node.dokumen && ep.dokumen?.[node.dokumen] ? <KartuDokumen dokumen={ep.dokumen[node.dokumen]!} id={node.dokumen} tx={tx} /> : null}
+                  <div className="cer-pilihan-daftar" role="group" aria-label={t('cerita.pilihanAria')} data-jumlah={pilihan.length}>
                     {pilihan.map((p) => (
                       <button key={p.id} type="button" className="cer-opsi" data-pilihan={p.id} onKeyDown={tahanUlang} onClick={() => pilih(p.id)}>
                         <span className="cer-opsi-tanda" aria-hidden="true">

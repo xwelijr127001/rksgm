@@ -270,6 +270,11 @@ test('adegan cocok dengan misi sintetis episode yang terdaftar (opsi & dokumen)'
   for (const akt of misiCerita) {
     for (const b of BAHASA) {
       const m = akt.misi(b);
+      // Aktivitas tanpa adegan 2D (scene 'gambar', mis. arena HP Episode 2): tidak boleh ada adegan terdaftar.
+      if (m.scene === 'gambar') {
+        assert.equal(ADEGAN_CERITA[m.id], undefined, `${m.id}: tanpa adegan 2D`);
+        continue;
+      }
       const s = ADEGAN_CERITA[m.id]?.();
       assert.ok(s, `${m.id}: adegan terdaftar`);
       for (const o of s!.objects) {
@@ -279,8 +284,14 @@ test('adegan cocok dengan misi sintetis episode yang terdaftar (opsi & dokumen)'
         }
         for (const sid of stepIdsOf(o)) {
           const step = m.steps.find((x) => x.id === sid);
-          assert.ok(step && (step.kind === 'single' || step.kind === 'multi'), `${m.id}/${o.id}: langkah ${sid} ada`);
-          if (step && (step.kind === 'single' || step.kind === 'multi')) assert.ok(step.options.some((x) => x.id === o.refId), `${m.id}/${o.id}: opsi ${o.refId}`);
+          assert.ok(step, `${m.id}/${o.id}: langkah ${sid} ada`);
+          if (step && (step.kind === 'single' || step.kind === 'multi')) {
+            assert.equal(o.role, 'option', `${m.id}/${o.id}: objek langkah pilih = option`);
+            assert.ok(step.options.some((x) => x.id === o.refId), `${m.id}/${o.id}: opsi ${o.refId}`);
+          } else if (step && step.kind === 'assign') {
+            assert.ok(o.role === 'item' || o.role === 'bucket', `${m.id}/${o.id}: objek langkah assign = item/bucket`);
+            assert.ok((o.role === 'item' ? step.items : step.buckets).some((x) => x.id === o.refId), `${m.id}/${o.id}: ${o.role} ${o.refId}`);
+          } else assert.fail(`${m.id}/${o.id}: jenis langkah ${step?.kind} tidak didukung adegan cerita`);
         }
       }
       // Bila langkah tampil di adegan, SEMUA opsinya harus ada (sama dengan aturan scenes.test.ts).

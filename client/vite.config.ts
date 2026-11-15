@@ -5,11 +5,26 @@ import react from '@vitejs/plugin-react';
 const rootDir = import.meta.dirname;
 const repoRoot = path.resolve(rootDir, '..');
 const serverTarget = process.env.VITE_SERVER_URL || 'http://localhost:4000';
+// Episode cerita yang dikeluarkan dari build (mis. VITE_CERITA_TANPA=auto-2 untuk deployment lomba yang memakai kasus yang
+// sama di room resmi): impor './<id>/episode' di registri diganti rintisan null, jadi naskah, kunci, arena, dan seni
+// kasusnya (semua diimpor dari modul episode) tidak dibundel.
+const episodeTanpa = (process.env.VITE_CERITA_TANPA || '').split(',').map((s) => s.trim()).filter((s) => /^[a-z0-9-]+$/.test(s));
 
 export default defineConfig({
+  // Hosting under a path prefix behind a reverse proxy (docs/prd-v02/HOSTING.md), e.g. VITE_BASE_PATH=/game/.
+  base: process.env.VITE_BASE_PATH || '/',
   plugins: [react()],
+  // PROTOTIPE meja kasus K11 (D-68): konstanta build, jadi build biasa membuang seluruh kode meja (tanpa chunk meja).
+  define: {
+    __MEJA_KASUS__: JSON.stringify(process.env.VITE_MEJA_KASUS === '1'),
+    // PROTOTIPE "Kejadian" (irisan K10): halaman /kejadian hanya ada di build VITE_KEJADIAN=1.
+    __KEJADIAN__: JSON.stringify(process.env.VITE_KEJADIAN === '1'),
+  },
   resolve: {
-    alias: { '@shared': path.resolve(repoRoot, 'shared') },
+    alias: [
+      { find: '@shared', replacement: path.resolve(repoRoot, 'shared') },
+      ...episodeTanpa.map((id) => ({ find: new RegExp(`^\\./${id}/episode$`), replacement: path.resolve(rootDir, 'src/cerita/episode/rintisan.ts') })),
+    ],
   },
   server: {
     host: true,
@@ -21,6 +36,8 @@ export default defineConfig({
       '/api': { target: serverTarget, changeOrigin: true },
       // Gambar soal buatan panitia disimpan & dilayani server (lihat server/src/gambarSoal.ts).
       '/gambar-soal': { target: serverTarget, changeOrigin: true },
+      // Aset cerita yang diunggah lewat CMS (server/src/story/content/assets.ts).
+      '/aset-cerita': { target: serverTarget, changeOrigin: true },
       '/socket.io': { target: serverTarget, ws: true, changeOrigin: true },
       // Build Unity disajikan Express (bukan Vite) supaya MIME & Content-Encoding benar.
       // Musik (/audio/*.mp3) TIDAK diproxy: itu aset di client/public dan sudah
@@ -34,12 +51,15 @@ export default defineConfig({
       '/api': { target: serverTarget, changeOrigin: true },
       // Gambar soal buatan panitia disimpan & dilayani server (lihat server/src/gambarSoal.ts).
       '/gambar-soal': { target: serverTarget, changeOrigin: true },
+      // Aset cerita yang diunggah lewat CMS (server/src/story/content/assets.ts).
+      '/aset-cerita': { target: serverTarget, changeOrigin: true },
       '/socket.io': { target: serverTarget, ws: true, changeOrigin: true },
       '/unity': { target: serverTarget, changeOrigin: true },
     },
   },
   build: {
-    outDir: 'dist',
+    // A prefixed build goes to its own folder (VITE_OUT_DIR) so it never overwrites the root build.
+    outDir: process.env.VITE_OUT_DIR || 'dist',
     emptyOutDir: true,
     chunkSizeWarningLimit: 900,
     // Seni piksel cerita (atlas tokoh, lapisan ruang, prop, ikon) SELALU berkas terpisah, tidak di-inline sebagai data URL:

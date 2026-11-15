@@ -1,0 +1,310 @@
+/**
+ * SYNTHETIC DEMO scenario 1 of 2 (Auto). NOT a settled case, NOT approved by the joint committee: answer keys,
+ * consequences and reasons are illustrative good-practice content written to exercise the platform. Policy figures and
+ * terms are fictional placeholders. Official content must come from Tim Story + committee (docs/prd-v02/DECISIONS.md).
+ */
+import { buildDemo, type DemoScenario } from './builder';
+
+export const DEMO_BARET: DemoScenario = {
+  title: '[DEMO] Baret di Parkiran Pasar',
+  synopsis:
+    'Mobil Bu Rina diserempet di parkiran pasar dan penabraknya kabur. Besok pagi ia harus mengantar 150 kotak katering. Temani ia dari laporan pertama sampai klaim tuntas. (Konten DEMO sintetis: kunci jawaban belum ditetapkan komite.)',
+  difficulty: 1,
+  initialMood: 20,
+  rounds: [
+    {
+      title: 'Sambutan pertama',
+      bg: 'meja',
+      lines: [
+        ['narrator', 'Pagi hari di meja layanan Raksa. Bu Rina datang tergesa sambil memegang kunci mobil.'],
+        ['customer', 'Mobil saya diserempet di parkiran pasar! Yang nabrak kabur. Besok pagi saya harus antar 150 kotak katering!'],
+        ['officer', 'Ini menit-menit pertama. Kesan awal menentukan sisanya.'],
+      ],
+      variants: { sangat_kecewa: 'Bu Rina mengetuk-ngetuk meja; suaranya bergetar menahan kesal.' },
+      prompt: 'Apa yang pertama kamu lakukan?',
+      choices: [
+        ['tepat', 1, 10, 'Persilakan duduk, dengarkan ceritanya sampai selesai, lalu tunjukkan bahwa kamu paham kepanikannya.', 'Bu Rina menarik napas panjang. "Terima kasih sudah mau dengar dulu," katanya. Bahunya mulai turun.', 'Customer yang sedang panik perlu didengar sebelum diberi prosedur. Mendengar dulu membuat informasi berikutnya lebih mudah diterima.'],
+        ['kurang_tepat', 0.5, 2, 'Langsung minta fotokopi polis dan KTP supaya prosesnya cepat.', 'Bu Rina menyerahkan dokumen sambil mendengus. "Saya belum selesai cerita, lho." Prosesnya jalan, tapi ia merasa diburu-buru.', 'Dokumen memang perlu, tetapi memintanya sebelum mendengar membuat customer merasa diperlakukan seperti nomor antrean.'],
+        ['keliru', 0, -10, 'Katakan bahwa baret di parkiran biasanya tidak bisa diklaim.', 'Wajah Bu Rina memerah. "Belum dilihat sudah bilang tidak bisa?" Ia mulai bicara soal pindah asuransi.', 'Keputusan klaim tidak boleh diberikan sebelum polis dan kerusakan diperiksa. Menyimpulkan di awal adalah janji yang salah arah.'],
+        ['keliru', 0, -8, 'Minta Bu Rina kembali besok karena antrean sedang ramai.', 'Bu Rina berdiri. "Besok saya harus antar katering!" Ia pergi, lalu kembali setengah jam kemudian dengan lebih marah.', 'Menunda layanan saat customer paling butuh membuat masalah kecil menjadi keluhan besar.'],
+        ['kurang_tepat', 0.4, 1, 'Beri brosur alur klaim dan minta ia membacanya dulu.', 'Bu Rina membolak-balik brosur tanpa benar-benar membaca. "Saya cuma mau tahu, mobil saya bagaimana?"', 'Brosur membantu, tetapi bukan pengganti percakapan. Di menit pertama, perhatian manusia lebih penting daripada kertas.'],
+      ],
+      timeout: [-6, 'Kamu terdiam terlalu lama. Bu Rina menatapmu: "Halo? Ada yang bisa bantu saya?"', 'Diam saat customer panik terasa seperti tidak peduli. Respons cepat dan hangat menenangkan.'],
+    },
+    {
+      title: 'Kronologi kejadian',
+      bg: 'meja',
+      lines: [
+        ['customer', 'Saya parkir jam sepuluh, belanja sebentar. Pas balik, pintu kiri belakang sudah baret panjang.'],
+        ['officer', 'Catatan yang rapi sejak awal memudahkan semua langkah berikutnya.'],
+      ],
+      variants: { kecewa: 'Bu Rina masih cemberut, tapi mau menjawab.', tenang: 'Bu Rina bercerita lebih runtut sekarang.' },
+      prompt: 'Bagaimana kamu menggali kronologinya?',
+      choices: [
+        ['kurang_tepat', 0.5, 2, 'Minta Bu Rina menulis sendiri kronologinya di kertas.', 'Tulisannya singkat: "Mobil diserempet di pasar." Kamu harus bertanya lagi nanti.', 'Customer yang sedang emosi sering lupa detail penting. Pertanyaan terarah dari petugas menghasilkan kronologi yang lebih lengkap.'],
+        ['tepat', 1, 8, 'Tanyakan waktu, tempat, posisi parkir, saksi, dan kamera di sekitar, lalu catat jawabannya.', 'Bu Rina ingat ada tukang parkir yang melihat motor boks biru. Catatanmu jadi lengkap.', 'Kronologi lengkap (kapan, di mana, bagaimana, siapa saksinya) adalah dasar laporan klaim dan membantu pemeriksaan berikutnya.'],
+        ['keliru', 0, -8, 'Tanyakan apakah Bu Rina yakin tidak menyerempet sendiri.', 'Bu Rina tersinggung. "Jadi saya dituduh bohong?" Suasana jadi tegang.', 'Pertanyaan yang terdengar menuduh merusak kepercayaan. Fakta digali dengan pertanyaan netral, bukan prasangka.'],
+        ['keliru', 0, -6, 'Lewati kronologi, langsung bahas berapa biaya perbaikannya.', 'Bu Rina bingung. "Saya juga belum tahu berapa." Kamu tidak punya dasar untuk membicarakan biaya.', 'Biaya baru bisa dibahas setelah kejadian dan kerusakan diperiksa. Melompati kronologi membuat proses mundur.'],
+        ['kurang_tepat', 0.5, 3, 'Catat kronologi singkat dan janjikan menelepon untuk detailnya.', 'Bu Rina setuju, tapi kamu baru sadar belum menanyakan saksi dan kamera.', 'Mencatat itu baik, tetapi detail paling berharga (saksi, kamera) sebaiknya ditanyakan saat ingatan customer masih segar.'],
+      ],
+      timeout: [-5, 'Kamu belum bertanya apa pun. Bu Rina bercerita ke arah lain dan detail penting terlewat.', 'Kronologi yang tidak digali terarah mudah kehilangan detail.'],
+    },
+    {
+      title: 'Melihat kondisi mobil',
+      bg: 'parkiran',
+      lines: [
+        ['narrator', 'Miss Raksa mengajakmu melihat mobil Bu Rina di parkiran kantor.'],
+        ['customer', 'Pintunya masih bisa dibuka-tutup. Tapi tadi ada serpihan cat di aspal.'],
+        ['officer', 'Pastikan dulu mobilnya aman dipakai, baru bicara soal lain.'],
+      ],
+      prompt: 'Apa yang kamu periksa lebih dulu?',
+      choices: [
+        ['tepat', 1, 8, 'Pastikan mobil aman dikendarai (pintu, lampu, tidak ada bagian lepas), lalu foto kerusakan dari beberapa sudut.', 'Mobil aman dipakai. Foto dari dekat dan jauh tersimpan rapi. Bu Rina lega mobilnya masih bisa jalan besok.', 'Keselamatan diperiksa lebih dulu. Foto dari beberapa sudut (dekat, jauh, dengan konteks) menjadi bukti awal yang kuat.'],
+        ['kurang_tepat', 0.5, 3, 'Foto kerusakan dari satu sudut saja supaya cepat.', 'Fotonya jelas, tapi tidak terlihat posisi baret terhadap seluruh mobil.', 'Satu foto dari dekat belum cukup. Bukti perlu menunjukkan letak kerusakan di mobil secara keseluruhan.'],
+        ['keliru', 0, -8, 'Sarankan langsung ke bengkel langganan dan perbaiki dulu, klaim belakangan.', 'Bu Rina hampir ke bengkel. Kalau diperbaiki sebelum diperiksa, bukti kerusakannya hilang.', 'Memperbaiki sebelum kerusakan diperiksa dapat menyulitkan klaim karena bukti kerusakan sudah tidak ada.'],
+        ['keliru', 0, -6, 'Bilang baretnya kecil, tidak usah dipermasalahkan.', 'Bu Rina menatapmu tajam. "Bagi saya ini tidak kecil." Kepercayaannya turun.', 'Meremehkan kerugian customer membuatnya merasa tidak dihargai, apa pun besar kecilnya kerusakan.'],
+        ['kurang_tepat', 0.5, 2, 'Minta Bu Rina memotret sendiri lalu mengirimkannya nanti.', 'Malam harinya Bu Rina mengirim dua foto buram.', 'Customer boleh memotret, tetapi petugas sebaiknya memastikan foto yang dibutuhkan lengkap dan jelas saat itu juga.'],
+      ],
+      timeout: [-5, 'Kalian berdiri di samping mobil tanpa memeriksa apa pun. Bu Rina melirik jam tangannya.', 'Waktu customer berharga. Pemeriksaan awal yang jelas menunjukkan proses berjalan.'],
+    },
+    {
+      title: 'Bukti di lokasi',
+      bg: 'parkiran',
+      lines: [
+        ['customer', 'Tukang parkir bilang ada kamera di toko kelontong dekat situ.'],
+        ['officer', 'Rekaman kamera biasanya disimpan terbatas. Kesempatan ini cepat hilang.'],
+      ],
+      prompt: 'Apa saranmu soal bukti di lokasi?',
+      choices: [
+        ['kurang_tepat', 0.5, 3, 'Catat nama toko dan sarankan Bu Rina memintanya kalau sempat.', 'Bu Rina mencatat, tapi "kalau sempat" membuatnya tidak bergegas.', 'Mencatat sumber bukti sudah benar, tetapi tanpa saran waktu yang jelas, bukti bisa terlambat diminta.'],
+        ['tepat', 1, 9, 'Sarankan Bu Rina hari ini juga meminta salinan rekaman dan nomor tukang parkir sebagai saksi.', 'Sore itu Bu Rina mendapat potongan rekaman dan nomor tukang parkir. Ia merasa ikut berperan.', 'Bukti pendukung seperti rekaman dan saksi sebaiknya diamankan secepatnya karena mudah hilang. Mengajak customer berperan aktif juga menenangkan.'],
+        ['keliru', 0, -7, 'Katakan bukti tambahan tidak perlu karena foto sudah cukup.', 'Belakangan, saat ada pertanyaan, Bu Rina tidak punya bukti apa pun selain foto baret.', 'Foto kerusakan tidak menunjukkan siapa penyebabnya. Bukti pendukung bisa penting, terutama jika ada pihak ketiga.'],
+        ['keliru', 0, -9, 'Sarankan Bu Rina mencari sendiri pemilik motor boks biru dan menagihnya langsung.', 'Bu Rina sempat ingin mendatangi semua pengantar barang di pasar. Situasi bisa memanas.', 'Mendorong customer menagih sendiri pihak ketiga berisiko konflik dan bukan cara yang aman.'],
+        ['kurang_tepat', 0.4, 1, 'Bilang kamu akan meminta rekaman itu sendiri minggu depan.', 'Minggu depan, rekaman sudah terhapus otomatis.', 'Niatnya baik, tetapi menunda pengamanan bukti membuat bukti hilang.'],
+      ],
+      timeout: [-5, 'Kesempatan bertanya soal kamera lewat. Bu Rina pulang tanpa rencana mengamankan bukti.', 'Bukti di lokasi berumur pendek; arahan cepat sangat menentukan.'],
+    },
+    {
+      title: 'Laporan dan syarat polis',
+      bg: 'meja',
+      lines: [
+        ['customer', 'Perlu lapor polisi tidak, sih? Saya takut ribet.'],
+        ['officer', 'Jawablah berdasarkan polisnya, bukan perkiraan.'],
+      ],
+      variants: { kecewa: 'Bu Rina terlihat lelah membayangkan urusan tambahan.', tenang: 'Bu Rina bertanya dengan nada lebih santai.' },
+      prompt: 'Bagaimana kamu menjawab?',
+      choices: [
+        ['keliru', 0, -7, 'Bilang tidak usah lapor polisi, nanti juga beres.', 'Belakangan ternyata dokumen pendukung diminta. Bu Rina harus bolak-balik.', 'Kebutuhan dokumen (termasuk laporan kepolisian) mengikuti ketentuan polis dan jenis kejadian, bukan perkiraan petugas.'],
+        ['tepat', 1, 8, 'Buka ketentuan polisnya bersama Bu Rina, jelaskan dokumen yang dibutuhkan untuk kejadian ini, dan bantu ia membuat daftar.', 'Bu Rina melihat sendiri isi polisnya dan pulang membawa daftar dokumen yang jelas.', 'Menjelaskan berdasarkan polis membuat customer paham alasan setiap dokumen dan mencegah bolak-balik.'],
+        ['kurang_tepat', 0.5, 2, 'Bilang "sebaiknya lapor saja biar aman" tanpa menjelaskan alasannya.', 'Bu Rina lapor, tapi tidak tahu dokumen lain yang juga diperlukan.', 'Saran "biar aman" tanpa penjelasan membuat customer tetap bingung tentang syarat lainnya.'],
+        ['keliru', 0, -8, 'Suruh Bu Rina mencari tahu sendiri lewat internet.', 'Bu Rina menemukan informasi yang saling bertentangan dan jadi makin cemas.', 'Petugas adalah sumber informasi resmi. Melempar customer ke internet menimbulkan kebingungan dan ketidakpercayaan.'],
+        ['kurang_tepat', 0.5, 3, 'Beri daftar dokumen umum untuk semua jenis klaim mobil.', 'Daftarnya panjang; sebagian tidak relevan untuk kasus Bu Rina.', 'Daftar umum membantu, tetapi menyesuaikannya dengan kejadian dan polis customer jauh lebih jelas.'],
+      ],
+      timeout: [-6, 'Pertanyaan Bu Rina menggantung. Ia berasumsi tidak perlu lapor apa pun.', 'Pertanyaan soal syarat sebaiknya dijawab jelas berdasarkan polis, bukan dibiarkan.'],
+    },
+    {
+      title: 'Membaca polis bersama',
+      bg: 'meja',
+      lines: [
+        ['narrator', 'Miss Raksa membuka ringkasan polis Bu Rina (contoh fiktif untuk demo).'],
+        ['officer', 'Lihat jenis perlindungannya. Di sinilah harapan sering berbeda dengan isi polis.'],
+        ['customer', 'Asuransi saya yang lengkap, kan?'],
+      ],
+      prompt: 'Apa yang kamu sampaikan?',
+      choices: [
+        ['tepat', 1, 7, 'Jelaskan jenis perlindungannya dengan bahasa sederhana: apa yang dijamin, apa yang tidak, dan artinya untuk baret ini.', 'Bu Rina mengangguk pelan. "Oh, jadi begitu. Lebih baik saya tahu sekarang."', 'Harapan yang diluruskan sejak awal mencegah kekecewaan di akhir proses. Bahasa sederhana membuat isi polis bisa dipahami.'],
+        ['keliru', 0, -10, 'Jawab "iya, semua pasti dijamin" supaya Bu Rina tenang.', 'Bu Rina tenang sesaat. Janji itu akan berbalik jika ada bagian yang ternyata tidak dijamin.', 'Janji di luar isi polis membuat kekecewaan lebih besar nanti. Kejujuran sejak awal menjaga kepercayaan.'],
+        ['kurang_tepat', 0.5, 2, 'Bacakan pasal polis kata per kata.', 'Bu Rina mendengar istilah-istilah teknis dan makin bingung.', 'Isi polis harus akurat, tetapi perlu diterjemahkan ke bahasa awam agar benar-benar dipahami.'],
+        ['keliru', 0, -6, 'Bilang detail polis nanti saja setelah survei.', 'Bu Rina pulang dengan dugaannya sendiri tentang apa yang dijamin.', 'Menunda penjelasan polis membiarkan harapan yang keliru tumbuh.'],
+        ['kurang_tepat', 0.5, 3, 'Tandai bagian penting di polis dan minta Bu Rina membacanya di rumah.', 'Bu Rina membawa pulang polisnya, tapi ada istilah yang tidak ia pahami.', 'Menandai bagian penting sudah membantu, tetapi penjelasan langsung lebih memastikan pemahaman.'],
+      ],
+      timeout: [-5, 'Kamu diam membaca polis sendiri. Bu Rina menunggu tanpa tahu isinya.', 'Polis dibaca bersama customer, bukan di depannya tanpa penjelasan.'],
+    },
+    {
+      title: 'Risiko sendiri',
+      bg: 'meja',
+      lines: [
+        ['officer', 'Polis ini mengenal risiko sendiri: bagian biaya yang ditanggung tertanggung (angka contoh demo).'],
+        ['customer', 'Lho, jadi saya tetap bayar?'],
+      ],
+      variants: { sangat_kecewa: 'Bu Rina menyilangkan tangan, siap kecewa lagi.', senang: 'Bu Rina bertanya karena penasaran, bukan marah.' },
+      prompt: 'Bagaimana kamu menjelaskan risiko sendiri?',
+      choices: [
+        ['kurang_tepat', 0.5, 2, 'Sebutkan angkanya saja tanpa menjelaskan alasannya.', 'Bu Rina mencatat angkanya, tapi masih merasa "dipotong".', 'Angka tanpa penjelasan terasa seperti potongan sepihak. Customer perlu tahu bahwa ini bagian dari kesepakatan polis.'],
+        ['keliru', 0, -9, 'Bilang risiko sendiri itu kebijakan kantor yang memang memberatkan.', 'Bu Rina makin kesal. "Kalau begitu buat apa saya asuransi?"', 'Risiko sendiri adalah bagian dari perjanjian polis yang disepakati, bukan kebijakan sewenang-wenang. Menyalahkan kantor merusak kepercayaan.'],
+        ['tepat', 1, 9, 'Jelaskan dengan contoh sederhana bahwa risiko sendiri disepakati di polis, tunjukkan letaknya, dan kapan dibayarkan.', 'Bu Rina mengangguk. "Oke, setidaknya jelas dan tidak ada kejutan."', 'Keterbukaan soal biaya yang ditanggung customer, disertai contoh dan dasarnya di polis, membuat customer merasa dihormati.'],
+        ['keliru', 0, -10, 'Jangan bahas dulu; nanti saja setelah mobil selesai diperbaiki.', 'Saat mengambil mobil, Bu Rina kaget harus membayar. Ia merasa ditipu.', 'Biaya yang baru diketahui di akhir terasa seperti jebakan. Hal yang ditanggung customer harus disampaikan di awal.'],
+        ['kurang_tepat', 0.5, 3, 'Jelaskan risiko sendiri lalu langsung pindah topik.', 'Bu Rina belum sempat bertanya kapan ia harus membayarnya.', 'Penjelasan perlu memberi ruang tanya-jawab supaya customer benar-benar paham.'],
+      ],
+      timeout: [-6, 'Topik biaya terlewat. Bu Rina masih mengira semuanya gratis.', 'Hal yang menyangkut uang customer harus dijelaskan, bukan didiamkan.'],
+    },
+    {
+      title: 'Formulir dan dokumen',
+      bg: 'meja',
+      lines: [
+        ['customer', 'Formulirnya banyak sekali. Saya harus isi semua?'],
+        ['officer', 'Bantu ia menyelesaikan yang penting tanpa membuatnya merasa sendirian.'],
+      ],
+      prompt: 'Apa yang kamu lakukan?',
+      choices: [
+        ['tepat', 1, 8, 'Dampingi pengisian formulir, periksa kelengkapan dokumen di tempat, dan beri tanda terima daftar dokumen.', 'Formulir terisi benar sekali jalan. Bu Rina pulang membawa tanda terima dan tahu apa yang masih kurang.', 'Pemeriksaan kelengkapan di awal mencegah klaim tertunda karena dokumen kurang. Tanda terima memberi kepastian bagi customer.'],
+        ['kurang_tepat', 0.5, 2, 'Beri formulir untuk dibawa pulang dan dikembalikan besok.', 'Besok Bu Rina kembali; dua kolom ternyata salah isi.', 'Formulir yang diisi tanpa pendampingan sering perlu diperbaiki, sehingga prosesnya molor.'],
+        ['keliru', 0, -7, 'Isi sendiri formulirnya tanpa bertanya, supaya cepat.', 'Ada data yang keliru karena kamu menebak. Bu Rina harus menandatangani perbaikan.', 'Data klaim harus berasal dari tertanggung. Menebak isian berisiko salah dan tidak sesuai prosedur.'],
+        ['keliru', 0, -6, 'Bilang klaim baru diproses setelah semua lengkap, tanpa menyebut dokumen yang kurang.', 'Bu Rina menunggu tanpa tahu dokumen apa yang kurang.', 'Customer perlu tahu persis dokumen yang masih kurang agar bisa segera melengkapinya.'],
+        ['kurang_tepat', 0.5, 3, 'Periksa dokumen, tapi lupa memberi tanda terima.', 'Seminggu kemudian Bu Rina ragu apakah dokumennya sudah diterima.', 'Memeriksa dokumen sudah benar; tanda terima melengkapinya dengan kepastian tertulis.'],
+      ],
+      timeout: [-5, 'Formulir menumpuk di meja. Bu Rina mengisinya asal-asalan sendiri.', 'Pendampingan saat mengisi formulir mencegah kesalahan berulang.'],
+    },
+    {
+      title: 'Jadwal survei',
+      bg: 'telepon',
+      lines: [
+        ['narrator', 'Keesokan harinya Bu Rina menelepon.'],
+        ['customer', 'Kapan mobil saya diperiksa? Mobilnya saya pakai antar katering setiap pagi.'],
+      ],
+      prompt: 'Bagaimana kamu mengatur jadwal survei?',
+      choices: [
+        ['kurang_tepat', 0.5, 3, 'Beri jadwal survei terdekat tanpa menanyakan jadwal Bu Rina.', 'Jadwalnya bentrok dengan pengantaran katering. Survei harus dijadwal ulang.', 'Jadwal yang tidak mempertimbangkan kebutuhan customer berisiko batal dan memperlambat proses.'],
+        ['tepat', 1, 9, 'Tanyakan waktu yang tidak mengganggu usahanya, tawarkan pilihan jadwal, dan konfirmasi lewat pesan tertulis.', 'Survei dijadwalkan siang hari setelah pengantaran. Bu Rina menerima konfirmasi tertulis dan merasa diperhatikan.', 'Menyesuaikan jadwal dengan kebutuhan customer dan mengonfirmasinya secara tertulis mengurangi pembatalan dan salah paham.'],
+        ['keliru', 0, -8, 'Bilang jadwal survei belum bisa dipastikan, nanti dikabari.', 'Tiga hari tanpa kabar. Bu Rina menelepon lagi dengan nada tinggi.', 'Ketidakpastian tanpa batas waktu membuat customer cemas dan merasa diabaikan.'],
+        ['keliru', 0, -6, 'Minta Bu Rina datang ke kantor setiap hari sampai ada slot survei kosong.', 'Bu Rina datang sekali, lalu menyerah karena usahanya terganggu.', 'Memindahkan beban ketidakpastian ke customer bukan pelayanan yang baik.'],
+        ['kurang_tepat', 0.5, 2, 'Tawarkan jadwal, tapi tidak mengirim konfirmasi.', 'Bu Rina lupa jam pastinya dan menelepon lagi untuk memastikan.', 'Konfirmasi tertulis sederhana mencegah lupa dan salah jadwal.'],
+      ],
+      timeout: [-6, 'Telepon hening. "Halo? Jadi kapan?" Bu Rina menutup telepon dengan kesal.', 'Pertanyaan jadwal perlu jawaban jelas saat itu juga.'],
+    },
+    {
+      title: 'Hasil survei',
+      bg: 'parkiran',
+      lines: [
+        ['narrator', 'Surveyor sudah memeriksa mobil. Kerusakannya ternyata sampai ke lis pintu.'],
+        ['customer', 'Jadi bagaimana? Bisa diperbaiki semua?'],
+      ],
+      variants: { tenang: 'Bu Rina mendengarkan dengan sabar.', sangat_kecewa: 'Bu Rina sudah menyiapkan kata-kata protes.' },
+      prompt: 'Bagaimana kamu menyampaikan hasil survei?',
+      choices: [
+        ['tepat', 1, 9, 'Jelaskan temuan survei dengan bahasa sederhana: bagian rusak, yang dijamin, dan langkah berikutnya, lalu tanyakan apa yang belum jelas.', 'Bu Rina mengerti mengapa lis pintu ikut diganti. Ia bertanya dua hal dan pulang tanpa ragu.', 'Hasil pemeriksaan disampaikan dengan jelas, termasuk dasar keputusannya, dan memberi kesempatan bertanya.'],
+        ['keliru', 0, -9, 'Kirim laporan survei penuh istilah teknis tanpa penjelasan.', 'Bu Rina membaca "refinish panel" dan "lis" tanpa paham artinya. Ia mengira klaimnya dipersulit.', 'Dokumen teknis tanpa penjelasan membuat customer menebak-nebak dan mudah salah paham.'],
+        ['kurang_tepat', 0.5, 2, 'Bilang "semua beres" tanpa merinci.', 'Bu Rina senang, tapi kaget ketika bengkel bilang ada bagian yang perlu dipesan.', 'Ringkasan yang terlalu umum menyembunyikan detail yang nanti memengaruhi waktu perbaikan.'],
+        ['keliru', 0, -7, 'Salahkan surveyor kalau ada bagian yang tidak sesuai harapan Bu Rina.', 'Bu Rina jadi curiga pada seluruh proses.', 'Petugas mewakili proses yang sama. Menyalahkan pihak lain merusak kepercayaan pada keputusan.'],
+        ['kurang_tepat', 0.5, 3, 'Jelaskan hasil survei, tapi tidak menyebut langkah berikutnya.', 'Bu Rina paham kerusakannya, tapi bertanya-tanya harus menunggu apa.', 'Customer perlu tahu langkah berikutnya, bukan hanya hasilnya.'],
+      ],
+      timeout: [-6, 'Hasil survei belum kamu jelaskan. Bu Rina membacanya sendiri dan menyimpulkan yang terburuk.', 'Hasil pemeriksaan sebaiknya disampaikan langsung dan jelas.'],
+    },
+    {
+      title: 'Memilih bengkel',
+      bg: 'meja',
+      lines: [
+        ['customer', 'Bengkelnya di mana? Saya mau yang dekat rumah.'],
+        ['officer', 'Jelaskan pilihan bengkel dan konsekuensinya sesuai ketentuan.'],
+      ],
+      prompt: 'Apa yang kamu sarankan?',
+      choices: [
+        ['kurang_tepat', 0.5, 3, 'Langsung tunjuk satu bengkel rekanan tanpa bertanya lokasi rumahnya.', 'Bengkelnya jauh dari rumah Bu Rina. Ia mengeluh soal ongkos ojek.', 'Bengkel rekanan memudahkan proses, tetapi mempertimbangkan kebutuhan customer membuat keputusan lebih memuaskan.'],
+        ['keliru', 0, -8, 'Bilang Bu Rina bebas ke bengkel mana saja tanpa menjelaskan bedanya.', 'Bu Rina memilih bengkel langganan; ternyata prosesnya berbeda dan lebih lama.', 'Customer perlu tahu perbedaan prosedur antar pilihan bengkel sebelum memutuskan.'],
+        ['tepat', 1, 8, 'Tunjukkan beberapa bengkel rekanan terdekat dari rumahnya, jelaskan beda prosesnya, dan biarkan ia memilih.', 'Bu Rina memilih bengkel rekanan sepuluh menit dari rumah. "Wah, ini memudahkan," katanya.', 'Memberi pilihan yang jelas beserta konsekuensinya menghormati kebutuhan customer dan menjaga proses tetap lancar.'],
+        ['keliru', 0, -6, 'Sarankan bengkel kenalanmu karena "lebih murah".', 'Miss Raksa menegurmu pelan: rekomendasi pribadi bisa menimbulkan konflik kepentingan.', 'Rekomendasi harus netral dan sesuai ketentuan, bukan berdasarkan hubungan pribadi.'],
+        ['kurang_tepat', 0.5, 2, 'Beri daftar semua bengkel rekanan se-kota tanpa membantu memilih.', 'Bu Rina bingung dengan daftar puluhan bengkel.', 'Daftar lengkap tanpa bantuan menyaring membuat customer sulit memutuskan.'],
+      ],
+      timeout: [-5, 'Pertanyaan soal bengkel menggantung. Bu Rina pergi ke bengkel pertama yang ia lihat.', 'Pilihan bengkel memengaruhi lama proses; customer perlu arahan.'],
+    },
+    {
+      title: 'Suku cadang menunggu',
+      bg: 'telepon',
+      lines: [
+        ['narrator', 'Bengkel mengabari bahwa lis pintu harus dipesan dan butuh waktu.'],
+        ['customer', 'Kok lama? Katering saya bagaimana?'],
+      ],
+      variants: { sangat_kecewa: 'Bu Rina hampir berteriak di telepon.', tenang: 'Bu Rina terdengar kecewa, tapi masih tenang.' },
+      prompt: 'Bagaimana kamu menanggapi keterlambatan ini?',
+      choices: [
+        ['keliru', 0, -9, 'Bilang itu urusan bengkel, bukan urusanmu.', 'Bu Rina merasa dilempar. Ia menulis ulasan buruk tentang layanan Raksa.', 'Customer melihat satu proses klaim. Melempar tanggung jawab ke pihak lain membuatnya merasa ditinggalkan.'],
+        ['kurang_tepat', 0.5, 3, 'Minta maaf atas keterlambatan dan bilang akan dikabari kalau barangnya datang.', 'Bu Rina menerima, tapi masih tidak tahu perkiraan waktunya.', 'Permintaan maaf baik, tetapi customer juga butuh perkiraan waktu dan rencana.'],
+        ['tepat', 1, 9, 'Akui keterlambatannya, cek perkiraan waktu ke bengkel, sampaikan tanggalnya, dan diskusikan apakah mobil bisa dipakai dulu.', 'Ternyata mobil boleh dipakai dulu sampai suku cadang tiba. Bu Rina tetap bisa mengantar katering.', 'Mengakui masalah, memberi informasi konkret, dan mencari solusi praktis mengurangi dampak keterlambatan bagi customer.'],
+        ['keliru', 0, -8, 'Janjikan suku cadang datang besok supaya Bu Rina tenang.', 'Besok suku cadang belum datang. Bu Rina merasa dibohongi.', 'Janji tanpa dasar memperburuk keadaan saat tidak terpenuhi.'],
+        ['kurang_tepat', 0.4, 1, 'Sarankan Bu Rina menyewa mobil sendiri sambil menunggu.', 'Bu Rina bertanya apakah biaya sewa diganti. Kamu tidak yakin dan jawabanmu menggantung.', 'Saran yang menimbulkan biaya baru harus disertai kejelasan apakah biaya itu dijamin atau tidak.'],
+      ],
+      timeout: [-7, 'Keluhan Bu Rina tidak terjawab. Ia menutup telepon dengan kesal.', 'Keterlambatan butuh respons cepat dan informasi yang jelas.'],
+    },
+    {
+      title: 'Kabar berkala',
+      bg: 'telepon',
+      lines: [
+        ['narrator', 'Perbaikan sedang berjalan di bengkel.'],
+        ['officer', 'Customer yang diberi kabar tanpa harus bertanya merasa diperhatikan.'],
+      ],
+      prompt: 'Bagaimana kamu menjaga komunikasi selama perbaikan?',
+      choices: [
+        ['tepat', 1, 8, 'Kirim kabar singkat berkala tentang progres dan perkiraan selesai, termasuk jika ada perubahan.', 'Bu Rina menerima foto progres dan perkiraan tanggal selesai. Ia tidak perlu menelepon sekali pun.', 'Kabar berkala yang proaktif mengurangi kecemasan dan pertanyaan berulang dari customer.'],
+        ['keliru', 0, -6, 'Tunggu Bu Rina yang menghubungi kalau ingin tahu.', 'Bu Rina menelepon tiga kali seminggu dan makin tidak sabar.', 'Diam selama proses membuat customer merasa harus mengejar informasi sendiri.'],
+        ['kurang_tepat', 0.5, 2, 'Kabari hanya saat mobil sudah selesai.', 'Bu Rina tenang di akhir, tapi sempat cemas berhari-hari.', 'Kabar akhir saja tidak cukup; proses yang panjang perlu kabar di tengah jalan.'],
+        ['keliru', 0, -7, 'Kirim pesan otomatis yang sama setiap hari tanpa informasi baru.', 'Bu Rina merasa pesannya tidak pernah dibaca manusia.', 'Kabar yang tidak berisi informasi nyata terasa seperti formalitas.'],
+        ['kurang_tepat', 0.5, 3, 'Kabari progres, tapi tidak menyebut perkiraan selesai.', 'Bu Rina senang dikabari, tapi masih bertanya kapan mobilnya selesai.', 'Perkiraan waktu adalah informasi yang paling ditunggu customer.'],
+      ],
+      timeout: [-5, 'Tidak ada kabar selama seminggu. Bu Rina mulai cemas lagi.', 'Komunikasi selama proses menjaga kepercayaan.'],
+    },
+    {
+      title: 'Serah terima mobil',
+      bg: 'parkiran',
+      lines: [
+        ['narrator', 'Mobil selesai diperbaiki dan siap diambil.'],
+        ['customer', 'Kelihatannya rapi. Tapi warnanya sama persis, kan?'],
+      ],
+      prompt: 'Apa yang kamu lakukan saat serah terima?',
+      choices: [
+        ['kurang_tepat', 0.5, 3, 'Serahkan kunci dan tanda terima, lalu persilakan Bu Rina pulang.', 'Di rumah, Bu Rina melihat sedikit beda warna dan harus kembali.', 'Serah terima sebaiknya disertai pemeriksaan bersama agar kekurangan ditemukan sebelum customer pulang.'],
+        ['tepat', 1, 9, 'Ajak Bu Rina memeriksa hasilnya bersama di tempat terang, cocokkan dengan daftar perbaikan, dan catat bila ada yang perlu dirapikan.', 'Ada sedikit beda warna di sudut pintu; bengkel langsung merapikannya. Bu Rina puas.', 'Pemeriksaan bersama memastikan hasil sesuai kesepakatan dan membuat customer yakin pada hasilnya.'],
+        ['keliru', 0, -7, 'Bilang beda warna kecil itu wajar dan tidak bisa diperbaiki.', 'Bu Rina kecewa; keluhannya diabaikan di tahap terakhir.', 'Keluhan hasil perbaikan perlu diperiksa, bukan langsung ditolak.'],
+        ['keliru', 0, -6, 'Minta Bu Rina membayar risiko sendiri dulu sebelum boleh melihat mobilnya.', 'Bu Rina merasa ditahan. Suasana serah terima jadi tidak enak.', 'Urutan serah terima harus jelas dan disepakati sejak awal; menahan customer di akhir menimbulkan kesan buruk.'],
+        ['kurang_tepat', 0.5, 2, 'Kirim foto hasil perbaikan dan minta Bu Rina mengambil mobil sendiri ke bengkel.', 'Bu Rina mengambil mobil sendirian dan tidak tahu harus memeriksa apa.', 'Foto membantu, tetapi pemeriksaan langsung saat serah terima lebih memastikan kualitas.'],
+      ],
+      timeout: [-5, 'Serah terima berjalan tanpa pemeriksaan. Bu Rina pulang dengan ragu.', 'Akhir proses adalah kesan terakhir; pastikan hasilnya diperiksa.'],
+    },
+    {
+      title: 'Penutupan klaim',
+      bg: 'meja',
+      lines: [
+        ['narrator', 'Klaim Bu Rina siap ditutup.'],
+        ['officer', 'Penutupan yang baik membuat customer tahu apa yang sudah terjadi dan ke mana harus menghubungi bila ada masalah lagi.'],
+        ['customer', 'Jadi sudah selesai semua?'],
+      ],
+      variants: { senang: 'Bu Rina tersenyum lebar memegang kunci mobilnya.', kecewa: 'Bu Rina terlihat ingin cepat-cepat pergi.' },
+      prompt: 'Bagaimana kamu menutup klaim ini?',
+      choices: [
+        ['keliru', 0, -8, 'Tutup klaim di sistem tanpa memberi tahu Bu Rina.', 'Bu Rina tidak tahu klaimnya sudah selesai dan menelepon minggu depan.', 'Penutupan klaim harus dikomunikasikan kepada customer, bukan hanya dicatat di sistem.'],
+        ['tepat', 1, 10, 'Rangkum langkah yang sudah dilalui, pastikan tidak ada yang tertinggal, jelaskan cara menghubungi Raksa bila ada masalah, lalu berterima kasih.', 'Bu Rina menjabat tanganmu. "Saya kira akan ribet. Ternyata saya selalu tahu sedang di tahap apa."', 'Rangkuman di akhir memastikan customer paham proses yang telah dilalui dan tahu ke mana harus menghubungi bila ada masalah.'],
+        ['kurang_tepat', 0.5, 3, 'Ucapkan terima kasih dan tawarkan produk asuransi lain.', 'Bu Rina tersenyum tipis; tawaran itu terasa terlalu cepat.', 'Menawarkan produk lain sah, tetapi momen penutupan sebaiknya fokus memastikan kebutuhan customer tuntas.'],
+        ['kurang_tepat', 0.5, 2, 'Minta Bu Rina mengisi survei kepuasan.', 'Bu Rina mengisi survei, tapi masih ada pertanyaan yang belum terjawab.', 'Survei kepuasan berguna, tetapi tidak menggantikan rangkuman dan kesempatan bertanya.'],
+        ['keliru', 0, -6, 'Bilang "semoga tidak ketemu lagi di sini, ya" sambil bercanda.', 'Bu Rina tertawa canggung. Ia tidak yakin boleh kembali jika ada masalah.', 'Candaan yang ambigu di akhir bisa membuat customer ragu meminta bantuan lagi.'],
+      ],
+      timeout: [-5, 'Klaim berakhir tanpa penutupan. Bu Rina pulang dengan perasaan menggantung.', 'Penutupan yang jelas adalah bagian dari layanan klaim.'],
+    },
+  ],
+  endings: [
+    {
+      id: 'happy',
+      kind: 'happy',
+      minMood: 75,
+      minScore: 9000,
+      title: 'Mobil kembali mulus, Bu Rina lega',
+      text: 'Pesanan katering terkirim tepat waktu, mobil kembali rapi, dan Bu Rina memahami setiap langkah klaimnya. Ia bercerita ke teman-teman arisannya bahwa klaim di Raksa ternyata jelas dan tidak berbelit.',
+    },
+    {
+      id: 'notes',
+      kind: 'with_notes',
+      minMood: 40,
+      minScore: null,
+      title: 'Klaim selesai, ada catatan',
+      text: 'Mobil Bu Rina sudah diperbaiki, tetapi beberapa langkah membuatnya bingung atau menunggu tanpa kabar. Klaim tuntas, namun pengalamannya belum sepenuhnya menyenangkan.',
+    },
+    {
+      id: 'kecewa',
+      kind: 'with_notes',
+      minMood: null,
+      minScore: null,
+      title: 'Klaim selesai, Bu Rina kecewa',
+      text: 'Klaim akhirnya diselesaikan, tetapi Bu Rina merasa harus berjuang sendiri di banyak tahap. Ia ragu memperpanjang polisnya tahun depan.',
+    },
+  ],
+};
+
+export const demoBaretContent = () => buildDemo(DEMO_BARET);

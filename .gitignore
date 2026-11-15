@@ -29,3 +29,10 @@ data/cadangan/
 
 # ekspor PNG/WebP tokoh & ruang mode cerita (dibuat ulang: npm run ekspor:aset-cerita)
 aset-ekspor/
+
+# PRD v0.2: data runtime room cerita (aset unggahan CMS, kredensial akun uji dev-setup) + build berprefiks harness
+data/aset-cerita/
+data/dev-staff-credentials.json
+dist-game/
+# separate local test build (client/dist-uji, server/dist-uji) so a running server's dist is never overwritten
+dist-uji/

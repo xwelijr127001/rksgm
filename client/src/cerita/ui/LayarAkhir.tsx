@@ -22,6 +22,9 @@ import { PotretNasabah } from '../seni';
 import { PotretMissRaksa } from '../seni/tokoh/PotretMissRaksa';
 import type { Ekspresi, Episode, IdAkhir, IdBab, KunciTeks, StateCerita } from '../tipe';
 import { labelPerasaan, selaPembicara } from './bagian';
+import { PotretIlustrasi } from './gambarIlustrasi';
+import { avatarTokoh } from './latar/ilustrasi';
+import { RingkasanKeputusan } from './RingkasanKeputusan';
 import { PemilihBagian } from './PemilihBagian';
 import { PerjalananKu, TandaNada } from './PerjalananKu';
 import { kartuAkhir } from './tinjauan';
@@ -54,15 +57,24 @@ export function LayarAkhir({ ep, state, bahasa, tx, ditemukan, onUlangBab, onUla
   const ulang = k.ulang;
   const babUlang = ulang ? ep.bab.find((b) => b.id === ulang) : undefined;
 
+  // Episode berpanggung latar: avatar ilustrasi episode (wajah sama dengan panggung & dialognya).
+  const avatarNasabah = ep.latar ? avatarTokoh(ep, ep.nasabah, k.ekspresi) : null;
+  const idMentor = Object.keys(ep.pemeran).find((id) => ep.pemeran[id]!.potret === 'missRaksa') ?? 'missRaksa';
+  const avatarMentor = ep.latar ? avatarTokoh(ep, idMentor, wajahMentor) : null;
+  const namaMentor = ep.pemeran[idMentor] ? tx(ep.pemeran[idMentor]!.nama) : '';
+  const adaRingkasan = !!ep.titik?.length;
+
   const pilihBab = (bab: IdBab) => { setDialog(null); onUlangBab(bab); };
   const ulangDariAwal = () => { setTanyaUlang(false); setDialog(null); onUlangEpisode(); };
 
   return (
+    <>
     <section className="akh-kartu" aria-labelledby="akh-judul" data-nada={k.nada} data-akhir={k.akhir} data-aturan={k.aturan || undefined}>
       <div className="akh-kepala">
         {/* Potret piksel: ukuran tampil diukur dari kotaknya (akhir.css menimpa 64 -> 56/80/88 px), jadi jendela & skala
             bulatnya selalu untuk ukuran yang benar-benar tampil. */}
-        <PotretNasabah ekspresi={k.ekspresi} ukuran={64} label={namaNasabah} className="akh-potret" />
+        {avatarNasabah ? <PotretIlustrasi varian={avatarNasabah} ukuran={64} nama={namaNasabah} className="akh-potret" />
+          : <PotretNasabah ekspresi={k.ekspresi} ukuran={64} label={namaNasabah} className="akh-potret" />}
         <div className="akh-kepala-teks">
           <p className="akh-perasaan">
             {k.sesudahnya ? t('ceritaAkhir.perasaanSesudah', { suasana }) : t('ceritaAkhir.perasaanAkhir', { nama: namaNasabah, suasana })}
@@ -82,7 +94,7 @@ export function LayarAkhir({ ep, state, bahasa, tx, ditemukan, onUlangBab, onUla
         <div className="akh-pelajaran" data-ukur="akhir-pelajaran">
           <p className="akh-pelajaran-label">
             {/* 32 = slot ikon kepala mini (seni/piksel/ikon.ts: sanggul & kerah utuh di lingkaran isi 28 px). */}
-            {adaMentor ? <PotretMissRaksa ekspresi={wajahMentor} ukuran={32} /> : null}
+            {adaMentor ? (avatarMentor ? <PotretIlustrasi varian={avatarMentor} ukuran={32} nama={namaMentor} /> : <PotretMissRaksa ekspresi={wajahMentor} ukuran={32} />) : null}
             <b>{t('ceritaAkhir.pelajaranLabel')}</b>
           </p>
           <p className="akh-pelajaran-teks">{tx(k.pelajaran)}</p>
@@ -120,9 +132,12 @@ export function LayarAkhir({ ep, state, bahasa, tx, ditemukan, onUlangBab, onUla
       {baik ? null : <p id={idKet} className="akh-ket">{ulang ? t('ceritaAkhir.ulangKet') : t('cerita.ulangIsi')}</p>}
 
       <div className="akh-kaki">
-        <button type="button" className="text-button akh-lihat" aria-haspopup="dialog" onClick={() => setDialog('perjalanan')}>
-          {t('ceritaAkhir.lihatPerjalanan')}
-        </button>
+        {/* Episode dengan ringkasan keputusan bernomor: ringkasan di bawah kartu menggantikan tinjauan perjalanan. */}
+        {adaRingkasan ? null : (
+          <button type="button" className="text-button akh-lihat" aria-haspopup="dialog" onClick={() => setDialog('perjalanan')}>
+            {t('ceritaAkhir.lihatPerjalanan')}
+          </button>
+        )}
         <p className="practice-note akh-simulasi">{t('misi.catatanSimulasiPeriksa')}</p>
       </div>
 
@@ -162,6 +177,8 @@ export function LayarAkhir({ ep, state, bahasa, tx, ditemukan, onUlangBab, onUla
         </Modal>
       ) : null}
     </section>
+    {adaRingkasan ? <RingkasanKeputusan ep={ep} state={state} tx={tx} namaNasabah={namaNasabah} namaMentor={namaMentor} /> : null}
+    </>
   );
 }
 

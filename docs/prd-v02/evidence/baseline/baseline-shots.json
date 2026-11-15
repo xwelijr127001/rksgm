@@ -1,0 +1,101 @@
+{
+ "base": "http://127.0.0.1:4810",
+ "code": "7F44",
+ "log": [
+  {
+   "name": "01-landing-d1440",
+   "url": "http://127.0.0.1:4810/",
+   "errors": []
+  },
+  {
+   "name": "01-landing-h390",
+   "url": "http://127.0.0.1:4810/",
+   "errors": []
+  },
+  {
+   "name": "02-admin-route",
+   "url": "http://127.0.0.1:4810/",
+   "errors": []
+  },
+  {
+   "name": "02-cms-route",
+   "url": "http://127.0.0.1:4810/",
+   "errors": []
+  },
+  {
+   "name": "03-join-code-h390",
+   "url": "http://127.0.0.1:4810/join?room=7F44",
+   "errors": []
+  },
+  {
+   "name": "04-lobby-h390",
+   "url": "http://127.0.0.1:4810/lobby",
+   "errors": []
+  },
+  {
+   "name": "05-host-lobby-d1440",
+   "url": "http://127.0.0.1:4810/host?room=7F44",
+   "errors": []
+  },
+  {
+   "name": "06-projector-lobby-d1440",
+   "url": "http://127.0.0.1:4810/projector?room=7F44",
+   "errors": []
+  },
+  {
+   "name": "07-round-active-h390",
+   "url": "http://127.0.0.1:4810/main",
+   "errors": []
+  },
+  {
+   "name": "08-projector-active-d1440",
+   "url": "http://127.0.0.1:4810/projector?room=7F44",
+   "errors": []
+  },
+  {
+   "name": "09-host-active-d1440",
+   "url": "http://127.0.0.1:4810/host?room=7F44",
+   "errors": []
+  },
+  {
+   "name": "10-round-reveal-h390",
+   "url": "http://127.0.0.1:4810/main",
+   "errors": []
+  },
+  {
+   "name": "11-projector-leaderboard-d1440",
+   "url": "http://127.0.0.1:4810/projector?room=7F44",
+   "errors": []
+  },
+  {
+   "name": "12-player-leaderboard-h390",
+   "url": "http://127.0.0.1:4810/main",
+   "errors": []
+  },
+  {
+   "name": "13-story-list-h390",
+   "url": "http://127.0.0.1:4810/cerita",
+   "errors": []
+  },
+  {
+   "name": "14-story-opening-h390",
+   "url": "http://127.0.0.1:4810/cerita/auto-1",
+   "errors": []
+  },
+  {
+   "name": "15-story-first-choice-h390",
+   "url": "http://127.0.0.1:4810/cerita/auto-1",
+   "errors": []
+  },
+  {
+   "name": "16-solo-missions-h390",
+   "url": "http://127.0.0.1:4810/solo",
+   "errors": []
+  },
+  {
+   "name": "17-solo-mission-h390",
+   "url": "http://127.0.0.1:4810/solo/main?misi=1",
+   "errors": []
+  }
+ ]
+}

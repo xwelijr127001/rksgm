@@ -125,7 +125,31 @@ export const CONFIG = {
   panitiaPin: (process.env.PANITIA_PIN || '').trim(),
   /** Halaman awal boleh mengiklankan room yang sedang di lobby (RAKSA_IKLAN_ROOM=off untuk mematikan). */
   iklanRoom: (process.env.RAKSA_IKLAN_ROOM || 'on').toLowerCase().trim() !== 'off',
+  /**
+   * Legacy experiences (solo story, Mini Games / practice missions, legacy quiz rooms, Mandarin UI) are outside the
+   * PRD v0.2 MVP (PRD p.4 "Di Luar Lingkup"). They are preserved, but OFF unless RAKSA_LEGACY=on
+   * (docs/prd-v02/DECISIONS.md D-03). Off = their API routes and the default Socket.IO namespace are refused.
+   */
+  legacy: (process.env.RAKSA_LEGACY || 'off').toLowerCase().trim() === 'on',
+  /**
+   * Number of trusted reverse-proxy hops in front of Node (e.g. 1 behind Apache/nginx). 0 = X-Forwarded-For is ignored.
+   * Needed so per-IP rate limits see the real client instead of the proxy (docs/prd-v02/HOSTING.md).
+   */
+  trustProxyHops: num(process.env.TRUST_PROXY_HOPS, 0),
+  /**
+   * Who may embed the app in a frame (CSP frame-ancestors), e.g. "'self' https://raksaonline.com". Default 'self'
+   * (no third-party framing) until IT sets the embedding policy (docs/prd-v02/DECISIONS.md D-24, HOSTING.md).
+   */
+  frameAncestors: frameAncestorsFrom(process.env.FRAME_ANCESTORS),
 };
+
+/** Keep only valid frame-ancestors sources (no header injection); empty/invalid input falls back to 'self'. */
+export function frameAncestorsFrom(raw: string | undefined): string {
+  const ok = (raw ?? '')
+    .split(/\s+/)
+    .filter((t) => /^('self'|'none'|https?:\/\/(\*\.)?[a-z0-9.-]+(:\d{1,5})?)$/i.test(t));
+  return ok.length ? ok.join(' ') : "'self'";
+}
 
 /** true bila hasil build client tersedia dan disajikan oleh server ini. */
 export function servingBuiltClient(): boolean {

@@ -32,7 +32,10 @@
  *      di atas bar aksi; multiplayer: briefing berisi cara main, durasi fase tidak berubah
  *   D  hasil HP: vonis & tombol aksi di layar pertama, di atas adegan; misi 2 sebagian: baris rincian
  *   E  bintang = ketepatan terbaik (0 bintang + "sudah dicoba"), migrasi progres lama + cadangan
- *   F  wordmark bersama host & pemain, tombol utama host hijau, font judul sama, tiga pintu di halaman awal
+ *   F  wordmark bersama host & pemain, tombol utama host hijau, font judul sama; halaman awal mengikuti kontrak PRD v0.2
+ *      + review staf #1–#6 (Join Game di atas & di layar pertama; Mini Games + cerita solo di bagian mode lama). Kontrak
+ *      lama "tiga pintu, pintu cerita utama" sengaja diganti (docs/prd-v02/REVIEW-HANDOFF.md, perubahan kontrak uji).
+ *      Jalankan dengan server RAKSA_LEGACY=on (mode lama).
  *
  * --cerita (tangkapan mode cerita v2, docs/rancangan-mode-cerita.md bagian 11; pemeriksaan lengkapnya di
  * tools/uji-cerita.mjs): percakapan, keputusan, aktivitas bukti (album "n/3 foto"), umpan balik, aktivitas polis
@@ -888,7 +891,7 @@ async function ujiF() {
   {
     const { page, tutup } = await halamanBaru({ vp: DESKTOP, nama: 'F-host', profil: false });
     try {
-      await page.goto(`${BASE}/host`, { waitUntil: 'domcontentloaded' });
+      await page.goto(`${BASE}/acara/host`, { waitUntil: 'domcontentloaded' });
       await tunggu(page, () => Boolean(document.querySelector('header .mrk') && document.querySelector('main h1, main h2') && document.querySelector('.btn-utama')), 'layar host', 20000);
       await tidur(800);
       g.host = await page.evaluate(gayaHalaman);
@@ -902,26 +905,26 @@ async function ujiF() {
     const { page, tutup } = await halamanBaru({ vp, nama: `F-${nama}` });
     try {
       await page.goto(`${BASE}/`, { waitUntil: 'domcontentloaded' });
-      await tunggu(page, () => document.querySelectorAll('.lp-pintu').length >= 3, `halaman awal ${nama}`, 20000);
+      await tunggu(page, () => document.querySelector('.lp-join') && document.querySelectorAll('.lp-pintu').length >= 2, `halaman awal ${nama}`, 20000);
       await tidur(900);
       g[nama] = await page.evaluate(gayaHalaman);
       const p = await page.evaluate(() => {
         const q = (s) => document.querySelector(s);
-        const c = q('.lp-pintu-cerita');
+        const c = q('.lp-join');
         const r = c?.getBoundingClientRect();
         const pusat = r ? document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2) : null;
         const judul = q('.lp-judul');
         return {
-          cerita: c?.getAttribute('href') ?? null, latihan: q('.lp-pintu-latihan')?.getAttribute('href') ?? null, acara: q('.lp-pintu-acara')?.getAttribute('href') ?? null,
-          ceritaTeks: (c?.textContent ?? '').trim().slice(0, 40),
+          cerita: q('.lp-pintu-cerita-solo')?.getAttribute('href') ?? null, latihan: q('.lp-pintu-latihan')?.getAttribute('href') ?? null, acara: c ? '/join' : null,
+          ceritaTeks: (q('.lp-join-judul')?.textContent ?? '').trim().slice(0, 40),
           top: r ? Math.round(r.top) : null, bottom: r ? Math.round(r.bottom) : null, tertutup: !(pusat && c?.contains(pusat)),
           vh: innerHeight, sy: Math.round(scrollY), fontLp: judul ? getComputedStyle(judul).fontFamily : null,
         };
       });
       g[nama].fontJudul = p.fontLp ?? g[nama].fontJudul;
-      periksa(/\/cerita$/.test(p.cerita ?? '') && /\/solo$/.test(p.latihan ?? '') && p.acara === '/join', `halaman awal ${nama}: tiga pintu cerita / latihan / acara (${p.cerita}, ${p.latihan}, ${p.acara})`);
-      periksa(p.sy === 0 && p.top !== null && p.top >= 0 && p.bottom <= p.vh && !p.tertutup, `halaman awal ${nama}: pintu cerita "${p.ceritaTeks}" terlihat di layar pertama (y ${p.top}-${p.bottom}, viewport ${p.vh})`);
-      catatUkur(`F ${nama}: pintu cerita y`, `${p.top}-${p.bottom} / ${p.vh}`);
+      periksa(/\/cerita$/.test(p.cerita ?? '') && /\/solo$/.test(p.latihan ?? '') && p.acara === '/join', `halaman awal ${nama}: Join Game + mode lama Mini Games / cerita solo (${p.cerita}, ${p.latihan}, ${p.acara})`);
+      periksa(p.sy === 0 && p.top !== null && p.top >= 0 && p.bottom <= p.vh && !p.tertutup, `halaman awal ${nama}: kartu "${p.ceritaTeks}" terlihat di layar pertama (y ${p.top}-${p.bottom}, viewport ${p.vh})`);
+      catatUkur(`F ${nama}: kartu Join Game y`, `${p.top}-${p.bottom} / ${p.vh}`);
       await tangkap(page, file);
     } finally {
       await tutup();
@@ -935,7 +938,7 @@ async function ujiF() {
       g.solo = await page.evaluate(gayaHalaman);
       await bukaMisi(page, 1, 'penuh');
       g.misi = await page.evaluate(gayaHalaman);
-      await page.goto(`${BASE}/projector`, { waitUntil: 'domcontentloaded' });
+      await page.goto(`${BASE}/acara/layar`, { waitUntil: 'domcontentloaded' });
       await tunggu(page, () => Boolean(document.querySelector('.mrk')), 'layar proyektor', 15000);
       g.proyektor = { merek: await page.evaluate(() => Boolean([...document.querySelectorAll('.mrk')].find((m) => m.getClientRects().length > 0))) };
     } finally {

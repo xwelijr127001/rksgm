@@ -5,9 +5,9 @@ import type { KamusRuang } from '.';
  * hasil akhir (Result), dan pemilih karakter (CharacterPicker).
  *
  * Catatan:
- * - Halaman awal = tiga pintu (`pintu*`): Main cerita (utama), Latihan misi, Gabung acara
- *   (docs/rancangan-mode-cerita.md bagian 1). `sambutKota` + `sambutKamu` = sapaan Mr Roger di
- *   ilustrasi kota.
+ * - Halaman awal (review staf #1–#6 + arahan pemilik 2 Nov 2026): kartu Join Game (`join*`) paling atas, lalu pintu Mode
+ *   Cerita (`pintuCerita*`, tindakan "Mulai"); Latihan misi/Mini Games tidak ditawarkan. `sambutSlogan` = sapaan Miss
+ *   Raksa di ilustrasi kota.
  * - `seri` diawali spasi di id/en karena ditempel langsung setelah "Juara 1".
  * - `aksesori.<id>` mengikuti id ACCESSORIES (shared/brand.ts); `lencana.<id>.nama/ket`
  *   mengikuti id ALL_BADGES (shared/scoring.ts). Teks id keduanya = salinan persis sumbernya.
@@ -18,23 +18,24 @@ import type { KamusRuang } from '.';
  */
 const kamus: KamusRuang = {
   id: {
+    pintuCeritaMulai: 'Mulai',
+    joinMasuk: 'Masuk',
     // --- Landing + WelcomeArt
     landingEyebrow: 'MAIN BARENG RAKSA',
     landingJudul1: 'Siap jadi',
     landingJudul2: 'andalan?',
-    landingPilih: 'Belajar melayani klaim asuransi sambil bermain. Pilih cara mainmu:',
+    landingPilih: 'Belajar melayani klaim asuransi lewat cerita interaktif: gabung acara bersama peserta lain, atau main sendiri.',
     pilihCaraMain: 'Pilih cara main',
-    pintuMulai: 'Mulai di sini',
-    pintuCeritaJudul: 'Main cerita',
-    pintuCeritaIsi: 'Bantu seorang pelanggan, langkah demi langkah. Tanpa timer.',
-    pintuLatihanJudul: 'Latihan misi',
-    pintuLatihanIsi: '10 misi singkat, bisa diulang.',
-    pintuAcaraJudul: 'Gabung acara',
-    pintuAcaraIsi: 'Punya kode dari panitia?',
+    pintuCeritaJudul: 'Mode Cerita',
+    pintuCeritaIsi: 'Kasus klaim yang dimainkan sendiri langkah demi langkah. Tanpa timer.',
+    joinJudul: 'Join Game',
+    joinIsi: 'Punya kode room dari host? Masukkan di sini untuk bergabung.',
+    joinKodeLabel: 'Kode room',
+    joinKodeKurang: 'Kode room berisi 6 huruf/angka (contoh: K7M2QX).',
+    mainSendiri: 'Main sendiri',
     ayoMain: 'Ayo, main!',
     landingCatatan: 'Tanpa akun · Main dari HP atau laptop',
-    sambutKota: 'Kota ini butuh andalan.',
-    sambutKamu: 'Kamu, misalnya.',
+    sambutSlogan: 'anytime anywhere with our smile',
 
     // --- Join
     labelGabung: 'Gabung permainan',
@@ -167,23 +168,24 @@ const kamus: KamusRuang = {
     'suasana.fokus': 'serius',
   },
   en: {
+    pintuCeritaMulai: 'Start',
+    joinMasuk: 'Join',
     // --- Landing + WelcomeArt
     landingEyebrow: 'PLAY WITH RAKSA',
     landingJudul1: 'Ready to',
     landingJudul2: 'step up?',
-    landingPilih: 'Learn to serve insurance claim customers through play. Choose how to play:',
+    landingPilih: 'Learn to serve insurance claim customers through interactive stories: join an event with other players, or play on your own.',
     pilihCaraMain: 'Choose how to play',
-    pintuMulai: 'Start here',
-    pintuCeritaJudul: 'Play the story',
-    pintuCeritaIsi: 'Help a customer, one step at a time. No timer.',
-    pintuLatihanJudul: 'Mission practice',
-    pintuLatihanIsi: '10 short missions you can replay.',
-    pintuAcaraJudul: 'Join an event',
-    pintuAcaraIsi: 'Got a code from the organisers?',
+    pintuCeritaJudul: 'Story Mode',
+    pintuCeritaIsi: 'Claim cases you play on your own, one step at a time. No timer.',
+    joinJudul: 'Join Game',
+    joinIsi: 'Got a room code from the host? Enter it here to join.',
+    joinKodeLabel: 'Room code',
+    joinKodeKurang: 'A room code has 6 letters/digits (example: K7M2QX).',
+    mainSendiri: 'Play on your own',
     ayoMain: 'Let’s play!',
     landingCatatan: 'No account needed · Play on your phone or laptop',
-    sambutKota: 'This city needs someone to count on.',
-    sambutKamu: 'Someone like you.',
+    sambutSlogan: 'anytime anywhere with our smile',
 
     // --- Join
     labelGabung: 'Join the game',
@@ -316,23 +318,24 @@ const kamus: KamusRuang = {
     'suasana.fokus': 'serious',
   },
   zh: {
+    pintuCeritaMulai: '开始',
+    joinMasuk: '加入',
     // --- Landing + WelcomeArt
     landingEyebrow: '和 RAKSA 一起玩',
     landingJudul1: '准备好',
     landingJudul2: '挑大梁？',
-    landingPilih: '边玩边学习保险理赔服务。选择你的玩法：',
+    landingPilih: '通过互动故事学习保险理赔服务：和其他玩家一起参加活动，或自己玩。',
     pilihCaraMain: '选择玩法',
-    pintuMulai: '从这里开始',
     pintuCeritaJudul: '故事模式',
-    pintuCeritaIsi: '一步一步帮助一位客户，没有计时。',
-    pintuLatihanJudul: '任务练习',
-    pintuLatihanIsi: '10 个简短任务，可以反复练习。',
-    pintuAcaraJudul: '加入活动',
-    pintuAcaraIsi: '有主办方给的代码吗？',
+    pintuCeritaIsi: '理赔案例，自己一步一步来玩，没有计时。',
+    joinJudul: '加入游戏',
+    joinIsi: '有主持人给的房间代码吗？在这里输入即可加入。',
+    joinKodeLabel: '房间代码',
+    joinKodeKurang: '房间代码由 6 个字母或数字组成（例如：K7M2QX）。',
+    mainSendiri: '单人游戏',
     ayoMain: '开始玩吧！',
     landingCatatan: '无需账号 · 用手机或电脑都能玩',
-    sambutKota: '这座城市需要一个靠得住的人。',
-    sambutKamu: '比如，你。',
+    sambutSlogan: 'anytime anywhere with our smile',
 
     // --- Join
     labelGabung: '加入游戏',

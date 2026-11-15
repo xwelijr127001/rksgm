@@ -49,118 +49,9 @@
 }
 .cer-main[data-tampilan="aktivitas"], .cer-main[data-tampilan="akhir"] { display: block; }
 .cer-panggung {
-  grid-area: panggung; position: relative; overflow: hidden; isolation: isolate; contain: layout paint;
-  aspect-ratio: 4 / 3; max-height: 38dvh; min-height: 200px;
+  grid-area: panggung; aspect-ratio: 4 / 3; max-height: 38dvh; min-height: 200px;
   margin: 0 max(12px, env(safe-area-inset-right)) 0 max(12px, env(safe-area-inset-left));
-  border-radius: 16px; border: 1px solid #e3e1d2; background: #d9b27a;
-  -webkit-user-select: none; user-select: none;
 }
-.cer-panggung[data-rusak] { background: linear-gradient(#e3b35c 0 66%, #c9a77a 66%); }
-
-/* Dunia 1600 x 900 satuan; kamera = transform (translate + scale) dari Panggung.tsx. */
-.cer-pg-dunia { position: absolute; left: 0; top: 0; width: 1600px; height: 900px; transform-origin: 0 0; pointer-events: none; }
-.cer-pg-lapisan { position: absolute; display: block; overflow: visible; }
-.cer-pg-pintu { position: absolute; }
-.cer-pg-pintu > .cer-pg-lapisan { left: 0; top: 0; }
-/* Tokoh & prop: kotak 0 x 0 di titik jangkar (isi meluber), supaya skala/gerak berporos di jangkar. */
-.cer-pg-tokoh, .cer-pg-prop { position: absolute; width: 0; height: 0; transform-origin: 0 0; }
-.cer-pg-sorot, .cer-pg-gerak, .cer-pg-napas, .cer-pg-cermin { position: absolute; left: 0; top: 0; width: 0; height: 0; transform-origin: 0 0; }
-.cer-pg-varian { position: absolute; display: block; overflow: visible; }
-/* Salinan kedip yang basi (data-basi: masih pose/wajah LAMA sampai diperbarui saat idle) tidak pernah terlihat, juga
-   bila animasi kedip yang sudah berjalan memperlihatkannya (!important penulis mengalahkan nilai animasi). */
-.cer-pg-varian[data-basi] { visibility: hidden !important; }
-/* Seni PIKSEL (panggung/piksel.ts): potongan PNG = <svg viewBox=kotak sumber><image/></svg>, dipotong ke kotak
-   sumbernya dan digambar nearest-neighbour. Kamera diam = piksel perangkat bulat per piksel seni (kamera.ts). */
-.cer-pg-piksel { overflow: hidden !important; image-rendering: pixelated; }
-.cer-pg-piksel > image { image-rendering: pixelated; }
-/* Dunia raster yang PNG-nya belum didekode: tak terlihat (latar panggung = warna ruang polos), lalu muncul sekali. */
-.cer-pg-dunia[data-memuat] { opacity: 0; }
-.cer-pg-dunia[data-muncul] { animation: cer-pg-muncul .24s ease-out; }
-@keyframes cer-pg-muncul { from { opacity: 0; } to { opacity: 1; } }
-/* Aktor rencana gerak: tak terlihat kecuali lewat animasinya (membatalkan animasi = komposisi akhir, tanpa hantu). */
-.cer-pg-sementara { opacity: 0; }
-/* Pembicara: sedikit lebih terang + terangkat tipis (pendengar tetap terlihat seperti biasa). */
-.cer-pg-sorot { transition: filter .2s ease-out, transform .2s ease-out; }
-.cer-pg-tokoh[data-sorot] > .cer-pg-sorot { filter: brightness(1.05) saturate(1.04); transform: translateY(-5px); }
-/* Tokoh raster: terangkat tepat 1 piksel seni (4 satuan), tetap sejajar kisi piksel ruang. */
-.cer-pg-tokoh[data-sorot][data-piksel] > .cer-pg-sorot { transform: translateY(-4px); }
-/* Nama tokoh bila gambar pengganti sementara dipakai (aset belum ada / gagal dimuat): satuan dunia. */
-.cer-pg-label {
-  position: absolute; transform: translateX(-50%); padding: 4px 16px; border-radius: 999px; white-space: nowrap;
-  background: rgba(255, 254, 250, .92); border: 2px solid #d9dfd2; color: #243d30; font-size: 28px; font-weight: 700; line-height: 1.25;
-}
-/* Salinan adegan (pembuka, pindah lokasi): lapisan penuh di atas dunia utama. */
-.cer-pg-lapis { position: absolute; inset: 0; overflow: hidden; opacity: 0; pointer-events: none; }
-.cer-pg-eksterior { background: #cfe3ef; }
-.cer-pg-eksterior > img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
-.cer-pg-eksterior > span {
-  position: absolute; left: 12px; bottom: 12px; padding: 4px 12px; border-radius: 999px; background: rgba(255, 254, 250, .94);
-  color: #17362a; font-size: 14px; font-weight: 700;
-}
-
-/* Label suasana (teks, bukan hanya wajah): pita bawah kiri, di atas meja depan / lantai. */
-.cer-suasana {
-  position: absolute; left: 8px; bottom: 7px; z-index: 2; max-width: calc(58% - 14px); margin: 0; padding: 3px 10px; border-radius: 999px;
-  background: rgba(255, 254, 250, .95); border: 1px solid #d9dfd2; color: #243d30; font-size: 13px; font-weight: 650; line-height: 1.3;
-  pointer-events: none;
-}
-
-/* "Lewati pembuka" (v5.1): di LUAR gambar, sel kiri baris kaki kotak dialog (Panggung -> portal ke KotakDialog
-   slotLewati), di samping Lanjut; tidak pernah menutupi wajah, tangan, pintu, atau jalur Bu Rina. Tetap >= 44 px. */
-.cer-pg-lewati {
-  display: inline-flex; align-items: center; gap: 6px; max-width: 100%;
-  min-height: 44px; min-width: 44px; padding: 6px 14px; border-radius: 999px; border: 1px solid #b9c7b6;
-  background: #f5f7ef; color: #17362a; font: inherit; font-size: 14px; font-weight: 650; line-height: 1.2; text-align: left; cursor: pointer;
-}
-.cer-pg-lewati svg { flex: 0 0 auto; }
-.cer-pg-lewati:hover { background: #ebf1e4; }
-/* Cadangan (kotak dialog tanpa baris kaki): pojok kanan-bawah panggung seperti v5. */
-.cer-panggung > .cer-pg-lewati {
-  position: absolute; right: 6px; bottom: 6px; z-index: 3; border-color: rgba(23, 54, 42, .25);
-  background: rgba(255, 254, 250, .94); box-shadow: 0 2px 8px rgba(40, 30, 10, .18);
-}
-.cer-panggung > .cer-pg-lewati:hover { background: #fff; }
-.cer-pg-lewati:focus-visible { outline: 3px solid #215c40; outline-offset: 2px; }
-
-/* Epilog telepon: sisipan panggilan (potret + ikon telepon + nama), kanan atas di atas kursi pengunjung kosong. */
-.cer-pg-telepon {
-  position: absolute; right: 8px; top: 8px; z-index: 2; display: flex; align-items: center; gap: 8px; max-width: calc(60% - 16px);
-  padding: 5px 12px 5px 5px; border-radius: 999px; background: rgba(255, 254, 250, .96); border: 1px solid #d9dfd2;
-  box-shadow: 0 2px 10px rgba(40, 30, 10, .16); pointer-events: none;
-}
-/* Dengan posisi terhitung (dinding kosong kanan plakat, lewat kamera; Panggung.tsx posisiSisipan): berpusat di titik itu. */
-.cer-pg-telepon[data-posisi] { right: auto; transform: translate(-50%, -50%); white-space: nowrap; }
-/* RINGKAS (dinding kosong terlalu sempit untuk satu baris, HP): kolom potret (di tengah) + nama di bawahnya; ikon telepon
-   menjadi lencana kecil di sudut KANAN-ATAS potret (hijab/latar, tidak pernah menutupi wajah atau mulut yang bergerak;
-   --u = sisi potret). Ukuran = Panggung.tsx ukuranSisipan. */
-.cer-pg-telepon[data-ringkas] { flex-direction: column; gap: 2px; min-width: calc(var(--u, 44px) + 24px); padding: 4px 4px 3px; border-radius: 16px; }
-.cer-pg-telepon[data-ringkas] .cer-pg-telepon-teks { display: block; max-width: 100%; text-align: center; }
-.cer-pg-telepon[data-ringkas] .cer-pg-telepon-teks b { display: block; padding: 0 4px; font-size: 12.5px; line-height: 16px; }
-.cer-pg-telepon[data-ringkas] .cer-pg-telepon-ikon {
-  position: absolute; left: calc(50% + var(--u, 44px) / 2 - 13px); top: 1px; width: 20px; height: 20px; box-shadow: 0 0 0 2px #fffefa;
-}
-.cer-pg-telepon[data-ringkas] .cer-pg-telepon-ikon svg { width: 12px; height: 12px; }
-/* Sisi potret diatur Panggung.tsx (ukuranPotretSisipan: desktop 84, HP <= 420 px 44, lainnya 52) bersama aturan
-   jendelanya (sama dengan potret Miss Raksa); 52 di sini hanya cadangan. */
-.cer-pg-telepon-potret { flex: 0 0 auto; width: 52px; height: 52px; border-radius: 50%; overflow: hidden; background: #f3e3c4; border: 2px solid #e8c170; }
-.cer-pg-telepon-potret > svg { display: block; width: 100%; height: 100%; }
-/* Potret sisipan PIKSEL (penyusun seni/piksel teleponSisipan): isi = (sisi - 2 x tepi) px CSS x dpr piksel perangkat
-   dengan skala bulat per piksel seni, nearest-neighbour. Mulut terbuka (salinan 'bicara') bergantian dengan salinan
-   dasar hanya selama Bu Rina berbicara; kepala & tubuh kedua salinan identik. */
-.cer-pg-telepon-potret[data-piksel] { position: relative; }
-.cer-pg-telepon-potret > .cer-pg-telepon-varian { position: absolute; left: 0; top: 0; image-rendering: pixelated; }
-.cer-pg-telepon-varian[data-varian="bicara"] { visibility: hidden; }
-.cer-pg-telepon[data-bicara] .cer-pg-telepon-varian[data-varian="bicara"] { animation: cer-pg-mulut-buka .68s step-end infinite; }
-.cer-pg-telepon[data-bicara] .cer-pg-telepon-varian[data-varian="dasar"] { animation: cer-pg-mulut-tutup .68s step-end infinite; }
-@keyframes cer-pg-mulut-buka { 0%, 38%, 72% { visibility: hidden; } 16%, 54%, 88% { visibility: visible; } }
-@keyframes cer-pg-mulut-tutup { 0%, 38%, 72% { visibility: visible; } 16%, 54%, 88% { visibility: hidden; } }
-.cer-pg-telepon-teks { display: flex; align-items: center; gap: 6px; min-width: 0; }
-.cer-pg-telepon-teks b { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 14px; color: #17362a; }
-.cer-pg-telepon-ikon { flex: 0 0 auto; width: 26px; height: 26px; border-radius: 50%; display: grid; place-items: center; background: #2f7a4f; color: #fff; }
-.cer-pg-telepon[data-bicara] .cer-pg-telepon-ikon { animation: cer-pg-dering 1.1s ease-in-out infinite; }
-@keyframes cer-pg-dering { 0%, 100% { box-shadow: 0 0 0 0 rgba(47, 122, 79, .45); } 50% { box-shadow: 0 0 0 6px rgba(47, 122, 79, 0); } }
-/* Gerak dikurangi / mode ringan: tanpa transisi & animasi CSS di panggung. */
-.cer-panggung[data-diam] *, .cer-panggung[data-diam] *::before { transition: none !important; animation: none !important; }
 .cer-cerita {
   grid-area: cerita; min-width: 0; display: flex; flex-direction: column; gap: 10px;
   padding: 10px max(12px, env(safe-area-inset-right)) 0 max(12px, env(safe-area-inset-left));
@@ -218,6 +109,9 @@
 
 .cer-potret { flex: 0 0 auto; display: inline-grid; place-items: center; line-height: 0; }
 .cer-potret-pemain { border-radius: 50%; overflow: hidden; }
+/* Avatar ilustrasi (episode berpanggung latar): gambar halus mengisi lingkaran; bukan pixelated. */
+.cer-potret-ilustrasi { border-radius: 50%; overflow: hidden; background: #f3e3c4; box-shadow: inset 0 0 0 2px #e8c170; }
+.cer-potret-ilustrasi > img { display: block; width: 100%; height: 100%; object-fit: cover; }
 .cer-inisial { display: inline-grid; place-items: center; font-weight: 700; color: #215c40; line-height: 1; }
 
 /* ------------------------------------------------------------------ kalimat ajar sesudah pilihan (netral)
@@ -368,18 +262,6 @@
 .cer-ep-aksi { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; margin-top: 4px; }
 .cer-ep-aksi .primary-action { flex: 1 1 220px; min-height: 52px; padding: 12px 18px; }
 .cer-ep-ket { flex: 1 1 100%; margin: 0; font-size: 13px; color: #5a6b5e; }
-.cer-hub-segera { margin: -4px 0 0; font-size: 14px; color: #5a6b5e; }
-.cer-hub-lain h2 { font-size: 18px; margin: 0 0 8px; }
-.cer-hub-pintu-daftar { display: grid; gap: 8px; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); }
-.cer-hub-pintu {
-  display: flex; align-items: center; gap: 12px; min-height: 64px; padding: 10px 14px; border-radius: 14px;
-  border: 1px solid #dfe4d8; background: #fffefa; color: #243d30; text-decoration: none;
-}
-.cer-hub-pintu:hover { border-color: #9fbf95; background: #f7faf2; }
-.cer-hub-pintu-ikon { flex: 0 0 40px; width: 40px; height: 40px; border-radius: 12px; display: grid; place-items: center; background: #f1f2e9; }
-.cer-hub-pintu-teks { flex: 1; min-width: 0; display: grid; gap: 2px; }
-.cer-hub-pintu-teks b { font-size: 16px; }
-.cer-hub-pintu-teks small { font-size: 13.5px; color: #4f6254; line-height: 1.4; }
 .cer-hub-catatan { margin: 0; font-size: 12.5px; color: #5f6b5d; }
 
 /* ------------------------------------------------------------------ HP sempit */
@@ -401,8 +283,8 @@
 @media (max-width: 420px) {
   .cer-kembali-teks { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; }
   .player-ui.cer-layar .player-header.cer-kepala { gap: 6px; }
-  .cer-suasana { font-size: 12px; padding: 2px 9px; max-width: calc(56% - 14px); }
-  .cer-pg-lewati { font-size: 13px; padding: 6px 12px; }
+  .cer-main .cer-suasana { font-size: 12px; padding: 2px 9px; max-width: calc(56% - 14px); }
+  .cer-main .cer-pg-lewati { font-size: 13px; padding: 6px 12px; }
 }
 @media (max-width: 380px) {
   .cer-opsi { font-size: 15px; padding: 10px 12px; }
@@ -413,7 +295,7 @@
 /* Tablet tegak: satu kolom yang tidak terlalu lebar. */
 @media (min-width: 600px) and (max-width: 899px) and (min-height: 541px) {
   .cer-main[data-tampilan="dialog"] { width: min(760px, 100%); }
-  .cer-panggung { aspect-ratio: 2 / 1; max-height: 40dvh; }
+  .cer-main .cer-panggung { aspect-ratio: 2 / 1; max-height: 40dvh; }
 }
 @media (min-width: 600px) {
   .cer-ep { grid-template-columns: 280px minmax(0, 1fr); }
@@ -428,7 +310,7 @@
   .cer-main[data-tampilan="dialog"] {
     grid-template-columns: minmax(0, .9fr) minmax(0, 1.1fr); grid-template-areas: "panggung cerita"; column-gap: 12px;
   }
-  .cer-panggung { position: sticky; top: 8px; aspect-ratio: auto; max-height: none; height: calc(100dvh - 116px); min-height: 180px; margin-right: 0; }
+  .cer-main .cer-panggung { position: sticky; top: 8px; aspect-ratio: auto; max-height: none; height: calc(100dvh - 116px); min-height: 180px; margin-right: 0; }
   .cer-cerita { padding-top: 0; padding-left: 0; gap: 8px; }
   .cer-dialog { padding: 10px 12px; gap: 8px; }
   .cer-dialog-teks { font-size: 15.5px; }
@@ -453,7 +335,7 @@
     width: min(1344px, 100%); grid-template-columns: minmax(0, 1fr); grid-template-areas: "panggung" "cerita";
     padding: 0 32px 32px;
   }
-  .cer-panggung {
+  .cer-main .cer-panggung {
     margin: 0; aspect-ratio: auto; max-height: none; min-height: 300px;
     height: clamp(300px, calc(100dvh - 372px), 620px); border-radius: 20px 20px 0 0; border-bottom: 0;
   }
@@ -465,16 +347,58 @@
   .cer-tanya { font-size: 19px; }
   .cer-pilihan-daftar { grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); }
   .cer-opsi { height: 100%; }
-  .cer-suasana { left: 12px; bottom: 10px; font-size: 14px; padding: 4px 12px; }
-  .cer-panggung > .cer-pg-lewati { right: 10px; bottom: 8px; }
-  .cer-pg-telepon { right: 14px; top: 14px; }
+  /* Empat-lima balasan (Episode 2): satu kolom, satu baris per balasan (bukan kisi 4 + 1 yang menyisakan satu kartu). */
+  .cer-pilihan-daftar[data-jumlah="4"], .cer-pilihan-daftar[data-jumlah="5"] { grid-template-columns: minmax(0, 1fr); gap: 6px; }
+  .cer-pilihan-daftar[data-jumlah="4"] .cer-opsi, .cer-pilihan-daftar[data-jumlah="5"] .cer-opsi { min-height: 46px; padding: 10px 14px; }
+  .cer-main .cer-suasana { left: 12px; bottom: 10px; font-size: 14px; padding: 4px 12px; }
+  .cer-main .cer-panggung > .cer-pg-lewati { right: 10px; bottom: 8px; }
+  .cer-main .cer-pg-telepon { right: 14px; top: 14px; }
   .cer-hub { gap: 22px; }
 }
 
 @media (prefers-reduced-motion: reduce) {
   :root:not([data-gerak="penuh"]) .cer-opsi { transition: none; }
   :root:not([data-gerak="penuh"]) .cer-alasan-dialog, :root:not([data-gerak="penuh"]) .cer-istilah-arti { animation: none; }
-  :root:not([data-gerak="penuh"]) .cer-pg-sorot { transition: none; }
-  :root:not([data-gerak="penuh"]) .cer-pg-telepon[data-bicara] .cer-pg-telepon-ikon,
-  :root:not([data-gerak="penuh"]) .cer-pg-telepon[data-bicara] .cer-pg-telepon-varian { animation: none; }
 }
+
+/* ------------------------------------------------------------------ dokumen di atas pilihan (KartuDokumen) & catatan bahasa */
+.cer-dok { padding: 12px 14px; border-radius: 14px; background: #fffdf4; border: 1px solid #e3d9b8; box-shadow: 0 1px 0 #efe6c8; }
+.cer-dok-judul { margin: 0 0 8px; display: flex; align-items: center; gap: 8px; font-size: 15px; font-weight: 750; color: #17362a; }
+.cer-dok-judul svg { flex: 0 0 auto; color: #2f5439; }
+.cer-dok-baris { margin: 0; display: grid; gap: 6px; }
+.cer-dok-isi { display: grid; grid-template-columns: minmax(7.5em, 34%) minmax(0, 1fr); gap: 2px 12px; padding: 6px 0 0; border-top: 1px dashed #e6dcbd; }
+.cer-dok-isi:first-child { border-top: 0; padding-top: 0; }
+.cer-dok-isi[data-tanpa-nilai] { grid-template-columns: minmax(0, 1fr); }
+.cer-dok-isi[data-tanpa-nilai] dd { display: none; }
+.cer-dok-isi dt { font-size: 14px; font-weight: 650; color: #2f5439; }
+.cer-dok-isi dd { margin: 0; font-size: 14.5px; line-height: 1.45; color: #243d30; }
+.cer-dok-catatan { margin: 8px 0 0; font-size: 13px; color: #5c6f58; }
+@media (max-width: 420px) { .cer-dok-isi { grid-template-columns: minmax(0, 1fr); } }
+.cer-bahasa-belum { margin: 0; padding: 8px 12px; border-radius: 12px; background: #f3f6ee; border: 1px solid #dfe6d6; color: #3d5a43; font-size: 13.5px; }
+
+/* Daftar episode: Join Game di atas daftar; sampul panggung latar mengisi kotak seni kartu. */
+.cer-hub-join { margin: 0; }
+.cer-ep-latar { position: relative; overflow: hidden; }
+.cer-ep-latar > .cer-panggung.cer-latar { position: absolute; inset: 0; width: 100%; height: 100%; min-height: 0; max-height: none; margin: 0; border: 0; border-radius: 0; }
+.cer-ep-latar .cer-latar-lokasi { display: none; }
+
+/* Bukti ruas jalan (KartuDokumen + BuktiLajur): tiruan rambu terbaca + diagram lajur tampak atas, bisa diperbesar. */
+.cer-bukti-lajur { display: grid; gap: 10px; margin-top: 8px; }
+.cer-bukti-rambu { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 8px; }
+.cer-bukti-papan { display: grid; gap: 2px; padding: 8px 10px; border: 2px solid #fffdf6; border-radius: 8px; box-shadow: 0 0 0 1.5px #3c4247; color: #fffdf6; }
+.cer-bukti-papan-label { font-size: 12.5px; font-weight: 700; opacity: .9; }
+.cer-bukti-papan-teks { font-size: 15.5px; font-weight: 800; line-height: 1.3; }
+.cer-bukti-diagram { margin: 0; display: grid; gap: 6px; justify-items: center; }
+.cer-bukti-diagram svg { width: 100%; max-width: 320px; height: auto; display: block; border-radius: 8px; background: #8fbf6c; }
+.cer-bukti-diagram figcaption { display: grid; gap: 4px; justify-self: stretch; font-size: 15px; line-height: 1.4; color: #2f3d34; }
+.cer-bukti-truk { display: inline-block; width: 10px; height: 16px; margin-right: 6px; vertical-align: -2px; border: 1.5px solid #243d30; border-radius: 2px; background: linear-gradient(#2f6fb0 0 30%, #f4f1e6 30%); }
+.cer-bukti-lajur[data-besar] .cer-bukti-papan-teks { font-size: 20px; }
+.cer-bukti-lajur[data-besar] .cer-bukti-diagram svg { max-width: 520px; }
+.cer-bukti-lajur[data-besar] .cer-bukti-diagram figcaption { font-size: 17px; }
+.cer-dok-perbesar {
+  display: inline-flex; align-items: center; gap: 8px; justify-self: start; min-height: 44px; margin-top: 4px; padding: 0 14px; border: 1.5px solid #c9d3c4;
+  border-radius: 22px; background: #fff; color: #1f5c40; font: inherit; font-size: 15px; font-weight: 700; cursor: pointer;
+}
+
+/* Riwayat: ringkasan tindakan pemain di bawah aktivitas (Episode 2). */
+.cer-rw-ringkas { margin: 2px 0 0; font-size: 14px; line-height: 1.4; color: #4b5b51; }

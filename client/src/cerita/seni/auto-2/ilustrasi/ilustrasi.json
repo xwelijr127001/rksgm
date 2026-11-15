@@ -1,0 +1,1145 @@
+{
+  "versi": 2,
+  "catatan": "Dibuat tools/cerita/bangun-ilustrasi-auto2.mjs; jangan disunting tangan.",
+  "potret": {
+    "miss-senyum": {
+      "tokoh": "missRaksa",
+      "ekspresi": [
+        "netral"
+      ],
+      "pose": "senyum tenang",
+      "sumber": "ChatGPT Image Nov 2, 2026, 11_36_23 PM-1.png",
+      "sha256": "c279100dc83956fe6929a066bdaa2d1c5d7dbb69e2ed16fcf0a0cd4512df505d",
+      "ukuranSumber": [
+        1254,
+        1254
+      ],
+      "tepi": {
+        "pikselTepi": 7949,
+        "bertinta": 95,
+        "diwarnaiTinta": 2643,
+        "bintikDibuang": 176
+      },
+      "kepala": {
+        "atas": 0.0031974420463629096,
+        "bawah": 0.518784972022382,
+        "cx": 0.3568019093078759
+      },
+      "rasio": 0.6698641087130296,
+      "dekat": [
+        {
+          "w": 480,
+          "h": 717,
+          "berkas": "miss-senyum-480.webp",
+          "bytes": 54424
+        },
+        {
+          "w": 838,
+          "h": 1251,
+          "berkas": "miss-senyum-838.webp",
+          "bytes": 111164
+        }
+      ],
+      "avatar": [
+        {
+          "w": 160,
+          "h": 160,
+          "berkas": "miss-senyum-avatar-160.webp",
+          "bytes": 7226
+        },
+        {
+          "w": 320,
+          "h": 320,
+          "berkas": "miss-senyum-avatar-320.webp",
+          "bytes": 17290
+        }
+      ]
+    },
+    "miss-jelaskan": {
+      "tokoh": "missRaksa",
+      "ekspresi": [
+        "serius"
+      ],
+      "pose": "menjelaskan, telapak terbuka",
+      "sumber": "ChatGPT Image Nov 2, 2026, 11_36_24 PM-2.png",
+      "sha256": "92753b0d4009f81916f58e73beccb69663daa7199f51c45bf9354c539f89557c",
+      "ukuranSumber": [
+        1254,
+        1254
+      ],
+      "tepi": {
+        "pikselTepi": 11501,
+        "bertinta": 99,
+        "diwarnaiTinta": 4838,
+        "bintikDibuang": 334
+      },
+      "kepala": {
+        "atas": 0.003205128205128205,
+        "bawah": 0.5336538461538461,
+        "cx": 0.26491862567811936
+      },
+      "rasio": 0.8862179487179487,
+      "dekat": [
+        {
+          "w": 480,
+          "h": 542,
+          "berkas": "miss-jelaskan-480.webp",
+          "bytes": 41752
+        },
+        {
+          "w": 1106,
+          "h": 1248,
+          "berkas": "miss-jelaskan-1106.webp",
+          "bytes": 123322
+        }
+      ],
+      "avatar": [
+        {
+          "w": 160,
+          "h": 160,
+          "berkas": "miss-jelaskan-avatar-160.webp",
+          "bytes": 6948
+        },
+        {
+          "w": 320,
+          "h": 320,
+          "berkas": "miss-jelaskan-avatar-320.webp",
+          "bytes": 16584
+        }
+      ]
+    },
+    "miss-salam": {
+      "tokoh": "missRaksa",
+      "ekspresi": [
+        "tersenyum"
+      ],
+      "pose": "tangan menyatu, ramah",
+      "sumber": "ChatGPT Image Nov 2, 2026, 11_36_26 PM-3.png",
+      "sha256": "50126b409a0d2ff392bd5521bb90d79c336b913139a9ab95f49750393f8e7f23",
+      "ukuranSumber": [
+        1254,
+        1254
+      ],
+      "tepi": {
+        "pikselTepi": 9808,
+        "bertinta": 95,
+        "diwarnaiTinta": 3274,
+        "bintikDibuang": 309
+      },
+      "kepala": {
+        "atas": 0.0007974481658692185,
+        "bawah": 0.47129186602870815,
+        "cx": 0.3206197854588796
+      },
+      "rasio": 0.6690590111642744,
+      "dekat": [
+        {
+          "w": 480,
+          "h": 717,
+          "berkas": "miss-salam-480.webp",
+          "bytes": 60454
+        },
+        {
+          "w": 839,
+          "h": 1254,
+          "berkas": "miss-salam-839.webp",
+          "bytes": 125268
+        }
+      ],
+      "avatar": [
+        {
+          "w": 160,
+          "h": 160,
+          "berkas": "miss-salam-avatar-160.webp",
+          "bytes": 7222
+        },
+        {
+          "w": 320,
+          "h": 320,
+          "berkas": "miss-salam-avatar-320.webp",
+          "bytes": 17650
+        }
+      ]
+    },
+    "miss-semangat": {
+      "tokoh": "missRaksa",
+      "ekspresi": [
+        "senang"
+      ],
+      "pose": "kepalan menyemangati",
+      "sumber": "ChatGPT Image Nov 2, 2026, 11_36_26 PM-4.png",
+      "sha256": "b8b8eb3ba06ba0518d6f76d5b562e1cbc6d1966131669042b9533d6290f101fe",
+      "ukuranSumber": [
+        1254,
+        1254
+      ],
+      "tepi": {
+        "pikselTepi": 11430,
+        "bertinta": 97,
+        "diwarnaiTinta": 4619,
+        "bintikDibuang": 144
+      },
+      "kepala": {
+        "atas": 0.003205128205128205,
+        "bawah": 0.5392628205128205,
+        "cx": 0.3282937365010799
+      },
+      "rasio": 0.7419871794871795,
+      "dekat": [
+        {
+          "w": 480,
+          "h": 647,
+          "berkas": "miss-semangat-480.webp",
+          "bytes": 53580
+        },
+        {
+          "w": 926,
+          "h": 1248,
+          "berkas": "miss-semangat-926.webp",
+          "bytes": 120240
+        }
+      ],
+      "avatar": [
+        {
+          "w": 160,
+          "h": 160,
+          "berkas": "miss-semangat-avatar-160.webp",
+          "bytes": 7636
+        },
+        {
+          "w": 320,
+          "h": 320,
+          "berkas": "miss-semangat-avatar-320.webp",
+          "bytes": 18116
+        }
+      ]
+    },
+    "miss-pikir": {
+      "tokoh": "missRaksa",
+      "ekspresi": [
+        "bingung"
+      ],
+      "pose": "tangan di dagu, berpikir",
+      "sumber": "ChatGPT Image Nov 2, 2026, 11_36_27 PM-5.png",
+      "sha256": "47777156a2420b3b866a03dbb80aa84900019f27f4c448bcb8494eeffcfb4cbe",
+      "ukuranSumber": [
+        1254,
+        1254
+      ],
+      "tepi": {
+        "pikselTepi": 8821,
+        "bertinta": 98,
+        "diwarnaiTinta": 3455,
+        "bintikDibuang": 389
+      },
+      "kepala": {
+        "atas": 0.0032102728731942215,
+        "bawah": 0.47592295345104335,
+        "cx": 0.31949685534591193
+      },
+      "rasio": 0.6380417335473515,
+      "dekat": [
+        {
+          "w": 480,
+          "h": 752,
+          "berkas": "miss-pikir-480.webp",
+          "bytes": 62308
+        },
+        {
+          "w": 795,
+          "h": 1246,
+          "berkas": "miss-pikir-795.webp",
+          "bytes": 119738
+        }
+      ],
+      "avatar": [
+        {
+          "w": 160,
+          "h": 160,
+          "berkas": "miss-pikir-avatar-160.webp",
+          "bytes": 7086
+        },
+        {
+          "w": 320,
+          "h": 320,
+          "berkas": "miss-pikir-avatar-320.webp",
+          "bytes": 17090
+        }
+      ]
+    },
+    "hendra-panik": {
+      "tokoh": "hendra",
+      "ekspresi": [
+        "bingung"
+      ],
+      "pose": "kaget/panik",
+      "sumber": "ChatGPT Image Nov 2, 2026, 11_36_35 PM-1.png",
+      "sha256": "fd5af91eff463ee07cb3020836bc3875bf8020b21eebda35a2f643b89473b575",
+      "ukuranSumber": [
+        1254,
+        1254
+      ],
+      "tepi": {
+        "pikselTepi": 7113,
+        "bertinta": 92,
+        "diwarnaiTinta": 2738,
+        "bintikDibuang": 104
+      },
+      "kepala": {
+        "atas": 0.003249390739236393,
+        "bawah": 0.5304630381803412,
+        "cx": 0.5310344827586206
+      },
+      "rasio": 0.942323314378554,
+      "dekat": [
+        {
+          "w": 480,
+          "h": 509,
+          "berkas": "hendra-panik-480.webp",
+          "bytes": 34844
+        },
+        {
+          "w": 1160,
+          "h": 1231,
+          "berkas": "hendra-panik-1160.webp",
+          "bytes": 113640
+        }
+      ],
+      "avatar": [
+        {
+          "w": 160,
+          "h": 160,
+          "berkas": "hendra-panik-avatar-160.webp",
+          "bytes": 7248
+        },
+        {
+          "w": 320,
+          "h": 320,
+          "berkas": "hendra-panik-avatar-320.webp",
+          "bytes": 17286
+        }
+      ]
+    },
+    "hendra-cemas": {
+      "tokoh": "hendra",
+      "ekspresi": [
+        "cemas"
+      ],
+      "pose": "cemas",
+      "sumber": "ChatGPT Image Nov 2, 2026, 11_36_36 PM-2.png",
+      "sha256": "d239124b90e61292cd0886c9a9edeab9f685f54689b9c9f75bdcfbc42de908bf",
+      "ukuranSumber": [
+        1254,
+        1254
+      ],
+      "tepi": {
+        "pikselTepi": 6667,
+        "bertinta": 99,
+        "diwarnaiTinta": 2614,
+        "bintikDibuang": 83
+      },
+      "kepala": {
+        "atas": 0.0032626427406199023,
+        "bawah": 0.48858075040783033,
+        "cx": 0.5348399246704332
+      },
+      "rasio": 0.866231647634584,
+      "dekat": [
+        {
+          "w": 480,
+          "h": 554,
+          "berkas": "hendra-cemas-480.webp",
+          "bytes": 38476
+        },
+        {
+          "w": 1062,
+          "h": 1226,
+          "berkas": "hendra-cemas-1062.webp",
+          "bytes": 114346
+        }
+      ],
+      "avatar": [
+        {
+          "w": 160,
+          "h": 160,
+          "berkas": "hendra-cemas-avatar-160.webp",
+          "bytes": 7014
+        },
+        {
+          "w": 320,
+          "h": 320,
+          "berkas": "hendra-cemas-avatar-320.webp",
+          "bytes": 16860
+        }
+      ]
+    },
+    "hendra-tenang": {
+      "tokoh": "hendra",
+      "ekspresi": [
+        "netral",
+        "lega"
+      ],
+      "pose": "tenang, senyum tipis",
+      "sumber": "ChatGPT Image Nov 2, 2026, 11_36_37 PM-3.png",
+      "sha256": "6efd6a56499dc385e083738f1a59673bf24cba8f598ef6ed2e561fe6d8990f56",
+      "ukuranSumber": [
+        1254,
+        1254
+      ],
+      "tepi": {
+        "pikselTepi": 8678,
+        "bertinta": 97,
+        "diwarnaiTinta": 4384,
+        "bintikDibuang": 56
+      },
+      "kepala": {
+        "atas": 0.0032388663967611335,
+        "bawah": 0.49554655870445347,
+        "cx": 0.5417057169634489
+      },
+      "rasio": 0.8639676113360324,
+      "dekat": [
+        {
+          "w": 480,
+          "h": 556,
+          "berkas": "hendra-tenang-480.webp",
+          "bytes": 38866
+        },
+        {
+          "w": 1067,
+          "h": 1235,
+          "berkas": "hendra-tenang-1067.webp",
+          "bytes": 110672
+        }
+      ],
+      "avatar": [
+        {
+          "w": 160,
+          "h": 160,
+          "berkas": "hendra-tenang-avatar-160.webp",
+          "bytes": 7202
+        },
+        {
+          "w": 320,
+          "h": 320,
+          "berkas": "hendra-tenang-avatar-320.webp",
+          "bytes": 16610
+        }
+      ]
+    },
+    "hendra-kecewa": {
+      "tokoh": "hendra",
+      "ekspresi": [
+        "kesal"
+      ],
+      "pose": "kecewa/sedih (tidak ada potret marah)",
+      "sumber": "ChatGPT Image Nov 2, 2026, 11_36_38 PM-4.png",
+      "sha256": "4fba42bc5a35ff81ca6d2843565e8027c8a5c1923669deb8f7846c6a817b321f",
+      "ukuranSumber": [
+        1254,
+        1254
+      ],
+      "tepi": {
+        "pikselTepi": 8968,
+        "bertinta": 98,
+        "diwarnaiTinta": 3812,
+        "bintikDibuang": 121
+      },
+      "kepala": {
+        "atas": 0.003236245954692557,
+        "bawah": 0.5008090614886731,
+        "cx": 0.5115658362989324
+      },
+      "rasio": 0.9093851132686084,
+      "dekat": [
+        {
+          "w": 480,
+          "h": 528,
+          "berkas": "hendra-kecewa-480.webp",
+          "bytes": 35936
+        },
+        {
+          "w": 1124,
+          "h": 1236,
+          "berkas": "hendra-kecewa-1124.webp",
+          "bytes": 116780
+        }
+      ],
+      "avatar": [
+        {
+          "w": 160,
+          "h": 160,
+          "berkas": "hendra-kecewa-avatar-160.webp",
+          "bytes": 7312
+        },
+        {
+          "w": 320,
+          "h": 320,
+          "berkas": "hendra-kecewa-avatar-320.webp",
+          "bytes": 17354
+        }
+      ]
+    },
+    "hendra-senang": {
+      "tokoh": "hendra",
+      "ekspresi": [
+        "senang"
+      ],
+      "pose": "puas, senyum lebar",
+      "sumber": "ChatGPT Image Nov 2, 2026, 11_36_39 PM-5.png",
+      "sha256": "e2ffba780e3a348d4481496dfb9fd64aadb2c2e80d3f3c4a6d71743bb5990fb1",
+      "ukuranSumber": [
+        1254,
+        1254
+      ],
+      "tepi": {
+        "pikselTepi": 8410,
+        "bertinta": 81,
+        "diwarnaiTinta": 2536,
+        "bintikDibuang": 111
+      },
+      "kepala": {
+        "atas": 0.0032102728731942215,
+        "bawah": 0.536115569823435,
+        "cx": 0.5287356321839081
+      },
+      "rasio": 0.9077046548956661,
+      "dekat": [
+        {
+          "w": 480,
+          "h": 529,
+          "berkas": "hendra-senang-480.webp",
+          "bytes": 36914
+        },
+        {
+          "w": 1131,
+          "h": 1246,
+          "berkas": "hendra-senang-1131.webp",
+          "bytes": 122342
+        }
+      ],
+      "avatar": [
+        {
+          "w": 160,
+          "h": 160,
+          "berkas": "hendra-senang-avatar-160.webp",
+          "bytes": 7200
+        },
+        {
+          "w": 320,
+          "h": 320,
+          "berkas": "hendra-senang-avatar-320.webp",
+          "bytes": 17132
+        }
+      ]
+    }
+  },
+  "badan": {
+    "bima": {
+      "tokoh": "bima",
+      "pose": "berdiri, kacamata, kemeja slate-blue",
+      "sumber": "ChatGPT Image Nov 2, 2026, 11_36_51 PM-1.png",
+      "sha256": "77962e4fcf3d91ae8cacdc6bd8de51d6b8593ef664907d27b133c1b1ad59a530",
+      "ukuranSumber": [
+        1024,
+        1536
+      ],
+      "tepi": {
+        "pikselTepi": 11628,
+        "bertinta": 99,
+        "diwarnaiTinta": 3589,
+        "bintikDibuang": 21
+      },
+      "kepala": {
+        "atas": 0.00392156862745098,
+        "bawah": 0.15098039215686274,
+        "cx": 0.4978902953586498
+      },
+      "rasio": 0.30980392156862746,
+      "tinggiSumber": 1530,
+      "dekat": [
+        {
+          "w": 149,
+          "h": 480,
+          "berkas": "bima-480.webp",
+          "bytes": 19538
+        },
+        {
+          "w": 297,
+          "h": 960,
+          "berkas": "bima-960.webp",
+          "bytes": 46570
+        },
+        {
+          "w": 471,
+          "h": 1520,
+          "berkas": "bima-1520.webp",
+          "bytes": 84444
+        }
+      ],
+      "avatar": [
+        {
+          "w": 160,
+          "h": 160,
+          "berkas": "bima-avatar-160.webp",
+          "bytes": 6686
+        },
+        {
+          "w": 320,
+          "h": 320,
+          "berkas": "bima-avatar-320.webp",
+          "bytes": 16632
+        }
+      ]
+    },
+    "darto": {
+      "tokoh": "darto",
+      "pose": "berdiri, senyum tegang, kemeja kerja biru",
+      "sumber": "ChatGPT Image Nov 2, 2026, 11_36_51 PM-2.png",
+      "sha256": "6182098c48eaff801b8a98da0c7094881fdc2670608ac3851340c9933378d478",
+      "ukuranSumber": [
+        1024,
+        1536
+      ],
+      "tepi": {
+        "pikselTepi": 10001,
+        "bertinta": 99,
+        "diwarnaiTinta": 4075,
+        "bintikDibuang": 16
+      },
+      "kepala": {
+        "atas": 0.003926701570680628,
+        "bawah": 0.15968586387434555,
+        "cx": 0.5135746606334841
+      },
+      "rasio": 0.2892670157068063,
+      "tinggiSumber": 1528,
+      "dekat": [
+        {
+          "w": 139,
+          "h": 480,
+          "berkas": "darto-480.webp",
+          "bytes": 20852
+        },
+        {
+          "w": 278,
+          "h": 960,
+          "berkas": "darto-960.webp",
+          "bytes": 47804
+        },
+        {
+          "w": 440,
+          "h": 1520,
+          "berkas": "darto-1520.webp",
+          "bytes": 84070
+        }
+      ],
+      "avatar": [
+        {
+          "w": 160,
+          "h": 160,
+          "berkas": "darto-avatar-160.webp",
+          "bytes": 6722
+        },
+        {
+          "w": 320,
+          "h": 320,
+          "berkas": "darto-avatar-320.webp",
+          "bytes": 16350
+        }
+      ]
+    },
+    "admin": {
+      "tokoh": "admin",
+      "pose": "berdiri, ramah, kemeja steel-blue",
+      "sumber": "ChatGPT Image Nov 2, 2026, 11_36_52 PM-3.png",
+      "sha256": "4564e9d47e788be4101292636c9f6c398a4e3109f30c8f096657e7e78ae01e8e",
+      "ukuranSumber": [
+        1024,
+        1536
+      ],
+      "tepi": {
+        "pikselTepi": 11754,
+        "bertinta": 98,
+        "diwarnaiTinta": 3531,
+        "bintikDibuang": 25
+      },
+      "kepala": {
+        "atas": 0.003947368421052632,
+        "bawah": 0.16052631578947368,
+        "cx": 0.4580498866213152
+      },
+      "rasio": 0.2901315789473684,
+      "tinggiSumber": 1520,
+      "dekat": [
+        {
+          "w": 139,
+          "h": 480,
+          "berkas": "admin-480.webp",
+          "bytes": 18594
+        },
+        {
+          "w": 279,
+          "h": 960,
+          "berkas": "admin-960.webp",
+          "bytes": 43032
+        },
+        {
+          "w": 441,
+          "h": 1520,
+          "berkas": "admin-1520.webp",
+          "bytes": 66090
+        }
+      ],
+      "avatar": [
+        {
+          "w": 160,
+          "h": 160,
+          "berkas": "admin-avatar-160.webp",
+          "bytes": 6408
+        },
+        {
+          "w": 320,
+          "h": 320,
+          "berkas": "admin-avatar-320.webp",
+          "bytes": 15220
+        }
+      ]
+    },
+    "hendra": {
+      "tokoh": "hendra",
+      "pose": "berdiri, cemas, kemeja krem",
+      "sumber": "ChatGPT Image Nov 2, 2026, 11_36_59 PM-2.png",
+      "sha256": "2a18135a6e1f7fde462c09ce77521b007430328937fd71412c82bfcc84ddc5ac",
+      "ukuranSumber": [
+        1024,
+        1536
+      ],
+      "tepi": {
+        "pikselTepi": 11371,
+        "bertinta": 98,
+        "diwarnaiTinta": 4111,
+        "bintikDibuang": 38
+      },
+      "kepala": {
+        "atas": 0.003931847968545216,
+        "bawah": 0.17038007863695936,
+        "cx": 0.49604743083003955
+      },
+      "rasio": 0.3315858453473132,
+      "tinggiSumber": 1526,
+      "dekat": [
+        {
+          "w": 159,
+          "h": 480,
+          "berkas": "hendra-480.webp",
+          "bytes": 21912
+        },
+        {
+          "w": 318,
+          "h": 960,
+          "berkas": "hendra-960.webp",
+          "bytes": 54332
+        },
+        {
+          "w": 504,
+          "h": 1520,
+          "berkas": "hendra-1520.webp",
+          "bytes": 101520
+        }
+      ],
+      "avatar": [
+        {
+          "w": 160,
+          "h": 160,
+          "berkas": "hendra-avatar-160.webp",
+          "bytes": 7340
+        },
+        {
+          "w": 320,
+          "h": 320,
+          "berkas": "hendra-avatar-320.webp",
+          "bytes": 18302
+        }
+      ]
+    },
+    "rudi": {
+      "tokoh": "rudi",
+      "pose": "berdiri, polo hijau + rompi abu",
+      "sumber": "ChatGPT Image Nov 2, 2026, 11_37_00 PM-3.png",
+      "sha256": "a1ec55281dd8ff818d17c1e7ab4704c525767bc31fd779ded1b5c99e86158781",
+      "ukuranSumber": [
+        1024,
+        1536
+      ],
+      "tepi": {
+        "pikselTepi": 10894,
+        "bertinta": 99,
+        "diwarnaiTinta": 3919,
+        "bintikDibuang": 13
+      },
+      "kepala": {
+        "atas": 0.003947368421052632,
+        "bawah": 0.14736842105263157,
+        "cx": 0.5063829787234042
+      },
+      "rasio": 0.3092105263157895,
+      "tinggiSumber": 1520,
+      "dekat": [
+        {
+          "w": 148,
+          "h": 480,
+          "berkas": "rudi-480.webp",
+          "bytes": 20246
+        },
+        {
+          "w": 297,
+          "h": 960,
+          "berkas": "rudi-960.webp",
+          "bytes": 46606
+        },
+        {
+          "w": 470,
+          "h": 1520,
+          "berkas": "rudi-1520.webp",
+          "bytes": 72086
+        }
+      ],
+      "avatar": [
+        {
+          "w": 160,
+          "h": 160,
+          "berkas": "rudi-avatar-160.webp",
+          "bytes": 6394
+        },
+        {
+          "w": 320,
+          "h": 320,
+          "berkas": "rudi-avatar-320.webp",
+          "bytes": 14554
+        }
+      ]
+    },
+    "tol": {
+      "tokoh": "tol",
+      "pose": "berdiri, topi, rompi oranye reflektif",
+      "sumber": "Friendly Indonesian Toll Worker in Safety Vest-1.png",
+      "sha256": "6f5a2c55d09e9f28649c456d05a8b020c95d24e51f26baa21cf4cee56f4df5f3",
+      "ukuranSumber": [
+        1024,
+        1536
+      ],
+      "tepi": {
+        "pikselTepi": 12527,
+        "bertinta": 96,
+        "diwarnaiTinta": 3209,
+        "bintikDibuang": 17
+      },
+      "kepala": {
+        "atas": 0.003949967083607637,
+        "bawah": 0.16129032258064516,
+        "cx": 0.5440613026819924
+      },
+      "rasio": 0.3436471362738644,
+      "tinggiSumber": 1519,
+      "dekat": [
+        {
+          "w": 165,
+          "h": 480,
+          "berkas": "tol-480.webp",
+          "bytes": 21944
+        },
+        {
+          "w": 330,
+          "h": 960,
+          "berkas": "tol-960.webp",
+          "bytes": 51316
+        },
+        {
+          "w": 522,
+          "h": 1519,
+          "berkas": "tol-1519.webp",
+          "bytes": 80372
+        }
+      ],
+      "avatar": [
+        {
+          "w": 160,
+          "h": 160,
+          "berkas": "tol-avatar-160.webp",
+          "bytes": 6612
+        },
+        {
+          "w": 320,
+          "h": 320,
+          "berkas": "tol-avatar-320.webp",
+          "bytes": 15190
+        }
+      ]
+    },
+    "polisi": {
+      "tokoh": "polisi",
+      "pose": "memberi keterangan, buku catatan, rompi hijau-kuning",
+      "sumber": "Traffic Officer Giving a Briefing.png",
+      "sha256": "279762c3e77b0a45432c1c6b0bc6105ea54fdaaa9fcdf0b93f29c9d9464230ea",
+      "ukuranSumber": [
+        1024,
+        1536
+      ],
+      "tepi": {
+        "pikselTepi": 10055,
+        "bertinta": 100,
+        "diwarnaiTinta": 4008,
+        "bintikDibuang": 7
+      },
+      "kepala": {
+        "atas": 0.003968253968253968,
+        "bawah": 0.15873015873015872,
+        "cx": 0.631578947368421
+      },
+      "rasio": 0.4523809523809524,
+      "tinggiSumber": 1512,
+      "dekat": [
+        {
+          "w": 217,
+          "h": 480,
+          "berkas": "polisi-480.webp",
+          "bytes": 21540
+        },
+        {
+          "w": 434,
+          "h": 960,
+          "berkas": "polisi-960.webp",
+          "bytes": 49402
+        },
+        {
+          "w": 684,
+          "h": 1512,
+          "berkas": "polisi-1512.webp",
+          "bytes": 77344
+        }
+      ],
+      "avatar": [
+        {
+          "w": 160,
+          "h": 160,
+          "berkas": "polisi-avatar-160.webp",
+          "bytes": 6918
+        },
+        {
+          "w": 320,
+          "h": 320,
+          "berkas": "polisi-avatar-320.webp",
+          "bytes": 16166
+        }
+      ],
+      "avatarSumber": {
+        "sumber": "Friendly Safety Officer in High-Visibility Uniform.png",
+        "sha256": "7d8ce730806fdd98bedaae7c8f57aaa736c9cf7f0663b8b790b0bca06b5a8244"
+      }
+    }
+  },
+  "benda": {
+    "trailer": {
+      "pose": "truk trailer kepala biru, tampak 3/4 depan kanan, depan & kaca ringsek",
+      "sumber": "Damaged Blue Semi-Truck with Trailer.png",
+      "sha256": "3064f9f3c9e4579cdf86ad65b169b43264eaa010a48768b31c85033c41b04389",
+      "ukuranSumber": [
+        1774,
+        887
+      ],
+      "tepi": {
+        "pikselTepi": 11591,
+        "bertinta": 93,
+        "diwarnaiTinta": 4377,
+        "bintikDibuang": 430
+      },
+      "rasio": 2.143037974683544,
+      "alasPerSepertiga": [
+        0.8316,
+        0.9911,
+        0.9886
+      ],
+      "gambar": [
+        {
+          "w": 560,
+          "h": 261,
+          "berkas": "trailer-560.webp",
+          "bytes": 35168
+        },
+        {
+          "w": 1000,
+          "h": 467,
+          "berkas": "trailer-1000.webp",
+          "bytes": 78586
+        },
+        {
+          "w": 1680,
+          "h": 784,
+          "berkas": "trailer-1680.webp",
+          "bytes": 151206
+        }
+      ]
+    }
+  },
+  "latar": {
+    "kantor": {
+      "sumber": "latar-kantor-pilihan-user.png",
+      "sha256": "1d627d060815e3fa6786045a3219c84dcebc540036a9ad89630e4b732dad6c3e",
+      "ukuranSumber": [
+        1672,
+        941
+      ],
+      "gambar": [
+        {
+          "w": 1100,
+          "h": 619,
+          "berkas": "kantor-latar-1100.webp",
+          "bytes": 65788
+        },
+        {
+          "w": 1672,
+          "h": 941,
+          "berkas": "kantor-latar-1672.webp",
+          "bytes": 120852
+        }
+      ],
+      "poligonDepan": [
+        [
+          0,
+          470
+        ],
+        [
+          36,
+          470
+        ],
+        [
+          392,
+          506
+        ],
+        [
+          425,
+          666
+        ],
+        [
+          1052,
+          604
+        ],
+        [
+          1558,
+          760
+        ],
+        [
+          1558,
+          941
+        ],
+        [
+          0,
+          941
+        ]
+      ],
+      "depan": [
+        {
+          "w": 1100,
+          "h": 619,
+          "berkas": "kantor-depan-1100.webp",
+          "bytes": 27684
+        },
+        {
+          "w": 1672,
+          "h": 941,
+          "berkas": "kantor-depan-1672.webp",
+          "bytes": 43916
+        }
+      ]
+    },
+    "pool": {
+      "sumber": "Colorful Truck Parking Yard Background.png",
+      "sha256": "7c803aa66dfc49a0b6d6ab69e33f0c1f594c6b03d39660ee092e801bb75d97aa",
+      "ukuranSumber": [
+        1672,
+        941
+      ],
+      "gambar": [
+        {
+          "w": 1100,
+          "h": 619,
+          "berkas": "pool-latar-1100.webp",
+          "bytes": 106060
+        },
+        {
+          "w": 1672,
+          "h": 941,
+          "berkas": "pool-latar-1672.webp",
+          "bytes": 194314
+        }
+      ]
+    },
+    "bengkel": {
+      "sumber": "Heavy Vehicle Workshop Forecourt.png",
+      "sha256": "9175f8bd192d654ee3b6702cc01dbb20d7856b637f151df55e5a1f6625b8649a",
+      "ukuranSumber": [
+        1672,
+        941
+      ],
+      "gambar": [
+        {
+          "w": 1100,
+          "h": 619,
+          "berkas": "bengkel-latar-1100.webp",
+          "bytes": 126832
+        },
+        {
+          "w": 1672,
+          "h": 941,
+          "berkas": "bengkel-latar-1672.webp",
+          "bytes": 226724
+        }
+      ]
+    },
+    "tol": {
+      "sumber": "Vibrant Highway Overpass in Daylight.png",
+      "sha256": "f1d3f3a235d69184464f0b3179c07fb911415189b6a72ed5ba06d52bc1cfc115",
+      "ukuranSumber": [
+        1672,
+        941
+      ],
+      "gambar": [
+        {
+          "w": 1100,
+          "h": 619,
+          "berkas": "tol-latar-1100.webp",
+          "bytes": 106420
+        },
+        {
+          "w": 1672,
+          "h": 941,
+          "berkas": "tol-latar-1672.webp",
+          "bytes": 195376
+        }
+      ]
+    },
+    "wawancara": {
+      "sumber": "Bright Modern Office Meeting Room.png",
+      "sha256": "781052a67084a8f7a9d3757b8a35c7397b1f3f7c98062f67443d799173c5546d",
+      "ukuranSumber": [
+        1672,
+        941
+      ],
+      "gambar": [
+        {
+          "w": 1100,
+          "h": 619,
+          "berkas": "wawancara-latar-1100.webp",
+          "bytes": 62792
+        },
+        {
+          "w": 1672,
+          "h": 941,
+          "berkas": "wawancara-latar-1672.webp",
+          "bytes": 104322
+        }
+      ]
+    }
+  }
+}

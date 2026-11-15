@@ -32,7 +32,7 @@ export const TEKS_ZH: Record<string, string> = {
   'pemeran.nasabah.nama': 'Rina 女士',
   'pemeran.nasabah.peran': '客户',
   'pemeran.missRaksa.nama': 'Miss Raksa',
-  'pemeran.missRaksa.peran': '资深理赔专员',
+  'pemeran.missRaksa.peran': '理赔专员',
 
   // ------------------------------------------------------------------ bab
   'bab.menyambut.judul': '接待客户',

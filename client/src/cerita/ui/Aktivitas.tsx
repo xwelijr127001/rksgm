@@ -5,7 +5,8 @@
  *   'intro'  kartu aktivitas SATU tugas: baris pengantar terakhir, tugas singkat, tombol "Mulai". Cara main & dokumen
  *            tidak diulang di sini (tersedia di kepala tugas saat menjawab: "Cara main", "Dokumen").
  *   'play'   adegan 2D + daftar HTML; draft jawaban di state komponen ini (ganti bahasa tidak menghapusnya karena id
- *            misi/opsi sama). Album foto ringkas ("0/3 foto"), kartu polis yang bisa diperiksa di atas pilihan
+ *            misi/opsi sama) dan disalin ke raksa:cerita:draf per kunjungan (muat ulang di HP = susunan kembali, langsung
+ *            ke tahap menjawab; dihapus saat dikirim). Album foto ringkas ("0/3 foto"), kartu polis yang bisa diperiksa di atas pilihan
  *            (MissionPlay sisipanJawab), dan dialog "foto belum lengkap" khusus cerita (konfirmasiKurang). Tanpa
  *            bahasa poin/waktu.
  *   'reveal' setelah dikirim (aksi 'aktivitas' ke mesin, dinilai sekali di klien): tanda di adegan dari
@@ -23,15 +24,22 @@ import type { MissionAnswer, MissionPublic, MissionReveal, PlayerLook, StepDef }
 import { playSfx } from '../../audio/audio';
 import { Arrow } from '../../components/PlayerShell';
 import { fxLangkah } from '../../game/aksesInfo';
+import { sanitizeDraft } from '../../game/draft';
+import { misiBergambar } from '../../game/gambar';
 import type { StageStatus } from '../../game/GameStage';
 import { MissionPlay, TandaIkon, sela } from '../../game/MissionPlay';
 import { nilaiMisi, type HasilLangkah } from '../../game/hasil';
 import { sceneFor } from '../../game/scenes';
 import { t } from '../../i18n';
 import { barisTerlihat, umpanBalikKini } from '../mesin';
+import { bacaDrafAktivitas, hapusDrafAktivitas, kunjunganAktivitas, simpanDrafAktivitas } from '../simpan';
 import { PotretMissRaksa } from '../seni/tokoh/PotretMissRaksa';
 import type { Baris, DefAktivitas, Episode, KunciTeks, NodeAktivitas, StateCerita } from '../tipe';
-import { PotretPembicara, infoPembicara } from './bagian';
+import { PotretPembicara, infoPembicara, labelPerasaan } from './bagian';
+import { PotretIlustrasi } from './gambarIlustrasi';
+import { DaftarIstilah, istilahBaris } from './KotakDialog';
+import { komposisiLatar, nasabahDiPanggung } from './latar/komposisi';
+import { PanggungLatar } from './latar/PanggungLatar';
 import { KartuPolisPeriksa } from './KartuPolisPeriksa';
 import { artiKartu, buatReveal, langkahDenganJawaban, rincianOpsi, statusAkurasi, type OpsiHasil, type RincianOpsi } from './hasilAktivitas';
 import './aktivitas.css';
@@ -56,10 +64,16 @@ export default function AktivitasCerita({ ep, state, node, bahasa, look, namaPem
   const ub = umpanBalikKini(ep, state);
   const hasil = ub?.hasil ?? null;
   const reveal = useMemo(() => (hasil ? buatReveal(def, misi, tx) : null), [hasil, def, misi, tx]);
-  const [jawaban, setJawaban] = useState<MissionAnswer>({});
+  // Susunan yang belum dikirim pada kunjungan ini (mis. HP termuat ulang) dipulihkan, disaring ke id misi yang sah.
+  // Ditetapkan saat dipasang (komponen ber-key node): setelah dikirim, state berubah tetapi draf tidak ditulis ke kunci baru.
+  const [kunjungan] = useState(() => kunjunganAktivitas(state));
+  const [jawaban, setJawaban] = useState<MissionAnswer>(() => (hasil ? {} : sanitizeDraft(misi, bacaDrafAktivitas(ep.id, kunjungan))));
   const jawabanRef = useRef(jawaban);
   jawabanRef.current = jawaban;
-  const [mulai, setMulai] = useState(false);
+  const [mulai, setMulai] = useState(() => Object.keys(jawabanRef.current).length > 0);
+  useEffect(() => {
+    if (!hasil) simpanDrafAktivitas(ep.id, kunjungan, jawaban);
+  }, [ep.id, kunjungan, jawaban, hasil]);
   const mode = hasil ? 'reveal' : mulai ? 'play' : 'intro';
   const pengantar = barisTerlihat(ep, state);
   const barisAkhir = pengantar[pengantar.length - 1] ?? null;
@@ -69,8 +83,19 @@ export default function AktivitasCerita({ ep, state, node, bahasa, look, namaPem
   // Pemandu di kartu tugas saat menjawab = potret piksel Miss Raksa (sama dengan dialog & panggung), wajah dari baris
   // Miss Raksa terakhir di pengantar aktivitas ini. Miss Raksa nonaktif: MissionPlay memakai Raki seperti biasa.
   const wajahPemandu = [...pengantar].reverse().find((b) => ep.pemeran[b.siapa]?.potret === 'missRaksa')?.ekspresi ?? 'netral';
-  const potretPemandu = TOKOH.missRaksa.aktif ? <PotretMissRaksa ekspresi={wajahPemandu} ukuran={44} /> : undefined;
+  const avatarPemandu = infoPembicara(ep, 'missRaksa', tx, namaPemain).potret?.(wajahPemandu) ?? null;
+  const potretPemandu = !TOKOH.missRaksa.aktif ? undefined
+    : avatarPemandu ? <PotretIlustrasi varian={avatarPemandu} ukuran={44} nama={infoPembicara(ep, 'missRaksa', tx, namaPemain).nama} /> : <PotretMissRaksa ekspresi={wajahPemandu} ukuran={44} />;
   const namaNasabah = pemeranNasabah ? tx(pemeranNasabah.nama) : '';
+  // Episode berpanggung latar, aktivitas TANPA adegan 2D (misi 'gambar'): visualnya panggung yang sama dengan dialognya.
+  // Aktivitas beradegan (semua aktivitas Episode 2) memakai GameStage: benda di adegan adalah tindakannya.
+  const visualLatar = useMemo(() => {
+    if (!ep.latar || !misiBergambar(misi)) return null;
+    const k = komposisiLatar(ep, state);
+    const wajah = nasabahDiPanggung(ep, k)?.ekspresi ?? 'netral';
+    const nama = (id: string) => (Object.prototype.hasOwnProperty.call(ep.pemeran, id) ? tx(ep.pemeran[id]!.nama) : id);
+    return <PanggungLatar ep={ep} komposisi={k} tx={tx} nama={nama} suasana={labelPerasaan(ep, wajah, tx)} />;
+  }, [ep, state, tx, misi]);
 
   // Langkah pilih-banyak yang objeknya DIFOTO di adegan (aktivitas bukti): penghitung & dialog memakai kata "foto".
   // sceneFor di-cache per misi & bahasa (spec yang sama dengan MissionPlay).
@@ -85,6 +110,11 @@ export default function AktivitasCerita({ ep, state, node, bahasa, look, namaPem
 
   // Dialog "belum lengkap" khusus cerita: akibat jujur, tanpa poin. Kirim tetap lewat cabang "belum lengkap" episode.
   const konfirmasiKurang = useCallback(({ terisi, wajib, langkah }: { terisi: number; wajib: number; langkah: StepDef }) => {
+    // Akibat langsung: susunan dipetakan utuh ke akibat naskah, jadi semuanya harus lengkap dulu (tanpa kirim).
+    if (node.langsung) {
+      const judul = langkah.kind === 'assign' && wajib > terisi ? t('ceritaAkt.lengkapiJudulSisa', { n: wajib - terisi }) : t('ceritaAkt.lengkapiJudul');
+      return { judul, isi: <p>{t('ceritaAkt.lengkapiIsi')}</p>, kembali: t('ceritaAkt.lengkapi'), kirim: '' };
+    }
     if (langkahFoto.has(langkah.id)) {
       return {
         judul: t('ceritaAkt.fotoKurangJudul', { n: terisi, total: wajib }),
@@ -94,7 +124,7 @@ export default function AktivitasCerita({ ep, state, node, bahasa, look, namaPem
       };
     }
     return { judul: t('ceritaAkt.kurangJudul'), isi: <p>{t('ceritaAkt.kurangAkibat')}</p>, kembali: t('ceritaAkt.lengkapi'), kirim: t('ceritaAkt.kirimApaAdanya') };
-  }, [langkahFoto, namaNasabah]);
+  }, [langkahFoto, namaNasabah, node.langsung]);
 
   // Kartu polis yang bisa diperiksa: tampil di atas pilihan selama menjawab (satu-satunya tempat kartu tampil
   // utuh di aktivitas; kartu pengantar tidak mengulangnya).
@@ -125,9 +155,11 @@ export default function AktivitasCerita({ ep, state, node, bahasa, look, namaPem
 
   const kirim = useCallback(() => {
     playSfx('kirim');
+    hapusDrafAktivitas(ep.id);
     onKirim(jawabanRef.current);
-  }, [onKirim]);
+  }, [onKirim, ep.id]);
 
+  // Mode ringan / engine gagal: kanvas tidak bisa disentuh, pilihan lewat daftar.
   const tanpaKanvas = statusAdegan === 'static' || statusAdegan === 'failed';
   const tombolMulai = t('cerita.mulaiAktivitas');
 
@@ -155,6 +187,8 @@ export default function AktivitasCerita({ ep, state, node, bahasa, look, namaPem
         labelHitung={labelHitung}
         albumRingkas
         potretPemandu={potretPemandu}
+        visual={visualLatar ?? undefined}
+        wajibLengkap={node.langsung}
         panel={() => (hasil && reveal && ub ? (
           <PanelUmpanBalik
             ep={ep}
@@ -202,7 +236,7 @@ function Ucapan({ ep, baris, lanjutan = [], look, namaPemain, tx }: {
   const p = infoPembicara(ep, baris.siapa, tx, namaPemain);
   return (
     <div className="cer-ucap" data-jenis={p.jenis}>
-      {p.jenis !== 'narasi' ? <PotretPembicara jenis={p.jenis} ekspresi={baris.ekspresi} look={look} ukuran={44} nama={p.nama} /> : null}
+      {p.jenis !== 'narasi' ? <PotretPembicara jenis={p.jenis} ekspresi={baris.ekspresi} look={look} ukuran={44} nama={p.nama} potret={p.potret} /> : null}
       <p>
         {p.jenis !== 'narasi' ? <b>{p.nama}{p.peran ? <span> · {p.peran}</span> : null}</b> : null}
         <span className="cer-ucap-teks">{tx(baris.teks)}</span>
@@ -241,6 +275,8 @@ function KartuAktivitas({ ep, misi, baris, look, namaPemain, tx, onMulai }: {
     <div className="status-panel misi-mulai cer-akt-mulai">
       <span className="status-label cer-akt-label">{t('cerita.aktivitasLabel')} · {misi.title}</span>
       {baris ? <Ucapan ep={ep} baris={baris} look={look} namaPemain={namaPemain} tx={tx} /> : null}
+      {/* Istilah baris pengantar terakhir (mis. "Apa itu Komite?"): kotak dialog sudah berganti ke kartu ini. */}
+      {baris && istilahBaris(ep, baris, tx).length ? <DaftarIstilah key={baris.teks} istilah={istilahBaris(ep, baris, tx)} /> : null}
       <div className="status-tugas">
         <span className="status-label">{t('cerita.tugasmu')}</span>
         <h2 tabIndex={-1} data-cer-fokus="">{misi.instruction}</h2>

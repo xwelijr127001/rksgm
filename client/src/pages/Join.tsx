@@ -69,7 +69,7 @@ function StatusKode({ cek, code, onCobaLagi }: { cek: Cek; code: string; onCobaL
       {cek.s === 'gagal' ? <><b>{t('alur.cekGagal')}</b><p>{t('alur.cekGagalSaran')}</p></> : null}
     </div>
     {/* Tindakan di luar wadah status supaya tidak ikut dibacakan sebagai pengumuman. */}
-    {mulai ? <Link className="quiet-link alur-cek-aksi" to={'/projector?room=' + code}>{t('pemain.tontonPermainan')} <Arrow /></Link> : null}
+    {mulai ? <Link className="quiet-link alur-cek-aksi" to={'/acara/layar?room=' + code}>{t('pemain.tontonPermainan')} <Arrow /></Link> : null}
     {cek.s === 'gagal' ? <button type="button" className="text-button alur-cek-aksi" onClick={onCobaLagi}>{t('alur.cobaLagi')}</button> : null}
   </div>;
 }
@@ -152,7 +152,7 @@ export default function Join() {
       {/* Langkah 2: bar aksi lengket di bawah layar; pesan galat ikut di dalamnya supaya selalu terlihat di dekat tombol. */}
       <div className={'alur-aksi' + (step === 1 ? ' alur-aksi-lengket' : '')}>
         {/* Pencocokan "sudah dimulai" memakai teks asli server, bukan terjemahannya. */}
-        {error ? <Pesan jenis="error"><div>{error === GALAT_LOKAL ? t(GALAT_LOKAL) : terjemahkanGalat(error)}{/sudah dimulai/i.test(error) ? <Link className="quiet-link" to={'/projector?room=' + code}>{t('pemain.tontonPermainan')} <Arrow /></Link> : null}</div></Pesan> : null}
+        {error ? <Pesan jenis="error"><div>{error === GALAT_LOKAL ? t(GALAT_LOKAL) : terjemahkanGalat(error)}{/sudah dimulai/i.test(error) ? <Link className="quiet-link" to={'/acara/layar?room=' + code}>{t('pemain.tontonPermainan')} <Arrow /></Link> : null}</div></Pesan> : null}
         {step === 1 && nama.length === 1 ? <p className="field-error" role="status">{t('pemain.namaMinimal')}</p> : null}
         {!connected && step === 1 ? <p className="connection-note" role="status">{t('pemain.menyambungkan')}</p> : null}
         <div className="alur-aksi-baris"><button className="primary-action" type="submit" disabled={step === 0 ? !bolehLanjut : nama.length < 2 || !connected || sending}>{sending ? t('pemain.sebentar') : step === 0 ? t('pemain.lanjut') : t('pemain.ikutBermain')}{!sending ? <Arrow /> : null}</button></div>

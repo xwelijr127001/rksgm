@@ -1,0 +1,178 @@
+/* ==================================================================== CMS konten cerita (/cms) */
+
+.cms-filter { display: flex; align-items: center; gap: 8px; font-weight: 600; }
+.cms-filter .kolom { width: auto; min-width: 160px; }
+.cms-buat summary, .stf-kartu > summary { cursor: pointer; min-height: 44px; display: flex; align-items: center; }
+.cms-buat-tombol { justify-content: flex-end; }
+.cms-editor { display: flex; flex-direction: column; gap: 14px; }
+.cms-editor-kepala { display: flex; justify-content: space-between; align-items: flex-end; gap: 16px; flex-wrap: wrap; }
+.cms-editor-kepala h1 { margin: 4px 0; font-size: 26px; }
+.cms-editor-aksi { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.cms-tab-isi { display: flex; flex-direction: column; gap: 14px; padding-top: 14px; }
+.cms-isian-kaki { display: flex; justify-content: space-between; gap: 8px; }
+.cms-hitung { color: #7b887d; font-variant-numeric: tabular-nums; margin-left: auto; }
+.cms-isu-galat { color: var(--merah-tua); font-weight: 600; }
+.cms-isu-peringatan { color: #6b5310; }
+.cms-isu-ok { color: #1d5a37; font-weight: 600; }
+.cms-sumber { color: #4b5d4f; background: #f4f5ed; border-radius: 6px; padding: 4px 8px; }
+.cms-pratinjau-aset { max-width: 240px; max-height: 140px; object-fit: contain; border-radius: 8px; border: 1px solid #dfe4d8; background: #fff; margin-top: 4px; }
+
+.cms-babak { display: grid; grid-template-columns: minmax(220px, 280px) minmax(0, 1fr); gap: 16px; padding-top: 14px; align-items: start; }
+.cms-babak-daftar { position: sticky; top: 8px; background: #fffefa; border: 1px solid #dfe4d8; border-radius: 14px; padding: 12px; max-height: calc(100vh - 24px); overflow-y: auto; }
+.cms-babak-daftar ol { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 4px; }
+.cms-babak-daftar button { width: 100%; display: flex; align-items: center; gap: 8px; min-height: 44px; padding: 6px 8px; border: 1px solid transparent; border-radius: 10px; background: none; text-align: left; font: inherit; cursor: pointer; color: inherit; }
+.cms-babak-daftar button:hover { background: #f3f6ee; }
+.cms-babak-daftar button.aktif { border-color: #215c40; background: #eef5e9; }
+.cms-babak-no { flex: 0 0 28px; height: 28px; border-radius: 50%; display: grid; place-items: center; background: #eef1e9; font-weight: 700; font-size: 13px; }
+.cms-babak-judul { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.cms-babak-isu { font-size: 11.5px; font-weight: 700; color: #6b5310; white-space: nowrap; }
+.cms-babak-isu.galat { color: var(--merah-tua); }
+.cms-babak-isu.ok { color: #1d5a37; }
+.cms-babak-isi { display: flex; flex-direction: column; gap: 14px; min-width: 0; }
+.cms-isu-daftar { margin: 0; padding: 10px 10px 10px 28px; border-radius: 10px; background: #fff7f5; border: 1px solid #f0c4b9; display: flex; flex-direction: column; gap: 4px; font-size: 14px; }
+.cms-dialog { list-style: none; margin: 0 0 10px; padding: 0; display: flex; flex-direction: column; gap: 10px; }
+.cms-dialog-baris { border-left: 3px solid #dfe4d8; padding-left: 10px; }
+.cms-dialog-kepala { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 4px; }
+.cms-dialog-kepala .kolom { width: auto; min-width: 140px; max-width: 100%; }
+/* Conditional line (delayed consequence): only flag holders see it, never the shared screens. */
+.cms-dialog-bersyarat { border-left: 3px dashed #7a5bb5; background: #f7f4fc; border-radius: 0 10px 10px 0; padding: 6px 8px 2px 10px; }
+.cms-dialog-syarat { flex: 1 1 260px; }
+.cms-baris-isu { display: block; margin-bottom: 4px; }
+.cms-tanda { display: inline-block; padding: 2px 9px; border-radius: 999px; font-size: 12px; font-weight: 700; background: #efe9f8; color: #4f3a7a; border: 1px dashed #7a5bb5; }
+.cms-babak-tanda { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .03em; color: #4b5d4f; background: #eef1e9; border-radius: 6px; padding: 1px 5px; }
+.cms-efek-daftar { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+.cms-efek { display: grid; grid-template-columns: minmax(0, 2fr) minmax(140px, 1fr) auto; gap: 0 12px; align-items: start; border-left: 3px dashed #7a5bb5; padding-left: 10px; }
+.cms-efek > .btn { margin-top: 26px; }
+.cms-tokoh-daftar { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 12px; }
+.cms-tokoh { border: 1px solid #dfe4d8; border-radius: 12px; padding: 12px; }
+.cms-tokoh h3 { margin: 0; }
+.cms-catatan textarea { font-size: 14px; line-height: 1.5; background: #fbfaf3; }
+.cms-catatan-ada { margin: 0; padding: 8px 12px; border-radius: 10px; background: #f4f5ed; border: 1px dashed #b9c4b3; font-size: 14px; }
+.cms-varian { margin-top: 10px; }
+.cms-varian summary { cursor: pointer; min-height: 44px; display: flex; align-items: center; font-weight: 600; color: #215c40; }
+.cms-pilihan { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 12px; }
+.cms-pilihan-item { border: 1px solid #dfe4d8; border-radius: 12px; padding: 12px; border-left-width: 5px; }
+.cms-pilihan-tepat { border-left-color: #2e9a66; }
+.cms-pilihan-kurang_tepat { border-left-color: #d8a41f; }
+.cms-pilihan-keliru { border-left-color: var(--merah); }
+/* Help under a checkbox (e.g. "Tindakan, bukan pesan"), outside its label so the box keeps a short name; aligned with the label text. */
+.cms-centang-bantu { display: block; margin: -6px 0 8px 30px; line-height: 1.45; }
+
+.cms-efek-nama { grid-column: 1 / -1; }
+.cms-tombol-rapat { margin-top: 0; gap: 6px; }
+.cms-isu-aksi { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; margin-bottom: 10px; }
+.cms-isu-aksi p { margin: 0; }
+.cms-daftar-hapus { margin: 8px 0; padding-left: 20px; display: flex; flex-direction: column; gap: 4px; }
+
+/* Round activity (chat / desk / field / classic stage): radio cards with what the participant does. */
+.cms-kegiatan { border: 1px solid #dfe4d8; border-radius: 12px; padding: 10px 12px 12px; margin: 10px 0 0; min-width: 0; }
+.cms-kegiatan legend { font-weight: 700; padding: 0 4px; }
+.cms-kegiatan > p { margin: 0 0 8px; }
+.cms-kegiatan-pilih { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 8px; }
+.cms-kegiatan-pilih .stf-opsi small { font-size: 13px; line-height: 1.4; }
+
+/* Evidence (shared information) of a round. */
+.cms-berkas-daftar { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 12px; }
+.cms-berkas { border: 1px solid #dfe4d8; border-left: 5px solid #4f6f9b; border-radius: 12px; padding: 12px; min-width: 0; }
+.cms-berkas h4 { margin: 0; font-size: 15px; overflow-wrap: anywhere; }
+.cms-berkas-baris { margin-top: 4px; }
+.cms-berkas-baris h5 { margin: 4px 0 6px; font-size: 14px; }
+.cms-berkas-baris ol { list-style: none; margin: 0 0 8px; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+.cms-berkas-baris-item { display: grid; grid-template-columns: minmax(150px, .8fr) minmax(0, 2fr) minmax(0, 1.3fr) auto; gap: 0 10px; align-items: start; border-top: 1px dashed #dfe4d8; padding-top: 6px; }
+.cms-berkas-baris-item > .stf-tombol { margin-top: 26px; }
+.cms-berkas-baris-item > small { grid-column: 1 / -1; }
+.cms-titik-isian { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 0 12px; align-items: center; }
+
+/* Field spots: the inner box is exactly the picture, so click positions are percentages of the image. */
+.cms-peta { margin: 4px 0 14px; }
+.cms-peta-wadah { padding: 20px; background: #f4f5ed; border-radius: 12px; }
+.cms-peta-bingkai { position: relative; max-width: 760px; margin: 0 auto; border-radius: 8px; box-shadow: 0 0 0 1px #cfd8c8; background: #fff; }
+.cms-peta-bingkai.bisa-taruh { cursor: crosshair; }
+.cms-peta-bingkai img { display: block; width: 100%; height: auto; border-radius: 8px; user-select: none; }
+/* No picture to show (built-in background or failed load): a neutral 16:9 grid; the reason is written above the map. */
+.cms-peta-kosong { aspect-ratio: 16 / 9; border-radius: 8px;
+  background: repeating-linear-gradient(0deg, transparent 0 calc(10% - 1px), #e3e8dc calc(10% - 1px) 10%), repeating-linear-gradient(90deg, #fbfaf3 0 calc(10% - 1px), #e3e8dc calc(10% - 1px) 10%); }
+/* The room's safe range for markers (contentEdit.SPOT_RANGE): spots are kept inside this dashed frame. */
+.cms-peta-aman { position: absolute; border: 2px dashed rgba(33, 92, 64, .75); border-radius: 6px; box-shadow: 0 0 0 1px rgba(255, 255, 255, .7), inset 0 0 0 1px rgba(255, 255, 255, .7); pointer-events: none; }
+.cms-titik { position: absolute; transform: translate(-50%, -50%); width: 36px; height: 36px; padding: 0; border-radius: 50%; border: 2px solid #fff; background: #215c40; color: #fff; font: inherit; font-weight: 700; display: grid; place-items: center; box-shadow: 0 1px 4px rgba(0, 0, 0, .4); cursor: pointer; }
+.cms-titik-catatan { grid-column: 1 / -1; }
+.cms-titik.aktif { background: #9a4a12; box-shadow: 0 0 0 3px #f2c98f, 0 1px 4px rgba(0, 0, 0, .4); }
+.cms-titik:focus-visible { outline: 3px solid #1d4ed8; outline-offset: 2px; }
+span.cms-titik { cursor: default; }
+
+/* Option audit (length tells). */
+.cms-audit { margin-top: 12px; border: 1px solid #dfe4d8; border-radius: 12px; padding: 0 12px 10px; }
+.cms-audit summary { cursor: pointer; min-height: 44px; display: flex; align-items: center; font-weight: 600; color: #215c40; }
+.cms-audit .stf-kecil { margin: 8px 0; }
+.cms-audit-tepat td { background: #f1f8f3; }
+.cms-audit-ringkas { margin: 0 0 8px; }
+.cms-audit-skenario { margin-top: 14px; }
+.cms-strategi { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 10px; margin: 0 0 12px; }
+.cms-strategi > div { padding: 10px 12px; border-radius: 10px; background: #f4f5ed; border: 1px solid transparent; }
+.cms-strategi > div.cms-strategi-lewat { background: #fff7f5; border-color: #f0c4b9; }
+.cms-strategi dt { font-size: 13px; color: #5f6f64; font-weight: 600; }
+.cms-strategi dd { margin: 2px 0 0; display: flex; flex-direction: column; gap: 2px; font-size: 13.5px; }
+.cms-strategi dd b { font-size: 18px; }
+.cms-tautan { background: none; border: 0; padding: 0; min-height: 36px; color: #215c40; font: inherit; font-weight: 600; text-decoration: underline; text-align: left; cursor: pointer; }
+/* A link-style button inside a hint line (e.g. "muat ulang daftar"): keeps the line's size, still a 24 px target. */
+.cms-tautan.cms-tautan-kecil { min-height: 24px; vertical-align: baseline; }
+.cms-audit-tabel td { vertical-align: middle; }
+.cms-audit .cms-isu-daftar { background: #fffbea; border-color: #ecd58c; }
+.cms-titik-isian > .btn { justify-self: start; }
+
+.cms-isu-semua { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+.cms-isu-semua button { width: 100%; text-align: left; min-height: 44px; padding: 8px 12px; border: 1px solid #e3e8dc; border-radius: 10px; background: #fffefa; font: inherit; cursor: pointer; }
+.cms-isu-semua button:hover { background: #f3f6ee; }
+
+.cms-pratinjau { display: flex; flex-direction: column; gap: 14px; padding-top: 14px; }
+.cms-pratinjau-kendali { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 20px; }
+.cms-pratinjau-kendali p { flex: 1 1 100%; margin: 0; }
+.cms-slider { display: flex; flex-direction: column; gap: 4px; font-weight: 600; min-width: 220px; }
+/* The round as the room shows it: one centred column; author-only facts above it and the key below it. */
+.cms-pratinjau-babak { display: flex; flex-direction: column; gap: 12px; max-width: 760px; width: 100%; margin: 0 auto; }
+.cms-pratinjau-panel { display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+.cms-pratinjau-kunci h4 { margin: 0 0 6px; font-size: 15px; }
+.cms-pratinjau-kunci .stf-gulir .stf-tabel td.cms-pratinjau-kunci-teks { white-space: normal; min-width: 260px; }
+.cms-pratinjau-akhir { display: flex; flex-direction: column; gap: 8px; }
+.cms-pratinjau-akhir h4 { margin: 6px 0 2px; font-size: 17px; }
+.cms-pratinjau-nama { margin: 0; min-width: 200px; }
+.cms-pratinjau-nama .kolom { max-width: 260px; }
+.cms-pratinjau-lompat { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; font-weight: 600; }
+.cms-pratinjau-lompat .kolom { width: auto; min-width: 80px; }
+.cms-pratinjau-lompat small { flex: 1 1 100%; font-weight: 400; color: #5f6f64; font-size: 12.5px; }
+/* Author-only facts of the preview (mood number, flags held): never part of the participant's screen. */
+.cms-pratinjau-info { margin: 0; padding: 6px 10px; border-radius: 8px; background: #f4f5ed; border: 1px dashed #b9c4b3; font-size: 13px; color: #4b5d4f; }
+.cms-pratinjau-konsekuensi { display: flex; flex-direction: column; gap: 10px; }
+.cms-pratinjau-konsekuensi .btn { align-self: flex-start; }
+
+.cms-status { display: flex; flex-wrap: wrap; gap: 10px; margin: 0 0 10px; }
+.cms-status div { padding: 8px 12px; border-radius: 10px; background: #f4f5ed; min-width: 150px; }
+.cms-status dt { font-size: 12.5px; color: #5f6f64; }
+.cms-status dd { margin: 2px 0 0; font-weight: 600; }
+.cms-riwayat { margin: 0; padding-left: 20px; display: flex; flex-direction: column; gap: 6px; }
+
+.cms-aset-daftar { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 12px; }
+.cms-aset { display: flex; flex-direction: column; gap: 6px; }
+.cms-aset h3 { margin: 4px 0 0; font-size: 16px; }
+.cms-aset.diarsipkan { opacity: .7; border-style: dashed; }
+.cms-aset-pratinjau { height: 140px; border-radius: 10px; background: #f4f5ed; display: grid; place-items: center; overflow: hidden; }
+.cms-aset-pratinjau img, .cms-aset-pratinjau video { max-width: 100%; max-height: 140px; object-fit: contain; }
+.cms-aset-pratinjau audio { width: 95%; }
+.cms-aset-bawaan { font-size: 13px; color: #5f6f64; }
+.cms-aset-meta { display: grid; grid-template-columns: auto 1fr; gap: 2px 10px; margin: 0; font-size: 13px; }
+.cms-aset-meta dt { color: #5f6f64; }
+.cms-aset-meta dd { margin: 0; overflow-wrap: anywhere; }
+
+@media (max-width: 900px) {
+  .cms-babak { grid-template-columns: minmax(0, 1fr); }
+  .cms-babak-daftar { position: static; max-height: none; }
+}
+@media (max-width: 700px) {
+  .cms-berkas-baris-item { grid-template-columns: minmax(0, 1fr); }
+  .cms-berkas-baris-item > .stf-tombol { margin-top: 0; }
+  .cms-peta-wadah { padding: 16px 12px; }
+}
+@media (max-width: 600px) {
+  .cms-efek { grid-template-columns: minmax(0, 1fr); }
+  .cms-efek > .btn { margin-top: 0; justify-self: start; }
+}

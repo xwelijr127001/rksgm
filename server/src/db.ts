@@ -6,6 +6,7 @@ import Database from 'better-sqlite3';
 import type { SoalKustom } from '../../shared/bankSoal';
 import { CONFIG } from './config';
 import type { Room } from './rooms';
+import { runStoryMigrations } from './story/db/migrations';
 
 let db: Database.Database | null = null;
 
@@ -65,6 +66,9 @@ export function getDb(): Database.Database {
       diubah INTEGER NOT NULL
     );
   `);
+  // PRD v0.2 Story Room tables (versioned migrations; legacy tables above are never altered).
+  db.pragma('foreign_keys = ON');
+  runStoryMigrations(db);
   return db;
 }
 

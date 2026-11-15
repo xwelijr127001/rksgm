@@ -22,11 +22,13 @@ import type { KamusRuang } from './index';
  */
 const kamus: KamusRuang = {
   id: {
+    bahasaBelumTersedia: 'Naskah episode ini baru tersedia dalam Bahasa Indonesia.',
+    riwayatDijalankan: 'Dijalankan',
     judulMode: 'Mode Cerita',
 
     // --- Daftar episode (/cerita)
     labelHub: 'Mode cerita',
-    eyebrowHub: 'MAIN CERITA',
+    eyebrowHub: 'PILIH EPISODE',
     hubIntro: 'Pilihanmu mengubah jalannya cerita. Main dengan santai.',
     daftarEpisodeAria: 'Daftar episode',
     episodeKe: 'Episode {n}',
@@ -46,12 +48,6 @@ const kamus: KamusRuang = {
     tombolMainLagi: 'Main lagi dari awal',
     tombolRingkasan: 'Lihat hasil',
     mainLagiKet: 'Perjalanan sebelumnya disimpan sebagai arsip; akhir yang sudah ditemukan tetap tercatat.',
-    segera: 'Episode berikutnya sedang disiapkan.',
-    caraLain: 'Cara main lain',
-    latihanMisi: 'Latihan misi',
-    latihanMisiIsi: '10 misi singkat, bisa diulang.',
-    gabungAcara: 'Gabung acara',
-    gabungAcaraIsi: 'Punya kode dari panitia? Main bersama peserta lain.',
     catatanPerangkat: 'Progres cerita tersimpan di perangkat ini.',
 
     // --- Pemain episode (/cerita/:episode)
@@ -76,6 +72,9 @@ const kamus: KamusRuang = {
     bantuanIstilah: 'Tombol “Apa itu …?” menjelaskan istilah asuransi. Ketuk lagi untuk menutupnya.',
     suasanaChip: '{nama} · {suasana}',
     suasanaAria: 'Suasana hati {nama}: {suasana}',
+    // Episode berlabel status (Episode.labelSuasana): status hubungan kumulatif, bukan ekspresi sesaat.
+    statusChip: 'Status {nama}: {suasana}',
+    statusAria: 'Status hubungan dengan {nama}: {suasana}',
     'arah.naik': 'Suasana membaik',
     'arah.turun': 'Suasana memburuk',
     'arah.tetap': 'Suasana tetap',
@@ -188,10 +187,12 @@ const kamus: KamusRuang = {
   },
 
   en: {
+    bahasaBelumTersedia: 'This episode script is only available in Indonesian for now.',
+    riwayatDijalankan: 'Done',
     judulMode: 'Story Mode',
 
     labelHub: 'Story mode',
-    eyebrowHub: 'PLAY A STORY',
+    eyebrowHub: 'CHOOSE AN EPISODE',
     hubIntro: 'Your choices change how the story goes. Play at your own pace.',
     daftarEpisodeAria: 'Episode list',
     episodeKe: 'Episode {n}',
@@ -211,12 +212,6 @@ const kamus: KamusRuang = {
     tombolMainLagi: 'Play again from the start',
     tombolRingkasan: 'See the result',
     mainLagiKet: 'Your previous run is archived; the endings you found stay recorded.',
-    segera: 'More episodes are on the way.',
-    caraLain: 'Other ways to play',
-    latihanMisi: 'Mission practice',
-    latihanMisiIsi: '10 short missions you can replay.',
-    gabungAcara: 'Join an event',
-    gabungAcaraIsi: 'Got a code from the organizers? Play together with others.',
     catatanPerangkat: 'Story progress is saved on this device.',
 
     kembaliDaftar: 'Story list',
@@ -240,6 +235,8 @@ const kamus: KamusRuang = {
     bantuanIstilah: 'The “What does … mean?” buttons explain insurance terms. Tap again to close.',
     suasanaChip: '{nama} · {suasana}',
     suasanaAria: 'Mood of {nama}: {suasana}',
+    statusChip: '{nama} status: {suasana}',
+    statusAria: 'Relationship status with {nama}: {suasana}',
     'arah.naik': 'Mood improved',
     'arah.turun': 'Mood worsened',
     'arah.tetap': 'Mood unchanged',
@@ -347,10 +344,12 @@ const kamus: KamusRuang = {
   },
 
   zh: {
+    bahasaBelumTersedia: '本集剧本目前仅提供印尼语版本。',
+    riwayatDijalankan: '已执行',
     judulMode: '故事模式',
 
     labelHub: '故事模式',
-    eyebrowHub: '剧情体验',
+    eyebrowHub: '选择剧集',
     hubIntro: '你的选择会改变故事的走向。按自己的节奏慢慢玩。',
     daftarEpisodeAria: '剧集列表',
     episodeKe: '第 {n} 集',
@@ -370,12 +369,6 @@ const kamus: KamusRuang = {
     tombolMainLagi: '从头再玩',
     tombolRingkasan: '查看结果',
     mainLagiKet: '上一次的进度会存档；已发现的结局仍会保留。',
-    segera: '更多剧集正在准备中。',
-    caraLain: '其他玩法',
-    latihanMisi: '任务练习',
-    latihanMisiIsi: '10 个简短任务，可以反复练习。',
-    gabungAcara: '加入活动',
-    gabungAcaraIsi: '有主办方提供的代码？与其他参与者一起玩。',
     catatanPerangkat: '故事进度保存在此设备上。',
 
     kembaliDaftar: '故事列表',
@@ -399,6 +392,8 @@ const kamus: KamusRuang = {
     bantuanIstilah: '“……是什么？”按钮会解释保险术语。再点一次即可收起。',
     suasanaChip: '{nama} · {suasana}',
     suasanaAria: '{nama}的心情：{suasana}',
+    statusChip: '{nama}状态：{suasana}',
+    statusAria: '与{nama}的关系状态：{suasana}',
     'arah.naik': '心情好转',
     'arah.turun': '心情变差',
     'arah.tetap': '心情未变',

@@ -1,0 +1,55 @@
+{
+  "harness": "http://127.0.0.1:4890",
+  "checks": [
+    {
+      "name": "halaman game lewat proxy berprefiks: 200",
+      "ok": true,
+      "detail": "200"
+    },
+    {
+      "name": "CSP frame-ancestors mengizinkan halaman induk",
+      "ok": true,
+      "detail": "frame-ancestors http://127.0.0.1:4890"
+    },
+    {
+      "name": "index.html memakai aset berprefiks /game/",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "API lewat prefiks; tautan gabung memakai PUBLIC_BASE_URL berprefiks",
+      "ok": true,
+      "detail": "http://127.0.0.1:4890/game"
+    },
+    {
+      "name": "Socket.IO (WebSocket) tersambung lewat proxy berprefiks",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "halaman induk memuat landing game di iframe",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "bergabung ke room dari dalam iframe (rute /game/room/…)",
+      "ok": true,
+      "detail": "http://127.0.0.1:4890/game/room/CJ4BJM"
+    },
+    {
+      "name": "satu babak dimainkan di dalam iframe (jawab -> konsekuensi pribadi)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "tidak ada aset/API berprefiks yang gagal (404/5xx)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "origin lain (bukan FRAME_ANCESTORS) tidak bisa membingkai game",
+      "ok": true,
+      "detail": "Framing 'http://localhost:4890/' violates the following Content Security Policy directive: \"frame-ancestors http://127.0.0.1:4890\". The request has been blocked.\n"
+    }
+  ]
+}

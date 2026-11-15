@@ -149,7 +149,7 @@ export function KotakDialog({
       <div className="cer-dialog-badan">
         {!narasi ? (
           <BatasPotret kunci={`${pembicara.jenis}|${ekspresi ?? ''}`} nama={pembicara.nama} ukuran={52}>
-            <PotretPembicara jenis={pembicara.jenis} ekspresi={ekspresi} look={look} ukuran={52} nama={pembicara.nama} />
+            <PotretPembicara jenis={pembicara.jenis} ekspresi={ekspresi} look={look} ukuran={52} nama={pembicara.nama} potret={pembicara.potret} />
           </BatasPotret>
         ) : null}
         <div className="cer-dialog-isi">

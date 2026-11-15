@@ -9,6 +9,10 @@ import type { KamusRuang } from './index';
  */
 const kamus: KamusRuang = {
   id: {
+    // Aktivitas berakibat langsung (episode berpanggung latar): susunan harus lengkap sebelum dijalankan.
+    lengkapiJudul: 'Belum lengkap',
+    lengkapiJudulSisa: 'Masih {n} lagi yang belum ditempatkan',
+    lengkapiIsi: 'Selesaikan dulu semuanya. Susunan yang lengkap menentukan apa yang terjadi berikutnya di cerita.',
     // Penghitung album foto (MissionPlay labelHitung).
     hitungFoto: '{n}/{maks} foto',
     // Keterangan di bawah adegan sebelum "Mulai" bila gambar tidak bisa disentuh (mode ringan / engine gagal).
@@ -36,6 +40,9 @@ const kamus: KamusRuang = {
     kartuKet: 'Ketuk baris kartu untuk melihat artinya.',
   },
   en: {
+    lengkapiJudul: 'Not complete yet',
+    lengkapiJudulSisa: '{n} more still to place',
+    lengkapiIsi: 'Finish every part first. The complete arrangement decides what happens next in the story.',
     hitungFoto: '{n}/{maks} photos',
     ketDaftarMulai: 'After you press “{tombol}”, the choices are available as a list.',
     fotoKurangJudul: 'Only {n} of {total} photos chosen',
@@ -56,6 +63,9 @@ const kamus: KamusRuang = {
     kartuKet: 'Tap a line on the card to see what it means.',
   },
   zh: {
+    lengkapiJudul: '还没有完成',
+    lengkapiJudulSisa: '还有 {n} 个未放置',
+    lengkapiIsi: '请先全部完成。完整的安排决定故事接下来的发展。',
     hitungFoto: '{n}/{maks} 张照片',
     ketDaftarMulai: '按下“{tombol}”后，可以从列表中选择。',
     fotoKurangJudul: '只选了 {n}/{total} 张照片',

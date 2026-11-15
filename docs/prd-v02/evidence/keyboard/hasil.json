@@ -1,0 +1,45 @@
+{
+  "base": "http://127.0.0.1:4820",
+  "checks": [
+    {
+      "name": "Tab mencapai kolom kode Join Game",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "pemberitahuan dicentang dengan Spasi",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Tab berikutnya ke tombol \"Masuk ke room\"",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "masuk lobi tanpa mouse",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "panah memilih opsi dalam grup radio",
+      "ok": true,
+      "detail": "opsi 1"
+    },
+    {
+      "name": "fokus keyboard terlihat pada opsi",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Tab berikutnya ke tombol \"Kunci jawaban\"",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "jawaban terkunci dengan Enter dan konsekuensi tampil",
+      "ok": true,
+      "detail": ""
+    }
+  ]
+}

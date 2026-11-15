@@ -1,0 +1,139 @@
+﻿
+> raksa-game@1.0.0 build
+> npm -w @raksa/client run build && npm -w @raksa/server run build
+
+
+> @raksa/client@1.0.0 build
+> vite build
+
+vite v6.4.3 building for production...
+transforming...
+node.exe : 
+At line:1 char:1
++ & "C:\Users\User\AppData\Local\hermes\node/node.exe" "C:\Users\User\A ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+__VITE_PUBLIC_ASSET__3240112b__ referenced in __VITE_PUBLIC_ASSET__3240112b__ didn't resolve at build time, it will 
+remain unchanged to be resolved at runtime
+
+__VITE_PUBLIC_ASSET__5d706b92__ referenced in __VITE_PUBLIC_ASSET__5d706b92__ didn't resolve at build time, it will 
+remain unchanged to be resolved at runtime
+
+__VITE_PUBLIC_ASSET__ce3dc01c__ referenced in __VITE_PUBLIC_ASSET__ce3dc01c__ didn't resolve at build time, it will 
+remain unchanged to be resolved at runtime
+
+__VITE_PUBLIC_ASSET__b9cfcab3__ referenced in __VITE_PUBLIC_ASSET__b9cfcab3__ didn't resolve at build time, it will 
+remain unchanged to be resolved at runtime
+
+__VITE_PUBLIC_ASSET__ad5be85c__ referenced in __VITE_PUBLIC_ASSET__ad5be85c__ didn't resolve at build time, it will 
+remain unchanged to be resolved at runtime
+
+__VITE_PUBLIC_ASSET__b2acf4d7__ referenced in __VITE_PUBLIC_ASSET__b2acf4d7__ didn't resolve at build time, it will 
+remain unchanged to be resolved at runtime
+✓ 427 modules transformed.
+rendering chunks...
+computing gzip size...
+dist/assets/ruang-prop-cangkir-BGKbXY5v.png                   0.28 kB
+dist/assets/ruang-prop-kunci-C4j8WBfw.png                     0.29 kB
+dist/assets/ruang-prop-kartu-tangan-BZCEn8ks.png              0.29 kB
+dist/assets/ruang-prop-gagang-C2aUtlZL.png                    0.33 kB
+dist/assets/ruang-prop-kartu-YLSYOXwR.png                     0.39 kB
+dist/assets/ruang-prop-map-DfEelKxR.png                       0.41 kB
+dist/assets/ruang-prop-telepon-tanpa-gagang-BvLTjffR.png      0.49 kB
+dist/assets/ikon-miss-raksa-sPtgfsOa.png                      0.51 kB
+dist/assets/ikon-bu-rina-IXPK5gfe.png                         0.53 kB
+dist/assets/ruang-prop-telepon-D7t9GwQy.png                   0.56 kB
+dist/assets/ruang-meja-daun-DSFaoxPb.png                      0.80 kB
+dist/assets/ruang-meja-depan-meja-NDDncCqV.png                0.86 kB
+dist/assets/ruang-pintu-luar-koridor-BBlqnXsQ.png             0.89 kB
+dist/index.html                                               0.97 kB │ gzip:   0.56 kB
+dist/assets/ruang-meja-koridor-BYgGVRHe.png                   1.23 kB
+dist/assets/ruang-pintu-luar-daun-MDXViYO4.png                1.34 kB
+dist/assets/ruang-meja-belakang-meja-89mXUJr7.png             2.68 kB
+dist/assets/ruang-telepon-belakang-meja-Dgm3hjCC.png          2.92 kB
+dist/assets/ruang-meja-kursi-belakang-Cw0tbEg-.png            3.74 kB
+dist/assets/ruang-parkiran-latar-BpTz9tDy.png                12.01 kB
+dist/assets/ruang-meja-latar-BX66auiM.png                    14.06 kB
+dist/assets/ruang-pintu-luar-latar-biM8eJfQ.png              14.30 kB
+dist/assets/miss-raksa-Yx2BvXob.png                          19.97 kB
+dist/assets/bu-rina-Djt5sFbm.png                             54.53 kB
+dist/assets/mode-BWy0pd0D.css                                 0.50 kB │ gzip:   0.28 kB
+dist/assets/AdminApp-cEBrOiYD.css                             1.03 kB │ gzip:   0.47 kB
+dist/assets/tokoh-Ba1EGuXh.css                                4.94 kB │ gzip:   1.41 kB
+dist/assets/CmsApp-L2w0rGF3.css                               5.41 kB │ gzip:   1.48 kB
+dist/assets/StaffShell-EUVvZLLg.css                           5.62 kB │ gzip:   1.65 kB
+dist/assets/Panggung-DjMQujCA.css                             5.68 kB │ gzip:   1.69 kB
+dist/assets/CeritaMain-CZUWEJOr.css                          11.03 kB │ gzip:   2.86 kB
+dist/assets/story-DujXtudv.css                               13.96 kB │ gzip:   3.45 kB
+dist/assets/Host-D3odOUVZ.css                                14.60 kB │ gzip:   3.03 kB
+dist/assets/solo-D4wnIT1g.css                                17.13 kB │ gzip:   3.92 kB
+dist/assets/cerita-DlEY-XBD.css                              17.38 kB │ gzip:   4.10 kB
+dist/assets/stage-BhN7db90.css                               25.92 kB │ gzip:   5.77 kB
+dist/assets/index-6ABdDuX7.css                               41.94 kB │ gzip:   9.53 kB
+dist/assets/types-D84lwcUO.js                                 0.04 kB │ gzip:   0.06 kB
+dist/assets/errors-mABUuyBX.js                                0.23 kB │ gzip:   0.19 kB
+dist/assets/protocol-Qm6IZN1I.js                              0.24 kB │ gzip:   0.19 kB
+dist/assets/prefetch-3pbO-jEZ.js                              0.59 kB │ gzip:   0.36 kB
+dist/assets/Merek-DAx2voUu.js                                 0.63 kB │ gzip:   0.37 kB
+dist/assets/TombolKeluar-BPZpgyCP.js                          0.81 kB │ gzip:   0.45 kB
+dist/assets/TombolGerak-DXnlj2c3.js                           1.20 kB │ gzip:   0.65 kB
+dist/assets/music-CXHIlPe8.js                                 1.23 kB │ gzip:   0.71 kB
+dist/assets/Surveyor-DIsYqfdM.js                              1.52 kB │ gzip:   0.67 kB
+dist/assets/names-B7hIrm7j.js                                 1.62 kB │ gzip:   0.80 kB
+dist/assets/PlayerShell-DyqL1J4i.js                           2.49 kB │ gzip:   0.99 kB
+dist/assets/hasil-CGcBRFQs.js                                 2.57 kB │ gzip:   1.04 kB
+dist/assets/Tutorial-COlz7kWY.js                              2.59 kB │ gzip:   1.18 kB
+dist/assets/KarakterTokoh-DNHxXFF1.js                         2.91 kB │ gzip:   1.09 kB
+dist/assets/Kenalan-HMg2GCC_.js                               2.98 kB │ gzip:   1.39 kB
+dist/assets/profil-BeZXMTta.js                                3.15 kB │ gzip:   1.38 kB
+dist/assets/tokoh-B982ng7z.js                                 3.16 kB │ gzip:   1.53 kB
+dist/assets/CharacterPicker-CckoTAVw.js                       3.23 kB │ gzip:   1.20 kB
+dist/assets/Lobby-C1X36PPF.js                                 3.68 kB │ gzip:   1.49 kB
+dist/assets/Raki-DkCKQiC0.js                                  3.91 kB │ gzip:   1.54 kB
+dist/assets/solo-YaHnxIe5.js                                  3.93 kB │ gzip:   1.62 kB
+dist/assets/Solo-BFtS1Y3T.js                                  4.07 kB │ gzip:   1.47 kB
+dist/assets/Result-CM3qnnBT.js                                4.08 kB │ gzip:   1.64 kB
+dist/assets/participant-Dk_mR5jG.js                           4.48 kB │ gzip:   1.91 kB
+dist/assets/StoryJoin-Cx7puPJr.js                             5.58 kB │ gzip:   2.11 kB
+dist/assets/SoloHasil-BVEq7ONj.js                             5.72 kB │ gzip:   2.19 kB
+dist/assets/draft-HFojxZCO.js                                 6.58 kB │ gzip:   2.41 kB
+dist/assets/StoryProjector-CgGptfRw.js                        6.60 kB │ gzip:   2.27 kB
+dist/assets/StaffShell-DTDsB-k1.js                            7.05 kB │ gzip:   2.70 kB
+dist/assets/Join-C3mOymVc.js                                  7.89 kB │ gzip:   3.02 kB
+dist/assets/Landing-DaPm-i5A.js                               8.25 kB │ gzip:   2.97 kB
+dist/assets/SoloMain-DoLAvAuC.js                              8.43 kB │ gzip:   3.41 kB
+dist/assets/Cerita-Dtq1iq6O.js                                8.51 kB │ gzip:   3.58 kB
+dist/assets/characters-CdQtULUy.js                            8.77 kB │ gzip:   3.36 kB
+dist/assets/Aktivitas-a1K8v7MG.js                             8.96 kB │ gzip:   3.51 kB
+dist/assets/Play-BNmrs1rc.js                                  9.16 kB │ gzip:   3.45 kB
+dist/assets/StoryHost-e-Rfl33p.js                            11.26 kB │ gzip:   3.82 kB
+dist/assets/parts-D8emLCMj.js                                12.65 kB │ gzip:   4.77 kB
+dist/assets/StoryRoom-omAAQYGE.js                            15.17 kB │ gzip:   4.62 kB
+dist/assets/missions-BCOug6CE.js                             17.73 kB │ gzip:   5.24 kB
+dist/assets/stage-DU6zOFpK.js                                22.63 kB │ gzip:   8.58 kB
+dist/assets/Projector-pw8uNncY.js                            24.13 kB │ gzip:   7.80 kB
+dist/assets/AdminApp-BdIMySUB.js                             25.15 kB │ gzip:   6.70 kB
+dist/assets/MissionPlay-Knf4mAQo.js                          34.40 kB │ gzip:  10.81 kB
+dist/assets/CeritaMain-CXGXOxG-.js                           44.75 kB │ gzip:  13.05 kB
+dist/assets/Host-D6cZK1Hf.js                                 60.03 kB │ gzip:  16.53 kB
+dist/assets/Panggung-C3FmCpy1.js                             65.87 kB │ gzip:  23.23 kB
+dist/assets/CmsApp-Dq1xq4Gp.js                               71.32 kB │ gzip:  20.56 kB
+dist/assets/mode-D7lM2t_B.js                                 87.29 kB │ gzip:  31.77 kB
+dist/assets/cerita-DeGcL2db.js                              128.58 kB │ gzip:  36.37 kB
+dist/assets/stage-pLciIkUn.js                               176.25 kB │ gzip:  58.39 kB
+dist/assets/m01-parkiran-EDhAW1OQ.js                        197.19 kB │ gzip:  63.06 kB
+dist/assets/index-DvzGAzg4.js                               657.27 kB │ gzip: 214.82 kB
+dist/assets/phaser.esm-DMjGVukU.js                        1,685.68 kB │ gzip: 381.66 kB
+
+(!) Some chunks are larger than 900 kB after minification. Consider:
+- Using dynamic import() to code-split the application
+- Use build.rollupOptions.output.manualChunks to improve chunking: 
+https://rollupjs.org/configuration-options/#output-manualchunks
+- Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
+✓ built in 3.56s
+
+> @raksa/server@1.0.0 build
+> tsc -p tsconfig.json
+

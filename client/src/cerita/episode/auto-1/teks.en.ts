@@ -38,7 +38,7 @@ export const TEKS_EN: Record<string, string> = {
   'pemeran.nasabah.nama': 'Mrs Rina',
   'pemeran.nasabah.peran': 'Customer',
   'pemeran.missRaksa.nama': 'Miss Raksa',
-  'pemeran.missRaksa.peran': 'Senior Claims Officer',
+  'pemeran.missRaksa.peran': 'Claims Officer',
 
   // ------------------------------------------------------------------ bab
   'bab.menyambut.judul': 'Welcoming',

@@ -1,0 +1,866 @@
+{
+  "base": "http://127.0.0.1:4820",
+  "phases": [
+    "landing",
+    "main",
+    "cms",
+    "admin",
+    "peran",
+    "aset"
+  ],
+  "startedAt": "2026-10-30T11:31:26.273Z",
+  "durationSec": 730,
+  "state": {
+    "codeA": "PVUC3J",
+    "codeB": "29CSC6",
+    "startedAt": 1793359916361,
+    "durationA": 656149,
+    "sessionMinutesA": 10.9316,
+    "cmsTitle": "Skenario UI Uji Terima wl1kj",
+    "cmsScenarioId": "sc_5b39e79e-870"
+  },
+  "passed": 168,
+  "failed": 0,
+  "checks": [
+    {
+      "name": "landing hp390: Join Game + tombol Mulai (review #2, #4)",
+      "ok": true,
+      "detail": "{\"joinTitle\":\"Join Game\",\"mulai\":\"Mulai\",\"joinBottom\":423.125,\"vh\":844,\"slogan\":\"Miss Raksa · Senior Layanan Klaimanytime anywhere with our smile\",\"caraLain\":false,\"legacyDoors\":false,\"surveyor\":true,\"isti\":false}"
+    },
+    {
+      "name": "landing hp390: Join Game utuh di layar pertama HP (review #4)",
+      "ok": true,
+      "detail": "bawah=423.125 tinggi=844"
+    },
+    {
+      "name": "landing hp390: ikon surveyor, bukan Bu Isti (review #6)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "landing hp390: sapaan Miss Raksa \"anytime anywhere with our smile\" (review #1)",
+      "ok": true,
+      "detail": "Miss Raksa · Senior Layanan Klaimanytime anywhere with our smile"
+    },
+    {
+      "name": "landing hp390: tanpa \"Cara main lain\"; mode lama tidak tampil di MVP (review #3, D-03)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "landing hp390: tanpa luapan horizontal",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "landing hp390: tanpa galat JS",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "landing hp360: Join Game + tombol Mulai (review #2, #4)",
+      "ok": true,
+      "detail": "{\"joinTitle\":\"Join Game\",\"mulai\":\"Mulai\",\"joinBottom\":423.125,\"vh\":740,\"slogan\":\"Miss Raksa · Senior Layanan Klaimanytime anywhere with our smile\",\"caraLain\":false,\"legacyDoors\":false,\"surveyor\":true,\"isti\":false}"
+    },
+    {
+      "name": "landing hp360: Join Game utuh di layar pertama HP (review #4)",
+      "ok": true,
+      "detail": "bawah=423.125 tinggi=740"
+    },
+    {
+      "name": "landing hp360: ikon surveyor, bukan Bu Isti (review #6)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "landing hp360: sapaan Miss Raksa \"anytime anywhere with our smile\" (review #1)",
+      "ok": true,
+      "detail": "Miss Raksa · Senior Layanan Klaimanytime anywhere with our smile"
+    },
+    {
+      "name": "landing hp360: tanpa \"Cara main lain\"; mode lama tidak tampil di MVP (review #3, D-03)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "landing hp360: tanpa luapan horizontal",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "landing hp360: tanpa galat JS",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "landing mendatar: Join Game + tombol Mulai (review #2, #4)",
+      "ok": true,
+      "detail": "{\"joinTitle\":\"Join Game\",\"mulai\":\"Mulai\",\"joinBottom\":330.40625,\"vh\":390,\"slogan\":\"Miss Raksa · Senior Layanan Klaimanytime anywhere with our smile\",\"caraLain\":false,\"legacyDoors\":false,\"surveyor\":true,\"isti\":false}"
+    },
+    {
+      "name": "landing mendatar: Join Game utuh di layar pertama HP (review #4)",
+      "ok": true,
+      "detail": "bawah=330.40625 tinggi=390"
+    },
+    {
+      "name": "landing mendatar: ikon surveyor, bukan Bu Isti (review #6)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "landing mendatar: sapaan Miss Raksa \"anytime anywhere with our smile\" (review #1)",
+      "ok": true,
+      "detail": "Miss Raksa · Senior Layanan Klaimanytime anywhere with our smile"
+    },
+    {
+      "name": "landing mendatar: tanpa \"Cara main lain\"; mode lama tidak tampil di MVP (review #3, D-03)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "landing mendatar: tanpa luapan horizontal",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "landing mendatar: tanpa galat JS",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "landing desktop: Join Game + tombol Mulai (review #2, #4)",
+      "ok": true,
+      "detail": "{\"joinTitle\":\"Join Game\",\"mulai\":\"Mulai\",\"joinBottom\":648.5625,\"vh\":900,\"slogan\":\"Miss Raksa · Senior Layanan Klaimanytime anywhere with our smile\",\"caraLain\":false,\"legacyDoors\":false,\"surveyor\":true,\"isti\":false}"
+    },
+    {
+      "name": "landing desktop: ikon surveyor, bukan Bu Isti (review #6)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "landing desktop: sapaan Miss Raksa \"anytime anywhere with our smile\" (review #1)",
+      "ok": true,
+      "detail": "Miss Raksa · Senior Layanan Klaimanytime anywhere with our smile"
+    },
+    {
+      "name": "landing desktop: tanpa \"Cara main lain\"; mode lama tidak tampil di MVP (review #3, D-03)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "landing desktop: tanpa luapan horizontal",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "landing desktop: tanpa galat JS",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "rute mode lama /solo tertutup (kembali ke /)",
+      "ok": true,
+      "detail": "http://127.0.0.1:4820/"
+    },
+    {
+      "name": "rute mode lama /cerita tertutup (kembali ke /)",
+      "ok": true,
+      "detail": "http://127.0.0.1:4820/"
+    },
+    {
+      "name": "rute mode lama /kenalan tertutup (kembali ke /)",
+      "ok": true,
+      "detail": "http://127.0.0.1:4820/"
+    },
+    {
+      "name": "rute mode lama /acara/join tertutup (kembali ke /)",
+      "ok": true,
+      "detail": "http://127.0.0.1:4820/"
+    },
+    {
+      "name": "rute mode lama /acara/host tertutup (kembali ke /)",
+      "ok": true,
+      "detail": "http://127.0.0.1:4820/"
+    },
+    {
+      "name": "rute mode lama /lobby tertutup (kembali ke /)",
+      "ok": true,
+      "detail": "http://127.0.0.1:4820/"
+    },
+    {
+      "name": "rute mode lama /main tertutup (kembali ke /)",
+      "ok": true,
+      "detail": "http://127.0.0.1:4820/"
+    },
+    {
+      "name": "API mode lama /api/missions ditolak server (404) saat RAKSA_LEGACY=off",
+      "ok": true,
+      "detail": "404"
+    },
+    {
+      "name": "kode 4 karakter di MVP: tidak diteruskan ke kuis lama",
+      "ok": true,
+      "detail": "http://127.0.0.1:4820/join?room=AB12"
+    },
+    {
+      "name": "dua skenario demo terbit tersedia untuk host",
+      "ok": true,
+      "detail": "[DEMO] Baret di Parkiran Pasar, [DEMO] Mobil Terendam Banjir"
+    },
+    {
+      "name": "skenario A: 15 babak × 5 pilihan",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "skenario B: 15 babak × 5 pilihan",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "dua room terpisah dengan kode 6 karakter",
+      "ok": true,
+      "detail": "PVUC3J 29CSC6"
+    },
+    {
+      "name": "pemberitahuan nama tampil di papan peringkat & pengumuman pemenang sebelum masuk (FR-E7, #19)",
+      "ok": true,
+      "detail": "Pemberitahuan data pribadiNama yang kamu isi akan tampil di papan peringkat room ini dan di layar acara, dan dapat dipak"
+    },
+    {
+      "name": "tanpa centang persetujuan: tidak bisa masuk",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "nama kosong ditolak",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "nama tidak pantas ditolak",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "nama kembar (beda huruf besar/spasi) ditolak",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "room penuh: peserta ke-5 ditolak dengan pesan jelas",
+      "ok": true,
+      "detail": "Kembali\nBahasa\nID\nEN\nJoin Game\n\nMasukkan kode room dari host. Tanpa akun: cukup kode dan nama.\n\nPVUC3J\n[DEMO] Baret di Parkiran Pasar\nKategori Auto · 4 dari 4 p"
+    },
+    {
+      "name": "layar acara lobi menampilkan nama peserta",
+      "ok": true,
+      "detail": "Ani Best,Budi Poor,Citra Mix,Dodi Putus"
+    },
+    {
+      "name": "room scene-hp390: tanpa luapan horizontal",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "room scene-hp360: tanpa luapan horizontal",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "room scene-mendatar: tanpa luapan horizontal",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "room scene-desktop: tanpa luapan horizontal",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "room answering-hp390: tanpa luapan horizontal",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "room answering-hp390: 5 pilihan terlihat",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "room answering-hp390: tombol \"Kunci jawaban\" tidak tertutup",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "room answering-hp390: timer 30 detik terlihat (#11–#14)",
+      "ok": true,
+      "detail": "Sisa waktu menjawab 30 detik"
+    },
+    {
+      "name": "room answering-hp360: tanpa luapan horizontal",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "room answering-hp360: 5 pilihan terlihat",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "room answering-hp360: tombol \"Kunci jawaban\" tidak tertutup",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "room answering-hp360: timer 30 detik terlihat (#11–#14)",
+      "ok": true,
+      "detail": "Sisa waktu menjawab 30 detik"
+    },
+    {
+      "name": "room answering-mendatar: tanpa luapan horizontal",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "room answering-mendatar: 5 pilihan terlihat",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "room answering-mendatar: tombol \"Kunci jawaban\" tidak tertutup",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "room answering-mendatar: timer 30 detik terlihat (#11–#14)",
+      "ok": true,
+      "detail": "Sisa waktu menjawab 30 detik"
+    },
+    {
+      "name": "room answering-desktop: tanpa luapan horizontal",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "room answering-desktop: 5 pilihan terlihat",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "room answering-desktop: tombol \"Kunci jawaban\" tidak tertutup",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "room answering-desktop: timer 30 detik terlihat (#11–#14)",
+      "ok": true,
+      "detail": "Sisa waktu menjawab 30 detik"
+    },
+    {
+      "name": "room consequence-hp390: tanpa luapan horizontal",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "room consequence-hp360: tanpa luapan horizontal",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "room consequence-mendatar: tanpa luapan horizontal",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "room consequence-desktop: tanpa luapan horizontal",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "room leaderboard-hp390: tanpa luapan horizontal",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "room leaderboard-hp360: tanpa luapan horizontal",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "room leaderboard-mendatar: tanpa luapan horizontal",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "room leaderboard-desktop: tanpa luapan horizontal",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "host terputus: room tetap hidup dan menunggu (tidak direset)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "host masuk lagi di tab baru dan mengambil alih room yang sama",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "peserta yang putus kembali ke babak BERJALAN dengan kredensial room (bukan nama)",
+      "ok": true,
+      "detail": "babak 5"
+    },
+    {
+      "name": "semua peserta mencapai ringkasan akhir di kedua room",
+      "ok": true,
+      "detail": "Ani Best:true Budi Poor:true Citra Mix:true Dodi Putus:true Eko Terbaik:true Fani Campur:true Gilang Lambat:true"
+    },
+    {
+      "name": "Ani Best: ringkasan berisi 15 keputusan + akhir + rincian 70:30 + peringkat",
+      "ok": true,
+      "detail": "{\"decisions\":15,\"ending\":\"Happy ending penuh\",\"total\":\"14.587\",\"explain\":true,\"rank\":\"Peringkatmu: 1 dari 4\",\"timeouts\":\"0\"}"
+    },
+    {
+      "name": "Ani Best: ringkasan tanpa luapan horizontal (hp390)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Budi Poor: ringkasan berisi 15 keputusan + akhir + rincian 70:30 + peringkat",
+      "ok": true,
+      "detail": "{\"decisions\":15,\"ending\":\"Selesai dengan catatan\",\"total\":\"0\",\"explain\":true,\"rank\":\"Peringkatmu: 4 dari 4\",\"timeouts\":\"0\"}"
+    },
+    {
+      "name": "Budi Poor: ringkasan tanpa luapan horizontal (hp360)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Citra Mix: ringkasan berisi 15 keputusan + akhir + rincian 70:30 + peringkat",
+      "ok": true,
+      "detail": "{\"decisions\":15,\"ending\":\"Selesai dengan catatan\",\"total\":\"6.990\",\"explain\":true,\"rank\":\"Peringkatmu: 3 dari 4\",\"timeouts\":\"5\"}"
+    },
+    {
+      "name": "Citra Mix: ringkasan tanpa luapan horizontal (mendatar)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Dodi Putus: ringkasan berisi 15 keputusan + akhir + rincian 70:30 + peringkat",
+      "ok": true,
+      "detail": "{\"decisions\":15,\"ending\":\"Happy ending penuh\",\"total\":\"11.587\",\"explain\":true,\"rank\":\"Peringkatmu: 2 dari 4\",\"timeouts\":\"3\"}"
+    },
+    {
+      "name": "Dodi Putus: ringkasan tanpa luapan horizontal (desktop)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "jalur terbaik (Ani) mendapat happy ending penuh",
+      "ok": true,
+      "detail": "Happy ending penuh"
+    },
+    {
+      "name": "jalur terburuk (Budi) tidak mendapat happy ending",
+      "ok": true,
+      "detail": "Selesai dengan catatan"
+    },
+    {
+      "name": "Citra: 5 babak waktu habis tercatat 0 poin",
+      "ok": true,
+      "detail": "5"
+    },
+    {
+      "name": "Dodi: babak yang terlewat saat putus tercatat waktu habis",
+      "ok": true,
+      "detail": "3"
+    },
+    {
+      "name": "layar acara menampilkan peringkat akhir room A",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Ani Best: payload publik tanpa kunci/status pribadi",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Ani Best: tidak ada kunci jawaban/bobot di payload mana pun",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Ani Best: hanya menerima status pribadinya sendiri",
+      "ok": true,
+      "detail": "42b791aa-137"
+    },
+    {
+      "name": "Ani Best: tanpa galat JS",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Budi Poor: payload publik tanpa kunci/status pribadi",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Budi Poor: tidak ada kunci jawaban/bobot di payload mana pun",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Budi Poor: hanya menerima status pribadinya sendiri",
+      "ok": true,
+      "detail": "db5e4037-6db"
+    },
+    {
+      "name": "Budi Poor: tanpa galat JS",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Citra Mix: payload publik tanpa kunci/status pribadi",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Citra Mix: tidak ada kunci jawaban/bobot di payload mana pun",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Citra Mix: hanya menerima status pribadinya sendiri",
+      "ok": true,
+      "detail": "8ea93a94-9a5"
+    },
+    {
+      "name": "Citra Mix: tanpa galat JS",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Dodi Putus: payload publik tanpa kunci/status pribadi",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Dodi Putus: tidak ada kunci jawaban/bobot di payload mana pun",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Dodi Putus: hanya menerima status pribadinya sendiri",
+      "ok": true,
+      "detail": "5f87b61f-23f"
+    },
+    {
+      "name": "Dodi Putus: tanpa galat JS",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Eko Terbaik: payload publik tanpa kunci/status pribadi",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Eko Terbaik: tidak ada kunci jawaban/bobot di payload mana pun",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Eko Terbaik: hanya menerima status pribadinya sendiri",
+      "ok": true,
+      "detail": "fcbbc4c3-767"
+    },
+    {
+      "name": "Eko Terbaik: tanpa galat JS",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Fani Campur: payload publik tanpa kunci/status pribadi",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Fani Campur: tidak ada kunci jawaban/bobot di payload mana pun",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Fani Campur: hanya menerima status pribadinya sendiri",
+      "ok": true,
+      "detail": "c38c6a5b-2c2"
+    },
+    {
+      "name": "Fani Campur: tanpa galat JS",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Gilang Lambat: payload publik tanpa kunci/status pribadi",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Gilang Lambat: tidak ada kunci jawaban/bobot di payload mana pun",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Gilang Lambat: hanya menerima status pribadinya sendiri",
+      "ok": true,
+      "detail": "b3fb455b-370"
+    },
+    {
+      "name": "Gilang Lambat: tanpa galat JS",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "pilihan dan konsekuensi tidak pernah dikirim bersamaan (benar/salah tidak bocor saat menjawab)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "room selesai tidak bisa dimasuki lagi (tanpa reset/ulang)",
+      "ok": true,
+      "detail": "Kembali\nBahasa\nID\nEN\nJoin Game\n\nMasukkan kode room dari host. Tanpa akun: cukup kode dan nama.\n\nPVUC3J\n[DEMO] Baret di Parkiran Pasar\nKategori Auto · 4 dari 4 p"
+    },
+    {
+      "name": "host tidak bisa memulai ulang room yang selesai (socket)",
+      "ok": true,
+      "detail": "{\"ok\":false,\"code\":\"closed\",\"error\":\"Room sudah ditutup. Satu room hanya memainkan satu sesi; buka room baru.\"}"
+    },
+    {
+      "name": "hasil pribadi tetap terbuka setelah muat ulang",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "room A: 15 babak tercatat",
+      "ok": true,
+      "detail": "15"
+    },
+    {
+      "name": "babak tertutup otomatis begitu semua menjawab (FR-B6, review #17), tanpa menunggu timer",
+      "ok": true,
+      "detail": "babak all_answered=8 jeda maks=1ms"
+    },
+    {
+      "name": "babak dengan waktu habis ditutup tepat di batas 30 detik",
+      "ok": true,
+      "detail": "30015,30010,30005,30015,30003,30002,30009"
+    },
+    {
+      "name": "durasi sesi room A diukur (target ±14 menit, bukan jaminan)",
+      "ok": true,
+      "detail": "10.9 menit"
+    },
+    {
+      "name": "admin sistem mengunggah aset latar dengan metadata sumber/lisensi lewat UI",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "unggahan tanpa berkas gambar valid ditolak",
+      "ok": true,
+      "detail": "400"
+    },
+    {
+      "name": "skenario kosong gagal validasi dengan pesan spesifik",
+      "ok": true,
+      "detail": "Jumlah babak harus 15 (sekarang 0). rounds | Minimal dua akhir cerita (happy ending penuh dan penyelesaian dengan catatan). endings | Belum ada akhir \"happy ending penuh\". endings"
+    },
+    {
+      "name": "skenario lengkap dari UI lolos validasi",
+      "ok": true,
+      "detail": "Tidak ada masalah. Skenario siap diajukan ke review."
+    },
+    {
+      "name": "pratinjau memainkan 15 babak sampai akhir dengan aturan yang sama",
+      "ok": true,
+      "detail": "Semua dianjurkan, langsung15.000100Happy ending penuh: Akhir 1 | Semua dianjurkan, detik ke-1512.750100Happy ending penuh: Akhir 1 | Selang-seling dianjurkan/terlemah7.20035Selesai dengan catatan: Akhir 3 | Semua terlemah00Selesai dengan catatan: Akhir 3 | Semua waktu habis00Selesai dengan catatan: "
+    },
+    {
+      "name": "pratinjau tidak membuat room/hasil kompetisi",
+      "ok": true,
+      "detail": "2 -> 2"
+    },
+    {
+      "name": "draf terkunci saat review (409)",
+      "ok": true,
+      "detail": "409"
+    },
+    {
+      "name": "reviewer menerbitkan versi 1 lewat UI",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "skenario terbit langsung tersedia di host tanpa build/restart",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "revisi draf",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "versi 2 terbit",
+      "ok": true,
+      "detail": "200"
+    },
+    {
+      "name": "room yang berjalan tetap memakai versi 1 setelah revisi/terbit/arsip",
+      "ok": true,
+      "detail": "Skenario UI Uji Terima wl1kj – RAKSA GAME"
+    },
+    {
+      "name": "skenario diarsipkan tidak bisa membuka room baru",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "host menutup room: peserta melihat sesi dihentikan",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "rekap lintas room memuat 7 peserta dari dua room uji",
+      "ok": true,
+      "detail": "7"
+    },
+    {
+      "name": "dasbor: rata-rata nilai = rata-rata hasil selesai di rekap",
+      "ok": true,
+      "detail": "8889 vs 8889"
+    },
+    {
+      "name": "dasbor: peserta = baris rekap dari room yang sudah selesai/terhenti",
+      "ok": true,
+      "detail": "8 vs 8"
+    },
+    {
+      "name": "konten DEMO dikecualikan dari angka kompetisi secara bawaan",
+      "ok": true,
+      "detail": "0"
+    },
+    {
+      "name": "ekspor CSV ber-BOM UTF-8 berisi nama peserta",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "analisis babak tersedia per skenario/versi (15 babak)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "periode baru dibuat; periode bentrok ditolak",
+      "ok": true,
+      "detail": "200 409"
+    },
+    {
+      "name": "halaman admin tanpa galat JS",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "uji.host GET /api/cms/scenarios -> 403",
+      "ok": true,
+      "detail": "403"
+    },
+    {
+      "name": "uji.host GET /api/admin/dashboard -> 403",
+      "ok": true,
+      "detail": "403"
+    },
+    {
+      "name": "uji.penulis GET /api/host/scenarios -> 403",
+      "ok": true,
+      "detail": "403"
+    },
+    {
+      "name": "uji.penulis GET /api/admin/results -> 403",
+      "ok": true,
+      "detail": "403"
+    },
+    {
+      "name": "uji.penulis POST /api/admin/periods -> 403",
+      "ok": true,
+      "detail": "403"
+    },
+    {
+      "name": "uji.reviewer POST /api/cms/scenarios -> 403",
+      "ok": true,
+      "detail": "403"
+    },
+    {
+      "name": "uji.reviewer GET /api/admin/users -> 403",
+      "ok": true,
+      "detail": "403"
+    },
+    {
+      "name": "uji.panitia GET /api/cms/scenarios -> 403",
+      "ok": true,
+      "detail": "403"
+    },
+    {
+      "name": "uji.panitia GET /api/admin/users -> 403",
+      "ok": true,
+      "detail": "403"
+    },
+    {
+      "name": "uji.admin GET /api/admin/results -> 403",
+      "ok": true,
+      "detail": "403"
+    },
+    {
+      "name": "uji.admin GET /api/host/scenarios -> 403",
+      "ok": true,
+      "detail": "403"
+    },
+    {
+      "name": "tanpa sesi -> 401",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "penulis tidak bisa membuka room lewat socket",
+      "ok": true,
+      "detail": "{\"ok\":false,\"code\":\"forbidden\",\"error\":\"Hanya akun dengan peran host yang bisa mengendalikan room.\"}"
+    },
+    {
+      "name": "UI /cms untuk uji.host: akses ditolak dengan pesan",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "UI /host untuk uji.penulis: akses ditolak dengan pesan",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "UI /admin untuk uji.penulis: akses ditolak dengan pesan",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "gambar gagal dimuat: panggung jatuh ke gambar SVG/teks, dialog tetap terbaca",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "tetap bisa menjawab dan menerima konsekuensi tanpa gambar",
+      "ok": true,
+      "detail": ""
+    }
+  ]
+}

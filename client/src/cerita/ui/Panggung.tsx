@@ -59,6 +59,7 @@ import { IKON_TELEPON } from './panggung/prop';
 import type { Rencana } from './panggung/rencana';
 import { GerakKecil, Sutradara } from './panggung/sutradara';
 import { buatPembuka, kameraDiam, pabrikTransisi } from './panggung/transisi';
+import './panggung/panggung.css';
 
 /** Kendali panggung untuk halaman (ref). */
 export interface KendaliPanggung {
@@ -134,7 +135,8 @@ const UBAH_KECIL = 0.15;
 const lebarJendela = () => (typeof window === 'undefined' ? 0 : window.innerWidth);
 
 export interface PropsPanggung {
-  ep: Episode;
+  /** Hanya identitas & konfigurasi panggung episode yang dipakai (room cerita PRD memakai panggung yang sama). */
+  ep: Pick<Episode, 'id' | 'panggung'>;
   komposisi: KomposisiAdegan;
   /** Kalimat baris kini sedang diketik (mulut pembicara bergerak). */
   mengetik: boolean;
@@ -519,8 +521,9 @@ function IsiPanggung({ ep, komposisi, mengetik, namaMentor, namaNasabah, suasana
 
       {nasabahDiRuang ? (
         <p className="cer-suasana" data-aktor="chip" data-ekspresi={nasabahDiRuang.opsi.ekspresi}>
-          <span className="sr-only">{t('cerita.suasanaAria', { nama: namaNasabah, suasana })}</span>
-          <span aria-hidden="true">{t('cerita.suasanaChip', { nama: namaNasabah, suasana })}</span>
+          {/* Tanpa kata suasana (layar bersama room cerita: suasana tiap peserta bersifat pribadi) = nama saja. */}
+          <span className="sr-only">{suasana ? t('cerita.suasanaAria', { nama: namaNasabah, suasana }) : namaNasabah}</span>
+          <span aria-hidden="true">{suasana ? t('cerita.suasanaChip', { nama: namaNasabah, suasana }) : namaNasabah}</span>
         </p>
       ) : null}
 

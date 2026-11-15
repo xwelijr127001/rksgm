@@ -42,10 +42,11 @@ export function bahasaKini(): Bahasa {
   return kini;
 }
 
-export function aturBahasa(b: Bahasa): void {
+/** `simpan` = false: ganti tampilan tanpa menimpa pilihan tersimpan (mis. zh saat mode lama nonaktif). */
+export function aturBahasa(b: Bahasa, simpan = true): void {
   if (b === kini) return;
   kini = b;
-  try { localStorage.setItem(KUNCI, b); } catch { /* abaikan */ }
+  if (simpan) try { localStorage.setItem(KUNCI, b); } catch { /* abaikan */ }
   tandaiHtml();
   pendengar.forEach((fn) => fn());
 }
@@ -56,7 +57,7 @@ function langganan(fn: () => void): () => void {
 }
 
 /** Berlangganan bahasa aktif. Panggil di komponen yang menampilkan teks terjemahan. */
-export function useBahasa(): { bahasa: Bahasa; aturBahasa: (b: Bahasa) => void } {
+export function useBahasa(): { bahasa: Bahasa; aturBahasa: (b: Bahasa, simpan?: boolean) => void } {
   const bahasa = useSyncExternalStore(langganan, bahasaKini, () => BAHASA_BAWAAN);
   return { bahasa, aturBahasa };
 }

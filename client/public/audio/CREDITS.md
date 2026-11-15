@@ -90,3 +90,30 @@ Catatan teknis:
    publik ini karena semua isinya bisa diunduh siapa saja yang membuka aplikasi.
 6. Jangan hapus `tools/make-music.mjs` - musik prosedural ini tetap jadi cadangan
    bila musik berlisensi bermasalah saat hari-H (offline, salah versi, dll).
+
+## Mode cerita Episode 2 (ditambahkan 15 Nov 2026)
+
+Dibuat oleh `tools/make-music-ep2.mjs` (100% disintesis di script ini: piano elektrik FM, pad sinus, bass sinus,
+petikan Karplus-Strong redup, reverb ringan). Tanpa sampel, loop, atau rekaman pihak ketiga. Lisensi sama dengan lagu di
+atas: milik proyek RAKSA GAME / PT Asuransi Raksa Pratikara. Lagu lama (`lobby`, `gameplay`, `podium`) tidak diubah.
+
+| Berkas               | Judul                                | Durasi | BPM | Pemakaian                                              | Status |
+| -------------------- | ------------------------------------ | -----: | --: | ------------------------------------------------------ | ------ |
+| `cerita-kantor.mp3`  | Meja Layanan                         | 96,0 s |  80 | Bagian 1 & 4: kantor dan percakapan dengan nasabah, loop | DRAF   |
+| `cerita-periksa.mp3` | Catatan Lapangan                     | 91,4 s |  84 | Bagian 2 & 3: survey dan pemeriksaan kejadian, loop      | DRAF   |
+| `cerita-penutup.mp3` | Berkas Ditutup                       | 109,7 s |  70 | K15 dan layar akhir, loop tenang                        | DRAF   |
+
+Format MP3 mono 96 kbps, sekitar 1,1 sampai 1,3 MB per trek; hanya trek yang sedang dipakai yang diunduh. Pemeriksaan otomatis
+script: durasi, peak (sekitar -4 dBFS), panjang kelipatan bar, sambungan loop, dan lonjakan level antar-bagian (maks 3 dB).
+Status **DRAF**: belum didengar dan disetujui manusia (lihat laporan). Di game diputar 55% dari volume musik pemain, dengan
+crossfade 1,6 s saat berganti tema.
+
+Efek suara mode cerita (`taruh`, `kertas`, `pesanKirim`, `pesanTerima`, `ketuk`, `konfirmasi`, `batal`) dan suasana tempat
+(`bengkel`, `jalan`: noise ter-filter yang naik-turun pelan) disintesis di `client/src/audio/audio.ts`, tanpa berkas.
+
+### Pemeriksaan MP3 hasil encode (15 Nov 2026, `node tools/cek-mp3-ep2.mjs`, ffmpeg)
+
+Ketiga berkas didekode penuh tanpa galat dan tanpa clipping (peak -4,6 s/d -5,2 dBFS). Temuan yang BELUM diperbaiki (menunggu
+dengar manusia, komposisi tidak diubah berdasarkan dugaan):
+- Hening 16-26 ms di kepala tiap berkas (jeda encoder MP3): calon jeda kecil saat `<audio loop>` berulang.
+- `cerita-periksa.mp3`: detik terakhir sekitar 8 dB lebih pelan dari detik pertama, jadi di titik loop ada lompatan level.

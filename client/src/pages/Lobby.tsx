@@ -25,8 +25,8 @@ export default function Lobby() {
   // Unduh engine adegan selagi menunggu, supaya misi pertama langsung tampil.
   useEffect(() => { setTrack('lobby'); prefetchAdegan(); return () => setTrack(null); }, []);
   useOnChange(room?.playerCount ?? 0, (next, prev) => { if (prev !== undefined && next > prev) playSfx('masuk'); });
-  if (!identity) return <PlayerShell back="/"><main className="result-focus"><h1>{t('pemain.gabungDulu')}</h1><Link className="primary-action" to="/join">{t('pemain.masukkanKode')}</Link></main></PlayerShell>;
-  if (!room) return <PlayerShell><main className="result-focus"><Memuat teks={t('pemain.menyiapkanRuang')} /><Link className="quiet-link" to="/join">{t('pemain.cobaGabungLagi')}</Link></main></PlayerShell>;
+  if (!identity) return <PlayerShell back="/"><main className="result-focus"><h1>{t('pemain.gabungDulu')}</h1><Link className="primary-action" to="/acara/join">{t('pemain.masukkanKode')}</Link></main></PlayerShell>;
+  if (!room) return <PlayerShell><main className="result-focus"><Memuat teks={t('pemain.menyiapkanRuang')} /><Link className="quiet-link" to="/acara/join">{t('pemain.cobaGabungLagi')}</Link></main></PlayerShell>;
   const me = room.players.find(p => p.id === identity.playerId);
   const ready = me?.ready ?? false;
   const name = me?.nickname ?? identity.nickname;

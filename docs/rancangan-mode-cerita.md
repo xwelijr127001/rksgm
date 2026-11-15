@@ -506,7 +506,7 @@ baris tabel 3.1 yang terdampak sudah diberi rujukan ke sini. Hasil pengujian dic
   (`docs/cerita/PANDUAN-EPISODE.md` bagian 4.3).
 - `game/scenes/cerita/cerita.test.ts` mengunci daftar adegan = dua adegan AUTO-1; perlu digeneralisasi saat
   episode kedua dibuat.
-- Naskah, istilah terjemahan, jalur `ralat-polis`, sebutan jabatan Miss Raksa ("Senior Layanan Klaim"), dan
+- Naskah, istilah terjemahan, jalur `ralat-polis`, sebutan jabatan Miss Raksa ("Layanan Klaim"), dan
   pengecoh aktivitas bukti belum ditinjau PIC Claim maupun penutur asli (`docs/cerita/TINJAUAN-PIC-CLAIM.md`).
 - (Selesai) `bagian-disimpan` yang dulu tampil lebih awal di Catatan kasus: diperbaiki lewat `b2-cerita-bagian`
   (10.1 no. 1).

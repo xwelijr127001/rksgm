@@ -41,6 +41,10 @@ import {
 } from './gambarSoal';
 import { POLA_ID_KUSTOM, idKustomBaru, validasiSoalKustom } from './soalKustom';
 import { mountUnity } from './unityServe';
+import { STORY_SCORE_POLICY } from '../../shared/story/scorePolicy';
+import { mountStoryHttp } from './story/http';
+import { createStoryService } from './story/socket';
+import { recoverInterruptedRooms } from './story/runtime/sqliteStore';
 import {
   RoomManager,
   sanitizeAnswer,
@@ -54,15 +58,48 @@ import {
 assertKeysComplete();
 
 const app = express();
+// Real client address behind N trusted proxies (per-IP rate limits); 0 = X-Forwarded-For ignored.
+app.set('trust proxy', CONFIG.trustProxyHops);
 app.use(cors());
-app.use(express.json({ limit: '128kb' }));
+// Small JSON limit for the legacy/public API; scenario drafts (/api/cms) are parsed by the story router (1 MB).
+const jsonKecil = express.json({ limit: '128kb' });
+app.use((req, res, next) => (req.path.startsWith('/api/cms/') ? next() : jsonKecil(req, res, next)));
+
+// Legacy (pre-PRD) features are refused server-side unless RAKSA_LEGACY=on; hiding links alone is not a gate.
+// Case-insensitive like Express routing itself (otherwise "/api/Matches" would slip past the gate).
+const LEGACY_PATH = /^\/(api\/(missions|practice|room|matches|acara-terbuka|bank)(\/|$)|gambar-soal(\/|$)|unity(\/|$))/i;
+app.use((req, res, next) => {
+  if (!CONFIG.legacy && LEGACY_PATH.test(req.path)) {
+    res.status(404).json({ ok: false, error: 'Fitur lama tidak aktif pada konfigurasi MVP.' });
+    return;
+  }
+  next();
+});
+
+// Framing policy for pages (embedding in raksaonline.com is decided by IT): CSP frame-ancestors + legacy XFO header.
+app.use((req, res, next) => {
+  if (!req.path.startsWith('/api/') && !req.path.startsWith('/aset-cerita/')) {
+    res.setHeader('Content-Security-Policy', `frame-ancestors ${CONFIG.frameAncestors}`);
+    if (CONFIG.frameAncestors === "'self'") res.setHeader('X-Frame-Options', 'SAMEORIGIN');
+  }
+  next();
+});
 
 const server = http.createServer(app);
 const io = new SocketServer(server, {
   cors: { origin: true, credentials: false },
   pingTimeout: 20000,
   pingInterval: 10000,
+  // Every game message is small; a 1 MB default would let one client stall the event loop with giant payloads.
+  maxHttpBufferSize: 64 * 1024,
 });
+if (!CONFIG.legacy) io.of('/').use((_socket, next) => next(new Error('Fitur lama tidak aktif pada konfigurasi MVP.')));
+
+// PRD v0.2 Story Room system: /story namespace, /api/staff|cms|host|admin|story routes, /aset-cerita files.
+const story = createStoryService(io);
+mountStoryHttp(app, story);
+const interrupted = recoverInterruptedRooms();
+if (interrupted.length) console.log('[story] room terputus karena server dimulai ulang:', interrupted.join(', '));
 
 // ------------------------------------------------------------------ broadcast
 
@@ -139,6 +176,8 @@ app.get('/api/config', (_req, res) => {
     paketBawaan: CONFIG.paketBawaan,
     /** true = membuat room & menulis bank soal butuh PIN panitia. */
     butuhPin: Boolean(CONFIG.panitiaPin),
+    features: { legacy: CONFIG.legacy },
+    story: { maxParticipants: story.manager.limits.maxParticipantsPerRoom, answerWindowMs: STORY_SCORE_POLICY.answerWindowMs, scorePolicyId: STORY_SCORE_POLICY.id },
   });
 });
 
@@ -837,4 +876,4 @@ server.listen(CONFIG.port, CONFIG.host, () => {
   console.log('');
 });
 
-export { app, server, io, manager, resetPembatasPin };
+export { app, server, io, manager, resetPembatasPin, story };

@@ -1,0 +1,151 @@
+/*
+ * PROTOTIPE /lokasi: adegan "Periksa rambu" dengan arah visual dari ekspor Claude Design (hijau hutan, krem, sage, kuning).
+ * Aset: ./seni (lihat seni/README.md). Satu kolom HP 360-430 px; di layar lebar tampil di bingkai 440 px di tengah.
+ * Tanda pemain = arsiran + garis tepi + lencana (merah rambu 1, biru putus rambu 2), bukan warna benar/salah.
+ * Gerak: denyut titik ketuk, masuknya tanda, cincin truk; semua dimatikan bila pengguna meminta gerak dikurangi
+ * (kecuali <html data-gerak="penuh">, pola aplikasi ini).
+ */
+.lk {
+  --lk-hijau: #215C40; --lk-hijau-tua: #163F2B; --lk-krem: #F8F7F2; --lk-sage: #B9C9A4; --lk-kuning: #E0B84F; --lk-merah: #D4553B; --lk-biru: #2F6FB0;
+  --lk-tinta: #1E2B24; --lk-tinta-2: #3D4A42; --lk-tinta-3: #4D5A52;
+  display: grid; gap: 12px; max-width: 440px; margin: 0 auto; padding: 4px 16px 24px; color: var(--lk-tinta);
+  font-family: 'Plus Jakarta Sans', system-ui, -apple-system, 'Segoe UI', sans-serif; -webkit-font-smoothing: antialiased; overflow-x: hidden;
+}
+.lk *, .lk *::before, .lk *::after { box-sizing: border-box; }
+@media (min-width: 600px) {
+  .lk { margin: 12px auto 32px; padding: 20px 20px 28px; background: var(--lk-krem); border-radius: 28px; box-shadow: 0 0 0 1px #D6D8CB, 0 12px 32px rgba(30, 43, 36, .08); }
+}
+.lk button { font: inherit; -webkit-tap-highlight-color: transparent; }
+.lk button:focus-visible, .lk summary:focus-visible, .lk a:focus-visible { outline: 3px solid var(--lk-hijau); outline-offset: 3px; }
+.lk [tabindex="-1"]:focus { outline: none; }
+.lk-bagian { display: grid; gap: 12px; }
+.lk-judul { margin: 0; font-size: 24px; line-height: 1.2; font-weight: 800; letter-spacing: -.01em; }
+.lk-konteks { margin: 0; font-size: 16px; line-height: 1.4; color: var(--lk-tinta-2); }
+.lk-instruksi { margin: 0; font-size: 18px; line-height: 1.35; font-weight: 800; }
+.lk-tugas { margin: 0; font-size: 16px; }
+.lk-alasan { margin: -4px 0 0; font-size: 14px; color: var(--lk-tinta-3); }
+.lk-narasi { margin: 0; font-size: 17px; line-height: 1.45; }
+.lk-dikatakan { margin: 0; padding: 10px 12px; border-radius: 14px; background: #EAF0E1; font-size: 15px; line-height: 1.4; }
+.lk-alasan-teks { margin: 0; font-size: 15px; line-height: 1.45; color: var(--lk-tinta-3); }
+
+/* ---------------------------------------------------------------- tombol */
+.lk-btn { width: 100%; min-height: 52px; padding: 12px 18px; border-radius: 14px; font-size: 17px; font-weight: 800; cursor: pointer; transition: transform .08s ease, background-color .12s ease; }
+.lk-btn-utama { background: var(--lk-hijau); color: var(--lk-krem); border: 2px solid var(--lk-hijau); }
+.lk-btn-utama:hover:not(:disabled) { background: #1B4D35; }
+.lk-btn-utama:active:not(:disabled) { background: var(--lk-hijau-tua); transform: scale(.98); }
+.lk-btn-utama:disabled { opacity: .45; cursor: not-allowed; }
+.lk-btn-tenang { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 44px; padding: 8px 14px; border: 0; border-radius: 10px; background: transparent; color: var(--lk-hijau); font-size: 16px; font-weight: 700; text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
+.lk-chip-baris { display: flex; flex-wrap: wrap; gap: 8px; }
+.lk-chip { min-height: 44px; padding: 8px 16px; border: 2px solid var(--lk-sage); border-radius: 22px; background: #fff; color: var(--lk-hijau); font-size: 15px; font-weight: 700; cursor: pointer; }
+.lk-chip:active { background: #EAF0E1; }
+
+/* ---------------------------------------------------------------- titik ketuk rambu (sorotan kuning berdenyut) */
+.lk-tag-baris { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 14px; }
+.lk-tag { position: relative; display: inline-flex; align-items: center; gap: 10px; min-height: 52px; padding: 6px 18px 6px 6px; border-radius: 16px; background: #fff; border: 2px solid var(--lk-hijau); color: var(--lk-hijau); font-size: 17px; font-weight: 800; cursor: pointer; transition: transform .08s ease; }
+.lk-tag:hover { background: #FBFAF5; }
+.lk-tag:active { transform: scale(.97); background: #F1F3EA; }
+.lk-tag::after { content: ''; position: absolute; inset: -6px; border-radius: 21px; border: 3px solid var(--lk-kuning); pointer-events: none; animation: lk-denyut 1.9s ease-out infinite; }
+.lk-tag-ikon { width: 38px; height: 38px; border-radius: 12px; background: var(--lk-kuning); color: var(--lk-tinta); display: flex; align-items: center; justify-content: center; }
+.lk-tag-baris .lk-instruksi { flex: 1 1 150px; }
+
+/* ---------------------------------------------------------------- tulisan rambu (kartu bukti) */
+.lk-bukti-kartu { display: grid; gap: 6px; padding: 10px 12px 12px; background: #fff; border: 2px solid var(--lk-sage); border-radius: 18px; }
+.lk-bukti-kepala { display: flex; align-items: center; gap: 10px; }
+.lk-bukti-ikon { flex: none; width: 32px; height: 32px; border-radius: 10px; background: var(--lk-hijau); color: var(--lk-krem); display: flex; align-items: center; justify-content: center; }
+.lk-bukti-label { margin: 0; font-size: 17px; font-weight: 800; color: var(--lk-hijau); }
+.lk-bukti-kicker { margin-left: auto; font-size: 13px; font-weight: 600; color: var(--lk-tinta-3); }
+.lk-bukti-isi { margin: 0; font-size: 18px; line-height: 1.35; font-weight: 700; }
+
+/* ---------------------------------------------------------------- adegan jalan */
+.lk-adegan { margin: 0; display: grid; gap: 6px; }
+.lk-kotak { position: relative; width: 100%; aspect-ratio: 1 / 1; border-radius: 20px; overflow: hidden; background: var(--lk-sage); }
+.lk-seni { position: absolute; inset: 0; }
+.lk-svg { display: block; line-height: 0; }
+.lk-svg svg { display: block; width: 100%; height: auto; }
+.lk-svg-jalan, .lk-svg-jalan svg { width: 100%; height: 100%; }
+.lk-svg-arsir { position: absolute; inset: 0; }
+.lk-svg-arsir svg { width: 100%; height: 100%; }
+.lk-svg-ikon { display: inline-flex; }
+.lk-svg-truk svg { overflow: visible; }
+
+.lk-lajur { position: absolute; top: 0; bottom: 0; margin: 0; padding: 0; border: 0; background: transparent; cursor: pointer; transition: background-color .12s ease; }
+.lk-lajur:disabled { cursor: default; }
+.lk-lajur-statis { pointer-events: none; }
+.lk-lajur:focus-visible { outline: 3px solid var(--lk-krem) !important; outline-offset: -5px !important; box-shadow: inset 0 0 0 5px var(--lk-tinta); }
+.lk-hidup .lk-lajur:not(:disabled):hover { background: rgba(248, 247, 242, .07); }
+.lk-hidup .lk-lajur:not(:disabled):active { background: rgba(248, 247, 242, .16); }
+.lk-hidup .lk-lajur:not(:disabled):not(.is-on)::before { content: ''; position: absolute; inset: 8px 7px; border: 2px dashed rgba(248, 247, 242, .38); border-radius: 10px; pointer-events: none; }
+
+.lk-tanda { position: absolute; inset: 0; display: block; pointer-events: none; }
+.lk-tanda-tepi { position: absolute; inset: 0; border: 3px solid var(--lk-merah); border-radius: 4px; box-shadow: inset 0 0 0 2px rgba(248, 247, 242, .55); }
+.lk-lencana { position: absolute; top: 10px; left: 50%; transform: translateX(-50%); width: 30px; height: 30px; border-radius: 50%; background: var(--lk-merah); border: 2px solid var(--lk-krem); display: flex; align-items: center; justify-content: center; color: var(--lk-krem); }
+/* rambu 2: di dalam lajur (lebih kecil) dengan garis putus biru, agar terlihat bersama tanda rambu 1 */
+.lk-tanda-biru { inset: 18px 11px 52px; border-radius: 10px; overflow: hidden; }
+.lk-tanda-biru .lk-tanda-tepi { border: 3px dashed var(--lk-biru); border-radius: 10px; box-shadow: inset 0 0 0 2px rgba(248, 247, 242, .55); }
+.lk-tanda-biru .lk-lencana { top: 6px; background: var(--lk-biru); }
+
+.lk-num { position: absolute; bottom: 12px; transform: translateX(-50%); width: 36px; height: 36px; border-radius: 50%; background: var(--lk-krem); color: var(--lk-tinta); font-size: 18px; font-weight: 800; display: flex; align-items: center; justify-content: center; pointer-events: none; box-shadow: 0 1px 0 rgba(0, 0, 0, .28); transition: box-shadow .12s ease; }
+.lk-num.on-merah { box-shadow: 0 0 0 3px var(--lk-merah), 0 1px 0 rgba(0, 0, 0, .28); }
+.lk-num.on-biru { box-shadow: 0 0 0 3px var(--lk-biru), 0 1px 0 rgba(0, 0, 0, .28); }
+.lk-num.on-merah.on-biru { box-shadow: 0 0 0 3px var(--lk-merah), 0 0 0 6px var(--lk-biru), 0 1px 0 rgba(0, 0, 0, .28); }
+
+.lk-truk { position: absolute; pointer-events: none; }
+.lk-cincin { position: absolute; border: 3px dashed var(--lk-kuning); border-radius: 14px; background: rgba(224, 184, 79, .14); pointer-events: none; }
+.lk-cincin-label { position: absolute; bottom: calc(100% + 6px); left: 50%; transform: translateX(-50%); white-space: nowrap; background: var(--lk-tinta); color: var(--lk-krem); font-size: 14px; font-weight: 700; padding: 4px 10px; border-radius: 10px; }
+.lk-keterangan { margin: 0; font-size: 14px; line-height: 1.4; font-weight: 600; color: var(--lk-tinta-3); }
+
+/* ---------------------------------------------------------------- pilihan pemain */
+.lk-pilihanmu { display: grid; gap: 4px; margin: 0; padding: 0; list-style: none; font-size: 17px; line-height: 1.4; }
+.lk-warna { display: inline-block; width: 12px; height: 12px; margin-right: 8px; border-radius: 3px; vertical-align: -1px; }
+.lk-warna.merah { background: var(--lk-merah); }
+.lk-warna.biru { border: 2px dashed #6fb1ff; background: #5A6066; }
+.lk-catatan-tanda { display: flex; align-items: center; gap: 8px; margin: 0; font-size: 15px; line-height: 1.4; color: var(--lk-tinta-3); }
+
+/* ---------------------------------------------------------------- Pak Bima / Hendra */
+.lk-orang { display: grid; grid-template-columns: 72px 1fr; gap: 12px; align-items: start; }
+.lk-orang img { width: 72px; height: 72px; border-radius: 36px; object-fit: cover; background: #E6EBE0; }
+.lk-gelembung { margin: 0; padding: 12px 14px; border-radius: 4px 18px 18px 18px; background: #EAF0E1; font-size: 17px; line-height: 1.45; }
+.lk-pilihan { display: grid; gap: 8px; margin: 0; padding: 0; list-style: none; }
+.lk-opsi { display: block; width: 100%; min-height: 60px; padding: 10px 14px; border: 2px solid var(--lk-hijau); border-radius: 14px; background: #fff; color: var(--lk-hijau); font-size: 17px; font-weight: 700; line-height: 1.35; text-align: left; cursor: pointer; transition: transform .08s ease, background-color .12s ease; }
+.lk-opsi:hover { background: #F4F6EE; }
+.lk-opsi:active { background: #E1E9D6; transform: scale(.99); }
+.lk-opsi.dipilih { background: #EAF0E1; box-shadow: inset 0 0 0 2px var(--lk-hijau); }
+
+/* tanggapan Pak Bima atas tanda pemain (kartu seperti umpan balik di desain) */
+.lk-tanggapan { display: grid; gap: 10px; }
+.lk-umpan { display: flex; gap: 12px; align-items: flex-start; padding: 14px; border-radius: 16px; }
+.lk-umpan p { margin: 0; font-size: 17px; line-height: 1.45; }
+.lk-umpan-sama { background: #EAF0E1; border: 2px solid var(--lk-sage); }
+.lk-umpan-beda { background: #fff; border: 2px solid #C9CBC0; }
+.lk-umpan-isi { display: grid; gap: 6px; }
+
+/* ---------------------------------------------------------------- catatan dan tentang */
+.lk-lihat-catatan, .lk-tentang { border: 2px solid var(--lk-sage); border-radius: 16px; background: #fff; }
+.lk-lihat-catatan summary, .lk-tentang summary { min-height: 48px; padding: 10px 14px; font-weight: 700; font-size: 15px; cursor: pointer; display: flex; align-items: center; gap: 8px; list-style: none; color: var(--lk-tinta-3); }
+.lk-lihat-catatan summary::-webkit-details-marker, .lk-tentang summary::-webkit-details-marker { display: none; }
+.lk-lihat-catatan summary { color: var(--lk-hijau); }
+.lk-tentang { border: 0; border-top: 1px solid #E1E0D6; border-radius: 0; background: transparent; }
+.lk-tentang p { margin: 0 0 8px; padding: 0 2px; font-size: 14px; line-height: 1.5; color: var(--lk-tinta-3); }
+.lk-kaki { margin: 4px 2px 0; font-size: 13px; color: var(--lk-tinta-3); }
+.lk-catatan { display: grid; gap: 6px; padding: 2px 14px 14px; font-size: 15px; line-height: 1.4; }
+.lk-catatan-judul { margin: 0 0 2px; font-size: 16px; }
+.lk-catatan-sub { margin: 8px 0 2px; font-size: 13px; font-weight: 800; color: var(--lk-hijau); }
+.lk-catatan-daftar { margin: 0; padding-left: 18px; display: grid; gap: 4px; }
+
+/* ---------------------------------------------------------------- gerak (restrained) */
+@keyframes lk-denyut { 0% { transform: scale(.96); opacity: .95; } 70% { transform: scale(1.08); opacity: 0; } 100% { transform: scale(1.08); opacity: 0; } }
+@keyframes lk-masuk { from { opacity: 0; } to { opacity: 1; } }
+@keyframes lk-geser { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: none; } }
+@keyframes lk-cincin { 0% { opacity: 0; transform: scale(1.18); } 35% { opacity: 1; transform: scale(1); } 55% { transform: scale(1.05); } 75% { transform: scale(1); } 100% { opacity: 1; transform: scale(1); } }
+.lk-masuk { animation: lk-masuk .14s ease-out both; }
+.lk-geser { animation: lk-geser .22s ease-out both; }
+.lk-cincin-masuk { animation: lk-cincin 1.1s ease-out both; }
+@media (prefers-reduced-motion: reduce) {
+  :root:not([data-gerak="penuh"]) .lk *, :root:not([data-gerak="penuh"]) .lk *::before, :root:not([data-gerak="penuh"]) .lk *::after { animation: none !important; transition: none !important; }
+}
+
+/* ---------------------------------------------------------------- tertanam di arena/adegan Episode 2 (tanpa bingkai, lebar mengikuti kolom) */
+.lk.lk-tertanam { max-width: none; margin: 0; padding: 0; background: none; box-shadow: none; border-radius: 0; overflow: visible; }
+@media (min-width: 600px) { .lk.lk-tertanam { margin: 0; padding: 0; background: none; box-shadow: none; border-radius: 0; } }
+.lk-tertanam .lk-adegan { max-width: 520px; }
+.hp-rambu-ringkas { display: grid; gap: 12px; margin: 10px 0; }

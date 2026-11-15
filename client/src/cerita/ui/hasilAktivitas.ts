@@ -174,7 +174,8 @@ export interface RingkasAktivitas {
 export function ringkasAktivitas(ep: Episode, s: StateCerita, bahasa: Bahasa, tx: (k: KunciTeks) => string): RingkasAktivitas[] {
   const hasil: RingkasAktivitas[] = [];
   for (const [id, def] of Object.entries(ep.aktivitas)) {
-    if (!ada(s.aktivitas, id)) continue;
+    // Aktivitas berakibat langsung: hasilnya = akibat di cerita; saran & alasan menunggu ringkasan akhir (tanpa tanda tepat).
+    if (!ada(s.aktivitas, id) || aktivitasLangsung(ep, id)) continue;
     const h = s.aktivitas[id]!;
     const misi = def.misi(bahasa);
     // Opsi yang sudah dihapus dari misi tetap terbaca (perjalanan lama).
@@ -191,6 +192,11 @@ export function ringkasAktivitas(ep: Episode, s: StateCerita, bahasa: Bahasa, tx
     });
   }
   return hasil;
+}
+
+/** true bila aktivitas dimainkan lewat node `langsung` (akibat naskah tanpa pembahasan tepat/keliru). */
+export function aktivitasLangsung(ep: Episode, id: IdAktivitas): boolean {
+  return Object.values(ep.node).some((n) => n.jenis === 'aktivitas' && n.aktivitas === id && n.langsung === true);
 }
 
 /**

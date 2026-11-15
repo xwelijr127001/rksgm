@@ -52,6 +52,8 @@ process.env.DB_FILE = DB_FILE;
 process.env.PUBLIC_BASE_URL = `http://127.0.0.1:${PORT}`;
 process.env.UNITY_BUILD_DIR = FIXTURE;
 process.env.UNITY_3D = 'on';
+// PRD v0.2: legacy modes are off by default (docs/prd-v02/DECISIONS.md D-03); these tests exercise them.
+process.env.RAKSA_LEGACY = 'on';
 
 // eslint-disable-next-line @typescript-eslint/no-require-imports
 const srv = require('./index') as typeof import('./index');

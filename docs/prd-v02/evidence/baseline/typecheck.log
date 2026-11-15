@@ -1,0 +1,13 @@
+
+> raksa-game@1.0.0 typecheck
+> npm -w @raksa/server run typecheck && npm -w @raksa/client run typecheck
+
+
+> @raksa/server@1.0.0 typecheck
+> tsc -p tsconfig.json --noEmit
+
+
+> @raksa/client@1.0.0 typecheck
+> tsc -p tsconfig.json --noEmit
+
+typecheck exit 0

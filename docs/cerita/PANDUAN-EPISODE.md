@@ -475,9 +475,13 @@ const MAKNA: Record<string, MaknaAlasan> = {
   label tidak bertumpuk (id/en/zh), petugas & properti tidak menutupi objek, kunci tekstur unik, kode adegan
   tidak mengimpor kode pertandingan atau kunci jawaban. Aturan umum adegan: README bagian 4a.
 
-### 4.3 Seni nasabah & latar: perlu perluasan kontrak sebelum episode kedua
+### 4.3 Seni nasabah & latar: panggung dunia Episode 1
 
-Keadaan sekarang (bukan pilihan desain jangka panjang):
+> Sejak Episode 2 (2 Nov 2026) kontraknya sudah diperluas lewat **panggung latar** (`Episode.latar`, bagian 4.5): episode
+> baru memakai lokasi & sprite tokohnya sendiri tanpa menyentuh seni Episode 1. Uraian di bawah berlaku untuk panggung
+> DUNIA Episode 1 (`Episode.panggung`).
+
+Panggung dunia Episode 1:
 
 - `IdLatar` hanya `'kantor' | 'parkiran'` (`tipe.ts`), digambar `cerita/seni/latar.ts`.
 - `TokohNasabah` dan `PotretNasabah` **selalu menggambar Bu Rina** (tanpa parameter), dan dipakai panggung,
@@ -570,6 +574,94 @@ kedatangan, putar ulang bab, aset gagal, gerak berkurang): `node tools/uji-pangg
    momen masuk, reaksi, dokumen, dan akhir sudah dilihat.
 
 ---
+
+### 4.5 Panggung latar, titik keputusan, dan aktivitas berakibat langsung (Episode 2+)
+
+Episode 2 memakai mesin, simpanan, dan layar yang sama dengan Episode 1; bedanya hanya DATA (tanpa `if episode`):
+
+- **`latar` (KonfigLatar)**: lokasi -> nama + gambar ILUSTRASI wajib (`lokasi.<id>.ilustrasi`, `LokasiIlustrasi`):
+  latar + lapisan DEPAN bermasker dari gambar yang sama (opsional), `tokoh` = `dekat` (potret di balik meja, diskalakan
+  menurut tinggi kepala) ATAU `berdiri` (badan penuh berpijak di titik kaki slot; tinggi dari `cakrawala` & `mata` gambar),
+  `benda` berkedalaman (kendaraan; `alas` menentukan siapa di depan, `fokus` wajib dibingkai), `papan` bertulisan kode
+  (kunci teks; `wajib` = ikut dibingkai), `tiang`, diagram `lajur` (teks UI pojok), `bingkai` per kelas layar `hp`/`lebar`,
+  benda akibat `objek`. Seni kode SVG lapangan (dunia 720 x 225) sudah dihapus (D-64). `tokoh` -> aset ILUSTRASI per
+  pemeran (`avatar` & `dekat` per ekspresi, `badan` penuh untuk lokasi berdiri & sampul); `tanpaAset` = pemeran yang
+  diakui belum punya aset (siluet bernama / inisial); `awal`, `sampul` (kartu daftar, dibingkai seperti adegan). Tata
+  per node/baris lewat `tata: { lokasi?, hadir?, telepon?, objek? }` (dilipat seperti cue v3). Maksimal 3 tokoh hadir
+  (validator; juga: lokasi berdiri butuh `badan`, slot kaki di bawah cakrawala, papan/benda/tiang di dalam gambar).
+  Komposisi murni: `ui/latar/komposisi.ts`; aset, letak berkedalaman & kamera murni: `ui/latar/ilustrasi.ts`. Potret dialog, obrolan, aktivitas, Riwayat, dan layar akhir memakai avatar yang sama
+  (`PotretIlustrasi`, srcset; gagal = inisial). Ilustrasi dirender HALUS; aturan pixelated hanya untuk seni piksel Ep. 1.
+- **Presentasi visual novel (antarmuka HP)**: adegan tatap muka = panggung + kotak dialog dalam satu komposisi
+  (`hp/AdeganTatap.tsx`). Satu ketukan = satu BEAT (`hp/alur.ts bolehGabung`): ucapan dengan penutur/ekspresi baru = beat
+  baru (wajah/kamera berganti), narasi menempel pada beat sebelumnya; jadi tulis tiap gagasan sebagai baris sendiri dengan
+  ekspresi yang berbeda bila ingin beat terpisah. Tinggi panggung HP mengikuti beat (`tinggiPanggung`: tinggi 4:3 / sedang
+  16:10 / pendek 2:1 untuk teks panjang atau keputusan yang menunggu). Kotak dialog berisi tab nama + peran, narasi, umpan
+  balik tindakan & status sebagai baris (bukan kartu), baris "Hadir: ..." bila dua tokoh atau lebih, dan aksi (Lanjut /
+  mulai tugas); pilihan keputusan tepat di bawahnya tanpa kartu. Pada bidikan dekat (kantor, atau pembicara) kotak dialog
+  menumpang pita bawah panggung yang dicadangkan kamera (`TUMPANG_DIALOG`). Di lapangan kamera mengikuti PEMBICARA setengah
+  badan (`BINGKAI_BICARA`), badan penuh saat narasi; tanpa papan nama permanen di gambar. Chat tetap chat (gelembung masuk tanpa avatar per pesan): `Episode.cutIn` = kunci baris nasabah yang diberi
+  potret dekat sesaat, menyatu dengan gelembungnya (avatar kepala obrolan disembunyikan selama cut-in) (`hp/alur.ts idCutIn`: hanya pesan masuk terbaru, hilang sesudah dibalas, baris bersyarat ikut
+  bersyarat; tanpa animasi saat gerak dikurangi; tidak mengunci input). Bukti yang harus terbaca = `DokumenCerita.skema`
+  (`ui/BuktiLajur.tsx`: tiruan rambu + diagram lajur & posisi kendaraan dari baris dokumen, bisa diperbesar), bukan teks
+  di gambar latar. Arena susun: `KonfigArena.catatanBenda` = fakta kunci tidak diulang saat kartu benda itu aktif.
+- **Kejelasan tindakan (D-67)**: satu fokus per langkah; pisahkan langkah hanya bila membantu (pola `bundel` = periksa ->
+  tindakan -> kabar; aktivitas sederhana tetap satu layar). Akibat aktivitas dengan dua sisi ditulis per sisi dengan
+  `Baris.topik` (mis. "Berkas" / "Kabar untuk ...") dan node akibat per kombinasi bila satu kalimat tidak benar untuk
+  semua kombinasi (aturan ber-`akibat` + `akibatLain`, alternatif TETAP). Kosakata: dipilih / draf / tersedia /
+  terkirim. Jangan memakai centang/silang sebagai ikon wadah (terbaca benar/salah); pakai ikon arti.
+- **Kamera** (`ui/latar/ilustrasi.ts`, murni & teruji): lokasi `dekat` = potongan tetap per kelas layar
+  (`potonganIlustrasi`); lokasi `berdiri` = MENGIKUTI SUBJEK (`potonganSubjek`: tokoh, fokus benda, papan wajib, benda
+  akibat), lebar minimum per kelas layar, kepala & papan wajib tidak di bawah pita label lokasi, tidak muat = bagian atas
+  diutamakan. Lawan bicara jarak jauh (telepon) tidak digambar di panggung; obrolannya di antarmuka HP.
+- **`labelSuasana: 'status'`**: label nasabah di panggung = status hubungan KUMULATIF (pita `suasana` dari
+  kepercayaan, "Status Pak Hendra: Cemas"), berubah hanya bila pitanya berubah; emosi sesaat tetap di wajah sprite.
+  Bawaan `'wajah'` (Episode 1): label mengikuti wajah yang tampil.
+- **Aset ilustrasi dari sumber pemilik**: `tools/cerita/bangun-ilustrasi-auto2.mjs <folder-sumber>` (sumber disalin ke
+  `character/<episode>-ilustrasi/sumber`, tidak diubah): normalisasi alpha, pinggiran berwarna di sebelah garis tinta
+  diwarnai tinta (alpha tetap), perkecil Lanczos premultiplied, WebP beberapa resolusi untuk DPR 1-3, masker lapisan depan
+  interior, `ilustrasi.json` (sumber, sha256, statistik tepi). Pemetaan, pemeriksaan halo, dan kekurangan aset:
+  `docs/cerita/aset/ILUSTRASI-AUTO2.md`. Jangan menganggap aset siap hanya karena PNG punya alpha.
+- **`dokumen` + `NodePilihan.dokumen`**: kartu fakta HTML di atas pilihan (`KartuDokumen`); hanya fakta yang juga
+  diketahui petugas, bukan jawaban.
+- **`titik`** (keputusan bernomor): tiap alternatif = tanda `kep:<titik>:<alt>` yang dipasang efek pilihan/cabangnya;
+  layar akhir menampilkan grafik status (riwayat `alasan.nilai`) + per keputusan: pilihanmu, saran, alasan mentor.
+  Validator memastikan setiap alternatif bisa dipilih dan saran bernilai `tepat`.
+- **`NodeAktivitas.langsung`**: sesudah dinilai, cabang pertama yang cocok diterapkan dan cerita LANGSUNG pindah ke node
+  akibatnya (dialog; kalimat alasan ikut baris pertama), tanpa layar pembahasan tepat/keliru; Riwayat menulis
+  "Dijalankan" dan Catatan kasus tidak memberi tanda tepat. MissionPlay memakai `wajibLengkap` (susunan wajib lengkap;
+  dialog menyebut berapa lagi yang belum ditempatkan). Langkah susun memasang tanda
+  `akt:<id>:taruh:<item>:<wadah>`; aturan cabang ditulis BERURUTAN dengan cabang sisa terakhir, dan tiap susunan
+  lengkap harus jatuh ke tepat satu alternatif (uji enumerasi di `episode/auto-2/episode.test.ts`). Bila satu
+  alternatif dicapai susunan yang akibatnya berbeda, buat node akibat varian (mis. `k09-a2`) atau baris bersyarat.
+- **`antarmuka: 'hp'` (Episode 2, D-60..D-62)**: pemain mobile-first `cerita/hp/PemainHP.tsx` (desktop = kolom yang
+  sama). Satu tampilan per layar: `obrolan` (baris dari nasabah saat `tata.telepon === nasabah`, atau tanpa tokoh hadir)
+  = satu utas WhatsApp dari riwayat (`hp/alur.ts`), `adegan` (panggung latar + satu kartu dialog), `arena` (aktivitas),
+  `akhir`. Baris berurutan dengan tampilan sama & tanpa perubahan tata = satu ketukan. `Baris.lampiran` = foto/dokumen
+  di obrolan (`Episode.lampiran`, gambar dari `Episode.seniArena`). Umpan balik dipisah: tindakan, akibat, status.
+- **Aktivitas di antarmuka HP = arena** (`DefAktivitas.arena`, `cerita/hp/arena`): pola `susun` | `tujuan` |
+  `bandingkan` | `bundel` | `pesan` dipilih sesuai adegan; `tanya` = satu pertanyaan sederhana; `fakta` = tabel misi /
+  dokumen yang dibutuhkan saat memutuskan (`hanyaDaftar` bila gambar sudah memuatnya, mis. papan rencana; `catatan` =
+  fakta singkat di gambar). Wadah/tujuan punya `arti` singkat bila perbedaan kategorinya memengaruhi keputusan (turunan
+  label naskah, tanpa fakta asuransi baru). `pesanObrolan` mengubah susunan menjadi pesan keluar. Susunan = MissionAnswer
+  misi sintetis (draf per kunjungan), dikirim sekali ke `langsung`. Validator memeriksa kecocokan arena dengan misi.
+  Tampilan daftar = state & penilaian yang sama. Uji: `cerita/hp/hp.test.ts` (murni) + uji browser HP (360/390/430).
+- **Aktivitas antarmuka standar (Episode 1) = tindakan pada benda di adegan 2D (engine Phaser)**: tiap misi sintetis
+  punya SceneSpec terdaftar (`game/scenes/cerita/<id>/adegan.ts`, `fokus: 'adegan'`, bukan `scene: 'gambar'`). Langkah
+  assign: item = dokumen/kartu tokoh/penanda, bucket = baki/lokasi peta/slot rencana/stempel/ponsel; ketuk benda lalu
+  wadah. `SceneSpec.masukWadah` = salinan kecil item terbang & tinggal di wadahnya (dokumen masuk baki, Mas Rudi ke
+  lokasi), aslinya pudar tetapi tetap bisa diketuk untuk dipindah. Langkah single: opsi = benda/gelembung pesan. Ketukan
+  menulis draf MissionAnswer yang sama dengan daftar HTML (tetap tampil sebagai jalur keyboard/pembaca layar; engine
+  gagal / `?adegan=ringan` = gambar statis dari spec + daftar), lalu Kirim -> `langsung` -> akibat (tanpa kuis kedua).
+  Draf yang belum dikirim disimpan per kunjungan (`raksa:cerita:draf`, `simpan.ts`): muat ulang di HP memulihkan susunan.
+  Penjaga tata letak: `game/scenes/cerita/cerita.test.ts` (label, area ketuk >= 86 tanpa tumpang tindih, petugas & stiker
+  tidak menutupi benda/label, item/wadah/opsi = isi misi). `MissionPlay.visual` (panggung latar di slot adegan) hanya
+  untuk aktivitas episode berlatar yang memang tanpa adegan 2D.
+- **`kepercayaanBatas`**: status dijepit (mis. 0-100); **`bahasa`**: naskah yang belum disahkan cukup `['id']`
+  (tabel en/zh kosong; halaman memberi catatan, tidak menerjemahkan diam-diam). **`statusNaskah`**: catatan draf di
+  bawah ringkasan.
+- **Batas keamanan**: naskah, klasifikasi, dan alasan episode solo ada di bundel klien. Untuk deployment lomba yang
+  memakai kasus yang sama di room resmi: build dengan `VITE_CERITA_TANPA=<id>` (modul episode `./<id>/episode` diganti
+  rintisan null, `episode/rintisan.ts`; arena & gambar Episode 2 hanya diimpor modul episodenya sehingga ikut keluar). Jangan pakai skenario room yang juga terbit sebagai episode solo untuk kompetisi berhadiah.
 
 ## 5. Materi klaim dan tinjauan PIC Claim
 

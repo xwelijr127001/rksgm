@@ -16,6 +16,8 @@ process.env.HOST = '127.0.0.1';
 process.env.DB_FILE = DB_FILE;
 process.env.PUBLIC_BASE_URL = `http://127.0.0.1:${PORT}`;
 process.env.NODE_ENV = 'test';
+// PRD v0.2: legacy modes are off by default (docs/prd-v02/DECISIONS.md D-03); these tests exercise them.
+process.env.RAKSA_LEGACY = 'on';
 // Tes ini memainkan 10 misi paket latihan dengan kunci answerKeys.ts; room baru tanpa pilihan
 // paket mengikuti RAKSA_PAKET, jadi dipaku di sini (bawaan server = paket acara).
 process.env.RAKSA_PAKET = 'latihan';
