@@ -9,7 +9,7 @@ import { ukuranPermintaanPotret, useDpr } from '../../../../game/tokoh';
 import { potretTokoh, svgPotret, type IdTokohPiksel } from '../../../seni/piksel';
 import type { Ekspresi } from '../../../tipe';
 
-export function PotretPikselHp({ tokoh, ekspresi, ukuran, label }: { tokoh: IdTokohPiksel; ekspresi: Ekspresi; ukuran: number; label: string }) {
+export function PotretPikselHp({ tokoh, ekspresi, ukuran, label, className = '' }: { tokoh: IdTokohPiksel; ekspresi: Ekspresi; ukuran: number; label: string; className?: string }) {
   const dpr = useDpr();
   const { px } = ukuranPermintaanPotret(ukuran, dpr);
   const isi = useMemo(() => {
@@ -23,7 +23,7 @@ export function PotretPikselHp({ tokoh, ekspresi, ukuran, label }: { tokoh: IdTo
     }
   }, [tokoh, ekspresi, px]);
   return (
-    <span className="tokoh-potret cer-potret cseni-potret" role="img" aria-label={label} style={{ width: ukuran, height: ukuran }} data-tokoh={tokoh} data-ekspresi={ekspresi} data-jendela={isi?.asal}>
+    <span className={'tokoh-potret cer-potret cseni-potret ' + className} {...(label ? { role: 'img', 'aria-label': label } : { 'aria-hidden': true })} style={{ width: ukuran, height: ukuran }} data-tokoh={tokoh} data-ekspresi={ekspresi} data-jendela={isi?.asal}>
       {isi ? (
         <svg width={ukuran} height={ukuran} viewBox={isi.viewBox} preserveAspectRatio="none" focusable="false" aria-hidden="true" style={{ imageRendering: 'pixelated' }} dangerouslySetInnerHTML={{ __html: isi.svg }} />
       ) : (

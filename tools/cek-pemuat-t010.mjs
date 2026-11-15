@@ -117,28 +117,8 @@ for (const rute of ['/host', '/projector', '/join', '/cerita', '/acara/join', '/
   await ctx.close();
 }
 
-// 7. Part A: reduced motion (instant swap) and ?gerak=penuh, plus the 404 background state, on /cerita/auto-2 at 360x740.
-for (const [nama, reduce, q, gagal] of [['gerak-ikut-dikurangi', true, '?gerak=ikut', false], ['gerak-penuh', true, '?gerak=penuh', false], ['latar-404', false, '', true]]) {
-  const ctx = await b.createBrowserContext();
-  const p = await halaman(ctx, { reduce });
-  if (gagal) { await p.setRequestInterception(true); p.on('request', (r) => (/-latar-\d+.*\.webp/.test(r.url()) ? r.respond({ status: 404, body: '' }) : r.continue())); }
-  await p.goto(BASE + '/cerita/auto-2' + q);
-  await p.waitForSelector('.cer-ilustrasi[data-siap]', { timeout: 20000 }).catch(() => {});
-  await tunggu(600);
-  const r = await p.evaluate(() => {
-    const w = document.querySelector('.cer-ilustrasi');
-    const k = w?.querySelector('.cer-ilustrasi-kabur');
-    return { siap: w?.hasAttribute('data-siap'), gagalLatar: w?.hasAttribute('data-gagal-latar'), kaburAda: !!k, kaburOpacity: k && getComputedStyle(k).opacity, pil: !!document.querySelector('.cer-adegan-memuat'),
-      transisiLapis: w && getComputedStyle(w.querySelector('img')).transitionDuration, tokoh: !!w?.querySelector('.cer-ilustrasi-tokoh'), lanjut: !!document.querySelector('button.primary-action, .hp-vn-aksi button') };
-  });
-  // dialogue still usable: press the first action button
-  const tombol = await p.$('.hp-vn-aksi button, .hp-komposer button');
-  let maju = null;
-  if (tombol) { const sebelum = await p.evaluate(() => document.querySelector('.hp-vn-dialog')?.textContent); await tombol.click(); await tunggu(500); maju = (await p.evaluate(() => document.querySelector('.hp-vn-dialog')?.textContent)) !== sebelum; }
-  await p.screenshot({ path: path.join(OUT, `adegan-${nama}-360.png`) });
-  lapor(`adegan-${nama}`, { ...r, dialogMaju: maju });
-  await ctx.close();
-}
+// 7. RETIRED in T-013 Stage 3: the AUTO-2 illustrated placeholder (blurred thumbnail, 404 background, reduced-motion swap) no
+// longer exists; Episode 2 scenes are checked by tools/cek-piksel-t013.mjs (pixel stage, incl. the reduced-motion probe).
 
 // 8. (fix round, D-62 / D-59) Cold "/" with NO hold (fast link, preload restored): skipped, or on screen >= 600 ms.
 for (const lang of ['id', 'en']) {
@@ -160,44 +140,7 @@ for (const lang of ['id', 'en']) {
   lapor('tahan-singkat-minimal600', { tampil: r.tampil, selesai: r.selesai, durasi: r.tampil == null ? null : r.selesai - r.tampil });
   await ctx.close();
 }
-// 10. (D-61 / D-64) Scene pill: ~30 px tall, fits the stage, id/en/zh at 320/360/390 (webp delayed so the pill is visible).
-for (const lang of ['id', 'en', 'zh']) for (const w of [320, 360, 390]) {
-  const ctx = await b.createBrowserContext();
-  const p = await ctx.newPage();
-  await p.setViewport({ width: w, height: w === 390 ? 844 : 740, deviceScaleFactor: 2, isMobile: true, hasTouch: true });
-  await p.evaluateOnNewDocument((l, pj) => { localStorage.setItem('raksa:bahasa', l); localStorage.setItem('raksa:profil', pj); }, lang, PROFIL);
-  await p.setRequestInterception(true);
-  p.on('request', async (r) => { if (/\.webp/.test(r.url()) && !r.url().startsWith('data:')) await tunggu(4000); try { await r.continue(); } catch { /* */ } });
-  await p.goto(BASE + '/cerita/auto-2', { waitUntil: 'domcontentloaded' });
-  await p.waitForSelector('.cer-adegan-memuat', { timeout: 15000 }).catch(() => {});
-  await tunggu(300);
-  const r = await p.evaluate(() => {
-    const e = document.querySelector('.cer-adegan-memuat'); const st = document.querySelector('.cer-panggung.cer-latar');
-    if (!e) return null;
-    const a = e.getBoundingClientRect(), s = st.getBoundingClientRect();
-    return { h: Math.round(a.height * 10) / 10, w: Math.round(a.width), kiri: Math.round(a.left - s.left), kanan: Math.round(s.right - a.right), teks: e.textContent, pas: a.left >= s.left && a.right <= s.right };
-  });
-  if (r) await p.screenshot({ path: path.join(OUT, `pil-${w}-${lang}.png`), clip: { x: 0, y: 0, width: w, height: 420 } });
-  lapor(`pil-${w}-${lang}`, r ?? { pil: 'tidak ada' });
-  await ctx.close();
-}
-// 11. (D-61) The activity-loading fallback `.cer-memuat` (cerita.css) carries no pill rules: no stylesheet rule for `.cer-memuat`
-// sets position/top/border-radius (the scene pill is `.cer-adegan-memuat`).
-{
-  const ctx = await b.createBrowserContext();
-  const p = await halaman(ctx, {});
-  await p.goto(BASE + '/cerita/auto-2', { waitUntil: 'domcontentloaded' });
-  await p.waitForSelector('.cer-ilustrasi', { timeout: 20000 }).catch(() => {});
-  const r = await p.evaluate(() => {
-    const out = [];
-    for (const sh of document.styleSheets) { let rules; try { rules = sh.cssRules; } catch { continue; }
-      const jalan = (rs) => { for (const x of rs) { if (x.cssRules && !x.selectorText) jalan(x.cssRules); else if (x.selectorText && /(^|[\s,])\.cer-memuat(?![-\w])/.test(x.selectorText)) out.push(x.cssText.slice(0, 160)); } };
-      jalan(rules); }
-    return out;
-  });
-  lapor('cer-memuat-aturan', { aturan: r, tanpaPil: r.every((x) => !/position|border-radius|top:/.test(x)) });
-  await ctx.close();
-}
+// 10 + 11. RETIRED in T-013 Stage 3: the scene pill `.cer-adegan-memuat` was removed with the illustrated stage.
 
 await b.close();
 fs.writeFileSync(path.join(OUT, 'hasil.json'), JSON.stringify(hasil, null, 1));

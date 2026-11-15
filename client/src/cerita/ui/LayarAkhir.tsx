@@ -22,8 +22,8 @@ import { PotretNasabah } from '../seni';
 import { PotretMissRaksa } from '../seni/tokoh/PotretMissRaksa';
 import type { Ekspresi, Episode, IdAkhir, IdBab, KunciTeks, StateCerita } from '../tipe';
 import { labelPerasaan, selaPembicara } from './bagian';
-import { PotretIlustrasi } from './gambarIlustrasi';
-import { avatarTokoh } from './latar/ilustrasi';
+import { PotretPikselHp } from './latar/piksel/PotretPikselHp';
+import { tokohPotret } from './latar/piksel/potret';
 import { RingkasanKeputusan } from './RingkasanKeputusan';
 import { PemilihBagian } from './PemilihBagian';
 import { PerjalananKu, TandaNada } from './PerjalananKu';
@@ -57,10 +57,10 @@ export function LayarAkhir({ ep, state, bahasa, tx, ditemukan, onUlangBab, onUla
   const ulang = k.ulang;
   const babUlang = ulang ? ep.bab.find((b) => b.id === ulang) : undefined;
 
-  // Episode berpanggung latar: avatar ilustrasi episode (wajah sama dengan panggung & dialognya).
-  const avatarNasabah = ep.latar ? avatarTokoh(ep, ep.nasabah, k.ekspresi) : null;
+  // Episode berpanggung latar: potret piksel episode (atlas yang sama dengan panggung & dialognya).
+  const avatarNasabah = tokohPotret(ep, ep.nasabah);
   const idMentor = Object.keys(ep.pemeran).find((id) => ep.pemeran[id]!.potret === 'missRaksa') ?? 'missRaksa';
-  const avatarMentor = ep.latar ? avatarTokoh(ep, idMentor, wajahMentor) : null;
+  const avatarMentor = tokohPotret(ep, idMentor);
   const namaMentor = ep.pemeran[idMentor] ? tx(ep.pemeran[idMentor]!.nama) : '';
   const adaRingkasan = !!ep.titik?.length;
 
@@ -73,7 +73,7 @@ export function LayarAkhir({ ep, state, bahasa, tx, ditemukan, onUlangBab, onUla
       <div className="akh-kepala">
         {/* Potret piksel: ukuran tampil diukur dari kotaknya (akhir.css menimpa 64 -> 56/80/88 px), jadi jendela & skala
             bulatnya selalu untuk ukuran yang benar-benar tampil. */}
-        {avatarNasabah ? <PotretIlustrasi varian={avatarNasabah} ukuran={64} nama={namaNasabah} className="akh-potret" />
+        {avatarNasabah ? <PotretPikselHp tokoh={avatarNasabah} ekspresi={k.ekspresi} ukuran={64} label={namaNasabah} className="akh-potret" />
           : <PotretNasabah ekspresi={k.ekspresi} ukuran={64} label={namaNasabah} className="akh-potret" />}
         <div className="akh-kepala-teks">
           <p className="akh-perasaan">
@@ -94,7 +94,7 @@ export function LayarAkhir({ ep, state, bahasa, tx, ditemukan, onUlangBab, onUla
         <div className="akh-pelajaran" data-ukur="akhir-pelajaran">
           <p className="akh-pelajaran-label">
             {/* 32 = slot ikon kepala mini (seni/piksel/ikon.ts: sanggul & kerah utuh di lingkaran isi 28 px). */}
-            {adaMentor ? (avatarMentor ? <PotretIlustrasi varian={avatarMentor} ukuran={32} nama={namaMentor} /> : <PotretMissRaksa ekspresi={wajahMentor} ukuran={32} />) : null}
+            {adaMentor ? (avatarMentor ? <PotretPikselHp tokoh={avatarMentor} ekspresi={wajahMentor} ukuran={32} label={namaMentor} /> : <PotretMissRaksa ekspresi={wajahMentor} ukuran={32} />) : null}
             <b>{t('ceritaAkhir.pelajaranLabel')}</b>
           </p>
           <p className="akh-pelajaran-teks">{tx(k.pelajaran)}</p>

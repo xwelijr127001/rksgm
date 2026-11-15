@@ -9,22 +9,23 @@ import { Avatar } from '../../art/Avatar';
 import { bahasaKini, t } from '../../i18n';
 import { PotretNasabah } from '../seni';
 import { PotretMissRaksa } from '../seni/tokoh/PotretMissRaksa';
-import type { Ekspresi, Episode, KunciTeks, NilaiProses, VarianGambar } from '../tipe';
-import { PotretIlustrasi } from './gambarIlustrasi';
-import { asetTokoh, avatarTokoh } from './latar/ilustrasi';
+import type { Ekspresi, Episode, KunciTeks, NilaiProses } from '../tipe';
+import { PotretPikselHp } from './latar/piksel/PotretPikselHp';
+import { tokohPotret } from './latar/piksel/potret';
+import type { IdTokohPiksel } from '../seni/piksel';
 import { kunciLabelEkspresi } from './tampilan';
 
 export type Arah = 'naik' | 'turun' | 'tetap';
 export type JenisPembicara = 'nasabah' | 'missRaksa' | 'pemain' | 'tokoh' | 'narasi';
 /** Avatar ilustrasi pembicara untuk ekspresi tertentu (episode berpanggung latar), atau null. */
-export type AvatarPotret = (ekspresi: Ekspresi) => readonly VarianGambar[] | null;
+/** Episode berpanggung latar (Episode 2): tokoh piksel pemeran ini (potret = atlas yang sama dengan panggung). */
+export type AvatarPotret = IdTokohPiksel;
 
 export interface Pembicara {
   jenis: JenisPembicara;
   /** Kosong untuk narasi. */
   nama: string;
   peran: string;
-  /** Episode berpanggung latar: avatar ilustrasi tokoh itu per ekspresi (wajah sama dengan panggung). */
   potret?: AvatarPotret;
 }
 
@@ -33,7 +34,7 @@ export function infoPembicara(ep: Episode, siapa: string, tx: (k: KunciTeks) => 
   if (siapa === 'pemain') return { jenis: 'pemain', nama: namaPemain, peran: t('cerita.peranPemain') };
   const p = Object.prototype.hasOwnProperty.call(ep.pemeran, siapa) ? ep.pemeran[siapa] : undefined;
   if (!p) return { jenis: 'narasi', nama: '', peran: '' };
-  const potret: AvatarPotret | undefined = asetTokoh(ep, siapa) ? (e) => avatarTokoh(ep, siapa, e) : undefined;
+  const potret = tokohPotret(ep, siapa) ?? undefined;
   return { jenis: p.potret, nama: tx(p.nama), peran: tx(p.peran), ...(potret ? { potret } : {}) };
 }
 
@@ -55,11 +56,10 @@ export function PotretPembicara({ jenis, ekspresi, look, ukuran = 48, nama = '',
   look: PlayerLook;
   ukuran?: number;
   nama?: string;
-  /** Episode berpanggung latar: avatar ilustrasi (lihat Pembicara.potret) menggantikan seni Episode 1. */
+  /** Episode berpanggung latar: potret piksel tokoh itu (lihat Pembicara.potret) menggantikan seni Episode 1. */
   potret?: AvatarPotret;
 }) {
-  const v = potret?.(ekspresi ?? 'netral');
-  if (v) return <PotretIlustrasi varian={v} ukuran={ukuran} nama={nama} />;
+  if (potret) return <PotretPikselHp tokoh={potret} ekspresi={ekspresi ?? 'netral'} ukuran={ukuran} label="" />;
   if (jenis === 'nasabah') return <PotretNasabah ekspresi={ekspresi ?? 'netral'} ukuran={ukuran} className="cer-potret" />;
   if (jenis === 'pemain') {
     return <span className="cer-potret cer-potret-pemain" aria-hidden="true" style={{ width: ukuran, height: ukuran }}><Avatar look={look} size={ukuran} mood="netral" /></span>;

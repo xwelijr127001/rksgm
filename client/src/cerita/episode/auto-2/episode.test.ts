@@ -394,8 +394,8 @@ test('komposisi panggung latar mengikuti tata node/baris dan wajah pembicara', (
   const kp = komposisiLatar(EP, k04);
   assert.equal(kp.lokasi, 'pool');
   assert.deepEqual(kp.hadir.map((x) => x.id), ['rudi']);
-  // Semua lokasi bergambar ilustrasi; lapangan = tokoh berdiri (bukan interior kantor).
-  for (const [id, l] of Object.entries(EP.latar!.lokasi)) assert.equal(l.ilustrasi.tokoh.jenis, id === 'kantor' ? 'dekat' : 'berdiri', id);
+  // T-013 Stage 3: semua lokasi = ruang piksel `<lokasi>-ep2` (panggung ilustrasi dihapus).
+  for (const [id, l] of Object.entries(EP.latar!.lokasi)) assert.equal(l.piksel, `${id}-ep2`, id);
 });
 
 function mainkanSampai(target: string): StateCerita {

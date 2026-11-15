@@ -21,8 +21,8 @@ import '../cerita/kejadian/kejadian.css';
 
 type Fase = 'buka' | 'susun' | 'putar' | 'banding' | 'tindak' | 'akhir';
 
-const AVATAR = import.meta.glob('../cerita/seni/auto-2/ilustrasi/hendra-{cemas,tenang}-avatar-320.webp', { eager: true, query: '?url', import: 'default' }) as Record<string, string>;
-const avatar = (k: 'cemas' | 'tenang') => AVATAR[`../cerita/seni/auto-2/ilustrasi/hendra-${k}-avatar-320.webp`] ?? '';
+const AVATAR = import.meta.glob('../cerita/seni/auto-2/proto/hendra-{cemas,tenang}-avatar-320.webp', { eager: true, query: '?url', import: 'default' }) as Record<string, string>;
+const avatar = (k: 'cemas' | 'tenang') => AVATAR[`../cerita/seni/auto-2/proto/hendra-${k}-avatar-320.webp`] ?? '';
 
 const JEDA_AWAL_MS = 700;
 const JEDA_LANGKAH_MS = 1900;

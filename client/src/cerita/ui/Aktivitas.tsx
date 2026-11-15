@@ -36,7 +36,7 @@ import { bacaDrafAktivitas, hapusDrafAktivitas, kunjunganAktivitas, simpanDrafAk
 import { PotretMissRaksa } from '../seni/tokoh/PotretMissRaksa';
 import type { Baris, DefAktivitas, Episode, KunciTeks, NodeAktivitas, StateCerita } from '../tipe';
 import { PotretPembicara, infoPembicara, labelPerasaan } from './bagian';
-import { PotretIlustrasi } from './gambarIlustrasi';
+import { PotretPikselHp } from './latar/piksel/PotretPikselHp';
 import { DaftarIstilah, istilahBaris } from './KotakDialog';
 import { komposisiLatar, nasabahDiPanggung } from './latar/komposisi';
 import { PanggungLatar } from './latar/PanggungLatar';
@@ -83,9 +83,9 @@ export default function AktivitasCerita({ ep, state, node, bahasa, look, namaPem
   // Pemandu di kartu tugas saat menjawab = potret piksel Miss Raksa (sama dengan dialog & panggung), wajah dari baris
   // Miss Raksa terakhir di pengantar aktivitas ini. Miss Raksa nonaktif: MissionPlay memakai Raki seperti biasa.
   const wajahPemandu = [...pengantar].reverse().find((b) => ep.pemeran[b.siapa]?.potret === 'missRaksa')?.ekspresi ?? 'netral';
-  const avatarPemandu = infoPembicara(ep, 'missRaksa', tx, namaPemain).potret?.(wajahPemandu) ?? null;
+  const avatarPemandu = infoPembicara(ep, 'missRaksa', tx, namaPemain).potret ?? null;
   const potretPemandu = !TOKOH.missRaksa.aktif ? undefined
-    : avatarPemandu ? <PotretIlustrasi varian={avatarPemandu} ukuran={44} nama={infoPembicara(ep, 'missRaksa', tx, namaPemain).nama} /> : <PotretMissRaksa ekspresi={wajahPemandu} ukuran={44} />;
+    : avatarPemandu ? <PotretPikselHp tokoh={avatarPemandu} ekspresi={wajahPemandu} ukuran={44} label={infoPembicara(ep, 'missRaksa', tx, namaPemain).nama} /> : <PotretMissRaksa ekspresi={wajahPemandu} ukuran={44} />;
   const namaNasabah = pemeranNasabah ? tx(pemeranNasabah.nama) : '';
   // Episode berpanggung latar, aktivitas TANPA adegan 2D (misi 'gambar'): visualnya panggung yang sama dengan dialognya.
   // Aktivitas beradegan (semua aktivitas Episode 2) memakai GameStage: benda di adegan adalah tindakannya.

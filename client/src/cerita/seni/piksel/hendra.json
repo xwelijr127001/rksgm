@@ -90,14 +90,14 @@
   "kedip (di frame.wajah.mata)"
  ],
  "frame": {
-  "berdiri-kiri": {
+  "berdiri-kanan": {
    "rect": [
     0,
     0,
     84,
     196
    ],
-   "hadap": "kiri",
+   "hadap": "kanan",
    "jenisJangkar": "kaki",
    "jangkar": {
     "x": 45,
@@ -198,14 +198,14 @@
     }
    }
   },
-  "gestur-cemas-kiri": {
+  "gestur-cemas-kanan": {
    "rect": [
     85,
     95,
     62,
     94
    ],
-   "hadap": "kiri",
+   "hadap": "kanan",
    "jenisJangkar": "pinggul",
    "jangkar": {
     "x": 31,
@@ -222,14 +222,14 @@
    "kepalaTinggi": 39,
    "teleponTergambar": false
   },
-  "gestur-panik-kiri": {
+  "gestur-panik-kanan": {
    "rect": [
     85,
     0,
     84,
     94
    ],
-   "hadap": "kiri",
+   "hadap": "kanan",
    "jenisJangkar": "pinggul",
    "jangkar": {
     "x": 42,
@@ -246,14 +246,14 @@
    "kepalaTinggi": 39,
    "teleponTergambar": false
   },
-  "gestur-kecewa-kiri": {
+  "gestur-kecewa-kanan": {
    "rect": [
     253,
     0,
     71,
     94
    ],
-   "hadap": "kiri",
+   "hadap": "kanan",
    "jenisJangkar": "pinggul",
    "jangkar": {
     "x": 36,
@@ -270,14 +270,14 @@
    "kepalaTinggi": 39,
    "teleponTergambar": false
   },
-  "gestur-tenang-kiri": {
+  "gestur-tenang-kanan": {
    "rect": [
     396,
     0,
     68,
     94
    ],
-   "hadap": "kiri",
+   "hadap": "kanan",
    "jenisJangkar": "pinggul",
    "jangkar": {
     "x": 34,
@@ -294,14 +294,14 @@
    "kepalaTinggi": 39,
    "teleponTergambar": false
   },
-  "gestur-senang-kiri": {
+  "gestur-senang-kanan": {
    "rect": [
     325,
     0,
     70,
     94
    ],
-   "hadap": "kiri",
+   "hadap": "kanan",
    "jenisJangkar": "pinggul",
    "jangkar": {
     "x": 35,
@@ -318,14 +318,14 @@
    "kepalaTinggi": 39,
    "teleponTergambar": false
   },
-  "gestur-menjelaskan-kiri": {
+  "gestur-menjelaskan-kanan": {
    "rect": [
     170,
     0,
     82,
     94
    ],
-   "hadap": "kiri",
+   "hadap": "kanan",
    "jenisJangkar": "pinggul",
    "jangkar": {
     "x": 41,
@@ -345,51 +345,51 @@
  },
  "pose": {
   "berdiri": {
-   "kiri": "berdiri-kiri",
-   "bawaan": "kiri"
+   "kanan": "berdiri-kanan",
+   "bawaan": "kanan"
   },
   "gestur-cemas": {
-   "kiri": "gestur-cemas-kiri",
-   "bawaan": "kiri"
+   "kanan": "gestur-cemas-kanan",
+   "bawaan": "kanan"
   },
   "gestur-panik": {
-   "kiri": "gestur-panik-kiri",
-   "bawaan": "kiri"
+   "kanan": "gestur-panik-kanan",
+   "bawaan": "kanan"
   },
   "gestur-kecewa": {
-   "kiri": "gestur-kecewa-kiri",
-   "bawaan": "kiri"
+   "kanan": "gestur-kecewa-kanan",
+   "bawaan": "kanan"
   },
   "gestur-tenang": {
-   "kiri": "gestur-tenang-kiri",
-   "bawaan": "kiri"
+   "kanan": "gestur-tenang-kanan",
+   "bawaan": "kanan"
   },
   "gestur-senang": {
-   "kiri": "gestur-senang-kiri",
-   "bawaan": "kiri"
+   "kanan": "gestur-senang-kanan",
+   "bawaan": "kanan"
   },
   "gestur-menjelaskan": {
-   "kiri": "gestur-menjelaskan-kiri",
-   "bawaan": "kiri"
+   "kanan": "gestur-menjelaskan-kanan",
+   "bawaan": "kanan"
   }
  },
  "pandang": {
   "lawan": {
-   "arah": "kiri"
+   "arah": "kanan"
   },
   "pemain": {
-   "arah": "kiri"
+   "arah": "kanan"
   },
   "depan": {
-   "arah": "kiri"
+   "arah": "kanan"
   },
   "bawah": {}
  },
  "potret": {
-  "frame": "berdiri-kiri",
+  "frame": "berdiri-kanan",
   "jendela": {
    "32": {
-    "frame": "berdiri-kiri",
+    "frame": "berdiri-kanan",
     "x": 25,
     "y": 6,
     "sisi": 32,
@@ -397,7 +397,7 @@
     "tampil": 32
    },
    "44": {
-    "frame": "berdiri-kiri",
+    "frame": "berdiri-kanan",
     "x": 19,
     "y": 2,
     "sisi": 44,
@@ -405,7 +405,7 @@
     "tampil": 44
    },
    "52": {
-    "frame": "berdiri-kiri",
+    "frame": "berdiri-kanan",
     "x": 15,
     "y": 0,
     "sisi": 52,
@@ -413,7 +413,7 @@
     "tampil": 52
    },
    "64": {
-    "frame": "berdiri-kiri",
+    "frame": "berdiri-kanan",
     "x": 9,
     "y": -4,
     "sisi": 64,
@@ -421,7 +421,7 @@
     "tampil": 64
    },
    "96": {
-    "frame": "berdiri-kiri",
+    "frame": "berdiri-kanan",
     "x": 17,
     "y": 0,
     "sisi": 48,
@@ -431,7 +431,7 @@
   },
   "dekat": {
    "52": {
-    "frame": "berdiri-kiri",
+    "frame": "berdiri-kanan",
     "x": 28,
     "y": 9,
     "sisi": 26,
@@ -439,7 +439,7 @@
     "tampil": 52
    },
    "64": {
-    "frame": "berdiri-kiri",
+    "frame": "berdiri-kanan",
     "x": 25,
     "y": 6,
     "sisi": 32,
@@ -447,7 +447,7 @@
     "tampil": 64
    },
    "96": {
-    "frame": "berdiri-kiri",
+    "frame": "berdiri-kanan",
     "x": 25,
     "y": 6,
     "sisi": 32,
@@ -457,9 +457,9 @@
   }
  },
  "telepon": {
-  "frame": "berdiri-kiri",
+  "frame": "berdiri-kanan",
   "jendela": {
-   "frame": "berdiri-kiri",
+   "frame": "berdiri-kanan",
    "x": 13,
    "y": 2,
    "sisi": 56,

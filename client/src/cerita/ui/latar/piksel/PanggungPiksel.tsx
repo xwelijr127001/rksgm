@@ -20,9 +20,10 @@ import { useDpr } from '../../../../game/tokoh';
 import { susunTokoh, teleponSisipan, type SusunanTokoh } from '../../../seni/piksel';
 import type { Episode, IdPembicara, KunciTeks } from '../../../tipe';
 import { pasKamera, qPiksel, jenisBingkai, type Kamera } from '../../panggung/kamera';
-import { gabungKotak, type Kotak } from '../../panggung/dunia';
+import { DUNIA_H, DUNIA_W, gabungKotak, type Kotak } from '../../panggung/dunia';
 import { ADEGAN_SIAP } from '../hangatkan';
 import { titikTeks } from './hurufPiksel';
+import { muatPng, siap } from './muat';
 import { nasabahDiPanggung, type KomposisiLatar } from '../komposisi';
 import type { AdeganPiksel, TokohDiPiksel } from './adegan';
 import { RUANG_PIKSEL, SATUAN_RUANG, type RuangPiksel } from './ruang';
@@ -32,35 +33,18 @@ import '../latar.css';
 const K = SATUAN_RUANG;
 /** Perbesaran di atas skala bingkai yang boleh dipakai piksel bulat (Episode 1: 1,25; kantor HP butuh wajah lebih besar). */
 const MAKS_LEBIH = 1.6;
-
-// ------------------------------------------------------------------ gambar (cache per dokumen)
-
-const cache = new Map<string, Promise<HTMLImageElement>>();
-const siap = new Map<string, HTMLImageElement>();
-export function muatPng(url: string): Promise<HTMLImageElement> {
-  let p = cache.get(url);
-  if (!p) {
-    p = new Promise<HTMLImageElement>((ok, gagal) => {
-      const img = new Image();
-      img.decoding = 'async';
-      img.onload = () => { (img.decode ? img.decode() : Promise.resolve()).then(() => { siap.set(url, img); ok(img); }, gagal); };
-      img.onerror = () => gagal(new Error(`gagal ${url}`));
-      img.src = url;
-    });
-    p.catch(() => cache.delete(url));
-    cache.set(url, p);
-  }
-  return p;
-}
+const MAKS_LEBIH_LEBAR = 1.15;
 
 // ------------------------------------------------------------------ susunan murni
 
 export interface TokohTersusun {
   t: TokohDiPiksel;
   s: SusunanTokoh;
-  /** Pojok kiri-atas frame di dunia. */
+  /** Pojok kiri-atas frame di dunia (sebelum cermin). */
   x: number;
   y: number;
+  /** Titik kaki di dunia (sumbu cermin). */
+  kakiX: number;
 }
 
 /** Susun tokoh adegan (pose/arah dari adapter; mata & mulut dari animasi). */
@@ -71,11 +55,11 @@ export function susunAdeganPiksel(a: AdeganPiksel, r: RuangPiksel, gerak: { kedi
     const titik = (t.tempat === 'balikMeja' ? r.tempat.balikMeja : undefined) ?? r.slot[Math.max(1, t.jumlahSlot)]?.[t.slot] ?? r.slot[1]?.[0];
     if (!titik) continue;
     const s = susunTokoh(t.tokoh, {
-      pose: t.pose as never, hadap: t.hadap, ekspresi: t.ekspresi,
+      pose: t.pose as never, hadap: t.satuArah ?? t.hadap, ekspresi: t.ekspresi,
       mata: gerak.kedip ? 'tutup' : 'buka', mulut: t.bicara && gerak.mulut ? 'buka' : 'tutup',
     });
     if (!s) continue;
-    hasil.push({ t, s, x: titik.x - s.jangkar.x * K, y: titik.y - s.jangkar.y * K });
+    hasil.push({ t, s, x: titik.x - s.jangkar.x * K, y: titik.y - s.jangkar.y * K, kakiX: titik.x });
   }
   return hasil;
 }
@@ -84,14 +68,25 @@ export function susunAdeganPiksel(a: AdeganPiksel, r: RuangPiksel, gerak: { kedi
 export function kotakKepalaPiksel(x: TokohTersusun): Kotak {
   const h = x.s.kepalaTinggi * K;
   // + 30 % ke atas: topi/peci tokoh samping (tol, polisi, darto) ikut utuh di bingkai.
-  return { x: x.x + x.s.kepala.x * K - h / 2, y: x.y + x.s.kepala.y * K - h * 0.8, w: h, h: h * 1.3 };
+  const cx = x.t.cermin ? 2 * x.kakiX - (x.x + x.s.kepala.x * K) : x.x + x.s.kepala.x * K;
+  return { x: cx - h / 2, y: x.y + x.s.kepala.y * K - h * 0.8, w: h, h: h * 1.3 };
 }
 
 /** Kamera diam piksel bulat: bingkai ruang per kelas layar, kepala + papan wajib terlihat di atas pita dialog. */
-export function kameraPiksel(r: RuangPiksel, tokoh: readonly TokohTersusun[], W: number, H: number, dpr: number, bawah: number): Kamera {
+export function kameraPiksel(r: RuangPiksel, tokoh: readonly TokohTersusun[], W: number, H: number, dpr: number, bawah: number, penuh = false): Kamera {
   const kepala = tokoh.map(kotakKepalaPiksel).reduce<Kotak | null>((a, b) => gabungKotak(a, b), null);
-  const rect = r.bingkai[jenisBingkai(W)];
-  return pasKamera(W, H, rect, kepala, { atas: 0, kiri: 0, kanan: 0, bawah }, { q: qPiksel(dpr), wajib: gabungKotak(r.papan?.kotak ?? null, r.fokus), maksLebih: MAKS_LEBIH });
+  const jenis = jenisBingkai(W);
+  const rect = r.bingkai[jenis];
+  const q = qPiksel(dpr);
+  // D-95: layar lebar memperlihatkan ruangnya (perbesaran maks 1,15); HP boleh lebih dekat (wajah terbaca).
+  const k = pasKamera(W, H, rect, kepala, { atas: 0, kiri: 0, kanan: 0, bawah }, { q, wajib: gabungKotak(r.papan?.kotak ?? null, r.fokus), maksLebih: jenis === 'lebar' ? MAKS_LEBIH_LEBAR : MAKS_LEBIH });
+  if (!penuh || (W / k.s <= DUNIA_W + 1e-6 && H / k.s <= DUNIA_H + 1e-6)) return k;
+  // D-97 (kartu episode): "cover" = skala bulat berikutnya yang MENGISI kotak, dipotong, dipusatkan pada tokoh + fokus ruang.
+  const s = Math.ceil(Math.max(W / DUNIA_W, H / DUNIA_H) * q - 1e-6) / q;
+  const pusat = gabungKotak(kepala, r.fokus) ?? { x: 0, y: 0, w: DUNIA_W, h: DUNIA_H };
+  const vw = W / s, vh = H / s;
+  const bulat = (v: number) => Math.round(v * s * dpr) / (s * dpr);
+  return { s, x: bulat(Math.min(Math.max(0, pusat.x + pusat.w / 2 - vw / 2), DUNIA_W - vw)), y: bulat(Math.min(Math.max(0, pusat.y + pusat.h / 2 - vh / 2), DUNIA_H - vh)) };
 }
 
 // ------------------------------------------------------------------ komponen
@@ -135,6 +130,51 @@ function useGerak(mati: boolean, kunciBaris: string): { kedip: boolean; mulut: b
   return { kedip, mulut };
 }
 
+/**
+ * D-96: hidup di luar kantor, semuanya MATI saat gerak dikurangi. `lompat` = pembicara naik 2 piksel seni 160 md saat mulai
+ * berbicara; `napas` = pembicara naik 1 piksel seni bergantian tiap 1,2 d; `masuk` = tokoh yang baru bergabung meluncur dari
+ * tepi terdekat 180 md (p 0..1; bukan pada pemasangan pertama panggung).
+ */
+function useHidup(mati: boolean, pembicara: string, hadir: string): { lompat: boolean; napas: boolean; masuk: { id: Set<string>; p: number } | null } {
+  const [lompat, setLompat] = useState(false);
+  const [napas, setNapas] = useState(false);
+  const [masuk, setMasuk] = useState<{ id: Set<string>; p: number } | null>(null);
+  const lama = useRef<{ pembicara: string; hadir: string } | null>(null);
+  useEffect(() => {
+    const sebelum = lama.current;
+    lama.current = { pembicara, hadir };
+    if (mati || !sebelum) return;
+    const bersih: (() => void)[] = [];
+    if (pembicara && pembicara !== sebelum.pembicara) {
+      setLompat(true);
+      const tm = window.setTimeout(() => setLompat(false), 160);
+      bersih.push(() => { window.clearTimeout(tm); setLompat(false); });
+    }
+    const dulu = new Set(sebelum.hadir.split(' '));
+    const baru = hadir.split(' ').filter((x) => x && !dulu.has(x));
+    if (baru.length) {
+      const id = new Set(baru);
+      const t0 = performance.now();
+      let raf = 0;
+      const langkah = () => {
+        const p = Math.min(1, (performance.now() - t0) / 180);
+        setMasuk(p >= 1 ? null : { id, p });
+        if (p < 1) raf = requestAnimationFrame(langkah);
+      };
+      setMasuk({ id, p: 0 });
+      raf = requestAnimationFrame(langkah);
+      bersih.push(() => { cancelAnimationFrame(raf); setMasuk(null); });
+    }
+    return () => bersih.forEach((fn) => fn());
+  }, [mati, pembicara, hadir]);
+  useEffect(() => {
+    if (mati || !pembicara) return;
+    const iv = window.setInterval(() => setNapas((n) => !n), 1200);
+    return () => { window.clearInterval(iv); setNapas(false); };
+  }, [mati, pembicara]);
+  return { lompat, napas, masuk };
+}
+
 export interface PropsPanggungPiksel {
   ep: Episode;
   komposisi: KomposisiLatar;
@@ -145,11 +185,13 @@ export interface PropsPanggungPiksel {
   status?: boolean;
   ruangBawah?: number;
   className?: string;
-  /** Ada PNG adegan yang gagal dimuat: pemakai kembali ke panggung ilustrasi. */
+  /** 'penuh' = kartu episode: adegan mengisi kotak (cover), bukan letterbox. */
+  isi?: 'penuh';
+  /** Ada PNG adegan yang gagal dimuat: pemakai menampilkan kotak latar polos. */
   onGagal?: () => void;
 }
 
-export function PanggungPiksel({ ep, komposisi, adegan, tx, nama, suasana, status = false, ruangBawah = 0, className = '', onGagal }: PropsPanggungPiksel) {
+export function PanggungPiksel({ ep, komposisi, adegan, tx, nama, suasana, status = false, ruangBawah = 0, className = '', isi, onGagal }: PropsPanggungPiksel) {
   const akar = useRef<HTMLDivElement>(null);
   const kanvas = useRef<HTMLCanvasElement>(null);
   const ukuran = useUkuranKotak(akar);
@@ -158,6 +200,10 @@ export function PanggungPiksel({ ep, komposisi, adegan, tx, nama, suasana, statu
   const r = RUANG_PIKSEL[adegan.ruang]!;
   const kunciBaris = adegan.tokoh.map((x) => `${x.id}:${x.bicara}:${x.ekspresi}`).join('|');
   const gerak = useGerak(kurang, kunciBaris);
+  const hidup = useHidup(kurang, adegan.tokoh.find((x) => x.bicara)?.id ?? '', adegan.tokoh.map((x) => x.id).join(' '));
+  const lapisLama = useRef<HTMLCanvasElement>(null);
+  const ruangLama = useRef<string | null>(null);
+  const menungguPudar = useRef(false);
   const tokoh = useMemo(() => susunAdeganPiksel(adegan, r, gerak), [adegan, r, gerak]);
   const sisipan = useMemo(() => (adegan.telepon ? teleponSisipan(adegan.telepon.ekspresi, 56, { tokoh: adegan.telepon.tokoh }) : null), [adegan.telepon]);
   const prop = adegan.prop.map((p) => r.prop[p]).filter((x) => !!x);
@@ -177,11 +223,21 @@ export function PanggungPiksel({ ep, komposisi, adegan, tx, nama, suasana, statu
   }, [kunciUrl]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const papanTeks = r.papan ? tx(r.papan.teksKunci) : '';
-  const kamera = ukuran ? kameraPiksel(r, tokoh, ukuran.w, ukuran.h, dpr, ruangBawah) : null;
+  const kamera = ukuran ? kameraPiksel(r, tokoh, ukuran.w, ukuran.h, dpr, ruangBawah, isi === 'penuh') : null;
   useLayoutEffect(() => {
     const c = kanvas.current;
     if (!c || !ukuran || !kamera) return;
     const W = Math.round(ukuran.w * dpr), H = Math.round(ukuran.h * dpr);
+    // D-96 e: ganti ruang = bingkai ruang lama disalin ke kanvas atas, lalu memudar 150 md sesudah ruang baru tergambar.
+    const atas = lapisLama.current;
+    if (atas && ruangLama.current && ruangLama.current !== adegan.ruang && !kurang && c.width > 0) {
+      atas.width = c.width; atas.height = c.height;
+      atas.getContext('2d')?.drawImage(c, 0, 0);
+      atas.removeAttribute('data-pudar');
+      atas.setAttribute('data-aktif', '');
+      menungguPudar.current = true;
+    }
+    ruangLama.current = adegan.ruang;
     if (c.width !== W) c.width = W;
     if (c.height !== H) c.height = H;
     const g = c.getContext('2d');
@@ -202,11 +258,33 @@ export function PanggungPiksel({ ep, komposisi, adegan, tx, nama, suasana, statu
       for (const x of tokoh) {
         if (x.t.tempat !== tempat) continue;
         const tubuh = x.s.lapisan[0]!;
-        for (const l of x.s.lapisan) {
-          gambar(x.s.url, l.sumber.x, l.sumber.y, l.sumber.w, l.sumber.h, x.x + (l.x - tubuh.x) * K, x.y + (l.y - tubuh.y) * K, l.sumber.w * K, l.sumber.h * K);
+        // D-96: lompat/napas pembicara (piksel seni bulat) + luncur masuk dari tepi pandangan terdekat.
+        const naik = x.t.bicara ? (hidup.lompat ? 2 : hidup.napas ? 1 : 0) * K : 0;
+        let geser = 0;
+        if (hidup.masuk?.id.has(x.t.id)) {
+          const vw = W / s, kiri = x.kakiX < kamera.x + vw / 2;
+          const awal = kiri ? kamera.x - x.s.ukuran.w * K : kamera.x + vw + x.s.ukuran.w * K;
+          geser = (awal - x.kakiX) * (1 - hidup.masuk.p) ** 2;
         }
+        g.save();
+        // D-93: hadap kiri untuk atlas satu arah = cermin terhadap titik kaki.
+        if (x.t.cermin) { g.translate(2 * dx(x.kakiX + geser), 0); g.scale(-1, 1); }
+        for (const l of x.s.lapisan) {
+          gambar(x.s.url, l.sumber.x, l.sumber.y, l.sumber.w, l.sumber.h, x.x + geser + (l.x - tubuh.x) * K, x.y - naik + (l.y - tubuh.y) * K, l.sumber.w * K, l.sumber.h * K);
+        }
+        g.restore();
       }
     };
+    // Pandangan lebih besar daripada dunia (piksel bulat): pita di luar dunia diisi baris/kolom TEPI latar yang direntang
+    // (langit berlanjut ke atas, lantai ke bawah), bukan warna polos.
+    const latar = siap.get(r.lapisan[0]!.url);
+    if (latar) {
+      const x0 = dx(0), x1 = dx(DUNIA_W), y0 = dy(0), y1 = dy(DUNIA_H), pw = latar.naturalWidth, ph = latar.naturalHeight;
+      if (y0 > 0) g.drawImage(latar, 0, 0, pw, 1, x0, 0, x1 - x0, y0);
+      if (y1 < H) g.drawImage(latar, 0, ph - 1, pw, 1, x0, y1, x1 - x0, H - y1);
+      if (x0 > 0) g.drawImage(latar, 0, 0, 1, ph, 0, y0, x0, y1 - y0);
+      if (x1 < W) g.drawImage(latar, pw - 1, 0, 1, ph, x1, y0, W - x1, y1 - y0);
+    }
     for (const l of r.lapisan) {
       if (l.z >= 30 && l.id !== 'latar') break;
       gambar(l.url, 0, 0, l.w / K, l.h / K, l.x, l.y, l.w, l.h);
@@ -251,6 +329,10 @@ export function PanggungPiksel({ ep, komposisi, adegan, tx, nama, suasana, statu
       }
       g.restore();
     }
+    if (atas && menungguPudar.current) {
+      menungguPudar.current = false;
+      requestAnimationFrame(() => { atas.setAttribute('data-pudar', ''); window.setTimeout(() => { atas.removeAttribute('data-aktif'); atas.removeAttribute('data-pudar'); }, 200); });
+    }
     window.dispatchEvent(new Event(ADEGAN_SIAP));
   });
 
@@ -270,7 +352,8 @@ export function PanggungPiksel({ ep, komposisi, adegan, tx, nama, suasana, statu
       data-k={kamera ? Math.round(kamera.s * qPiksel(dpr)) : undefined}
     >
       <div className="cer-piksel" data-siap={siapUrl ? '' : undefined} aria-hidden="true">
-        <canvas ref={kanvas} className="cer-piksel-kanvas" data-pose={tokoh.map((x) => `${x.t.id}:${x.s.pose}:${x.s.hadap}:${x.s.ekspresi}`).join(' ') || undefined} />
+        <canvas ref={kanvas} className="cer-piksel-kanvas" data-pose={tokoh.map((x) => `${x.t.id}:${x.s.pose}:${x.t.hadap}:${x.s.ekspresi}`).join(' ') || undefined} data-mata={gerak.kedip ? 'tutup' : 'buka'} />
+        <canvas ref={lapisLama} className="cer-piksel-kanvas cer-piksel-lama" />
       </div>
       {/* Label lokasi hanya untuk ruang KOSONG tanpa papan: dengan tokoh, chip menutupi kepala (wawancara tiga saksi); di kantor
           nama lokasi sudah tertulis di papan. Nama lokasi tetap di narasi/judul bagian. */}

@@ -152,126 +152,19 @@ export interface CueLatar {
   objek?: string[];
 }
 
-/** Satu gambar dalam beberapa resolusi (ukuran piksel berkas + URL), terkecil dulu. */
-export interface VarianGambar {
-  w: number;
-  h: number;
-  src: string;
-}
-
 /**
- * Gambar ILUSTRASI tokoh (halus, bukan piksel): varian resolusi + letak kepala relatif gambar (0..1; atas = puncak
- * rambut, bawah = leher, cx = pusat kepala). Kepala dipakai untuk menskalakan tokoh-tokoh berbeda ke ukuran kepala yang
- * sama dan menaruh puncak kepalanya; `rasio` = lebar / tinggi.
- */
-export interface GambarTokoh {
-  varian: readonly VarianGambar[];
-  rasio: number;
-  kepala: { atas: number; bawah: number; cx: number };
-}
-
-/** Aset ilustrasi satu pemeran. Ekspresi tanpa gambar memakai `netral`. */
-export interface TokohIlustrasi {
-  /** Potret kepala-bahu persegi (avatar obrolan, kartu dialog, Riwayat, layar akhir). */
-  avatar: Partial<Record<Ekspresi, readonly VarianGambar[]>> & { netral: readonly VarianGambar[] };
-  /** Adegan dekat di balik meja: potret dada-ke-atas per ekspresi (tokoh tanpa potret = badan penuhnya). */
-  dekat: Partial<Record<Ekspresi, GambarTokoh>> & { netral: GambarTokoh };
-  /** Badan penuh untuk lokasi lapangan & sampul; `tinggi` = tinggi relatif (160 = orang dewasa acuan 1,7 m). */
-  badan?: GambarTokoh & { tinggi: number };
-}
-
-/** Kotak dalam piksel gambar sumber. */
-export interface KotakSumber {
-  x: number;
-  y: number;
-  w: number;
-  h: number;
-}
-
-/**
- * Cara tokoh tampil di lokasi ilustrasi:
- * - `dekat` (kantor): gambar `dekat` ekspresinya DI BALIK meja, diskalakan supaya tinggi kepalanya `tinggiKepala` dan
- *   puncak kepalanya di `atasKepala`; slot = pusat kepala x.
- * - `berdiri` (lapangan): BADAN PENUH berpijak di lantai gambar; slot = titik kaki {x, y}. Tinggi dari perspektif gambar:
- *   orang 1,7 m berkaki di y setinggi (y - cakrawala) x 1,7 / mata (mata = tinggi kamera dalam meter), dikali tinggi
- *   relatif tokoh; jadi tokoh lebih jauh (y kecil) lebih kecil dan semua kepala dewasa sekitar garis cakrawala.
- */
-export type TokohLokasi =
-  | { jenis: 'dekat'; slot: Record<1 | 2 | 3, number[]>; atasKepala: number; tinggiKepala: number }
-  | { jenis: 'berdiri'; slot: Record<1 | 2 | 3, readonly { x: number; y: number }[]>; cakrawala: number; mata: number };
-
-/** Benda berdiri di lokasi (kendaraan kasus), bukan bagian gambar latar. */
-export interface BendaIlustrasi {
-  varian: readonly VarianGambar[];
-  kotak: KotakSumber;
-  /** y alas terdekat ke kamera (roda depan): tokoh berkaki lebih rendah (y lebih besar) digambar di DEPAN benda. */
-  alas: number;
-  /** Bagian yang wajib masuk bingkai (mis. kepala truk yang ringsek); sisanya boleh terpotong tepi panggung. */
-  fokus: KotakSumber;
-}
-
-/**
- * Papan bertulisan yang digambar KODE di atas gambar latar (tulisan tajam & sesuai naskah, tidak bergantung pada tulisan
- * hasil generasi gambar). `latar` null = tulisan di papan kosong yang memang ada di gambar.
- */
-export interface PapanIlustrasi {
-  kotak: KotakSumber;
-  latar: string | null;
-  tepi?: string;
-  /** Baris tulisan dari atas; ukuran huruf dalam piksel sumber. */
-  baris: readonly { teks: KunciTeks; ukuran: number; warna: string; tebal?: number }[];
-  /** Wajib terlihat saat narasi: kotaknya ikut dibingkai kamera (saat ada yang berbicara, kamera mengikuti pembicara). */
-  wajib?: boolean;
-}
-
-/**
- * Lokasi bergambar ILUSTRASI (gambar latar, bukan seni kode). Koordinat = piksel gambar sumber (w x h). Lapisan: latar ->
- * tiang & papan (kode) -> benda & tokoh (urut kedalaman) -> `depan` (meja/monitor dari gambar yang sama, bermasker,
- * sehingga tokoh `dekat` berdiri DI BELAKANG meja) -> benda akibat keputusan. `bingkai` = potongan kamera per kelas layar
- * (HP tegak / lebar): lebar potongan minimum & pusat bila tidak ada subjek; potongan mengikuti subjek (tokoh, fokus benda,
- * papan wajib) dan melebar bila subjek tidak muat.
- */
-export interface LokasiIlustrasi {
-  w: number;
-  h: number;
-  latar: readonly VarianGambar[];
-  depan?: readonly VarianGambar[];
-  /** (T-010) Gambar mini latar (data URI ~0,5 KB) yang tampil kabur sebagai pengganti ruangan sampai lapisan siap. */
-  kabur?: string;
-  tokoh: TokohLokasi;
-  bingkai: Record<'hp' | 'lebar', { cx: number; cy: number; lebar: number }> & {
-    /** (tokoh `dekat`) Bidikan dekat untuk panggung HP yang tinggi (rasio <= 1,15): tokoh memenuhi panggung. */
-    hpDekat?: { cx: number; cy: number; lebar: number };
-  };
-  /** Benda akibat keputusan: id objek komposisi -> seni (Episode.seniArena) + kotak (piksel sumber). */
-  objek?: Readonly<Record<string, { seni: string; x: number; y: number; w: number }>>;
-  benda?: readonly BendaIlustrasi[];
-  papan?: readonly PapanIlustrasi[];
-  /** Tiang/gantri papan (persegi warna besi). */
-  tiang?: readonly KotakSumber[];
-}
-
-/**
- * Konfigurasi panggung latar sebuah episode (alternatif dari `panggung` dunia Episode 1). Lokasi = gambar ilustrasi
- * (`ilustrasi`) + nama tempat; tokoh = aset ilustrasi turunan aset pemilik (seni/<episode>).
+ * Konfigurasi panggung latar sebuah episode (alternatif dari `panggung` dunia Episode 1). T-013 Stage 3: lokasi = ruang
+ * PIKSEL (seni/piksel/ruang-ep2.json, digambar ui/latar/piksel/PanggungPiksel lewat adapter cue adeganPiksel); tokoh =
+ * atlas piksel (adegan.ts PERAN_PIKSEL). Panggung ilustrasi (WebP) dan asetnya sudah dihapus.
  */
 export interface KonfigLatar {
-  /**
-   * Lokasi -> nama tempat (kunci teks) + gambar ilustrasi. `piksel` (T-013) = id ruang di seni/piksel/ruang-ep2.json: lokasi ini
-   * digambar PANGGUNG PIKSEL (ui/latar/piksel) lewat adapter cue (adeganPiksel); tanpa nilai = panggung ilustrasi. Adegan yang
-   * tidak bisa dipetakan (pemeran tanpa atlas piksel, objek tanpa prop piksel) tetap memakai ilustrasi (cadangan eksplisit).
-   */
-  lokasi: Record<string, { nama: KunciTeks; ilustrasi: LokasiIlustrasi; piksel?: string }>;
-  /** Aset ilustrasi per pemeran (panggung, potret). */
-  tokoh: Partial<Record<IdPembicara, TokohIlustrasi>>;
-  /** Pemeran yang boleh hadir TANPA aset (kekurangan aset yang diakui): siluet bernama di panggung, inisial di potret. */
-  tanpaAset?: readonly IdPembicara[];
+  /** Lokasi -> nama tempat (kunci teks) + id ruang piksel. */
+  lokasi: Record<string, { nama: KunciTeks; piksel: string }>;
   /** Komposisi sebelum cue mana pun. */
   awal: CueLatar;
   /**
    * Gambar kartu episode di daftar: lokasi + tokoh (urut kiri -> kanan). `ekspresi` = wajah pemeran SELAIN nasabah
-   * (nasabah mengikuti status kartu: cemas / lega). Kamera membingkainya seperti adegan biasa (tokoh + fokus benda
-   * lokasi, mis. kepala truk kasus).
+   * (nasabah mengikuti status kartu: cemas / lega).
    */
   sampul: { lokasi: string; hadir: IdPembicara[]; ekspresi?: Ekspresi };
 }

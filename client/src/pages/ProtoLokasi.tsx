@@ -22,8 +22,8 @@ import '../cerita/lokasi/lokasi.css';
 
 type Fase = 'periksa' | 'putus' | 'akibat';
 
-const AVATAR = import.meta.glob('../cerita/seni/auto-2/ilustrasi/{bima,hendra-cemas}-avatar-320.webp', { eager: true, query: '?url', import: 'default' }) as Record<string, string>;
-const avatar = (k: 'bima' | 'hendra-cemas') => AVATAR[`../cerita/seni/auto-2/ilustrasi/${k}-avatar-320.webp`] ?? '';
+const AVATAR = import.meta.glob('../cerita/seni/auto-2/proto/{bima,hendra-cemas}-avatar-320.webp', { eager: true, query: '?url', import: 'default' }) as Record<string, string>;
+const avatar = (k: 'bima' | 'hendra-cemas') => AVATAR[`../cerita/seni/auto-2/proto/${k}-avatar-320.webp`] ?? '';
 
 const NAMA: Record<IdRambu, string> = { rambu1: 'Rambu 1', rambu2: 'Rambu 2' };
 

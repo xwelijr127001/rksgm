@@ -15,13 +15,13 @@ const ep = EPISODE_AUTO_2;
 const komp = (k: Partial<KomposisiLatar>): KomposisiLatar => ({ lokasi: 'kantor', hadir: [], telepon: null, objek: [], ...k });
 const tl = (id: string, ekspresi: Ekspresi = 'netral', bicara = false) => ({ id, ekspresi, bicara });
 
-test('pemetaan cue: kantor -> ruang piksel, Miss Raksa berdiri di balik meja hadap kanan, Hendra di depan meja hadap kiri', () => {
+test('pemetaan cue: kantor -> ruang piksel, Miss Raksa berdiri di balik meja hadap kanan, pengunjung di depan meja hadap kiri (cermin, D-93)', () => {
   const h = adeganPiksel(ep, komp({ hadir: [tl('missRaksa', 'serius', true), tl('hendra', 'lega')] }));
   assert.ok(h.piksel, String(h.alasan));
   assert.equal(h.piksel.ruang, 'kantor-ep2');
-  assert.deepEqual(h.piksel.tokoh.map((x) => [x.id, x.tokoh, x.tempat, x.pose, x.hadap, x.ekspresi, x.bicara]), [
-    ['missRaksa', 'missRaksa', 'balikMeja', 'berdiri', 'kanan', 'serius', true],
-    ['hendra', 'hendra', 'slot', 'berdiri', 'kiri', 'lega', false],
+  assert.deepEqual(h.piksel.tokoh.map((x) => [x.id, x.tokoh, x.tempat, x.pose, x.hadap, x.cermin, x.ekspresi, x.bicara]), [
+    ['missRaksa', 'missRaksa', 'balikMeja', 'berdiri', 'kanan', false, 'serius', true],
+    ['hendra', 'hendra', 'slot', 'berdiri', 'kiri', true, 'lega', false],
   ]);
 });
 
@@ -53,8 +53,10 @@ test('ruang-ep2: setiap ruang punya latar, slot 1..3, dan prop untuk objek yang 
 test('pose atlas: semua pose yang bisa diminta adapter ada; pose yang tidak ada TERDETEKSI', () => {
   const m = (id: Parameters<typeof penyusunPiksel.tersedia>[0]) => penyusunPiksel.manifest[id];
   assert.deepEqual(poseHilang(m), []);
-  assert.deepEqual(poseHilang(m, { hendra: { tokoh: 'hendra', tempat: 'slot', pose: 'duduk', hadap: 'kiri' } }), ['hendra: pose duduk/kiri tidak ada di atlas hendra']);
-  assert.deepEqual(poseHilang(m, { hendra: { tokoh: 'hendra', tempat: 'slot', pose: 'berdiri', hadap: 'kanan' } }), ['hendra: pose berdiri/kanan tidak ada di atlas hendra']);
+  assert.deepEqual(poseHilang(m, { hendra: { tokoh: 'hendra', tempat: 'slot', pose: 'duduk', hadap: 'kanan', satuArah: 'kanan' } }), ['hendra: pose duduk/kanan tidak ada di atlas hendra']);
+  assert.deepEqual(poseHilang(m, { hendra: { tokoh: 'hendra', tempat: 'slot', pose: 'berdiri', hadap: 'kiri' } }), ['hendra: pose berdiri/kiri tidak ada di atlas hendra']);
+  // D-93: frame atlas Hendra & tokoh samping bernama -kanan (seni menghadap kanan); tidak ada frame -kiri (kiri = cermin).
+  for (const id of ['hendra', 'rudi', 'bima', 'darto', 'admin', 'tol', 'polisi'] as const) assert.deepEqual(Object.keys(m(id)!.pose.berdiri!).filter((k) => k === 'kiri' || k === 'kanan'), ['kanan'], id);
 });
 
 /** Semua id node penerus (setiap nilai "lanjut" di dalam node: dialog, pilihan, hasil aktivitas, cabang). */
@@ -105,12 +107,14 @@ test('naskah AUTO-2 (SELURUH episode): setiap komposisi = piksel tanpa cadangan;
     lokasi.add(l.lokasi);
     for (const t of h.piksel.tokoh) {
       for (const e of EKSPRESI) {
-        const s = susunTokoh(t.tokoh, { pose: t.pose as never, hadap: t.hadap, ekspresi: e })!;
+        const arah = t.satuArah ?? t.hadap;
+        assert.equal(t.cermin, !!t.satuArah && t.satuArah !== t.hadap, `${t.id}: cermin hanya untuk atlas satu arah`);
+        const s = susunTokoh(t.tokoh, { pose: t.pose as never, hadap: arah, ekspresi: e })!;
         assert.ok(s, `${t.id} tersusun`);
         assert.equal(s.pose, t.pose, `${t.id}/${e}: pose tanpa cadangan`);
-        assert.equal(s.hadap, t.hadap, `${t.id}/${e}: arah tanpa cadangan`);
+        assert.equal(s.hadap, arah, `${t.id}/${e}: arah atlas tanpa cadangan`);
         assert.notEqual(s.ekspresi, '', `${t.id}/${e}: wajah ekspresi ada`);
-        diminta.add(`${t.id}:${t.pose}:${t.hadap}`);
+        diminta.add(`${l.lokasi}/${h.piksel.tokoh.filter((x) => x.tempat === 'slot').length}:${t.id}:${t.hadap}`);
       }
     }
     if (h.piksel.telepon) for (const e of EKSPRESI) assert.ok(penyusunPiksel.teleponSisipan(e, 56, { tokoh: h.piksel.telepon.tokoh }), `sisipan ${e}`);
@@ -119,7 +123,12 @@ test('naskah AUTO-2 (SELURUH episode): setiap komposisi = piksel tanpa cadangan;
   // Stage 2: TIDAK ADA komposisi naskah yang jatuh ke ilustrasi.
   assert.deepEqual([...alasan], []);
   assert.deepEqual([...lokasi].sort(), ['bengkel', 'kantor', 'pool', 'tol', 'wawancara']);
-  assert.deepEqual([...diminta].sort(), ['admin:berdiri:kiri', 'bima:berdiri:kiri', 'darto:berdiri:kiri', 'missRaksa:berdiri:kanan', 'polisi:berdiri:kiri', 'rudi:berdiri:kiri', 'tol:berdiri:kiri']);
+  // Arah per adegan (D-93): kantor pengunjung kiri; pool/tol kanan; bengkel admin kiri; wawancara 1 kanan, 2 saling berhadapan,
+  // 3 = kiri & tengah kanan, kanan kiri.
+  assert.deepEqual([...diminta].sort(), [
+    'bengkel/1:admin:kiri', 'kantor/0:missRaksa:kanan', 'kantor/1:bima:kiri', 'pool/1:rudi:kanan', 'tol/1:bima:kanan',
+    'wawancara/1:bima:kanan', 'wawancara/2:bima:kanan', 'wawancara/2:darto:kiri', 'wawancara/3:bima:kanan', 'wawancara/3:polisi:kiri', 'wawancara/3:tol:kanan',
+  ]);
 });
 
 test('ekspresi Hendra: pemetaan owner (lega -> senang) dan setiap ekspresi cerita punya wajah sendiri', () => {
@@ -130,12 +139,24 @@ test('ekspresi Hendra: pemetaan owner (lega -> senang) dan setiap ekspresi cerit
 test('sampul episode (kartu /cerita): pool + Hendra di panggung piksel', () => {
   const h = adeganPiksel(ep, { lokasi: ep.latar!.sampul.lokasi, hadir: ep.latar!.sampul.hadir.map((id) => tl(id, 'cemas')), telepon: null, objek: [] }).piksel!;
   assert.equal(h.ruang, 'pool-ep2');
-  assert.deepEqual(h.tokoh.map((x) => [x.id, x.pose, x.hadap]), [['hendra', 'berdiri', 'kiri']]);
+  assert.deepEqual(h.tokoh.map((x) => [x.id, x.pose, x.hadap, x.cermin]), [['hendra', 'berdiri', 'kanan', false]]);
 });
 
 test('tokoh samping: dua wajah (netral/prihatin) sesuai peta D-85', () => {
   for (const id of ['rudi', 'bima', 'darto', 'admin', 'tol', 'polisi'] as const) {
     for (const e of ['netral', 'tersenyum', 'senang', 'lega'] as Ekspresi[]) assert.equal(susunTokoh(id, { pose: 'berdiri', ekspresi: e })!.ekspresi, 'netral', `${id}/${e}`);
     for (const e of ['cemas', 'serius', 'bingung', 'kesal'] as Ekspresi[]) assert.equal(susunTokoh(id, { pose: 'berdiri', ekspresi: e })!.ekspresi, 'prihatin', `${id}/${e}`);
+  }
+});
+
+test('D-94/D-96: trailer pool 240 x ~124 piksel seni di art x 160 dengan roda di y 172; tokoh samping punya strip kedip', () => {
+  const tr = RUANG_PIKSEL['pool-ep2']!.lapisan.find((l) => l.id === 'trailer')!;
+  assert.equal(tr.x, 640);
+  assert.equal(tr.w, 960);
+  assert.equal(tr.y + tr.h, 688);
+  assert.deepEqual(RUANG_PIKSEL['pool-ep2']!.fokus, { x: 640, y: 240, w: 400, h: 460 });
+  for (const id of ['rudi', 'bima', 'darto', 'admin', 'tol', 'polisi'] as const) {
+    assert.equal(susunTokoh(id, { pose: 'berdiri', ekspresi: 'netral', mata: 'tutup' })!.mata, 'tutup', id);
+    assert.equal(susunTokoh(id, { pose: 'berdiri', ekspresi: 'cemas', mata: 'tutup' })!.mata, 'tutup', id);
   }
 });

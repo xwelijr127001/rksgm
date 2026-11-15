@@ -1,0 +1,143 @@
+[
+ {
+  "nama": "dingin-tahan1500-360-id",
+  "tampil": 414,
+  "selesai": 1546,
+  "hilang": 1799,
+  "durasi": 1132,
+  "inertSaatTampil": true,
+  "inertSaatSelesai": false,
+  "statusTeks": "Menyiapkan…",
+  "statusDiLuarRoot": true,
+  "rootInertAkhir": false,
+  "kunci": "1"
+ },
+ {
+  "nama": "kunjungan-kedua-360",
+  "tampil": null
+ },
+ {
+  "nama": "dingin-tahan1500-390-en",
+  "tampil": 406,
+  "selesai": 1533,
+  "hilang": 1802,
+  "durasi": 1127,
+  "inertSaatTampil": true,
+  "inertSaatSelesai": false,
+  "statusTeks": "Preparing…",
+  "statusDiLuarRoot": true,
+  "rootInertAkhir": false,
+  "kunci": "1"
+ },
+ {
+  "nama": "kunjungan-kedua-390",
+  "tampil": null
+ },
+ {
+  "nama": "dingin-tahan1500-1280-zh",
+  "tampil": 406,
+  "selesai": 1524,
+  "hilang": 1779,
+  "durasi": 1118,
+  "inertSaatTampil": true,
+  "inertSaatSelesai": false,
+  "statusTeks": "正在准备……",
+  "statusDiLuarRoot": true,
+  "rootInertAkhir": false,
+  "kunci": "1"
+ },
+ {
+  "nama": "kunjungan-kedua-1280",
+  "tampil": null
+ },
+ {
+  "nama": "batas-lembar-macet",
+  "tampil": 398,
+  "selesai": 2365,
+  "durasiSampaiLepas": 1967,
+  "frame": [
+   20,
+   78,
+   320,
+   144
+  ],
+  "masukBottom": 565.734375
+ },
+ {
+  "nama": "gerak-dikurangi",
+  "anim": "none",
+  "trans": "1e-06s"
+ },
+ {
+  "nama": "rute /host",
+  "tampil": null,
+  "url": "/host"
+ },
+ {
+  "nama": "rute /projector",
+  "tampil": null,
+  "url": "/projector"
+ },
+ {
+  "nama": "rute /join",
+  "tampil": null,
+  "url": "/join"
+ },
+ {
+  "nama": "rute /cerita",
+  "tampil": null,
+  "url": "/cerita"
+ },
+ {
+  "nama": "rute /acara/join",
+  "tampil": null,
+  "url": "/acara/join"
+ },
+ {
+  "nama": "rute /cerita/auto-2",
+  "tampil": null,
+  "url": "/cerita/auto-2"
+ },
+ {
+  "nama": "rute /kenalan",
+  "tampil": null,
+  "url": "/kenalan"
+ },
+ {
+  "nama": "fokus-sesudah-lepas",
+  "tampil": 996,
+  "hilang": 2759,
+  "fokusH1": [
+   {
+    "t": 2760,
+    "pemuatMasihAda": false
+   }
+  ],
+  "aktifAkhir": "H1.lp-judul"
+ },
+ {
+  "nama": "fokus-muat-awal",
+  "fokus": [],
+  "aktif": "BODY"
+ },
+ {
+  "nama": "dingin-cepat-id",
+  "tampil": null,
+  "selesai": null,
+  "durasi": null,
+  "lulus": true
+ },
+ {
+  "nama": "dingin-cepat-en",
+  "tampil": null,
+  "selesai": null,
+  "durasi": null,
+  "lulus": true
+ },
+ {
+  "nama": "tahan-singkat-minimal600",
+  "tampil": 407,
+  "selesai": 1023,
+  "durasi": 616
+ }
+]

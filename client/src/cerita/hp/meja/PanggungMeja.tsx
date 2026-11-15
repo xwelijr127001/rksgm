@@ -37,13 +37,13 @@ export function PanggungMeja({ ep, seniBerkas, pandang, onKetuk, onStatus, child
     const ubah = (s: StatusPanggung) => { setStatus(s); statusRef.current(s); };
     if (adeganDimatikan() || !host.current) { ubah('gagal'); return; }
     let batal = false;
-    const potret = ep.latar?.tokoh[ep.nasabah ?? '']?.avatar.netral;
     buatPanggungMeja({
       parent: host.current,
       seni: ep.seniArena ?? {},
       kunciSeni: [...new Set([...SENI_MEJA, ...Object.values(seniBerkas).filter((x): x is string => !!x)])],
       seniBerkas,
-      avatarUrl: potret?.length ? potret[potret.length - 1]!.src : null,
+      // T-013 Stage 3: avatar ilustrasi WebP dihapus; prototipe meja (Phaser) tampil tanpa avatar di kanvasnya.
+      avatarUrl: null,
       pandang: pandangRef.current,
       onKetuk: (id) => ketukRef.current(id),
     }).then((h) => {

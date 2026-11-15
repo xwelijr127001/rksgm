@@ -17,8 +17,7 @@ import { JUMLAH_LAJUR as JUMLAH_LAJUR_ASET, LAJUR_TRUK as LAJUR_TRUK_ASET } from
 import { jalankan, pilihanTersedia, semuaBarisTampil, stateAwal } from './mesin';
 import {
   DAFTAR_EKSPRESI, DAFTAR_LATAR, DAFTAR_LOKASI_ADEGAN, type AksiCerita, type Baris, type CueAdegan, type CueLatar, type DefAktivitas, type Efek, type Ekspresi, type Episode,
-  type GambarTokoh, type KotakSumber, type IdAkhir, type IdLokasiAdegan, type IdNode, type Kondisi, type NilaiProses, type NodeCerita, type StateCerita,
-  type VarianGambar,
+  type IdAkhir, type IdLokasiAdegan, type IdNode, type Kondisi, type NilaiProses, type NodeCerita, type StateCerita,
 } from './tipe';
 import { DAFTAR_AKSI_ADEGAN, DAFTAR_PANDANG, DAFTAR_PROP_ADEGAN, DAFTAR_TEMPAT_PROP, JENIS_POSE_MENTOR, JENIS_POSE_NASABAH } from './ui/adegan';
 
@@ -907,84 +906,18 @@ export function validasiEpisode(ep: Episode): string[] {
   // ---- panggung latar (Episode.latar): lokasi & aset tokoh yang dirujuk tata node/baris harus ada
   const latar = ep.latar;
   if (latar) {
-    const varianSah = (v: readonly VarianGambar[] | undefined, tempat: string) => {
-      if (!Array.isArray(v) || v.length === 0) salah(`${tempat}: varian gambar kosong`);
-      else for (const x of v) if (!(x.w > 0 && x.h > 0 && teksSah(x.src))) salah(`${tempat}: varian tanpa ukuran/URL`);
-    };
-    const gambarSah = (g: GambarTokoh | undefined, tempat: string) => {
-      if (!g) return;
-      varianSah(g.varian, tempat);
-      const k = g.kepala;
-      if (!(g.rasio > 0 && k && k.atas >= 0 && k.atas < k.bawah && k.bawah <= 1 && k.cx >= 0 && k.cx <= 1)) salah(`${tempat}: rasio/kepala tidak sah`);
-    };
+    // T-013 Stage 3: lokasi = ruang piksel (id tidak kosong; keberadaan ruang & seni tokoh diuji di
+    // ui/latar/piksel/adegan.test.ts terhadap manifest: setiap komposisi naskah harus terpetakan tanpa cadangan).
     for (const [idL, l] of Object.entries(latar.lokasi ?? {})) {
       teks(l?.nama, `latar.lokasi "${idL}".nama`);
-      const il = l?.ilustrasi;
-      const t2 = `latar.lokasi "${idL}".ilustrasi`;
-      if (!il) { salah(`${t2}: wajib ada (gambar lokasi)`); continue; }
-      if (!(il.w > 0 && il.h > 0)) salah(`${t2}: ukuran gambar tidak sah`);
-      varianSah(il.latar, `${t2}.latar`);
-      if (il.depan) varianSah(il.depan, `${t2}.depan`);
-      const dalam = (k: KotakSumber | undefined) => !!k && k.w > 0 && k.h > 0 && k.x >= 0 && k.y >= 0 && k.x + k.w <= il.w + 0.5 && k.y + k.h <= il.h + 0.5;
-      const tk = il.tokoh;
-      for (const n of [1, 2, 3] as const) {
-        const s = tk?.slot?.[n] as readonly (number | { x: number; y: number })[] | undefined;
-        const sah = (p: number | { x: number; y: number }) => tk?.jenis === 'dekat'
-          ? typeof p === 'number' && p >= 0 && p <= il.w
-          : typeof p === 'object' && p.x >= 0 && p.x <= il.w && p.y > tk.cakrawala && p.y <= il.h;
-        if (!Array.isArray(s) || s.length !== n || !s.every(sah)) salah(`${t2}.tokoh.slot[${n}]: harus ${n} posisi di dalam gambar (berdiri: kaki di bawah cakrawala)`);
-      }
-      if (tk?.jenis === 'dekat') {
-        if (!(tk.tinggiKepala > 0 && tk.atasKepala >= 0 && tk.atasKepala < il.h)) salah(`${t2}.tokoh: kepala di luar gambar`);
-      } else if (tk?.jenis === 'berdiri') {
-        if (!(tk.cakrawala > 0 && tk.cakrawala < il.h && tk.mata > 0)) salah(`${t2}.tokoh: cakrawala/mata tidak sah`);
-      } else salah(`${t2}.tokoh: jenis harus "dekat" atau "berdiri"`);
-      for (const kelas of ['hp', 'lebar', ...(il.bingkai?.hpDekat ? ['hpDekat' as const] : [])] as const) {
-        const b = il.bingkai?.[kelas];
-        if (!(b && b.lebar > 0 && b.cx >= 0 && b.cx <= il.w && b.cy >= 0 && b.cy <= il.h)) salah(`${t2}.bingkai.${kelas}: pusat/lebar di luar gambar`);
-      }
-      for (const [idO, o] of Object.entries(il.objek ?? {})) if (!ada(ep.seniArena ?? {}, o.seni)) salah(`${t2}.objek "${idO}": seni "${o.seni}" tidak ada di episode.seniArena`);
-      (il.benda ?? []).forEach((b, i) => {
-        varianSah(b.varian, `${t2}.benda[${i}]`);
-        if (!dalam(b.fokus) || !(b.alas > (tk?.jenis === 'berdiri' ? tk.cakrawala : 0) && b.alas <= il.h)) salah(`${t2}.benda[${i}]: fokus/alas di luar gambar`);
-      });
-      (il.papan ?? []).forEach((p, i) => {
-        if (!dalam(p.kotak)) salah(`${t2}.papan[${i}]: kotak di luar gambar`);
-        if (!p.baris?.length) salah(`${t2}.papan[${i}]: tanpa tulisan`);
-        for (const b of p.baris ?? []) { teks(b.teks, `${t2}.papan[${i}]`); if (!(b.ukuran > 0)) salah(`${t2}.papan[${i}]: ukuran huruf tidak sah`); }
-      });
-      (il.tiang ?? []).forEach((k, i) => { if (!dalam(k)) salah(`${t2}.tiang[${i}]: di luar gambar`); });
+      if (!teksSah(l?.piksel)) salah(`latar.lokasi "${idL}".piksel: id ruang piksel wajib ada`);
     }
-    for (const [idT, a] of Object.entries(latar.tokoh ?? {})) {
-      const t2 = `latar.tokoh "${idT}"`;
-      if (!ada(pemeran, idT)) salah(`${t2} bukan pemeran`);
-      if (!a) continue;
-      for (const [peta, nama] of [[a.avatar, 'avatar'], [a.dekat, 'dekat']] as const) {
-        if (!peta?.netral) salah(`${t2}.${nama}: netral wajib ada`);
-        for (const e of Object.keys(peta ?? {})) if (!DAFTAR_EKSPRESI.includes(e as Ekspresi)) salah(`${t2}.${nama}: ekspresi "${e}" tidak dikenal`);
-      }
-      for (const [e, v] of Object.entries(a.avatar ?? {})) varianSah(v, `${t2}.avatar.${e}`);
-      for (const [e, g] of Object.entries(a.dekat ?? {})) gambarSah(g, `${t2}.dekat.${e}`);
-      if (a.badan) {
-        gambarSah(a.badan, `${t2}.badan`);
-        if (!(a.badan.tinggi > 0)) salah(`${t2}.badan: tinggi dunia tidak sah`);
-      }
-    }
-    for (const idT of latar.tanpaAset ?? []) {
-      if (!ada(pemeran, idT)) salah(`latar.tanpaAset: "${idT}" bukan pemeran`);
-      if (ada(latar.tokoh ?? {}, idT)) salah(`latar.tanpaAset: "${idT}" punya aset di latar.tokoh`);
-    }
-    const punyaAset = (idT: string) => ada(latar.tokoh ?? {}, idT) || (latar.tanpaAset ?? []).includes(idT);
+    const punyaAset = (idT: string) => ada(pemeran, idT);
     const cekTata = (c: CueLatar | undefined, tempat: string) => {
       if (!c) return;
       if (c.lokasi !== undefined && !ada(latar.lokasi ?? {}, c.lokasi)) salah(`${tempat}: lokasi "${c.lokasi}" tidak ada di latar.lokasi`);
       for (const idT of [...(c.hadir ?? []), ...(c.telepon ? [c.telepon] : [])]) {
-        if (!punyaAset(idT)) salah(`${tempat}: tokoh "${idT}" tidak punya aset di latar.tokoh (atau latar.tanpaAset)`);
-      }
-      // Lokasi BERDIRI menampilkan badan penuh: tokoh yang hanya punya potret dekat tidak bisa berdiri di sana.
-      const lok = c.lokasi !== undefined ? latar.lokasi?.[c.lokasi] : undefined;
-      if (lok?.ilustrasi?.tokoh?.jenis === 'berdiri') {
-        for (const idT of c.hadir ?? []) if (latar.tokoh?.[idT] && !latar.tokoh[idT]!.badan) salah(`${tempat}: tokoh "${idT}" tanpa badan penuh di lokasi "${c.lokasi}"`);
+        if (!punyaAset(idT)) salah(`${tempat}: tokoh "${idT}" bukan pemeran`);
       }
       // Panggung punya paling banyak tiga slot tokoh per lokasi; lebih dari itu akan hilang diam-diam.
       if ((c.hadir?.length ?? 0) > 3) salah(`${tempat}: paling banyak 3 tokoh hadir (${c.hadir!.length})`);

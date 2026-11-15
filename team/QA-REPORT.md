@@ -217,3 +217,35 @@ Medium (1.5 MB/s, 40 ms, sprite held 1 s): node first 623 ms, fade 1237 ms = **6
 - Bugs: none (high 0 / med 0 / low 0).
 - Note: my regression scripts re-wrote same-named screenshots (home-*, ep1-*, cerita-hub-*) inside `team/evidence/T-010/qa-fix/` with equivalent T-011 results; nothing else was overwritten.
 - Not tested: real devices, a literal resumed-player redirect (not reachable, see step 4).
+
+## T-013 Stage 1 — PARTIAL, superseded by Stage 2 (2026-11-15)
+
+Folder read: C:\Users\User\Desktop\rksgm-episode2. No source edited, nothing committed. Lead (option C): Stage 2 is already built on this tree, so a Stage-1-only verdict is moot; the Stage 2 QA is the verdict that matters.
+
+| # | Test | Result |
+|---|---|---|
+| 1 | `tools/cek-piksel-t013.mjs` on :4001 (my own fresh build, Stage 1 only at that moment) | **82/82 PASS** ("ALL PASS"; log `team/evidence/T-013/stage1/qa/cek-82.log`). Kantor cases pixel, 0 kantor/miss/hendra illustration requests, Hendra chat avatar = pixel (`piksel:hendra`) in all 5 faces, bima/pool illustrated |
+| 2 | Playthrough id (auto-driver, 390x844, ~1500 steps, dist already mixed with Stage 2 WIP) | Reached all 4 locations and the WhatsApp/form/stage-order/location-picker activities, 0 console errors except one 404 on `rudi-avatar-160` that occurred while dist was being rebuilt by another agent (file exists and serves 200 afterwards, not a product bug). My driver did not get past the lane-tap activity ("Periksa rambu"), so end of episode and en/zh were NOT reached |
+| 3, 4, 5, 7 | Per-viewport shots, WebKit, network bytes, regression/test suites | NOT RUN (dist changed under me) — covered by the Stage 2 QA |
+| 6 | Kantor -> illustrated location and back | **NOT TESTABLE / superseded** (no illustrated locations remain) |
+
+Bugs: none found (B-xx: 0). Note: my 82-check run re-wrote same-named screenshots/`hasil.json` in `team/evidence/T-013/` (equivalent content).
+
+## T-013 Stage 2 — INTERIM, 1 bug (2026-11-15)
+
+Folder read: C:\Users\User\Desktop\rksgm-episode2. No source edited, nothing committed. Per Lead (Stage 3 starts on this tree), this is a quick INTERIM run on the Stage 2 build (fresh `npm run build`, :4001); per-room screenshots skipped; a FINAL QA follows Stage 3.
+
+| # | Test | Result |
+|---|---|---|
+| 1 | `tools/cek-piksel-t013.mjs` | **70/70 PASS** ("ALL PASS", `stage2/qa/cek-70.log`) |
+| 2 | Playthrough id (3 auto-driven runs, 390x844): kantor, pool, bengkel, tol, wawancara all pixel; WhatsApp, forms, stage order, location picker, rambu lane activity work | 0 console errors, 0 HTTP>=400. Driver stopped at the witness-interview planner (my driver limit, not a product stall) so **no ending reached, en/zh not played** |
+| 2b | Requests on AUTO-2 | Ep1 room PNGs / bu-rina: **0**. **Illustration WebP: NOT 0 — see B-01** |
+| 4 | WebKit 27.2, 390x844 DPR3, kantor (mentor) + pool | No halo or rectangle, pixels crisp, nameplate "LAYANAN KLAIM RAKSA" complete, text readable (`stage2/qa/webkit-*.png`). No page errors |
+| 6 | PNG bytes served on a (partial) playthrough | 135,522 B (HANDOFF PNG subtotal 136,027, same set minus 3 small props not reached). Plus WebP 219,168 B (B-01) |
+| 7 | `test:client` | **728/728 pass** (brief expected 735: tree moved on, Stage 3 likely changed tests); `test:e2e` exit 0, kegagalan 0, console/http 0 |
+| 3, 5, rest of 7 | Per-room shots, reduce/gerak, nameplate id/en/zh, homepage numbers, Ep1 scene | NOT RUN (interim) |
+
+### Bugs
+- **[B-01] Illustration WebP still downloaded on AUTO-2** · medium · Repro: open /cerita/auto-2 (id), press Lanjut through the first scene: `hendra-panik-1160-*.webp` (113,640 B) is requested at the Pak Hendra call gate/chat opening (step ~7) and `kantor-latar-1100-*.webp` (65,788 B) when the first activity "Mulai" screen opens (step ~16); the six `*-avatar-160-*.webp` (rudi, admin, bima, tol, polisi, darto, ~6.4-6.9 KB each) also load. Total WebP 219,168 B, which breaks "0 requests to the illustration set" and the 145,510 B total (real total ≈ 355 KB of the 400 KB gate). Non-stage screens (gate card, activity intro, avatars) still use the illustrated assets; Stage 3 cleanup should cover them.
+
+Note: my 70-check run re-wrote same-named screenshots/`hasil.json` in `team/evidence/T-013/stage2/` (equivalent content).

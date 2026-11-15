@@ -14,7 +14,7 @@ import path from 'node:path';
 
 const BASE = process.env.UI_BASE || 'http://127.0.0.1:4000';
 const OUT = path.resolve(import.meta.dirname, '..', 'team/evidence/T-013');
-const OUT2 = path.join(OUT, 'stage2');
+const OUT2 = path.join(OUT, 'stage3');
 fs.mkdirSync(OUT2, { recursive: true });
 fs.mkdirSync(OUT, { recursive: true });
 const STATES = JSON.parse(fs.readFileSync(path.join(OUT, 'states.json'), 'utf8'));
@@ -107,7 +107,63 @@ for (const vp of VP) {
   lapor('transisi-kantor-pool-360', (awal?.lokasi === 'kantor' || awal?.obrolan !== undefined) && bingkai.at(-1)?.startsWith('pool:piksel:siap') && bingkai.every((x) => !x.includes('ilustrasi')) && ilu.length === 0, { awal, bingkai, webp: ilu.length });
   await ctx.close();
 }
-fs.writeFileSync(path.join(OUT, cepat ? 'hasil-cepat.json' : 'hasil.json'), JSON.stringify(hasil, null, 1));
+// B-01 (QA Stage 2): layar NON-panggung juga tanpa ilustrasi. (a) gerbang panggilan / cut-in potret di obrolan, (b) pembuka
+// aktivitas (arena baki K02, latar kantor), (c) avatar. Dari tiap state obrolan: catat cut-in, tekan "Mulai" tugas bila ada,
+// dan jumlahkan SEMUA gambar unik yang diminta (ukuran dari respons) = transfer gambar Episode 2 yang terukur.
+{
+  const unik = new Map();
+  let cutIn = 0, arena = 0, webp = 0;
+  for (const [kasus, st] of Object.entries(STATES)) {
+    const ctx = await b.createBrowserContext();
+    const pg = await ctx.newPage();
+    await pg.setViewport({ width: 360, height: 740, deviceScaleFactor: 2, isMobile: true, hasTouch: true });
+    await pg.evaluateOnNewDocument((pj, v) => { localStorage.setItem('raksa:bahasa', 'id'); localStorage.setItem('raksa:profil', pj); sessionStorage.setItem('raksa:loader:v1', '1'); localStorage.setItem('raksa:cerita', v); }, PROFIL, st.nilai);
+    pg.on('requestfinished', async (r) => {
+      const u = r.url();
+      if (!/\.(png|webp|jpg|jpeg|gif|svg)(\?|$)/.test(u)) return;
+      if (/\.webp/.test(u) && !/\/karakter\//.test(u)) webp++;
+      let n = 0; try { n = (await r.response().buffer()).length; } catch { /* */ }
+      unik.set(u.replace(BASE, ''), n);
+    });
+    await pg.goto(BASE + '/cerita/auto-2', { waitUntil: 'domcontentloaded' });
+    await pg.waitForFunction(() => document.querySelector('.cer-piksel[data-siap], .hp-potret'), { timeout: 15000 }).catch(() => null);
+    await tunggu(500);
+    if (await pg.$('.hp-cutin')) { cutIn++; await pg.screenshot({ path: path.join(OUT2, `cutin-${kasus}-360.png`) }); }
+    const mulai = await pg.evaluateHandle(() => [...document.querySelectorAll('button')].find((x) => /^Mulai/.test(x.textContent.trim())) ?? null);
+    if (mulai.asElement()) {
+      await mulai.asElement().click();
+      await tunggu(900);
+      if (await pg.$('.hp-susun, .hp-arena, [class*="arena"]')) { arena++; await pg.screenshot({ path: path.join(OUT2, `arena-${kasus}-360.png`) }); }
+    }
+    await ctx.close();
+  }
+  const daftar = [...unik].sort();
+  const total = daftar.reduce((n, [, v]) => n + v, 0);
+  fs.writeFileSync(path.join(OUT2, 'transfer-gambar.json'), JSON.stringify({ total, daftar }, null, 1));
+  lapor('b01-non-panggung', webp === 0 && arena > 0, { webpEpisode: webp, cutInTerlihat: cutIn, arenaDibuka: arena, gambarUnik: daftar.length, totalByte: total, terbesar: daftar.sort((x, y) => y[1] - x[1]).slice(0, 4) });
+}
+// D-96: hidup di luar kantor. Pool (Rudi, tanpa Miss Raksa): hash kanvas tiap 100 md selama 9 d harus BERUBAH (kedip) pada
+// gerak normal dan TIDAK berubah saat sistem meminta gerak dikurangi (?gerak=ikut).
+for (const [nama, kurang] of [['normal', false], ['dikurangi', true]]) {
+  const ctx = await b.createBrowserContext();
+  const p = await ctx.newPage();
+  await p.setViewport({ width: 360, height: 740, deviceScaleFactor: 2, isMobile: true, hasTouch: true });
+  if (kurang) await p.emulateMediaFeatures([{ name: 'prefers-reduced-motion', value: 'reduce' }]);
+  await p.evaluateOnNewDocument((pj, st) => { localStorage.setItem('raksa:bahasa', 'id'); localStorage.setItem('raksa:profil', pj); sessionStorage.setItem('raksa:loader:v1', '1'); localStorage.setItem('raksa:cerita', st); }, PROFIL, STATES.pool.nilai);
+  await p.goto(BASE + '/cerita/auto-2' + (kurang ? '?gerak=ikut' : ''), { waitUntil: 'domcontentloaded' });
+  await p.waitForFunction(() => document.querySelector('.cer-piksel[data-siap]'), { timeout: 15000 }).catch(() => null);
+  await tunggu(500);
+  const r = await p.evaluate(async () => {
+    const c = document.querySelector('.cer-piksel-kanvas');
+    const hash = () => { const d = c.getContext('2d').getImageData(0, 0, c.width, c.height).data; let h = 0; for (let i = 0; i < d.length; i += 97) h = (h * 31 + d[i]) | 0; return h; };
+    const lihat = new Set(); let ganti = 0, lalu = null, mata = 0;
+    for (let i = 0; i < 90; i++) { const h = hash(); if (lalu !== null && h !== lalu) ganti++; lalu = h; lihat.add(h); if (c.getAttribute('data-mata') === 'tutup') mata++; await new Promise((ok) => setTimeout(ok, 100)); }
+    return { bingkaiBeda: lihat.size, perubahan: ganti, mataTutup: mata };
+  });
+  lapor(`gerak-pool-${nama}`, kurang ? r.perubahan === 0 : r.perubahan >= 2, r);
+  await ctx.close();
+}
+fs.writeFileSync(path.join(OUT, cepat ? 'hasil-cepat.json' : 'hasil-stage3.json'), JSON.stringify(hasil, null, 1));
 await b.close();
 console.log(gagal ? `FAILED ${gagal}` : 'ALL PASS');
 process.exit(gagal ? 1 : 0);

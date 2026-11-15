@@ -105,10 +105,11 @@ export function bangunRuangEp2() {
 
 /** Referensi Stage 2 (1680 x 944, ÷ 4,2): latar saja (tanpa meja/pagar: tokoh berdiri di depan semua isi ruang). */
 const RUANG_LAPANGAN = {
-  bengkel: { sumber: 'bengkel-ep2-pixel-v1/bengkel-ep2-referensi-v1.png', slot: { 1: [1000], 2: [700, 1060], 3: [520, 820, 1120] }, kaki: 860 },
-  tol: { sumber: 'tol-ep2-pixel-v1/tol-ep2-referensi-v1.png', slot: { 1: [560], 2: [460, 760], 3: [360, 600, 840] }, kaki: 880, fokus: { x: 960, y: 380, w: 300, h: 180 } },
-  pool: { sumber: 'pool-ep2-pixel-v1/pool-ep2-referensi-v1.png', slot: { 1: [560], 2: [400, 760], 3: [400, 760, 1000] }, kaki: 860, fokus: { x: 900, y: 520, w: 200, h: 170 } },
-  wawancara: { sumber: 'wawancara-ep2-pixel-v1/wawancara-ep2-referensi-v1.png', slot: { 1: [830], 2: [650, 1010], 3: [520, 830, 1140] }, kaki: 870 },
+  // D-93: hadap per slot (seni menghadap kanan; 'kiri' = cermin di panggung). D-94: slot & fokus pool. D-95: fokus layar lebar.
+  bengkel: { sumber: 'bengkel-ep2-pixel-v1/bengkel-ep2-referensi-v1.png', slot: { 1: [[1000, 'kiri']], 2: [[700, 'kanan'], [1060, 'kiri']], 3: [[520, 'kanan'], [820, 'kanan'], [1120, 'kiri']] }, kaki: 860 },
+  tol: { sumber: 'tol-ep2-pixel-v1/tol-ep2-referensi-v1.png', slot: { 1: [[560, 'kanan']], 2: [[460, 'kanan'], [760, 'kanan']], 3: [[360, 'kanan'], [600, 'kanan'], [840, 'kanan']] }, kaki: 880, fokus: { x: 960, y: 380, w: 300, h: 180 } },
+  pool: { sumber: 'pool-ep2-pixel-v1/pool-ep2-referensi-v1.png', slot: { 1: [[360, 'kanan']], 2: [[160, 'kanan'], [460, 'kanan']], 3: [[120, 'kanan'], [300, 'kanan'], [480, 'kanan']] }, kaki: 860, fokus: { x: 640, y: 240, w: 400, h: 460 } },
+  wawancara: { sumber: 'wawancara-ep2-pixel-v1/wawancara-ep2-referensi-v1.png', slot: { 1: [[830, 'kanan']], 2: [[610, 'kanan'], [1050, 'kiri']], 3: [[520, 'kanan'], [830, 'kanan'], [1140, 'kiri']] }, kaki: 870 },
 };
 
 /** Ruang lapangan: rata-rata area ke 400 x 225, palet <= 48 (OKLab). */
@@ -127,20 +128,25 @@ export function bangunTrailer() {
   const warna = [...L.hitungWarna(bawah)].map(([kk, n]) => ({ c: kk.split(',').map(Number), n }));
   const palet = L.kuantisasi(warna, 32, { kunci: [[22, 18, 18]] });
   const ber = L.petakanPalet(bawah, palet);
-  const p = k.w / 150;
-  const img = sampel(ber, p, k.x, k.y, 150, Math.ceil(k.h / p));
+  // D-94: 450 piksel seni lebar (pitch ± 2,95), disampel LANGSUNG dari sheet (bukan lapisan 150 px diperbesar).
+  const p = k.w / 450;
+  const img = sampel(ber, p, k.x, k.y, 450, Math.ceil(k.h / p));
   const kk = L.kotakAlpha(img);
-  return { img: L.potong(img, kk.x, kk.y, kk.w, kk.h), pitch: +p.toFixed(3), palet };
+  // Dipotong di kontainer pada tepi kanan dunia (art x 160 + 240 = 400); kabin utuh.
+  return { img: L.potong(img, kk.x, kk.y, Math.min(kk.w, 240), kk.h), pitch: +p.toFixed(3), palet };
 }
 
 /** Foto bukti (kode): cetak foto 12 x 9, tepi putih, isi abu kebiruan + oranye kabin. */
 function fotoProp(palet) {
   const dekat = (c) => palet.reduce((a, b) => (L.jarakOk(L.keOklab(b), L.keOklab(c)) < L.jarakOk(L.keOklab(a), L.keOklab(c)) ? b : a));
-  const f = L.buat(12, 9);
-  L.isiKotak(f, 0, 0, 12, 9, [...dekat([40, 30, 30]), 255]);
-  L.isiKotak(f, 1, 1, 10, 7, [...dekat([245, 240, 230]), 255]);
-  L.isiKotak(f, 2, 2, 8, 5, [...dekat([120, 140, 150]), 255]);
-  L.isiKotak(f, 3, 4, 4, 3, [...dekat([200, 90, 40]), 255]);
+  // D-99: 20 x 15 piksel seni, setinggi mata di kiri admin.
+  const f = L.buat(20, 15);
+  L.isiKotak(f, 0, 0, 20, 15, [...dekat([40, 30, 30]), 255]);
+  L.isiKotak(f, 1, 1, 18, 13, [...dekat([245, 240, 230]), 255]);
+  L.isiKotak(f, 3, 3, 14, 9, [...dekat([120, 140, 150]), 255]);
+  L.isiKotak(f, 3, 9, 14, 3, [...dekat([90, 90, 90]), 255]);
+  L.isiKotak(f, 5, 6, 6, 5, [...dekat([200, 90, 40]), 255]);
+  L.isiKotak(f, 11, 5, 6, 5, [...dekat([150, 150, 150]), 255]);
   return f;
 }
 
@@ -156,7 +162,7 @@ if (import.meta.url === `file:///${process.argv[1].replace(/\\/g, '/')}`) {
   tulis('ep2-ruang-prop-surat.png', r.surat, r.palet);
   const lap = (id, berkas, x, y, img, z, alpha) => ({ id, berkas, x: x * K, y: y * K, w: img.w * K, h: img.h * K, pw: img.w, ph: img.h, z, alpha });
   const prop = (berkas, x, y, img, z = 35) => ({ berkas, x: x * K, y: y * K, w: img.w * K, h: img.h * K, pw: img.w, ph: img.h, z });
-  const slotDari = (slot, kaki) => Object.fromEntries(Object.entries(slot).map(([n, xs]) => [n, xs.map((x) => ({ x, y: kaki }))]));
+  const slotDari = (slot, kaki) => Object.fromEntries(Object.entries(slot).map(([n, xs]) => [n, xs.map(([x, hadap]) => ({ x, y: kaki, hadap }))]));
   const lokasi = {
     'kantor-ep2': {
       warnaTepi: sering(r.latar),
@@ -166,7 +172,8 @@ if (import.meta.url === `file:///${process.argv[1].replace(/\\/g, '/')}`) {
       // papan utuh di kirinya; slot pengunjung digeser ke 1120 (jarak 80 art px, sama dengan saran D-87).
       tempat: { balikMeja: { x: 800, y: 756 } },
       // Pengunjung berdiri di DEPAN meja (Hendra, Pak Bima K07).
-      slot: slotDari({ 1: [1120], 2: [1080, 1320], 3: [1040, 1240, 1440] }, 860),
+      // D-93: pengunjung menghadap KIRI (ke meja & Miss Raksa); slot 1 di x 1040.
+      slot: slotDari({ 1: [[1040, 'kiri']], 2: [[1040, 'kiri'], [1300, 'kiri']], 3: [[1040, 'kiri'], [1240, 'kiri'], [1440, 'kiri']] }, 860),
       prop: { map: prop('ep2-ruang-prop-map.png', r.mapXY.x, r.mapXY.y, r.map), surat: prop('ep2-ruang-prop-surat.png', 196, 98, r.surat) },
       bingkai: { hp: { x: 300, y: 0, w: 1100, h: 900 }, lebar: { x: 0, y: 0, w: 1600, h: 900 } },
     },
@@ -178,16 +185,17 @@ if (import.meta.url === `file:///${process.argv[1].replace(/\\/g, '/')}`) {
     tulis(berkas, b.latar, b.palet);
     const L1 = { warnaTepi: sering(b.latar), lapisan: [lap('latar', berkas, 0, 0, b.latar, 10, false)], tempat: {}, slot: slotDari(c.slot, c.kaki), prop: {}, bingkai: { hp: { x: 300, y: 0, w: 1000, h: 900 }, lebar: { x: 0, y: 0, w: 1600, h: 900 } } };
     if (c.fokus) L1.fokus = c.fokus;
+    // D-95: layar lebar memperlihatkan ruangnya (perbesaran maks 1,15 di PanggungPiksel).
     if (id === 'pool') {
       const t = bangunTrailer();
       tulis('ep2-ruang-pool-trailer.png', t.img, t.palet);
       // Prop trailer rusak SELALU tampak di pool (D-84): lapisan z 25 (di belakang tokoh, di depan kerb), roda menapak y 170.
-      L1.lapisan.push({ ...lap('trailer', 'ep2-ruang-pool-trailer.png', 230, 171 - t.img.h, t.img, 25, true), pitch: t.pitch });
+      L1.lapisan.push({ ...lap('trailer', 'ep2-ruang-pool-trailer.png', 160, 172 - t.img.h, t.img, 25, true), pitch: t.pitch });
     }
     if (id === 'bengkel') {
       const f = fotoProp(b.palet);
       tulis('ep2-ruang-prop-foto.png', f, b.palet);
-      L1.prop.foto = prop('ep2-ruang-prop-foto.png', 182, 74, f);
+      L1.prop.foto = prop('ep2-ruang-prop-foto.png', 196, 40, f);
     }
     lokasi[`${id}-ep2`] = L1;
     L.tulis(path.join(L.ROOT, 'character', 'piksel', 'kantor-ep2', `tinjau-${id}.png`), L.perbesar(b.latar, 2));

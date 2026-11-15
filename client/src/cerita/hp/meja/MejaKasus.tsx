@@ -32,6 +32,8 @@ import {
 } from './logika';
 import type { KataMeja, PandangMeja } from './MejaScene';
 import { PanggungMeja, type StatusPanggung } from './PanggungMeja';
+import { PotretPikselHp } from '../../ui/latar/piksel/PotretPikselHp';
+import { tokohPotret } from '../../ui/latar/piksel/potret';
 import { OBJEK, kotakKartu, kotakMapDi, persen, type ObjekMeja } from './tata';
 import './meja.css';
 
@@ -431,13 +433,13 @@ function PanelKontak({ ep, konfig, tx, nasabah, kabar, onPilih, onTutup, kembali
 }) {
   const idTanya = useId();
   const pilihan = konfig.kabar.pilihan.find((x) => x.id === kabar) ?? null;
-  const potret = ep.latar?.tokoh[ep.nasabah ?? '']?.avatar.netral;
+  const potret = tokohPotret(ep, ep.nasabah ?? '');
   return (
     <Modal judul={t('ceritaHp.mejaKontak', { nama: nasabah })} gaya="lembar" lebar={520} onTutup={onTutup} kembaliKe={kembaliKe}
       aksi={<button type="button" className="btn btn-utama" onClick={onTutup}>{t('ceritaHp.mejaKembaliMeja')}</button>}>
       <div className="meja-kontak">
         <div className="meja-kontak-kepala">
-          {potret?.length ? <img src={potret[0]!.src} alt="" width={48} height={48} /> : null}
+          {potret ? <PotretPikselHp tokoh={potret} ekspresi="netral" ukuran={48} label="" /> : null}
           <p id={idTanya}><b>{tx(konfig.kabar.tanya)}</b></p>
         </div>
         <div className="hp-opsi-daftar" role="radiogroup" aria-labelledby={idTanya} onKeyDown={panahUbin}>

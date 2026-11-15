@@ -62,7 +62,7 @@ function ModeCerita() {
     batalHangat.current = () => {}; // sedang diimpor
     void import('../cerita/ui/latar/hangatkanDaftar').then((m) => {
       if (!terpasang.current) { batalHangat.current = null; return; }
-      batalHangat.current = m.hangatkanEpisodeAwal();
+      m.hangatkanEpisodeAwal();
     }, () => { batalHangat.current = null; });
   };
   return <section className="lp-sendiri" aria-labelledby={id + 's'}>

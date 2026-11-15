@@ -20,7 +20,6 @@
 import type {
   Baris, CueLatar, Efek, Ekspresi, Episode, IdNode, Kondisi, KonfigLatar, NilaiAlternatif, NodeCerita, TitikKeputusan,
 } from '../../tipe';
-import { BENGKEL_AUTO_2, KANTOR_AUTO_2, POOL_AUTO_2, TOKOH_AUTO_2, TOL_AUTO_2, WAWANCARA_AUTO_2 } from '../../seni/auto-2/ilustrasi';
 import { AKTIVITAS_AUTO_2 } from './aktivitas';
 import { LAMPIRAN_AUTO_2, SENI_ARENA_AUTO_2 } from './arena';
 import { TEKS_AUTO_2 } from './teks';
@@ -566,14 +565,13 @@ const LATAR: KonfigLatar = {
   lokasi: {
     // Kantor = interior pilihan pemilik (tokoh di balik meja); lapangan = latar masing-masing (bukan interior kantor),
     // tokoh berdiri berbadan penuh.
-    // T-013: semua lokasi di panggung piksel (ruang <lokasi>-ep2, seni/piksel/ruang-ep2.json); ilustrasi = cadangan sampai Stage 3.
-    kantor: { nama: 'lokasi.kantor', ilustrasi: KANTOR_AUTO_2, piksel: 'kantor-ep2' },
-    pool: { nama: 'lokasi.pool', ilustrasi: POOL_AUTO_2, piksel: 'pool-ep2' },
-    bengkel: { nama: 'lokasi.bengkel', ilustrasi: BENGKEL_AUTO_2, piksel: 'bengkel-ep2' },
-    tol: { nama: 'lokasi.tol', ilustrasi: TOL_AUTO_2, piksel: 'tol-ep2' },
-    wawancara: { nama: 'lokasi.wawancara', ilustrasi: WAWANCARA_AUTO_2, piksel: 'wawancara-ep2' },
+    // T-013: semua lokasi di panggung piksel (ruang <lokasi>-ep2, seni/piksel/ruang-ep2.json); panggung ilustrasi dihapus di Stage 3.
+    kantor: { nama: 'lokasi.kantor', piksel: 'kantor-ep2' },
+    pool: { nama: 'lokasi.pool', piksel: 'pool-ep2' },
+    bengkel: { nama: 'lokasi.bengkel', piksel: 'bengkel-ep2' },
+    tol: { nama: 'lokasi.tol', piksel: 'tol-ep2' },
+    wawancara: { nama: 'lokasi.wawancara', piksel: 'wawancara-ep2' },
   },
-  tokoh: TOKOH_AUTO_2,
   awal: { lokasi: 'kantor', hadir: ['missRaksa'], telepon: null, objek: [] },
   // Sampul: truk trailer yang ringsek + Pak Hendra di depannya (identitas kendaraan kasus terbaca, review staf #7).
   sampul: { lokasi: 'pool', hadir: ['hendra'] },

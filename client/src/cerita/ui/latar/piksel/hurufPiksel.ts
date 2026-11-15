@@ -14,12 +14,17 @@ const FONT: Readonly<Record<string, string>> = {
   '_': '000000000000111', ' ': '000000000000000', 'x': '000101010101000', '(': '010100100100010', ')': '010001001001010', '=': '000111000111000', '%': '101001010100101',
 };
 
+/** D-98: glyph LEBAR 5 x 5 (M dan W tidak terbaca pada 3 kolom: KLAIM terbaca KLAIN). */
+const LEBAR: Readonly<Record<string, string>> = { M: '1000111011101011000110001', W: '1000110001101011101110001' };
+
 /** Titik-titik piksel (x, y piksel seni relatif kiri-atas) untuk teks, atau null bila ada karakter tanpa glyph. */
 export function titikTeks(teks: string): { titik: [number, number][]; w: number; h: number } | null {
   const t = teks.toUpperCase();
   const titik: [number, number][] = [];
   let x = 0;
   for (const ch of t) {
+    const l = LEBAR[ch];
+    if (l) { for (let i = 0; i < 25; i++) if (l[i] === '1') titik.push([x + (i % 5), Math.floor(i / 5)]); x += 6; continue; }
     const f = FONT[ch];
     if (f === undefined) return null;
     for (let i = 0; i < 15; i++) if (f[i] === '1') titik.push([x + (i % 3), Math.floor(i / 3)]);

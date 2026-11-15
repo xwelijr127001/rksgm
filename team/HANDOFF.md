@@ -664,3 +664,82 @@ The adapter can still refuse an unknown location or objek, a cast member without
   - Delete `seni/auto-2/ilustrasi` (≈ 4.9 MB) and `PanggungLatarIlustrasi`, `useGrupSiap` and the T-010 gate/warm-up code if no consumer is left. The `PanggungLatar` wrapper becomes the pixel stage only.
   - Drop the unused illustrated avatar path in `PotretHp`, and the illustrated warm-up of the next location (`komposisiBerikut` -> `hangatkanKomposisi`, now a no-op for pixel scenes).
   - Possibly night tint for tol (D-84 q5).
+
+
+## T-013 Stage 3 (2026-11-15)
+
+Fullstack · status: doing (Stage 3 done, awaiting final QA) · NOT committed. Base: 0013d01 (tag ep2-piksel-stage2). The deletions were made with `git rm`, so they are staged in the index; nothing else is staged. QA-REPORT has no "T-013 Stage 2" section yet; the QA interim item B-01 arrived by Orca message and is handled below.
+
+### Fixes applied
+| item | what was done |
+|---|---|
+| **D-92** (owner blocker: legs) | `bangun-samping.mjs` rebuilt from `tokoh-samping-badan-v2.png` (drawn full bodies, cell 512×1024, pitch 945/198 = 4.773). Procedural legs deleted. Heights: rudi/bima/darto 198, tol/polisi 196, admin 195 art px (Hendra 198). Face `netral` from the v2 bodies; `prihatin` from the v2 expression sheet, normalised to the MEASURED body head width (34-40 art px) and registered by IoU 0.961-0.982. Atlas 512×204, 62 colours, 28,471 B (was 17,696). Review sheet: `character/piksel/samping/tinjau-samping.png`. |
+| **D-93** (facing) | Frames renamed `berdiri-kanan` / `gestur-*-kanan` in `hendra.json` and `samping.json` (pose `kanan`, `bawaan: 'kanan'`). Left-facing = mirrored on the canvas around the foot anchor (faces and blink strips flip with the body; the camera head box is mirrored too). Facing comes per slot from `ruang-ep2.json` (`slot[n][i].hadap`); the adapter sets `hadap` + `cermin`. Applied as listed: kantor visitors kiri with slot 1 at x 1040; pool kanan; tol kanan; bengkel admin kiri at x 1000; wawancara 1 kanan, 2 kanan/kiri, 3 kanan/kanan/kiri. Test-enforced per scene. |
+| **D-94** (truck) | Trailer layer rebuilt directly from the damaged row of the sheet at 450 art px wide (pitch 2.96, 32 colours), cropped at the world's right edge (240×124 art px; cut in the container, cab whole). Placed at art x 160, wheels on art y 172, z 25. Pool slots 1: 360 · 2: 160/460 (3: 120/300/480, mine). Focus box world x 640-1040, y 240-700. 6,691 B (was 1,785). |
+| **D-95** (1280) | `maksLebih` 1.15 for the wide frame, 1.6 kept for phones. Bengkel, tol and wawancara now show the room at 1280 (`stage3/*-1280-id.png`). |
+| **D-96** (liveliness) | (a) Blink for the six side characters: a closed-eye strip per face, generated in the builder (eye pixels replaced by skin, lash line). (b) Speaker hop 2 art px for 160 ms. (c) 1-art-px breathing bob on the speaker, toggling every 1.2 s. (d) 180 ms slide-in from the nearest view edge when a character joins `hadir` (not on first mount). (e) 150 ms crossfade when the room changes (old frame copied to an overlay canvas). All off under reduced motion via `useReducedMotion` (respects `data-gerak`). Probe at pool: normal = 2 distinct frames / 4 changes in 9 s; system reduce + `?gerak=ikut` = 1 frame / 0 changes. Hop, bob, slide-in and crossfade are implemented but only the blink is asserted by the probe. |
+| **D-97** (card) | `/cerita` card uses cover (`isi="penuh"`): the next integer scale that fills the box, centred on Hendra + cab. No side bars at 360 (`stage3/kartu-cerita-360.png`). |
+| **D-98** | 5×5 glyphs for `M` and `W` in the nameplate font; "KLAIM" reads correctly. |
+| **D-99** | `foto` prop is 20×15 art px at eye height left of the admin (art 196, 40). |
+| **B-01** (QA, medium) | Every remaining illustration consumer replaced: chat cut-in / call gate (pixel portrait), K02 activity backdrop (`hp.css` now uses `ep2-ruang-kantor-latar.png`, pixelated), all avatars (chat, dialog, Riwayat, activity guide, end screen: `PotretPikselHp` for every cast member with pixel art, Miss Raksa included). No JS or CSS in the build references an AUTO-2 WebP any more. |
+
+Extra, not in the review:
+- The band outside the 1600×900 world (integer-pixel letterbox) is now filled by stretching the room's edge row/column (sky continues upward) instead of a flat wall colour.
+- Wawancara slot 2 moved from 650/1010 to 610/1050: with full-width drawn bodies facing each other, Bima's arm and Darto overlapped. Designer to confirm.
+
+### Deletions
+- `client/src/cerita/seni/auto-2/ilustrasi/` (94 files: 90 WebP ≈ 4.7 MB, `ilustrasi.json`, `index.ts`, `kabur.ts`). Source art remains in `character/auto-2-ilustrasi/`.
+- `ui/latar/ilustrasi.ts` + `ilustrasi.test.ts` (removed from `test:client`).
+- The illustrated renderer inside `PanggungLatar.tsx` (AdeganIlustrasi, `useGrupSiap`, T-010 gate, blurred placeholder, pill). The illustrated CSS in `latar.css`.
+- `ImgIlustrasi`, `GambarIlustrasi`, `PotretIlustrasi`, `useGambarSiap` from `ui/gambarIlustrasi.tsx`.
+- The illustrated warm-up in `hangatkan.ts` (srcset/size generations, `useVersiUkuran`, diagnostics).
+- Types `VarianGambar`, `GambarTokoh`, `TokohIlustrasi`, `LokasiIlustrasi`, etc.; `KonfigLatar.lokasi[x].ilustrasi`, `.tokoh`, `.tanpaAset`. `piksel` is now required.
+- Tools: `tools/ukur-aset-t010.mjs`, `tools/cek-gagal-t010.mjs`, `tools/cerita/bangun-kabur-auto2.mjs` (they measured or built the illustrated stage). `tools/cek-pemuat-t010.mjs`: sections 7, 10, 11 (AUTO-2 placeholder and pill) retired with a note; the homepage loader checks stay and pass.
+
+### Kept, and why
+- `PanggungLatar` (now a thin wrapper): still the single entry for the HP scene, activity, `/cerita` card and wide CeritaMain. Unmappable composition or failed PNG = plain stage box with the location label.
+- `hangatkan.ts` / `hangatkanDaftar.ts`: kept as a small pixel warm-up (preloads the first composition's PNGs from the list page / homepage card hover, and the next location's PNGs from the current scene). `komposisiBerikut` kept.
+- `GambarSeni` (code SVG art for the arena): unrelated to illustrations.
+- T-010/T-011 homepage loader (`PemuatAwal`, index.html): untouched; it never served AUTO-2 scenes.
+- `tools/cerita/state-lokasi-kedua.mts`: used by the T-013 transition check.
+- Three prototype avatars moved to `seni/auto-2/proto/` (hendra-cemas, hendra-tenang, bima, 320 px): consumed only by `ProtoKejadian` / `ProtoLokasi` (build flag `VITE_KEJADIAN`). Vite still emits them into the default dist (50 KB, unreferenced by any JS/CSS, never requested).
+- `MejaKasus` prototype (flag `VITE_MEJA_KASUS`): modal avatar is now the pixel portrait; its Phaser canvas gets no avatar (`avatarUrl: null`).
+- Validation (`validasi.ts`): the illustrated-asset checks were replaced by "lokasi has a `piksel` id" + "cast exists"; room/slot/pose existence is enforced by `adegan.test.ts`.
+
+### Bundle and dist (production build, gzip -9; before = 0013d01)
+| | before | after |
+|---|---|---|
+| index.js | 226,044 | 226,044 |
+| Landing.js | 3,119 | 3,112 |
+| CeritaMain.js | 41,813 | 41,397 |
+| cerita shared chunk (`hangatkan-*.js`: episodes + stage) | 82,582 | 69,863 |
+| all JS | 1,111,092 | 1,095,058 (−16,034) |
+| all CSS | 62,707 | 61,979 |
+| WebP in dist/assets | 90 files, 4,734,280 B | 3 files, 50,102 B (prototype avatars, unreferenced) |
+| dist total | 16.6 MB | 11.8 MB |
+
+### Episode 2 stage assets as served (PNG raw)
+| asset | bytes |
+|---|---|
+| rooms: kantor latar 8,705 + meja 2,404 · bengkel 22,249 · tol 21,001 · pool 11,013 · wawancara 12,252 | 77,624 |
+| pool trailer | 6,691 |
+| props map / surat / foto | 528 |
+| hendra.png | 18,445 |
+| samping.png | 28,471 |
+| miss-raksa.png (Episode 1 atlas, reused) | 19,972 |
+| **PNG total** | **151,731 B ≈ 148 KB** of the 400 KB gate |
+- Manifests are bundled in JS (gzip: hendra 1,671, samping 1,402, ruang-ep2 904). All JS is now 6.5 KB gzip SMALLER than before T-013 began (1,101,546 at f6da694), so the stage code adds no net transfer.
+- Measured in the browser: every image requested across all 16 saved states plus two opened activities = 13 unique files, **152,086 B**, 0 Episode 2 WebP (`stage3/transfer-gambar.json`). This is state sampling, not a single continuous playthrough; QA's full playthrough should confirm.
+
+### Tests
+- `npm run test:client`: **728 / 728 pass** (735 before; −8 from the retired `ilustrasi.test.ts`, +1 new in `adegan.test.ts`, now 10 tests incl. facing per scene, mirror flag, trailer geometry, blink strips).
+- `npm run test:e2e`: **exit 0, kegagalan 0, console/http bermasalah 0** (production build, legacy on).
+- `tsc --noEmit` clean; production build OK.
+- `node tools/cek-piksel-t013.mjs`: **73 / 73 PASS**, 0 `.webp` and 0 Episode 1 room PNG requests. 16 states × 3 viewports in id (+ en/zh for mentor, pool, wawancara-3), `/cerita` card × 3, kantor→pool transition, B-01 non-stage check, motion probe normal + reduced. Screenshots: `team/evidence/T-013/stage3/`.
+- `node tools/cek-pemuat-t010.mjs` (homepage loader, after retiring its AUTO-2 sections): exit 0.
+
+### Open / for final QA
+- The chat cut-in (pixel portrait in the slanted frame) did not appear in any sampled state, so its new look is unverified visually.
+- Mirrored Hendra/polisi are the Designer's interim (pocket/badge swap sides).
+- Not checked on real iOS WebKit; no continuous full playthrough by me in en/zh.
+- `PotretHp` keeps an unused `piksel` prop for call-site compatibility.

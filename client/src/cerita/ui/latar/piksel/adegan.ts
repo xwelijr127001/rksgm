@@ -19,6 +19,7 @@
 import type { Ekspresi, Episode, IdPembicara } from '../../../tipe';
 import type { IdTokohPiksel } from '../../../seni/piksel/susun';
 import type { KomposisiLatar } from '../komposisi';
+import { RUANG_PIKSEL } from './ruang';
 
 /** `balikMeja` = di balik meja layanan (Miss Raksa, kantor); `slot` = berdiri di slot ruang ke-i dari n (kiri -> kanan). */
 export type TempatPiksel = 'balikMeja' | 'slot';
@@ -29,20 +30,17 @@ export interface PeranPiksel {
   tokoh: IdTokohPiksel;
   tempat: TempatPiksel;
   pose: string;
+  /** Arah bawaan (Miss Raksa: tetap). Tokoh slot: arah adegan diambil dari slot ruang (D-93). */
   hadap: ArahPiksel;
+  /** Atlas hanya punya SATU arah (seni Hendra & tokoh samping menghadap kanan): arah lain = cermin saat digambar. */
+  satuArah?: ArahPiksel;
 }
 
 /** SEMUA pose yang bisa diminta adapter (diuji terhadap atlas: tidak boleh jatuh ke cadangan pose/arah). */
 export const PERAN_PIKSEL: Readonly<Partial<Record<IdPembicara, PeranPiksel>>> = {
   missRaksa: { tokoh: 'missRaksa', tempat: 'balikMeja', pose: 'berdiri', hadap: 'kanan' },
-  hendra: { tokoh: 'hendra', tempat: 'slot', pose: 'berdiri', hadap: 'kiri' },
-  // Stage 2 (D-85): tokoh samping, still berdiri hadap kiri (sheet tanpa varian kanan).
-  rudi: { tokoh: 'rudi', tempat: 'slot', pose: 'berdiri', hadap: 'kiri' },
-  bima: { tokoh: 'bima', tempat: 'slot', pose: 'berdiri', hadap: 'kiri' },
-  darto: { tokoh: 'darto', tempat: 'slot', pose: 'berdiri', hadap: 'kiri' },
-  admin: { tokoh: 'admin', tempat: 'slot', pose: 'berdiri', hadap: 'kiri' },
-  tol: { tokoh: 'tol', tempat: 'slot', pose: 'berdiri', hadap: 'kiri' },
-  polisi: { tokoh: 'polisi', tempat: 'slot', pose: 'berdiri', hadap: 'kiri' },
+  // D-93: seni Hendra & tokoh samping menghadap KANAN penonton; hadap 'kiri' di adegan = dicerminkan di panggung.
+  ...Object.fromEntries((['hendra', 'rudi', 'bima', 'darto', 'admin', 'tol', 'polisi'] as const).map((id) => [id, { tokoh: id, tempat: 'slot', pose: 'berdiri', hadap: 'kanan', satuArah: 'kanan' } satisfies PeranPiksel])),
 };
 /** Slot berdiri per ruang (ruang-ep2.json `slot` 1..3). */
 export const MAKS_SLOT = 3;
@@ -54,6 +52,8 @@ export interface TokohDiPiksel extends PeranPiksel {
   /** (tempat 'slot') urutan 0..n-1 dan jumlah tokoh slot di adegan. */
   slot: number;
   jumlahSlot: number;
+  /** true = frame atlas (satuArah) digambar tercermin terhadap jangkar kaki. */
+  cermin: boolean;
   id: IdPembicara;
   ekspresi: Ekspresi;
   bicara: boolean;
@@ -79,12 +79,19 @@ export function adeganPiksel(ep: Pick<Episode, 'latar'>, k: KomposisiLatar): Has
     const p = PERAN_PIKSEL[h.id];
     if (!p) return tolak(`pemeran ${h.id} tanpa atlas piksel`);
     if (p.tempat === 'balikMeja' && tokoh.some((x) => x.tempat === 'balikMeja')) return tolak('tempat balikMeja ganda');
-    tokoh.push({ ...p, id: h.id, ekspresi: h.ekspresi, bicara: h.bicara, slot: 0, jumlahSlot: 0 });
+    tokoh.push({ ...p, id: h.id, ekspresi: h.ekspresi, bicara: h.bicara, slot: 0, jumlahSlot: 0, cermin: false });
   }
   // Slot berdiri: urut naskah (kiri -> kanan), maksimal MAKS_SLOT (adegan tiga saksi wawancara = slot 3, D-84 q1).
   const berdiri = tokoh.filter((x) => x.tempat === 'slot');
   if (berdiri.length > MAKS_SLOT) return tolak(`${berdiri.length} tokoh berdiri > ${MAKS_SLOT} slot`);
-  berdiri.forEach((x, i) => { x.slot = i; x.jumlahSlot = berdiri.length; });
+  const slotRuang = RUANG_PIKSEL[ruang]?.slot[berdiri.length] ?? [];
+  berdiri.forEach((x, i) => {
+    x.slot = i;
+    x.jumlahSlot = berdiri.length;
+    // Arah per adegan dari slot ruang (ruang-ep2.json, D-93); atlas satu arah -> cermin bila berbeda.
+    x.hadap = slotRuang[i]?.hadap ?? x.hadap;
+    x.cermin = !!x.satuArah && x.satuArah !== x.hadap;
+  });
   let telepon: AdeganPiksel['telepon'] = null;
   if (k.telepon) {
     const p = PERAN_PIKSEL[k.telepon.id];
@@ -113,7 +120,8 @@ export function poseHilang(
     if (!p) continue;
     const m = manifest(p.tokoh);
     if (!m) { hilang.push(`${id}: atlas ${p.tokoh} tidak ada`); continue; }
-    if (!m.pose[p.pose]?.[p.hadap]) hilang.push(`${id}: pose ${p.pose}/${p.hadap} tidak ada di atlas ${p.tokoh}`);
+    const arah = p.satuArah ?? p.hadap;
+    if (!m.pose[p.pose]?.[arah]) hilang.push(`${id}: pose ${p.pose}/${arah} tidak ada di atlas ${p.tokoh}`);
   }
   return hilang;
 }

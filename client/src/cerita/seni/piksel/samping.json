@@ -10,13 +10,13 @@
    "gambar": "samping.png",
    "ukuranAtlas": [
     512,
-    188
+    204
    ],
    "skala": {
     "unitDuniaPerPikselSeni": 4,
     "pxSumberPerPikselSeni": {
-     "badan": 5.028,
-     "ekspresi": 6.722
+     "badan": 4.773,
+     "ekspresi": 6.916
     },
     "kepala": "lebar kepala 36 piksel seni (= Pak Hendra)"
    },
@@ -25,7 +25,8 @@
     "prihatin"
    ],
    "varian": [
-    "dasar"
+    "dasar",
+    "kedip"
    ],
    "ekspresiDari": {
     "netral": "netral",
@@ -38,43 +39,43 @@
     "kesal": "prihatin"
    },
    "frame": {
-    "berdiri-kiri": {
+    "berdiri-kanan": {
      "rect": [
-      151,
+      144,
       0,
-      73,
-      188
+      71,
+      198
      ],
-     "hadap": "kiri",
+     "hadap": "kanan",
      "jenisJangkar": "kaki",
      "jangkar": {
-      "x": 39,
-      "y": 187
+      "x": 22,
+      "y": 197
      },
      "kaki": {
-      "x": 39,
-      "y": 187
+      "x": 22,
+      "y": 197
      },
      "kepala": {
-      "x": 36,
+      "x": 36.5,
       "y": 21
      },
      "kepalaTinggi": 42,
      "wajah": {
       "kotak": [
-       26,
+       27,
        12,
-       28,
+       27,
        30
       ],
       "mata": [
-       26,
-       16,
-       28,
-       8
+       27,
+       20,
+       27,
+       6
       ],
       "mulut": [
-       30,
+       31,
        32,
        8,
        4
@@ -83,18 +84,30 @@
      "ekspresi": {
       "netral": {
        "dasar": [
-        436,
-        124,
-        28,
+        431,
+        155,
+        27,
         30
+       ],
+       "kedip": [
+        272,
+        197,
+        27,
+        6
        ]
       },
       "prihatin": {
        "dasar": [
-        465,
-        124,
-        28,
+        459,
+        155,
+        27,
         30
+       ],
+       "kedip": [
+        300,
+        197,
+        27,
+        6
        ]
       }
      }
@@ -102,60 +115,60 @@
    },
    "pose": {
     "berdiri": {
-     "kiri": "berdiri-kiri",
-     "bawaan": "kiri"
+     "kanan": "berdiri-kanan",
+     "bawaan": "kanan"
     }
    },
    "pandang": {
     "lawan": {
-     "arah": "kiri"
+     "arah": "kanan"
     },
     "pemain": {
-     "arah": "kiri"
+     "arah": "kanan"
     },
     "depan": {
-     "arah": "kiri"
+     "arah": "kanan"
     },
     "bawah": {}
    },
    "potret": {
-    "frame": "berdiri-kiri",
+    "frame": "berdiri-kanan",
     "jendela": {
      "32": {
-      "frame": "berdiri-kiri",
-      "x": 20,
+      "frame": "berdiri-kanan",
+      "x": 21,
       "y": 7,
       "sisi": 32,
       "skala": 1,
       "tampil": 32
      },
      "44": {
-      "frame": "berdiri-kiri",
-      "x": 14,
+      "frame": "berdiri-kanan",
+      "x": 15,
       "y": 3,
       "sisi": 44,
       "skala": 1,
       "tampil": 44
      },
      "52": {
-      "frame": "berdiri-kiri",
-      "x": 10,
+      "frame": "berdiri-kanan",
+      "x": 11,
       "y": 1,
       "sisi": 52,
       "skala": 1,
       "tampil": 52
      },
      "64": {
-      "frame": "berdiri-kiri",
-      "x": 4,
+      "frame": "berdiri-kanan",
+      "x": 5,
       "y": -3,
       "sisi": 64,
       "skala": 1,
       "tampil": 64
      },
      "96": {
-      "frame": "berdiri-kiri",
-      "x": 12,
+      "frame": "berdiri-kanan",
+      "x": 13,
       "y": 1,
       "sisi": 48,
       "skala": 2,
@@ -164,24 +177,24 @@
     },
     "dekat": {
      "52": {
-      "frame": "berdiri-kiri",
-      "x": 23,
+      "frame": "berdiri-kanan",
+      "x": 24,
       "y": 10,
       "sisi": 26,
       "skala": 2,
       "tampil": 52
      },
      "64": {
-      "frame": "berdiri-kiri",
-      "x": 20,
+      "frame": "berdiri-kanan",
+      "x": 21,
       "y": 7,
       "sisi": 32,
       "skala": 2,
       "tampil": 64
      },
      "96": {
-      "frame": "berdiri-kiri",
-      "x": 20,
+      "frame": "berdiri-kanan",
+      "x": 21,
       "y": 7,
       "sisi": 32,
       "skala": 3,
@@ -190,10 +203,10 @@
     }
    },
    "telepon": {
-    "frame": "berdiri-kiri",
+    "frame": "berdiri-kanan",
     "jendela": {
-     "frame": "berdiri-kiri",
-     "x": 8,
+     "frame": "berdiri-kanan",
+     "x": 9,
      "y": 3,
      "sisi": 56,
      "skala": 1,
@@ -209,13 +222,13 @@
    "gambar": "samping.png",
    "ukuranAtlas": [
     512,
-    188
+    204
    ],
    "skala": {
     "unitDuniaPerPikselSeni": 4,
     "pxSumberPerPikselSeni": {
-     "badan": 4.861,
-     "ekspresi": 6.333
+     "badan": 4.773,
+     "ekspresi": 6.676
     },
     "kepala": "lebar kepala 36 piksel seni (= Pak Hendra)"
    },
@@ -224,7 +237,8 @@
     "prihatin"
    ],
    "varian": [
-    "dasar"
+    "dasar",
+    "kedip"
    ],
    "ekspresiDari": {
     "netral": "netral",
@@ -237,22 +251,22 @@
     "kesal": "prihatin"
    },
    "frame": {
-    "berdiri-kiri": {
+    "berdiri-kanan": {
      "rect": [
       0,
       0,
-      76,
-      188
+      71,
+      198
      ],
-     "hadap": "kiri",
+     "hadap": "kanan",
      "jenisJangkar": "kaki",
      "jangkar": {
-      "x": 42,
-      "y": 187
+      "x": 21,
+      "y": 197
      },
      "kaki": {
-      "x": 42,
-      "y": 187
+      "x": 21,
+      "y": 197
      },
      "kepala": {
       "x": 37.5,
@@ -261,19 +275,19 @@
      "kepalaTinggi": 42,
      "wajah": {
       "kotak": [
-       27,
+       28,
        12,
-       29,
+       27,
        30
       ],
       "mata": [
+       28,
+       19,
        27,
-       16,
-       29,
-       8
+       7
       ],
       "mulut": [
-       31,
+       32,
        32,
        8,
        4
@@ -282,18 +296,30 @@
      "ekspresi": {
       "netral": {
        "dasar": [
-        436,
-        0,
-        29,
+        431,
+        124,
+        27,
         30
+       ],
+       "kedip": [
+        431,
+        186,
+        27,
+        7
        ]
       },
       "prihatin": {
        "dasar": [
-        466,
-        0,
-        29,
+        459,
+        124,
+        27,
         30
+       ],
+       "kedip": [
+        459,
+        186,
+        27,
+        7
        ]
       }
      }
@@ -301,27 +327,27 @@
    },
    "pose": {
     "berdiri": {
-     "kiri": "berdiri-kiri",
-     "bawaan": "kiri"
+     "kanan": "berdiri-kanan",
+     "bawaan": "kanan"
     }
    },
    "pandang": {
     "lawan": {
-     "arah": "kiri"
+     "arah": "kanan"
     },
     "pemain": {
-     "arah": "kiri"
+     "arah": "kanan"
     },
     "depan": {
-     "arah": "kiri"
+     "arah": "kanan"
     },
     "bawah": {}
    },
    "potret": {
-    "frame": "berdiri-kiri",
+    "frame": "berdiri-kanan",
     "jendela": {
      "32": {
-      "frame": "berdiri-kiri",
+      "frame": "berdiri-kanan",
       "x": 22,
       "y": 7,
       "sisi": 32,
@@ -329,7 +355,7 @@
       "tampil": 32
      },
      "44": {
-      "frame": "berdiri-kiri",
+      "frame": "berdiri-kanan",
       "x": 16,
       "y": 3,
       "sisi": 44,
@@ -337,7 +363,7 @@
       "tampil": 44
      },
      "52": {
-      "frame": "berdiri-kiri",
+      "frame": "berdiri-kanan",
       "x": 12,
       "y": 1,
       "sisi": 52,
@@ -345,7 +371,7 @@
       "tampil": 52
      },
      "64": {
-      "frame": "berdiri-kiri",
+      "frame": "berdiri-kanan",
       "x": 6,
       "y": -3,
       "sisi": 64,
@@ -353,7 +379,7 @@
       "tampil": 64
      },
      "96": {
-      "frame": "berdiri-kiri",
+      "frame": "berdiri-kanan",
       "x": 14,
       "y": 1,
       "sisi": 48,
@@ -363,7 +389,7 @@
     },
     "dekat": {
      "52": {
-      "frame": "berdiri-kiri",
+      "frame": "berdiri-kanan",
       "x": 25,
       "y": 10,
       "sisi": 26,
@@ -371,7 +397,7 @@
       "tampil": 52
      },
      "64": {
-      "frame": "berdiri-kiri",
+      "frame": "berdiri-kanan",
       "x": 22,
       "y": 7,
       "sisi": 32,
@@ -379,7 +405,7 @@
       "tampil": 64
      },
      "96": {
-      "frame": "berdiri-kiri",
+      "frame": "berdiri-kanan",
       "x": 22,
       "y": 7,
       "sisi": 32,
@@ -389,9 +415,9 @@
     }
    },
    "telepon": {
-    "frame": "berdiri-kiri",
+    "frame": "berdiri-kanan",
     "jendela": {
-     "frame": "berdiri-kiri",
+     "frame": "berdiri-kanan",
      "x": 10,
      "y": 3,
      "sisi": 56,
@@ -408,13 +434,13 @@
    "gambar": "samping.png",
    "ukuranAtlas": [
     512,
-    188
+    204
    ],
    "skala": {
     "unitDuniaPerPikselSeni": 4,
     "pxSumberPerPikselSeni": {
-     "badan": 5.278,
-     "ekspresi": 6.889
+     "badan": 4.773,
+     "ekspresi": 6.842
     },
     "kepala": "lebar kepala 36 piksel seni (= Pak Hendra)"
    },
@@ -423,7 +449,8 @@
     "prihatin"
    ],
    "varian": [
-    "dasar"
+    "dasar",
+    "kedip"
    ],
    "ekspresiDari": {
     "netral": "netral",
@@ -436,43 +463,43 @@
     "kesal": "prihatin"
    },
    "frame": {
-    "berdiri-kiri": {
+    "berdiri-kanan": {
      "rect": [
-      298,
+      72,
       0,
-      69,
-      188
+      71,
+      198
      ],
-     "hadap": "kiri",
+     "hadap": "kanan",
      "jenisJangkar": "kaki",
      "jangkar": {
-      "x": 33,
-      "y": 187
+      "x": 20,
+      "y": 197
      },
      "kaki": {
-      "x": 33,
-      "y": 187
+      "x": 20,
+      "y": 197
      },
      "kepala": {
-      "x": 36,
+      "x": 39,
       "y": 21
      },
      "kepalaTinggi": 42,
      "wajah": {
       "kotak": [
-       26,
+       29,
        12,
        28,
        30
       ],
       "mata": [
-       26,
-       16,
+       29,
+       20,
        28,
-       8
+       5
       ],
       "mulut": [
-       30,
+       33,
        32,
        8,
        4
@@ -481,18 +508,30 @@
      "ekspresi": {
       "netral": {
        "dasar": [
-        436,
+        431,
         62,
         28,
         30
+       ],
+       "kedip": [
+        328,
+        197,
+        28,
+        5
        ]
       },
       "prihatin": {
        "dasar": [
-        465,
+        460,
         62,
         28,
         30
+       ],
+       "kedip": [
+        0,
+        199,
+        28,
+        5
        ]
       }
      }
@@ -500,60 +539,60 @@
    },
    "pose": {
     "berdiri": {
-     "kiri": "berdiri-kiri",
-     "bawaan": "kiri"
+     "kanan": "berdiri-kanan",
+     "bawaan": "kanan"
     }
    },
    "pandang": {
     "lawan": {
-     "arah": "kiri"
+     "arah": "kanan"
     },
     "pemain": {
-     "arah": "kiri"
+     "arah": "kanan"
     },
     "depan": {
-     "arah": "kiri"
+     "arah": "kanan"
     },
     "bawah": {}
    },
    "potret": {
-    "frame": "berdiri-kiri",
+    "frame": "berdiri-kanan",
     "jendela": {
      "32": {
-      "frame": "berdiri-kiri",
-      "x": 20,
+      "frame": "berdiri-kanan",
+      "x": 23,
       "y": 7,
       "sisi": 32,
       "skala": 1,
       "tampil": 32
      },
      "44": {
-      "frame": "berdiri-kiri",
-      "x": 14,
+      "frame": "berdiri-kanan",
+      "x": 17,
       "y": 3,
       "sisi": 44,
       "skala": 1,
       "tampil": 44
      },
      "52": {
-      "frame": "berdiri-kiri",
-      "x": 10,
+      "frame": "berdiri-kanan",
+      "x": 13,
       "y": 1,
       "sisi": 52,
       "skala": 1,
       "tampil": 52
      },
      "64": {
-      "frame": "berdiri-kiri",
-      "x": 4,
+      "frame": "berdiri-kanan",
+      "x": 7,
       "y": -3,
       "sisi": 64,
       "skala": 1,
       "tampil": 64
      },
      "96": {
-      "frame": "berdiri-kiri",
-      "x": 12,
+      "frame": "berdiri-kanan",
+      "x": 15,
       "y": 1,
       "sisi": 48,
       "skala": 2,
@@ -562,24 +601,24 @@
     },
     "dekat": {
      "52": {
-      "frame": "berdiri-kiri",
-      "x": 23,
+      "frame": "berdiri-kanan",
+      "x": 26,
       "y": 10,
       "sisi": 26,
       "skala": 2,
       "tampil": 52
      },
      "64": {
-      "frame": "berdiri-kiri",
-      "x": 20,
+      "frame": "berdiri-kanan",
+      "x": 23,
       "y": 7,
       "sisi": 32,
       "skala": 2,
       "tampil": 64
      },
      "96": {
-      "frame": "berdiri-kiri",
-      "x": 20,
+      "frame": "berdiri-kanan",
+      "x": 23,
       "y": 7,
       "sisi": 32,
       "skala": 3,
@@ -588,10 +627,10 @@
     }
    },
    "telepon": {
-    "frame": "berdiri-kiri",
+    "frame": "berdiri-kanan",
     "jendela": {
-     "frame": "berdiri-kiri",
-     "x": 8,
+     "frame": "berdiri-kanan",
+     "x": 11,
      "y": 3,
      "sisi": 56,
      "skala": 1,
@@ -607,13 +646,13 @@
    "gambar": "samping.png",
    "ukuranAtlas": [
     512,
-    188
+    204
    ],
    "skala": {
     "unitDuniaPerPikselSeni": 4,
     "pxSumberPerPikselSeni": {
-     "badan": 4.917,
-     "ekspresi": 6.5
+     "badan": 4.773,
+     "ekspresi": 6.769
     },
     "kepala": "lebar kepala 36 piksel seni (= Pak Hendra)"
    },
@@ -622,7 +661,8 @@
     "prihatin"
    ],
    "varian": [
-    "dasar"
+    "dasar",
+    "kedip"
    ],
    "ekspresiDari": {
     "netral": "netral",
@@ -635,25 +675,25 @@
     "kesal": "prihatin"
    },
    "frame": {
-    "berdiri-kiri": {
+    "berdiri-kanan": {
      "rect": [
-      77,
+      360,
       0,
-      73,
-      188
+      70,
+      195
      ],
-     "hadap": "kiri",
+     "hadap": "kanan",
      "jenisJangkar": "kaki",
      "jangkar": {
-      "x": 39,
-      "y": 187
+      "x": 23,
+      "y": 194
      },
      "kaki": {
-      "x": 39,
-      "y": 187
+      "x": 23,
+      "y": 194
      },
      "kepala": {
-      "x": 36,
+      "x": 35.5,
       "y": 21
      },
      "kepalaTinggi": 42,
@@ -661,14 +701,14 @@
       "kotak": [
        26,
        12,
-       28,
+       27,
        30
       ],
       "mata": [
        26,
-       16,
-       28,
-       8
+       20,
+       27,
+       6
       ],
       "mulut": [
        30,
@@ -680,18 +720,30 @@
      "ekspresi": {
       "netral": {
        "dasar": [
-        436,
-        31,
-        28,
+        431,
+        93,
+        27,
         30
+       ],
+       "kedip": [
+        216,
+        197,
+        27,
+        6
        ]
       },
       "prihatin": {
        "dasar": [
-        465,
-        31,
-        28,
+        459,
+        93,
+        27,
         30
+       ],
+       "kedip": [
+        244,
+        197,
+        27,
+        6
        ]
       }
      }
@@ -699,27 +751,27 @@
    },
    "pose": {
     "berdiri": {
-     "kiri": "berdiri-kiri",
-     "bawaan": "kiri"
+     "kanan": "berdiri-kanan",
+     "bawaan": "kanan"
     }
    },
    "pandang": {
     "lawan": {
-     "arah": "kiri"
+     "arah": "kanan"
     },
     "pemain": {
-     "arah": "kiri"
+     "arah": "kanan"
     },
     "depan": {
-     "arah": "kiri"
+     "arah": "kanan"
     },
     "bawah": {}
    },
    "potret": {
-    "frame": "berdiri-kiri",
+    "frame": "berdiri-kanan",
     "jendela": {
      "32": {
-      "frame": "berdiri-kiri",
+      "frame": "berdiri-kanan",
       "x": 20,
       "y": 7,
       "sisi": 32,
@@ -727,7 +779,7 @@
       "tampil": 32
      },
      "44": {
-      "frame": "berdiri-kiri",
+      "frame": "berdiri-kanan",
       "x": 14,
       "y": 3,
       "sisi": 44,
@@ -735,7 +787,7 @@
       "tampil": 44
      },
      "52": {
-      "frame": "berdiri-kiri",
+      "frame": "berdiri-kanan",
       "x": 10,
       "y": 1,
       "sisi": 52,
@@ -743,7 +795,7 @@
       "tampil": 52
      },
      "64": {
-      "frame": "berdiri-kiri",
+      "frame": "berdiri-kanan",
       "x": 4,
       "y": -3,
       "sisi": 64,
@@ -751,7 +803,7 @@
       "tampil": 64
      },
      "96": {
-      "frame": "berdiri-kiri",
+      "frame": "berdiri-kanan",
       "x": 12,
       "y": 1,
       "sisi": 48,
@@ -761,7 +813,7 @@
     },
     "dekat": {
      "52": {
-      "frame": "berdiri-kiri",
+      "frame": "berdiri-kanan",
       "x": 23,
       "y": 10,
       "sisi": 26,
@@ -769,7 +821,7 @@
       "tampil": 52
      },
      "64": {
-      "frame": "berdiri-kiri",
+      "frame": "berdiri-kanan",
       "x": 20,
       "y": 7,
       "sisi": 32,
@@ -777,7 +829,7 @@
       "tampil": 64
      },
      "96": {
-      "frame": "berdiri-kiri",
+      "frame": "berdiri-kanan",
       "x": 20,
       "y": 7,
       "sisi": 32,
@@ -787,9 +839,9 @@
     }
    },
    "telepon": {
-    "frame": "berdiri-kiri",
+    "frame": "berdiri-kanan",
     "jendela": {
-     "frame": "berdiri-kiri",
+     "frame": "berdiri-kanan",
      "x": 8,
      "y": 3,
      "sisi": 56,
@@ -806,13 +858,13 @@
    "gambar": "samping.png",
    "ukuranAtlas": [
     512,
-    188
+    204
    ],
    "skala": {
     "unitDuniaPerPikselSeni": 4,
     "pxSumberPerPikselSeni": {
-     "badan": 5.222,
-     "ekspresi": 6.639
+     "badan": 4.773,
+     "ekspresi": 6.302
     },
     "kepala": "lebar kepala 36 piksel seni (= Pak Hendra)"
    },
@@ -821,7 +873,8 @@
     "prihatin"
    ],
    "varian": [
-    "dasar"
+    "dasar",
+    "kedip"
    ],
    "ekspresiDari": {
     "netral": "netral",
@@ -834,25 +887,25 @@
     "kesal": "prihatin"
    },
    "frame": {
-    "berdiri-kiri": {
+    "berdiri-kanan": {
      "rect": [
-      225,
+      288,
       0,
-      72,
-      188
+      71,
+      196
      ],
-     "hadap": "kiri",
+     "hadap": "kanan",
      "jenisJangkar": "kaki",
      "jangkar": {
-      "x": 34,
-      "y": 187
+      "x": 21,
+      "y": 195
      },
      "kaki": {
-      "x": 34,
-      "y": 187
+      "x": 21,
+      "y": 195
      },
      "kepala": {
-      "x": 38,
+      "x": 39,
       "y": 21
      },
      "kepalaTinggi": 42,
@@ -860,14 +913,14 @@
       "kotak": [
        28,
        12,
-       28,
+       30,
        30
       ],
       "mata": [
        28,
-       16,
-       28,
-       8
+       21,
+       30,
+       6
       ],
       "mulut": [
        32,
@@ -879,18 +932,30 @@
      "ekspresi": {
       "netral": {
        "dasar": [
-        436,
-        155,
-        28,
+        431,
+        31,
+        30,
         30
+       ],
+       "kedip": [
+        360,
+        196,
+        30,
+        6
        ]
       },
       "prihatin": {
        "dasar": [
-        465,
-        155,
-        28,
+        462,
+        31,
+        30,
         30
+       ],
+       "kedip": [
+        391,
+        196,
+        30,
+        6
        ]
       }
      }
@@ -898,60 +963,60 @@
    },
    "pose": {
     "berdiri": {
-     "kiri": "berdiri-kiri",
-     "bawaan": "kiri"
+     "kanan": "berdiri-kanan",
+     "bawaan": "kanan"
     }
    },
    "pandang": {
     "lawan": {
-     "arah": "kiri"
+     "arah": "kanan"
     },
     "pemain": {
-     "arah": "kiri"
+     "arah": "kanan"
     },
     "depan": {
-     "arah": "kiri"
+     "arah": "kanan"
     },
     "bawah": {}
    },
    "potret": {
-    "frame": "berdiri-kiri",
+    "frame": "berdiri-kanan",
     "jendela": {
      "32": {
-      "frame": "berdiri-kiri",
-      "x": 22,
+      "frame": "berdiri-kanan",
+      "x": 23,
       "y": 7,
       "sisi": 32,
       "skala": 1,
       "tampil": 32
      },
      "44": {
-      "frame": "berdiri-kiri",
-      "x": 16,
+      "frame": "berdiri-kanan",
+      "x": 17,
       "y": 3,
       "sisi": 44,
       "skala": 1,
       "tampil": 44
      },
      "52": {
-      "frame": "berdiri-kiri",
-      "x": 12,
+      "frame": "berdiri-kanan",
+      "x": 13,
       "y": 1,
       "sisi": 52,
       "skala": 1,
       "tampil": 52
      },
      "64": {
-      "frame": "berdiri-kiri",
-      "x": 6,
+      "frame": "berdiri-kanan",
+      "x": 7,
       "y": -3,
       "sisi": 64,
       "skala": 1,
       "tampil": 64
      },
      "96": {
-      "frame": "berdiri-kiri",
-      "x": 14,
+      "frame": "berdiri-kanan",
+      "x": 15,
       "y": 1,
       "sisi": 48,
       "skala": 2,
@@ -960,24 +1025,24 @@
     },
     "dekat": {
      "52": {
-      "frame": "berdiri-kiri",
-      "x": 25,
+      "frame": "berdiri-kanan",
+      "x": 26,
       "y": 10,
       "sisi": 26,
       "skala": 2,
       "tampil": 52
      },
      "64": {
-      "frame": "berdiri-kiri",
-      "x": 22,
+      "frame": "berdiri-kanan",
+      "x": 23,
       "y": 7,
       "sisi": 32,
       "skala": 2,
       "tampil": 64
      },
      "96": {
-      "frame": "berdiri-kiri",
-      "x": 22,
+      "frame": "berdiri-kanan",
+      "x": 23,
       "y": 7,
       "sisi": 32,
       "skala": 3,
@@ -986,10 +1051,10 @@
     }
    },
    "telepon": {
-    "frame": "berdiri-kiri",
+    "frame": "berdiri-kanan",
     "jendela": {
-     "frame": "berdiri-kiri",
-     "x": 10,
+     "frame": "berdiri-kanan",
+     "x": 11,
      "y": 3,
      "sisi": 56,
      "skala": 1,
@@ -1005,13 +1070,13 @@
    "gambar": "samping.png",
    "ukuranAtlas": [
     512,
-    188
+    204
    ],
    "skala": {
     "unitDuniaPerPikselSeni": 4,
     "pxSumberPerPikselSeni": {
-     "badan": 5.528,
-     "ekspresi": 7.028
+     "badan": 4.773,
+     "ekspresi": 6.389
     },
     "kepala": "lebar kepala 36 piksel seni (= Pak Hendra)"
    },
@@ -1020,7 +1085,8 @@
     "prihatin"
    ],
    "varian": [
-    "dasar"
+    "dasar",
+    "kedip"
    ],
    "ekspresiDari": {
     "netral": "netral",
@@ -1033,43 +1099,43 @@
     "kesal": "prihatin"
    },
    "frame": {
-    "berdiri-kiri": {
+    "berdiri-kanan": {
      "rect": [
-      368,
+      216,
       0,
-      67,
-      188
+      71,
+      196
      ],
-     "hadap": "kiri",
+     "hadap": "kanan",
      "jenisJangkar": "kaki",
      "jangkar": {
-      "x": 32,
-      "y": 187
+      "x": 22,
+      "y": 195
      },
      "kaki": {
-      "x": 32,
-      "y": 187
+      "x": 22,
+      "y": 195
      },
      "kepala": {
-      "x": 34,
+      "x": 37.5,
       "y": 21
      },
      "kepalaTinggi": 42,
      "wajah": {
       "kotak": [
-       24,
+       26,
        12,
-       28,
+       31,
        30
       ],
       "mata": [
-       24,
-       16,
-       28,
-       8
+       26,
+       22,
+       31,
+       6
       ],
       "mulut": [
-       28,
+       30,
        32,
        8,
        4
@@ -1078,18 +1144,30 @@
      "ekspresi": {
       "netral": {
        "dasar": [
-        436,
-        93,
-        28,
+        431,
+        0,
+        31,
         30
+       ],
+       "kedip": [
+        431,
+        194,
+        31,
+        6
        ]
       },
       "prihatin": {
        "dasar": [
-        465,
-        93,
-        28,
+        463,
+        0,
+        31,
         30
+       ],
+       "kedip": [
+        463,
+        194,
+        31,
+        6
        ]
       }
      }
@@ -1097,60 +1175,60 @@
    },
    "pose": {
     "berdiri": {
-     "kiri": "berdiri-kiri",
-     "bawaan": "kiri"
+     "kanan": "berdiri-kanan",
+     "bawaan": "kanan"
     }
    },
    "pandang": {
     "lawan": {
-     "arah": "kiri"
+     "arah": "kanan"
     },
     "pemain": {
-     "arah": "kiri"
+     "arah": "kanan"
     },
     "depan": {
-     "arah": "kiri"
+     "arah": "kanan"
     },
     "bawah": {}
    },
    "potret": {
-    "frame": "berdiri-kiri",
+    "frame": "berdiri-kanan",
     "jendela": {
      "32": {
-      "frame": "berdiri-kiri",
-      "x": 18,
+      "frame": "berdiri-kanan",
+      "x": 22,
       "y": 7,
       "sisi": 32,
       "skala": 1,
       "tampil": 32
      },
      "44": {
-      "frame": "berdiri-kiri",
-      "x": 12,
+      "frame": "berdiri-kanan",
+      "x": 16,
       "y": 3,
       "sisi": 44,
       "skala": 1,
       "tampil": 44
      },
      "52": {
-      "frame": "berdiri-kiri",
-      "x": 8,
+      "frame": "berdiri-kanan",
+      "x": 12,
       "y": 1,
       "sisi": 52,
       "skala": 1,
       "tampil": 52
      },
      "64": {
-      "frame": "berdiri-kiri",
-      "x": 2,
+      "frame": "berdiri-kanan",
+      "x": 6,
       "y": -3,
       "sisi": 64,
       "skala": 1,
       "tampil": 64
      },
      "96": {
-      "frame": "berdiri-kiri",
-      "x": 10,
+      "frame": "berdiri-kanan",
+      "x": 14,
       "y": 1,
       "sisi": 48,
       "skala": 2,
@@ -1159,24 +1237,24 @@
     },
     "dekat": {
      "52": {
-      "frame": "berdiri-kiri",
-      "x": 21,
+      "frame": "berdiri-kanan",
+      "x": 25,
       "y": 10,
       "sisi": 26,
       "skala": 2,
       "tampil": 52
      },
      "64": {
-      "frame": "berdiri-kiri",
-      "x": 18,
+      "frame": "berdiri-kanan",
+      "x": 22,
       "y": 7,
       "sisi": 32,
       "skala": 2,
       "tampil": 64
      },
      "96": {
-      "frame": "berdiri-kiri",
-      "x": 18,
+      "frame": "berdiri-kanan",
+      "x": 22,
       "y": 7,
       "sisi": 32,
       "skala": 3,
@@ -1185,10 +1263,10 @@
     }
    },
    "telepon": {
-    "frame": "berdiri-kiri",
+    "frame": "berdiri-kanan",
     "jendela": {
-     "frame": "berdiri-kiri",
-     "x": 6,
+     "frame": "berdiri-kanan",
+     "x": 10,
      "y": 3,
      "sisi": 56,
      "skala": 1,

@@ -32,7 +32,6 @@ import { useDpr } from '../game/tokoh';
 import { simpanModeAdegan } from '../cerita/ui/panggung/mode';
 import { statusEpisode, type StatusEpisode } from '../cerita/ui/tampilan';
 import { hangatkanEpisodeAwal } from '../cerita/ui/latar/hangatkanDaftar';
-import { useVersiUkuran } from '../cerita/ui/latar/hangatkan';
 import '../cerita/ui/cerita.css';
 
 export default function Cerita() {
@@ -46,8 +45,7 @@ export default function Cerita() {
   const nav = useNavigate();
   // T-010 G3: latar adegan pertama episode berpanggung latar dipanaskan selagi daftar dibaca (dibatalkan saat pindah halaman).
   // R-14: dipanaskan ulang dengan ukuran baru saat layar diputar / DPR berubah.
-  const versiUkuran = useVersiUkuran();
-  useEffect(() => (profil ? hangatkanEpisodeAwal() : undefined), [profil, versiUkuran]);
+  useEffect(() => { if (profil) hangatkanEpisodeAwal(); }, [profil]);
 
   if (!profil) return <Navigate to="/kenalan?lanjut=/cerita" replace />;
 
@@ -216,7 +214,7 @@ function SampulLatar({ ep, ekspresi, tx }: { ep: Episode; ekspresi: Ekspresi; tx
   const nama = (id: string) => (ep.pemeran[id] ? tx(ep.pemeran[id]!.nama) : id);
   return (
     <div className="cer-ep-seni cer-ep-latar" aria-hidden="true">
-      <PanggungLatar ep={ep} komposisi={komposisi} tx={tx} nama={nama} suasana={null} />
+      <PanggungLatar ep={ep} komposisi={komposisi} tx={tx} nama={nama} suasana={null} isi="penuh" />
     </div>
   );
 }

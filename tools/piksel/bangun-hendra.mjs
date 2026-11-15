@@ -10,14 +10,15 @@
  *   character/piksel/hendra/tinjau-*.png        lembar tinjauan (x4, latar putih/krem/hijau/gelap)
  *
  * Isi atlas:
- *  - frame `berdiri-kiri`: tubuh master (badan penuh, hadap KIRI, wajah tenang terpanggang) + wajah 5 ekspresi
+ *  - frame `berdiri-kanan`: tubuh master (badan penuh, hadap KIRI, wajah tenang terpanggang) + wajah 5 ekspresi
  *    (panik, cemas, kecewa, tenang, senang) dari lembar ekspresi, diregistrasi ke kepala master (IoU siluet rambut),
  *    + varian `kedip` (mata dari sel kedip) untuk tenang/cemas/kecewa. Tanpa varian bicara (lembar tidak punya mulut
  *    bicara): mulut tertutup (aturan cadangan 4 susun.ts).
- *  - frame `gestur-<nama>-kiri` (6, pinggang ke atas, jangkar pinggul): cemas, panik, kecewa, tenang, senang,
+ *  - frame `gestur-<nama>-kanan` (6, pinggang ke atas, jangkar pinggul): cemas, panik, kecewa, tenang, senang,
  *    menjelaskan; wajah gestur terpanggang. Belum dipakai panggung Stage 1 (Hendra tidak hadir badan di kantor menurut
  *    naskah); tersedia untuk cue berikutnya.
- *  - HANYA hadap kiri. Tidak ada varian cermin (D-83 #3: kantong, kancing, ponsel akan pindah sisi).
+ *  - D-93 (Stage 3): seni Hendra menghadap KANAN penonton (README Stage 1 keliru menyebut kiri), jadi frame bernama `-kanan`.
+ *    Hadap kiri = CERMIN saat digambar di panggung (sementara: saku & ponsel pindah sisi), bukan frame atlas.
  * Pemetaan ekspresi cerita -> seni (D-79 + keputusan owner 15 Nov: `lega` -> senang): bingung->panik, cemas->cemas,
  * kesal->kecewa, netral|serius->tenang, lega|senang|tersenyum->senang.
  */
@@ -129,25 +130,25 @@ export function bangunHendra() {
     if (DENGAN_KEDIP.includes(e)) ekspresi[e].kedip = r('kedip');
   }
   const frame = {
-    'berdiri-kiri': {
-      rect: r('tubuh'), hadap: 'kiri', jenisJangkar: 'kaki', jangkar: kaki, kaki, kepala, kepalaTinggi,
+    'berdiri-kanan': {
+      rect: r('tubuh'), hadap: 'kanan', jenisJangkar: 'kaki', jangkar: kaki, kaki, kepala, kepalaTinggi,
       titikWajah: { x: wajah.x + wajah.w / 2, y: wajah.y + 10 }, teleponTergambar: true,
       wajah: { kotak: [wajah.x, wajah.y, wajah.w, wajah.h], mata: [mata.x, mata.y, mata.w, mata.h], mulut: [mulut.x, mulut.y, mulut.w, mulut.h] },
       ekspresi,
     },
   };
-  const pose = { berdiri: { kiri: 'berdiri-kiri', bawaan: 'kiri' } };
+  const pose = { berdiri: { kanan: 'berdiri-kanan', bawaan: 'kanan' } };
   for (const g of SEL_POSE) {
     const img = gestur[g];
     const k = kepalaDari(img, 20);
-    frame[`gestur-${g}-kiri`] = {
-      rect: r(`gestur-${g}`), hadap: 'kiri', jenisJangkar: 'pinggul', jangkar: { x: Math.round(img.w / 2), y: img.h - 1 }, pinggul: { x: Math.round(img.w / 2), y: img.h - 1 },
+    frame[`gestur-${g}-kanan`] = {
+      rect: r(`gestur-${g}`), hadap: 'kanan', jenisJangkar: 'pinggul', jangkar: { x: Math.round(img.w / 2), y: img.h - 1 }, pinggul: { x: Math.round(img.w / 2), y: img.h - 1 },
       kepala: { x: (k.x0 + k.x1 + 1) / 2, y: k.atas + kepalaTinggi / 2 }, kepalaTinggi, teleponTergambar: g === 'menjelaskan',
     };
-    pose[`gestur-${g}`] = { kiri: `gestur-${g}-kiri`, bawaan: 'kiri' };
+    pose[`gestur-${g}`] = { kanan: `gestur-${g}-kanan`, bawaan: 'kanan' };
   }
   // Jendela potret/sisipan di sekitar kepala frame berdiri (skala bulat), pola manifest Miss Raksa.
-  const jendela = (sisi, skala, geserY = 0) => ({ frame: 'berdiri-kiri', x: Math.round(kepala.x - sisi / 2), y: Math.round(kepala.y - sisi / 2 + geserY), sisi, skala, tampil: sisi * skala });
+  const jendela = (sisi, skala, geserY = 0) => ({ frame: 'berdiri-kanan', x: Math.round(kepala.x - sisi / 2), y: Math.round(kepala.y - sisi / 2 + geserY), sisi, skala, tampil: sisi * skala });
   const manifest = {
     versi: 1,
     dibuat: 'tools/piksel/bangun-hendra.mjs',
@@ -168,13 +169,13 @@ export function bangunHendra() {
     urutanGambar: ['tubuh (frame.rect; wajah tenang terpanggang)', 'wajah ekspresi dasar (frame.ekspresi[e].dasar di frame.wajah.kotak)', 'kedip (di frame.wajah.mata)'],
     frame,
     pose,
-    pandang: { lawan: { arah: 'kiri' }, pemain: { arah: 'kiri' }, depan: { arah: 'kiri' }, bawah: {} },
+    pandang: { lawan: { arah: 'kanan' }, pemain: { arah: 'kanan' }, depan: { arah: 'kanan' }, bawah: {} },
     potret: {
-      frame: 'berdiri-kiri',
+      frame: 'berdiri-kanan',
       jendela: { 32: jendela(32, 1, 2), 44: jendela(44, 1, 4), 52: jendela(52, 1, 6), 64: jendela(64, 1, 8), 96: jendela(48, 2, 4) },
       dekat: { 52: jendela(26, 2, 2), 64: jendela(32, 2, 2), 96: jendela(32, 3, 2) },
     },
-    telepon: { frame: 'berdiri-kiri', jendela: jendela(56, 1, 10), catatan: 'kepala utuh + bahu (ponsel di tangan tidak masuk jendela); skala bulat' },
+    telepon: { frame: 'berdiri-kanan', jendela: jendela(56, 1, 10), catatan: 'kepala utuh + bahu (ponsel di tangan tidak masuk jendela); skala bulat' },
     registrasi: reg,
   };
   return { atlas, manifest, tubuh, eks, gestur, laporan: b.laporan, reg, wajah };
@@ -189,7 +190,7 @@ if (import.meta.url === `file:///${process.argv[1].replace(/\\/g, '/')}`) {
   const item = [];
   for (const e of EKSPRESI_SENI) {
     const t = L.salin(h.tubuh);
-    const [ax, ay, aw, ah] = h.manifest.frame['berdiri-kiri'].ekspresi[e].dasar;
+    const [ax, ay, aw, ah] = h.manifest.frame['berdiri-kanan'].ekspresi[e].dasar;
     L.tempel(t, L.potong(h.atlas, ax, ay, aw, ah), h.wajah.x, h.wajah.y);
     item.push({ label: e, img: L.potong(t, 0, 0, t.w, 90) });
   }

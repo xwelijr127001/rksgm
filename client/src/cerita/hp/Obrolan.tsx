@@ -18,8 +18,8 @@ import { useReducedMotion } from '../../hooks';
 import { t } from '../../i18n';
 import type { Ekspresi, Episode, KunciTeks, StateCerita } from '../tipe';
 import { IkonArah } from '../ui/bagian';
-import { ImgIlustrasi } from '../ui/gambarIlustrasi';
-import { dekatTokoh } from '../ui/latar/ilustrasi';
+import { PotretPikselHp } from '../ui/latar/piksel/PotretPikselHp';
+import { tokohPotret } from '../ui/latar/piksel/potret';
 import { CatatanStatus, GambarSeni, PotretHp, judulStatus } from './bagianHp';
 import { idCutIn, ringkasCatatan, utasObrolan, type PesanObrolan } from './alur';
 
@@ -237,17 +237,16 @@ function ItemPesan({ ep, p, tx, nama, baru, gaya, cutIn = false, kini = false }:
 }
 
 /**
- * Cut-in potret: gambar dekat (dada ke atas) ekspresi pesan ini dalam bingkai miring beraksen emas, label "WhatsApp".
- * Gambar tidak ada / gagal = tanpa cut-in (gelembung tetap utuh).
+ * Cut-in potret: potret PIKSEL dekat (wajah x3) ekspresi pesan ini dalam bingkai miring beraksen emas, label "WhatsApp".
+ * Tokoh tanpa seni piksel = tanpa cut-in (gelembung tetap utuh).
  */
 function CutIn({ ep, id, ekspresi }: { ep: Episode; id: string; ekspresi?: Ekspresi }) {
-  const [gagal, setGagal] = useState(false);
-  const g = dekatTokoh(ep, id, ekspresi ?? 'netral');
-  if (!g || gagal) return null;
+  const tp = tokohPotret(ep, id);
+  if (!tp) return null;
   return (
     <figure className="hp-cutin" data-tokoh={id} data-ekspresi={ekspresi ?? 'netral'} aria-hidden="true">
       <span className="hp-cutin-aksen" />
-      <ImgIlustrasi className="hp-cutin-gambar" varian={g.varian} sizes="(min-width: 900px) 420px, 66vw" prioritas onGagal={() => setGagal(true)} />
+      <span className="hp-cutin-gambar hp-cutin-piksel"><PotretPikselHp tokoh={tp} ekspresi={ekspresi ?? 'netral'} ukuran={144} label="" className="hp-cutin-potret" /></span>
       <figcaption className="hp-cutin-label">{t('ceritaHp.cutInLabel')}</figcaption>
     </figure>
   );

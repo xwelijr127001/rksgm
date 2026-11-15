@@ -8,11 +8,8 @@ import { Arrow } from '../../components/PlayerShell';
 import { t } from '../../i18n';
 import type { Baris, Ekspresi, Episode, IdPembicara, KunciTeks } from '../tipe';
 import { IkonArah } from '../ui/bagian';
-import { PotretIlustrasi } from '../ui/gambarIlustrasi';
-import { avatarTokoh } from '../ui/latar/ilustrasi';
-import { PERAN_PIKSEL } from '../ui/latar/piksel/adegan';
+import { tokohPotret } from '../ui/latar/piksel/potret';
 import { PotretPikselHp } from '../ui/latar/piksel/PotretPikselHp';
-import { tokohPikselTersedia, type IdTokohPiksel } from '../seni/piksel';
 import { KartuDokumen } from '../ui/KartuDokumen';
 
 export { GambarSeni } from '../ui/gambarIlustrasi';
@@ -42,23 +39,15 @@ export function CatatanStatus({ nama, sebelum, sesudah, arah, alasan }: { nama: 
 
 /** Ukuran potret HP (piksel CSS) per kelipatan: avatar obrolan & kartu (1x), kartu saksi (2x). */
 const UKURAN_POTRET = { 1: 48, 2: 96 } as const;
-/** Pemeran yang potretnya selalu piksel (Stage 1: Pak Hendra). */
-const POTRET_PIKSEL_SELALU: Partial<Record<IdPembicara, IdTokohPiksel>> = { hendra: 'hendra' };
-
 /**
- * Potret kepala-bahu tokoh (avatar ilustrasi ekspresinya); tokoh tanpa aset (mis. polisi) = inisial di bingkai sama.
- * T-013: Pak Hendra SELALU memakai potret PIKSEL (atlas Stage 1, wajah ekspresinya; obrolan WhatsApp, dialog, arena), seni yang
- * sama dengan panggung. Miss Raksa piksel hanya bila prop 'piksel' (adegan di panggung piksel), selebihnya ilustrasi seperti dulu.
+ * Potret kepala-bahu tokoh: potret PIKSEL (atlas yang sama dengan panggung, wajah ekspresinya) untuk semua pemeran Episode 2
+ * yang punya seni piksel (Miss Raksa, Pak Hendra, enam tokoh samping); tanpa seni = inisial di bingkai yang sama.
  */
-export function PotretHp({ ep, id, ekspresi = 'netral', kali = 1, nama, piksel = false }: { ep: Episode; id: IdPembicara; ekspresi?: Ekspresi; kali?: 1 | 2; nama: string; piksel?: boolean }) {
-  const tp = POTRET_PIKSEL_SELALU[id] ?? (piksel ? PERAN_PIKSEL[id]?.tokoh : undefined);
-  if (tp && tokohPikselTersedia(tp)) {
-    return <span className="hp-potret" data-seni="piksel"><PotretPikselHp tokoh={tp} ekspresi={ekspresi} ukuran={UKURAN_POTRET[kali]} label={nama} /></span>;
-  }
-  const v = avatarTokoh(ep, id, ekspresi);
+export function PotretHp({ ep, id, ekspresi = 'netral', kali = 1, nama }: { ep: Episode; id: IdPembicara; ekspresi?: Ekspresi; kali?: 1 | 2; nama: string; /** @deprecated tidak dipakai lagi (semua potret piksel) */ piksel?: boolean }) {
+  const tp = tokohPotret(ep, id);
   const ukuran = UKURAN_POTRET[kali];
-  if (!v) return <span className="tokoh-potret cer-potret cer-inisial hp-potret" aria-hidden="true" style={{ width: ukuran, height: ukuran }}>{nama.slice(0, 1)}</span>;
-  return <span className="hp-potret"><PotretIlustrasi varian={v} ukuran={ukuran} nama={nama} /></span>;
+  if (!tp) return <span className="tokoh-potret cer-potret cer-inisial hp-potret" aria-hidden="true" style={{ width: ukuran, height: ukuran }}>{nama.slice(0, 1)}</span>;
+  return <span className="hp-potret" data-seni="piksel"><PotretPikselHp tokoh={tp} ekspresi={ekspresi} ukuran={ukuran} label={nama} /></span>;
 }
 
 /** Fakta yang dibutuhkan saat memutuskan: tabel misi atau kartu dokumen episode, langsung di tempat (bukan tab lain). */

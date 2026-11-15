@@ -1358,3 +1358,58 @@ Still a RAKSA game screen: hand-drawn-feeling pixel room, a single character at 
 
 ### Not verified by me
 Real iOS WebKit device, the owner phone check, `npm run test:client`/`test:e2e` (Fullstack reports 733/733 and e2e 0 failures), Hendra physically on stage (the script never places him in the kantor; the slot exists and is unit-tested only).
+
+---
+
+## T-013 — Stage 2 review (2026-11-15)
+
+Reviewer: Designer · Build: production build in client/dist (22:42) on `npm start` :4000 (`RAKSA_LEGACY=on`, started and stopped by me) · No source edits.
+Method: read team/HANDOFF.md "T-013 Stage 2" and my D-84..D-86; drove Fullstack's saved states (team/evidence/T-013/states.json) with my own CDP scripts at 360×740 DPR 2 (id), 390×844 DPR 3 (en), 1280×800 DPR 1 (zh): kantor mentor/berkas/K07 Bima, pool, bengkel (+ foto), tol (+ the next line, Bima "serius"), wawancara 1/2/3, a WhatsApp beat, the /cerita card; a 10 s canvas-hash motion probe; the atlas sheet `character/piksel/samping/tinjau-samping.png`; Fullstack's 20-frame kantor→pool series; the owner's phone screenshot `team/evidence/T-013/owner/side-characters-legs-off.jpg`. For the scale question I composited mock-ups from the shipped room PNG + my trailer sheet (not saved to the repo).
+
+### Verdict: FIX NEEDED (3 high, 3 med, 2 low). The port itself is sound.
+Confirmed working: every scene is on the pixel stage (0 `.webp`, 0 Episode 1 room PNGs in every run; only `ep2-ruang-*`, `samping`, `hendra`, `miss-raksa`), rooms are faithful to my references (layers, palette ≤ 48, grain, no baked text), the third witness slot works at all three viewports, K07 Bima is in the pixel kantor (D-89 ✔), the nameplate is clear in all three viewports and reads "LAYANAN KLAIM RAKSA" in pixel lettering (D-87 ✔, D-88 ✔), chat avatars are the pixel Hendra, and reduced motion behaves as in Episode 1.
+
+### 1. Rooms and the outdoor scale question
+- **Decision: keep the characters at the Episode 1 scale** (188–198 art px in a 225-px room). Face readability at 360 px and consistency with the kantor and Episode 1 matter more than literal scale, and Episode 1 already uses this convention (in `ruang-parkiran-latar.png` the van is ≈ 100 art px tall next to 184-px people: backdrop objects are drawn at about half the character scale and read as "further back").
+- **bengkel: acceptable as is.** The admin stands in front of the kerb; the roller doors (≈ her height) read as a hall behind her. No change.
+- **tol: acceptable as is.** Bima is a foreground figure on the shoulder, the cracked barrier segment and tyre mark stay in the phone crop (verified 360 and 1280). No change.
+- **wawancara: good.** Table behind, witnesses in front, three faces clear at 360/390/1280, chip hidden.
+- **pool: NOT acceptable (D-94).** The damaged trailer is on the same ground plane as Rudi but at backdrop scale: cab 39 art px tall vs Rudi 188, so the truck (the subject of the whole episode and of the card) looks like a toy. Mock-up tested: trailer at **450 art px wide (3×)**, cab ≈ 110 art px tall, reads as a real truck parked beside him and the cracked windscreen/crumpled bumper become legible.
+
+### 2. Facing: the labels are wrong, the art faces RIGHT (my Stage 1 error)
+Hendra's master and all side-character art are three-quarter views toward the viewer's **RIGHT** (ear on the left, nose and toes to the right), the same direction as Miss Raksa's `berdiri-kanan`. My Stage 1/2 READMEs said "faces left"; that was wrong (the generator inverted the request and I did not verify it; corrected in `character/hendra-pixel-v1/README.md` and the side-character README). So the atlas frames named `berdiri-kiri` are right-facing, and "everyone faces left" is really "everyone faces right".
+What that means on screen today: **reads right by accident:** pool (Rudi on the left looks right at the truck), tol (Bima looks right at the cracked barrier), card (Hendra looks at the truck). **Reads wrong:** kantor visitor slots (K07 Bima at x 1120 looks out of the right edge, away from the counter and nameplate; Hendra would turn his back on Miss Raksa if the script ever stages him), wawancara-2 (Darto looks away from Bima who interviews him), bengkel (admin at x 1000 looks out of the frame on the phone crop).
+**Decision (D-93): no new art now; rename + mirror.** Draw LEFT-facing by mirroring the frame on the canvas around the foot anchor. Mirror-safe (no lettering; only a plain pocket/patch changes side): rudi, bima, darto, admin, tol. Acceptable as an interim: polisi (plain badge/name bar swap sides) and Hendra (chest pocket, phone hand). Drawn left-facing sheets are a follow-up only if the owner notices the swapped pocket/badge.
+
+### 3. Side characters
+- Identity vs the sheets: all six match the canonical bodies sheet (Bima glasses + moustache, Darto flat cap + grey goatee, Petugas tol and Polisi clean-shaven with the right caps).
+- Second expression: only two scripted beats use one (Bima `serius` at K08.2 and K10.2); verified live on K08.2: `data-pose` goes `bima:berdiri:kiri:netral` → `…:prihatin` and the concerned face shows.
+- **Procedural legs: owner feedback confirmed (D-92, high).** Flat two-tone columns, no knees/shoes, too long under hand-drawn torsos. **Art fix delivered in this task:** `character/tokoh-samping-ep2-pixel-v1/tokoh-samping-badan-v2.png` (1536×2048 RGBA, six FULL-BODY figures with drawn trousers and shoes, 3×2, common foot baseline per row, same height as Hendra; name→cell table and measured alpha boxes in the README).
+- Third slot: works.
+
+### 4. Stage 1 items, transitions, avatars, motion
+- D-87 ✔ (Miss Raksa at x 800, board fully visible at 360/390/1280). D-88 ✔ pixel font (see D-98 for one glyph). D-89 ✔. D-91 ✔ (no Episode 1 room PNGs or bu-rina on AUTO-2 pages).
+- Pixel→pixel transition (Fullstack's 100-ms series kantor→pool): hard cut, the pool is complete within the series, no illustrated or blank frame. Acceptable; a short crossfade belongs to D-96.
+- Chat: Hendra pixel portrait in the header, `hendra.png` only, 0 illustrations.
+- Motion (10 s canvas hash): kantor mentor 2 distinct frames/6 changes (blink) under normal motion, 1/0 under system reduce + `?gerak=ikut`, 2/6 with `?gerak=penuh`. **Pool (and every scene without Miss Raksa): 1 frame, 0 changes: nothing moves** (D-96).
+
+### 5. Anti AI-slop and the one sentence for the owner
+Pass on style: one consistent hand-pixelled world, no gradients/glow, no baked text or logos, story props only.
+**For the owner: Episode 2 now lives in the same pixel world as Episode 1 and is clearly better than the old stills, but it is not yet as lively as Episode 1: outside the office nobody blinks, moves or enters, and the side characters' legs and the toy-sized truck still need the fixes below; with those three fixes plus a little idle motion it will feel like Episode 1.**
+
+### Fix list: blockers (high)
+- [D-92] All scenes with side characters · procedural lower bodies look stiff and too long (owner) · rebuild the samping atlas from `tokoh-samping-badan-v2.png` (drawn full bodies; frame `berdiri`, foot anchor on the row baseline y=983 in each 512×1024 cell; total height 198 art px like Hendra; face `netral` from v2 bodies, `prihatin` from the v2 expression sheet registered as before) and delete the procedural legs · high. Cost measured at atlas scale: ≈ 26.2 KB for six full bodies (was 17.7 KB): +8.5 KB.
+- [D-93] Facing · frames are mislabelled (`berdiri-kiri` art faces right) and no left-facing drawing exists · (1) rename the Hendra and side-character frames to `…-kanan` in the manifests/tools; (2) add mirrored drawing for `hadap: 'kiri'` (flip around the foot anchor; faces and blink strips flipped with the body); (3) set facing per scene: kantor visitors (Bima K07, Hendra if staged) → **kiri** and move kantor visitor slot 1 from x 1120 to **x 1040** (his elbow is cut by the phone crop today); pool Rudi/Hendra → **kanan**; tol Bima → **kanan**; bengkel admin → **kiri** at x 1000 (she looks into the hall); wawancara 1 → kanan; 2 → left **kanan**, right **kiri** (they face each other); 3 → left and middle **kanan**, right **kiri** · high.
+- [D-94] Pool (scene and /cerita card) · truck at backdrop scale on the character's ground plane · rebuild the trailer layer from the damaged row of `trailer-ep2-sheet-v1.png` at **450 art px wide** (pitch ≈ 2.95 source px per art px, ≈ 450×124 art px, 32 colours; do NOT scale the 150-px layer ×3, the grain would not match); place it at **art x 160 (world 640), wheel contact at art y 172 (world 688)**, z 25, running off the right edge (cut in the container, never the cab; it faces left, toward Rudi); slots: 1 → **x 360** (art 90), 2 → 160 / 460; focus box = cab, **world x 640–1040, y 240–700**; phone crop must contain Rudi (art 51–127) and the whole cab (art 160–260) · high. Cost measured: ≈ 12.2 KB (was 1.8 KB): +10.4 KB. New episode stage total ≈ 164 KB of the 400 KB gate.
+
+### Should fix in Stage 3 (med)
+- [D-95] 1280 (wide frame), bengkel / tol / wawancara · the camera zooms to `maksLebih` 1.6 so characters are cut at the waist/thigh and the room loses its identity, while pool shows the whole room (its focus box) · use `maksLebih` **1.15** for the `lebar` frame on the Episode 2 rooms (or give each room a focus box: bengkel world x 80–1180 y 100–660; wawancara x 0–1600 y 60–560) so 1280 shows the room like pool does · med.
+- [D-96] Liveliness, all non-kantor scenes · nothing moves (side characters have no blink/talk frames; rooms are static) · code-only life, all disabled under reduced motion: (a) blink for the six side characters (eye-closed strip per face; I can draw them, or use a 2-row eyelid in the face's skin tone over the eye box), (b) speaker "hop" 2 art px for 160 ms when a character starts a line, (c) 1-art-px idle breathing bob every ≈ 2.4 s on the speaking character, (d) 180 ms slide-in from the nearest edge when a character joins `hadir`, (e) 150 ms crossfade between rooms · med (it is the owner's original complaint: "not lively like Episode 1").
+- [D-97] /cerita Episode 2 card · the scene is letterboxed inside the card (bars of the wall colour left and right at 360/390; the Episode 1 card fills the width) · use "cover" for the card: the next integer scale up and crop top/bottom, centred on Hendra + cab (after D-94) · med.
+
+### Polish (low)
+- [D-98] Nameplate pixel font · 3×5 `M` and `N` are nearly identical, "KLAIM" can read as "KLAIN" · give `M` (and `W`) a 5-px-wide glyph; the board has room (text ≈ 76 of 87 art px) · low.
+- [D-99] Bengkel `foto` prop · a 12×9 art px print on the pillar is easy to miss · enlarge to ≈ 20×15 at eye height left of the admin, or show it only in the dialog attachment · low.
+
+### Not verified by me
+Real iOS WebKit and the owner phone check; a full manual playthrough in en/zh (dialogue is Indonesian in all languages, D-90, out of scope); `npm run test:client` / `test:e2e` (Fullstack: 735/735, e2e clean); Fullstack's byte table (I re-measured only my two cost estimates).
