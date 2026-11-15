@@ -12,7 +12,7 @@
  * Pada bidikan dekat, kotak dialog menumpang pita bawah panggung yang dicadangkan kamera (`TUMPANG_DIALOG`): tidak menutupi
  * tokoh/papan; pada bidikan lebar (narasi di lapangan) dialog tepat di bawah gambar.
  */
-import type { ReactNode } from 'react';
+import { useEffect, useRef, type ReactNode } from 'react';
 import { barisTerlihat } from '../mesin';
 import type { Baris, Episode, KunciTeks, StateCerita } from '../tipe';
 import { t } from '../../i18n';
@@ -20,6 +20,7 @@ import { selaPembicara } from '../ui/bagian';
 import { punyaPotret } from '../ui/latar/ilustrasi';
 import { komposisiLatar } from '../ui/latar/komposisi';
 import { PanggungLatar } from '../ui/latar/PanggungLatar';
+import { hangatkanKomposisi, komposisiBerikut, perkiraanPanggung, sesudahAdeganSiap, useVersiUkuran } from '../ui/latar/hangatkan';
 import { jenisPenutur, ketukanKini } from './alur';
 import { CatatanStatus, PotretHp } from './bagianHp';
 
@@ -61,6 +62,23 @@ export function AdeganTatap({ ep, state, tx, namaPemain, status, tindakan, bukti
   sisipan?: ReactNode;
 }) {
   const k = komposisiLatar(ep, state);
+  // T-010 G3: lokasi BERIKUTNYA (bila diketahui dari naskah) dipanaskan saat adegan ini tampil, memakai ukuran panggung
+  // yang terpasang (cadangan: perkiraan). Lokasi sama tidak perlu. Dibatalkan saat state berganti / keluar halaman.
+  const bingkai = useRef<HTMLDivElement>(null);
+  const berikut = komposisiBerikut(ep, state);
+  // R-14: ukuran/DPR/orientasi berubah = hasil lama dibuang; efek berjalan lagi dan memanaskan varian yang kini dibutuhkan.
+  const versiUkuran = useVersiUkuran();
+  const kunciBerikut = berikut ? `${berikut.lokasi}|${berikut.hadir.map((x) => x.id).join(',')}` : '';
+  useEffect(() => {
+    if (!berikut) return;
+    // Baru sesudah adegan kini tampil (grup siap): tidak berebut jaringan dengan lapisan yang sedang ditunggu.
+    return sesudahAdeganSiap(bingkai.current, () => {
+      const el = bingkai.current?.querySelector<HTMLElement>('.cer-panggung.cer-latar');
+      const u = el && el.clientWidth > 0 ? { w: el.clientWidth, h: el.clientHeight } : perkiraanPanggung();
+      return hangatkanKomposisi(ep, berikut, u.w, u.h);
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [ep, kunciBerikut, versiUkuran]);
   const ketukan = ketukanKini(ep, state);
   const baris = ketukan ? barisTerlihat(ep, state).slice(ketukan.awal, ketukan.akhir + 1) : [];
   const nama = (id: string) => (id === 'pemain' ? namaPemain : Object.prototype.hasOwnProperty.call(ep.pemeran, id) ? tx(ep.pemeran[id]!.nama) : id);
@@ -82,8 +100,8 @@ export function AdeganTatap({ ep, state, tx, namaPemain, status, tindakan, bukti
   const jenisSusun = susun === 'dekat' && (kosong || !k.hadir.every((x) => punyaPotret(ep, x.id))) ? 'dekat-badan' : susun;
   return (
     <div className="hp-adegan hp-vn" data-panggung={tanpaPanggung ? 'tanpa' : tinggi} data-tumpang={dekat ? '' : undefined} data-susun={jenisSusun}>
-      <div className="hp-vn-bingkai">
-        {tanpaPanggung ? null : <PanggungLatar ep={ep} komposisi={k} tx={tx} nama={nama} suasana={status} status ruangBawah={dekat ? TUMPANG_DIALOG : 0} />}
+      <div className="hp-vn-bingkai" ref={bingkai}>
+        {tanpaPanggung ? null : <PanggungLatar ep={ep} komposisi={k} tx={tx} nama={nama} suasana={status} status ruangBawah={dekat ? TUMPANG_DIALOG : 0} gerbang />}
         <article className="hp-vn-dialog" aria-live="polite">
           {tindakan ? <p className="hp-tindakan"><b>{t('ceritaHp.tindakanmu')}</b>{selaPembicara()}{tindakan}</p> : null}
           {buktiTindakan}

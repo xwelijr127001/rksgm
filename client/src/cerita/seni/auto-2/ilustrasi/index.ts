@@ -13,6 +13,7 @@
  * Modul ini tidak menyentuh DOM.
  */
 import json from './ilustrasi.json';
+import { KABUR_AUTO_2 } from './kabur';
 import type { BendaIlustrasi, Ekspresi, GambarTokoh, LokasiIlustrasi, TokohIlustrasi, VarianGambar } from '../../../tipe';
 
 let urlVite: Record<string, string> = {};
@@ -69,7 +70,7 @@ export const TOKOH_AUTO_2: Readonly<Record<string, TokohIlustrasi>> = Object.fro
 const latar = (id: string) => {
   const l = M.latar[id];
   if (!l) throw new Error(`latar ilustrasi "${id}" tidak ada`);
-  return { w: l.ukuranSumber[0], h: l.ukuranSumber[1], latar: varian(l.gambar), ...(l.depan ? { depan: varian(l.depan) } : {}) };
+  return { w: l.ukuranSumber[0], h: l.ukuranSumber[1], latar: varian(l.gambar), ...(l.depan ? { depan: varian(l.depan) } : {}), ...(KABUR_AUTO_2[id] ? { kabur: KABUR_AUTO_2[id] } : {}) };
 };
 
 /**

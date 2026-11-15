@@ -523,3 +523,28 @@ button.alur-spanduk-gabung { border: 0; cursor: pointer; font: inherit; }
 
 /* Tombol keluar header (TombolKeluar): tampil seperti tautan kembali. */
 .tombol-keluar { background: none; border: 0; padding: 0 4px 0 0; color: inherit; font: inherit; font-size: 15px; cursor: pointer; }
+
+/* T-010 B (DESIGN-REVIEW D-57..D-60): layar pemuat kunjungan pertama, rute "/" saja (components/PemuatAwal.tsx). Overlay = saudara
+   #root (portal), #root inert selama tampil. */
+.lp-pemuat { position: fixed; inset: 0; z-index: 60; display: grid; place-items: center; padding: 24px 24px calc(24px + env(safe-area-inset-bottom)); background: var(--krem); transition: opacity .2s ease-out; }
+.lp-pemuat[data-selesai] { opacity: 0; pointer-events: none; }
+.lp-pemuat-isi { display: flex; flex-direction: column; align-items: center; margin-top: -8vh; }
+.lp-pemuat .mrk { font-size: 34px; min-height: 0; }
+.lp-pemuat .mrk-game { font-size: 14px; padding: 4px 0 4px 12px; }
+.lp-pemuat-raki { margin-top: 24px; display: block; }
+.lp-pemuat-bar { display: flex; gap: 4px; margin-top: 20px; }
+.lp-pemuat-bar i { width: 28px; height: 10px; background: var(--krem-tua); border-bottom: 3px solid #d3d6cb; animation: lp-seg 1.2s steps(1) infinite; }
+.lp-pemuat-bar i:nth-child(2) { animation-delay: .3s; } .lp-pemuat-bar i:nth-child(3) { animation-delay: .6s; } .lp-pemuat-bar i:nth-child(4) { animation-delay: .9s; }
+@keyframes lp-seg { 0%, 24% { background: var(--kuning); border-bottom-color: var(--kuning-tua); } 25%, 100% { background: var(--krem-tua); border-bottom-color: #d3d6cb; } }
+.lp-pemuat-teks { margin: 12px 0 0; font-size: 14px; line-height: 1.4; color: var(--tinta-lembut); }
+html:has(.lp-pemuat) { overflow: hidden; }
+@media (min-width: 901px) {
+  .lp-pemuat .mrk { font-size: 48px; } .lp-pemuat .mrk-game { font-size: 16px; padding: 5px 0 5px 14px; }
+  .lp-pemuat-raki { margin-top: 32px; } .lp-pemuat-raki svg { width: 112px; height: 112px; }
+  .lp-pemuat-bar { margin-top: 24px; } .lp-pemuat-bar i { width: 40px; height: 12px; }
+  .lp-pemuat-teks { font-size: 16px; margin-top: 16px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  :root:not([data-gerak="penuh"]) .lp-pemuat-bar i { animation: none; background: var(--kuning); border-bottom-color: var(--kuning-tua); opacity: .55; }
+  :root:not([data-gerak="penuh"]) .lp-pemuat { transition: none; }
+}

@@ -20,11 +20,13 @@
  * (aria-hidden); semua informasi ada di teks. Aset tidak ada / gagal dimuat = siluet bernama di tempat yang sama. Lawan
  * bicara jarak jauh (telepon) tidak digambar di panggung: obrolannya tampil di antarmuka HP. Gerak dikurangi: tanpa pudar.
  */
-import { useLayoutEffect, useRef, useState, type CSSProperties, type RefObject } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState, type CSSProperties, type RefObject } from 'react';
 import { t } from '../../../i18n';
 import type { Episode, IdPembicara, KunciTeks, LokasiIlustrasi, PapanIlustrasi } from '../../tipe';
 import { GambarSeni, ImgIlustrasi, useGambarSiap } from '../gambarIlustrasi';
-import { dekatTokoh, kaburLatar, kotakTokohIlustrasi, letakBerdiri, potonganIlustrasi, potonganSubjek, type Kotak, type LapisBerdiri } from './ilustrasi';
+import { dekatTokoh, kaburLatar, kotakTokohIlustrasi, type Kotak, type LapisBerdiri } from './ilustrasi';
+import { ADEGAN_SIAP, catatCocok, ukuranDunia } from './hangatkan';
+import { useDpr } from '../../../game/tokoh';
 import { nasabahDiPanggung, type KomposisiLatar, type TokohLatar } from './komposisi';
 import '../panggung/panggung.css';
 import './latar.css';
@@ -43,12 +45,16 @@ export interface PropsPanggungLatar {
   className?: string;
   /** Pita bawah panggung (px CSS) yang ditumpangi kotak dialog; tokoh lapangan dibingkai di atasnya. */
   ruangBawah?: number;
+  /**
+   * (T-010 G1, D-51..D-55) Adegan cerita yang sedang dimainkan: lapisan wajib (latar, depan, tokoh/benda awal) disembunyikan
+   * di atas gambar mini kabur ruangan sampai SEMUA selesai dimuat & di-decode (atau gagal / batas 6 s), lalu tampil
+   * bersama SEKALI. Bawaan false: kartu episode, aktivitas, dll. tetap seperti sebelumnya.
+   */
+  gerbang?: boolean;
 }
 
 type Ukuran = { w: number; h: number };
 
-/** Tinggi pita label lokasi/status di atas panggung (px CSS) yang tidak boleh menutupi kepala tokoh berdiri. */
-const PITA_LABEL = 38;
 
 /** Ukuran kotak panggung (piksel CSS), diukur sebelum digambar dan saat berubah. */
 function useUkuranKotak(akar: RefObject<HTMLDivElement | null>): Ukuran | null {
@@ -69,7 +75,7 @@ function useUkuranKotak(akar: RefObject<HTMLDivElement | null>): Ukuran | null {
   return ukuran;
 }
 
-export function PanggungLatar({ ep, komposisi, tx, nama, suasana, status = false, className = '', ruangBawah = 0 }: PropsPanggungLatar) {
+export function PanggungLatar({ ep, komposisi, tx, nama, suasana, status = false, className = '', ruangBawah = 0, gerbang = false }: PropsPanggungLatar) {
   const akar = useRef<HTMLDivElement>(null);
   const ukuran = useUkuranKotak(akar);
   const lok = ep.latar?.lokasi[komposisi.lokasi];
@@ -86,7 +92,7 @@ export function PanggungLatar({ ep, komposisi, tx, nama, suasana, status = false
       data-telepon={komposisi.telepon?.id}
       data-objek={komposisi.objek.join(' ') || undefined}
     >
-      {ukuran && lok ? <AdeganIlustrasi key={komposisi.lokasi} ep={ep} lok={lok.ilustrasi} komposisi={komposisi} ukuran={ukuran} tx={tx} nama={nama} ruangBawah={ruangBawah} /> : null}
+      {ukuran && lok ? <AdeganIlustrasi key={komposisi.lokasi} ep={ep} lok={lok.ilustrasi} komposisi={komposisi} ukuran={ukuran} tx={tx} nama={nama} ruangBawah={ruangBawah} gerbang={gerbang} /> : null}
       {lok?.nama ? <p className="cer-latar-lokasi">{tx(lok.nama)}</p> : null}
       {wajahNasabah && suasana !== null ? (
         <p className="cer-suasana" data-ekspresi={wajahNasabah.ekspresi} data-jenis={status ? 'status' : 'wajah'}>
@@ -103,7 +109,108 @@ const gayaKotak = (lok: LokasiIlustrasi, k: Kotak): CSSProperties => ({
   left: `${(k.x / lok.w) * 100}%`, top: `${(k.y / lok.h) * 100}%`, width: `${(k.w / lok.w) * 100}%`, height: `${(k.h / lok.h) * 100}%`,
 });
 
-function AdeganIlustrasi({ ep, lok, komposisi, ukuran, tx, nama, ruangBawah }: {
+/** Batas tunggu grup (D-54): sesudahnya yang sudah siap tampil, gambar mini tetap di bawah yang belum. */
+const BATAS_GRUP_MS = 6000;
+/** Gambar mini & pil dilepas sesudah pudar 240 ms (D-53). */
+const LEPAS_MS = 300;
+
+type StatusGrup = { siap: boolean; latarOk: boolean };
+
+/** Deskriptor gambar wajib: berkas yang benar-benar diminta (srcset + sizes + src) per lapisan. */
+const deskriptor = (img: HTMLImageElement) =>
+  `${img.dataset.lapis ?? img.dataset.tokoh ?? '?'}:${img.getAttribute('srcset') ?? ''}|${img.getAttribute('sizes') ?? ''}|${img.getAttribute('src') ?? ''}`;
+
+/**
+ * Kesiapan grup lapisan adegan (T-010 G1; perbaikan R-11/R-12).
+ * - WAJIB = semua <img> di dunia saat itu (latar, depan, tokoh & benda yang tampil; lapisan tak ada / siluet = tidak ditunggu),
+ *   dikunci dengan DESKRIPTOR NYATA tiap gambar (srcset/sizes/src) + DPR + kunci React (lebar, tokoh:ekspresi, objek). Pergantian
+ *   ekspresi yang masih MENUNGGU decode (TokohDekat `data-menunggu`) menahan grup: gambar lama tidak boleh membuat grup siap.
+ * - Deskriptor berubah sebelum siap (ganti ekspresi selesai, DPR/ukuran berubah, lapisan dilepas) = generasi baru; hasil generasi
+ *   lama diabaikan. Sesudah siap tidak pernah kembali tersembunyi.
+ * - Tiap gambar: load + decode() BERHASIL + naturalWidth > 0 = siap; error ATAU decode ditolak = GAGAL. Gambar gagal yang bukan
+ *   latar diberi event 'error' supaya pemiliknya memakai cadangan (tokoh -> siluet, depan -> dihilangkan, benda -> dihilangkan).
+ *   Latar gagal = `latarOk` false (gambar mini tetap menjadi ruangan). Latar yang berhasil belakangan tetap mengganti gambar mini.
+ * - Batas 6 s sejak mulai (tidak diulang saat generasi baru).
+ */
+function useGrupSiap(dunia: RefObject<HTMLDivElement | null>, aktif: boolean, kunci: string): StatusGrup {
+  const [st, setSt] = useState<StatusGrup>({ siap: !aktif, latarOk: !aktif });
+  const siapRef = useRef(!aktif);
+  const latarOkRef = useRef(false);
+  const mulaiRef = useRef<number | null>(null);
+  useLayoutEffect(() => {
+    const el = dunia.current;
+    if (!aktif || !el) return;
+    mulaiRef.current ??= performance.now();
+    let gen = 0;
+    let kunciDom = '';
+    let lepas: (() => void)[] = [];
+    let mati = false;
+    const bersihkan = () => { lepas.forEach((f) => f()); lepas = []; };
+    const tetapkan = (latarOk: boolean) => { latarOkRef.current = latarOk; setSt({ siap: siapRef.current, latarOk }); };
+    const bacaKunci = () => [...el.querySelectorAll('img')].map(deskriptor).join('#') + (el.querySelector('[data-menunggu]') ? '#menunggu' : '');
+    const mulai = () => {
+      bersihkan();
+      const g = ++gen;
+      const imgs = [...el.querySelectorAll('img')];
+      const menunggu = el.querySelector('[data-menunggu]') !== null;
+      kunciDom = bacaKunci();
+      const latar = el.querySelector<HTMLImageElement>('img[data-lapis="latar"]');
+      let sisa = imgs.length;
+      const selesaiSatu = (img: HTMLImageElement, ok: boolean) => {
+        if (mati || g !== gen) return; // generasi lama / dilepas: abaikan
+        if (!ok && img !== latar) img.dispatchEvent(new Event('error')); // pemilik memakai cadangannya
+        if (img === latar) {
+          latarOkRef.current = ok;
+          if (siapRef.current) { tetapkan(ok); return; }
+        }
+        sisa -= 1;
+        if (sisa <= 0 && !menunggu && !siapRef.current) { siapRef.current = true; tetapkan(latarOkRef.current); }
+      };
+      const tunggu = (img: HTMLImageElement) => {
+        let sekali = false;
+        const decode = () => {
+          if (sekali) return; sekali = true;
+          if (!(img.naturalWidth > 0)) { selesaiSatu(img, false); return; }
+          img.decode().then(() => selesaiSatu(img, img.naturalWidth > 0), () => selesaiSatu(img, false));
+        };
+        const gagal = () => { if (sekali) return; sekali = true; selesaiSatu(img, false); };
+        img.addEventListener('load', decode);
+        img.addEventListener('error', gagal);
+        lepas.push(() => { img.removeEventListener('load', decode); img.removeEventListener('error', gagal); });
+        if (img.complete && img.getAttribute('src')) decode();
+      };
+      if (!imgs.length && !menunggu && !siapRef.current) { siapRef.current = true; tetapkan(false); }
+      imgs.forEach(tunggu);
+    };
+    mulai();
+    // Deskriptor berubah sebelum siap = generasi baru; sesudah siap hanya latar yang belum berhasil yang dipantau lagi.
+    const obs = new MutationObserver(() => {
+      if (bacaKunci() === kunciDom) return;
+      if (!siapRef.current || !latarOkRef.current) mulai();
+    });
+    obs.observe(el, { subtree: true, childList: true, attributes: true, attributeFilter: ['src', 'srcset', 'sizes', 'data-menunggu'] });
+    const batas = window.setTimeout(() => {
+      if (mati || siapRef.current) return;
+      siapRef.current = true;
+      tetapkan(latarOkRef.current);
+    }, Math.max(0, BATAS_GRUP_MS - (performance.now() - mulaiRef.current)));
+    return () => { mati = true; obs.disconnect(); window.clearTimeout(batas); bersihkan(); };
+  }, [dunia, aktif, kunci]);
+  return st;
+}
+
+/** Nilai yang menjadi true LEPAS_MS sesudah `aktif` true (gambar mini & pil dilepas sesudah pudar). */
+function useSesudah(aktif: boolean): boolean {
+  const [lewat, setLewat] = useState(false);
+  useEffect(() => {
+    if (!aktif) { setLewat(false); return; }
+    const id = window.setTimeout(() => setLewat(true), LEPAS_MS);
+    return () => window.clearTimeout(id);
+  }, [aktif]);
+  return lewat;
+}
+
+function AdeganIlustrasi({ ep, lok, komposisi, ukuran, tx, nama, ruangBawah, gerbang }: {
   ep: Episode;
   lok: LokasiIlustrasi;
   komposisi: KomposisiLatar;
@@ -111,28 +218,53 @@ function AdeganIlustrasi({ ep, lok, komposisi, ukuran, tx, nama, ruangBawah }: {
   tx: (k: KunciTeks) => string;
   nama: (id: IdPembicara) => string;
   ruangBawah: number;
+  gerbang: boolean;
 }) {
-  const berdiri = letakBerdiri(ep, lok, komposisi);
-  const pot = lok.tokoh.jenis === 'berdiri'
-    ? potonganSubjek(lok, ukuran.w, ukuran.h, berdiri.subjek, berdiri.bebasLabel, PITA_LABEL, ruangBawah)
-    : potonganIlustrasi(lok, ukuran.w, ukuran.h);
-  const s = ukuran.w / pot.w;
-  const lebar = lok.w * s;
+  const dunia = useRef<HTMLDivElement>(null);
+  // Perhitungan kamera tidak berubah; dipindah ke hangatkan.ts supaya pemanasan memakai angka yang sama (T-010 G3).
+  const { berdiri, pot, s, lebar } = ukuranDunia(ep, lok, komposisi, ukuran.w, ukuran.h, ruangBawah);
   // Bidikan yang memperbesar latar melewati berkas terbesarnya: latar & lapisan depan dikaburkan lembut (tokoh tetap tajam).
   const dpr = typeof window === 'undefined' ? 1 : window.devicePixelRatio || 1;
   const kabur = kaburLatar((lebar * dpr) / Math.max(...lok.latar.map((v) => v.w)));
   const gayaLatar = kabur ? { filter: `blur(${kabur}px)` } : undefined;
   const tokoh = lok.tokoh;
   const n = Math.min(3, komposisi.hadir.length) as 0 | 1 | 2 | 3;
+  // R-11: + DPR (pilihan varian srcset) + objek; deskriptor gambar nyata dibaca dari DOM oleh useGrupSiap.
+  const dprGrup = useDpr();
+  const kunciGrup = `${Math.round(lebar)}|${dprGrup}|${komposisi.hadir.map((x) => x.id + ':' + x.ekspresi).join(',')}|${komposisi.objek.join(',')}`;
+  // R-12: lapisan depan yang gagal (404 / decode ditolak) DIHILANGKAN dari adegan.
+  const [depanGagal, setDepanGagal] = useState(false);
+  const grup = useGrupSiap(dunia, gerbang, kunciGrup);
+  // Gambar mini tetap selama latar belum siap (gagal / masih dimuat sesudah batas): ruangan tidak pernah kotak polos.
+  const latarGagal = gerbang && grup.siap && !grup.latarOk;
+  const lepasMini = useSesudah(gerbang && grup.siap && grup.latarOk);
+  const lepasPil = useSesudah(gerbang && grup.siap);
+  useEffect(() => {
+    if (gerbang && grup.siap) window.dispatchEvent(new Event(ADEGAN_SIAP));
+  }, [gerbang, grup.siap]);
+  useEffect(() => {
+    if (!gerbang || !grup.latarOk) return;
+    const img = dunia.current?.querySelector<HTMLImageElement>('img[data-lapis="latar"]');
+    if (img?.currentSrc) catatCocok(lok.latar, `${Math.round(lebar)}px`, img.currentSrc);
+  }, [gerbang, grup.latarOk, lok.latar, lebar]);
+  const mini = gerbang && lok.kabur && !lepasMini
+    ? <div className="cer-ilustrasi-kabur" style={{ backgroundImage: `url(${lok.kabur})` }} />
+    : null;
   return (
+    <>
     <div
+      ref={dunia}
       className="cer-ilustrasi"
+      data-gerbang={gerbang ? '' : undefined}
+      data-siap={gerbang && grup.siap ? '' : undefined}
+      data-gagal-latar={latarGagal ? '' : undefined}
       data-susun={lok.tokoh.jenis}
       data-ada-bicara={komposisi.hadir.some((x) => x.bicara) ? '' : undefined}
       data-kamera={`${Math.round(pot.x)} ${Math.round(pot.y)} ${Math.round(pot.w)} ${Math.round(pot.h)}`}
       style={{ width: lebar, height: lok.h * s, transform: `translate(${-pot.x * s}px, ${-pot.y * s}px)` }}
       aria-hidden="true"
     >
+      {mini}
       <ImgIlustrasi className="cer-ilustrasi-lapis" varian={lok.latar} sizes={`${Math.round(lebar)}px`} prioritas style={gayaLatar} data={{ lapis: 'latar', kabur: kabur ? String(kabur) : undefined }} />
       {(lok.tiang ?? []).map((k, i) => <div key={i} className="cer-ilustrasi-tiang" style={gayaKotak(lok, k)} />)}
       {(lok.papan ?? []).map((p, i) => <Papan key={i} lok={lok} p={p} skala={s} tx={tx} />)}
@@ -141,7 +273,7 @@ function AdeganIlustrasi({ ep, lok, komposisi, ukuran, tx, nama, ruangBawah }: {
           <TokohDekat key={tk.id} ep={ep} lok={lok} tk={tk} x={(n ? tokoh.slot[n] : [])[i]!} skala={s} nama={nama(tk.id)} />
         ))
         : berdiri.lapis.map((l, i) => <LapisAdegan key={l.jenis === 'tokoh' ? l.tokoh.id : `benda-${i}`} lok={lok} l={l} skala={s} nama={nama} />)}
-      {lok.depan ? <ImgIlustrasi className="cer-ilustrasi-lapis" varian={lok.depan} sizes={`${Math.round(lebar)}px`} prioritas style={gayaLatar} data={{ lapis: 'depan', kabur: kabur ? String(kabur) : undefined }} /> : null}
+      {lok.depan && !(gerbang && depanGagal) ? <ImgIlustrasi className="cer-ilustrasi-lapis" varian={lok.depan} sizes={`${Math.round(lebar)}px`} prioritas style={gayaLatar} data={{ lapis: 'depan', kabur: kabur ? String(kabur) : undefined }} onGagal={gerbang ? () => setDepanGagal(true) : undefined} /> : null}
       {/* Benda akibat berdiri DI ATAS meja / di depan papan: sesudah lapisan depan. */}
       {komposisi.objek.map((id) => {
         const o = lok.objek?.[id];
@@ -150,6 +282,11 @@ function AdeganIlustrasi({ ep, lok, komposisi, ukuran, tx, nama, ruangBawah }: {
         return <GambarSeni key={id} ep={ep} id={o.seni} className="cer-ilustrasi-objek" style={gayaKotak(lok, { x: o.x, y: o.y, w: o.w, h: (o.w * seni.h) / seni.w })} />;
       })}
     </div>
+    {/* Pil "Menyiapkan adegan…" (D-51): hiasan; dialog & tombol tidak menunggu. Hilang saat siap ATAU gagal. */}
+    {gerbang && !lepasPil ? (
+      <p className="cer-adegan-memuat" aria-hidden="true" data-selesai={grup.siap ? '' : undefined}><i><b /><b /><b /></i>{t('layar.menyiapkanAdegan')}</p>
+    ) : null}
+    </>
   );
 }
 
@@ -166,6 +303,8 @@ function TokohDekat({ ep, lok, tk, x, skala, nama }: { ep: Episode; lok: LokasiI
   const baru = g && t0 ? { g, k: kotakTokohIlustrasi(t0, g, x) } : null;
   const sizes = baru ? `${Math.round(baru.k.w * skala)}px` : '0px';
   const tampil = useGambarSiap(baru, baru?.g.varian ?? [], sizes);
+  // R-11: ekspresi baru diminta tetapi gambar lama masih tampil sampai yang baru ter-decode: grup adegan menunggu.
+  const menunggu = baru !== null && tampil !== baru;
   if (!t0) return null;
   if (!tampil || gagal) {
     const k = { x: x - t0.tinggiKepala * 0.9, y: t0.atasKepala, w: t0.tinggiKepala * 1.8, h: lok.h - t0.atasKepala };
@@ -178,7 +317,7 @@ function TokohDekat({ ep, lok, tk, x, skala, nama }: { ep: Episode; lok: LokasiI
       sizes={`${Math.round(tampil.k.w * skala)}px`}
       style={gayaKotak(lok, tampil.k)}
       prioritas
-      data={{ tokoh: tk.id, ekspresi: tk.ekspresi, bicara: tk.bicara ? '' : undefined }}
+      data={{ tokoh: tk.id, ekspresi: tk.ekspresi, bicara: tk.bicara ? '' : undefined, menunggu: menunggu ? '' : undefined }}
       onGagal={() => setGagal(true)}
     />
   );

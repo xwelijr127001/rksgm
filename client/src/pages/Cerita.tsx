@@ -8,7 +8,7 @@
  * selesai: "Main lagi dari awal" (arsip episode itu saja) dan "Lihat hasil". Seni kartu dari panggung episodenya:
  * ruang piksel Episode 1, atau sampul panggung latar (`Episode.latar.sampul`).
  */
-import { useId, useLayoutEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react';
+import { useEffect, useId, useLayoutEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react';
 import { Link, Navigate, useNavigate } from 'react-router-dom';
 import type { Bahasa } from '@shared/bahasa';
 import { TOKOH } from '@shared/brand';
@@ -31,6 +31,8 @@ import { ambilRuang, gambarTokoh } from '../cerita/ui/panggung/sumber';
 import { useDpr } from '../game/tokoh';
 import { simpanModeAdegan } from '../cerita/ui/panggung/mode';
 import { statusEpisode, type StatusEpisode } from '../cerita/ui/tampilan';
+import { hangatkanEpisodeAwal } from '../cerita/ui/latar/hangatkanDaftar';
+import { useVersiUkuran } from '../cerita/ui/latar/hangatkan';
 import '../cerita/ui/cerita.css';
 
 export default function Cerita() {
@@ -42,6 +44,10 @@ export default function Cerita() {
   // Status kartu ikut perubahan progres (tab ini & tab lain).
   useSyncExternalStore(berlanggananCerita, versiPenyimpananCerita, () => 0);
   const nav = useNavigate();
+  // T-010 G3: latar adegan pertama episode berpanggung latar dipanaskan selagi daftar dibaca (dibatalkan saat pindah halaman).
+  // R-14: dipanaskan ulang dengan ukuran baru saat layar diputar / DPR berubah.
+  const versiUkuran = useVersiUkuran();
+  useEffect(() => (profil ? hangatkanEpisodeAwal() : undefined), [profil, versiUkuran]);
 
   if (!profil) return <Navigate to="/kenalan?lanjut=/cerita" replace />;
 

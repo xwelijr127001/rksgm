@@ -777,3 +777,274 @@ None.
 ### Not verified by me
 Flag-off render myself (Fullstack's evidence screenshot only), real DPR devices and fractional DPR / zoom, the owner's real-phone check (planned tomorrow; there is no classic scrollbar on a phone, so the 15 px
 left shift in shot 2 should be gone), and `npm run test:client` / `test:e2e` (Fullstack's logs: 724/724 and 0 failures; I did not re-run them).
+
+---
+
+## T-010 — spec (2026-11-15)
+
+Author: Designer · Status: spec for Fullstack · No source edited · **No Claude Design mockup needed**: both treatments are fully specified in words plus tested CSS/markup,
+and they cost no new design asset, so there is nothing for Lead to approve.
+Inputs: team/specs/2026-11-15-aset-episode2.md (rev 2: G1, G2, Work 1 and 3), team/REVIEW.md "T-010 plan review" and "re-review rev 2" (last bullet: a flat colour is the same square), ROLE-DESIGNER.md,
+client/src/cerita/ui/latar/PanggungLatar.tsx + latar.css, cerita/ui/gambarIlustrasi.tsx, cerita/seni/auto-2/ilustrasi/ (index.ts, ilustrasi.json, the webp files), pages/Landing.tsx,
+components/PlayerShell.tsx + Merek.tsx, ui/halaman.ts, theme.css tokens, i18n/kamus/layar.ts.
+Support file (tested data, documentation only): `team/specs/T-010-kabur-thumbs.txt` (the five placeholder thumbnails as data URIs plus the exact ffmpeg command).
+
+**How this was checked.** Live dev client :5233, headless Chrome over CDP. Episode 2 first scene = `/cerita/auto-2` (office, Miss Raksa "salam", desk foreground), with the placeholder CSS/markup injected on stage mount
+(nothing saved to the repo). Network throttle = CDP Fetch interception of ONLY `*.webp` responses on one shared pipe with 150 ms RTT (200 KB/s = 1.6 Mbps and 100 KB/s = 0.8 Mbps), because throttling the whole dev
+page made the dev bundle itself unusable; Fullstack's real harness (production build, `Network.emulateNetworkConditions`) is the authority for the before/after table. 360x740 and 390x844 DPR 2, id/en/zh,
+reduced motion on/off, 404 failure of a layer, loader at 360 / 390 / 1280 including the 2000 ms cap. Numbers below are measured.
+
+### What the owner sees today (baseline, measured)
+The stage frame `.cer-latar` has a flat `#efe3c8` background. On the throttled first scene the three images (office 121 KB, Miss Raksa 60 KB, desk 44 KB, 225 KB total) land one by one: at 200 KB/s the stage mounts at
+0.6 s and the layers arrive at 1.2 s, 1.5 s and 1.7 s; at 100 KB/s they arrive at 1.8 s, 2.4 s and 2.8 s. Until then the frame is a beige square with only the location chip on it (captured frames 1-8 at 100 KB/s), which is
+exactly the owner's "plain coloured square". The room, Miss Raksa and the desk also appear one at a time.
+
+### Part A: Episode 2 scene placeholder (G1, Work item 1)
+
+- [D-51] Placeholder = a blurred thumbnail of THE room, plus a small branded loading pill · Recommended and tested. Not a flat colour, not a spinner on white. Each location gets a tiny build-time thumbnail of its own
+  background (`kantor`, `pool`, `bengkel`, `tol`, `wawancara`), shown blurred as the FIRST layer inside the camera world (`.cer-ilustrasi`, same coordinates as the background layer, so the camera crop is already right
+  and nothing jumps at the reveal): `<div class="cer-ilustrasi-kabur" style="background-image:url(data:image/webp;base64,...)">` with `filter: blur(6px) saturate(.9) brightness(1.04); transform: scale(1.06)` (the scale hides
+  the blur's edge bleed). It reads as "this room is coming" (warm wood and green slats for the office, sky and road for the toll, and so on, see the contact sheet of all five in my notes), keeps the real palette and costs almost nothing.
+  The pill `.cer-memuat` sits centred at 38% from the top of the stage (above the dialogue card, below the location chip): `rgba(255,254,250,.94)` fill, 1px `#d9dfd2` border, radius 999 (the same chip look as `.cer-latar-lokasi`),
+  12.5px/650 `#243d30`, text = the EXISTING key `layar.menyiapkanAdegan` ("Menyiapkan adegan…", "Preparing the scene…", "正在准备场景……": no new i18n), and three 5 px pixel squares that step through a 1.2 s loop
+  (`steps(1)`, same pixel language as the homepage hero and CTA). The pill is `aria-hidden` (the stage is decorative and the dialogue text, buttons and focus are untouched, so nothing needs announcing). Priority: high.
+
+- [D-52] Placeholder asset approach and measured cost · Thumbnails are 64x36 WebP, quality 40, generated from each `<lokasi>-latar-1100.webp` with the SAME toolchain as `tools/cerita/bangun-ilustrasi-auto2.mjs` (ffmpeg libwebp):
+  `ffmpeg -i <lokasi>-latar-1100.webp -vf "scale=64:-2:flags=area" -c:v libwebp -quality 40 -compression_level 6 out.webp`. **Measured: kantor 540 B, pool 526 B, bengkel 742 B, tol 532 B, wawancara 486 B = 2,826 B total
+  (3,891 characters as five inline data URIs).** That is 0.5-0.75 KB per location (the limit was 2 KB), no network request, no new large asset. Where it lives: a generated module next to the illustration manifest
+  (for example `seni/auto-2/ilustrasi/kabur.ts` exporting the five data URIs, written by the same build script) read through an optional `kabur?: string` on `LokasiIlustrasi`; it is imported only by the AUTO-2 episode chunk,
+  so the homepage bundle is unchanged. Locations without a thumbnail (other episodes) keep today's flat fallback. Rejected: 32 px (200 B each, visibly blocky), 48 px (350-490 B) is the acceptable floor, 64 px chosen for
+  smoother blur. Rejected: a drawn pattern in the dominant colour (still reads as a coloured block) and a stage-frame silhouette (does not say which room). Priority: high.
+
+- [D-53] The reveal · The four things the owner sees at once must appear together. Required layers = background (`latar`), foreground (`depan`, only kantor has one) and every character illustration visible at the start of the scene
+  (the `hadir` list; `miss-salam` in scene 1); optional layers that do not exist count as absent, not pending. While the group is pending, all layers stay MOUNTED (so they load) but hidden (`opacity:0`) above the placeholder.
+  When every required image is loaded and `decode()`d (or failed, D-54, or the 6 s cap fired) the world gets `data-siap` ONCE: the layers fade in over **240 ms ease-out** while the placeholder fades out over the same 240 ms and the pill
+  over 160 ms, then the placeholder and the pill are removed after 300 ms. Reduced motion (and `data-gerak` not `penuh`): **instant swap**, static pill squares, no fade, same rule shape as today (`:root:not([data-gerak="penuh"]) ...`).
+  Remove the existing mount `animation: cer-latar-muncul` from the world root and from the group layers until `data-siap`, otherwise a cached image could flash alone during its own 200 ms animation (measured: no flash when the
+  image arrives after the animation, but not guaranteed on cached loads). Tested: at 100 KB/s the stage mounted at 0.40 s, the placeholder showed from the first frame, the group was ready at 2.84 s, the crossfade ran, the placeholder
+  was removed at 3.24 s; same timing in en and zh at 390x844. Do not gate dialogue, buttons or story actions on readiness (Codex: no restart of actions). Priority: high.
+
+- [D-54] Failure and slow layers · Measured with the background returning 404: the placeholder stays at full opacity as the room (`data-gagal-latar`), the pill is removed (no endless "loading" for something that failed),
+  Miss Raksa and the desk still reveal on top, the dialogue card and buttons work (screenshot at 3.4 s: blurred office behind a sharp Miss Raksa). Per layer: background fails = placeholder is the room; desk (`depan`) fails = omitted;
+  a character fails or has no asset = the existing named silhouette (`Siluet`) over the placeholder; every required layer needs an explicit error/decode handler that settles to this state (the existing `onGagal` path is
+  not enough, per Codex re-review). 6 s cap: reveal what has loaded, keep the placeholder under whatever has not, and let late layers fade in on their own (still no blank block). Priority: high.
+
+- [D-55] Transition between scenes · When the LOCATION changes (`key={komposisi.lokasi}` already remounts the world) show the NEW room's thumbnail immediately (hard cut from the old sharp room to the new blurred room, then
+  the same reveal). Do NOT keep the previous room visible: the location chip and the dialogue already say the story moved, so a stale room would contradict them. When G3 warm-up has the next composition decoded, the group is ready in
+  the same tick and the user just sees the 240 ms crossfade. Same-location changes (expression, another speaker, the existing `useGambarSiap` swap-after-decode) are unchanged and need no placeholder. Priority: med.
+
+- [D-56] Tested CSS for Part A (markup: placeholder div first in `.cer-ilustrasi`, pill as a sibling inside `.cer-panggung`, `data-siap` / `data-gagal-latar` set on `.cer-ilustrasi`) ·
+
+```css
+/* T-010 A: stage placeholder + one-shot reveal. Mount fade moves from the world root to the group (below). */
+.cer-latar .cer-ilustrasi { animation: none; }
+.cer-ilustrasi-kabur { position: absolute; inset: 0; background-size: 100% 100%; background-repeat: no-repeat; filter: blur(6px) saturate(.9) brightness(1.04); transform: scale(1.06); }
+.cer-ilustrasi:not([data-siap]) > :not(.cer-ilustrasi-kabur) { opacity: 0; animation: none; }
+.cer-ilustrasi > :not(.cer-ilustrasi-kabur) { transition: opacity .24s ease-out; }
+.cer-ilustrasi[data-siap]:not([data-gagal-latar]) .cer-ilustrasi-kabur { opacity: 0; transition: opacity .24s ease-out; }
+.cer-memuat { position: absolute; left: 50%; top: 38%; transform: translate(-50%, -50%); z-index: 3; display: inline-flex; align-items: center; gap: 8px; padding: 6px 14px 6px 12px; border-radius: 999px;
+  background: rgba(255, 254, 250, .94); border: 1px solid #d9dfd2; color: #243d30; font-size: 12.5px; font-weight: 650; line-height: 1.3; white-space: nowrap; transition: opacity .16s ease-out; }
+.cer-memuat[data-selesai] { opacity: 0; pointer-events: none; }
+.cer-memuat i { display: inline-flex; gap: 3px; }
+.cer-memuat i b { width: 5px; height: 5px; background: var(--hijau); opacity: .25; animation: cer-titik 1.2s steps(1) infinite; }
+.cer-memuat i b:nth-child(2) { animation-delay: .4s; } .cer-memuat i b:nth-child(3) { animation-delay: .8s; }
+@keyframes cer-titik { 0%, 33% { opacity: 1; } 34%, 100% { opacity: .25; } }
+@media (prefers-reduced-motion: reduce) {
+  :root:not([data-gerak="penuh"]) .cer-memuat i b { animation: none; opacity: .6; }
+  :root:not([data-gerak="penuh"]) .cer-ilustrasi > :not(.cer-ilustrasi-kabur),
+  :root:not([data-gerak="penuh"]) .cer-ilustrasi[data-siap] .cer-ilustrasi-kabur,
+  :root:not([data-gerak="penuh"]) .cer-memuat { transition: none; }
+}
+```
+  Cost of this block: 1.8 KB raw / 0.74 KB gzip. Priority: high.
+
+### Part B: homepage first-visit loader (G2, Work item 3)
+
+- [D-57] Loader look and layout · Route `/` only, mounted by Landing, first visit of the session. A full-viewport overlay in `var(--krem)` with ONE centred column, nothing else (no card, no shadow, no gradient, no spinner-on-white):
+  1. the shared wordmark "RAKSA | GAME" (existing `.mrk` / `.mrk-game` styles, `aria-hidden`), 34 px;
+  2. **Raki** (`art/Raki.tsx`, mood `sapa`, 80 px, its existing gentle float) 24 px below the wordmark. Decision: Raki ALWAYS, not Miss Raksa: the loader waits for Miss Raksa's sprite sheet, so her portrait cannot be visible
+     inside it (tested: the ring stayed an empty cream circle), Raki is inline vector (zero requests, zero decode wait), and it also covers `TOKOH.missRaksa.aktif === false` with no branching;
+  3. an indeterminate pixel bar 20 px below Raki: four 28x10 segments, 4 px apart, each with a 3 px base; one segment at a time lights up (`--kuning` face, `--kuning-tua` base) in a 1.2 s `steps(1)` loop, idle segments
+     `--krem-tua` with a base of that colour mixed 12% with `--tinta` (the one tone I used is `#d3d6cb`; write it as `color-mix(in srgb, var(--krem-tua), var(--tinta) 12%)` or keep the hex, no other colour);
+  4. the status text 12 px below the bar: 14 px `--tinta-lembut`, `role="status"`: **new key `umum.menyiapkan`: id "Menyiapkan…", en "Preparing…", zh "正在准备……"** (existing "…" style).
+  The column sits 8vh above the optical centre. **360x740 / 390x844:** as above. **>=901 px (1280x800 tested):** wordmark 48 px, Raki 112 px (margin 32), bar segments 40x12 (margin 24), text 16 px (margin 16), same column.
+  The whole overlay is `position:fixed; inset:0; z-index:60`, and the page behind must not scroll: `html:has(.lp-pemuat){overflow:hidden}` (tested: without it the desktop scrollbar showed through the overlay). Palette = theme tokens only.
+  Priority: high.
+
+- [D-58] Loader motion and dismissal · Indeterminate bar (honest: no fake percentage) plus Raki's existing float; under reduced motion (`:root:not([data-gerak="penuh"])`) the bar is static (all four segments lit at 55%) and Raki is still
+  (the global rule already stops `.anim-melayang`), the text alone says what is happening. Dismissal: the content under the overlay stops being `inert` at the START of the dismissal, the overlay fades out in **200 ms ease-out**
+  (instant under reduced motion), then unmounts after 260 ms. It ends when the homepage essentials are ready (sprite sheet decoded and `document.fonts.ready`) OR at the 2000 ms cap (measured: dismissal at 2016-2021 ms with the sheet
+  stalled, `inert` removed). It never mounts when the essentials are already ready (warm visit: no flash), is skipped for reduced data and for the whole session after the first dismissal (Lead's `raksa:loader:v1` rule), and never
+  mounts on other routes. Status text is OUTSIDE the inert region (the overlay is a sibling of the app root; the app root is the inert subtree), and focus moves to the h1 only after the overlay is gone, per the Codex notes. Priority: high.
+
+- [D-59] The homepage at the 2000 ms cap with the sprite not ready (measured, sheet stalled for 6 s) · No layout jump: the hero frame, the greeting row, the headline, Join and Mode Cerita card sit at exactly the final
+  positions (frame 20-340 x 78-222 at 360, same at 1280) because the sprite slot has its inline size and the portrait rings are fixed-size. What is missing until the 7 KB sheet lands: Miss Raksa in the hero (the sun shows empty
+  behind the counter), and the two portrait rings (greeting and Mode Cerita) are empty cream circles. Spec: accept it (the reserved size is the requirement), let the sprite and portraits appear when ready (pop-in, no layout change;
+  a fade is optional polish). The cheap way to make this case rare: have `client/index.html` add a `<link rel="preload" as="image" href="/karakter/miss-raksa-besar.webp" type="image/webp">` only when the path is the homepage
+  (a tiny inline check that respects the base path), so the 7 KB sheet downloads in parallel with the entry JS; do not preload for other routes. Priority: med.
+
+- [D-60] Tested CSS for Part B (markup: `<div class="lp-pemuat" aria-busy="true"><div class="lp-pemuat-isi"><div class="mrk" aria-hidden="true">...</div><span class="lp-pemuat-raki" aria-hidden="true"><Raki size={80} mood="sapa"/></span><div class="lp-pemuat-bar" aria-hidden="true"><i/><i/><i/><i/></div><p class="lp-pemuat-teks" role="status">…</p></div></div>`; add `data-selesai` at dismissal) ·
+
+```css
+/* T-010 B: homepage first-visit loader (route "/" only) */
+.lp-pemuat { position: fixed; inset: 0; z-index: 60; display: grid; place-items: center; padding: 24px 24px calc(24px + env(safe-area-inset-bottom)); background: var(--krem); transition: opacity .2s ease-out; }
+.lp-pemuat[data-selesai] { opacity: 0; pointer-events: none; }
+.lp-pemuat-isi { display: flex; flex-direction: column; align-items: center; margin-top: -8vh; }
+.lp-pemuat .mrk { font-size: 34px; min-height: 0; }
+.lp-pemuat .mrk-game { font-size: 14px; padding: 4px 0 4px 12px; }
+.lp-pemuat-raki { margin-top: 24px; display: block; }
+.lp-pemuat-bar { display: flex; gap: 4px; margin-top: 20px; }
+.lp-pemuat-bar i { width: 28px; height: 10px; background: var(--krem-tua); border-bottom: 3px solid #d3d6cb; animation: lp-seg 1.2s steps(1) infinite; }
+.lp-pemuat-bar i:nth-child(2) { animation-delay: .3s; } .lp-pemuat-bar i:nth-child(3) { animation-delay: .6s; } .lp-pemuat-bar i:nth-child(4) { animation-delay: .9s; }
+@keyframes lp-seg { 0%, 24% { background: var(--kuning); border-bottom-color: var(--kuning-tua); } 25%, 100% { background: var(--krem-tua); border-bottom-color: #d3d6cb; } }
+.lp-pemuat-teks { margin: 12px 0 0; font-size: 14px; line-height: 1.4; color: var(--tinta-lembut); }
+html:has(.lp-pemuat) { overflow: hidden; }
+@media (min-width: 901px) {
+  .lp-pemuat .mrk { font-size: 48px; } .lp-pemuat .mrk-game { font-size: 16px; padding: 5px 0 5px 14px; }
+  .lp-pemuat-raki { margin-top: 32px; } .lp-pemuat-raki svg { width: 112px; height: 112px; }
+  .lp-pemuat-bar { margin-top: 24px; } .lp-pemuat-bar i { width: 40px; height: 12px; }
+  .lp-pemuat-teks { font-size: 16px; margin-top: 16px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  :root:not([data-gerak="penuh"]) .lp-pemuat-bar i { animation: none; background: var(--kuning); border-bottom-color: var(--kuning-tua); opacity: .55; }
+  :root:not([data-gerak="penuh"]) .lp-pemuat { transition: none; }
+}
+```
+  Cost: 1.5 KB raw / 0.66 KB gzip; with the loader component and hook I estimate 2-3 KB gzip for the whole homepage change (limit 10 KB). The thumbnails are NOT in the homepage bundle. Priority: high.
+
+### Part C: anti AI-slop check (both)
+Pass. Both reuse what already makes this a RAKSA game: Part A shows the real room blurred (not a stock shimmer or a grey block), with the same chip style as the stage's location label and the pixel-square motif from the hero and CTA;
+Part B is the brand wordmark, the owl mascot and a pixel bar on the cream page colour, with honest indeterminate motion and a status line, not a generic spinner in white. No gradient besides the existing stage styles, no glow, no emoji,
+no new colour except the one derived bar tone, no new copy except one i18n key, motion only for status (stepping squares/segments, 240 ms and 200 ms reveals), all of it stopped under reduced motion.
+
+### Sketch (1 char ~ 4 px)
+
+```
+ Homepage loader, 360x740                          Stage placeholder, first scene (stage frame ~328 x 184, camera crop applied)
+ +------------------------------------+            +--------------------------------------------------+  gold border, radius 16
+ |                                    |            | (Layanan Klaim Raksa)                            |  location chip (existing)
+ |                                    |            |   ~~ blurred office thumbnail (64x36, blur 6px) ~~|
+ |         RAKSA | GAME      (34px)    |            |   ~~    warm wood / green slats / desk      ~~ |
+ |                                    |            |        +--------------------------+              |
+ |              ,___,                 |            |        | [] [] []  Menyiapkan adegan… |            |  pill at 38%, stepping squares
+ |              (o,o)   Raki 80px      |            |        +--------------------------+              |
+ |              /)__)  (floats)       |            |   ~~ ~~ ~~ ~~ ~~ ~~ ~~ ~~ ~~ ~~ ~~ ~~ ~~ ~~    |
+ |                                    |            +--------------------------------------------------+
+ |        [] [] [] []   bar 4x28x10     |            | dialogue card (existing, usable the whole time)  |
+ |        one segment lit, steps 1.2s  |            +--------------------------------------------------+
+ |            Menyiapkan…   (14px)    |             then: layers fade in 240 ms (group), placeholder + pill fade out; failed latar => blur stays
+ |                                    |
+ +------------------------------------+
+```
+
+### Part D: review checklist for step 3 (Designer review) and QA
+- **Throttle matrix (Part A), production build, Fullstack's harness:** 360x740 DPR 2 and 390x844 DPR 3, CPU 4x, 1.6 Mbps and also 0.8 Mbps, cache enabled for the warm run; id/en/zh. A frame series at 50 ms plus the readiness marker
+  (`data-siap` timestamp and decode times): the placeholder is visible in the FIRST frame after the stage mounts; NO frame shows the flat `#efe3c8` square; the room, desk and character appear together; reveal 240 ms; final-layer time
+  against the baseline table.
+- **Part A states:** 404 on the background (placeholder stays, pill gone, character visible), 404 on the desk, 404 on the character (silhouette), all layers stalled past 6 s (partial reveal, placeholder under the missing ones); reduced motion
+  with `?gerak=ikut` (instant swap, static squares); `?gerak=penuh` (fades on); scene change to pool / tol (new thumbnail at once, no stale room); a cached/warm scene (no visible placeholder frame beyond the crossfade); dialogue and
+  buttons usable the whole time; stage crop identical to today's final frame.
+- **Part B:** cold `/` with the sprite sheet held 1.5 s: loader visible at 360x740, 390x844, 1280x800 in id/en/zh; ends when the sheet is decoded, not later; cap case (sheet stalled 6 s): dismissal at about 2000 ms, no layout jump
+  (positions equal to the final layout), Miss Raksa and the portraits appear when the sheet lands; warm visit and second visit in the session: no loader; reduced motion: static bar, instant dismissal; page behind does not scroll;
+  `inert` removed at dismissal; status text announced once; focus lands on the h1 only after dismissal; not mounted on /host, /projector, /join, /cerita, /acara/*; flag off (Miss Raksa inactive): same loader (Raki), homepage per T-007.
+- **Cost:** production build gzip delta for the whole T-010 homepage change <= 10 KB (expect 2-3 KB); the AUTO-2 episode chunk grows by about 3.9 KB (inline thumbnails); no new network requests in the placeholder approach.
+- `npm run test:client` and `npm run test:e2e` pass; T-003..T-008 homepage results unchanged.
+
+---
+
+## T-010 — review (2026-11-15)
+
+Reviewer: Designer · Build reviewed: the production build in client/dist (newer than the sources: 19:06 vs 18:43), served by `npm start` on :4000 with `RAKSA_LEGACY=on` (I started it for this review and stopped it
+afterwards) · No source edited.
+Method: read team/HANDOFF.md T-010 and the diffs of PanggungLatar.tsx, latar.css, PemuatAwal.tsx, Landing.tsx, player.css, halaman.ts; then measured and screenshotted the REAL production pages with headless Chrome over CDP
+(my own scripts, so Fullstack's evidence folder was not overwritten): Episode 2 first scene at 360x740 and 390x844 (DPR 2), images-only throttle at 200 KB/s and 100 KB/s + 150 ms RTT, id/en; reduced motion + `?gerak=ikut`; a 404 on the
+background; the homepage loader cold at 360/390/1280 (id/en/zh), at the 2000 ms cap, under reduced motion, unthrottled "fast" cold loads, and a whole-page 1.6 Mbps throttle.
+
+### Verdict: FIX NEEDED (two small fixes, both quick; everything else PASS)
+
+The design and the logic match my spec. The two things to fix before acceptance: a CSS class-name collision that makes the Episode 2 pill twice as tall as designed and restyles an unrelated loading fallback (D-61, my spec's naming mistake), and a
+loader that flashes instead of reading as a loading screen (D-62, open point 3a). Decisions for the three open points are below.
+
+### Does it look like my spec, and does it read as "loading", not a square? (Part A, production, measured)
+- **Yes, with one cosmetic exception (D-61).** At 360x740 (200 KB/s) the stage mounts at 413 ms and the FIRST frame already shows the blurred office thumbnail (warm wood and green slats) with the "Menyiapkan adegan…" pill and three stepping
+  squares; no frame shows a stage without the placeholder (list of such frames is empty). The three layers (office 121 KB, Miss Raksa 60 KB, desk 44 KB) become ready together and the group is revealed at 1.73 s (`data-siap`), caught
+  mid-crossfade (latar opacity 0.73, placeholder 0.27); the placeholder and pill are gone by 2.8 s. At 390x844 in English (100 KB/s): placeholder from 412 ms, single reveal at 2.86 s. The flat beige square is gone.
+- **Reduced motion + `?gerak=ikut`:** instant swap: the first revealed frame already has latar opacity 1 and placeholder opacity 0, then the placeholder is removed; static squares.
+- **404 background:** `data-gagal-latar`, the blurred room stays at full opacity as the room, the pill is gone, Miss Raksa and the desk are visible on top (screenshot at 3.4 s), the dialogue is usable.
+- **Warm-up:** after the reveal the next location (pool, 194 KB) is fetched once (one variant per layer); the scene's own layers were not requested twice.
+- **Location change (D-55): not verified by me.** Reaching another room needs real story interactions (the first beats go through a phone conversation); I could not script it safely. By construction the world is keyed on the location
+  and takes the new location's thumbnail, so QA should check scene 1 -> pool/tol with the 0.8 Mbps throttle.
+
+### Homepage loader (Part B, production, measured)
+- **Layout and content as specced:** cold `/` with the sprite sheet held 1.5 s: shown at ~360 ms, dismissed when the sheet decodes (1.2 s on screen), gone ~260 ms later. Wordmark, Raki (80 px), 4-segment pixel bar (one lit segment,
+  stepping), status text "Menyiapkan…" / "Preparing…" / "正在准备……" at 360x740 (id), 390x844 (en), 1280x800 (zh). `#root` is `inert` and `aria-busy="true"` while shown, the `role=status` text is outside `#root`, `<html>` is
+  `overflow:hidden` (no scrollbar behind it), `inert` and `aria-busy` are gone when the fade starts.
+- **200 ms fade / reduced motion:** overlay removed 262 ms after dismissal; with reduced motion the bar animation is `none`.
+- **2000 ms cap, sheet stalled:** dismissed at the cap (2027 ms on screen), the homepage keeps its final layout: frame 20,78 -> 340,222, Masuk bottom 565.7 (id/360) with no jump; Miss Raksa and the portrait rings fill in when the
+  sheet lands (accepted in D-59).
+- **Homepage composition unchanged:** Masuk bottom 565.7 at 360x740 (id), 577.7 at 390x844 (en); frame 20,78 -> 340,222 / 20,78 -> 370,234 (T-003..T-008 numbers). The 1280 zh run is taller only because of Chinese text.
+- **Two problems:** the loader FLASHES instead of being seen (D-62), measured below.
+
+### Decisions on Fullstack's three open points (binding for the follow-up)
+
+- **3a. Loader appears only after the JS and flashes:** **Recommend two steps, not "accept".**
+  Measured: (i) slow link (whole page at 1.6 Mbps): the page is a blank cream screen for about 4.9 s while the ~730 KB entry JS downloads, then the loader shows for 209 ms plus a 260 ms fade (gone at 5.4 s); (ii) a fast cold load
+  (localhost, cache off): the overlay mounts and is dismissed on the SAME frame (duration 0 ms, `inert` never set) and then fades for ~260 ms, i.e. a one-frame flash of a full-opacity branded screen followed by a ghost fade.
+  Neither is the owner's "loading screen, then the homepage".
+  **Step 1 (do now, small, inside T-010):** a minimum on-screen time of **600 ms** measured from the overlay's first painted frame, whenever the loader mounts (dismiss at max(essentials ready, 600 ms), the 2000 ms cap unchanged and still the
+  upper bound). It makes the screen read as a deliberate, branded moment (once per session, only on a cold visit, skipped when the sheet is already cached/warm as it is today) instead of a flicker. Cost: +0.6 s on a cold first visit only.
+  Reject "accept as is" (flash) and reject a bare delay-before-show (on the slow link it would still show nothing, because the sheet finishes right after the JS).
+  **Step 2 (new follow-up task, recommended soon):** a tiny pre-JS loader in `client/index.html`, `/` only (base-path-aware inline check), the SAME look (wordmark, Raki as inline SVG, bar, text; about 1.5-2 KB inline,
+  tokens as CSS variables or copied hex), visible from the first paint and handed over to the React overlay without a jump, removed at dismissal. It is the only thing that gives a slow-link user (the owner's phone over Tailscale) a loading
+  screen during the ~5 s that is currently blank; the page background is already `--krem`, so the hand-over is seamless. Keep the React overlay (essentials, inert, a11y) as the owner of dismissal.
+- **3b. Homepage preload hint removed:** **Agree, keep it removed.** With the preload the 7 KB sheet is always complete before the entry JS runs, so the "skip when already ready" rule means the loader never shows on a cold `/`, which
+  contradicts the owner's request. The cost of removing it (the rare empty rings after the cap, D-59) is accepted. Do not re-add a preload unless the pre-JS loader of step 2 exists, and even then not for the sprite sheet.
+- **3c. D-56 CSS scoped under `[data-gerbang]` and `aria-busy` on `#root`:** **Accept both.** Scoping is correct and better than my spec: my unscoped rule would have hidden every other `PanggungLatar` (episode card, activities)
+  forever; `data-gerbang` is set only for the played scene. `aria-busy` belongs on the content being prepared (`#root`); on the overlay it would mute the status announcement inside it, and I measured it is set while shown and removed with
+  `inert` at the start of the fade. No change.
+
+### Fix list: blockers (high)
+- [D-61] Episode 2 scene pill · **class-name collision:** `.cer-memuat` already exists in `client/src/cerita/ui/cerita.css:156` (`.cer-memuat { padding: 24px 16px }`) and is the activity-loading fallback in `pages/CeritaMain.tsx:486`
+  (`<div className="cer-memuat"><Memuat .../></div>`). (a) The pill's padding is overridden to 24px 16px, so it renders 66 px tall (computed on the production page: 194 x 66) instead of the specified ~30 px (6px 14px 6px 12px); (b) my pill
+  rules now apply to the unrelated activity fallback: measured on the production page it becomes `position:absolute; left:50%; top:38%; border-radius:999px; white-space:nowrap; pointer-events:none`, i.e. a floating pill instead of an inline
+  loading block, a regression while an activity chunk loads · fix: rename the pill class everywhere to a unique name, for example `.cer-adegan-memuat` (CSS in latar.css incl. `[data-selesai]` and the reduced-motion list, and
+  `PanggungLatar.tsx:254`), and update any selector in tools/cek-pemuat-t010.mjs / ukur-aset-t010.mjs; do not touch cerita.css:156 or CeritaMain.tsx · high. The collision is my spec's naming mistake (D-56 reused the name), Fullstack followed the spec.
+- [D-62] Homepage loader · flashes instead of reading as a loading screen (open point 3a): 0 ms on screen on fast cold loads, 209 ms on a slow link · fix: step 1 of decision 3a, minimum 600 ms on screen from first paint of the overlay
+  (`const sisa = max(0, 600 - tampilMs)` before `lepas()`), 2000 ms cap unchanged · high.
+
+### Should schedule (med)
+- [D-63] Homepage, slow links · about 4.9 s of blank cream screen before the loader can exist, because it lives in the JS bundle · fix: new follow-up task: pre-JS loader in `client/index.html` for `/` only (decision 3a, step 2) · med.
+
+### Polish (low), non-blocking
+- [D-64] Episode 2 first scene · after D-61 re-check the pill at 360 and 390 (about 30 px tall, centred at 38%, above the dialogue card) in id/en/zh and that the English "Preparing the scene…" fits at 320 · low.
+- [D-65] Homepage cap case · empty portrait rings and an empty sun until the 7 KB sheet lands (accepted, D-59); optional later polish: fade the sprite and portraits in when they arrive · low.
+
+### Anti AI-slop and regression
+Pass on both treatments: the room placeholder is the real room blurred with the same chip style and pixel-square motif as the hero and CTA; the loader is wordmark + Raki + pixel bar + status on the cream page colour with honest indeterminate motion,
+tokens only, static under reduced motion; no gradients, glow, emoji or new colours; one new i18n key. The homepage composition from T-003..T-008 is unchanged (numbers above); `/cerita` untouched by this task.
+
+### Not verified by me
+The scene change to pool/tol (D-55), real devices, the 0.8 Mbps matrix on the production harness, Fullstack's before/after table and gzip numbers (their evidence), and `npm run test:client` / `test:e2e` (their logs: 724/724, 0 failures).
+
+---
+
+## T-010 — re-check (2026-11-15)
+
+Reviewer: Designer · Build: production build in client/dist (20:08, newer than the 19:39 sources) on `npm start` :4000 (`RAKSA_LEGACY=on`, started and stopped by me) · Only my items re-checked · No source edited.
+
+### Verdict: PASS. No open items.
+
+- **D-61 (pill collision) fixed.** The pill is `.cer-adegan-memuat`; computed padding is `6px 14px 6px 12px` and the pill is **30.3 px tall at 320 / 360 / 390 in id, en and zh** (widths 187-188 px id/en, 151 px zh).
+  **D-64:** English "Preparing the scene…" fits at 320 with 55 px either side (id 54, zh 72), centred above the dialogue card. The old `.cer-memuat` class is not present on the scene. The activity-loading fallback markup
+  (`<div class="cer-memuat">`, CeritaMain) is back to normal: `position:static`, `padding:24px 16px`, no radius, `white-space:normal`, `pointer-events:auto`.
+- **D-62 (loader flash) fixed.** With the sheet request held, the loader that shows stays on screen **621 ms** (sheet at ~0.6 s) and **656 ms** (0.9 s), **1185 ms** with a 1.5 s hold, then fades ~250-280 ms (unchanged);
+  with the sheet never arriving it dismisses at the 2000 ms cap (2031 ms on screen), and the homepage keeps its final layout (frame 20,78 -> 340,222, Masuk bottom 565.7 at 360; 577.7 at 390).
+- **D-59 (restored preload hint + honest skip rule): accepted.** Measured: the preload is in the served index.html; on a normal cold `/` (360 id, 390 en) the sheet is decoded before Landing mounts and the loader is
+  **skipped** (no overlay, no flash, layout unchanged); with a 300 ms hold it is also skipped; it shows, for at least 600 ms, only when the sheet is late (hold 0.6 / 0.9 / 1.5 s). On the whole-page 1.6 Mbps throttle the
+  loader showed after the JS at 4.99 s and stayed 639 ms, so no flash either. I accept this on one condition for the owner's expectation: on a normal link the loader will usually NOT be seen, and on a slow link it only
+  appears after the ~5 s blank cream screen; making a loading screen visible during that wait is T-011 (pre-JS loader in index.html, my D-63), which stays open.
+- **D-55 (location change) verified live.** Using `tools/cerita/state-lokasi-kedua.mts` (progress saved in `raksa:cerita`, one "Lanjut" before the first change), pressing Lanjut under a 100 KB/s image throttle: **8 ms later** the stage is on
+  `pool` with the pool thumbnail at opacity 1, every layer at opacity 0 and the pill showing ("Pool truk" chip, part title "Survey dan estimasi"); the layers arrive one by one (background 2.1 s, trailer 3.0 s, Rudi 3.2 s) and
+  are revealed as one group at about 3.2 s (placeholder 0.07 -> removed by 3.45 s). No stale room and no flat square.
+
+Not re-verified: real devices and Fullstack's before/after numbers (their evidence); `npm run test:client` / `test:e2e`.

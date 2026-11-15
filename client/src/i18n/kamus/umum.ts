@@ -22,6 +22,7 @@ const kamus: KamusRuang = {
     gerakNyalakanPanjang: 'Animasi dimatikan perangkat ini · Nyalakan',
     gerakKet: 'Perangkat ini meminta animasi dikurangi (pengaturan sistem). Tombol ini hanya berlaku di perangkat ini.',
     menyiapkanGame: 'Menyiapkan game...',
+    menyiapkan: 'Menyiapkan…',
     dialogIsi: 'Isi {judul}, bisa digulir',
     // Pesan saat halaman gagal dimuat/dirender (App.tsx BatasRute).
     gagalHalamanJudul: 'Halaman ini belum bisa dibuka',
@@ -49,6 +50,7 @@ const kamus: KamusRuang = {
     gerakNyalakanPanjang: 'Animation is off on this device · Turn on',
     gerakKet: 'This device asks for reduced motion (system setting). This button only affects this device.',
     menyiapkanGame: 'Getting the game ready...',
+    menyiapkan: 'Preparing…',
     dialogIsi: '{judul} content, scrollable',
     gagalHalamanJudul: 'This page couldn’t be opened',
     gagalHalamanIsi: 'The connection may have dropped for a moment, or the game was just updated. Reload the page to try again.',
@@ -75,6 +77,7 @@ const kamus: KamusRuang = {
     gerakNyalakanPanjang: '此设备已关闭动画 · 点击开启',
     gerakKet: '此设备的系统设置要求减少动画。此按钮只对本设备生效。',
     menyiapkanGame: '正在准备游戏……',
+    menyiapkan: '正在准备……',
     dialogIsi: '{judul}内容，可滚动',
     gagalHalamanJudul: '此页面暂时无法打开',
     gagalHalamanIsi: '可能是网络短暂中断，或游戏刚刚更新。请重新加载页面再试一次。',

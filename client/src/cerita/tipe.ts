@@ -236,6 +236,8 @@ export interface LokasiIlustrasi {
   h: number;
   latar: readonly VarianGambar[];
   depan?: readonly VarianGambar[];
+  /** (T-010) Gambar mini latar (data URI ~0,5 KB) yang tampil kabur sebagai pengganti ruangan sampai lapisan siap. */
+  kabur?: string;
   tokoh: TokohLokasi;
   bingkai: Record<'hp' | 'lebar', { cx: number; cy: number; lebar: number }> & {
     /** (tokoh `dekat`) Bidikan dekat untuk panggung HP yang tinggi (rasio <= 1,15): tokoh memenuhi panggung. */

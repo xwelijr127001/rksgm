@@ -65,6 +65,19 @@ export function perluFokusJudul(kunciLalu: string, kini: Kunjungan, interaksi: b
  * ganda StrictMode saat pengembangan) tidak mengulangnya dan tidak pula membatalkannya.
  */
 let catatan: { kunci: string; fokus: boolean; selesai: boolean } | null = null;
+
+/**
+ * (T-010 G2) Penahan fokus: selama layar pemuat halaman awal tampil, isi halaman `inert` (h1 tidak bisa difokus), jadi upaya
+ * fokus judul MENUNGGU sampai pemuat dilepas, lalu baru dijalankan (kebijakan fokus tidak berubah: muat awal tetap tanpa fokus).
+ */
+let penahan: { tunggu: Promise<void>; lepas: () => void } | null = null;
+export function tahanFokusJudul(): () => void {
+  let lepas!: () => void;
+  const tunggu = new Promise<void>((r) => { lepas = r; });
+  const ini = { tunggu, lepas };
+  penahan = ini;
+  return () => { if (penahan === ini) penahan = null; ini.lepas(); };
+}
 let pernahBerinteraksi = false;
 /**
  * Kunci entri riwayat saat dokumen dimuat (react-router menyimpannya di history.state; entri baru
@@ -118,7 +131,7 @@ function fokusJudulNanti(selesai: () => void): () => void {
   const coba = (): boolean => {
     if (fokusDipegang()) return true; // halaman/pengguna sudah menaruh fokus: jangan direbut
     const h1 = document.querySelector<HTMLElement>('h1');
-    if (!h1) return false;
+    if (!h1 || h1.closest('[inert]')) return false; // isi di balik pemuat (inert) tidak bisa difokus: tunggu
     if (!h1.hasAttribute('tabindex')) h1.tabIndex = -1;
     h1.setAttribute('data-fokus-halaman', '');
     h1.focus({ preventScroll: true });
@@ -130,7 +143,7 @@ function fokusJudulNanti(selesai: () => void): () => void {
     obs = new MutationObserver(() => {
       if (coba()) tuntas();
     });
-    obs.observe(document.body, { childList: true, subtree: true });
+    obs.observe(document.body, { childList: true, subtree: true, attributes: true, attributeFilter: ['inert'] });
     batasWaktu = window.setTimeout(tuntas, 4000);
   });
   return () => {
@@ -161,9 +174,13 @@ export function useHalaman(judul?: string | null): void {
     }
     const c = catatan;
     if (!c.fokus || c.selesai) return;
-    return fokusJudulNanti(() => {
-      c.selesai = true;
-    });
+    const tandaiSelesai = () => { c.selesai = true; };
+    const tahan = penahan;
+    if (!tahan) return fokusJudulNanti(tandaiSelesai);
+    let batal = false;
+    let hentikan: (() => void) | null = null;
+    void tahan.tunggu.then(() => { if (!batal) hentikan = fokusJudulNanti(tandaiSelesai); });
+    return () => { batal = true; hentikan?.(); };
     // Hanya saat halaman dipasang atau pathname berubah (bukan saat ?query berganti di halaman yang sama).
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [loc.pathname]);
