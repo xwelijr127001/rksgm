@@ -361,3 +361,69 @@ Screenshots: `team/evidence/T-010/gagal/*.png` (incl. `lokasi-kedua-placeholder-
 - Because of D-59 the loader will rarely be seen; the blank screen while the JS downloads is T-011.
 
 - Lead acceptance (2026-11-15) of Codex R-17: the 390px DPR 3 warm-up completes 0/5 within the 3 s dwell but is reused in flight 5/5 and the scene reveals within ~40 ms of mounting; the 4/5 completed-cache target is waived for DPR 3. Improving it would require a longer dwell or heavier prefetch, neither of which helps the player.
+
+## T-011 — pre-JS loading screen (2026-11-15)
+
+Fullstack · status: review · not committed. Followed DESIGN-REVIEW D-66..D-76. The block in index.html is the tested block from team/specs/T-011-pra-pemuat-block.html, unchanged.
+
+### Changes
+- `client/index.html`: the T-011 block was inserted directly after `<div id="root"></div>`:
+  - `<template id="pra-tpl">`: the same markup as the React loader, including the inline Raki.
+  - The inline script: `'%BASE_URL%'` path test identical to the D-59 preload, 400 ms show delay, `window.__lepasPra(f)` with the 600 ms minimum from the node's first paint, the 15 s id/en/zh "taking too long" message, language from `?lang`, then `raksa:bahasa`, default id.
+  - The D-59 preload script is untouched.
+- `client/src/components/PemuatAwal.tsx` (D-71):
+  - New `lepasPra()` helper: every call is guarded with `typeof window.__lepasPra === 'function'`, plus the typed globals.
+  - New `ikutiPra()`: watches the node's `data-selesai` attribute and its removal.
+  - **Skip** (sheet decoded / already dismissed): `__lepasPra(1)`. If the node is up, `#root` stays inert and the h1 focus is held until the fade starts or the node is gone; otherwise the call only cancels the 400 ms timer.
+  - **Show + node present: ADOPT.** No portal is rendered and no second overlay appears. `#root` stays inert + aria-busy and the focus hold is kept; on essentials-ready or the 2000 ms cap from mount it calls `__lepasPra(1)`. Inert is removed when the fade starts; the focus hold is released when the node is removed.
+  - **Show + no node yet:** `__lepasPra(0)` cancels the timer, then React's own overlay, exactly as in T-010.
+  - The overlay markup moved into an exported `KerangkaPemuat` component (the same JSX) so it can be tested.
+- `client/src/App.tsx`: `LepasPraDiLuarBeranda` calls `__lepasPra(0)` when the router path is not `/`. The brief says `0`; D-71(d) said `1`. I used the Lead's `0`: remove at once, because nobody needs a fade when the homepage never mounts. It is written inline so PemuatAwal does not move into the main bundle.
+- `client/src/components/pemuatPra.test.tsx` (new guard, added to `test:client` in the root package.json):
+  1. The `<template>` in index.html must equal `renderToStaticMarkup(<KerangkaPemuat teks="Menyiapkan…"/>)`. It is normalised only for `id="pra-pemuat"`, inline-style spacing and `<i></i>` vs `<i/>`.
+  2. The block is scoped with the D-59 path test, exposes `__lepasPra`, and sits after `#root`.
+- `tools/cek-pra-t011.mjs` (new): the check script below.
+- Not changed: `ui/halaman.ts` (the T-010 focus hold already covers adoption) and `tools/cek-pemuat-t010.mjs`.
+
+### How to test
+1. Build and serve: `npm run build && RAKSA_LEGACY=on npm start` (port 4000; legacy on for zh and /acara/*).
+2. Run `node tools/cek-pra-t011.mjs`. It exits 1 on any failure.
+3. Throttles it uses:
+   - Slow: whole page via `Network.emulateNetworkConditions`, 200,000 B/s down / 94,000 B/s up / 150 ms latency, cache disabled.
+   - Medium: 1,500,000 B/s / 40 ms.
+4. Viewport: 360x740 at DPR 2.
+5. Output goes to `team/evidence/T-011/`: `hasil.json`, `frames-lambat-{id,en,zh}/` (one screencast frame per 100 ms) and screenshots.
+
+### Timings (production build, 360x740)
+| case | result |
+|---|---|
+| slow, cold `/`, id / en / zh | first contentful paint **1352 / 1332 / 1356 ms**, and it is the loader (node inserted at 1320 / 1299 / 1321 ms; it was 4.03 s of blank cream before). Homepage mounted under it at 4964 / 4973 / 4990 ms; fade starts 4975 / 4986 / 5009; node gone 5257 / 5267 / 5259 ms. **0 frames with neither overlay nor homepage** after the node appears; **no second React overlay**; `.lp-pemuat-isi` rect identical before and after the handover (93.6, 238.0, 172.7 x 204.8). Text and `lang` correct. |
+| fast cold `/` (no throttle) | node never inserted; homepage at 365 ms, FCP 88 ms; no flash |
+| medium + sheet held 1 s | node inserted 610 ms, painted 622 ms, released 1235 ms = **614 ms on screen**, gone 1516 ms; released once, no second overlay |
+| slow + sheet held 15 s (adoption, sprite late) | node adopted, released **1981 ms after the homepage mounted** (the 2000 ms cap), gone 7240 ms; no second overlay |
+| other routes (slow link): /host, /projector, /join, /cerita, /cerita/auto-2, /acara/join, /kenalan, /cms, /room/ABC123 | no `#pra-pemuat`, no `__lepasPra`, no `aria-busy` |
+| main JS blocked | after 15 s: id "Memuat terlalu lama…", en "Taking too long…", zh "加载时间过长…"; bar `display:none`; `aria-busy` cleared |
+| reduced motion, before JS | bar `animation: none` (static); Raki held by the global theme.css rule (0.001 ms x 1 = still) |
+
+### Size
+- Built `client/dist/index.html` gzip: **819 -> 2,301 B (+1,482 B)**. 819 rather than the Designer's 804 because the D-59 preload line is included.
+- Bundles:
+  - Landing 2.77 -> 3.09 KB gzip (adoption code).
+  - index.js 227.84 -> 227.88 KB (App route effect).
+  - Every other chunk is within ±0.01 KB (hash churn).
+  - Lists: `team/evidence/T-011/bundle-before.txt` and `bundle-after.txt`.
+
+### Regression
+- `npm run test:client`: 726 tests / 726 pass / 0 fail (+2 guard tests).
+- `npm run test:e2e`: exit 0, kegagalan 0, console/http bermasalah 0.
+- T-008 numbers unchanged: 360 Masuk 565.7, gaps 8/16/12, sprite centre 180; 390 577.7; 800 777.9; 1280 514.7.
+- T-010 loader checks unchanged:
+  - Late sheet: shown ≥ 600 ms (636 ms with a short hold; 1118-1148 ms when held 1.5 s); cap 2010 ms.
+  - Fast cold `/`: skipped.
+  - Never on other routes; h1 focus only after dismissal; cold load moves no focus.
+  - Pill 30.3 px; the `.cer-memuat` fallback keeps only its padding; a 404 background keeps the blurred room.
+  - Evidence: `team/evidence/T-011/regresi-t010/` and `regresi-*`.
+
+### Known issues
+- Not scripted: a player resumed away from `/` by PhaseRouter (the App effect releases the node; covered by code, not by a run).
+- With legacy mode off, zh briefly shows on the pre-JS screen before `main.tsx` flips the app to id (accepted in D-68).

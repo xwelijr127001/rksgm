@@ -1048,3 +1048,169 @@ Reviewer: Designer · Build: production build in client/dist (20:08, newer than 
   are revealed as one group at about 3.2 s (placeholder 0.07 -> removed by 3.45 s). No stale room and no flat square.
 
 Not re-verified: real devices and Fullstack's before/after numbers (their evidence); `npm run test:client` / `test:e2e`.
+
+---
+
+## T-011 — spec (2026-11-15)
+
+Author: Designer · Status: spec for Fullstack (step 1) · No source edited · no mockup (words + tested HTML/JS) · nothing new for Lead to approve.
+Inputs: client/index.html (+ the built client/dist/index.html), components/PemuatAwal.tsx, player.css `.lp-pemuat*`, theme.css, components/Merek.tsx, ui/halaman.ts, main.tsx, i18n/index.ts, my D-57..D-63.
+Support file (the exact tested block): `team/specs/T-011-pra-pemuat-block.html`.
+
+**How this was checked.** Production build (client/dist, :4000). The block was injected by rewriting the served `index.html` with CDP (`Fetch.fulfillRequest`), with the WHOLE page throttled (`Network.emulateNetworkConditions`: 1.6 Mbps =
+200 KB/s, 150 ms RTT, cache off), 360x740 DPR 2, plus 390x844 and 1280x800, id/en/zh, reduced motion, a per-animation-frame state recorder (rAF) and timed screenshots. The app code was NOT edited, so the React side of the handover
+(D-71) is emulated from outside by calling the same function the React code will call; the emulation is labelled below. Numbers are measured.
+
+### What the owner sees today (measured, 1.6 Mbps whole page)
+First paint at 776 ms (blank cream), first CONTENTFUL paint at 4,028 ms when the ~730 KB entry JS has run, and the React loader at 4.77 s (shown for about 0.6 s). So about 4 s of blank cream, then a short loader.
+
+### Spec lines
+
+- [D-66] Look and markup: reuse the React loader's own markup and class names, no inline CSS · The `.lp-pemuat*` and `.mrk*` rules live in the render-blocking main stylesheet (`index-*.css`, in `<head>`), so the first paint already has them.
+  The pre-JS screen is therefore the SAME markup as `PemuatAwal` (`<div class="lp-pemuat" id="pra-pemuat"><div class="lp-pemuat-isi">` wordmark, Raki, 4-segment bar, `<p class="lp-pemuat-teks" role="status">`) held in a `<template>` and styled by the same
+  CSS: cream `--krem`, 34 px wordmark (48 px on desktop), 4 pixel segments, 14 px status text. **Measured pixel match:** at 360x740 (id), 390x844 (en) and 1280x800 (zh), under reduced motion (static bar), the element rectangles of wordmark, Raki,
+  bar and text are identical to the React overlay's to 0.1 px, and the full-page PNG of the pre-JS screen alone and of the React overlay alone have the SAME MD5 (pixel-identical). Dark mode is not a thing here (no `prefers-color-scheme` or
+  `color-scheme` in theme.css or player.css). No fonts, no external assets, no React. Priority: high.
+
+- [D-67] Raki: inline copy (recommended, not wordmark + bar only) · The handover must be invisible, and the React overlay has Raki. A wordmark+bar-only pre-JS screen would make the column jump (Raki adds an 80 px block plus 24 px margin, shifting
+  the wordmark about 52 px) and pop the owl in at the handover, OR force Raki out of the React loader I specified (D-57). Cost of keeping Raki inline, measured on the built index.html: **+538 bytes gzip** (full block 1,503 B vs 965 B without Raki).
+  It is the exact markup React renders (`<svg class="anim-melayang" ...>`, colours via the existing CSS variables; the float animation class comes from the main CSS and stops under reduced motion). Priority: high.
+
+- [D-68] Status text and language · Use the page language with a three-way text, not a single Indonesian string: `?lang=id|en|zh` first, then `localStorage['raksa:bahasa']`, default id (the template already holds "Menyiapkan…"); en "Preparing…",
+  zh "正在准备……" (same strings as `umum.menyiapkan`), with `lang="en"` / `lang="zh-CN"` on the `<p>` so a screen reader uses the right voice. Tested for the six combinations (stored x query: `?lang=id` overrides stored `en`; `?lang=en`; stored `zh`;
+  stored `en`; none -> id), all correct. Known and accepted: when legacy mode is off, `main.tsx` flips zh to id after /api/config; the pre-JS screen may say zh for that short moment. Priority: med.
+
+- [D-69] Scope: route `/` only, not rendered elsewhere · The block's script checks `location.pathname` against the base path with the SAME test as the existing D-59 preload (`p===b||p+'/'===b`, `b='%BASE_URL%'`) and only then takes the node out of the `<template>`
+  (a `<template>` is inert and never rendered). Measured on the production page: node and `__lepasPra` exist on `/` and `/?lang=en`; on `/host`, `/join`, `/projector`, `/cerita`, `/cerita/auto-2`, `/acara/join`, `/kenalan`, `/room/ABC123`, `/cms`
+  there is no `#pra-pemuat` in the DOM, no `__lepasPra`, no `aria-busy` on `#root`. Priority: high.
+
+- [D-70] Timing: 400 ms show-delay, then at least 600 ms on screen · Without a delay, a fast link would flash the pre-JS screen on every cold load (the same flicker D-62 removed). So the node is inserted only if the app has not claimed the page after
+  **400 ms**, and once shown it stays at least **600 ms from its first painted frame** (the script records `window.__praT` in a `requestAnimationFrame` after insertion) before the 200 ms fade. Measured: **fast link (no throttle):** the app is up at
+  15 ms, no pre-JS node was ever inserted, no flicker. **Medium (1.5 MB/s):** node at ~660 ms, painted ~700 ms, held ~710 ms, fade 281 ms, homepage. **Slow (1.6 Mbps):** cream at first paint (776 ms), loader painted at ~1.15 s (first contentful
+  paint 1.15-1.18 s, was 4.03 s), held until the app takes over at ~4.8 s, fade, homepage. The short cream gap before the loader (0.4 s after the script runs) is deliberate. Priority: high.
+
+- [D-71] Handover: the pre-JS node IS the overlay; React only releases it (recommended) · One function owns the node: `window.__lepasPra(f)`: `f = 1` = wait until the node has been on screen 600 ms, then fade it (`data-selesai`, the same 200 ms CSS as the
+  React overlay, instant under reduced motion) and remove it after 260 ms; `f = 0` = remove at once (or just cancel the 400 ms timer if the node was never inserted). It also clears `aria-busy` on `#root`. What PemuatAwal does (Fullstack):
+  (a) **decision "show" (sprite late) and the pre-JS node exists:** ADOPT it: do not render the portal; keep `#root` inert + `aria-busy` and the focus hold exactly as today; when the essentials are ready (or the 2000 ms cap from mount) call `__lepasPra(1)`.
+  The inline code enforces the 600 ms minimum from the pre-JS first paint, so React's own minimum logic only applies when it renders its own overlay. (b) **decision "skip" (sprite ready):** `__lepasPra(1)`: the pre-JS screen fades over the complete homepage
+  (and still honours the 600 ms minimum). (c) **no pre-JS node yet** (the JS arrived before 400 ms): at mount call `__lepasPra(0)` to cancel the pending 400 ms timer so the pre-JS screen can never appear after React took over; PemuatAwal then behaves exactly as it does today
+  (own overlay if the sprite is late). Reasons for adoption over replacement: one node, no duplicated Raki, and the bar's lit segment and Raki's float do not restart at the handover. (d) **Landing never mounts** (a player resumed into `/lobby`, `/main` etc. by
+  `PhaseRouter`, or any redirect away from `/`): add one effect in `App` that calls `__lepasPra(1)` when the route is not the homepage. Type the globals: `interface Window { __lepasPra?: (f: 0 | 1) => void; __praT?: number }`.
+  **Tested (React side emulated from outside, same calls):** *adopt:* pre-JS node painted from 1.1 s, home mounted under it at 4.8 s, fade at 5.4 s, gone 5.7 s, **0 frames with no overlay** and no jump; *skip:* node fades the moment the homepage is mounted
+  (after its minimum) over the complete page, 0 blank frames; *replace* (alternative, not recommended): the node is removed in the same frame the React overlay appears, 0 frames with neither. Priority: high.
+
+- [D-72] Failure: never stay forever · If the bundle never runs or errors, a 15 s timer inside the same script replaces the status text with a short message (id "Memuat terlalu lama. Periksa koneksi lalu muat ulang halaman.", en "Taking too long. Check your
+  connection and reload the page.", zh "加载时间过长。请检查网络后重新加载页面。"), hides the bar and clears `aria-busy` (measured with the JS bundle blocked: text changed at 15.7 s, bar `display:none`, busy removed); the node stays so the user is told what to do,
+  and `__lepasPra` still removes it if the app wakes up later. If JavaScript is off, the script never runs, the template is never rendered, and the existing `<noscript>` message is the only content (unchanged). If the Landing chunk fails after the entry JS ran,
+  the same 15 s timer fires (the node is only released by Landing or by the App route effect). Priority: high.
+
+- [D-73] Motion and reduced motion · The bar is pure CSS from the main stylesheet (`lp-seg` 1.2 s `steps(1)`, one lit segment, Raki's existing float). Before the JS runs there is no `data-gerak` attribute, so the rule shape
+  `@media (prefers-reduced-motion: reduce) { :root:not([data-gerak="penuh"]) ... }` reduces to the media query alone: with reduced motion the bar is static (all four segments lit at 55%), Raki is still and the fade is instant (the pixel-identical test above
+  ran in this mode). Once the JS runs, `siapkanGerak()` sets `data-gerak="penuh"` when the user turned animations on in the app, and the React override takes over (animations resume); that is the expected, documented hand-off. Priority: med.
+
+- [D-74] Accessibility · The status `<p>` keeps `role="status"` (inserted with the node; a region inserted together with its text is not reliably announced, so this is best effort like the React version) with the right `lang`; `aria-busy="true"` is on `#root` (the content
+  being prepared, never on an ancestor of the status text, which would mute it), set on insertion and cleared by `__lepasPra`; the wordmark, Raki and bar are `aria-hidden`; nothing focusable exists in the overlay or before the app mounts, so there is no focus trap;
+  scrolling is locked by the existing `html:has(.lp-pemuat){overflow:hidden}` rule. Priority: med.
+
+- [D-75] Budget · Measured on the built `client/dist/index.html`: **804 B -> 2,307 B gzip = +1,503 B** (raw +3,451 B): template 1,937 B raw (the React markup incl. Raki), script 1,221 B raw. That is 1.47 KiB, at the 1.5 KB target. If a few bytes are needed:
+  dropping the zh timeout text saves 94 B gzip (zh would fall back to id), dropping Raki saves 538 B (not recommended, D-67). No new request, no CSS, no font, no asset; the block is parsed with the HTML so it costs nothing on the JS or CSS bundles.
+  Known and accepted: the first paint still waits for the render-blocking 10.7 KB gzip main stylesheet (776 ms at 1.6 Mbps); the loader appears about 0.4 s after the script runs (D-70), so on the slowest link there is about 1.1 s of cream before it, down from 4 s. Priority: med.
+
+- [D-76] Constraints for Fullstack (binding) · 1. Edit `client/index.html` only for the block (place it after `<div id="root"></div>`, use `'%BASE_URL%'` in the path test, keep the D-59 preload script as is) plus the small React hooks of D-71 in `PemuatAwal.tsx` and `App.tsx`.
+  2. The template must stay a byte-for-byte copy of the React overlay markup (regenerate from the rendered `.lp-pemuat` if PemuatAwal changes; the support file says how). 3. No inline CSS, no new colours, no new i18n keys. 4. Verify on the PRODUCTION build (the block is
+  not applied by the dev server's `%BASE_URL%`, check it there too). 5. Landing/Join/other routes untouched.
+
+### Tested block (the exact file is `team/specs/T-011-pra-pemuat-block.html`; the template's `<svg>` is the exact Raki markup React renders, abbreviated here)
+
+```html
+<template id="pra-tpl"><div class="lp-pemuat" id="pra-pemuat"><div class="lp-pemuat-isi"><div class="mrk" aria-hidden="true"><span class="mrk-raksa">RAKSA</span><span class="mrk-game">GAME</span></div><span class="lp-pemuat-raki" aria-hidden="true"><svg class="anim-melayang" width="80" height="80" viewBox="0 0 64 64" ...exact Raki markup...></svg></span><div class="lp-pemuat-bar" aria-hidden="true"><i></i><i></i><i></i><i></i></div><p class="lp-pemuat-teks" role="status">Menyiapkan…</p></div></div></template>
+<script>(function(){try{var b='%BASE_URL%',p=location.pathname;if(p!==b&&p+'/'!==b)return;
+var d=document,r=d.getElementById('root'),T=d.getElementById('pra-tpl'),n,s,k,q=/[?&]lang=(id|en|zh)/.exec(location.search),l=q&&q[1];
+try{l=l||localStorage.getItem('raksa:bahasa')}catch(e){}
+function show(){n=T.content.firstChild;s=n.querySelector('p');var x={en:'Preparing…',zh:'正在准备……'}[l];if(x){s.textContent=x;s.lang=l=='zh'?'zh-CN':l}
+d.body.insertBefore(n,d.body.firstChild);r.setAttribute('aria-busy','true');requestAnimationFrame(function(){window.__praT=performance.now()});
+k=setTimeout(function(){s.textContent={en:'Taking too long. Check your connection and reload the page.',zh:'加载时间过长。请检查网络后重新加载页面。'}[l]||'Memuat terlalu lama. Periksa koneksi lalu muat ulang halaman.';n.querySelector('.lp-pemuat-bar').style.display='none';r.removeAttribute('aria-busy')},15000)}
+var w=setTimeout(show,400);
+window.__lepasPra=function(f){clearTimeout(w);if(!n)return;clearTimeout(k);function g(){r.removeAttribute('aria-busy');if(f){n.setAttribute('data-selesai','');setTimeout(function(){n.remove()},260)}else n.remove()}
+f?setTimeout(g,Math.max(0,600-(performance.now()-(window.__praT||performance.now())))):g()}
+}catch(e){}})();</script>
+```
+(Bug found and fixed while testing, worth knowing: the regex must not contain a `\b` written through a string template: it silently became a backspace character; the file above has none.)
+
+### Sketch (360x740, 1 char ~ 4 px; identical to the React loader, so the same picture before and after the handover)
+
+```
+ t=0..~1.1s (slow link)      t=~1.15s .. app takes over (~4.8s)                 t=handover               t=+200ms fade
+ +----------------+          +----------------+                                 +----------------+       +----------------+
+ |  cream         |          |                |                                 | (same screen,  |       | complete       |
+ |  (first paint  |          |  RAKSA | GAME  |   34px wordmark                  |  bar keeps     |       | homepage       |
+ |   776 ms,      |   -->    |     ,___,      |   Raki 80px (floats)            |  stepping;     |  -->  | (hero, Join,   |
+ |   no content   |          |     (o,o)      |                                 |  node adopted  |       |  Mode Cerita)  |
+ |   yet)         |          |  [] [] [] []   |   4-segment pixel bar           |  by React)     |       |                |
+ |                |          |   Menyiapkan…  |   status, role=status           +----------------+       +----------------+
+ +----------------+          +----------------+                                  fast link: no node at all (app in <400 ms)
+```
+
+### Measurements (production build, 360x740 DPR 2 unless noted)
+
+| case | first paint | loader painted | app takes over | handover | blank/gap frames |
+|---|---|---|---|---|---|
+| today (no pre-JS) | 776 ms (cream) | React loader at 4.77 s | 4.77 s | n/a | cream until 4.0 s |
+| slow 1.6 Mbps, pre-JS block | 776 ms (cream) | ~1.15 s | ~4.8 s | adopt / skip / replace | 0 frames with no overlay after it appears |
+| medium 1.5 MB/s | 292 ms | ~0.7 s | ~1.4 s | skip: held ~710 ms then 281 ms fade | 0 |
+| fast (no throttle) | 76 ms | never inserted | 15 ms | n/a | none (no flicker) |
+| gzip cost of index.html | 804 B | | | +1,503 B (2,307 B) | |
+| pixel match (reduced motion) | | | | 360 id, 390 en, 1280 zh: rects identical, PNG MD5 identical | |
+
+### Review checklist for step 3 (Designer review) and QA
+- Production build, 360x740 DPR 2 and 390x844 DPR 3, whole-page throttle 1.6 Mbps / 150 ms, cache off AND a warm second visit: screenshot series (50-100 ms): cream, loader painted ~1.1 s (wordmark, Raki, bar stepping, status), handover frame(s), complete homepage;
+  an rAF recorder shows no frame without an overlay between the node's first paint and the homepage reveal; the bar's lit segment does not restart at the handover (adopt).
+- Fast link (no throttle) and a LAN/Tailscale run: the pre-JS screen does not appear (no flash); medium link: 600 ms minimum honoured.
+- Three languages (id/en/zh, `?lang=` and stored `raksa:bahasa`): text and `lang` attribute; zh-then-id flip with legacy off noted.
+- Scope: no `#pra-pemuat` on /host, /join, /projector, /cerita, /cerita/auto-2, /acara/*, /kenalan, /room/*, /cms; a player resumed into /lobby or /main: the App effect removes it (no stuck screen).
+- Failure: JS blocked -> 15 s message (id/en/zh), bar hidden, `aria-busy` cleared; JS disabled -> only the existing noscript message; Landing chunk blocked -> 15 s message.
+- Reduced motion: static bar, instant fade, `?gerak=ikut` and `?gerak=penuh` after the JS runs; pixel-identical pre-JS vs React overlay (rects and PNG MD5) at 360, 390, 1280.
+- A11y: `role=status` with the right `lang`, `aria-busy` on `#root` only, no focusable elements, page behind does not scroll.
+- Size: gzip of the built index.html <= +1.5 KB (expect about +1,503 B); homepage composition from T-003..T-010 unchanged; `npm run test:client` and `npm run test:e2e` pass.
+
+---
+
+## T-011 — review (2026-11-15)
+
+Reviewer: Designer · Build: production build in client/dist (20:57, newer than the sources) on `npm start` :4000 (`RAKSA_LEGACY=on`, started and stopped by me) · No source edited.
+Method: read team/HANDOFF.md T-011, the diffs of client/index.html, PemuatAwal.tsx and App.tsx, the guard test (I ran it: 2/2 pass); checked that the `index.html` script and template are **byte-identical** to the block I tested
+(team/specs/T-011-pra-pemuat-block.html); then ran my own CDP checks on the real, un-rewritten page (per-animation-frame recorder, whole-page throttle), not Fullstack's harness.
+
+### Verdict: PASS. No open items for Fullstack (two low notes for QA/Lead below).
+
+### Results (measured)
+1. **Slow cold `/` (1.6 Mbps whole page, 150 ms RTT, cache off), 360x740, id / en / zh:** first contentful paint **1,368 / 1,328 / 1,312 ms and it is the loader** (was 4,028 ms of blank cream); node inserted at ~1.12-1.15 s; the app's JS finished at
+   ~4.1 s and the homepage mounted under the loader at ~4.73-4.75 s; the node starts fading the same frame and is gone ~280 ms later (about 5.0 s). **0 frames with no overlay** from the node's first paint to the homepage, **no second React overlay at any
+   frame** (max 0), and the `.lp-pemuat-isi` rectangle is the same single value for the whole run (93.6,238 172.7x204.8): it is the same node, so nothing moves at the handover. Text and `lang` per language: "Menyiapkan…" (id, inherits the page
+   language), "Preparing…" with `lang="en"`, "正在准备……" with `lang="zh-CN"`; `aria-busy="true"` on `#root` while shown, cleared afterwards.
+   **Pre-JS vs React overlay, pixel check under reduced motion:** 360x740 id, 390x844 en, 1280x800 zh: PNG MD5 of the pre-JS screen (slow link) equals the MD5 of React's own overlay (fast link, sprite held 1.5 s) in all three
+   (ead183dbf7, 3cdcc07780, 96939fe2da), the same hashes as in my spec test.
+2. **Fast cold `/` (no throttle):** the node is never inserted (homepage at 364 ms, FCP 88 ms), no flash. **Medium (1.5 MB/s, sprite held 1 s):** node painted ~575 ms, adopted when the homepage mounted at ~1.0 s, fade at 1.2 s = **624 ms on screen**,
+   gone 1.45 s, released once, no second overlay. **Late sprite (slow, sprite held 15 s):** adopted, released **2,032 ms after the homepage mounted** (the 2000 ms cap), gone 0.25 s later, no second overlay; `inert` and `aria-busy` cleared.
+3. **JS blocked:** after ~16 s the status text reads the "too long" message in the page language (id "Memuat terlalu lama. Periksa koneksi lalu muat ulang halaman.", en "Taking too long. Check your connection and reload the page.", zh "加载时间过长。请检查网络后重新加载页面。"),
+   bar `display:none`, `aria-busy` cleared (not stuck busy), node stays so the user is told what to do. **Reduced motion before JS:** bar `animation: none` (static).
+4. **Scope:** on `/host`, `/projector`, `/join`, `/cerita`, `/cerita/auto-2`, `/acara/join`, `/kenalan`, `/cms`, `/room/ABC123` there is no `#pra-pemuat` and no `aria-busy` (JS blocked so a stray node would stay visible). **Resumed player landing off `/`:** I
+   could not drive a live PhaseRouter redirect, so I emulated the same condition: with the pre-JS node shown I changed the URL to `/kenalan` right when the React root was created; the App effect released the node (removed 184 ms later), the Kenalan page
+   rendered, nothing left busy or inert. The PhaseRouter navigation itself is NOT run: note for QA (resume a player into /lobby or /main on the slow link and check no stuck loader).
+5. **Anti AI-slop and composition:** it is still the RAKSA loader (wordmark, the Raki owl floating, the 4-segment pixel bar, status on the cream page colour), the same screen as the React one, not a generic splash. Homepage composition after the handover is unchanged:
+   Masuk bottom 565.7 (360x740 id) / 577.7 (390x844 en) / 777.9 (800x1024) / 514.7 (1280x800), frame 20,78 -> 340,222 and the T-008 positions, no overlay left, `<html>` overflow back to visible, no horizontal scroll.
+   Code points: the `index.html` block is unchanged from my tested one, the template is guarded by `pemuatPra.test.tsx` against drift from the React markup, PemuatAwal adopts the node (no portal) and the App route effect uses `0` (remove at once) instead of my `1` (fade):
+   an accepted improvement, nobody needs a fade when the homepage never mounts.
+
+### Step 6: the owner's wish ("it kinda loads and downloads some assets, then the homepage appears")
+**Yes on the slow link: T-010 + T-011 now show the owner a branded loader from about 1.3 s (it was about 4 s of blank cream) through the ~5 s bundle download and a fade into the complete homepage, with Episode 2 rooms shown as a blurred placeholder instead of a flat square;
+what is still missing is any real progress indication (the bar is indeterminate by design) and the first ~1.3 s of cream before anything paints.**
+(On a fast link nothing shows at all, by design, so a LAN test will not reproduce the loader.)
+
+### Items
+- [D-77] Resumed player (PhaseRouter redirect off `/`) · not driven end to end (emulated via the same App effect) · QA: resume a player into /lobby or /main on the 1.6 Mbps throttle and confirm the loader is released at once and focus/inert are clean · low.
+- [D-78] Slow link, first ~1.3 s · cream before the loader: the first paint waits for the render-blocking 10.7 KB gzip stylesheet (~0.78 s at 1.6 Mbps) and the 400 ms show-delay adds the rest · accepted trade-off (no flicker on fast links); only revisit if the owner still finds the start too blank, e.g.
+  by moving the few loader rules inline (extra bytes in index.html) and shortening the delay to ~250 ms · low.
+
+### Not verified by me
+Real devices and a real PhaseRouter resume (D-77), the legacy-off zh-then-id text flip (accepted in D-68), Fullstack's bundle-size numbers (their evidence: +1,482 B gzip in index.html, Landing +0.32 KB), and `npm run test:e2e` (their log; I ran only the 2 guard tests, 2/2 pass).

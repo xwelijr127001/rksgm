@@ -24,7 +24,7 @@ const KUNCI = 'raksa:loader:v1';
 const BATAS_MS = 2000;
 const MIN_TAMPIL_MS = 600;
 const LEPAS_MS = 260;
-const LEMBAR = `${import.meta.env.BASE_URL}karakter/miss-raksa-besar.webp`;
+const LEMBAR = `${import.meta.env?.BASE_URL ?? '/'}karakter/miss-raksa-besar.webp`;
 
 function sudahDilepas(): boolean {
   try { return sessionStorage.getItem(KUNCI) === '1'; } catch { return true; } // penyimpanan diblokir: jangan tampil
@@ -63,6 +63,28 @@ function decodeLembar(): Promise<void> {
   }).then(() => { lembarSiap = true; }, (e) => { janjiLembar = null; throw e; });
   return janjiLembar;
 }
+/**
+ * T-011 (D-71): layar pemuat PRA-JS dari client/index.html (#pra-pemuat, markup SAMA dengan overlay di bawah) dimiliki
+ * `window.__lepasPra`: 1 = pudar sesudah minimal 600 ms sejak cat pertamanya, 0 = segera / batalkan penundaan 400 ms.
+ */
+declare global { interface Window { __lepasPra?: (f: 0 | 1) => void; __praT?: number } }
+function lepasPra(f: 0 | 1) {
+  if (typeof window !== 'undefined' && typeof window.__lepasPra === 'function') window.__lepasPra(f);
+}
+/** Ikuti node pra-JS: `pudar` saat mulai memudar (data-selesai), `hilang` saat dibuang dari DOM. Mengembalikan pembatal. */
+function ikutiPra(node: Element, pudar: () => void, hilang: () => void): () => void {
+  let sudahPudar = false;
+  const cek = () => {
+    if (!sudahPudar && (node.hasAttribute('data-selesai') || !node.isConnected)) { sudahPudar = true; pudar(); }
+    if (!node.isConnected) { obs.disconnect(); hilang(); }
+  };
+  const obs = new MutationObserver(cek);
+  obs.observe(node, { attributes: true, attributeFilter: ['data-selesai'] });
+  obs.observe(document.body, { childList: true });
+  cek();
+  return () => obs.disconnect();
+}
+
 if (typeof window !== 'undefined' && TOKOH.missRaksa.aktif && !sudahDilepas()) {
   // Halaman awal (modul ini hanya diimpor Landing): mulai sedini mungkin; preload index.html biasanya sudah memuatnya.
   decodeLembar().catch(() => { /* ditangani saat pemuat memutuskan */ });
@@ -70,7 +92,7 @@ if (typeof window !== 'undefined' && TOKOH.missRaksa.aktif && !sudahDilepas()) {
 
 export function PemuatAwal() {
   useBahasa();
-  const [fase, setFase] = useState<'belum' | 'tampil' | 'pudar' | 'hilang'>('belum');
+  const [fase, setFase] = useState<'belum' | 'tampil' | 'pudar' | 'hilang' | 'diadopsi'>('belum');
   const dipasang = useRef<number | null>(null);
   const keputusan = useRef<boolean | null>(null);
 
@@ -82,10 +104,25 @@ export function PemuatAwal() {
       keputusan.current = !(sudahDilepas() || hematData() || bekalSiap);
       if (!keputusan.current && bekalSiap) tandaiDilepas();
     }
-    if (!keputusan.current) { setFase('hilang'); return; }
-    setFase((f) => (f === 'belum' ? 'tampil' : f));
-    dipasang.current ??= performance.now(); // tenggat tetap dari pemasangan PERTAMA
     const root = document.getElementById('root');
+    const pra = document.getElementById('pra-pemuat');
+    if (!keputusan.current) {
+      setFase('hilang');
+      // Bekal siap / sudah dilepas: layar pra-JS (bila ada) memudar di atas halaman yang sudah lengkap (D-71 b); bila belum
+      // pernah tampil, penundaan 400 ms-nya dibatalkan. Selama masih menutupi, isi halaman inert dan fokus judul ditahan.
+      lepasPra(1);
+      if (!pra || !pra.isConnected) return;
+      const lepasFokusPra = tahanFokusJudul();
+      root?.setAttribute('inert', '');
+      const henti = ikutiPra(pra, () => { root?.removeAttribute('inert'); root?.removeAttribute('aria-busy'); }, lepasFokusPra);
+      return () => { henti(); root?.removeAttribute('inert'); lepasFokusPra(); };
+    }
+    // Tampil: layar pra-JS yang SUDAH tampil DIADOPSI (tanpa overlay kedua; bar & Raki tidak mulai ulang). Belum tampil =
+    // batalkan penundaannya, lalu overlay React sendiri seperti biasa (D-71 a / c).
+    const adopsi = !!pra && pra.isConnected;
+    if (!adopsi) lepasPra(0);
+    setFase((f) => (f === 'belum' ? (adopsi ? 'diadopsi' : 'tampil') : f));
+    dipasang.current ??= performance.now(); // tenggat tetap dari pemasangan PERTAMA
     const lepasFokus = tahanFokusJudul();
     let selesai = false;
     let tLepas = 0;
@@ -95,9 +132,19 @@ export function PemuatAwal() {
     const raf = requestAnimationFrame(() => { tampilPada = performance.now(); });
     root?.setAttribute('inert', '');
     root?.setAttribute('aria-busy', 'true');
+    let hentiPra: (() => void) | null = null;
     const lepas = () => {
       if (selesai) return;
       selesai = true;
+      if (adopsi && pra) {
+        // Node pra-JS menegakkan minimal 600 ms sejak cat pertamanya sendiri, lalu memudar 200 ms dan dibuang.
+        window.clearTimeout(tBatas);
+        window.clearTimeout(tMin);
+        tandaiDilepas();
+        lepasPra(1);
+        hentiPra = ikutiPra(pra, () => { root?.removeAttribute('inert'); root?.removeAttribute('aria-busy'); }, () => { setFase('hilang'); lepasFokus(); });
+        return;
+      }
       window.clearTimeout(tBatas);
       window.clearTimeout(tMin);
       root?.removeAttribute('inert'); // di AWAL pudar: isi halaman bisa difokus lagi
@@ -109,6 +156,7 @@ export function PemuatAwal() {
     /** Bekal siap atau batas: lepas sesudah minimal 600 ms sejak cat pertama (tetap tidak melewati batas 2000 ms). */
     const siapLepas = () => {
       if (selesai) return;
+      if (adopsi) { lepas(); return; }
       const kini = performance.now();
       const sudahTampil = tampilPada === null ? 0 : kini - tampilPada;
       const sisaMin = Math.max(0, MIN_TAMPIL_MS - sudahTampil);
@@ -123,6 +171,7 @@ export function PemuatAwal() {
     return () => {
       // Dilepas (StrictMode / pindah halaman): kembalikan semuanya, hasil janji yang terlambat diabaikan.
       selesai = true;
+      hentiPra?.();
       cancelAnimationFrame(raf);
       window.clearTimeout(tBatas);
       window.clearTimeout(tMin);
@@ -133,16 +182,23 @@ export function PemuatAwal() {
     };
   }, []);
 
-  if (fase === 'hilang' || fase === 'belum') return null;
-  return createPortal(
-    <div className="lp-pemuat" data-selesai={fase === 'pudar' ? '' : undefined}>
+  if (fase === 'hilang' || fase === 'belum' || fase === 'diadopsi') return null;
+  return createPortal(<KerangkaPemuat teks={t('umum.menyiapkan')} selesai={fase === 'pudar'} />, document.body);
+}
+
+/**
+ * Kerangka overlay pemuat. client/index.html memuat SALINAN statisnya (`<template id="pra-tpl">`, layar pra-JS T-011); uji
+ * components/pemuatPra.test.tsx membandingkan keduanya, jadi perubahan di sini wajib diikuti template (D-76).
+ */
+export function KerangkaPemuat({ teks, selesai = false }: { teks: string; selesai?: boolean }) {
+  return (
+    <div className="lp-pemuat" data-selesai={selesai ? '' : undefined}>
       <div className="lp-pemuat-isi">
         <div className="mrk" aria-hidden="true"><span className="mrk-raksa">RAKSA</span><span className="mrk-game">GAME</span></div>
         <span className="lp-pemuat-raki" aria-hidden="true"><Raki size={80} mood="sapa" /></span>
         <div className="lp-pemuat-bar" aria-hidden="true"><i /><i /><i /><i /></div>
-        <p className="lp-pemuat-teks" role="status">{t('umum.menyiapkan')}</p>
+        <p className="lp-pemuat-teks" role="status">{teks}</p>
       </div>
-    </div>,
-    document.body,
+    </div>
   );
 }

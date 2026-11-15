@@ -22,6 +22,18 @@
   </head>
   <body>
     <div id="root"></div>
+    <!-- T-011: layar pemuat PRA-JS (halaman awal saja): kerangka sama dengan PemuatAwal.tsx, kelas .lp-pemuat* dari CSS utama. Muncul bila JS belum tiba setelah 400 ms; lepas lewat window.__lepasPra(1 = pudar sesudah min. 600 ms, 0 = segera). -->
+    <template id="pra-tpl"><div class="lp-pemuat" id="pra-pemuat"><div class="lp-pemuat-isi"><div class="mrk" aria-hidden="true"><span class="mrk-raksa">RAKSA</span><span class="mrk-game">GAME</span></div><span class="lp-pemuat-raki" aria-hidden="true"><svg class="anim-melayang" width="80" height="80" viewBox="0 0 64 64" aria-hidden="true" focusable="false" style="flex: 0 0 auto; overflow: visible;"><path d="M15.8 15.4 16.8 6.4l7.4 5.4Z" fill="var(--cokelat)"></path><path d="M48.2 15.4 47.2 6.4l-7.4 5.4Z" fill="var(--cokelat)"></path><path d="M26 55.6v3.4M23.6 59h4.8M38 55.6v3.4M35.6 59h4.8" fill="none" stroke="var(--kuning)" stroke-width="2.6" stroke-linecap="round"></path><ellipse cx="13.6" cy="34" rx="4.8" ry="10.4" fill="var(--cokelat)" transform="rotate(-8 13.6 34)"></ellipse><ellipse cx="50.4" cy="34" rx="4.8" ry="10.4" fill="var(--cokelat)" transform="rotate(-52 50.4 34)"></ellipse><ellipse cx="32" cy="32.4" rx="19.6" ry="23" fill="var(--cokelat)"></ellipse><ellipse cx="32" cy="38.4" rx="13" ry="15.6" fill="var(--krem)"></ellipse><circle cx="24.4" cy="26.4" r="7.2" fill="var(--putih)"></circle><circle cx="39.6" cy="26.4" r="7.2" fill="var(--putih)"></circle><circle cx="24.4" cy="26.4" r="3.4" fill="var(--tinta)"></circle><circle cx="39.6" cy="26.4" r="3.4" fill="var(--tinta)"></circle><circle cx="25.8" cy="25.2" r="1.1" fill="var(--putih)"></circle><circle cx="41" cy="25.2" r="1.1" fill="var(--putih)"></circle><path d="M18.6 16.6q6 -3 11.6 0M34 16.6q5.6 -3 11.4 0" fill="none" stroke="var(--tinta)" stroke-width="2.4" stroke-linecap="round"></path><path d="M32 31.6l4 5.2h-8Z" fill="var(--kuning)"></path><path d="M19.4 46.8c7.6 4 17.6 4 25.2 0l-1.8 5.2c-6.6 3-14.8 3-21.6 0Z" fill="var(--hijau)"></path><path d="M41.6 51.4l4.6 1.6-1.6 6-4.2-2Z" fill="var(--hijau)"></path></svg></span><div class="lp-pemuat-bar" aria-hidden="true"><i></i><i></i><i></i><i></i></div><p class="lp-pemuat-teks" role="status">Menyiapkan…</p></div></div></template>
+    <script>(function(){try{var b='%BASE_URL%',p=location.pathname;if(p!==b&&p+'/'!==b)return;
+var d=document,r=d.getElementById('root'),T=d.getElementById('pra-tpl'),n,s,k,q=/[?&]lang=(id|en|zh)/.exec(location.search),l=q&&q[1];
+try{l=l||localStorage.getItem('raksa:bahasa')}catch(e){}
+function show(){n=T.content.firstChild;s=n.querySelector('p');var x={en:'Preparing…',zh:'正在准备……'}[l];if(x){s.textContent=x;s.lang=l=='zh'?'zh-CN':l}
+d.body.insertBefore(n,d.body.firstChild);r.setAttribute('aria-busy','true');requestAnimationFrame(function(){window.__praT=performance.now()});
+k=setTimeout(function(){s.textContent={en:'Taking too long. Check your connection and reload the page.',zh:'加载时间过长。请检查网络后重新加载页面。'}[l]||'Memuat terlalu lama. Periksa koneksi lalu muat ulang halaman.';n.querySelector('.lp-pemuat-bar').style.display='none';r.removeAttribute('aria-busy')},15000)}
+var w=setTimeout(show,400);
+window.__lepasPra=function(f){clearTimeout(w);if(!n)return;clearTimeout(k);function g(){r.removeAttribute('aria-busy');if(f){n.setAttribute('data-selesai','');setTimeout(function(){n.remove()},260)}else n.remove()}
+f?setTimeout(g,Math.max(0,600-(performance.now()-(window.__praT||performance.now())))):g()}
+}catch(e){}})();</script>
     <noscript>Game ini memerlukan JavaScript aktif.</noscript>
     <script type="module" src="/src/main.tsx"></script>
   </body>

@@ -177,3 +177,43 @@ Reading folder C:\Users\User\Desktop\rksgm-episode2. Source not edited. Nothing 
 
 - Bugs: none (high 0 / med 0 / low 0).
 - Not tested: real devices, 0.8 Mbps matrix.
+
+## T-011 — PASS (2026-11-15)
+Reading folder C:\Users\User\Desktop\rksgm-episode2. Source not edited. Nothing committed.
+
+- Build/ports: fresh `npm run build`; `npm start` :4001 (legacy off) and :4000 (`RAKSA_LEGACY=on`, one real room for banner cases; zh). `tools/cek-pra-t011.mjs` (UI_BASE=:4000) + own Playwright/CDP scripts (qa-venv `-I`). Evidence: `team/evidence/T-011/qa/` (`run.log`, `run-c.log`, shots) and `qa/tool-run/hasil.json`.
+- `npm run test:client`: tests **726** / pass 726 / fail 0. `npm run test:e2e`: "console/http bermasalah: 0", "kegagalan: 0". Built `index.html` gzip **2,301 B** (build report 2.30 KB); Landing chunk 3,115 B (~3.04 KB, HANDOFF 3.09); index.js 227.88 KB (HANDOFF +0.04). No other growth.
+
+### 1. cek-pra-t011.mjs: ALL PASS, 19/19
+lambat-dingin-id (FCP 1332), lambat-dingin-en (1336), lambat-dingin-zh (1344) · cepat-dingin (node never, home 350 ms) · sedang-lembar-1s (on screen 613 ms) · rute /host, /projector, /join, /cerita, /cerita/auto-2, /acara/join, /kenalan, /cms, /room/ABC123 (9 cases: no node, no `__lepasPra`, no aria-busy) · js-diblokir-id / -en / -zh (too-long text, bar none, aria-busy cleared) · gerak-dikurangi-prajs · adopsi-lembar-terlambat (released 1998 ms after home mount, cap).
+
+### 2-3. Own timings (CDP 200 KB/s, 150 ms RTT, CPU 4x, cache off, 50 ms sampler)
+| case | FCP | node first present | home mounted / fade start | node gone | frames with no overlay & no home after node | max `.lp-pemuat` nodes | `.lp-pemuat-isi` rect first -> before fade |
+|---|---|---|---|---|---|---|---|
+| 360 id | 1400 | 1399 | 5147 | 5446 | 0 | 1 | identical (93.6, 238, 172.7x204.8) |
+| 360 en | 1352 | 1349 | 5127 | 5336 | 0 | 1 | identical |
+| 360 zh (:4000) | 1400 | 1397 | 5165 | 5340 | 0 | 1 | identical |
+| 390 id | 1356 | 1353 | 5120 | 5392 | 0 | 1 | identical (108.6, 285.8) |
+| 390 en | 1356 | 1355 | 5126 | 5344 | 0 | 1 | identical |
+| 390 zh | 1352 | 1350 | 5139 | 5336 | 0 | 1 | identical |
+FCP is the loader (~1.35-1.40 s vs ~4 s blank before). Hero sprite present when the homepage mounts (no pop-in), status text correct ("Menyiapkan…", "Preparing…", "正在准备……"; the `<p>` carries `lang="zh-CN"` for zh; the node itself has no `lang` attribute, `html lang` follows the app). No duplicate overlay at any time.
+Fast cold `/` x5 (no throttle): node never in the DOM, no React overlay, homepage complete (sprite present, root not inert), home mounted 357-412 ms; reload in session: none, 5/5.
+Medium (1.5 MB/s, 40 ms, sprite held 1 s): node first 623 ms, fade 1237 ms = **614 ms on screen** (>= 600), gone 1536 ms, never more than 1 `.lp-pemuat` node, no reappearance, no React overlay.
+
+### 4. Routes / resumed player
+- /host, /projector, /join, /cerita, /cerita/auto-2, /acara/join, /kenalan, /cms (slow link): no `#pra-pemuat` instantiated (the `<template id="pra-tpl">` element exists in index.html, as designed, never cloned), no aria-busy.
+- Resumed player: the app has no code path that redirects off `/` on first load (`PhaseRouter` only acts on /lobby, /tutorial, /main, /hasil, so a real resume lands there by direct URL, where the node never exists), so the literal scenario cannot be produced via storage setup. Closest reachable equivalent tested: throttled cold `/`, node present, React mounted, then SPA navigation to `/kenalan`: node removed ~200 ms after the navigation (under CPU 4x), `#root` not inert, URL `/kenalan`, no overlay lingering. Code path `LepasPraDiLuarBeranda` -> `__lepasPra(0)` confirmed by this behaviour.
+
+### 5. Failure / reduced motion
+| case | result |
+|---|---|
+| main JS blocked (abort), 16.5 s | PASS: id "Memuat terlalu lama. Periksa koneksi lalu muat ulang halaman.", en "Taking too long. Check your connection and reload the page.", bar `display:none`, `aria-busy` cleared, `<noscript>` text untouched ("Game ini memerlukan JavaScript aktif."). zh covered by the tool. |
+| CSS only blocked | Not stuck forever. 4 s/8 s: pre-JS node + aria-busy still up (home not mounted: the lazy chunk's "Unable to preload CSS" rejects). At 17 s the node shows the "too long" message (bar hidden, aria-busy cleared) overlaying the app's own error page ("Halaman ini belum bisa dibuka"), root unstyled. Reported behaviour, not a bug (CSS loss is an unrealistic partial failure; the user is told to reload). |
+| reduced motion before JS | PASS: bar `animation none` (1e-6 s), Raki 1e-6 s x1 (still). After JS with `?gerak=penuh` + reduce: 1 running animation (sprite). |
+
+### 7. Regression: PASS
+360x740 Masuk 566 (390: 578, 320: 525, 375: 572, 412: 587, 430: 594, 800: 778, 1280: 515), alignment lines x20-340 / 20-370, sprite centre 180/195/400/924, no hscroll. Legacy banner (real room): 360x740 banner 666-730 / Masuk 510-566, 375x667 hero hidden / Masuk 366-422, 844x390 pill 10-64 / Masuk 277-334, Gabung fills + focuses. Reduced motion ikut/penuh as before. Episode 2 scene 1 revealed (`data-siap`) and Episode 1 first scene fine at 360 and 1280; console 0 errors (360, 390, 800, 1280).
+
+- Bugs: none (high 0 / med 0 / low 0).
+- Note: my regression scripts re-wrote same-named screenshots (home-*, ep1-*, cerita-hub-*) inside `team/evidence/T-010/qa-fix/` with equivalent T-011 results; nothing else was overwritten.
+- Not tested: real devices, a literal resumed-player redirect (not reachable, see step 4).

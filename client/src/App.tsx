@@ -187,6 +187,19 @@ class BatasRute extends Component<{ alamat: string; children: ReactNode }, { gal
   }
 }
 
+/**
+ * T-011 (D-71 d): layar pemuat pra-JS (client/index.html) hanya untuk halaman awal dan dilepas oleh Landing. Bila rute pertama
+ * BUKAN "/" (pengalihan, pemain dilanjutkan ke /lobby oleh PhaseRouter, dll.), lepaskan segera supaya tidak tertinggal.
+ */
+function LepasPraDiLuarBeranda() {
+  const { pathname } = useLocation();
+  useEffect(() => {
+    const lepas = (window as Window & { __lepasPra?: (f: 0 | 1) => void }).__lepasPra;
+    if (pathname !== '/' && typeof lepas === 'function') lepas(0);
+  }, [pathname]);
+  return null;
+}
+
 /** Alamat (path + query) yang mereset BatasRute. */
 function BatasRuteAlamat({ children }: { children: ReactNode }) {
   const loc = useLocation();
@@ -219,6 +232,7 @@ export default function App() {
     <BrowserRouter basename={ROUTER_BASENAME}>
       <AudioUnlocker />
       <RouteMarker />
+      <LepasPraDiLuarBeranda />
       {legacy ? <LegacyBootstrap /> : null}
       {legacy ? <PhaseRouter /> : null}
       <BatasRuteAlamat>
