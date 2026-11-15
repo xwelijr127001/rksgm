@@ -35,7 +35,7 @@ function disc(cx: number, cy: number, rad: number, step = 4): string {
   }
   return d;
 }
-const LATAR_AWAN: Kotak[] = [...cloud(36, 14), ...cloud(318, 26), ...r(176, 8, 4, 4, WIN)];
+const LATAR_AWAN: Kotak[] = [...cloud(36, 14), ...cloud(318, 14), ...r(176, 8, 4, 4, WIN)];
 const LATAR_KOTA: Kotak[] = [
   ...box(22, 96, 56, 70, PALE), ...windows(34, 108, 3, 3),
   ...r(88, 112, 52, 4, SALMON), ...r(92, 108, 44, 4, SALMON), ...r(100, 104, 28, 4, SALMON),
@@ -43,14 +43,13 @@ const LATAR_KOTA: Kotak[] = [
   ...box(262, 66, 66, 100, PALE), ...windows(274, 78, 4, 5), ...r(300, 150, 12, 8, INK),
   ...r(318, 56, 4, 10, INK), ...r(316, 52, 8, 4, SALMON),
   ...box(338, 110, 56, 56, PALE), ...windows(350, 122, 3, 3),
-  ...r(236, 128, 4, 28, INK), ...r(226, 114, 24, 8, GLASS), ...r(222, 122, 32, 8, GLASS), ...r(228, 130, 20, 6, GLASS),
 ];
-const MATAHARI = disc(186, 112, 56);
+const MATAHARI = disc(210, 112, 56);
 const MEJA: Kotak[] = [
   ...r(-10, 20, 440, 34, INK), ...r(-10, 22, 440, 8, CREAM), ...r(-10, 30, 440, 20, GREEN), ...r(-10, 50, 440, 4, INK),
   ...Array.from({ length: 12 }, (_, i): Kotak => [14 + i * 36, 34, 4, 14, INK]),
   ...r(96, 8, 32, 14, INK), ...r(98, 10, 28, 12, CREAM), ...r(98, 6, 12, 4, SALMON), ...r(104, 14, 16, 2, GLASS), ...r(104, 18, 12, 2, GLASS),
-  ...r(232, 12, 16, 10, INK), ...r(234, 14, 12, 8, SALMON), ...r(236, 0, 8, 4, GLASS), ...r(230, 4, 20, 6, GLASS), ...r(234, 10, 12, 2, GLASS),
+  ...r(248, 12, 16, 10, INK), ...r(250, 14, 12, 8, SALMON), ...r(252, 0, 8, 4, GLASS), ...r(246, 4, 20, 6, GLASS), ...r(250, 10, 12, 2, GLASS),
 ];
 const rects = (k: Kotak[]) => k.map(([x, y, width, height, fill], i) => <rect key={i} x={x} y={y} width={width} height={height} fill={fill} />);
 /** Latar piksel di BELAKANG sprite (420x190 satuan). */

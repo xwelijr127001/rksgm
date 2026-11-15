@@ -322,7 +322,7 @@ button.alur-spanduk-gabung { border: 0; cursor: pointer; font: inherit; }
 .lp-halaman .lp-latar { bottom: 0; width: 420px; height: 190px; }
 .lp-halaman .lp-meja { bottom: 0; width: 420px; height: 54px; }
 /* Sprite berjangkar atas: kepala 6px di bawah tepi atas bingkai 144px; kaki di balik meja (D-22). */
-.lp-halaman .lp-kota-slot { position: absolute; left: 0; right: 0; top: calc(100% - 136px); display: flex; justify-content: center; padding-right: 48px; pointer-events: none; }
+.lp-halaman .lp-kota-slot { position: absolute; left: 0; right: 0; top: calc(100% - 136px); display: flex; justify-content: center; pointer-events: none; }
 .lp-halaman .lp-kota-slot-raki { top: auto; bottom: 27px; }
 .lp-halaman .lp-kota-slot .tokoh-sprite { flex: 0 0 auto; }
 /* T-007 D-37: bayangan bersama tokoh.css tidak dicat di atas matahari (hanya hero halaman awal). */
@@ -334,7 +334,7 @@ button.alur-spanduk-gabung { border: 0; cursor: pointer; font: inherit; }
   .lp-halaman .lp-kota-bingkai { height: 380px; }
   .lp-halaman .lp-latar { margin-left: -420px; width: 840px; height: 380px; }
   .lp-halaman .lp-meja { margin-left: -420px; width: 840px; height: 108px; }
-  .lp-halaman .lp-kota-slot { top: calc(100% - 272px); padding-right: 96px; }
+  .lp-halaman .lp-kota-slot { top: calc(100% - 272px); }
   /* Skala CSS 2x: piksel tetap utuh (2 x floor(DPR) piksel perangkat per piksel seni); ukuran sprite bersama tidak diubah (N-1). */
   .lp-halaman .lp-kota-slot .tokoh-sprite { transform: scale(2); transform-origin: 50% 0; }
   .lp-halaman .lp-kota-slot-raki { top: auto; bottom: 54px; }
@@ -369,6 +369,11 @@ button.alur-spanduk-gabung { border: 0; cursor: pointer; font: inherit; }
   :root:not([data-gerak="penuh"]) .lp-halaman .lp-pintu-aksi::before,
   :root:not([data-gerak="penuh"]) .lp-halaman .lp-pintu-aksi::after { animation: none; transition: none; }
 }
+
+/* T-008 (D-40, D-44, D-47): balon sapaan selebar bingkai (HP + kolom tablet); logo/tombol header rata dengan kartu (20px).
+   Sprite/Raki kini di tengah sumbu halaman (padding-right slot dihapus, D-42.5). */
+@media (max-width: 900px) { .lp-halaman .lp-kota-balon { flex: 1 1 auto; max-width: none; } }
+@media (max-width: 700px) { .lp-halaman .player-header { padding-left: 20px; padding-right: 20px; } }
 
 /* T-003 tata letak HP halaman awal (team/DESIGN-REVIEW.md D-01..D-13). Semua di bawah .lp-halaman: JoinGame juga dipakai
    /cerita (cer-hub-join), aturan dasar .lp-join* tidak diubah. Ilustrasi kini anak pertama .lp-utama (urutan DOM). */

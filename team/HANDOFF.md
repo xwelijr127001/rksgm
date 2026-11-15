@@ -141,3 +141,31 @@ Measurements: 360x740 id Masuk 509.7-565.7 (unchanged), frame 320x144, no horizo
 Screenshots (team/evidence/T-007/): after-hero-360x740, after-hero-800x1024 (tower windows 3x3, clear of the outline), after-sprite-dpr1-zoom (sprite over the sun, no shadow), flagoff-bubble-360x740 (Raki, slogan bubble without tail), after-360x740, after-800x1024, after-1280x800 (.png); after-ukur.json, flagoff-ukur.json.
 
 Known issues: none new. D-39 stays accepted.
+
+## T-008 — phone alignment (2026-11-15)
+
+Fullstack · status: review · not committed. Followed DESIGN-REVIEW D-40..D-47 exactly.
+
+Changes (`git diff --stat` vs HEAD 2f779f7: WelcomeArt.tsx 7 lines, player.css 9 lines; team/specs is untracked, so its diff is vs team/evidence/T-008/base/):
+- `client/src/art/WelcomeArt.tsx`: D-42 changes. Sun `disc(186,112,56)` -> `disc(210,112,56)`; backdrop tree (rects 236/226/222/228) deleted; counter plant x +16 (248/250/252/246/250); right cloud `cloud(318,14)`.
+- `client/src/player.css`: D-42.5 removes `padding-right:48px` from `.lp-halaman .lp-kota-slot` and `padding-right:96px` from its >=901 override. The D-47 block (bubble `flex:1 1 auto; max-width:none` at <=900, header padding 20px at <=700) is added after the T-004 block, before T-003.
+- `team/specs/T-004-hero-art.txt`: generator (section C) updated the same way, static blocks A/B regenerated from it, rev note on line 3.
+- shared/brand.ts: flag flipped for the test, then restored; it equals HEAD (the Lead's commit 2f779f7 already contains the T-002 title).
+
+How to test: dev client `cd client && npx vite --port 5233`. Script: copy team/evidence/T-008/shoot.mjs to tools/, `node tools/shoot.mjs after` (DPR 2).
+
+Tests: `npm run test:client` -> tests 724 / pass 724 / fail 0. `npm run build` + `RAKSA_LEGACY=on npm start` + `npm run test:e2e` -> exit 0, kegagalan 0, console/http bermasalah 0, landing 360 luberX 0 / tombol<44 0.
+
+Measurements (before -> after):
+| | bubble gap to frame right | sprite centre / frame centre | logo left / sound gap | Masuk bottom | gaps frame>greeting>eyebrow, h1>Join |
+|---|---|---|---|---|---|
+| 360x740 | 14.7 -> 0 (340) | 156 -> 180 / 180 | 22/22 -> 20/20 | 565.7 -> 565.7 | 8/16/12 -> 8/16/12 |
+| 390x844 | 44.7 -> 0 (370) | 171 -> 195 / 195 | 22/22 -> 20/20 | 577.7 -> 577.7 | 8/16/12 -> 8/16/12 |
+| 800x1024 | 79.4 -> 0 (610) | 376 -> 400 / 400 | 40/40 unchanged | 777.9 -> 777.9 | unchanged |
+| 1280x800 | unchanged (desktop) | 876 -> 924 / 924 | 80/80 unchanged | 514.7 -> 514.7 | unchanged |
+No horizontal scroll. Frame 144 px at 360. /cerita 390 full page: before and after md5 identical (10d35d4c...).
+Flag off (missRaksa.aktif=false, local only): Raki centre 180 = frame centre 180; bubble spans to 340.
+
+Screenshots (team/evidence/T-008/): before-/after- 360x740, 390x844, 800x1024, 1280x800; after-hero-zoom-360 (sun behind head, plant between arm and tower); after-hero-375 / -390 / -412 (top edge, no cloud sliver); before-/after-cerita-390; flagoff-360 (.png); before-/after-/flagoff-ukur.json.
+
+Known issues: none.
