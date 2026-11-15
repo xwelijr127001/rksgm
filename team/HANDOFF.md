@@ -778,3 +778,44 @@ Fullstack · NOT committed · base d4cd775 (tag ep2-piksel-stage3). Board status
 **Screenshots** (`team/evidence/T-013/final/`)
 - Card, image only: `kartu-ep2-gambar-{360,390,768,1024,1280}.png`. Whole page: `kartu-cerita-{360,390,768,1024,1280}.png`.
 - D-100: `wawancara-3-360-id.png`, `wawancara-3-1280-id.png`, `wawancara-2-*-id.png`, `bima-*-id.png` (K07), `bengkel-*-id.png`, `pool-*-id.png`, `tol-*-id.png` (each at 360, 390, 1280).
+
+
+## T-015 (2026-11-16): phone cut-in covered Miss Raksa's head
+
+Fullstack · NOT committed · base 11c8c75. Board status: review.
+
+**Cause.** The cut-in was always drawn top-right of the stage. On a phone the kantor camera shows only about 160 art px of width, so the top-right square sat exactly on Miss Raksa's head (she stands at x 800).
+
+**Scenes affected.** The script has three kantor scenes with a cut-in plus a character on stage: the three endings `akhir-puas`, `akhir-kurang`, `akhir-catatan` (Miss Raksa at the counter, Hendra on the phone). All phone widths were affected; 1280 was not.
+
+**Placement rule** (`tataSisipan` in the new `ui/latar/piksel/tata.ts`).
+- Candidates in order: top-right (default), top-left, left under the name board, right under the name board.
+- The first candidate that touches no character head box and not the board wins. If none fits, the cut-in steps down in whole pixel scales (to 50 %). If still none, the board may be covered; a head never is.
+- Result: on phones the cut-in sits left, under the LAYANAN KLAIM RAKSA board (board readable, head free). At 1280 it stays top-right. Miss Raksa and the camera do not move.
+- I did not use the "move Miss Raksa left" option: the board, her head and the cut-in do not fit side by side in a phone view, and her head would cover the board.
+
+**Code.**
+- `ui/latar/piksel/tata.ts` (new): the pure layout functions moved out of `PanggungPiksel.tsx` (no behaviour change) plus `tataSisipan` / `sisipanAdegan`. `PanggungPiksel.tsx` re-exports them.
+- `PanggungPiksel.tsx`: draws the cut-in at the chosen place; stage root now carries `data-sisipan`, `data-sisipan-letak`, `data-kepala`, `data-bawah` (CSS px) for checks.
+- `adegan.test.ts`: new test. Every kantor scene with a cut-in from the story graph (plus a Miss Raksa + Bima guard case) at the three measured stage boxes and a sweep of 162 other sizes: no cut-in/head intersection, cut-in fully on stage.
+- `tools/cek-sisipan-t015.mjs` (new): browser check + screenshots. `tools/cek-piksel-t013.mjs` now runs the same check for the `cutin-*` states.
+- `tools/cerita/state-kantor-t013.mts`: saves `cutin-*` states (one step before the scene; the checker presses Lanjut once). `team/evidence/T-013/states.json` regenerated (19 states).
+
+**Tests** (own server on :4001; :4000 not touched)
+- `npm run test:client`: 729 / 729 pass.
+- `npm run test:e2e`: exit 0, kegagalan 0.
+- `node tools/cek-piksel-t013.mjs`: 84 / 84 PASS (75 before + 9 cut-in checks).
+- `node tools/cek-sisipan-t015.mjs`: 9 / 9 PASS (3 scenes x 360x740 DPR2, 390x844 DPR3, 1280x800).
+- `tsc --noEmit` clean; production build OK.
+
+**Screenshots** (`team/evidence/T-015/`, all `id`)
+- `cutin-akhir-puas-missRaksa-{360,390,1280}-id.png`
+- `cutin-akhir-kurang-missRaksa-{360,390,1280}-id.png`
+- `cutin-akhir-catatan-missRaksa-{360,390,1280}-id.png`
+- `hasil.json` (measured rects per case)
+
+**Notes**
+- `npm run build` rewrote `client/dist`. If the owner's :4000 server serves that folder, it now serves this uncommitted fix.
+- I opened the `akhir-puas` screenshots at 390 and 1280; the other seven passed the automated check but I did not open them.
+- On phones the cut-in's lower-right corner comes close to the desk phone handset (no overlap of the handset body seen at 390).
+- Not checked on a real iPhone.

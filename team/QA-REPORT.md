@@ -269,3 +269,14 @@ Folder read: C:\Users\User\Desktop\rksgm-episode2. No source edited (a temporary
 None high/medium found. Observations: (a) idle animation not seen in pool/bengkel in a 15 s window; (b) in en/zh the Pak Hendra chat lines stay Indonesian (D-90, known/out of scope); (c) 3 unreferenced prototype WebPs remain in dist.
 
 Evidence overwrite note: my 73-check run re-wrote same-named files in `team/evidence/T-013/` (equivalent content).
+
+## T-015 — PASS (2026-11-16)
+
+Folder confirmed: C:\Users\User\Desktop\rksgm-episode2 (own server on :4001; :4000 untouched). No source edited, nothing committed. Evidence: `team/evidence/T-015/qa/`.
+
+- Browser checks: `cek-piksel-t013.mjs` 84/84 PASS; `cek-sisipan-t015.mjs` 9/9 PASS (cek-84.log, cek-sisipan-9.log).
+- Independent matrix (matrix.log + screenshots): akhir-puas / akhir-kurang / akhir-catatan at Chromium 360x740 DPR2, 390x844 DPR3, 1280x800 and WebKit 390x844 DPR3 = 12/12: cut-in hits 0 head boxes, fully inside the stage, 0 console errors. Phones: cut-in "kiri-bawah-papan" (name board readable, checked visually at WebKit 390); 1280: top-right.
+- Other kantor cut-in scenes: the only stage scenes with cut-in + a character are those three endings (grep adegan/episode). The `tel-*` states (Hendra on the phone, no one on stage) render as chat screens, not the stage, so there is no cut-in to place.
+- `npm run test:client` 729/729; `npm run test:e2e` exit 0, kegagalan 0 (needs the server started with `RAKSA_LEGACY=on`; without it the e2e hangs at socket connect, not a bug).
+- Visual: cut-in's lower-right corner is close to the desk phone handset at 390 (no overlap), as the HANDOFF notes. Not checked on a real iPhone.
+- Bugs: 0.

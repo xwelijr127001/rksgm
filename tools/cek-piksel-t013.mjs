@@ -11,6 +11,7 @@
 import puppeteer from 'puppeteer-core';
 import fs from 'node:fs';
 import path from 'node:path';
+import { cekSisipan, majuKeSisipan } from './cek-sisipan-t015.mjs';
 
 const BASE = process.env.UI_BASE || 'http://127.0.0.1:4000';
 const OUT = path.resolve(import.meta.dirname, '..', 'team/evidence/T-013');
@@ -58,6 +59,15 @@ for (const [kasus, st] of Object.entries(STATES)) {
     if (lang !== 'id' && !TIGA_BAHASA.has(kasus)) continue;
     if (cepat && kasus.startsWith('tel-') && kasus !== 'tel-cemas') continue;
     const { ctx, p, req } = await buka(vp, lang, st.nilai);
+    // T-015: adegan kantor bersisipan telepon: sisipan tidak boleh menutupi kepala tokoh.
+    if (kasus.startsWith('cutin-')) {
+      await majuKeSisipan(p);
+      const r = await cekSisipan(p);
+      await p.screenshot({ path: path.join(OUT2, `${kasus}-${vp.n}-${lang}.png`) });
+      lapor(`sisipan-${kasus}-${vp.n}-${lang}`, r.lulus && req.every((u) => !/.webp/.test(u)), r.data);
+      await ctx.close();
+      continue;
+    }
     await p.waitForFunction(() => document.querySelector('.cer-piksel[data-siap], .cer-ilustrasi[data-siap], .hp-potret'), { timeout: 15000 }).catch(() => null);
     await tunggu(600);
     const s = await stage(p);

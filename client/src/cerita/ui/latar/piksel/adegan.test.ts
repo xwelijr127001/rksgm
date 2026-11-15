@@ -160,3 +160,37 @@ test('D-94/D-96: trailer pool 240 x ~124 piksel seni di art x 160 dengan roda di
     assert.equal(susunTokoh(id, { pose: 'berdiri', ekspresi: 'cemas', mata: 'tutup' })!.mata, 'tutup', id);
   }
 });
+
+test('T-015: sisipan telepon tidak pernah menutupi kotak kepala tokoh (setiap adegan kantor bertelepon, 360/390/1280 + sapuan ukuran)', async () => {
+  const { susunAdeganPiksel, kameraPiksel, sisipanAdegan, kotakLuarSisipan } = await import('./tata');
+  const potong = (a: { x: number; y: number; w: number; h: number }, b: typeof a) => a.x < b.x + b.w && b.x < a.x + a.w && a.y < b.y + b.h && b.y < a.y + a.h;
+  // Kotak panggung terukur di browser (tools/cek-sisipan-t015.mjs): 360x740 DPR2, 390x844 DPR3, 1280x800 DPR1; pita dialog 22.
+  const UKURAN: [number, number, number][] = [[336, 336, 2], [366, 366, 3], [780, 432, 1]];
+  for (let w = 280; w <= 1300; w += 60) for (const rasio of [1, 0.8, 0.5625]) for (const dpr of [1, 2, 3]) UKURAN.push([w, Math.round(w * rasio), dpr]);
+  const adegan = new Map<string, KomposisiLatar>();
+  for (const l of semuaKomposisi()) {
+    if (l.lokasi !== 'kantor' || !l.telepon) continue;
+    const hadir = l.hadir.filter((x) => x !== l.telepon);
+    if (hadir.length) adegan.set(hadir.join('+') + '/' + l.telepon, { lokasi: l.lokasi, hadir: hadir.map((id) => tl(id)), telepon: tl(l.telepon), objek: l.objek });
+  }
+  // Naskah: hanya Miss Raksa + telepon Hendra (tiga akhir). Bima + telepon ikut diuji sebagai penjaga.
+  assert.deepEqual([...adegan.keys()], ['missRaksa/hendra']);
+  adegan.set('missRaksa+bima/hendra', komp({ hadir: [tl('missRaksa'), tl('bima')], telepon: tl('hendra') }));
+  const letakHp = new Set<string>();
+  for (const [nama, k] of adegan) {
+    const a = adeganPiksel(ep, k).piksel!;
+    const r = RUANG_PIKSEL[a.ruang]!;
+    const tokoh = susunAdeganPiksel(a, r, { kedip: false, mulut: false });
+    for (const [W, H, dpr] of UKURAN) {
+      const kam = kameraPiksel(r, tokoh, W, H, dpr, 22);
+      const { tata, kepala } = sisipanAdegan(r, tokoh, kam, W, H, dpr, 22, 56);
+      const luar = kotakLuarSisipan(tata);
+      assert.equal(kepala.length, tokoh.length);
+      assert.ok(!kepala.some((h) => potong(luar, h)), `${nama} ${W}x${H}@${dpr}: sisipan ${tata.letak} menutupi kepala`);
+      assert.ok(luar.x >= 0 && luar.y >= 0 && luar.x + luar.w <= W * dpr && luar.y + luar.h <= (H - 22) * dpr, `${nama} ${W}x${H}@${dpr}: sisipan keluar panggung`);
+      if (nama === 'missRaksa/hendra' && (W === 336 || W === 366) && H === W) letakHp.add(tata.letak);
+    }
+  }
+  // HP: kanan atas = di atas kepala Miss Raksa (bug owner), jadi sisipan pindah ke kiri di bawah papan (papan tetap terbaca).
+  assert.deepEqual([...letakHp], ['kiri-bawah-papan']);
+});

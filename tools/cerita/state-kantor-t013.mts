@@ -38,6 +38,7 @@ const simpan = (nama: string, s: StateCerita, ekspresi?: string) => {
 };
 for (let run = 0; run < 60; run++) {
   let s: StateCerita = stateAwal(ep);
+  let lalu: StateCerita | null = null;
   for (let i = 0; i < 600; i++) {
     const k = komposisiLatar(ep, s);
     if (k.lokasi === 'kantor') {
@@ -46,6 +47,9 @@ for (let run = 0; run < 60; run++) {
         const wajah = susunTokoh('hendra', { pose: 'berdiri', ekspresi: k.telepon.ekspresi })!.ekspresi;
         simpan(`tel-${wajah}`, s, k.telepon.ekspresi);
       }
+      // T-015: SETIAP adegan kantor dengan sisipan telepon + tokoh di panggung (per node).
+      // Disimpan state SEBELUMNYA (baris terakhir node akhir dipulihkan sebagai layar akhir); pemeriksa menekan Lanjut sekali.
+      if (k.telepon && k.hadir.some((x) => x.bicara) && lalu) simpan(`cutin-${s.node}-${k.hadir.map((x) => x.id).join('+')}`, lalu);
       if (k.objek.includes('berkas')) simpan('berkas', s);
       if (k.objek.includes('surat')) simpan('surat', s);
       if (k.hadir.some((x) => x.id === 'bima')) simpan('bima', s);
@@ -70,6 +74,7 @@ for (let run = 0; run < 60; run++) {
     let maju: StateCerita | null = null;
     for (const a of calon) { const t = jalankan(ep, s, a); if (t !== s) { maju = t; break; } }
     if (!maju) break;
+    lalu = s;
     s = maju;
   }
 }
