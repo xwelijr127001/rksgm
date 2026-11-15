@@ -17,7 +17,7 @@ import { jalurKlip, kotakDiAtasMeja, pikselDari, SATUAN_PIKSEL, sidikGambar, tem
 import {
   ARAH_BAWAAN, bacaManifestTokoh, buatPenyusun, DAFTAR_TOKOH_PIKSEL, idSvgAman, keGambarTokoh, keSvg, KEPALA_TINGGI_BAWAAN, opsiDariCerita,
   POSE_CERITA, potretDari, SATUAN, susunDari, susunFrame, svgPotret, svgTokoh, teleponDari,
-  type ArahTokoh, type IdTokohPiksel, type KotakSeni, type ManifestTokoh, type MataTokoh, type MulutTokoh, type OpsiSusun, type SusunanTokoh,
+  type ArahTokoh, type IdTokohPiksel, type IdTokohPikselEp1, type KotakSeni, type ManifestTokoh, type MataTokoh, type MulutTokoh, type OpsiSusun, type SusunanTokoh,
 } from './susun';
 import * as pintu from './index';
 
@@ -26,7 +26,7 @@ const bacaJson = (f: string): unknown => JSON.parse(fs.readFileSync(path.join(DI
 const JSON_MISS = bacaJson('miss-raksa.json') as Record<string, unknown>;
 const JSON_RINA = bacaJson('bu-rina.json') as Record<string, unknown>;
 const P = buatPenyusun({ missRaksa: { json: JSON_MISS, url: '/aset/miss-raksa.png' }, buRina: { json: JSON_RINA, url: '/aset/bu-rina.png' } });
-const MAN: Record<IdTokohPiksel, ManifestTokoh> = { missRaksa: P.manifest.missRaksa!, buRina: P.manifest.buRina! };
+const MAN: Record<IdTokohPikselEp1, ManifestTokoh> = { missRaksa: P.manifest.missRaksa!, buRina: P.manifest.buRina! };
 const salin = <T>(x: T): T => JSON.parse(JSON.stringify(x)) as T;
 
 const ARAH: (ArahTokoh | undefined)[] = [undefined, 'kiri', 'kanan'];
@@ -194,7 +194,7 @@ test('pemetaan cerita -> seni: wajah Miss, tubuh gestur Bu Rina, arah bawaan, ma
 test('opsiDariCerita: pandang -> arah & mata (Miss), Bu Rina tetap ke meja; kedip menang atas bawah', () => {
   const m = MAN.missRaksa;
   const r = MAN.buRina;
-  const o = (id: IdTokohPiksel, x: Parameters<typeof opsiDariCerita>[2]) => opsiDariCerita(id, MAN[id], x);
+  const o = (id: IdTokohPikselEp1, x: Parameters<typeof opsiDariCerita>[2]) => opsiDariCerita(id, MAN[id], x);
   assert.deepEqual(o('missRaksa', { pose: 'duduk-dengar', ekspresi: 'netral', pandang: 'lawan' }), { pose: 'duduk-dengar', ekspresi: 'netral', hadap: 'kanan', mata: 'buka', mulut: 'tutup' });
   assert.equal(o('missRaksa', { pose: 'duduk-jelaskan', ekspresi: 'netral', pandang: 'pemain' }).hadap, 'kiri');
   assert.equal(o('missRaksa', { pose: 'berdiri', ekspresi: 'netral', pandang: 'depan' }).hadap, 'kiri');
@@ -305,7 +305,7 @@ test('cadangan: manifest dipangkas/cacat tetap menghasilkan susunan tanpa melemp
 });
 
 /** Kotak wajah frame di koordinat frame: di dalam jendela pada sumbu yang juga memuatnya di jendela acuan manifest. */
-function cekPotret(id: IdTokohPiksel, p: NonNullable<ReturnType<typeof P.potretTokoh>>, u: number, label: string) {
+function cekPotret(id: IdTokohPikselEp1, p: NonNullable<ReturnType<typeof P.potretTokoh>>, u: number, label: string) {
   assert.ok(Number.isInteger(p.skala) && p.skala >= 1, `${label}: skala bulat`);
   assert.ok([p.jendela.x, p.jendela.y, p.jendela.sisi].every(Number.isInteger), `${label}: jendela bulat`);
   assert.equal(p.tampil, p.jendela.sisi * p.skala, `${label}: tampil`);
@@ -470,13 +470,13 @@ test('keSvg / svgPotret / svgTokoh: <image> pixelated memotong atlas, tanpa id k
 // ------------------------------------------------------------------ komposisi piksel nyata
 
 const { PNG } = createRequire(import.meta.url)('pngjs') as { PNG: { sync: { read(b: Buffer): { width: number; height: number; data: Buffer } } } };
-const ATLAS: Record<IdTokohPiksel, { width: number; height: number; data: Buffer }> = {
+const ATLAS: Record<IdTokohPikselEp1, { width: number; height: number; data: Buffer }> = {
   missRaksa: PNG.sync.read(fs.readFileSync(path.join(DIR, 'miss-raksa.png'))),
   buRina: PNG.sync.read(fs.readFileSync(path.join(DIR, 'bu-rina.png'))),
 };
 
 /** Komposisi RGBA sebuah susunan (alpha-over lapisan berurutan, seperti <image> bertumpuk di panggung). */
-function komposit(id: IdTokohPiksel, s: SusunanTokoh): Uint8Array {
+function komposit(id: IdTokohPikselEp1, s: SusunanTokoh): Uint8Array {
   const A = ATLAS[id];
   const o = new Uint8Array(s.ukuran.w * s.ukuran.h * 4);
   for (const l of s.lapisan) {

@@ -427,3 +427,240 @@ Fullstack · status: review · not committed. Followed DESIGN-REVIEW D-66..D-76.
 ### Known issues
 - Not scripted: a player resumed away from `/` by PhaseRouter (the App effect releases the node; covered by code, not by a run).
 - With legacy mode off, zh briefly shows on the pre-JS screen before `main.tsx` flips the app to id (accepted in D-68).
+
+
+## T-013 Stage 1 (2026-11-15)
+
+Fullstack · status: doing (Stage 1 built, awaiting Designer review + QA + owner phone check) · not committed. Followed REVIEW "T-013 plan review" and DESIGN-REVIEW D-79..D-83. Owner decisions applied: Miss Raksa STANDING at the counter, Hendra `lega` -> senang face, standing poses only.
+
+### 1. Boundary decision (settled before coding)
+- **Selection is per location.** `KonfigLatar.lokasi[x].piksel?: string` (tipe.ts) names a pixel room. AUTO-2 sets it only on `kantor` (`piksel: 'kantor-ep2'`). `Episode.latar` stays the only cue source. The engine, the script, `antarmuka: 'hp'` and the saved state are untouched.
+- **Presentation adapter** `ui/latar/piksel/adegan.ts` (pure): `komposisiLatar(ep, state)` (folded CueLatar) -> a pixel scene, or a named reason to stay illustrated.
+
+  | AUTO-2 cue | pixel stage |
+  |---|---|
+  | `lokasi` with `piksel` | room `kantor-ep2` |
+  | `hadir: missRaksa` | place `balikMeja`, pose `berdiri`, faces RIGHT; waist down hidden by the counter (`bisaDudukTurun` ignored: no chair) |
+  | `hadir: hendra` | place `depanMeja`, pose `berdiri`, faces LEFT |
+  | `hadir: <other>` (bima, rudi, …) | whole scene stays ILLUSTRATED (reason `pemeran X tanpa atlas piksel`) |
+  | `telepon: hendra` | phone inset with Hendra's face in the line's expression; the room stays |
+  | `objek: berkas` / `surat` | prop `map` / `surat` on the counter; any other objek -> illustrated |
+  | `dekat` close-up | no equivalent: the camera stays; expression is read from the face and the dialog portrait |
+  | lokasi without `piksel` (bengkel, tol, pool, wawancara) | illustrated renderer, unchanged until Stage 2 |
+- **Coexistence:**
+  - `AdeganTatap` renders `PanggungPiksel` when the adapter returns a scene, otherwise `PanggungLatar` exactly as before, T-010 gate included. If a pixel PNG fails to load, it falls back to the illustrated stage.
+  - The pixel stage never waits on the T-010 gate. It shows the wall colour until its ~30 KB of PNGs decode, then dispatches `ADEGAN_SIAP`; `sesudahAdeganSiap` also accepts `.cer-piksel[data-siap]`.
+  - The next-location warm-up skips pixel scenes, so no kantor illustrations are prefetched.
+  - The old renderer and the illustration set are untouched; removal is Stage 3.
+- **Script finding:**
+  - In the current script Pak Hendra is NEVER physically in the kantor. Every kantor `telepon: 'hendra'` beat is rendered by the HP UI as the WhatsApp chat (Obrolan), not on the stage.
+  - So in Stage 1 his pixel art is seen as the chat and dialog avatar, in every expression. The on-stage slot (`depanMeja`) and the phone inset are implemented and unit-tested, but the current script never reaches them.
+  - The only kantor scene that stays illustrated is K07 (surveyor Bima at the office; no pixel atlas yet).
+
+### 2. Pipeline
+- **`tools/piksel/hendra-native.mjs`:**
+  - Shared palette: ≤ 40 colours (OKLab k-means over all three sheets), then a MODE sample per cell.
+  - Master pitch: measured with `lib.cariPitch` (x 7, y 7.4; weak scores because the source is generative). Used at **7.4**, giving a 198 art px body (Miss Raksa is 184).
+  - Head rule: adult-male proportion KEPT (D-83 #2). Head 36 art px wide, 39 px from top to chin.
+  - The expression and pose sheets are resampled at the pitch that matches the master head width: 7.777 and 5.1.
+- **`tools/piksel/bangun-hendra.mjs`** -> `seni/piksel/hendra.png` + `hendra.json` (existing manifest schema, read by susun.ts):
+  - Frame `berdiri-kiri`: full body, facing LEFT only, no mirrored variant.
+  - Five faces (panik, cemas, kecewa, tenang, senang), registered to the master head by hair-silhouette IoU 0.95-0.97.
+  - `kedip` eyes for tenang, cemas and kecewa. No talk mouth: the sheet has none.
+  - Six waist-up gesture frames, `gestur-<cemas|panik|kecewa|tenang|senang|menjelaskan>-kiri`. Available, not requested in Stage 1.
+  - Portrait and phone windows.
+  - `ekspresiDari`: bingung->panik, cemas->cemas, kesal->kecewa, netral|serius->tenang, **lega|senang|tersenyum->senang**.
+  - Review sheet: `character/piksel/hendra/tinjau-wajah.png`.
+- **`tools/piksel/bangun-ruang-ep2.mjs`** -> `ruang-ep2.json` + `ep2-ruang-*.png`:
+  - Downsample: 400×225 by area mean, 48-colour palette.
+  - Layers were MEASURED from the image: counter top y 95-112, front 113-159, base 160-169. The README estimate was 70-125.
+  - `latar` (z 10): the folder is cut out and filled with the counter colour.
+  - `meja` (z 30, alpha): counter plus the phone, card holder and plant on it. Drawn over Miss Raksa and under Hendra.
+  - Props: `map` (taken from the reference) and `surat` (drawn by code).
+  - Nameplate: blank in the art, text drawn at runtime (`lokasi.kantor`).
+  - Places: Miss Raksa's feet at (560, 756), Hendra's at (1040, 860); 120 art px between heads (D-80).
+  - Kept separate from Episode 1's `ruang.json`. The `ep2-` prefix keeps the files out of Episode 1's `ruang-*.png` glob and its orphan-file test.
+- **Registration:**
+  - `IdTokohPiksel` gains `'hendra'`. The new `DAFTAR_TOKOH_PIKSEL_SEMUA` feeds the composer; `DAFTAR_TOKOH_PIKSEL` (the Episode 1 list) is unchanged.
+  - `gambarTokohPiksel` now honours an explicit `id`.
+  - `game/tokoh.ts` / `KarakterTokoh` are NOT changed: they are the homepage sheet registry and Hendra is not a homepage character. Shared sizing rules are untouched.
+- **Runtime:**
+  - `ui/latar/piksel/PanggungPiksel.tsx`: one `<canvas>` at an integer number of device pixels per art pixel.
+  - Camera: Episode 1's `pasKamera` with the pixel option (`q = 4 × DPR`; nameplate and heads must stay visible above the dialog band; `maksLebih` 1.6).
+  - No CSS blur or filter, so the T-012 iOS rectangle cannot occur on this stage.
+  - Motion: blink every 3-5 s; mouth flaps only where the atlas has a talk frame (Miss Raksa). Reduced motion stops both.
+  - Draw order: wall, nameplate text, Miss Raksa, counter, props, Hendra, phone inset. The location chip is hidden when the room has a nameplate, so the name is not shown twice.
+  - `ui/latar/piksel/ruang.ts` reads the room manifest.
+  - `ui/latar/piksel/PotretPikselHp.tsx`: pixel round portrait. It deliberately avoids Episode 1's `PotretPiksel`, which imports `sumberPiksel`.
+- **Avatars (step 5):**
+  - `PotretHp` always uses the Hendra pixel portrait (Obrolan header, cut-ins, dialog, arena), in the line's expression: default tenang, cemas in tense beats.
+  - Miss Raksa's portrait is pixel only in pixel scenes.
+
+### 3. Asset table (production build, bytes as served; PNG raw, text gzip -9)
+| asset | bytes |
+|---|---|
+| hendra.png (atlas 512×196, 40 colours) | 18,445 |
+| ep2-ruang-kantor-latar.png | 8,705 |
+| ep2-ruang-kantor-meja.png | 2,404 |
+| ep2-ruang-prop-map.png | 259 |
+| ep2-ruang-prop-surat.png | 117 |
+| **new PNG subtotal** | **29,930** |
+| hendra.json (gzip; bundled in CeritaMain) | 1,669 |
+| ruang-ep2.json (gzip; bundled) | 769 |
+| stage + adapter + portrait code (rest of the CeritaMain delta) | ~4,845 |
+| **CeritaMain.js gzip delta (41,454 -> 48,737)** | **7,283** |
+| **Stage 1 new total** | **37,213 B ≈ 36.3 KB** |
+| miss-raksa.png (reused Episode 1 atlas; already downloaded on AUTO-2 before T-013) | 19,972 |
+
+- **Against the 80-95 KB estimate:** 36.3 KB new, 55.8 KB including the reused Miss Raksa atlas.
+- **Why it came in lower:** no extra Miss Raksa poses (`berdiri` facing right already exists), Hendra has no talk or blink variants beyond three kedip eye strips, and the room is 11.5 KB.
+- **All JS, gzip:** +8.6 KB (1,101,546 -> 1,110,148).
+- **Old illustration set:** untouched.
+- **Pre-existing, not caused by T-013 (measured on the HEAD build):**
+  - What: AUTO-2 pages download ALL Episode 1 room PNGs plus `miss-raksa.png` and `bu-rina.png`, about 131 KB.
+  - Why: `ui/panggung/sumberPiksel.ts` starts loading as soon as it is imported, and it sits in the shared CeritaMain chunk.
+  - Worth fixing in Stage 2/3 if the 400 KB gate counts transferred bytes.
+
+### 4. Pose coverage (requested vs provided)
+| character | requested by Stage 1 scenes | atlas provides | fallback |
+|---|---|---|---|
+| Miss Raksa | `berdiri`, facing right (all kantor pixel scenes) | berdiri L/R, berdiri-sambut L/R, berdiri-persilakan L/R, duduk-*, telepon | none needed |
+| Pak Hendra (stage) | none in the current script (the adapter's `depanMeja` slot asks for `berdiri`, facing left) | `berdiri` LEFT + 6 gesture frames (left) | right-facing is NOT provided; the adapter only ever asks for left |
+| Pak Hendra (faces) | bingung, cemas, kesal, netral, lega, senang (+ serius, tersenyum) | panik, cemas, kecewa, tenang, senang + kedip | lega -> senang (owner); no talk mouth |
+| Bima (K07 kantor) | on stage | no atlas | whole scene illustrated (explicit) |
+
+- **Seated, walking, phone-at-ear:** neither requested nor provided (owner constraint).
+- **Unknown-pose check:**
+  - `poseHilang()` in adegan.ts and the "pose atlas" test fail on any pose or direction missing from the atlas. Verified with `duduk` and `berdiri/kanan` for Hendra.
+  - The script test walks the whole AUTO-2 node graph: every reachable node and line, with cue folding along each path.
+  - It asserts every kantor composition is either pixel or a named fallback (only `pemeran bima`).
+  - It also asserts every requested pose resolves without fallback for all 8 story expressions.
+
+### 5. Tests and evidence
+- `npm run test:client`: **733 / 733 pass**, including 7 new tests in `client/src/cerita/ui/latar/piksel/adegan.test.ts` (added to the root package.json `test:client` list). Two existing test files got type-only edits (`IdTokohPikselEp1`).
+- `npm run test:e2e` (production build, legacy on): **exit 0, kegagalan 0**.
+- `npx tsc --noEmit -p client`: clean. The production build succeeds.
+- **Browser checks:** `node tools/cek-piksel-t013.mjs` against `RAKSA_LEGACY=on npm start`.
+  - Result: **82/82 PASS**. That is 9 cases × three viewports (360×740 DPR 2, 390×844 DPR 3, 1280×800 DPR 1) × three languages (id/en/zh), plus one transition series.
+  - States come from `tools/cerita/state-kantor-t013.mts`, which drives the real engine, and are saved to `team/evidence/T-013/states.json`.
+  - Cases:
+    - `mentor`: Miss Raksa standing and speaking.
+    - `berkas`: claim folder prop on the counter.
+    - `tel-panik|cemas|kecewa|tenang|senang`: WhatsApp with the Hendra pixel avatar in that face.
+    - `bima`: illustrated fallback.
+    - `pool`: illustrated, unchanged.
+  - Network: **0 kantor/miss/hendra illustration requests** on every kantor pixel case. The next location (pool) is still warmed by the existing rule.
+  - Frame series: `team/evidence/T-013/transisi/00-15.png`, 100 ms apart (mentor line -> next line; the face changes and the stage stays drawn).
+  - Screenshots and `hasil.json` are in `team/evidence/T-013/`. Before-build screenshots (HEAD f6da694): `sebelum-*.png`.
+- **Unchanged:**
+  - Homepage: not touched.
+  - Episode 1: still on `Panggung` / `ruang.json`, tests green.
+  - Non-kantor Episode 2 scenes: still on `PanggungLatar` (pool case verified).
+
+### 6. Known gaps for Stage 2
+- **Hendra on stage:** the current script never puts him in the kantor (his phone beats are WhatsApp). Showing him at the counter needs a script/cue change (`hadir: ['missRaksa','hendra']` on a kantor node); the adapter already handles it.
+- **Composition:** at the phone crop, Miss Raksa's head overlaps the nameplate (Designer placement x 560). The text is drawn behind her; the Designer should review the board or her position.
+- **Art and text gaps:**
+  - The nameplate text uses a system font on the canvas, not pixel type.
+  - There is no lifted-handset variant of the desk phone (it is baked into the counter layer).
+  - Hendra has no talk-mouth frames.
+- **K07 Bima** stays illustrated until the side-character atlases exist.
+- **Not yet checked:**
+  - iOS WebKit has not been tested on a real device (canvas, no filters).
+  - The owner phone check is pending.
+
+
+## T-013 Stage 2 (2026-11-15)
+
+Fullstack · status: doing (Stage 2 built, awaiting Designer review + QA) · not committed. Built on the Stage 1 adapter. Followed D-84..D-86 and folded in the Stage 1 review items D-87 (blocker), D-88, D-89 and D-91. QA-REPORT has no T-013 Stage 1 section, so there were no QA bugs to fold in.
+
+### Result
+**Every AUTO-2 composition is now on the pixel stage, with 0 fallbacks.** That covers kantor, pool, bengkel, tol, wawancara (1, 2 and 3 witnesses), K07 Bima in the kantor, and the episode card on /cerita.
+- **Scope:** all four `PanggungLatar` consumers (HP scene, activity, /cerita card, wide CeritaMain) now go through ONE wrapper. `PanggungLatar` picks the pixel stage via the adapter; otherwise, or if a pixel PNG fails, it renders `PanggungLatarIlustrasi`, which is the old renderer unchanged.
+- **Network:** 0 `.webp` requests on any AUTO-2 scene or on the card, and 0 Episode 1 room or Bu Rina PNGs.
+
+### Rooms (tools/piksel/bangun-ruang-ep2.mjs -> seni/piksel/ruang-ep2.json v2 + ep2-ruang-*.png)
+- **Downsampling:** each room from its own source size (D-84 q4) with an area mean to 400×225 and a ≤ 48-colour OKLab palette.
+- **Layers:** latar only for the four new rooms. Characters stand in front of everything, so no `meja`/`pagar` alpha layers are needed.
+
+| room | layers / props | slots (feet, world) | camera focus |
+|---|---|---|---|
+| kantor | latar + meja (alpha) + map/surat props; nameplate in a pixel font | Miss Raksa `balikMeja` x **800** (D-87); visitors 1: 1120 · 2: 1080/1320 · 3: 1040/1240/1440, y 860 | nameplate |
+| pool | latar + **damaged trailer** layer z 25 (behind people, in front of the kerb), wheels on art y 170, x 230-380 | 1: 560 · 2: 400/760 · 3: 400/760/1000, y 860 | trailer cab (world 900-1100 × 520-690) |
+| bengkel | latar + prop `foto` (code-drawn photo print, for K05-E `objek: ['foto']`) | 1: 1000 · 2: 700/1060 · 3: 520/820/1120, y 860 | — |
+| tol | latar (daylight as delivered) | 1: 560 · 2: 460/760 · 3: 360/600/840, y 880 | cracked barrier (world 960-1260 × 380-560), always in the phone crop |
+| wawancara | latar (table stays background; witnesses in front, Designer option (a)) | 1: 830 · 2: 650/1010 · 3: 520/830/1140, y 870 | — |
+
+- **Trailer:** only the damaged variant is shipped. It is the bottom row of the sheet, mode-sampled at pitch 8.87 to 150 art px, 32 colours. The intact one is not bundled (README: "bila tidak dipakai, jangan dibundel").
+- **Three witnesses (D-84 q1):** a THIRD stage slot, not the two-plus-avatar fallback. The pixel adapter has its own slot model (`tempat: 'slot'`, index i of n ≤ 3), so `CueAdegan` and the Episode 1 types are NOT extended and there is no schema change. More than 3 standing characters returns a named fallback; the script has none.
+
+### Side characters (tools/piksel/bangun-samping.mjs -> seni/piksel/samping.png + samping.json)
+- **Characters:** rudi, bima, darto, admin, tol, polisi, in one shared atlas (512×188, 17.7 KB) with one manifest per character in the existing susun.ts schema. Registered as `IdTokohSamping` and composed by the same composer.
+- **Scale:** head width normalised to Hendra's 36 art px per sheet. Body pitch is 4.86-5.53; the expression sheet pitch is 6.33-7.03 (its heads are ≈ 1.3× larger, normalised as noted).
+- **Body:** the waist-up sheet plus a PROCEDURAL lower body (D-85 (a)): two-tone trousers per costume, a dark outline and shoes, 188 art px tall in total (Hendra 198).
+- **Faces:** `netral` = face from the bodies sheet (canonical identity). `prihatin` = face from the v2 expression sheet, registered to the body head by top-of-head IoU 0.967-0.973.
+- **Expression map (D-85):** netral|tersenyum|senang|lega -> netral; cemas|serius|bingung|kesal -> prihatin.
+- **Facing:** LEFT only (no right variant exists). No blink or talk frames.
+- **Review sheet:** `character/piksel/samping/tinjau-samping.png`.
+
+### Camera
+- **Base camera:** `pasKamera` with integer pixels, the same as Stage 1.
+- **Required area:** heads (+30 % upward so caps stay whole) ∪ nameplate ∪ room focus box.
+- **Location chip:** shown only for an empty room without a nameplate. With characters on stage the chip covered a witness's face in wawancara-3. The location is still named in the narration and the section title.
+- **`dekat`:** still no close-up. Expression is read from the face and the dialog portrait.
+
+### Stage 1 review items
+- **D-87 (blocker):** fixed. The nameplate is MEASURED at art px 78-165 (the README estimated 57-121), so Miss Raksa moved to x 800 (head ≈ art 182-218). "LAYANAN KLAIM RAKSA" is fully visible at 360/390/1280 (`stage2/mentor-*.png`).
+- **D-88:** fixed. The nameplate uses a 3×5 pixel font at art-pixel scale (`ui/latar/piksel/hurufPiksel.ts`, the font from tools/piksel/lib.mjs). Text outside the font, or too wide, falls back to fillText.
+- **D-89:** fixed. K07 Bima is in the pixel kantor at the visitor slot.
+- **D-91:** fixed, and it was an easy split.
+  - `ui/panggung/sumberPiksel.ts` now starts the Episode 1 room manifest and PNG loading on FIRST USE (`pastikanPiksel()` inside its accessors) instead of at import.
+  - `ui/panggung/sumber.ts` starts the Episode 1 atlas preload on the first `gambarTokoh`/`ambilRuang`.
+  - The first-use call is synchronous, so Episode 1's first render still sees status 'memuat'.
+  - AUTO-2 pages no longer download ≈ 111 KB of Episode 1 room PNGs + bu-rina.png. miss-raksa.png is still loaded because AUTO-2 uses it.
+  - Episode 1 tests and e2e are green.
+- **D-90 (script language):** out of scope; unchanged.
+
+### Asset table: everything AUTO-2's stage ships (production build, bytes as served; PNG raw, JS gzip -9)
+| asset | bytes |
+|---|---|
+| ep2-ruang-kantor-latar.png | 8,705 |
+| ep2-ruang-kantor-meja.png | 2,404 |
+| ep2-ruang-bengkel-latar.png | 22,249 |
+| ep2-ruang-tol-latar.png | 21,001 |
+| ep2-ruang-pool-latar.png | 11,013 |
+| ep2-ruang-wawancara-latar.png | 12,252 |
+| ep2-ruang-pool-trailer.png | 1,785 |
+| props map / surat / foto | 259 / 117 / 129 |
+| hendra.png | 18,445 |
+| samping.png (6 characters) | 17,696 |
+| miss-raksa.png (Episode 1 atlas, reused) | 19,972 |
+| **PNG subtotal** | **136,027** |
+| all JS gzip delta vs HEAD f6da694 (1,101,546 -> 1,111,029): stage, adapter, font, manifests (hendra 1,669 + samping 1,274 + ruang-ep2 877 gzip) | 9,483 |
+| **AUTO-2 stage total** | **145,510 B ≈ 142 KB** of the 400 KB gate (Designer estimate 235-255 KB) |
+- **Removed from AUTO-2 transfers (D-91):** ≈ 111 KB of Episode 1 PNGs. The illustrated WebP set is no longer requested but still sits in the build (Stage 3).
+
+### Tests and evidence
+- **Tests:**
+  - `npm run test:client`: **735 / 735 pass**.
+  - `adegan.test.ts` has 9 tests. The whole-episode graph walk asserts every reachable composition is pixel with NO fallback, every room/slot/prop exists, and every requested pose+facing resolves without fallback for all 8 story expressions. Requested set: missRaksa berdiri/right; rudi, bima, darto, admin, tol, polisi berdiri/left. The other tests cover the 3-slot mapping, the card (pool + Hendra), side-character faces, named fallbacks for impossible input, and the unknown-pose check.
+  - `npm run test:e2e` (production build, legacy on): **exit 0, kegagalan 0, console/http bermasalah 0**. `tsc --noEmit` is clean and the production build succeeds.
+- **Browser checks:** `node tools/cek-piksel-t013.mjs` -> **70 / 70 PASS**, all with 0 `.webp` and 0 Episode 1 room PNG requests.
+  - 16 cases at 360×740 DPR 2, 390×844 DPR 3 and 1280×800 in id; mentor, pool and wawancara-3 also in en and zh.
+  - Cases: mentor, berkas, surat (lands on the chat), K07 bima, pool (Rudi + trailer), bengkel, foto, tol, wawancara-1/2/3, tel-panik/cemas/kecewa/tenang/senang (chat avatar).
+  - Also the /cerita card at 3 viewports, and a kantor -> pool transition series (20 frames, 100 ms apart, `stage2/transisi-kantor-pool/`).
+  - States come from `tools/cerita/state-kantor-t013.mts` (the real engine; half the runs use activity answer keys so K09-E with three witnesses is reached) and `state-lokasi-kedua.mts`.
+- **Screenshots:** `team/evidence/T-013/stage2/`.
+
+### Remaining fallbacks: none
+The adapter can still refuse an unknown location or objek, a cast member without pixel art, or more than 3 standing characters. No AUTO-2 composition does (test-enforced).
+
+### For Designer review / Stage 3
+- **Scale and facing:**
+  - Characters are large relative to the outdoor rooms. Rudi is much taller than the trailer cab: the trailer was sized per D-84 (150 art px), the people to the Episode 1/Hendra scale.
+  - Everyone faces left, including Rudi (README asked for right) and Bima at tol (right, towards the barrier). No right-facing sheets exist.
+- **Art gaps:** the lower bodies are procedural and plain. The `foto` prop in bengkel is a small print on the wall, a placement chosen by Fullstack.
+- **Stage 3:**
+  - Delete `seni/auto-2/ilustrasi` (≈ 4.9 MB) and `PanggungLatarIlustrasi`, `useGrupSiap` and the T-010 gate/warm-up code if no consumer is left. The `PanggungLatar` wrapper becomes the pixel stage only.
+  - Drop the unused illustrated avatar path in `PotretHp`, and the illustrated warm-up of the next location (`komposisiBerikut` -> `hangatkanKomposisi`, now a no-op for pixel scenes).
+  - Possibly night tint for tol (D-84 q5).

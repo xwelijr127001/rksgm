@@ -36,12 +36,19 @@ export const TOKOH_PIKSEL = !ujiTokohMati();
 // saja), supaya biasanya sudah siap sebelum panggung dicat pertama kali. Gagal = pendengar sumberPiksel diberi tahu
 // (Panggung menyusun ulang dunianya: tokoh SVG).
 pasangStatusAtlas(gambarSiap);
-if (TOKOH_PIKSEL && typeof window !== 'undefined' && typeof Image !== 'undefined') {
-  for (const url of Object.values(URL_ATLAS_PIKSEL)) if (url && !url.startsWith('file:')) void muatGambar(url);
+// T-013 (D-91): atlas Episode 1 mulai dimuat pada penggambaran tokoh pertama (bukan saat impor modul; Episode 2 tidak memakainya).
+let atlasDimulai = false;
+function mulaiAtlas(): void {
+  if (atlasDimulai) return;
+  atlasDimulai = true;
+  if (TOKOH_PIKSEL && typeof window !== 'undefined' && typeof Image !== 'undefined') {
+    for (const id of ['missRaksa', 'buRina'] as const) { const url = URL_ATLAS_PIKSEL[id]; if (url && !url.startsWith('file:')) void muatGambar(url); }
+  }
 }
 
 /** Penggambar tokoh untuk panggung: gambar RASTER dari penyusun piksel bila tersedia, selain itu generator SVG. */
 export const gambarTokoh: PenggambarTokoh = (o) => {
+  mulaiAtlas();
   const { siapa, ...opsi } = o as OpsiGambar;
   const seni = { ...opsi, piksel: TOKOH_PIKSEL };
   if (siapa === 'mentor') return gambarMissRaksa(seni as Parameters<typeof gambarMissRaksa>[0]);
@@ -156,6 +163,7 @@ export function gambarSementara(l: LetakTokoh): boolean {
  * gagal, selain itu ruang SVG. Generator SVG gagal -> pengganti sementara (panggung tetap tampil).
  */
 export function ambilRuang(lokasi: IdLokasiAdegan): RuangAdegan {
+  mulaiAtlas();
   return ruangPikselUntuk(lokasi) ?? ambilRuangSvg(lokasi);
 }
 

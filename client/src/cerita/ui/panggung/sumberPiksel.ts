@@ -49,21 +49,24 @@ function ubah(s: StatusPiksel): void {
 
 /** Berlangganan perubahan status seni piksel (useSyncExternalStore). */
 export function langgananPiksel(f: () => void): () => void {
+  pastikanPiksel();
   pendengar.add(f);
   return () => { pendengar.delete(f); };
 }
 /** Versi status (berubah setiap status manifest / PNG berubah): snapshot useSyncExternalStore. */
-export const versiPiksel = (): number => versi;
-export const statusPiksel = (): StatusPiksel => status;
+export const versiPiksel = (): number => { pastikanPiksel(); return versi; };
+export const statusPiksel = (): StatusPiksel => { pastikanPiksel(); return status; };
 
 /** Ruang raster untuk lokasi, atau null (tanpa manifest / lokasi tidak ada / PNG ruang gagal = pakai ruang SVG). */
 export function ruangPikselUntuk(lokasi: IdLokasiAdegan): RuangAdegan | null {
+  pastikanPiksel();
   if (!manifest || status === 'gagal' || status === 'tidak-ada') return null;
   return manifest.ruang[lokasi] ?? null;
 }
 
 /** Prop raster (null: tanpa manifest, ruang gagal, prop tidak dibangun, atau PNG prop gagal). */
 export function propPikselUntuk(id: IdPropPiksel): PropPiksel | null {
+  pastikanPiksel();
   if (!manifest || status === 'gagal' || status === 'tidak-ada') return null;
   const p = manifest.prop[id];
   return p && gambarSiap(p.piksel.url) !== false ? p : null;
@@ -71,6 +74,7 @@ export function propPikselUntuk(id: IdPropPiksel): PropPiksel | null {
 
 /** URL PNG prop raster (didekode bersama ruang sebelum dunia piksel diperlihatkan). */
 export function urlPropPiksel(): string[] {
+  pastikanPiksel();
   if (!manifest) return [];
   return Object.values(manifest.prop).map((p) => p.piksel.url);
 }
@@ -186,4 +190,14 @@ function mulai(): void {
   if (json !== undefined) pasangManifest(json, (berkas) => pngBuild[`${AKAR}${berkas.replace(/^\.?\//, '')}`] ?? null);
 }
 
-mulai();
+/**
+ * T-013 (D-91): manifest & PNG ruang Episode 1 dimuat MALAS, pada pemakaian pertama (render panggung/potret Episode 1),
+ * bukan saat modul diimpor: modul ini ada di chunk CeritaMain bersama Episode 2, yang tidak memakai ruang Episode 1.
+ * pasangManifest sinkron, jadi render pertama yang memanggil fungsi di atas langsung melihat status 'memuat'.
+ */
+let dimulai = false;
+export function pastikanPiksel(): void {
+  if (dimulai) return;
+  dimulai = true;
+  mulai();
+}

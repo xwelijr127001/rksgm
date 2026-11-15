@@ -20,6 +20,7 @@ import { selaPembicara } from '../ui/bagian';
 import { punyaPotret } from '../ui/latar/ilustrasi';
 import { komposisiLatar } from '../ui/latar/komposisi';
 import { PanggungLatar } from '../ui/latar/PanggungLatar';
+import { adeganPiksel } from '../ui/latar/piksel/adegan';
 import { hangatkanKomposisi, komposisiBerikut, perkiraanPanggung, sesudahAdeganSiap, useVersiUkuran } from '../ui/latar/hangatkan';
 import { jenisPenutur, ketukanKini } from './alur';
 import { CatatanStatus, PotretHp } from './bagianHp';
@@ -62,6 +63,9 @@ export function AdeganTatap({ ep, state, tx, namaPemain, status, tindakan, bukti
   sisipan?: ReactNode;
 }) {
   const k = komposisiLatar(ep, state);
+  // T-013: adegan yang bisa dipetakan ke panggung piksel (kantor) digambar PanggungPiksel; selebihnya (dan bila PNG piksel
+  // gagal dimuat) panggung ilustrasi seperti sebelumnya. Gerbang T-010 hanya untuk ilustrasi.
+  const piksel = adeganPiksel(ep, k).piksel;
   // T-010 G3: lokasi BERIKUTNYA (bila diketahui dari naskah) dipanaskan saat adegan ini tampil, memakai ukuran panggung
   // yang terpasang (cadangan: perkiraan). Lokasi sama tidak perlu. Dibatalkan saat state berganti / keluar halaman.
   const bingkai = useRef<HTMLDivElement>(null);
@@ -70,7 +74,8 @@ export function AdeganTatap({ ep, state, tx, namaPemain, status, tindakan, bukti
   const versiUkuran = useVersiUkuran();
   const kunciBerikut = berikut ? `${berikut.lokasi}|${berikut.hadir.map((x) => x.id).join(',')}` : '';
   useEffect(() => {
-    if (!berikut) return;
+    // Lokasi berikutnya di panggung piksel: tidak memanaskan ilustrasi (PNG piksel kecil, dimuat saat dipakai).
+    if (!berikut || adeganPiksel(ep, berikut).piksel) return;
     // Baru sesudah adegan kini tampil (grup siap): tidak berebut jaringan dengan lapisan yang sedang ditunggu.
     return sesudahAdeganSiap(bingkai.current, () => {
       const el = bingkai.current?.querySelector<HTMLElement>('.cer-panggung.cer-latar');
@@ -114,7 +119,7 @@ export function AdeganTatap({ ep, state, tx, namaPemain, status, tindakan, bukti
             return (
               <div key={i} className="hp-ucapan" data-penutur={b.siapa}>
                 <p className="hp-ucapan-nama">
-                  {jenis !== 'pemain' && (tanpaPanggung || !diPanggung.has(b.siapa)) ? <PotretHp ep={ep} id={b.siapa} ekspresi={akhir.ekspresi} nama={nama(b.siapa)} /> : null}
+                  {jenis !== 'pemain' && (tanpaPanggung || !diPanggung.has(b.siapa)) ? <PotretHp ep={ep} id={b.siapa} ekspresi={akhir.ekspresi} nama={nama(b.siapa)} piksel={!!piksel} /> : null}
                   <b>{nama(b.siapa)}</b>{p ? <span>{tx(p.peran)}</span> : null}
                 </p>
                 {grup.map((x, j) => <p key={j} className="hp-ucapan-teks">{tx(x.teks)}</p>)}

@@ -53,8 +53,16 @@ export const SATUAN = 4;
 /** Tinggi kepala (piksel seni) bila frame tidak menyebutnya (Bu Rina: hijab -> dagu 45-46, BU-RINA-PIKSEL.md). */
 export const KEPALA_TINGGI_BAWAAN = 46;
 
-export type IdTokohPiksel = 'missRaksa' | 'buRina';
-export const DAFTAR_TOKOH_PIKSEL: readonly IdTokohPiksel[] = ['missRaksa', 'buRina'];
+/** 'hendra' = Pak Hendra Episode 2 (T-013, tools/piksel/bangun-hendra.mjs): hadap kiri saja, berdiri + gestur. */
+/** Episode 2 Stage 2: enam tokoh samping (tools/piksel/bangun-samping.mjs, satu atlas samping.png), hadap kiri, berdiri. */
+export type IdTokohSamping = 'rudi' | 'bima' | 'darto' | 'admin' | 'tol' | 'polisi';
+export const DAFTAR_TOKOH_SAMPING: readonly IdTokohSamping[] = ['rudi', 'bima', 'darto', 'admin', 'tol', 'polisi'];
+export type IdTokohPiksel = 'missRaksa' | 'buRina' | 'hendra' | IdTokohSamping;
+/** Tokoh panggung Episode 1 (daftar lama, semantik tidak berubah: uji pose cerita, atlasGagal, ikon). */
+export type IdTokohPikselEp1 = 'missRaksa' | 'buRina';
+export const DAFTAR_TOKOH_PIKSEL: readonly IdTokohPikselEp1[] = ['missRaksa', 'buRina'];
+/** Semua tokoh piksel yang bisa dipasang ke penyusun (Episode 1 + Pak Hendra Episode 2). */
+export const DAFTAR_TOKOH_PIKSEL_SEMUA: readonly IdTokohPiksel[] = ['missRaksa', 'buRina', 'hendra', ...DAFTAR_TOKOH_SAMPING];
 export type ArahTokoh = 'kiri' | 'kanan';
 /** Mata: terbuka (dasar), tertutup (kedip), atau melihat ke bawah/kartu (bawah). */
 export type MataTokoh = 'buka' | 'tutup' | 'bawah';
@@ -220,6 +228,7 @@ function pandangBawaan(id: IdTokohPiksel, pose: string): ArahPandang {
 const PANDANG_BAWAAN: Readonly<Record<IdTokohPiksel, Partial<Record<ArahPandang, { arah?: ArahTokoh; varian?: 'bawah' }>>>> = {
   missRaksa: { lawan: { arah: 'kanan' }, pemain: { arah: 'kiri' }, depan: { arah: 'kiri' }, bawah: { varian: 'bawah' } },
   buRina: { bawah: { varian: 'bawah' } },
+  hendra: {}, rudi: {}, bima: {}, darto: {}, admin: {}, tol: {}, polisi: {},
 };
 
 const jenisPose = (pose: string): JenisJangkar => (pose !== 'duduk-turun' && (pose.startsWith('duduk') || pose === 'telepon') ? 'pinggul' : 'kaki');
@@ -1004,7 +1013,7 @@ export function buatPenyusun(sumber: Partial<Record<IdTokohPiksel, SumberAtlasTo
   const manifest: Partial<Record<IdTokohPiksel, ManifestTokoh>> = {};
   const url: Partial<Record<IdTokohPiksel, string>> = {};
   const catatan: string[] = [];
-  for (const id of DAFTAR_TOKOH_PIKSEL) {
+  for (const id of DAFTAR_TOKOH_PIKSEL_SEMUA) {
     const s = sumber[id];
     if (!s) continue;
     const c: string[] = [];
@@ -1027,7 +1036,8 @@ export function buatPenyusun(sumber: Partial<Record<IdTokohPiksel, SumberAtlasTo
       return manifest[id] ? teleponDari(manifest[id]!, e, u, opsi, url[id]) : null;
     },
     gambarTokohPiksel: (o) => {
-      const id: IdTokohPiksel = o.siapa === 'mentor' ? 'missRaksa' : 'buRina';
+      // `id` = tokoh piksel eksplisit (Episode 2: hendra); tanpa itu mentor = Miss Raksa, nasabah = Bu Rina (Episode 1).
+      const id: IdTokohPiksel = o.id && (DAFTAR_TOKOH_PIKSEL_SEMUA as readonly string[]).includes(o.id) ? (o.id as IdTokohPiksel) : o.siapa === 'mentor' ? 'missRaksa' : 'buRina';
       const m = manifest[id];
       if (!m) return null;
       return keGambarTokoh(susunDari(m, opsiDariCerita(id, m, o), url[id]));

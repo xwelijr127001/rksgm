@@ -1214,3 +1214,147 @@ what is still missing is any real progress indication (the bar is indeterminate 
 
 ### Not verified by me
 Real devices and a real PhaseRouter resume (D-77), the legacy-off zh-then-id text flip (accepted in D-68), Fullstack's bundle-size numbers (their evidence: +1,482 B gzip in index.html, Landing +0.32 KB), and `npm run test:e2e` (their log; I ran only the 2 guard tests, 2/2 pass).
+
+---
+
+## T-013 — Stage 1 concept (2026-11-15)
+
+Author: Designer · Art produced, not only notes · No code edited (`client/`, `tools/`, BOARD untouched, nothing committed).
+Deliverables: `character/hendra-pixel-v1/` (master, 6 poses, 6 expressions, all RGBA full size, README, PROMPTS-IMAGEGEN, preview.html) and `character/kantor-ep2-pixel-v1/` (room reference 2720×1536, README with layer plan + camera mapping).
+**Preview for the owner's phone:** `character/hendra-pixel-v1/preview.html` (Hendra next to Miss Raksa v4 at the same scale, white/cream/green/dark backgrounds, 44–96 px avatars, room reference at the bottom).
+
+### How the art was made
+Canva image generation with two references (Miss Raksa v4 master = style, old `hendra-480.webp` = identity), then Canva background removal, then export of exact-size pages as lossless transparent PNG (the only path to full-size bytes; media links give 200 px thumbnails). Verified with ffprobe + alpha histogram: master 1024×1536 RGBA (67.9 % transparent / 3.4 % edge), poses and expressions 1536×1024 RGBA (53 % transparent / 6.4 % edge), room 2720×1536 RGB. Full prompts in PROMPTS-IMAGEGEN.md.
+
+### Pak Hendra sheet (D-79)
+Indonesian man ±45, haulage owner: grey temples, moustache, tan skin, heavier build; cream short-sleeve polo with chest pocket, open navy field vest, brown belt and trousers, brown work shoes, black phone in the left hand. No yellow/green so he never reads as staff. Master faces viewer's LEFT (Miss Raksa stands left, facing right). Poses (waist-up, 3×2): cemas (arms crossed) · panik (both palms up) · kecewa (hand on neck) · tenang (hands at waist) · senang (thumbs-up, open smile) · menjelaskan (phone held up, pointing). Expressions (3×2): panik · cemas · kecewa · tenang · senang · kedip. Identity is continuous with the old illustration (moustache, grey, cream shirt, brown trousers) so returning players see the same man. Priority: high (owner sign-off).
+
+### Expression mapping (old `hendra-*` → new sheet cell)
+| old file | script `ekspresi` | new cell (col,row) |
+|---|---|---|
+| hendra-panik | bingung | panik (1,1) |
+| hendra-cemas | cemas | cemas (2,1) |
+| hendra-kecewa | kesal | kecewa (3,1) |
+| hendra-tenang | netral, lega | tenang (1,2); recommend routing `lega` → senang (2,2) |
+| hendra-senang | senang | senang (2,2) |
+| — | blink variant | kedip (3,2) |
+Chat avatar (cerita/hp): crop from the expression sheet, default tenang (1,2), tense scenes cemas (2,1); approximate face boxes in the README, pipeline measures the real alpha box.
+
+### Kantor room (D-80)
+Reference continues the homepage hero counter (cream top, green grooved front, wood wall, yellow claim folder, phone, plant) in the Episode 1 room palette; nameplate board left BLANK for runtime text "Layanan Klaim". Layer plan at 400×225 art px: `latar` (wall, blank board, poster, clock, drawers, floor), `meja` (alpha, hides characters from the waist down), props `map`, `telepon`, `kartu`, `tanaman` (alpha, ≤1 KB each), optional `depan`. Camera: Miss Raksa behind the counter left-centre facing right, Hendra in front right-centre facing left, 120 art px between faces (same as Episode 1 `meja`); phone crop ±1000 world units centred between the heads. Full table in `character/kantor-ep2-pixel-v1/README.md`.
+
+### Camera mapping, `dekat` → v3 (D-81)
+`hadir` both → `lokasi:'meja'`, mentor standing (recommend `berdiri`/`berdiri-persilakan`, ignore `bisaDudukTurun`: a service counter has no chair), nasabah `berdiri` facing left; `hadir` mentor only → nasabah `null`; `telepon:'hendra'` → same room, nasabah `lewatTelepon`, prop telepon in hand; close-up `dekat` has no equivalent: expressions carry through the 44–64 px face and the dialog avatar, camera stays; `objek` → `prop` on `meja`. **Owner decision needed:** Miss Raksa standing at the counter (recommended, matches homepage) or seated as in Episode 1.
+
+### Asset accounting (compressed bytes of final atlas/room PNGs, not sources) (D-82)
+Basis: Episode 1 production files (`miss-raksa.png` atlas 20.0 KB, `bu-rina.png` 54.5 KB, `ruang-meja-latar.png` 14.1 KB) and measured downsamples of the new art: room at 400×225 with a 48-colour palette = **22.2 KB**; master at 184 art px, 40 colours + alpha = **5.3 KB** per body frame; pose sheet at atlas scale 20.4 KB, expression sheet 11.3 KB. Estimate Stage 1: Hendra atlas (≈8 body frames + 6 faces × blink/talk variants) **45–60 KB**, kantor room + 4 props **≈ 25 KB**, Miss Raksa extra poses **≈ 8 KB** → **≈ 80–95 KB**. Whole episode (Stage 2 adds 4 rooms ≈ 25 KB each, trailer prop ≈ 6 KB, Rudi/Darto/admin/tol/polisi as silhouettes or ≈ 15 KB each if drawn) → **≈ 200–290 KB**, inside the 400 KB gate with margin; the gate is only at risk if every side character gets a full atlas. Measurement basis for Fullstack: gzip/brotli is irrelevant for PNG; report raw file bytes of `client/src/cerita/seni/piksel/*ep2*` from the build output.
+
+### Open questions for Fullstack's pipeline (`tools/piksel/bangun-hendra.mjs`, v4 pattern) (D-83)
+1. Native pitch: measure like `miss-native.mjs` (v4 master was 7.34 px/art px; Hendra master looks ≈ 8; sheets differ). 2. Head lock: Hendra's head is proportionally smaller than Miss Raksa's; decide whether to scale his head to the 54-art-px rule or keep adult-male proportion (recommend keep, verify at 44 px). 3. Facing-right variant: not generated; do not mirror (pocket, phone hand, buttons flip). 4. Missing frames: walking in/out, sitting, phone-at-ear: only needed if the kantor cue uses Episode 1 `masuk`/`duduk`; Stage 1 can start with standing only. 5. Alpha sheets are ≈2 % rescaled vs the `-putih` sheets (Canva trim); use `-putih` for geometry registration if needed. 6. Room: downsample 2720×1536 → 400×225 with area filter, palette ≤48, split by the layer boxes; blank board gets `teksPapan`.
+
+### Stage 2 list
+bengkel (workshop bay, lift, tool wall), tol (toll-road shoulder at night, barrier, trailer crash as a room feature not a prop), pool (truck yard, parked trailer prop, office hut), wawancara/trailer (interview room or trailer cab), plus props: trailer (depth-sorted), police letter, claim documents; characters Rudi, Darto, admin bengkel, petugas tol, polisi (decide atlas vs named silhouettes against the budget).
+
+### Anti AI-slop
+Same pixel language as Miss Raksa v4 and the homepage hero; no text, logos, gradients or glow baked in; costume differentiates roles by colour (navy/cream vs RAKSA gold); props are story props (claim folder, phone), not decoration.
+
+---
+
+## T-013 — Stage 2 concept (2026-11-15)
+
+Author: Designer · Art produced as in Stage 1 (Canva generate → background removal where alpha is needed → exact-size page → lossless PNG export, verified with ffprobe + alpha histogram) · No `client/`/`tools/` edits, BOARD untouched, nothing committed.
+
+**Deliverables and preview paths (open on the phone):**
+- `character/bengkel-ep2-pixel-v1/preview.html` · `character/tol-ep2-pixel-v1/preview.html` · `character/pool-ep2-pixel-v1/preview.html` (shows the trailer prop composited) · `character/wawancara-ep2-pixel-v1/preview.html`
+- `character/trailer-ep2-pixel-v1/preview.html` (alpha check, 150 px size test)
+- `character/tokoh-samping-ep2-pixel-v1/preview.html` (six side characters beside Hendra, 64 px avatars)
+Each folder: reference/sheet PNG, README (layer plan, props, camera, cue mapping or sheet notes + honest limits), PROMPTS-IMAGEGEN.md, thumb/.
+
+### Files (all full size)
+| file | size | alpha |
+|---|---|---|
+| bengkel-ep2-referensi-v1.png | 1680×944 RGB | n/a (room) |
+| tol-ep2-referensi-v1.png | 1680×944 RGB | n/a |
+| pool-ep2-referensi-v1.png | 1680×944 RGB | n/a |
+| wawancara-ep2-referensi-v1.png | 1680×944 RGB | n/a |
+| trailer-ep2-sheet-v1.png (intact + damaged, facing left) | 1456×1088 RGBA | 52.0 % transparent / 5.3 % edge |
+| tokoh-samping-badan-v1.png (6 waist-up) | 1536×1024 RGBA | 55.3 % / 6.2 % |
+| tokoh-samping-ekspresi-v1.png (6 heads, 2nd expression) | 1536×1024 RGBA | 51.1 % / 6.8 % |
+
+### Per-room layer plan and camera (D-84) — details and boxes in each README
+| room | script use | layers (400×225 art px) | horizon | slots (world 1600) | cue mapping |
+|---|---|---|---|---|---|
+| bengkel | K05, `hadir:['admin']` | `latar`; optional props kotak-alat, rak-ban | 45 % | admin x≈1000 facing left; 2nd x 700 | nasabah-slot = admin `berdiri`, mentor null |
+| tol | Bima's inspection, `hadir:['bima']` (crash was at night; scene is a daylight visit, so drawn late afternoon) | `latar` (barrier with cracked segment + tyre mark = the story point); `pagar` guardrail in front; optional cones | 43 % | Bima x≈560 facing right; keep cracked segment (x≈1000–1300) in the phone crop | nasabah-slot = bima `berdiri`, `pandang:'depan'` when pointing |
+| pool | K04 `hadir:['rudi']` + episode cover `['hendra']` | `latar`; `benda-trailer` (damaged prop, x 230–380 art px, wheels y≈170, z between kerb and standing characters) | 58 % | Rudi x≈560, Hendra x 700, trailer right | nasabah-slot = rudi/hendra `berdiri`; `prop.trailer:'rusak'` always on in pool |
+| wawancara | K09, 1–3 witnesses (`bima`, `bima+darto`, `tol+bima+polisi`) | `latar` (blank whiteboard, blank binders); `meja` alpha layer (people in front of it stay whole) | 45 % | 830 / 650+1010 / 520+830+1140, feet y≈870 | all `berdiri`; **three on stage needs a third slot in `CueAdegan`** (open question) |
+Kantor (Stage 1) unchanged. Trailer decision: **prop, not a room feature** (pool only; not drawn at tol, not at wawancara).
+
+### Side characters (D-85)
+On stage besides Hendra/Miss Raksa (from `episode.ts` `hadir`): **rudi, bima, darto, admin, tol, polisi** (six). Budget choice: waist-up stills + one second-expression head each (no atlas, no second facing, no blink): bodies sheet + expression sheet, 3×2 each, scale/grain anchored to the Hendra master. Expression map: face 1 (bodies) ← `netral, tersenyum, senang, lega`; face 2 (expressions) ← `cemas, serius, bingung, kesal`. Feet: generate the lower body procedurally from each palette (2–3 KB) or stand them behind furniture. Known drift between the two sheets (facial hair on Bima, Petugas tol, Polisi): bodies sheet is canonical; fix at pixel normalisation or re-run the expression sheet with the bodies sheet as reference. Police cap/badge are generic emblems with no lettering (not a real insignia) — Lead to confirm acceptable.
+
+### Episode-wide asset accounting (compressed PNG bytes, measured downsamples at atlas/room scale) (D-86)
+| asset | basis | estimate |
+|---|---|---|
+| kantor room (Stage 1) | 400×225, 48 col | 22.2 KB (+ props ≈ 3 KB) |
+| bengkel | same | 25.8 KB |
+| tol | same | 32.3 KB |
+| pool | same | 30.5 KB |
+| wawancara | same | 21.0 KB |
+| layer overhead (alpha meja/pagar/props across rooms) | | ≈ 12 KB |
+| trailer prop, damaged only / both | 170 art px, 32 col | 3 / 5.6 KB |
+| Hendra atlas (Stage 1 estimate) | 8 body frames × 5.3 KB + faces | 45–60 KB |
+| Miss Raksa extra poses | | ≈ 8 KB |
+| six side characters | bodies 19.0 KB + heads 11.6 KB + feet ≈ 3 KB | ≈ 34 KB |
+| **Episode total** | | **≈ 235–255 KB** (gate 400 KB; ≈ 145 KB headroom) |
+Measurement basis for Fullstack: raw bytes of the shipped `client/src/cerita/seni/piksel/*ep2*` PNGs in the build; not gzip, not source PNGs. Tol is the heaviest room (trees + markings); flatten the tree band to two tones if a room must shrink.
+
+### Open questions for Fullstack
+1. Third stage slot for the three-witness wawancara scene (`CueAdegan` extension) or stage them as two + one on the dialog avatar.
+2. Side characters are waist-up: procedural lower body vs furniture occlusion (recommend procedural).
+3. Trailer prop registration in pool: ground line y≈170 art px, depth between kerb (z 10) and characters (z 30+); cover scene uses the same.
+4. Room pitch: all four rooms were generated at 1680×944 (÷4.2 to 400×225) vs kantor at 2720×1536 (÷6.8); `bangun-ruang.mjs` must downsample each from its own source size with the area filter, palette ≤ 48.
+5. Tol time of day: daylight (readable) vs night tint — owner taste; geometry is the same.
+6. Expression-sheet facial-hair drift: fix in pixel pass or regenerate.
+
+### Step-3 review checklist (Designer review + QA screenshots)
+Per room, production build, 360×740 DPR 2 and 390×844 DPR 3 + 1280×800: first frame of the scene (placeholder, if T-010 gate still applies), settled frame with the scripted characters in place; check: horizon/feet line consistent across rooms, characters not clipped by `meja`/`pagar` wrongly, the cracked barrier visible in the tol phone crop, the damaged trailer visible with Rudi in the pool crop, three witnesses readable in wawancara (or the agreed fallback), no baked text/logo anywhere, palette ≤ 48 per room, pixel grain matches Hendra/Miss Raksa (no smooth blur), no WebKit rectangle artefacts; side characters: identity matches the bodies sheet, both faces distinguishable at 44–64 px, feet treatment looks intentional; totals: shipped bytes table in HANDOFF ≤ 400 KB; id/en/zh full playthrough; T-003..T-011 homepage untouched.
+
+---
+
+## T-013 — Stage 1 review (2026-11-15)
+
+Reviewer: Designer · Build: production build in client/dist (22:16, newer than the 22:10 assets) on `npm start` :4000 (`RAKSA_LEGACY=on`, started and stopped by me) · No source edits.
+Method: read team/HANDOFF.md "T-013 Stage 1"; drove the same saved states as Fullstack's harness (team/evidence/T-013/states.json via `raksa:cerita`) with my own CDP scripts: kantor `mentor` at 360×740 DPR 2 (id), 390×844 DPR 3 (en), 1280×800 DPR 1 (zh); `berkas`; WhatsApp `tel-tenang`/`tel-cemas`/`tel-panik`; `bima` (illustrated fallback) and `pool` (illustrated, next location); a 12 s canvas-hash probe for blink under normal / reduce+`?gerak=ikut` / reduce+`?gerak=penuh`; and the atlas review sheet `character/piksel/hendra/tinjau-wajah.png`.
+
+### Verdict: FIX NEEDED (one composition blocker, small); everything else PASS
+
+### 1. Kantor scene vs my reference and Episode 1
+- **Room, palette, grain, props:** the 400×225 room is my reference, faithfully downsampled: wood wall, blank green nameplate board, poster, clock, drawers, plant, cream counter top with the desk phone and card holder, green grooved front, tiled floor; 48-colour palette sits next to Episode 1's rooms without a seam; pixel grain matches Miss Raksa v4 and the Hendra atlas (no blur, no filter, integer device-pixel canvas). The dialogue box, name plate chip and "Lanjut" are Episode 1's. It reads as one game. PASS.
+- **Miss Raksa:** standing, facing right, behind the counter, hidden from the waist down by the `meja` layer; head ≈ 36 art px against a 17-art-px-tall counter top: the scale is right and the pose matches the homepage hero. PASS.
+- **Camera:** phone crop keeps her head, the phone and the counter; 1280 shows the wider room. PASS, except:
+- **Nameplate overlap, confirmed at ALL three viewports:** her head covers the right half of the board; the runtime text reads "Layanan K…" (id) at 360, 390 and 1280. Her feet are at world x 560 (art px 140); the board spans art px 57–121; her head (≈ 122–158) sits on the board's right end and the text is centred under it. **[D-87] blocker:** move Miss Raksa's `balikMeja` place from x 560 to **x 720** (art px 180; head ≈ 162–198) so the whole board is clear on her left and she still stands left of the frame's centre, 80 art px from Hendra's slot at 1040 (was 120; still ≥ 2 head widths, fine for a counter). Alternative if Fullstack prefers not to move her: shift the board to the wall segment right of her (art px 200–264, under the poster) in `bangun-ruang-ep2.mjs`; do NOT shrink the text. Re-check at 360/390/1280 that the full "Layanan Klaim Raksa" / "Raksa Claims Service" / zh string fits the board width (the longest string decides; `fillText` max-width already clamps).
+
+### 2. Hendra as chat/dialog avatar
+- The round pixel portrait in the Obrolan header is the tenang face by default and the cemas face in tense beats (`Status: Cemas`), crisp at ≈ 64 px on 360 and ≈ 76 px on 390 DPR 3; identity (grey temples, moustache, cream polo, navy vest) matches the canonical sheet; crop shows hair top to collar. The five atlas faces (tinjau-wajah.png) are faithful to the expression sheet and distinct at small size; `lega → senang` per the owner. PASS.
+
+### 3. Transitions pixel → illustrated (Stage 1 coexistence)
+- Kantor (pixel) → pool (illustrated): a visible style change (pixel room with pixel Miss Raksa, then the smooth illustrated yard with the blue illustrated truck and smooth Rudi). Acceptable for Stage 1 as agreed; Stage 2 removes it by converting pool/bengkel/tol/wawancara.
+- **Most jarring case: K07 Bima in the OLD illustrated kantor.** The same location appears in two different looks (smooth wood/candle office vs the pixel counter) within one episode. Stage 2 must give Bima his pixel still so K07 renders on the pixel kantor; note for Fullstack: the side-character sheet already has him (col 2, row 1).
+- The T-010 blurred placeholder still shows for illustrated rooms; the pixel kantor shows wall colour then the room (≈ 30 KB) — no square, fine.
+
+### 4. Reduced motion / data-gerak
+- Canvas hash over 12 s: normal = 2 distinct frames, 6 changes (3 blinks, 100-ms frames); system reduce + `?gerak=ikut` = 1 frame, 0 changes (no blink, no mouth); reduce + `?gerak=penuh` = blinks again (`data-gerak="penuh"`). Same behaviour as Episode 1. PASS.
+
+### 5. Anti AI-slop
+Still a RAKSA game screen: hand-drawn-feeling pixel room, a single character at her post, Episode 1's dialogue chrome, no gradients/glow, no baked text (the nameplate is runtime text). PASS.
+
+### Items
+- [D-87] Kantor pixel scene, all viewports · Miss Raksa's head covers the nameplate; the location text is unreadable · fix: move her `balikMeja` place to world x 720 (or move the board to art px 200–264); verify id/en/zh text fits · **high (blocker for owner phone check)**.
+- [D-88] Nameplate text · drawn with `system-ui` on the canvas; it is the only non-pixel element inside the pixel frame · fix (polish, fold into Stage 2): render the board text with the same approach Episode 1 uses for "Raksa Silver Club" (its bitmap/pixel lettering helper) or a small inline bitmap font; keep runtime translation · low.
+- [D-89] K07 Bima scene · illustrated old kantor coexists with the pixel kantor · fix: Stage 2 Bima pixel still (sheet col 2,row 1) and remove the fallback for kantor · med (Stage 2 scope, not a Stage 1 block).
+- [D-90] Script language · Episode 2 dialogue stays Indonesian under `?lang=en|zh` (only UI chrome translates); pre-existing (no `teks.en/zh.ts` for AUTO-2) · note for Lead/owner, out of T-013 scope · low.
+- [D-91] Bytes · pre-existing: AUTO-2 pages still download all Episode 1 room PNGs + both Episode 1 atlases (~131 KB) via `sumberPiksel` import; count it in the Stage 2/3 gate or lazy-load · med (Fullstack already flagged).
+
+### Not verified by me
+Real iOS WebKit device, the owner phone check, `npm run test:client`/`test:e2e` (Fullstack reports 733/733 and e2e 0 failures), Hendra physically on stage (the script never places him in the kantor; the slot exists and is unit-tested only).

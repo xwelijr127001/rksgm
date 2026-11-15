@@ -256,8 +256,12 @@ export interface LokasiIlustrasi {
  * (`ilustrasi`) + nama tempat; tokoh = aset ilustrasi turunan aset pemilik (seni/<episode>).
  */
 export interface KonfigLatar {
-  /** Lokasi -> nama tempat (kunci teks; label lokasi di panggung) + gambar ilustrasi. */
-  lokasi: Record<string, { nama: KunciTeks; ilustrasi: LokasiIlustrasi }>;
+  /**
+   * Lokasi -> nama tempat (kunci teks) + gambar ilustrasi. `piksel` (T-013) = id ruang di seni/piksel/ruang-ep2.json: lokasi ini
+   * digambar PANGGUNG PIKSEL (ui/latar/piksel) lewat adapter cue (adeganPiksel); tanpa nilai = panggung ilustrasi. Adegan yang
+   * tidak bisa dipetakan (pemeran tanpa atlas piksel, objek tanpa prop piksel) tetap memakai ilustrasi (cadangan eksplisit).
+   */
+  lokasi: Record<string, { nama: KunciTeks; ilustrasi: LokasiIlustrasi; piksel?: string }>;
   /** Aset ilustrasi per pemeran (panggung, potret). */
   tokoh: Partial<Record<IdPembicara, TokohIlustrasi>>;
   /** Pemeran yang boleh hadir TANPA aset (kekurangan aset yang diakui): siluet bernama di panggung, inisial di potret. */

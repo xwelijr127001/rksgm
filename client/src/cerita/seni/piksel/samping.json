@@ -1,0 +1,1200 @@
+{
+ "versi": 1,
+ "dibuat": "tools/piksel/bangun-samping.mjs",
+ "tokoh": {
+  "rudi": {
+   "versi": 1,
+   "dibuat": "tools/piksel/bangun-samping.mjs",
+   "tokoh": "rudi",
+   "piksel": 4,
+   "gambar": "samping.png",
+   "ukuranAtlas": [
+    512,
+    188
+   ],
+   "skala": {
+    "unitDuniaPerPikselSeni": 4,
+    "pxSumberPerPikselSeni": {
+     "badan": 5.028,
+     "ekspresi": 6.722
+    },
+    "kepala": "lebar kepala 36 piksel seni (= Pak Hendra)"
+   },
+   "ekspresi": [
+    "netral",
+    "prihatin"
+   ],
+   "varian": [
+    "dasar"
+   ],
+   "ekspresiDari": {
+    "netral": "netral",
+    "tersenyum": "netral",
+    "senang": "netral",
+    "lega": "netral",
+    "cemas": "prihatin",
+    "serius": "prihatin",
+    "bingung": "prihatin",
+    "kesal": "prihatin"
+   },
+   "frame": {
+    "berdiri-kiri": {
+     "rect": [
+      151,
+      0,
+      73,
+      188
+     ],
+     "hadap": "kiri",
+     "jenisJangkar": "kaki",
+     "jangkar": {
+      "x": 39,
+      "y": 187
+     },
+     "kaki": {
+      "x": 39,
+      "y": 187
+     },
+     "kepala": {
+      "x": 36,
+      "y": 21
+     },
+     "kepalaTinggi": 42,
+     "wajah": {
+      "kotak": [
+       26,
+       12,
+       28,
+       30
+      ],
+      "mata": [
+       26,
+       16,
+       28,
+       8
+      ],
+      "mulut": [
+       30,
+       32,
+       8,
+       4
+      ]
+     },
+     "ekspresi": {
+      "netral": {
+       "dasar": [
+        436,
+        124,
+        28,
+        30
+       ]
+      },
+      "prihatin": {
+       "dasar": [
+        465,
+        124,
+        28,
+        30
+       ]
+      }
+     }
+    }
+   },
+   "pose": {
+    "berdiri": {
+     "kiri": "berdiri-kiri",
+     "bawaan": "kiri"
+    }
+   },
+   "pandang": {
+    "lawan": {
+     "arah": "kiri"
+    },
+    "pemain": {
+     "arah": "kiri"
+    },
+    "depan": {
+     "arah": "kiri"
+    },
+    "bawah": {}
+   },
+   "potret": {
+    "frame": "berdiri-kiri",
+    "jendela": {
+     "32": {
+      "frame": "berdiri-kiri",
+      "x": 20,
+      "y": 7,
+      "sisi": 32,
+      "skala": 1,
+      "tampil": 32
+     },
+     "44": {
+      "frame": "berdiri-kiri",
+      "x": 14,
+      "y": 3,
+      "sisi": 44,
+      "skala": 1,
+      "tampil": 44
+     },
+     "52": {
+      "frame": "berdiri-kiri",
+      "x": 10,
+      "y": 1,
+      "sisi": 52,
+      "skala": 1,
+      "tampil": 52
+     },
+     "64": {
+      "frame": "berdiri-kiri",
+      "x": 4,
+      "y": -3,
+      "sisi": 64,
+      "skala": 1,
+      "tampil": 64
+     },
+     "96": {
+      "frame": "berdiri-kiri",
+      "x": 12,
+      "y": 1,
+      "sisi": 48,
+      "skala": 2,
+      "tampil": 96
+     }
+    },
+    "dekat": {
+     "52": {
+      "frame": "berdiri-kiri",
+      "x": 23,
+      "y": 10,
+      "sisi": 26,
+      "skala": 2,
+      "tampil": 52
+     },
+     "64": {
+      "frame": "berdiri-kiri",
+      "x": 20,
+      "y": 7,
+      "sisi": 32,
+      "skala": 2,
+      "tampil": 64
+     },
+     "96": {
+      "frame": "berdiri-kiri",
+      "x": 20,
+      "y": 7,
+      "sisi": 32,
+      "skala": 3,
+      "tampil": 96
+     }
+    }
+   },
+   "telepon": {
+    "frame": "berdiri-kiri",
+    "jendela": {
+     "frame": "berdiri-kiri",
+     "x": 8,
+     "y": 3,
+     "sisi": 56,
+     "skala": 1,
+     "tampil": 56
+    }
+   }
+  },
+  "bima": {
+   "versi": 1,
+   "dibuat": "tools/piksel/bangun-samping.mjs",
+   "tokoh": "bima",
+   "piksel": 4,
+   "gambar": "samping.png",
+   "ukuranAtlas": [
+    512,
+    188
+   ],
+   "skala": {
+    "unitDuniaPerPikselSeni": 4,
+    "pxSumberPerPikselSeni": {
+     "badan": 4.861,
+     "ekspresi": 6.333
+    },
+    "kepala": "lebar kepala 36 piksel seni (= Pak Hendra)"
+   },
+   "ekspresi": [
+    "netral",
+    "prihatin"
+   ],
+   "varian": [
+    "dasar"
+   ],
+   "ekspresiDari": {
+    "netral": "netral",
+    "tersenyum": "netral",
+    "senang": "netral",
+    "lega": "netral",
+    "cemas": "prihatin",
+    "serius": "prihatin",
+    "bingung": "prihatin",
+    "kesal": "prihatin"
+   },
+   "frame": {
+    "berdiri-kiri": {
+     "rect": [
+      0,
+      0,
+      76,
+      188
+     ],
+     "hadap": "kiri",
+     "jenisJangkar": "kaki",
+     "jangkar": {
+      "x": 42,
+      "y": 187
+     },
+     "kaki": {
+      "x": 42,
+      "y": 187
+     },
+     "kepala": {
+      "x": 37.5,
+      "y": 21
+     },
+     "kepalaTinggi": 42,
+     "wajah": {
+      "kotak": [
+       27,
+       12,
+       29,
+       30
+      ],
+      "mata": [
+       27,
+       16,
+       29,
+       8
+      ],
+      "mulut": [
+       31,
+       32,
+       8,
+       4
+      ]
+     },
+     "ekspresi": {
+      "netral": {
+       "dasar": [
+        436,
+        0,
+        29,
+        30
+       ]
+      },
+      "prihatin": {
+       "dasar": [
+        466,
+        0,
+        29,
+        30
+       ]
+      }
+     }
+    }
+   },
+   "pose": {
+    "berdiri": {
+     "kiri": "berdiri-kiri",
+     "bawaan": "kiri"
+    }
+   },
+   "pandang": {
+    "lawan": {
+     "arah": "kiri"
+    },
+    "pemain": {
+     "arah": "kiri"
+    },
+    "depan": {
+     "arah": "kiri"
+    },
+    "bawah": {}
+   },
+   "potret": {
+    "frame": "berdiri-kiri",
+    "jendela": {
+     "32": {
+      "frame": "berdiri-kiri",
+      "x": 22,
+      "y": 7,
+      "sisi": 32,
+      "skala": 1,
+      "tampil": 32
+     },
+     "44": {
+      "frame": "berdiri-kiri",
+      "x": 16,
+      "y": 3,
+      "sisi": 44,
+      "skala": 1,
+      "tampil": 44
+     },
+     "52": {
+      "frame": "berdiri-kiri",
+      "x": 12,
+      "y": 1,
+      "sisi": 52,
+      "skala": 1,
+      "tampil": 52
+     },
+     "64": {
+      "frame": "berdiri-kiri",
+      "x": 6,
+      "y": -3,
+      "sisi": 64,
+      "skala": 1,
+      "tampil": 64
+     },
+     "96": {
+      "frame": "berdiri-kiri",
+      "x": 14,
+      "y": 1,
+      "sisi": 48,
+      "skala": 2,
+      "tampil": 96
+     }
+    },
+    "dekat": {
+     "52": {
+      "frame": "berdiri-kiri",
+      "x": 25,
+      "y": 10,
+      "sisi": 26,
+      "skala": 2,
+      "tampil": 52
+     },
+     "64": {
+      "frame": "berdiri-kiri",
+      "x": 22,
+      "y": 7,
+      "sisi": 32,
+      "skala": 2,
+      "tampil": 64
+     },
+     "96": {
+      "frame": "berdiri-kiri",
+      "x": 22,
+      "y": 7,
+      "sisi": 32,
+      "skala": 3,
+      "tampil": 96
+     }
+    }
+   },
+   "telepon": {
+    "frame": "berdiri-kiri",
+    "jendela": {
+     "frame": "berdiri-kiri",
+     "x": 10,
+     "y": 3,
+     "sisi": 56,
+     "skala": 1,
+     "tampil": 56
+    }
+   }
+  },
+  "darto": {
+   "versi": 1,
+   "dibuat": "tools/piksel/bangun-samping.mjs",
+   "tokoh": "darto",
+   "piksel": 4,
+   "gambar": "samping.png",
+   "ukuranAtlas": [
+    512,
+    188
+   ],
+   "skala": {
+    "unitDuniaPerPikselSeni": 4,
+    "pxSumberPerPikselSeni": {
+     "badan": 5.278,
+     "ekspresi": 6.889
+    },
+    "kepala": "lebar kepala 36 piksel seni (= Pak Hendra)"
+   },
+   "ekspresi": [
+    "netral",
+    "prihatin"
+   ],
+   "varian": [
+    "dasar"
+   ],
+   "ekspresiDari": {
+    "netral": "netral",
+    "tersenyum": "netral",
+    "senang": "netral",
+    "lega": "netral",
+    "cemas": "prihatin",
+    "serius": "prihatin",
+    "bingung": "prihatin",
+    "kesal": "prihatin"
+   },
+   "frame": {
+    "berdiri-kiri": {
+     "rect": [
+      298,
+      0,
+      69,
+      188
+     ],
+     "hadap": "kiri",
+     "jenisJangkar": "kaki",
+     "jangkar": {
+      "x": 33,
+      "y": 187
+     },
+     "kaki": {
+      "x": 33,
+      "y": 187
+     },
+     "kepala": {
+      "x": 36,
+      "y": 21
+     },
+     "kepalaTinggi": 42,
+     "wajah": {
+      "kotak": [
+       26,
+       12,
+       28,
+       30
+      ],
+      "mata": [
+       26,
+       16,
+       28,
+       8
+      ],
+      "mulut": [
+       30,
+       32,
+       8,
+       4
+      ]
+     },
+     "ekspresi": {
+      "netral": {
+       "dasar": [
+        436,
+        62,
+        28,
+        30
+       ]
+      },
+      "prihatin": {
+       "dasar": [
+        465,
+        62,
+        28,
+        30
+       ]
+      }
+     }
+    }
+   },
+   "pose": {
+    "berdiri": {
+     "kiri": "berdiri-kiri",
+     "bawaan": "kiri"
+    }
+   },
+   "pandang": {
+    "lawan": {
+     "arah": "kiri"
+    },
+    "pemain": {
+     "arah": "kiri"
+    },
+    "depan": {
+     "arah": "kiri"
+    },
+    "bawah": {}
+   },
+   "potret": {
+    "frame": "berdiri-kiri",
+    "jendela": {
+     "32": {
+      "frame": "berdiri-kiri",
+      "x": 20,
+      "y": 7,
+      "sisi": 32,
+      "skala": 1,
+      "tampil": 32
+     },
+     "44": {
+      "frame": "berdiri-kiri",
+      "x": 14,
+      "y": 3,
+      "sisi": 44,
+      "skala": 1,
+      "tampil": 44
+     },
+     "52": {
+      "frame": "berdiri-kiri",
+      "x": 10,
+      "y": 1,
+      "sisi": 52,
+      "skala": 1,
+      "tampil": 52
+     },
+     "64": {
+      "frame": "berdiri-kiri",
+      "x": 4,
+      "y": -3,
+      "sisi": 64,
+      "skala": 1,
+      "tampil": 64
+     },
+     "96": {
+      "frame": "berdiri-kiri",
+      "x": 12,
+      "y": 1,
+      "sisi": 48,
+      "skala": 2,
+      "tampil": 96
+     }
+    },
+    "dekat": {
+     "52": {
+      "frame": "berdiri-kiri",
+      "x": 23,
+      "y": 10,
+      "sisi": 26,
+      "skala": 2,
+      "tampil": 52
+     },
+     "64": {
+      "frame": "berdiri-kiri",
+      "x": 20,
+      "y": 7,
+      "sisi": 32,
+      "skala": 2,
+      "tampil": 64
+     },
+     "96": {
+      "frame": "berdiri-kiri",
+      "x": 20,
+      "y": 7,
+      "sisi": 32,
+      "skala": 3,
+      "tampil": 96
+     }
+    }
+   },
+   "telepon": {
+    "frame": "berdiri-kiri",
+    "jendela": {
+     "frame": "berdiri-kiri",
+     "x": 8,
+     "y": 3,
+     "sisi": 56,
+     "skala": 1,
+     "tampil": 56
+    }
+   }
+  },
+  "admin": {
+   "versi": 1,
+   "dibuat": "tools/piksel/bangun-samping.mjs",
+   "tokoh": "admin",
+   "piksel": 4,
+   "gambar": "samping.png",
+   "ukuranAtlas": [
+    512,
+    188
+   ],
+   "skala": {
+    "unitDuniaPerPikselSeni": 4,
+    "pxSumberPerPikselSeni": {
+     "badan": 4.917,
+     "ekspresi": 6.5
+    },
+    "kepala": "lebar kepala 36 piksel seni (= Pak Hendra)"
+   },
+   "ekspresi": [
+    "netral",
+    "prihatin"
+   ],
+   "varian": [
+    "dasar"
+   ],
+   "ekspresiDari": {
+    "netral": "netral",
+    "tersenyum": "netral",
+    "senang": "netral",
+    "lega": "netral",
+    "cemas": "prihatin",
+    "serius": "prihatin",
+    "bingung": "prihatin",
+    "kesal": "prihatin"
+   },
+   "frame": {
+    "berdiri-kiri": {
+     "rect": [
+      77,
+      0,
+      73,
+      188
+     ],
+     "hadap": "kiri",
+     "jenisJangkar": "kaki",
+     "jangkar": {
+      "x": 39,
+      "y": 187
+     },
+     "kaki": {
+      "x": 39,
+      "y": 187
+     },
+     "kepala": {
+      "x": 36,
+      "y": 21
+     },
+     "kepalaTinggi": 42,
+     "wajah": {
+      "kotak": [
+       26,
+       12,
+       28,
+       30
+      ],
+      "mata": [
+       26,
+       16,
+       28,
+       8
+      ],
+      "mulut": [
+       30,
+       32,
+       8,
+       4
+      ]
+     },
+     "ekspresi": {
+      "netral": {
+       "dasar": [
+        436,
+        31,
+        28,
+        30
+       ]
+      },
+      "prihatin": {
+       "dasar": [
+        465,
+        31,
+        28,
+        30
+       ]
+      }
+     }
+    }
+   },
+   "pose": {
+    "berdiri": {
+     "kiri": "berdiri-kiri",
+     "bawaan": "kiri"
+    }
+   },
+   "pandang": {
+    "lawan": {
+     "arah": "kiri"
+    },
+    "pemain": {
+     "arah": "kiri"
+    },
+    "depan": {
+     "arah": "kiri"
+    },
+    "bawah": {}
+   },
+   "potret": {
+    "frame": "berdiri-kiri",
+    "jendela": {
+     "32": {
+      "frame": "berdiri-kiri",
+      "x": 20,
+      "y": 7,
+      "sisi": 32,
+      "skala": 1,
+      "tampil": 32
+     },
+     "44": {
+      "frame": "berdiri-kiri",
+      "x": 14,
+      "y": 3,
+      "sisi": 44,
+      "skala": 1,
+      "tampil": 44
+     },
+     "52": {
+      "frame": "berdiri-kiri",
+      "x": 10,
+      "y": 1,
+      "sisi": 52,
+      "skala": 1,
+      "tampil": 52
+     },
+     "64": {
+      "frame": "berdiri-kiri",
+      "x": 4,
+      "y": -3,
+      "sisi": 64,
+      "skala": 1,
+      "tampil": 64
+     },
+     "96": {
+      "frame": "berdiri-kiri",
+      "x": 12,
+      "y": 1,
+      "sisi": 48,
+      "skala": 2,
+      "tampil": 96
+     }
+    },
+    "dekat": {
+     "52": {
+      "frame": "berdiri-kiri",
+      "x": 23,
+      "y": 10,
+      "sisi": 26,
+      "skala": 2,
+      "tampil": 52
+     },
+     "64": {
+      "frame": "berdiri-kiri",
+      "x": 20,
+      "y": 7,
+      "sisi": 32,
+      "skala": 2,
+      "tampil": 64
+     },
+     "96": {
+      "frame": "berdiri-kiri",
+      "x": 20,
+      "y": 7,
+      "sisi": 32,
+      "skala": 3,
+      "tampil": 96
+     }
+    }
+   },
+   "telepon": {
+    "frame": "berdiri-kiri",
+    "jendela": {
+     "frame": "berdiri-kiri",
+     "x": 8,
+     "y": 3,
+     "sisi": 56,
+     "skala": 1,
+     "tampil": 56
+    }
+   }
+  },
+  "tol": {
+   "versi": 1,
+   "dibuat": "tools/piksel/bangun-samping.mjs",
+   "tokoh": "tol",
+   "piksel": 4,
+   "gambar": "samping.png",
+   "ukuranAtlas": [
+    512,
+    188
+   ],
+   "skala": {
+    "unitDuniaPerPikselSeni": 4,
+    "pxSumberPerPikselSeni": {
+     "badan": 5.222,
+     "ekspresi": 6.639
+    },
+    "kepala": "lebar kepala 36 piksel seni (= Pak Hendra)"
+   },
+   "ekspresi": [
+    "netral",
+    "prihatin"
+   ],
+   "varian": [
+    "dasar"
+   ],
+   "ekspresiDari": {
+    "netral": "netral",
+    "tersenyum": "netral",
+    "senang": "netral",
+    "lega": "netral",
+    "cemas": "prihatin",
+    "serius": "prihatin",
+    "bingung": "prihatin",
+    "kesal": "prihatin"
+   },
+   "frame": {
+    "berdiri-kiri": {
+     "rect": [
+      225,
+      0,
+      72,
+      188
+     ],
+     "hadap": "kiri",
+     "jenisJangkar": "kaki",
+     "jangkar": {
+      "x": 34,
+      "y": 187
+     },
+     "kaki": {
+      "x": 34,
+      "y": 187
+     },
+     "kepala": {
+      "x": 38,
+      "y": 21
+     },
+     "kepalaTinggi": 42,
+     "wajah": {
+      "kotak": [
+       28,
+       12,
+       28,
+       30
+      ],
+      "mata": [
+       28,
+       16,
+       28,
+       8
+      ],
+      "mulut": [
+       32,
+       32,
+       8,
+       4
+      ]
+     },
+     "ekspresi": {
+      "netral": {
+       "dasar": [
+        436,
+        155,
+        28,
+        30
+       ]
+      },
+      "prihatin": {
+       "dasar": [
+        465,
+        155,
+        28,
+        30
+       ]
+      }
+     }
+    }
+   },
+   "pose": {
+    "berdiri": {
+     "kiri": "berdiri-kiri",
+     "bawaan": "kiri"
+    }
+   },
+   "pandang": {
+    "lawan": {
+     "arah": "kiri"
+    },
+    "pemain": {
+     "arah": "kiri"
+    },
+    "depan": {
+     "arah": "kiri"
+    },
+    "bawah": {}
+   },
+   "potret": {
+    "frame": "berdiri-kiri",
+    "jendela": {
+     "32": {
+      "frame": "berdiri-kiri",
+      "x": 22,
+      "y": 7,
+      "sisi": 32,
+      "skala": 1,
+      "tampil": 32
+     },
+     "44": {
+      "frame": "berdiri-kiri",
+      "x": 16,
+      "y": 3,
+      "sisi": 44,
+      "skala": 1,
+      "tampil": 44
+     },
+     "52": {
+      "frame": "berdiri-kiri",
+      "x": 12,
+      "y": 1,
+      "sisi": 52,
+      "skala": 1,
+      "tampil": 52
+     },
+     "64": {
+      "frame": "berdiri-kiri",
+      "x": 6,
+      "y": -3,
+      "sisi": 64,
+      "skala": 1,
+      "tampil": 64
+     },
+     "96": {
+      "frame": "berdiri-kiri",
+      "x": 14,
+      "y": 1,
+      "sisi": 48,
+      "skala": 2,
+      "tampil": 96
+     }
+    },
+    "dekat": {
+     "52": {
+      "frame": "berdiri-kiri",
+      "x": 25,
+      "y": 10,
+      "sisi": 26,
+      "skala": 2,
+      "tampil": 52
+     },
+     "64": {
+      "frame": "berdiri-kiri",
+      "x": 22,
+      "y": 7,
+      "sisi": 32,
+      "skala": 2,
+      "tampil": 64
+     },
+     "96": {
+      "frame": "berdiri-kiri",
+      "x": 22,
+      "y": 7,
+      "sisi": 32,
+      "skala": 3,
+      "tampil": 96
+     }
+    }
+   },
+   "telepon": {
+    "frame": "berdiri-kiri",
+    "jendela": {
+     "frame": "berdiri-kiri",
+     "x": 10,
+     "y": 3,
+     "sisi": 56,
+     "skala": 1,
+     "tampil": 56
+    }
+   }
+  },
+  "polisi": {
+   "versi": 1,
+   "dibuat": "tools/piksel/bangun-samping.mjs",
+   "tokoh": "polisi",
+   "piksel": 4,
+   "gambar": "samping.png",
+   "ukuranAtlas": [
+    512,
+    188
+   ],
+   "skala": {
+    "unitDuniaPerPikselSeni": 4,
+    "pxSumberPerPikselSeni": {
+     "badan": 5.528,
+     "ekspresi": 7.028
+    },
+    "kepala": "lebar kepala 36 piksel seni (= Pak Hendra)"
+   },
+   "ekspresi": [
+    "netral",
+    "prihatin"
+   ],
+   "varian": [
+    "dasar"
+   ],
+   "ekspresiDari": {
+    "netral": "netral",
+    "tersenyum": "netral",
+    "senang": "netral",
+    "lega": "netral",
+    "cemas": "prihatin",
+    "serius": "prihatin",
+    "bingung": "prihatin",
+    "kesal": "prihatin"
+   },
+   "frame": {
+    "berdiri-kiri": {
+     "rect": [
+      368,
+      0,
+      67,
+      188
+     ],
+     "hadap": "kiri",
+     "jenisJangkar": "kaki",
+     "jangkar": {
+      "x": 32,
+      "y": 187
+     },
+     "kaki": {
+      "x": 32,
+      "y": 187
+     },
+     "kepala": {
+      "x": 34,
+      "y": 21
+     },
+     "kepalaTinggi": 42,
+     "wajah": {
+      "kotak": [
+       24,
+       12,
+       28,
+       30
+      ],
+      "mata": [
+       24,
+       16,
+       28,
+       8
+      ],
+      "mulut": [
+       28,
+       32,
+       8,
+       4
+      ]
+     },
+     "ekspresi": {
+      "netral": {
+       "dasar": [
+        436,
+        93,
+        28,
+        30
+       ]
+      },
+      "prihatin": {
+       "dasar": [
+        465,
+        93,
+        28,
+        30
+       ]
+      }
+     }
+    }
+   },
+   "pose": {
+    "berdiri": {
+     "kiri": "berdiri-kiri",
+     "bawaan": "kiri"
+    }
+   },
+   "pandang": {
+    "lawan": {
+     "arah": "kiri"
+    },
+    "pemain": {
+     "arah": "kiri"
+    },
+    "depan": {
+     "arah": "kiri"
+    },
+    "bawah": {}
+   },
+   "potret": {
+    "frame": "berdiri-kiri",
+    "jendela": {
+     "32": {
+      "frame": "berdiri-kiri",
+      "x": 18,
+      "y": 7,
+      "sisi": 32,
+      "skala": 1,
+      "tampil": 32
+     },
+     "44": {
+      "frame": "berdiri-kiri",
+      "x": 12,
+      "y": 3,
+      "sisi": 44,
+      "skala": 1,
+      "tampil": 44
+     },
+     "52": {
+      "frame": "berdiri-kiri",
+      "x": 8,
+      "y": 1,
+      "sisi": 52,
+      "skala": 1,
+      "tampil": 52
+     },
+     "64": {
+      "frame": "berdiri-kiri",
+      "x": 2,
+      "y": -3,
+      "sisi": 64,
+      "skala": 1,
+      "tampil": 64
+     },
+     "96": {
+      "frame": "berdiri-kiri",
+      "x": 10,
+      "y": 1,
+      "sisi": 48,
+      "skala": 2,
+      "tampil": 96
+     }
+    },
+    "dekat": {
+     "52": {
+      "frame": "berdiri-kiri",
+      "x": 21,
+      "y": 10,
+      "sisi": 26,
+      "skala": 2,
+      "tampil": 52
+     },
+     "64": {
+      "frame": "berdiri-kiri",
+      "x": 18,
+      "y": 7,
+      "sisi": 32,
+      "skala": 2,
+      "tampil": 64
+     },
+     "96": {
+      "frame": "berdiri-kiri",
+      "x": 18,
+      "y": 7,
+      "sisi": 32,
+      "skala": 3,
+      "tampil": 96
+     }
+    }
+   },
+   "telepon": {
+    "frame": "berdiri-kiri",
+    "jendela": {
+     "frame": "berdiri-kiri",
+     "x": 6,
+     "y": 3,
+     "sisi": 56,
+     "skala": 1,
+     "tampil": 56
+    }
+   }
+  }
+ }
+}

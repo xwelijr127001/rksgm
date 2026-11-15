@@ -28,6 +28,8 @@ import { dekatTokoh, kaburLatar, kotakTokohIlustrasi, type Kotak, type LapisBerd
 import { ADEGAN_SIAP, catatCocok, ukuranDunia } from './hangatkan';
 import { useDpr } from '../../../game/tokoh';
 import { nasabahDiPanggung, type KomposisiLatar, type TokohLatar } from './komposisi';
+import { adeganPiksel } from './piksel/adegan';
+import { PanggungPiksel } from './piksel/PanggungPiksel';
 import '../panggung/panggung.css';
 import './latar.css';
 
@@ -75,7 +77,21 @@ function useUkuranKotak(akar: RefObject<HTMLDivElement | null>): Ukuran | null {
   return ukuran;
 }
 
-export function PanggungLatar({ ep, komposisi, tx, nama, suasana, status = false, className = '', ruangBawah = 0, gerbang = false }: PropsPanggungLatar) {
+/**
+ * T-013: pintu masuk panggung Episode 2 untuk SEMUA pemakai (adegan HP, aktivitas, kartu episode, halaman cerita lebar).
+ * Komposisi yang bisa dipetakan adapter (piksel/adegan.ts) = PanggungPiksel; selain itu (atau PNG piksel gagal) = panggung
+ * ilustrasi di bawah, tidak berubah. Stage 2: semua lokasi AUTO-2 berpiksel.
+ */
+export function PanggungLatar(p: PropsPanggungLatar) {
+  const [gagal, setGagal] = useState(false);
+  const piksel = gagal ? null : adeganPiksel(p.ep, p.komposisi).piksel;
+  if (piksel) {
+    return <PanggungPiksel ep={p.ep} komposisi={p.komposisi} adegan={piksel} tx={p.tx} nama={p.nama} suasana={p.suasana} status={p.status} ruangBawah={p.ruangBawah} className={p.className} onGagal={() => setGagal(true)} />;
+  }
+  return <PanggungLatarIlustrasi {...p} />;
+}
+
+export function PanggungLatarIlustrasi({ ep, komposisi, tx, nama, suasana, status = false, className = '', ruangBawah = 0, gerbang = false }: PropsPanggungLatar) {
   const akar = useRef<HTMLDivElement>(null);
   const ukuran = useUkuranKotak(akar);
   const lok = ep.latar?.lokasi[komposisi.lokasi];

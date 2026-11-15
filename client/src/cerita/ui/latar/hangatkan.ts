@@ -219,7 +219,7 @@ export function sesudahAdeganSiap(akar: Element | null, fn: () => () => void): (
   if (typeof window === 'undefined') return () => {};
   let batal: (() => void) | null = null;
   const jalan = () => { window.removeEventListener(ADEGAN_SIAP, jalan); batal ??= fn(); };
-  if (akar?.querySelector('.cer-ilustrasi[data-siap]')) jalan();
+  if (akar?.querySelector('.cer-ilustrasi[data-siap], .cer-piksel[data-siap]')) jalan();
   else window.addEventListener(ADEGAN_SIAP, jalan);
   return () => { window.removeEventListener(ADEGAN_SIAP, jalan); batal?.(); };
 }

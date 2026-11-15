@@ -41,7 +41,7 @@ import { gambarBuRina as gambarBuRinaAman, pasangGenerator } from './tokoh';
 import { awalanId } from '../ui/panggung/dunia';
 import { JENDELA_POTRET_SEDANG, POTRET_SEDANG_MAKS_PX, aturanPotret, gambarMissRaksa } from './tokoh/missRaksa';
 import { JENDELA_POTRET_KECIL, JENDELA_POTRET_V3, POTRET_KECIL_MAKS_PX } from './tokoh/ukuran';
-import { ikonTokoh, manifestIkon, penyusunPiksel, susunTokoh, URL_ATLAS_PIKSEL, URL_IKON_PIKSEL, type IdTokohPiksel } from './piksel';
+import { ikonTokoh, manifestIkon, penyusunPiksel, susunTokoh, URL_ATLAS_PIKSEL, URL_IKON_PIKSEL, type IdTokohPiksel, type IdTokohPikselEp1 } from './piksel';
 import {
   SPRITE_BESAR, SISI_POTRET_PIKSEL, potretSpritePiksel, skalaMinSpritePiksel, skalaPerangkat, ukuranPermintaanPotret, ukuranSpritePiksel,
 } from '../../game/tokoh';
@@ -63,7 +63,7 @@ const UKURAN_POTRET = [28, 32, 44, 48, 52, 56, 64, 80, 88, 96];
 // ------------------------------------------------------------------ potret piksel (halaman)
 
 test('potret piksel: skala BULAT, satu piksel seni = piksel perangkat bulat di dpr 1/2/3/1.25/1.5/1.75, viewBox pas', () => {
-  for (const tokoh of ['missRaksa', 'buRina'] as IdTokohPiksel[]) {
+  for (const tokoh of ['missRaksa', 'buRina'] as IdTokohPikselEp1[]) {
     const eks = tokoh === 'missRaksa' ? EKSPRESI_MISS : DAFTAR_EKSPRESI;
     for (const e of eks) {
       for (const u of UKURAN_POTRET) {
@@ -97,7 +97,7 @@ test('potret piksel: skala BULAT, satu piksel seni = piksel perangkat bulat di d
 });
 
 test('potret piksel: ekspresi berbeda di ukuran dialog, wajah & kepala di dalam jendela 44-96', () => {
-  for (const tokoh of ['missRaksa', 'buRina'] as IdTokohPiksel[]) {
+  for (const tokoh of ['missRaksa', 'buRina'] as IdTokohPikselEp1[]) {
     const eks = tokoh === 'missRaksa' ? EKSPRESI_MISS : DAFTAR_EKSPRESI;
     const m = penyusunPiksel.manifest[tokoh]!;
     for (const u of [44, 52, 56, 64, 88]) {
@@ -118,7 +118,7 @@ test('potret piksel: ekspresi berbeda di ukuran dialog, wajah & kepala di dalam 
 test('ikon kepala mini: slot < 44 px = ikon gambar tangan, skala BULAT di dpr 1/2/3/1.25/1.5/1.75/2.625, ikon utuh di slot 32', () => {
   assert.ok(manifestIkon, 'ikon.json terbaca');
   assert.equal(BATAS_IKON_PX, 44);
-  for (const tokoh of ['missRaksa', 'buRina'] as IdTokohPiksel[]) {
+  for (const tokoh of ['missRaksa', 'buRina'] as IdTokohPikselEp1[]) {
     const eks = tokoh === 'missRaksa' ? EKSPRESI_MISS : DAFTAR_EKSPRESI;
     for (const e of eks) {
       for (const u of [28, 32, 36, 40]) {
@@ -149,7 +149,7 @@ test('ikon kepala mini: slot < 44 px = ikon gambar tangan, skala BULAT di dpr 1/
 
 test('ikon kepala mini: kepala UTUH di lingkaran isi 28, wajah beda per ekspresi hanya di kotak wajah, PNG sah', () => {
   const m = manifestIkon!;
-  for (const tokoh of ['missRaksa', 'buRina'] as IdTokohPiksel[]) {
+  for (const tokoh of ['missRaksa', 'buRina'] as IdTokohPikselEp1[]) {
     const t = m.tokoh[tokoh]!;
     const png = bacaPng('client/src/cerita/seni/piksel', t.gambar);
     assert.deepEqual([png.width, png.height], [t.atlas.w, t.atlas.h]);

@@ -1,0 +1,503 @@
+{
+ "versi": 1,
+ "dibuat": "tools/piksel/bangun-hendra.mjs",
+ "tokoh": "hendra",
+ "piksel": 4,
+ "gambar": "hendra.png",
+ "ukuranAtlas": [
+  512,
+  196
+ ],
+ "satuan": {
+  "dunia": "piksel seni x 4",
+  "catatan": "koordinat = piksel seni relatif pojok kiri-atas frame; tampilkan dengan skala bulat & nearest-neighbour"
+ },
+ "skala": {
+  "unitDuniaPerPikselSeni": 4,
+  "pxSumberPerPikselSeni": {
+   "master": 7.4,
+   "ekspresi": 7.777,
+   "gestur": 5.1
+  },
+  "kepala": "proporsi pria dewasa dipertahankan (D-83 #2): puncak rambut -> dagu = 39 piksel seni, lebar kepala 36.08"
+ },
+ "palet": [
+  "#160e10",
+  "#0b0504",
+  "#160a06",
+  "#21120e",
+  "#291813",
+  "#292223",
+  "#3c1a0e",
+  "#342a29",
+  "#333440",
+  "#4b2212",
+  "#483126",
+  "#3d3f4d",
+  "#573a2b",
+  "#622913",
+  "#75361b",
+  "#5e4638",
+  "#6f503c",
+  "#755e4f",
+  "#8b4121",
+  "#895c3d",
+  "#a14c26",
+  "#8d6c54",
+  "#a7754f",
+  "#b3582e",
+  "#c46333",
+  "#938172",
+  "#ac9883",
+  "#b5865c",
+  "#c69769",
+  "#d1703b",
+  "#de7e44",
+  "#d0a77b",
+  "#f29756",
+  "#ea8b4c",
+  "#f9a764",
+  "#e7c497",
+  "#dcb589",
+  "#f1d3a6",
+  "#fae2b6",
+  "#f9f2e5"
+ ],
+ "ekspresi": [
+  "panik",
+  "cemas",
+  "kecewa",
+  "tenang",
+  "senang"
+ ],
+ "varian": [
+  "dasar",
+  "kedip"
+ ],
+ "ekspresiDari": {
+  "bingung": "panik",
+  "cemas": "cemas",
+  "kesal": "kecewa",
+  "netral": "tenang",
+  "serius": "tenang",
+  "lega": "senang",
+  "senang": "senang",
+  "tersenyum": "senang"
+ },
+ "urutanGambar": [
+  "tubuh (frame.rect; wajah tenang terpanggang)",
+  "wajah ekspresi dasar (frame.ekspresi[e].dasar di frame.wajah.kotak)",
+  "kedip (di frame.wajah.mata)"
+ ],
+ "frame": {
+  "berdiri-kiri": {
+   "rect": [
+    0,
+    0,
+    84,
+    196
+   ],
+   "hadap": "kiri",
+   "jenisJangkar": "kaki",
+   "jangkar": {
+    "x": 45,
+    "y": 195
+   },
+   "kaki": {
+    "x": 45,
+    "y": 195
+   },
+   "kepala": {
+    "x": 40.5,
+    "y": 19.5
+   },
+   "kepalaTinggi": 39,
+   "titikWajah": {
+    "x": 45,
+    "y": 23
+   },
+   "teleponTergambar": true,
+   "wajah": {
+    "kotak": [
+     31,
+     13,
+     28,
+     26
+    ],
+    "mata": [
+     31,
+     16,
+     28,
+     9
+    ],
+    "mulut": [
+     40,
+     32,
+     10,
+     4
+    ]
+   },
+   "ekspresi": {
+    "panik": {
+     "dasar": [
+      465,
+      54,
+      28,
+      26
+     ]
+    },
+    "cemas": {
+     "dasar": [
+      465,
+      0,
+      28,
+      26
+     ],
+     "kedip": [
+      177,
+      95,
+      28,
+      9
+     ]
+    },
+    "kecewa": {
+     "dasar": [
+      465,
+      27,
+      28,
+      26
+     ],
+     "kedip": [
+      177,
+      95,
+      28,
+      9
+     ]
+    },
+    "tenang": {
+     "dasar": [
+      148,
+      95,
+      28,
+      26
+     ],
+     "kedip": [
+      177,
+      95,
+      28,
+      9
+     ]
+    },
+    "senang": {
+     "dasar": [
+      465,
+      81,
+      28,
+      26
+     ]
+    }
+   }
+  },
+  "gestur-cemas-kiri": {
+   "rect": [
+    85,
+    95,
+    62,
+    94
+   ],
+   "hadap": "kiri",
+   "jenisJangkar": "pinggul",
+   "jangkar": {
+    "x": 31,
+    "y": 93
+   },
+   "pinggul": {
+    "x": 31,
+    "y": 93
+   },
+   "kepala": {
+    "x": 27,
+    "y": 19.5
+   },
+   "kepalaTinggi": 39,
+   "teleponTergambar": false
+  },
+  "gestur-panik-kiri": {
+   "rect": [
+    85,
+    0,
+    84,
+    94
+   ],
+   "hadap": "kiri",
+   "jenisJangkar": "pinggul",
+   "jangkar": {
+    "x": 42,
+    "y": 93
+   },
+   "pinggul": {
+    "x": 42,
+    "y": 93
+   },
+   "kepala": {
+    "x": 36,
+    "y": 19.5
+   },
+   "kepalaTinggi": 39,
+   "teleponTergambar": false
+  },
+  "gestur-kecewa-kiri": {
+   "rect": [
+    253,
+    0,
+    71,
+    94
+   ],
+   "hadap": "kiri",
+   "jenisJangkar": "pinggul",
+   "jangkar": {
+    "x": 36,
+    "y": 93
+   },
+   "pinggul": {
+    "x": 36,
+    "y": 93
+   },
+   "kepala": {
+    "x": 41.5,
+    "y": 19.5
+   },
+   "kepalaTinggi": 39,
+   "teleponTergambar": false
+  },
+  "gestur-tenang-kiri": {
+   "rect": [
+    396,
+    0,
+    68,
+    94
+   ],
+   "hadap": "kiri",
+   "jenisJangkar": "pinggul",
+   "jangkar": {
+    "x": 34,
+    "y": 93
+   },
+   "pinggul": {
+    "x": 34,
+    "y": 93
+   },
+   "kepala": {
+    "x": 33,
+    "y": 19.5
+   },
+   "kepalaTinggi": 39,
+   "teleponTergambar": false
+  },
+  "gestur-senang-kiri": {
+   "rect": [
+    325,
+    0,
+    70,
+    94
+   ],
+   "hadap": "kiri",
+   "jenisJangkar": "pinggul",
+   "jangkar": {
+    "x": 35,
+    "y": 93
+   },
+   "pinggul": {
+    "x": 35,
+    "y": 93
+   },
+   "kepala": {
+    "x": 33,
+    "y": 19.5
+   },
+   "kepalaTinggi": 39,
+   "teleponTergambar": false
+  },
+  "gestur-menjelaskan-kiri": {
+   "rect": [
+    170,
+    0,
+    82,
+    94
+   ],
+   "hadap": "kiri",
+   "jenisJangkar": "pinggul",
+   "jangkar": {
+    "x": 41,
+    "y": 93
+   },
+   "pinggul": {
+    "x": 41,
+    "y": 93
+   },
+   "kepala": {
+    "x": 34,
+    "y": 19.5
+   },
+   "kepalaTinggi": 39,
+   "teleponTergambar": true
+  }
+ },
+ "pose": {
+  "berdiri": {
+   "kiri": "berdiri-kiri",
+   "bawaan": "kiri"
+  },
+  "gestur-cemas": {
+   "kiri": "gestur-cemas-kiri",
+   "bawaan": "kiri"
+  },
+  "gestur-panik": {
+   "kiri": "gestur-panik-kiri",
+   "bawaan": "kiri"
+  },
+  "gestur-kecewa": {
+   "kiri": "gestur-kecewa-kiri",
+   "bawaan": "kiri"
+  },
+  "gestur-tenang": {
+   "kiri": "gestur-tenang-kiri",
+   "bawaan": "kiri"
+  },
+  "gestur-senang": {
+   "kiri": "gestur-senang-kiri",
+   "bawaan": "kiri"
+  },
+  "gestur-menjelaskan": {
+   "kiri": "gestur-menjelaskan-kiri",
+   "bawaan": "kiri"
+  }
+ },
+ "pandang": {
+  "lawan": {
+   "arah": "kiri"
+  },
+  "pemain": {
+   "arah": "kiri"
+  },
+  "depan": {
+   "arah": "kiri"
+  },
+  "bawah": {}
+ },
+ "potret": {
+  "frame": "berdiri-kiri",
+  "jendela": {
+   "32": {
+    "frame": "berdiri-kiri",
+    "x": 25,
+    "y": 6,
+    "sisi": 32,
+    "skala": 1,
+    "tampil": 32
+   },
+   "44": {
+    "frame": "berdiri-kiri",
+    "x": 19,
+    "y": 2,
+    "sisi": 44,
+    "skala": 1,
+    "tampil": 44
+   },
+   "52": {
+    "frame": "berdiri-kiri",
+    "x": 15,
+    "y": 0,
+    "sisi": 52,
+    "skala": 1,
+    "tampil": 52
+   },
+   "64": {
+    "frame": "berdiri-kiri",
+    "x": 9,
+    "y": -4,
+    "sisi": 64,
+    "skala": 1,
+    "tampil": 64
+   },
+   "96": {
+    "frame": "berdiri-kiri",
+    "x": 17,
+    "y": 0,
+    "sisi": 48,
+    "skala": 2,
+    "tampil": 96
+   }
+  },
+  "dekat": {
+   "52": {
+    "frame": "berdiri-kiri",
+    "x": 28,
+    "y": 9,
+    "sisi": 26,
+    "skala": 2,
+    "tampil": 52
+   },
+   "64": {
+    "frame": "berdiri-kiri",
+    "x": 25,
+    "y": 6,
+    "sisi": 32,
+    "skala": 2,
+    "tampil": 64
+   },
+   "96": {
+    "frame": "berdiri-kiri",
+    "x": 25,
+    "y": 6,
+    "sisi": 32,
+    "skala": 3,
+    "tampil": 96
+   }
+  }
+ },
+ "telepon": {
+  "frame": "berdiri-kiri",
+  "jendela": {
+   "frame": "berdiri-kiri",
+   "x": 13,
+   "y": 2,
+   "sisi": 56,
+   "skala": 1,
+   "tampil": 56
+  },
+  "catatan": "kepala utuh + bahu (ponsel di tangan tidak masuk jendela); skala bulat"
+ },
+ "registrasi": {
+  "panik": {
+   "dx": 11,
+   "dy": 0,
+   "iou": 0.966
+  },
+  "cemas": {
+   "dx": 12,
+   "dy": 0,
+   "iou": 0.959
+  },
+  "kecewa": {
+   "dx": 14,
+   "dy": 0,
+   "iou": 0.975
+  },
+  "tenang": {
+   "dx": 11,
+   "dy": 0,
+   "iou": 0.962
+  },
+  "senang": {
+   "dx": 11,
+   "dy": 0,
+   "iou": 0.96
+  },
+  "kedip": {
+   "dx": 14,
+   "dy": 0,
+   "iou": 0.976
+  }
+ }
+}
