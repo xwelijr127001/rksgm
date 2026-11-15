@@ -34,6 +34,8 @@ const K = SATUAN_RUANG;
 /** Perbesaran di atas skala bingkai yang boleh dipakai piksel bulat (Episode 1: 1,25; kantor HP butuh wajah lebih besar). */
 const MAKS_LEBIH = 1.6;
 const MAKS_LEBIH_LEBAR = 1.15;
+/** D-101: lebar dunia minimum yang tampil di kartu episode (125 piksel seni). */
+const LEBAR_MIN_KARTU = 125 * K;
 
 // ------------------------------------------------------------------ susunan murni
 
@@ -52,8 +54,10 @@ export function susunAdeganPiksel(a: AdeganPiksel, r: RuangPiksel, gerak: { kedi
   const hasil: TokohTersusun[] = [];
   for (const t of a.tokoh) {
     // balikMeja (kantor) bila ruang punya; selain itu slot berdiri ke-i dari n (ruang-ep2.json slot).
-    const titik = (t.tempat === 'balikMeja' ? r.tempat.balikMeja : undefined) ?? r.slot[Math.max(1, t.jumlahSlot)]?.[t.slot] ?? r.slot[1]?.[0];
-    if (!titik) continue;
+    const dasar = (t.tempat === 'balikMeja' ? r.tempat.balikMeja : undefined) ?? r.slot[Math.max(1, t.jumlahSlot)]?.[t.slot] ?? r.slot[1]?.[0];
+    if (!dasar) continue;
+    const xKhusus = (dasar as { xTokoh?: Record<string, number> }).xTokoh?.[t.id];
+    const titik = typeof xKhusus === 'number' ? { ...dasar, x: xKhusus } : dasar;
     const s = susunTokoh(t.tokoh, {
       pose: t.pose as never, hadap: t.satuArah ?? t.hadap, ekspresi: t.ekspresi,
       mata: gerak.kedip ? 'tutup' : 'buka', mulut: t.bicara && gerak.mulut ? 'buka' : 'tutup',
@@ -80,13 +84,35 @@ export function kameraPiksel(r: RuangPiksel, tokoh: readonly TokohTersusun[], W:
   const q = qPiksel(dpr);
   // D-95: layar lebar memperlihatkan ruangnya (perbesaran maks 1,15); HP boleh lebih dekat (wajah terbaca).
   const k = pasKamera(W, H, rect, kepala, { atas: 0, kiri: 0, kanan: 0, bawah }, { q, wajib: gabungKotak(r.papan?.kotak ?? null, r.fokus), maksLebih: jenis === 'lebar' ? MAKS_LEBIH_LEBAR : MAKS_LEBIH });
-  if (!penuh || (W / k.s <= DUNIA_W + 1e-6 && H / k.s <= DUNIA_H + 1e-6)) return k;
-  // D-97 (kartu episode): "cover" = skala bulat berikutnya yang MENGISI kotak, dipotong, dipusatkan pada tokoh + fokus ruang.
-  const s = Math.ceil(Math.max(W / DUNIA_W, H / DUNIA_H) * q - 1e-6) / q;
-  const pusat = gabungKotak(kepala, r.fokus) ?? { x: 0, y: 0, w: DUNIA_W, h: DUNIA_H };
-  const vw = W / s, vh = H / s;
+  if (!penuh) return k;
+  const jepit = (v: number, maks: number) => Math.min(Math.max(0, v), Math.max(0, maks));
+  // Kartu episode. (1) D-97 "cover": bila pandangan kamera biasa lebih besar daripada dunia, pakai skala bulat berikutnya yang
+  // MENGISI kotak. (2) D-101: skala tidak boleh memperlihatkan kurang dari 125 piksel seni lebarnya (turun skala bulat).
+  let kk = Math.round(k.s * q);
+  if (W / k.s > DUNIA_W + 1e-6 || H / k.s > DUNIA_H + 1e-6) kk = Math.ceil(Math.max(W / DUNIA_W, H / DUNIA_H) * q - 1e-6);
+  while (kk > 1 && W / (kk / q) < LEBAR_MIN_KARTU - 1e-6) kk--;
+  if (kk === Math.round(k.s * q)) return k;
+  const s = kk / q, vw = W / s, vh = H / s;
   const bulat = (v: number) => Math.round(v * s * dpr) / (s * dpr);
-  return { s, x: bulat(Math.min(Math.max(0, pusat.x + pusat.w / 2 - vw / 2), DUNIA_W - vw)), y: bulat(Math.min(Math.max(0, pusat.y + pusat.h / 2 - vh / 2), DUNIA_H - vh)) };
+  // Bingkai bawaan (D-97): dipusatkan pada kepala tokoh + fokus ruang. Kartu HP memakai ini (tidak berubah).
+  const pusat = gabungKotak(kepala, r.fokus) ?? { x: 0, y: 0, w: DUNIA_W, h: DUNIA_H };
+  const x0 = jepit(pusat.x + pusat.w / 2 - vw / 2, DUNIA_W - vw), y0 = jepit(pusat.y + pusat.h / 2 - vh / 2, DUNIA_H - vh);
+  // (3) D-101: bingkai WAJIB memuat seluruh kepala tokoh, puncak rambut, dan kaca depan retak (15-57 % kotak fokus kabin, terukur
+  // dari tangkapan layar). Bila bingkai bawaan memotongnya (kartu hampir persegi di tata letak lebar): mendatar di TENGAH antara
+  // kepala dan kaca depan (angka Designer), tepi atas 5 piksel seni di atas rambut.
+  if (tokoh.length && kepala) {
+    const kacaKiri = r.fokus ? r.fokus.x + r.fokus.w * 0.15 : kepala.x, kacaKanan = r.fokus ? r.fokus.x + r.fokus.w * 0.57 : kepala.x + kepala.w;
+    const rambut = Math.min(...tokoh.map((x) => x.y));
+    // Kepala sebenarnya (tepi kiri kotak kamera `kepala` ± tepi rambut).
+    const kepalaKiri = kepala.x + kepala.w * 0.03;
+    if (!(x0 <= kepalaKiri + 1 && x0 + vw >= kacaKanan - 1 && y0 <= rambut + 1)) {
+      const cx = (kepala.x + kepala.w / 2 + (kacaKiri + kacaKanan) / 2) / 2;
+      // Kepala utuh menang atas kaca bila keduanya tidak muat.
+      const x = Math.min(Math.max(cx - vw / 2, kacaKanan - vw), kepalaKiri);
+      return { s, x: bulat(jepit(x, DUNIA_W - vw)), y: bulat(jepit(rambut - 5 * K, DUNIA_H - vh)) };
+    }
+  }
+  return { s, x: bulat(x0), y: bulat(y0) };
 }
 
 // ------------------------------------------------------------------ komponen
@@ -350,6 +376,7 @@ export function PanggungPiksel({ ep, komposisi, adegan, tx, nama, suasana, statu
       data-telepon={komposisi.telepon?.id}
       data-objek={komposisi.objek.join(' ') || undefined}
       data-k={kamera ? Math.round(kamera.s * qPiksel(dpr)) : undefined}
+      data-kamera={kamera ? `${Math.round(kamera.x)},${Math.round(kamera.y)},${Math.round(ukuran!.w / kamera.s)}x${Math.round(ukuran!.h / kamera.s)}` : undefined}
     >
       <div className="cer-piksel" data-siap={siapUrl ? '' : undefined} aria-hidden="true">
         <canvas ref={kanvas} className="cer-piksel-kanvas" data-pose={tokoh.map((x) => `${x.t.id}:${x.s.pose}:${x.t.hadap}:${x.s.ekspresi}`).join(' ') || undefined} data-mata={gerak.kedip ? 'tutup' : 'buka'} />

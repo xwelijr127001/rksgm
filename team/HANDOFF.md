@@ -743,3 +743,38 @@ Extra, not in the review:
 - Mirrored Hendra/polisi are the Designer's interim (pocket/badge swap sides).
 - Not checked on real iOS WebKit; no continuous full playthrough by me in en/zh.
 - `PotretHp` keeps an unused `piksel` prop for call-site compatibility.
+
+
+### T-013 final fix (2026-11-16)
+
+Fullstack · NOT committed · base d4cd775 (tag ep2-piksel-stage3). Board status unchanged.
+
+**D-101 (blocker), `/cerita` Episode 2 card in the wide layout: fixed, with one shortfall.**
+- **Root cause:** in the near-square image column (280×238 / 280×261) the D-97 "cover" branch picked the scale and centred on head + whole cab box, which cut Hendra's head.
+- **Fix** (`kameraPiksel` in `ui/latar/piksel/PanggungPiksel.tsx`): the card scale may never show fewer than 125 art px of width. When the default cover frame cuts the head, hair or windscreen, the card is reframed: horizontally midway between the head and the cracked windscreen (the Designer's rule), head kept whole, top edge 5 art px above the hair.
+- **Measured at 768, 1024, 1280:** 2 device px per art px, 140 art px visible (camera x 268, y 60 world). Hendra's whole head and hair are in, with his chest and right shoulder.
+- **Shortfall:** head-left to windscreen-right is ≈ 148 art px, which does not fit in 140. The head wins, so the right ≈ 30 % of the windscreen and the edge of his left shoulder/arm are cut. The cracks are clearly visible. Options if the Designer wants all of it: move Hendra ≈ 10 art px toward the cab on the card only, or use 1 device px per art px (whole scene, small, like the Episode 1 card).
+- **Phone cards unchanged:** same camera as Stage 3 (360: x 0, y 66, 1304×600 world; 390: x 0, y 67, 1424×600). Hendra keeps his own card position (x 360) through a per-character slot override (`xTokoh` in `ruang-ep2.json`), because his anchor was already centred.
+
+**D-100, side-character anchors: fixed (preferred option).**
+- `bangun-samping.mjs`: `jangkar.x` is now the body centre (35-36 of a 70-71 px frame; was ≈ 21, the back foot). The measured midpoint between both soles is ≈ 40 because the front shoe's toe extends right, so I used the frame centre to match the Designer's 35-37.
+- Slots re-seated in `bangun-ruang-ep2.mjs`:
+  - Designer numbers: wawancara 1 → 890, 2 → 670/990, 3 → 500/830/1160; kantor visitor 1 → 980; tol 1 → 620; bengkel admin → 940; pool 1 → 420.
+  - Slots the review did not list (2- and 3-person slots in kantor, tol, bengkel, pool) follow the same rule (+58 for `kanan`, −58 for `kiri`). The script never uses them.
+- Result: wawancara 3 is evenly spaced with air between all three at 360 and 1280. No new overlaps seen in wawancara 3 (360 and 1280) and wawancara 2 (360), which I opened. K07 kantor, bengkel, pool and tol were captured and pass the automated checks, but I did not open those screenshots after the change.
+
+**D-102 (blank board behind the activity card): NOT done.** The backdrop is a CSS background image, so the pixel lettering would need either a second baked PNG per language or an overlay element with its own scaling maths. That is more than a few lines; left for a later round.
+
+**Also changed**
+- Added a `data-kamera` attribute on the stage root (camera x, y and visible world size) for checks.
+- `tools/cek-piksel-t013.mjs`: the card is now checked at 768 and 1024 too (asserts ≥ 125 art px visible); output folder `team/evidence/T-013/final/`.
+
+**Tests**
+- `npm run test:client`: **728 / 728 pass**.
+- `npm run test:e2e`: **exit 0, kegagalan 0, console/http bermasalah 0**.
+- `node tools/cek-piksel-t013.mjs`: **75 / 75 PASS** (73 from Stage 3 + the card at 768 and 1024), 0 `.webp` requests.
+- `tsc --noEmit` clean; production build OK.
+
+**Screenshots** (`team/evidence/T-013/final/`)
+- Card, image only: `kartu-ep2-gambar-{360,390,768,1024,1280}.png`. Whole page: `kartu-cerita-{360,390,768,1024,1280}.png`.
+- D-100: `wawancara-3-360-id.png`, `wawancara-3-1280-id.png`, `wawancara-2-*-id.png`, `bima-*-id.png` (K07), `bengkel-*-id.png`, `pool-*-id.png`, `tol-*-id.png` (each at 360, 390, 1280).

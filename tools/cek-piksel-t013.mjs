@@ -14,7 +14,7 @@ import path from 'node:path';
 
 const BASE = process.env.UI_BASE || 'http://127.0.0.1:4000';
 const OUT = path.resolve(import.meta.dirname, '..', 'team/evidence/T-013');
-const OUT2 = path.join(OUT, 'stage3');
+const OUT2 = path.join(OUT, 'final');
 fs.mkdirSync(OUT2, { recursive: true });
 fs.mkdirSync(OUT, { recursive: true });
 const STATES = JSON.parse(fs.readFileSync(path.join(OUT, 'states.json'), 'utf8'));
@@ -74,14 +74,15 @@ for (const [kasus, st] of Object.entries(STATES)) {
   }
 }
 // Kartu episode di /cerita (sampul pool + Hendra) juga piksel.
-for (const vp of VP) {
+// D-101: juga tata letak LEBAR kartu (768, 1024): kolom gambar hampir persegi, minimal 125 piksel seni lebar terlihat.
+for (const vp of [...VP, ...(cepat ? [] : [{ n: '768', w: 768, h: 900, dpr: 1 }, { n: '1024', w: 1024, h: 800, dpr: 1 }])]) {
   const { ctx, p, req } = await buka(vp, 'id', null, '/cerita');
   await p.waitForFunction(() => document.querySelector('.cer-latar .cer-piksel[data-siap]'), { timeout: 15000 }).catch(() => null);
   await tunggu(600);
-  const kartu = await p.evaluate(() => [...document.querySelectorAll('.cer-latar')].map((el) => ({ gaya: el.getAttribute('data-gaya'), lokasi: el.getAttribute('data-lokasi'), hadir: el.getAttribute('data-hadir'), pose: el.querySelector('canvas')?.getAttribute('data-pose') ?? null })));
+  const kartu = await p.evaluate(() => [...document.querySelectorAll('.cer-latar')].map((el) => ({ gaya: el.getAttribute('data-gaya'), lokasi: el.getAttribute('data-lokasi'), hadir: el.getAttribute('data-hadir'), pose: el.querySelector('canvas')?.getAttribute('data-pose') ?? null, k: Number(el.getAttribute('data-k')), w: el.clientWidth, h: el.clientHeight, seniLebar: Math.round(el.clientWidth * (window.devicePixelRatio || 1) / Number(el.getAttribute('data-k'))) })));
   await p.screenshot({ path: path.join(OUT2, `kartu-cerita-${vp.n}.png`), fullPage: true });
   const ilu = req.filter((u) => /\.webp/.test(u) && /auto-2|pool|hendra|trailer/.test(u));
-  lapor(`kartu-cerita-${vp.n}`, kartu.some((k) => k.gaya === 'piksel' && k.lokasi === 'pool') && ilu.length === 0, { kartu, webp: ilu });
+  lapor(`kartu-cerita-${vp.n}`, kartu.some((k) => k.gaya === 'piksel' && k.lokasi === 'pool' && k.seniLebar >= 125) && ilu.length === 0, { kartu, webp: ilu });
   await ctx.close();
 }
 // Deret bingkai transisi antar-ruang piksel: kantor -> pool (state-lokasi-kedua.json, satu Lanjut), 100 ms x 20.
@@ -163,7 +164,7 @@ for (const [nama, kurang] of [['normal', false], ['dikurangi', true]]) {
   lapor(`gerak-pool-${nama}`, kurang ? r.perubahan === 0 : r.perubahan >= 2, r);
   await ctx.close();
 }
-fs.writeFileSync(path.join(OUT, cepat ? 'hasil-cepat.json' : 'hasil-stage3.json'), JSON.stringify(hasil, null, 1));
+fs.writeFileSync(path.join(OUT, cepat ? 'hasil-cepat.json' : 'hasil-final.json'), JSON.stringify(hasil, null, 1));
 await b.close();
 console.log(gagal ? `FAILED ${gagal}` : 'ALL PASS');
 process.exit(gagal ? 1 : 0);

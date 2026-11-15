@@ -105,11 +105,13 @@ export function bangunRuangEp2() {
 
 /** Referensi Stage 2 (1680 x 944, ÷ 4,2): latar saja (tanpa meja/pagar: tokoh berdiri di depan semua isi ruang). */
 const RUANG_LAPANGAN = {
+  // D-100 (final fix): jangkar tokoh samping kini di tengah kedua telapak; slot digeser + 58 (kanan) / - 58 (kiri) supaya
+  // gambar yang disetujui tetap di tempatnya; wawancara 2/3 memakai angka Designer (670/990, 500/830/1160).
   // D-93: hadap per slot (seni menghadap kanan; 'kiri' = cermin di panggung). D-94: slot & fokus pool. D-95: fokus layar lebar.
-  bengkel: { sumber: 'bengkel-ep2-pixel-v1/bengkel-ep2-referensi-v1.png', slot: { 1: [[1000, 'kiri']], 2: [[700, 'kanan'], [1060, 'kiri']], 3: [[520, 'kanan'], [820, 'kanan'], [1120, 'kiri']] }, kaki: 860 },
-  tol: { sumber: 'tol-ep2-pixel-v1/tol-ep2-referensi-v1.png', slot: { 1: [[560, 'kanan']], 2: [[460, 'kanan'], [760, 'kanan']], 3: [[360, 'kanan'], [600, 'kanan'], [840, 'kanan']] }, kaki: 880, fokus: { x: 960, y: 380, w: 300, h: 180 } },
-  pool: { sumber: 'pool-ep2-pixel-v1/pool-ep2-referensi-v1.png', slot: { 1: [[360, 'kanan']], 2: [[160, 'kanan'], [460, 'kanan']], 3: [[120, 'kanan'], [300, 'kanan'], [480, 'kanan']] }, kaki: 860, fokus: { x: 640, y: 240, w: 400, h: 460 } },
-  wawancara: { sumber: 'wawancara-ep2-pixel-v1/wawancara-ep2-referensi-v1.png', slot: { 1: [[830, 'kanan']], 2: [[610, 'kanan'], [1050, 'kiri']], 3: [[520, 'kanan'], [830, 'kanan'], [1140, 'kiri']] }, kaki: 870 },
+  bengkel: { sumber: 'bengkel-ep2-pixel-v1/bengkel-ep2-referensi-v1.png', slot: { 1: [[940, 'kiri']], 2: [[758, 'kanan'], [1002, 'kiri']], 3: [[578, 'kanan'], [878, 'kanan'], [1062, 'kiri']] }, kaki: 860 },
+  tol: { sumber: 'tol-ep2-pixel-v1/tol-ep2-referensi-v1.png', slot: { 1: [[620, 'kanan']], 2: [[518, 'kanan'], [818, 'kanan']], 3: [[418, 'kanan'], [658, 'kanan'], [898, 'kanan']] }, kaki: 880, fokus: { x: 960, y: 380, w: 300, h: 180 } },
+  pool: { sumber: 'pool-ep2-pixel-v1/pool-ep2-referensi-v1.png', slot: { 1: [[420, 'kanan', { hendra: 360 }]], 2: [[218, 'kanan'], [518, 'kanan']], 3: [[178, 'kanan'], [358, 'kanan'], [538, 'kanan']] }, kaki: 860, fokus: { x: 640, y: 240, w: 400, h: 460 } },
+  wawancara: { sumber: 'wawancara-ep2-pixel-v1/wawancara-ep2-referensi-v1.png', slot: { 1: [[890, 'kanan']], 2: [[670, 'kanan'], [990, 'kiri']], 3: [[500, 'kanan'], [830, 'kanan'], [1160, 'kiri']] }, kaki: 870 },
 };
 
 /** Ruang lapangan: rata-rata area ke 400 x 225, palet <= 48 (OKLab). */
@@ -162,7 +164,8 @@ if (import.meta.url === `file:///${process.argv[1].replace(/\\/g, '/')}`) {
   tulis('ep2-ruang-prop-surat.png', r.surat, r.palet);
   const lap = (id, berkas, x, y, img, z, alpha) => ({ id, berkas, x: x * K, y: y * K, w: img.w * K, h: img.h * K, pw: img.w, ph: img.h, z, alpha });
   const prop = (berkas, x, y, img, z = 35) => ({ berkas, x: x * K, y: y * K, w: img.w * K, h: img.h * K, pw: img.w, ph: img.h, z });
-  const slotDari = (slot, kaki) => Object.fromEntries(Object.entries(slot).map(([n, xs]) => [n, xs.map(([x, hadap]) => ({ x, y: kaki, hadap }))]));
+  // Elemen ke-3 (opsional) = x khusus per tokoh: { hendra: 360 } (D-100: jangkar Hendra sudah di tengah, jadi ia TIDAK ikut digeser).
+const slotDari = (slot, kaki) => Object.fromEntries(Object.entries(slot).map(([n, xs]) => [n, xs.map(([x, hadap, xTokoh]) => ({ x, y: kaki, hadap, ...(xTokoh ? { xTokoh } : {}) }))]));
   const lokasi = {
     'kantor-ep2': {
       warnaTepi: sering(r.latar),
@@ -173,7 +176,7 @@ if (import.meta.url === `file:///${process.argv[1].replace(/\\/g, '/')}`) {
       tempat: { balikMeja: { x: 800, y: 756 } },
       // Pengunjung berdiri di DEPAN meja (Hendra, Pak Bima K07).
       // D-93: pengunjung menghadap KIRI (ke meja & Miss Raksa); slot 1 di x 1040.
-      slot: slotDari({ 1: [[1040, 'kiri']], 2: [[1040, 'kiri'], [1300, 'kiri']], 3: [[1040, 'kiri'], [1240, 'kiri'], [1440, 'kiri']] }, 860),
+      slot: slotDari({ 1: [[980, 'kiri']], 2: [[980, 'kiri'], [1242, 'kiri']], 3: [[980, 'kiri'], [1182, 'kiri'], [1382, 'kiri']] }, 860),
       prop: { map: prop('ep2-ruang-prop-map.png', r.mapXY.x, r.mapXY.y, r.map), surat: prop('ep2-ruang-prop-surat.png', 196, 98, r.surat) },
       bingkai: { hp: { x: 300, y: 0, w: 1100, h: 900 }, lebar: { x: 0, y: 0, w: 1600, h: 900 } },
     },

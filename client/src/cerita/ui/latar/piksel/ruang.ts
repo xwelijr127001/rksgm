@@ -37,7 +37,7 @@ export interface RuangPiksel {
   /** Titik kaki tokoh per tempat (dunia). */
   tempat: Record<string, { x: number; y: number }>;
   /** Slot berdiri per jumlah tokoh: slot[n][i] = titik kaki tokoh ke-i dari n. */
-  slot: Record<number, { x: number; y: number; hadap: 'kiri' | 'kanan' }[]>;
+  slot: Record<number, { x: number; y: number; hadap: 'kiri' | 'kanan'; /** x khusus per pemeran (mis. Hendra di sampul pool). */ xTokoh?: Record<string, number> }[]>;
   /** Kotak dunia yang wajib terlihat (titik cerita: pembatas retak, kabin trailer). */
   fokus: Kotak | null;
   papan: { kotak: Kotak; teksKunci: string; warna: string } | null;
@@ -77,7 +77,7 @@ export function bacaRuangPiksel(m: unknown, catatan: string[] = []): Record<stri
     const papanK = kotak(papanO?.kotak);
     const b = obj(o.bingkai);
     const slot: RuangPiksel['slot'] = {};
-    for (const [kk, v2] of Object.entries(obj(o.slot) ?? {})) if (Array.isArray(v2)) slot[Number(kk)] = v2.map(obj).filter((q): q is Obj => !!q && n(q.x) && n(q.y)).map((q) => ({ x: q.x as number, y: q.y as number, hadap: q.hadap === 'kiri' ? 'kiri' as const : 'kanan' as const }));
+    for (const [kk, v2] of Object.entries(obj(o.slot) ?? {})) if (Array.isArray(v2)) slot[Number(kk)] = v2.map(obj).filter((q): q is Obj => !!q && n(q.x) && n(q.y)).map((q) => ({ x: q.x as number, y: q.y as number, hadap: q.hadap === 'kiri' ? 'kiri' as const : 'kanan' as const, ...(obj(q.xTokoh) ? { xTokoh: obj(q.xTokoh) as Record<string, number> } : {}) }));
     hasil[id] = {
       id,
       warnaTepi: typeof o.warnaTepi === 'string' ? o.warnaTepi : tepiUmum,

@@ -1413,3 +1413,54 @@ Pass on style: one consistent hand-pixelled world, no gradients/glow, no baked t
 
 ### Not verified by me
 Real iOS WebKit and the owner phone check; a full manual playthrough in en/zh (dialogue is Indonesian in all languages, D-90, out of scope); `npm run test:client` / `test:e2e` (Fullstack: 735/735, e2e clean); Fullstack's byte table (I re-measured only my two cost estimates).
+
+---
+
+## T-013 — final review (2026-11-15)
+
+Reviewer: Designer · Build: production build in client/dist (23:19) on `npm start` :4000 (`RAKSA_LEGACY=on`, started and stopped by me) · No source edits.
+Method: read team/HANDOFF.md "T-013 Stage 3" and my D-92..D-99; drove the saved states (team/evidence/T-013/states.json) with my own CDP scripts at 360×740 DPR 2 (id), 390×844 DPR 3 (en), 1280×800 DPR 1 (zh): kantor mentor + K07 Bima, pool, bengkel (+ foto), tol (+ Bima's next line), wawancara 1/2/3, a WhatsApp beat, the K02 activity, the /cerita card (also 1024 and 768 wide); canvas-hash motion probes (10 s idle, 1.2 s on a new line) under normal motion, system reduce + `?gerak=ikut`, reduce + `?gerak=penuh`; read `ruang-ep2.json` slots and `samping.json` anchors.
+
+### Verdict: FIX NEEDED — 1 high (small, desktop card only), 1 med, 2 low. The episode itself (every in-game scene, all three viewports) is PASS.
+The one high item is a one-line camera choice on the /cerita card at desktop width; nothing inside the episode blocks. If the Lead prefers, a Fullstack screenshot of the card at 1280 after the fix is enough to close; no further Designer round is needed for it.
+
+### 1. Side characters from the full-body sheet (D-92): PASS
+All six stand on drawn legs with knees, hems and real shoes; the owner's "legs look off" complaint is resolved. Feet sit on one baseline with Hendra's, heights 195–198 art px match Hendra (196), and the scale reads correctly against all five rooms. Identity matches the sheet (Bima glasses + moustache, Darto cap + grey goatee, tol officer and police clean-shaven with the right caps). Viewed at 360, 390 and 1280.
+
+### 2. Facing per scene (D-93): PASS, one spacing follow-up
+- kantor K07: Bima mirrored, faces left toward the counter and the nameplate; elbow no longer cut at 360. ✔
+- pool: Rudi faces right at the truck. ✔ · tol: Bima faces right at the cracked barrier. ✔ · bengkel: admin mirrored, faces left into the hall. ✔
+- wawancara 1: faces right. ✔
+- wawancara 2 at **610 / 1050: confirmed, keep.** Bima faces right, Darto (mirrored) faces left, they face each other with ≈ 9 art px of air between them at 360; no change needed.
+- wawancara 3: left and middle face right, Polisi (mirrored) faces left. Facing is right, but **Bima and the Polisi overlap by ≈ 21 art px while the gap between the tol officer and Bima is wide** (D-100).
+- Mirrored figures look right: no lettering flips anywhere; only a plain pocket/badge changes side (Polisi, Hendra: still interim, redraw only if the owner notices).
+
+### 3. Truck, camera, motion, card, font, prop
+- **Pool truck at 450 art px (D-94): PASS.** Cab is now roughly shoulder-height-plus next to Rudi, reads as a real truck, cracked windscreen and crumpled bumper are legible at 360; phone crop holds Rudi and the whole cab.
+- **1280 camera cap (D-95): PASS.** Bengkel, tol and wawancara show the room and the figures down to their shoes.
+- **Idle motion outside the kantor (D-96): PASS for what I could measure.** Pool idle: 2 distinct frames / 6 changes in 10 s (blink). Wawancara 3: 2 / 6. Bengkel with the admin speaking: 4 distinct / 13 changes (blink + breathing bob). New line (tol → Bima): 4 distinct frames within 1.2 s (speaker hop), pose `bima:berdiri:kanan:prihatin`. **System reduce + `?gerak=ikut`: 1 frame, 0 changes in every probe** (all motion off). Reduce + `?gerak=penuh`: motion back (2 / 6).
+- **Slide-in and room crossfade: not observed by me.** No saved state crosses stage → stage or adds a character without an activity in between; the overlay canvas `.cer-piksel-lama` exists in the DOM. Left to QA's playthrough (see "Not verified").
+- **/cerita card cover (D-97): PASS at 360 and 390** (fills the card width, Hendra from hair to thigh beside the damaged cab; a good cover image). **FAIL at desktop width (D-101):** in the two-column card layout the image is near-square (280×238 at 1280 and 1024, 280×261 at 768) and the crop is so tight that Hendra's head is cut off above the moustache, half his body is outside the left edge and the cab is cut on the right. Episode 1's card directly above shows Bu Rina whole. My D-97 wording ("next integer scale up") did not consider this near-square frame; that part is my miss.
+- **Pixel font M (D-98): PASS.** "LAYANAN KLAIM RAKSA" reads unambiguously at 360.
+- **Foto prop (D-99): PASS.** The 20×15 print on the pillar is visible at 360 next to the admin.
+
+### 4. B-01: chat, activity backdrop, avatars
+- Chat (WhatsApp beat): header avatar is the pixel Hendra, 0 `.webp` requests. ✔
+- Activity K02: backdrop is `ep2-ruang-kantor-latar` with `image-rendering: pixelated`; resources are `hendra` + that PNG only, 0 `.webp`. ✔ (the green board is blank there: D-102, low).
+- Every in-game capture (16 scenes × viewports): `piksel: true`, 0 `.webp`, PNGs only `ep2-ruang-*`, `samping`, `hendra`, `miss-raksa`.
+- **Chat cut-in: not observed** (no sampled state shows one). QA to confirm during the playthrough.
+
+### 5. One sentence for the owner
+**On the phone, yes: Episode 2 now feels like the same living pixel game as Episode 1 (people stand on real legs, blink, breathe and hop when they speak, they look at each other and at the truck, and the truck is finally truck-sized); the only liveliness Episode 1 still has over it is that Bu Rina walks and sits while Episode 2's people slide in, and one small desktop-only fix remains (the episode card crops Pak Hendra's head).**
+
+### Blocker (high)
+- [D-101] /cerita Episode 2 card, wide layout (≥ 768 px: image column 280×238 / 280×261) · cover scale is one step too large: about 93×79 art px are visible, Hendra's head and left half are cut, the cab is cut · step down one integer scale for this frame (2 device px per art px at DPR 1; visible ≈ 140×119 art px) and centre horizontally midway between Hendra's head and the windscreen, top edge 3–4 art px above his hair. General rule that keeps the phone cards exactly as they are now: never use a card scale that shows fewer than **125 art px of width**, and the frame must always contain Hendra's whole head and both shoulders plus the cracked windscreen. Check at 1280, 1024 and 768 · high (first thing a desktop player sees of Episode 2). Numbers are measured from screenshots, ± 3 art px.
+
+### Follow-up list (does not block)
+- [D-100] wawancara 3 (and every mirrored side character) · the side-character foot anchor is on the back foot (`jangkar.x` ≈ 20–23 of a 70–71 px frame) instead of under the body, so a slot x is not the body centre and a mirrored figure shifts ≈ 30 art px toward its neighbour: Bima and the Polisi overlap ≈ 21 art px at slots 520 / 830 / 1140 (body centres land at ≈ 578 / 888 / 1086) · preferred: set `jangkar.x` to the midpoint between the soles (≈ 35–37 art px) for all six, then re-seat the slots so the pictures I approved today stay where they are (rule: + 58 world px for a `kanan` slot, − 58 for a `kiri` slot): wawancara 3 → **500 / 830 / 1160** (this one also evens the spacing: 330 between body centres, ≈ 11 art px of air; fits the 360 crop with > 40 art px to spare each side), wawancara 2 → **670 / 990**, wawancara 1 → **890**, kantor visitor slot 1 → **980**, tol slot 1 → **620**, bengkel admin → **940**, pool slot 1 → **420** (Hendra shares this slot on the /cerita card and his anchor is already centred, so re-check the card or give him his own x 360). Slot-only alternative if the anchors stay untouched: wawancara 3 → **442 / 772 / 1218**, nothing else changes · med.
+- [D-102] Activity backdrop (K02 and other tasks) · the kantor wall is used without its runtime nameplate text, so the green board is an empty rectangle behind the task card · either draw the same pixel-font text there or use a wall crop without the board · low.
+- [D-103] Liveliness, later · Episode 1's Bu Rina walks in and sits; Episode 2's characters only slide in · if the owner still feels a gap after the phone check, the next step is a 2-frame walk for Hendra and Rudi (new art from me, ≈ 2 frames each), not more code motion · low, owner's call.
+- Carried over, unchanged: mirrored Polisi/Hendra are interim (pocket/badge swap sides, no lettering); D-90 (dialogue stays Indonesian under en/zh) is outside T-013.
+
+### Not verified by me
+Slide-in (180 ms) and room crossfade (150 ms) on a live transition; the chat cut-in; real iOS WebKit and the owner phone check; a full manual playthrough in en/zh; `npm run test:client` / `test:e2e` / `cek-piksel-t013.mjs` (Fullstack reports 728/728, e2e clean, 73/73); Fullstack's byte table.

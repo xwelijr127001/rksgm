@@ -116,8 +116,13 @@ export function bangunSamping() {
   for (const [id, h] of Object.entries(hasil)) {
     const k = L.kotakAlpha(h.tubuh);
     let a = h.tubuh.w, bb = 0;
-    for (let y = h.tubuh.h - 2; y < h.tubuh.h; y++) for (let x = 0; x < h.tubuh.w; x++) if (buram(h.tubuh, x, y)) { a = Math.min(a, x); bb = Math.max(bb, x); }
-    const kaki = { x: Math.round((a + bb + 1) / 2), y: k.y + k.h - 1 };
+    // D-100: jangkar = titik tengah di antara KEDUA telapak (12 baris terbawah: sepatu depan sedikit lebih tinggi daripada
+    // sepatu belakang, jadi 2 baris terbawah hanya memuat kaki belakang dan figur cermin bergeser ke tetangganya).
+    for (let y = h.tubuh.h - 12; y < h.tubuh.h; y++) for (let x = 0; x < h.tubuh.w; x++) if (buram(h.tubuh, x, y)) { a = Math.min(a, x); bb = Math.max(bb, x); }
+    // Rentang kedua telapak terukur (a..bb) memuat ujung sepatu depan, jadi titik tengahnya ± 40; jangkar dipasang di TENGAH
+    // BADAN (tengah frame, 35-36 = angka Designer 35-37) supaya slot = pusat badan dan cermin simetris.
+    const kaki = { x: Math.round(h.tubuh.w / 2), y: k.y + k.h - 1 };
+    void a; void bb;
     const kepalaTinggi = h.wajah.y + h.wajah.h - h.kB.atas;
     const kepala = { x: (h.kB.x0 + h.kB.x1 + 1) / 2, y: h.kB.atas + kepalaTinggi / 2 };
     const jendela = (sisi, skala, gy = 0) => ({ frame: 'berdiri-kanan', x: Math.round(kepala.x - sisi / 2), y: Math.round(kepala.y - sisi / 2 + gy), sisi, skala, tampil: sisi * skala });
