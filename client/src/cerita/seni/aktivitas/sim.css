@@ -1,0 +1,162 @@
+/* T-022 "Periksa SIM Pak Darto": seni piksel (seni/aktivitas/sim/, sumber character/aktivitas-ep2-pixel-v1/sim/README.md) dan tata letak
+   adegan. 1 piksel seni = 1 px CSS, image-rendering: pixelated, tidak ada yang diskalakan. Adegan W x 236 dengan tepi 2 px; semua
+   posisi = px dari tepi / pusat area gambar (W - 4) x 232, jadi satu set seni melayani W 336 dan 366. */
+/* D-223: di desktop kolom 366 px rata kiri (sejajar judul) dan instruksi tetap di atas adegan (bukan sesudah tombol). */
+.hp-sim { display: grid; gap: 8px; width: 100%; max-width: 366px; margin: 0; }
+.hp-sim > .hp-instruksi-arena { order: -1; }
+.sim-instruksi { margin: 0; min-height: 20px; font-size: 16px; line-height: 20px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.sim-adegan { box-sizing: border-box; height: 236px; border: 2px solid #1c2b24; background: #b98a57; overflow: hidden; }
+/* D-222: overflow clip (bukan hidden): kotak hidden masih bisa menggulir sendiri saat kartu langkah 4 difokus dengan Tab. */
+.sim-isi { position: relative; width: 100%; height: 232px; overflow: hidden; overflow: clip; }
+.sim-isi > .px, .sim-isi > span { position: absolute; }
+.sim-isi .px { image-rendering: pixelated; background-repeat: no-repeat; }
+
+/* ---- sprite */
+.sm-sim-depan { width: 240px; height: 152px; background-image: url('./sim/sim-depan.png'); }
+.sm-sim-belakang { width: 240px; height: 152px; background-image: url('./sim/sim-belakang.png'); }
+.sm-sim-kecil { width: 120px; height: 76px; background-image: url('./sim/sim-kecil.png'); }
+.sm-sim-hantu { width: 240px; height: 152px; background-image: url('./sim/sim-hantu.png'); }
+.sm-sim-pin { width: 32px; height: 21px; background-image: url('./sim/sim-pin.png'); }
+.sm-lensa-asli { width: 124px; height: 124px; background-image: url('./sim/lensa-asli.png'); pointer-events: none; z-index: 5; }
+.sm-lensa-palsu { width: 124px; height: 124px; background-image: url('./sim/lensa-palsu.png'); }
+.sm-berkas { width: 140px; height: 98px; background-image: url('./sim/berkas-fotokopi.png'); }
+.sm-dompet { width: 64px; height: 46px; background-image: url('./sim/dompet.png'); }
+.sm-jempol { width: 32px; height: 46px; background-image: url('./sim/jempol.png'); pointer-events: none; z-index: 3; }
+.sm-truk-mini { width: 120px; height: 58px; background-image: url('./sim/truk-mini.png'); }
+.sm-lubang { width: 8px; height: 8px; background-image: url('./sim/label-lubang.png'); }
+.sm-ubin-satpas { width: 80px; height: 60px; background-image: url('./sim/ubin-satpas.png'); }
+.sm-ktp { width: 190px; height: 120px; background-image: url('./sim/ktp.png'); }
+.sm-monitor { width: 124px; height: 92px; }
+.sm-monitor-kosong { background-image: url('./sim/monitor-kosong.png'); }
+.sm-monitor-ketik { background-image: url('./sim/monitor-ketik.png'); }
+.sm-monitor-isi { background-image: url('./sim/monitor-isi.png'); }
+.sm-surat-kuasa { width: 124px; height: 46px; background-image: url('./sim/surat-kuasa.png'); }
+.sm-cetakan { width: 300px; height: 112px; background-image: url('./sim/cetakan.png'); }
+.sm-centang { position: absolute; width: 22px; height: 18px; background-image: url('./sim/centang.png'); }
+.sm-centang[data-centang] { background-position: -22px 0; }
+.sm-klip { width: 48px; height: 16px; background-image: url('./sim/klip.png'); }
+.sm-cap-asli { background-image: url('./sim/cap-asli.png'); }
+.sm-cap-cocok { background-image: url('./sim/cap-cocok.png'); }
+.sm-cap-satpas { background-image: url('./sim/cap-satpas.png'); }
+.sm-cap-sesuai { background-image: url('./sim/cap-sesuai.png'); }
+.sm-cap-kosong { background-image: url('./sim/cap-kosong.png'); }
+
+/* ---- latar */
+.sim-meja { inset: 0; background: url('./sim/meja.png') 0 0 repeat; image-rendering: pixelated; }
+.sim-meja-bawah { inset: 88px 0 0 0; border-top: 3px solid #1c2b24; }
+.sim-dinding { left: 0; right: 0; top: 0; height: 88px; background: url('../piksel/ep2-ruang-wawancara-latar.png') calc(50% + 0px) -10px / 400px 225px no-repeat; image-rendering: pixelated; }
+.sim-darto { left: calc(50% - 36px); top: 4px; height: 84px; overflow: hidden; }
+.sim-darto > span { position: absolute; background-repeat: no-repeat; image-rendering: pixelated; }
+.sim-loket { left: calc(50% - 183px); top: 0; width: 366px; height: 104px; background: url('./sim/loket-dinding.png') 0 0 no-repeat; image-rendering: pixelated; }
+.sim-rumput { inset: 0; background: #7c9a45 url('./peta/rumput.png') 0 0 repeat; image-rendering: pixelated; }
+.sim-jalan-h { left: 54px; right: 54px; top: 78px; height: 12px; background: url('./peta/jalan-tanah-h.png') 0 0 repeat-x; image-rendering: pixelated; }
+.sim-jalan-v { left: calc(50% - 6px); top: 78px; bottom: 60px; width: 12px; background: url('./peta/jalan-tanah-v.png') 0 0 repeat-y; image-rendering: pixelated; }
+
+/* ---- sasaran ketuk: polos; ragu = putus-putus kuning; benar = garis hijau */
+.sim-ketuk { position: absolute; z-index: 4; margin: 0; padding: 0; border: 0; border-radius: 0; background: transparent; cursor: pointer; }
+.sim-ketuk:disabled { cursor: default; }
+.sim-ketuk[data-keadaan="ragu"], .sim-ubin[data-keadaan="ragu"] .sim-ubin-gambar, .sim-label-truk[data-keadaan="ragu"] { outline: 2px dashed #e0a52f; outline-offset: -2px; }
+.sim-ketuk[data-keadaan="benar"] { outline: 2px solid #2e8a57; outline-offset: -2px; }
+.sim-ketuk:focus-visible, .sim-ubin:focus-visible, .sim-label-truk:focus-visible, .sim-balik:focus-visible, .sim-cetakan:focus-visible, .sim-kartu-seret:focus-visible, .sim-kenapa:focus-visible { outline: 3px solid #1d6fd1; outline-offset: -3px; }
+.sim-pelat { z-index: 3; padding: 1px 5px; border: 1px solid #1c2b1c; background: #fffdf6; color: #1e2b24; font-size: 13px; line-height: 15px; font-weight: 800; white-space: nowrap; pointer-events: none; }
+
+/* ---- langkah 2 */
+.sim-label-truk {
+  position: absolute; z-index: 4; left: 136px; right: 6px; top: 176px; height: 44px; box-sizing: border-box; display: grid; align-content: center; margin: 0; padding: 0 2px 0 14px; text-align: left;
+  border-style: solid; border-color: transparent; border-width: 6px 6px 8px; border-image: url('./sim/label-truk-9i.png') 6 6 8 6 fill / 6px 6px 8px repeat; image-rendering: pixelated; border-radius: 0;
+  background: none; color: #1c2b24; font: inherit; font-size: 13px; line-height: 16px; cursor: pointer; white-space: nowrap; overflow: hidden;
+}
+.sim-label-truk[data-keadaan="ketuk"] { border-image-source: url('./sim/label-truk-ketuk-9i.png'); }
+.sim-label-truk[data-keadaan="cocok"] { border-image-source: url('./sim/label-truk-cocok-9i.png'); cursor: default; }
+.sim-label-truk > span, .sim-label-truk > b { margin: -2px 0; overflow: hidden; text-overflow: ellipsis; }
+.sim-label-truk > .sm-lubang { position: absolute; left: 0; top: 12px; margin: 0; }
+.sim-balik {
+  position: absolute; z-index: 5; right: 6px; top: 27px; width: 62px; height: 44px; margin: 0; padding: 7px 0; box-sizing: border-box; border: 0; background: none; font: inherit; font-size: 13px; font-weight: 800; color: #1c2b24; cursor: pointer;
+}
+.sim-balik::before { content: ''; position: absolute; left: 0; top: 7px; width: 62px; height: 30px; box-sizing: border-box; border: 2px solid #1c2b24; background: #fffdf6; box-shadow: 0 2px 0 #1c2b24; z-index: -1; }
+
+/* ---- langkah 3a: ubin tempat (kotak 96, gambar 80 x 60 di bingkai 84 x 64, pelat label seperti K04) */
+.sim-ubin { position: absolute; z-index: 4; width: 96px; margin: 0; padding: 0; display: grid; justify-items: center; border: 0; background: none; color: #1e2b24; font: inherit; cursor: pointer; }
+.sim-ubin:disabled { cursor: default; }
+.sim-ubin-gambar { position: relative; box-sizing: border-box; width: 84px; height: 64px; padding: 2px; background: url('./peta/bingkai.png') 0 0 no-repeat; image-rendering: pixelated; }
+.sim-ubin.terpilih .sim-ubin-gambar::before { content: ''; position: absolute; left: -2px; top: -2px; width: 88px; height: 68px; background: url('./peta/bingkai-pilih.png') 0 0 no-repeat; image-rendering: pixelated; }
+.sim-ubin-gambar > .px { position: relative; width: 80px; height: 60px; }
+.sim-ubin-nama { position: relative; z-index: 1; max-width: 96px; box-sizing: border-box; margin-top: -8px; padding: 1px 5px; border: 1px solid #1c2b1c; background: #fffdf6; font-size: 13px; line-height: 15px; font-weight: 800; }
+.sim-ubin.terpilih .sim-ubin-nama { background: #e0b84f; }
+.sim-ubin > .sm-sim-pin { position: absolute; left: 70px; top: -6px; z-index: 2; }
+
+/* ---- langkah 4 */
+.sim-cetakan { position: absolute; z-index: 1; left: calc(50% - 150px); top: 6px; width: 300px; height: 112px; margin: 0; padding: 0; border: 0; background: none; cursor: pointer; }
+.sim-cetakan:disabled, .sim-kartu-seret:disabled { cursor: default; }
+.sim-cetakan > .sm-cetakan { position: absolute; left: 0; top: 0; }
+.sim-kartu-seret { position: absolute; z-index: 2; left: calc(50% - 120px); width: 240px; height: 152px; margin: 0; padding: 0; border: 0; background: none; cursor: grab; touch-action: none; }
+.sim-kartu-seret > .px { position: absolute; left: 0; top: 0; }
+.sim-garis { position: absolute; box-sizing: border-box; border: 2px solid #2e8a57; pointer-events: none; }
+.sm-sim-hantu { z-index: 1; pointer-events: none; }
+
+/* ---- "Kenapa?" */
+.sim-kenapa {
+  position: absolute; z-index: 6; right: 0; top: 0; width: 64px; height: 24px; box-sizing: border-box; margin: 0; padding: 0; border: 8px solid transparent; border-image: url('./sim/catatan-9i.png') 8 fill / 8px repeat; image-rendering: pixelated;
+  background: none; color: #3a3212; font: inherit; font-size: 12px; line-height: 8px; font-weight: 800; cursor: pointer;
+}
+.sim-kenapa::after { content: ''; position: absolute; inset: -8px -8px -18px -14px; }
+.sim-catatan {
+  position: absolute; z-index: 7; right: 0; top: 0; width: 204px; box-sizing: border-box; border: 8px solid transparent; border-image: url('./sim/catatan-9i.png') 8 fill / 8px repeat; image-rendering: pixelated; color: #3a3212;
+}
+.sim-catatan p { margin: -2px 0 2px; font-size: 13px; line-height: 17px; font-weight: 600; }
+.sim-catatan .hp-tautan { min-height: 28px; margin: 0 0 -4px; font-size: 13px; }
+
+/* ---- papan jalan dengan empat cap */
+.sim-papan {
+  position: relative; box-sizing: border-box; height: 48px; margin: 0; padding: 0 2px; list-style: none; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 4px; align-items: center;
+  border: 6px solid transparent; border-image: url('./sim/papan-jalan-9i.png') 6 fill / 6px repeat; image-rendering: pixelated;
+}
+.sim-papan[data-akhir] { height: 62px; }
+.sim-papan > .sm-klip { position: absolute; left: calc(50% - 24px); top: -15px; z-index: 1; }
+.sim-papan > li { display: grid; justify-items: center; gap: 0; margin: -4px 0; padding: 1px 0; background: #fbf3dd; }
+.sim-cap-nama { font-size: 10.5px; line-height: 12px; font-weight: 800; color: #3d4a42; white-space: nowrap; }
+.sim-papan > li > .px { width: 60px; height: 26px; background-repeat: no-repeat; image-rendering: pixelated; }
+.sim-papan > li[data-keadaan="kini"] > .sm-cap-kosong { background-position: -60px 0; }
+
+/* ---- kalimat Pak Bima */
+.sim-ucap { display: grid; grid-template-columns: 36px minmax(0, 1fr); gap: 8px; align-items: start; min-height: 36px; }
+.sim-ucap-potret { width: 36px; height: 36px; box-sizing: border-box; border: 2px solid #1c2b24; background: #f3ead2; overflow: hidden; }
+.sim-ucap-potret .hp-potret .cer-potret { width: 32px !important; height: 32px !important; border: 0 !important; border-radius: 0 !important; box-shadow: none !important; }
+.sim-ucap-potret .cer-potret svg { width: 100%; height: 100%; }
+.sim-ucap > p { position: relative; margin: 0; border: 6px solid transparent; border-image: url('./sim/gelembung-9i.png') 6 fill / 6px repeat; image-rendering: pixelated; font-size: 14px; line-height: 18px; color: #1c2b24; }
+.sim-ucap > p::before { content: ''; position: absolute; left: -12px; top: 6px; width: 8px; height: 10px; background: url('./sim/gelembung-ekor.png') 0 0 no-repeat; image-rendering: pixelated; }
+.sim-ucap[data-ragu] > p { border-image-source: url('./sim/gelembung-ragu-9i.png'); }
+.sim-ucap[data-ragu] > p::before { background-position: -8px 0; }
+
+/* ---- akhir: kartu kasus lain */
+.sim-kasus {
+  position: relative; box-sizing: border-box; min-height: 150px; margin-top: 8px; overflow: hidden; border-style: solid; border-color: transparent; border-width: 6px 6px 8px;
+  border-image: url('./sim/kartu-kasus-9i.png') 6 6 8 6 fill / 6px 6px 8px repeat; image-rendering: pixelated; color: #1c2b24;
+}
+.sim-kasus-judul { display: flex; align-items: center; gap: 6px; margin: -4px -4px 0; padding: 3px 8px; background: #1f3a5f; color: #fff8e7; font-size: 13.5px; line-height: 18px; }
+.sim-kasus > .sm-lensa-palsu { position: absolute; left: 0; top: 16px; }
+.sim-kasus > ul { margin: 6px 0 4px 128px; padding: 0; list-style: none; display: grid; gap: 6px; font-size: 13.5px; line-height: 17px; }
+@media (prefers-reduced-motion: no-preference) {
+  .sim-papan > li[data-keadaan="cap"] > .px { animation: sim-cap .22s ease-out both; }
+}
+@keyframes sim-cap { from { opacity: 0; transform: scale(1.35) rotate(-6deg); } to { opacity: 1; transform: none; } }
+
+/* ---------------------------------------------------------------- T-022 FIX (Designer review D-215..D-223)
+   D-215 (pemblokir): .player-ui button { touch-action: manipulation } (player.css) lebih kuat daripada .sim-kartu-seret, jadi browser
+   membatalkan seretan jari sesudah 8-20 px. Aturan ini lebih berat (dua kelas) dan berlaku juga untuk isi tombolnya. */
+.hp-sim .sim-kartu-seret, .hp-sim .sim-kartu-seret * { touch-action: none; }
+/* D-217: sebelum ketukan pertama, sasaran di meja dan tiga baris KTP bergaris putus-putus krem 1 px (terlihat bisa diketuk).
+   :not(:focus-visible): aturan ini lebih berat daripada aturan fokus (.hp-layar :focus-visible di hp.css, yang berlaku di HP, dan
+   .sim-ketuk:focus-visible di atas), jadi tanpa pengecualian itu sasaran yang difokus lewat keyboard kehilangan cincin fokus 3 px-nya
+   (terukur 17 Nov: fokus Tab pada fotokopi / baris NIK = 1px dashed krem, sama dengan sasaran yang tidak difokus). */
+.sim-ketuk[data-petunjuk]:not([data-keadaan]):not(:focus-visible) { outline: 1px dashed #fff3d9; outline-offset: -1px; }
+/* D-225: di loket garis krem itu jatuh di kertas KTP biru muda (207, 227, 238), kontras hanya 1,20 : 1. Di langkah loket SAJA garisnya
+   memakai biru tua kartu #2f4a6b (6,9 : 1 di kertas itu); tetap 1 px putus-putus. Meja tidak berubah (krem di atas kayu 2,0-2,8 : 1). */
+.sim-adegan[data-adegan="loket"] .sim-ketuk[data-petunjuk]:not([data-keadaan]):not(:focus-visible) { outline-color: #2f4a6b; }
+/* Fokus keyboard (17 Nov): saat langkah berganti lewat keyboard, baris instruksi difokus oleh skrip (tabindex -1) supaya fokus tidak
+   jatuh ke <body>; seperti judul langkah K11, baris yang tidak bisa ditekan ini tidak bercincin fokus (satu Tab = sasaran pertama). */
+.hp-instruksi-arena.sim-instruksi:focus, .hp-instruksi-arena.sim-instruksi:focus-visible { outline: none; }
+/* Langkah 4, selama tiga centang muncul: kartu dan cetakan masih bisa difokus (aria-disabled), tetapi tidak lagi bisa diseret. */
+.sim-cetakan[aria-disabled="true"], .sim-kartu-seret[aria-disabled="true"] { cursor: default; }
+/* D-220: klip papan jalan disembunyikan di layar akhir (setengah tertutup tepi area gulir di HP). */
+.sim-papan[data-akhir] > .sm-klip { display: none; }

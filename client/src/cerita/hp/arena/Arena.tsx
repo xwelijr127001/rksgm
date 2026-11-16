@@ -24,6 +24,7 @@ import { ArenaPolaBandingkan } from './ArenaBandingkan';
 import { ArenaPolaBundel, lupakanLangkahArena } from './ArenaBundel';
 import { ArenaPolaPesan } from './ArenaPesan';
 import { ArenaPolaRambu } from './ArenaRambu';
+import { ArenaPolaSim } from './ArenaSim';
 import { ArenaPolaSusun } from './ArenaSusun';
 import { ArenaPolaTujuan } from './ArenaTujuan';
 import type { PropsPola } from './pola';
@@ -66,18 +67,23 @@ export function Arena({ ep, state, node, bahasa, tx, namaPemain, onKirim, onKemb
   // Kalimat tokoh pemberi tugas. Narasi tidak diulang: baru saja dibaca di adegan/obrolan tepat sebelum tugas.
   const kutipan = [...pengantar].reverse().find((b) => b.siapa !== 'narasi' && Object.prototype.hasOwnProperty.call(ep.pemeran, b.siapa)) ?? null;
   // Tokoh yang memberi tugas = tokoh yang dipindah (Mas Rudi di peta): kalimatnya tampil di kartu tokoh itu, tidak dua kali.
-  const kutipanDiPola = (!daftar && konfig.pola === 'tujuan' && !!kutipan && konfig.benda.tokoh?.id === kutipan.siapa) || (konfig.pola === 'rambu' && !!kutipan);
+  const kutipanDiPola = (!daftar && konfig.pola === 'tujuan' && !!kutipan && konfig.benda.tokoh?.id === kutipan.siapa) || ((konfig.pola === 'rambu' || konfig.pola === 'sim') && !!kutipan);
   // Fakta tampil sebagai kartu, kecuali pola yang menampilkannya sendiri (isi bundel) atau gambar yang sudah memuatnya.
   const faktaKartu = konfig.pola === 'bundel' || konfig.pola === 'rambu' || (konfig.fakta?.hanyaDaftar && !daftar) ? undefined : konfig.fakta;
   // Pola susun: briefing sudah dibaca di obrolan/adegan tepat sebelum tugas, jadi konteks langsung diringkas: catatan fakta
   // kunci tetap terlihat + "Pesan & info tugas" (kutipan & cerita) yang bisa dibuka; benda aktif, pertanyaan, dan semua
   // wadah jadi pusat layar HP. Isi konteks tidak hilang, hanya dilipat.
   // K10 juga: satu persoalan aktif jadi pusat layar; kutipan, cerita, dan fakta pokok dilipat (prototipe Claude Design).
-  const ringkas = konfig.pola === 'susun' || konfig.pola === 'bandingkan' || (konfig.pola === 'tujuan' && konfig.gaya === 'rencana' && !daftar);
+  const ringkas = konfig.pola === 'susun' || konfig.pola === 'bandingkan' || (konfig.pola === 'tujuan' && (konfig.gaya === 'rencana' || konfig.gaya === 'teruskan') && !daftar) || konfig.pola === 'bundel';
   // Fakta kunci tidak diulang saat benda yang keterangannya sudah memuatnya sedang aktif (mis. kartu surat polisi).
   const [aktifSusun, setAktifSusun] = useState<string | null>(null);
   // Meja K02 (tampilan gambar): fakta catatan dibaca di kartu bendanya sendiri saat relevan, tidak menumpuk di atas meja.
   const catatanTampil = !!konfig.catatan && !(konfig.pola === 'tujuan' && konfig.gaya === 'rencana' && !daftar) && !(konfig.catatanBenda && (aktifSusun === konfig.catatanBenda || (konfig.pola === 'susun' && konfig.gaya === 'baki' && !daftar)));
+  // T-020 batch 2 (K07, K09, K10): di cangkang HP info tugas yang terlipat dibuka lewat tab "Info tugas" di baris judul (tidak
+  // memakan satu baris di atas papan). Isinya sama (kutipan, cerita, fakta); di desktop tetap <details> biasa.
+  const tabInfo = ringkas && !daftar && (konfig.pola === 'bandingkan' || konfig.pola === 'bundel' || (konfig.pola === 'tujuan' && (konfig.gaya === 'rencana' || konfig.gaya === 'teruskan')) || (konfig.pola === 'susun' && konfig.gaya === 'papan'));
+  const [infoBuka, setInfoBuka] = useState(false);
+  const gulirRef = useRef<HTMLDivElement>(null);
   const judulRef = useRef<HTMLHeadingElement>(null);
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'auto' });
@@ -105,19 +111,24 @@ export function Arena({ ep, state, node, bahasa, tx, namaPemain, onKirim, onKemb
 
   return (
     <SlotKepalaArena.Provider value={cangkang ? slotKepala : null}><SlotKirimArena.Provider value={cangkang ? slotKirim : null}>
-    <div className="hp-arena" data-pola={konfig.pola} data-tampilan={daftar ? 'daftar' : 'gambar'}>
+    <div className="hp-arena" data-pola={konfig.pola} data-tampilan={daftar ? 'daftar' : 'gambar'} data-tab-info={tabInfo ? '' : undefined}>
       <header className="hp-arena-kepala">
-        <button type="button" className="hp-arena-kembali" onClick={onKembali}><Arrow back /><span>{t('ceritaHp.kembaliCerita')}</span></button>
+        <button type="button" className="hp-arena-kembali" onClick={onKembali}><Arrow back /><span className="hp-arena-kembali-penuh">{t('ceritaHp.kembaliCerita')}</span><span className="hp-arena-kembali-pendek" aria-hidden="true">{t('ceritaHp.kembali')}</span></button>
         <p className="hp-arena-tugas">{t('ceritaHp.tugas')}</p>
         <h2 ref={judulRef} tabIndex={-1} className="hp-arena-judul">{misi.title}</h2>
+        {tabInfo ? (
+          <button type="button" className="hp-arena-info" data-info-tugas="" aria-expanded={infoBuka} onClick={() => { setInfoBuka(!infoBuka); if (gulirRef.current) gulirRef.current.scrollTop = 0; }}>
+            <span aria-hidden="true">≡</span>{t('ceritaHp.infoTugas')}
+          </button>
+        ) : null}
       </header>
       <div ref={setSlotKepala} className="hp-arena-sematan" />
-      <div className="hp-arena-gulir" data-gulir-arena="">
-      {konfig.pola === 'bundel' || konfig.pola === 'rambu' ? null : <div className="hp-arena-konteks" data-ringkas={ringkas ? '' : undefined}>
+      <div ref={gulirRef} className="hp-arena-gulir" data-gulir-arena="">
+      {konfig.pola === 'rambu' || konfig.pola === 'sim' || (konfig.pola === 'bundel' && !(cangkang && tabInfo)) ? null : <div className="hp-arena-konteks" data-ringkas={ringkas ? '' : undefined}>
         {ringkas ? (
           <>
             {catatanTampil ? <p className="hp-konteks-catatan">{tx(konfig.catatan!)}</p> : null}
-            <details className="hp-tahu">
+            <details className="hp-tahu" open={tabInfo ? infoBuka : undefined} onToggle={tabInfo ? (e) => setInfoBuka(e.currentTarget.open) : undefined}>
               <summary>{t('ceritaHp.konteksLengkap')}</summary>
               <Kutipan ep={ep} baris={kutipan} tx={tx} namaPemain={namaPemain} />
               <p>{misi.story}</p>
@@ -140,9 +151,10 @@ export function Arena({ ep, state, node, bahasa, tx, namaPemain, onKirim, onKemb
             : konfig.pola === 'bandingkan' ? <ArenaPolaBandingkan {...props} konfig={konfig} />
               : konfig.pola === 'bundel' ? <ArenaPolaBundel {...props} konfig={konfig} />
                 : konfig.pola === 'rambu' ? <ArenaPolaRambu {...props} konfig={konfig} />
+                  : konfig.pola === 'sim' ? <ArenaPolaSim {...props} konfig={konfig} />
                   : <ArenaPolaPesan {...props} konfig={konfig} />}
       </BatasArena>
-      {konfig.pola === 'rambu' ? null : (
+      {konfig.pola === 'rambu' || konfig.pola === 'sim' ? null : (
         <p className="hp-arena-alih">
           <button type="button" className="hp-tautan" onClick={ganti}>{daftar ? t('ceritaHp.tampilanVisual') : t('ceritaHp.tampilanDaftar')}</button>
         </p>

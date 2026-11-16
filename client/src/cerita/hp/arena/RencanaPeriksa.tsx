@@ -1,79 +1,103 @@
 /**
- * K07 RENCANA PEMERIKSAAN (pola tujuan gaya 'rencana', tampilan gambar) — ritme 15 Nov 2026.
- * Hierarki: (1) situasi: satu kartu "Hitungan biaya bengkel · Sedang berjalan" + fakta kasus (kendaraan lain ikut tertabrak);
- * (2) pertanyaan (oleh ArenaTujuan); (3) papan waktu dua baris (Bengkel / Pemeriksaan kejadian) yang BERUBAH sesuai pilihan
- * sebelum dikirim; (4) dua pilihan papan langsung + "Pilihan lain" (semua alternatif naskah tetap terlihat, tidak ada yang
- * dipilih lebih dulu atau disorot sebagai benar). Jawaban = tetapkan(langkah, benda, tujuan) seperti sebelumnya.
+ * K07 RENCANA PEMERIKSAAN (pola tujuan gaya 'rencana', tampilan gambar) — T-020 batch 2: papan gabus piksel (D-147, D-157).
+ * Seni: seni/aktivitas/papan/ (bingkai, gabus, pelat kolom, kartu kerja, nota, slot, kartu periksa, pin, chip, ikon), semuanya
+ * bingkai sembilan-iris lewat CSS border-image (piksel.css); tidak ada kata di dalam gambar.
+ * Susunan: (1) strip: kaca pembesar + instruksi, atau pilihan aktif + artinya; (2) papan: kolom Sekarang / Sesudah hitungan,
+ * kartu kerja bengkel yang sedang berjalan + nota catatan kasus, dua slot putus-putus (ketuk = kartu pemeriksaan ditempel);
+ * (3) tiga jawaban di luar papan sebagai chip berikon. Kelima jawaban naskah terlihat sekaligus; tidak ada yang dipilih lebih
+ * dulu. Jawaban = tetapkan(langkah, benda, tujuan) seperti sebelumnya (satu radiogroup, panah = pindah fokus).
  */
-import { useId, useState, type KeyboardEvent } from 'react';
+import type { KeyboardEvent } from 'react';
+import '../../seni/aktivitas/piksel.css';
 import { t } from '../../../i18n';
-import type { KunciTeks, TujuanArena } from '../../tipe';
+import type { Episode, KunciTeks, TujuanArena } from '../../tipe';
 import type { ArenaTujuan } from './logika';
 import { panahUbin } from './pola';
 
-const PAPAN = ['setelah', 'paralel'];
+/** Slot papan menurut kolomnya: kolom 1 = mulai sekarang (bersamaan dengan bengkel), kolom 2 = sesudah hitungan selesai. */
+const PAPAN = ['paralel', 'setelah'];
 
-export function RencanaPeriksa({ konfig, dipilih, tx, idTanya, onPilih }: {
+export function RencanaPeriksa({ ep, konfig, dipilih, tx, idTanya, instruksi, onPilih }: {
+  ep: Episode;
   konfig: ArenaTujuan;
   dipilih: string | null;
   tx: (k: KunciTeks) => string;
   idTanya: string;
+  /** Kalimat perintah tugas (misi.instruction), tampil di strip sebelum ada pilihan. */
+  instruksi?: string;
   onPilih: (id: string) => void;
 }) {
-  const idLain = useId();
-  const idUtama = useId();
-  const idDaftarLain = useId();
-  const utama = PAPAN.map((id) => konfig.tujuan.find((x) => x.id === id)).filter((x): x is TujuanArena => !!x);
-  const lain = konfig.tujuan.filter((x) => !PAPAN.includes(x.id));
+  const slot = PAPAN.map((id) => konfig.tujuan.find((x) => x.id === id)).filter((x): x is TujuanArena => !!x);
+  const luar = konfig.tujuan.filter((x) => !PAPAN.includes(x.id));
   const pil = konfig.tujuan.find((x) => x.id === dipilih) ?? null;
-  // Tiga alternatif tanpa pemeriksaan di lokasi: dibuka dengan tombol berlabel jelas; terbuka sendiri bila salah satunya dipilih.
-  const [lainBuka, setLainBuka] = useState(() => lain.some((x) => x.id === dipilih));
-  const lainTerbuka = lainBuka || lain.some((x) => x.id === dipilih);
-  const posisi = dipilih === 'paralel' ? 'bersama' : dipilih === 'setelah' ? 'sesudah' : dipilih ? 'tanpa' : 'kosong';
-  const opsi = (x: TujuanArena, i: number, daftar: TujuanArena[]) => {
-    const on = x.id === dipilih;
-    return (
-      <button key={x.id} type="button" role="radio" aria-checked={on} tabIndex={on || (!dipilih && i === 0 && daftar === utama) ? 0 : -1}
-        className={'hp-rpk-opsi' + (on ? ' terpilih' : '')} data-tujuan={x.id} onClick={() => onPilih(x.id)}>
-        <span className="hp-opsi-tanda" aria-hidden="true">{on ? <i /> : null}</span>
-        <span className="hp-rpk-opsi-teks"><b>{tx(x.label)}</b>{x.arti ? <span>{tx(x.arti)}</span> : null}</span>
-        {on ? <span className="hp-ubin-tanda">{t('ceritaHp.dipilih')}</span> : null}
-      </button>
-    );
-  };
+  const benda = tx(konfig.benda.nama ?? konfig.benda.id);
+  const urut = [...slot, ...luar];
+  const tab = (x: TujuanArena) => (x.id === dipilih || (!dipilih && urut[0]?.id === x.id) ? 0 : -1);
   return (
-    <div className="hp-rpk">
-      <div className="hp-rpk-situasi">
-        <p className="hp-rpk-situasi-kepala"><b>{tx('arena.jalur.hitung')}</b><span className="hp-rpk-chip"><span aria-hidden="true">◷ </span>{t('ceritaHp.sedangBerjalan')}</span></p>
-        {konfig.catatan ? <p className="hp-rpk-fakta">{tx(konfig.catatan)}</p> : null}
+    <div className="hp-rpk hp-rpk-px" data-dipilih={dipilih ?? undefined}>
+      <div className="rp-strip" role="status" data-strip={pil ? 'pilihan' : 'instruksi'}>
+        {pil ? (
+          <>
+            <b className="rp-strip-nama">{tx(pil.label)}</b>
+            <span className="rp-strip-benda">{benda}</span>
+            {pil.arti ? <span className="rp-strip-arti">{tx(pil.arti)}</span> : null}
+          </>
+        ) : (
+          <>
+            <span className="rp-token" aria-hidden="true"><span className="px px-kaca" /></span>
+            <p className="rp-strip-instruksi">{instruksi ?? benda}</p>
+          </>
+        )}
       </div>
 
-      <div className="hp-rpk-papan" aria-hidden="true" data-posisi={posisi}>
-        <span className="hp-rpk-kolom" data-kolom="1">{t('ceritaHp.kolomSekarang')}</span>
-        <span className="hp-rpk-kolom" data-kolom="2">{t('ceritaHp.kolomSesudah')}</span>
-        <span className="hp-rpk-baris-nama">{tx('arena.jalur.barisBengkel')}</span>
-        <span className="hp-rpk-bar hp-rpk-bar-bengkel">{tx('arena.jalur.hitung')}</span>
-        <span className="hp-rpk-baris-nama">{t('ceritaHp.rencanaPemeriksaan')}</span>
-        <span className="hp-rpk-bar hp-rpk-bar-periksa" data-posisi={posisi}>
-          {posisi === 'bersama' || posisi === 'sesudah' ? tx(pil!.label) : posisi === 'tanpa' ? t('ceritaHp.tanpaPemeriksaan') : t('ceritaHp.belumAdaDiRencana')}
-        </span>
-      </div>
-
-      <p id={idUtama} className="hp-rpk-lain">{t('ceritaHp.denganPemeriksaan')} ({utama.length})</p>
-      <div className="hp-rpk-opsi-daftar" role="radiogroup" aria-labelledby={idUtama} onKeyDown={(e: KeyboardEvent<HTMLDivElement>) => panahUbin(e)}>
-        {utama.map((x, i) => opsi(x, i, utama))}
-      </div>
-      {lain.length ? (
-        <>
-          <p id={idLain} className="hp-rpk-lain">{t('ceritaHp.tanpaPemeriksaan')} ({lain.length})</p>
-          <button type="button" className="hp-rpk-buka-lain" aria-expanded={lainTerbuka} aria-controls={idDaftarLain} data-buka-lain="" disabled={lain.some((x) => x.id === dipilih)} onClick={() => setLainBuka(!lainBuka)}>
-            {lainTerbuka ? t('ceritaHp.sembunyikanPilihanLain') : t('ceritaHp.lihatPilihanLain', { n: lain.length })}
-          </button>
-          <div id={idDaftarLain} hidden={!lainTerbuka} className="hp-rpk-opsi-daftar hp-rpk-opsi-lain" role="radiogroup" aria-labelledby={idLain} onKeyDown={(e: KeyboardEvent<HTMLDivElement>) => panahUbin(e)}>
-            {lain.map((x, i) => opsi(x, i, lain))}
+      <div className="rp-grup" role="radiogroup" aria-labelledby={idTanya} onKeyDown={(e: KeyboardEvent<HTMLDivElement>) => panahUbin(e)}>
+        <div className="rp-papan px-gabus" data-papan-rencana="">
+          <span className="px-plat" data-kolom="1">{t('ceritaHp.kolomSekarang')}</span>
+          <span className="px-plat" data-kolom="2">{t('ceritaHp.kolomSesudah')}</span>
+          <div className="rp-kerja">
+            <span className="rp-kerja-kicker">{tx('arena.jalur.barisBengkel')}</span>
+            <b>{tx('arena.jalur.hitung')}</b>
+            <span className="rp-kerja-status"><span className="px px-jam" aria-hidden="true" />{t('ceritaHp.sedangBerjalan')}</span>
           </div>
-        </>
-      ) : null}
+          {konfig.catatan ? <p className="rp-nota">{tx(konfig.catatan)}</p> : <span />}
+          {slot.map((x) => {
+            const on = x.id === dipilih;
+            return (
+              <button key={x.id} type="button" role="radio" aria-checked={on} tabIndex={tab(x)} className="rp-slot" data-tujuan={x.id} onClick={() => onPilih(x.id)}>
+                {on ? (
+                  <>
+                    <span className="px px-pin rp-pin" aria-hidden="true" />
+                    <span className="px px-kaca-kecil" aria-hidden="true" />
+                    <span className="rp-slot-teks"><b>{benda}</b><span>{tx(x.label)}</span></span>
+                  </>
+                ) : (
+                  <>
+                    <span className="px px-plus" aria-hidden="true" />
+                    <span className="rp-slot-teks"><b>{tx(x.label)}</b></span>
+                  </>
+                )}
+              </button>
+            );
+          })}
+        </div>
+        {luar.length ? (
+          <>
+            <p className="rp-lain">{tx('arena.jalur.lainnya')}</p>
+            <div className="rp-chip-baris">
+              {luar.map((x) => {
+                const on = x.id === dipilih;
+                const kelas = x.seni ? ep.seniArena?.[x.seni]?.piksel : undefined;
+                return (
+                  <button key={x.id} type="button" role="radio" aria-checked={on} tabIndex={tab(x)} className="rp-chip" data-tujuan={x.id} onClick={() => onPilih(x.id)}>
+                    {kelas ? <span className={'px ' + kelas} aria-hidden="true" /> : null}
+                    <span>{tx(x.label)}</span>
+                  </button>
+                );
+              })}
+            </div>
+          </>
+        ) : null}
+      </div>
     </div>
   );
 }

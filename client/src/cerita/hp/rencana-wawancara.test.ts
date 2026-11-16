@@ -40,7 +40,12 @@ test('K10: tiap perbedaan punya catatan bukti; yang belum diketahui disebut belu
   assert.match(cat.antisipasi!, /Dalam kutipan ini/);
   assert.match(cat.antisipasi!, /Belum diketahui apakah catatan polisi/);
   assert.doesNotMatch(cat.antisipasi!, /tidak ada di catatan polisi|polisi tidak (menulis|memuat)/i, 'ketiadaan di catatan polisi BELUM terkonfirmasi');
-  assert.match(cat.nama!, /disamarkan/);
+  assert.match(cat.nama!, /tertulis berbeda/);
+  // T-020 (keputusan owner 16 Nov): dua kertas memuat isi tiap baris; nama = ejaan fiktif yang berbeda satu huruf, sama di semua bahasa.
+  for (const s of k.selisih) { assert.ok(s.sel && s.ikon, `${s.id}: sel kertas + ikon`); for (const b of ['id', 'en', 'zh'] as const) for (const sisi of [s.sel!.kiri, s.sel!.kanan]) assert.notEqual(teksCerita(EP, sisi, b, { nama: 'Rina' }), sisi, `${sisi} (${b})`); }
+  const nm = k.selisih.find((s) => s.id === 'nama')!.sel!;
+  for (const b of ['id', 'en', 'zh'] as const) assert.deepEqual([teksCerita(EP, nm.kiri, b, { nama: 'Rina' }), teksCerita(EP, nm.kanan, b, { nama: 'Rina' })], ['Wahyudi', 'Wahyudin']);
+  assert.deepEqual([tx('arena.selisih.sel.jam.kiri'), tx('arena.selisih.sel.jam.kanan'), tx('arena.selisih.sel.antisipasi.kiri')], ['20.10', '20.15', '?']);
 });
 
 test('K10: teks tugas tidak menilai perbedaan "kecil/wajar" dan tidak menuduh; hanya naskah asli yang memakai kata itu', () => {

@@ -23,7 +23,9 @@ export async function bukaPool(b, BASE, nilai, vp, { kurang = false, lang = 'id'
   const ctx = await b.createBrowserContext();
   const p = await ctx.newPage();
   await p.setViewport({ width: vp.w, height: vp.h, deviceScaleFactor: vp.dpr, isMobile: vp.w < 800, hasTouch: vp.w < 800 });
-  if (kurang) await p.emulateMediaFeatures([{ name: 'prefers-reduced-motion', value: 'reduce' }]);
+  // Gerak normal dipaksa 'no-preference': bila Windows di PC ini 'Show animations' mati, Chrome melapor reduce dan game (dengan
+  // benar) tidak menganimasikan apa pun, sehingga sampel jalan gagal tanpa ada yang rusak. Dipakai juga oleh cek-akhir-t019 (bukaPool).
+  await p.emulateMediaFeatures([{ name: 'prefers-reduced-motion', value: kurang ? 'reduce' : 'no-preference' }]);
   await p.evaluateOnNewDocument((pj, st, lang) => { localStorage.setItem('raksa:bahasa', lang); localStorage.setItem('raksa:profil', pj); sessionStorage.setItem('raksa:loader:v1', '1'); localStorage.setItem('raksa:cerita', st); }, PROFIL, nilai, lang);
   await p.goto(BASE + '/cerita/auto-2' + (kurang ? '?gerak=ikut' : ''), { waitUntil: 'domcontentloaded' });
   await p.waitForFunction(() => document.querySelector('.cer-piksel[data-siap]'), { timeout: 15000 }).catch(() => null);

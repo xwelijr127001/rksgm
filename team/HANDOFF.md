@@ -1439,3 +1439,421 @@ Fullstack · NOT committed. Board: T-018 note "fix 2 done".
 - `tsc --noEmit` clean; production build OK; `test:e2e` not run. `cek-piksel`, `cek-akhir`, `cek-jalan`, `cek-kaki` were not rerun in this round (last green in the Fix round; this round changed one CSS position and three strings).
 
 **Evidence:** `team/evidence/T-018/stage2/fix2/layar-pertama-{360x640,390x645}-{chromium,webkit}.png` (captured, not opened by me; positions above are measured).
+
+## T-020 batch 1 (2026-11-16): pixel map (K04) and pixel road + sign scene (K08)
+
+Fullstack · NOT committed. Board: T-020 note "batch 1 integrated".
+
+**Assets.** The 29 approved PNGs (16 map, 13 road) are copied unchanged to `client/src/cerita/seni/aktivitas/{peta,jalan}/` and used only through `seni/aktivitas/piksel.css`: every sprite is drawn at its own size, `image-rendering: pixelated`, nothing is scaled. A unit test checks each file's size against the README, the 13,581 B total, and that the CSS references exactly these 29 files.
+
+**1. Map (K04)**
+- `lok.kantor / foto / pool / bengkel / langganan` in `SENI_ARENA_AUTO_2` are now pixel entries (`SeniArena.piksel` = CSS class, 80 x 60); `GambarSeni` draws them as an exact 80 x 60 box.
+- `PapanTujuan` switches to the pixel board when all its pictures are pixel: grass tile, dirt roads with junction patches, two trees + bush + tree, 2 px dark edge with the inner line.
+- Tiles: 96 px box, picture 80 x 60 inside the 84 x 64 frame, chosen and focus/hover frames, label plate (13 / 15, 1 px border, gold when chosen) overlapping by 8.
+- Pixel anchors replace the percent table for five places: side columns 6 px from the board edge (picture x = 14 and W - 94), centre column centred, top row at y 8 (picture y 10), bottom row ending 8 px above the edge.
+- Rudi's pin: the ring at picture (+52, -8) with the existing pixel portrait at 32 px. Measured in the browser: offset (52, -8), 40 x 42, inside the board.
+- Tap = choose with the send bar as confirmation (already so since Stage 2). The "Papan ilustrasi" plate is kept for screen readers only.
+- K05 (same board, other pictures) keeps its SVG pictures and the old percent layout until its batch.
+
+**2. Road (K08)**
+- `lokasi/seni/geometri.ts` is now in pixels: road block 278 (shoulder 7 + four lanes of 66 + shoulder 7), lane n left = (W - 278) / 2 + 7 + (n - 1) x 66, truck 40 x 124 at lane left + 13 and top 80 of 236, keycap at lane left + 13 and top 200, ring 54 x 136. `seni.test.ts` rewritten for these numbers and the PNG sizes.
+- `lokasi/Adegan.tsx` rewritten: grass, `jalan-strip.png` repeat-y, arrows, orange truck with shadow, hatch layers at 55 % with a 2 px border (solid red / dashed blue), the sign face at the top of a marked lane, keycap atlas (plain / forbidden / left lane; pressed 2 px when marked), trees and bush. Scene is W x 236 everywhere (was a square).
+- Sign posts on the left verge are now the buttons: the active post opens that sign, a finished post reopens it, sign 2 is locked at 55 % until sign 1 is done; number badge gold (active) or green (done). The "Rambu 1" button and the "Lihat lagi" chips are gone.
+- Marking step on phones: compact sign card with the pixel sign face, instruction 16 / 20, scene, then ONE legend line ("Tandamu · Rambu 1: lajur 3 dan 4 · Ilustrasi ..."). The context sentence shows on the first step only. Nothing scrolls at the four sizes.
+- **Conclusion step on phones = the reply sheet over the road.** Pak Bima's pixel face and his question head the sheet, five numbered rows, "Pilih 1 kesimpulan" -> "Sampaikan ke Pak Bima", a "Tandamu" tab that flips to the player's marks with the "Periksa lagi Rambu n" chips, activity head as one 44 px row. The content behind the sheet cannot scroll, so the jump cannot happen.
+
+  | Size | Sheet height | Road visible above | List scrolls? |
+  | --- | --- | --- | --- |
+  | 360x640 | 492 | 43 px | no |
+  | 390x645 | 459 | 81 | no |
+  | 360x740, 390x844 | not re-measured after the last spacing change (509 and 471 before it) | more than 100 | no |
+
+  To fit five rows at 360x640 I tightened this sheet by about 16 px against the chat sheet (no grab handle, gaps 4, top padding 4).
+- Desktop keeps the old conclusion layout (road, marks, quote, five option cards), now with the pixel scene.
+- `RingkasRambu` (K08 result) and the `/lokasi` prototype page use the same component, so they show the pixel scene too.
+
+**3. Removed vector**
+- Deleted: `lokasi/seni/svg/jalan-empat-lajur.svg` (3,641 B), `truk-biru.svg` (2,846 B), `arsir-lajur.svg` (464 B), `arsir-lajur-biru.svg` (475 B) and their components in `Aset.tsx`; `lokKantor`, `lokMejaFoto`, `lokPool`, `lokBengkel` in `seni/auto-2/benda.ts` (41 lines). I grepped first: no other consumer.
+- Stays: `ikon-periksa.svg` and `IkonPeriksa` (still used by the `/lokasi` prototype), `ContohArsir`, `IkonCentang`, `IkonUlang`, `IkonTandai`; all `tuju.*` pictures of K05; every other `SENI_ARENA_AUTO_2` entry.
+
+**Bytes**
+- Added PNG: 13,581 B (29 files), as expected. Vite inlines files under 4 KB, so they are not separate requests: they sit as base64 inside the story CSS chunk (about 18.1 KB of text there). No extra image requests on K04 / K08.
+- Removed: 7,426 B of SVG source plus the four generator functions.
+- This build: story CSS chunk 129,866 B, story JS chunk 157,610 B. I did not build the previous commit, so there is no exact before / after for the chunks.
+
+**New strings** (`i18n/kamus/ceritaHp.ts`, id / en / zh; **en and zh are my drafts**): `tandamu` "Tandamu" / "Your marks" / "你的标记"; `kembaliPilihan` "Kembali ke pilihan" / "Back to the choices" / "返回选项"; `pilihSatuKesimpulan` "Pilih 1 kesimpulan" / "Choose 1 conclusion" / "请选 1 个结论"; `kembali` "Kembali" / "Back" / "返回".
+
+**Checks on this build** (own server on :4003, now stopped; one browser at a time)
+
+| Check | Result |
+| --- | --- |
+| `npm run test:client` | 742 / 742 (741 + 1: PNG set and CSS references) |
+| `cek-layar-t018.mjs`, all Stage 2 families, Chromium + WebKit, four sizes | 160 / 160 |
+| `cek-piksel-t013.mjs` | 99 / 99 |
+| `cek-bahasa-t014.mjs` | 138 / 138 |
+
+- K04 assertions added: pixel board, five pictures exactly 80 x 60 and pixelated, pin offset (+52, -8) inside the board.
+- K08 assertions rewritten: scene 236 high, road block 278 centred, truck and keycap at their pixel anchors, post states, sign card whole, step button in the bar, marks + hatched keycaps + legend; conclusion sheet full width and inside the screen, five rows visible, at least 40 px of road above, label change without a jump, "Tandamu" flip and back, background not scrollable.
+- Not rerun this round: the chat family of `cek-gulir`, `cek-akhir`, `cek-jalan`, `cek-kaki` (their code is untouched). `tsc --noEmit` clean; production build OK; `test:e2e` not run.
+
+**Evidence:** `team/evidence/T-020/fullstack/`: `k04-peta-{awal,pilih}-{390x645,360x640}.png`, `k08-{ketuk,tandai,simpul,simpul-pilih}-{390x645,360x640}.png`, `k04-peta-1280.png`, `k08-1280.png`. I opened five (K04 chosen 360x640, K08 marking 360x640, K08 conclusion 360x640 twice, K08 at 1280); the rest were captured but not opened.
+
+**To judge / not done**
+- How the pixels look on a real phone at DPR 2 and 3 (headless screenshots look crisp; not seen on a device).
+- When a lane is marked for both signs I put sign 2's face under sign 1's (top 34); the README does not say where it goes.
+- Keycap row 1 (generic gold "chosen") is not used; marked lanes use the hatched rows as in the preview.
+- The README's 204 px minimum scene height (cropping) is not implemented; the scene is always 236.
+
+## T-020 batch 1 FIX (2026-11-16): Designer review D-182..D-189 + final strings
+
+Fullstack · NOT committed. Same build and same check run as batch 2 below.
+
+| Item | What changed | Measured |
+| --- | --- | --- |
+| D-182 | In the phone shell on screens under 700 px high the road scene is 204 px: 32 px cropped from the top, arrows at top 6, keycaps 36 px above the bottom, truck / ring / posts move up with it (post 1 stops at top 4) | legend with a mark on sign 2 (three lines) ends 15 px above the bar at 360x640 and 20 px at 390x645; nothing scrolls |
+| D-183 | "Tandamu" tab raised 8 px (34 px above the sheet) | tab no longer overlaps the question (asserted) |
+| D-184 | "Tandamu" side uses the 14 x 14 pixel swatches for both signs | asserted 14 x 14 PNG |
+| D-185 | Truck top 12 in the conclusion view | 29 px of cab above the sheet at 360x640, 72 px at 390x645 |
+| D-186 | Map tiles at the README positions, measured from the board's outer edge | picture x 14 / 14 from the right, top row y 10; bottom-row tiles end 8 px above the board edge as in the README (their pictures end 21 px above it, the plate hangs below) |
+| D-187 | Label plate padding 5 px | "Kantor Raksa" on one line |
+| D-188 | Sign faces drawn above both hatches | not measured, z-order only |
+| D-189 | Pin ring drawn above the portrait; portrait has no border inside the ring | not measured |
+
+- Final strings applied: `kembaliPilihan` en is now "Back to choices"; the other three were already as decided.
+- Sheet numbers after the fixes: 492 px with 43 px of road at 360x640; 454 px with 86 px at 390x645.
+- New assertions in `cek-layar-t018.mjs`: scene 204 / 236 by screen height, legend fully visible at every marking step, tab clear of the question, cab at least 20 px, swatches, README tile anchors, one-line first labels.
+- Not done: I did not zoom into D-188 / D-189 at DPR 2 or 3; they need the Designer's eye.
+
+## T-020 batch 2 (2026-11-16): planner board (K07), witness board (K09), compare papers (K10)
+
+Fullstack · NOT committed. Board: T-020 note "batch 2 integrated".
+
+**Assets.** The 38 approved PNGs go to `client/src/cerita/seni/aktivitas/{papan,saksi,banding}/`, used only from `piksel.css`, never scaled, `image-rendering: pixelated`. Frames ending `-9i` are CSS `border-image` with `repeat`.
+- **One deviation:** `saksi/kartu-9i.png` and `saksi/tombol-9i.png` are atlases, and `border-image` cannot address one cell of an atlas. `tools/piksel/potong-atlas-t020.mjs` cuts them into six single-cell files (same palette and bit depth, pixels untouched): `kartu-{biasa,tempel,bayangan,pilih}-9i.png`, `tombol-{biasa,tekan}-9i.png`. The two atlas files are not shipped in the client. The Designer may prefer to deliver these as separate files.
+
+**1. K07 Rencana pemeriksaan** (`RencanaPeriksa.tsx`)
+- Strip: magnifier on the inspection-card frame + the instruction; after a choice it shows the chosen answer, "Pemeriksaan kejadian" and its meaning. Fixed 76 px, so the board never moves.
+- Cork board with the wooden frame: plates "Sekarang" / "Sesudah hitungan", yellow job card with the clock and "Sedang berjalan", sticky note with the case note, two dashed slots with the "+" key. Tap a slot: the card is pinned there (gold frame, pushpin, small magnifier).
+- Three chips with icons under "Atau tidak lewat papan:". All five answers are visible at once; "Lihat 3 pilihan lainnya" is gone.
+- English at 360x640: the label "Or skip the board:" is hidden from sight (still read by screen readers), as documented by the Designer. Checked: it then fits exactly.
+
+**2. K09 Kartu saksi** (`PapanSaksi.tsx`)
+- Cork board "Rencana wawancara" with five slots and a count box; five portrait cards in one row (normal / selected and lifted / ghost when on the board / grey "Tidak perlu" with the "–" badge, which is also the undo key); the small-car driver is the car card with the "?" badge.
+- Action strip: name and role, then the keys "Wawancarai" and "Tidak perlu" with their meanings (pressed state when chosen; tap again = undo).
+- After a mark the next unmarked card is selected, so the strip stays and nothing jumps. Bar: "Tandai N kartu lagi." -> "Kirim daftar ke Pak Bima" (keys already existed in id / en / zh).
+- Head: the script's question "Perlu dimintai keterangan?" plus the instruction line (it was "Kontak · ketuk untuk melihat").
+
+**3. K10 Bandingkan keterangan** (`ArenaBandingkan.tsx`)
+- Two papers with blue / brown header bands, three rows with clock / face / pencil icons, highlight bar on the current row in both papers and the red marker between them.
+- **Row text = Lead's option C** (HTML, new keys `arena.selisih.sel.*` in id / en / zh): 20.10 | 20.15; **Wahyudi | Wahyudin** (fictional, same in all languages); ? | "kurang antisipasi" (en “failed to anticipate”, zh “预判不足”).
+- **Note text changed, as asked:** `arena.selisih.nama.catatan` no longer says the name is disguised: id "Yang pasti, namanya tertulis berbeda." / en "What is certain is that the name is written differently." / zh "可以确定的是，两处姓名写法不同。" (en / zh are my wording).
+- Sentence box with the evidence note and progress squares "n/3"; it is always as tall as the longest difference, so the stamps do not move.
+- Five rubber stamps (22 x 24 under 700 px of screen height, 44 x 48 above). Tap a stamp: its impression lands on the row, the instruction line shows that stamp's meaning, and after 0.65 s the next unstamped difference is highlighted. Tap a paper row to go back and change a stamp.
+- Bar: "Cap 3 perbedaan dulu." (`belumBedaRingkas`; en "Differences left to stamp: {n}.", zh "还需盖章 {n} 处出入。" are my drafts).
+- The list view keeps the old text layout.
+
+**"Info tugas" tab** (`Arena.tsx`, K07 / K09 / K10, phone shell only): a yellow tab on the title row opens the folded info (quote, story, facts) at the top of the scroller. New key `infoTugas`: "Info tugas" / "Task info" / "任务信息" (en / zh drafts). On these three screens the "Gunakan tampilan daftar" link and the "pilihan bisa diubah" note are now inside that opened panel, not under the board.
+
+**4. Removed vector**
+- `SENI_ARENA_AUTO_2`: `baki.ya`, `baki.tidakperlu` deleted; `jalur.telepon / jelas / percaya`, `saksi.mobilkecil`, `cap.*` are now pixel entries.
+- `seni/auto-2/benda.ts`: 11 generators deleted (`ponselMeja`, `mapJelas`, `lencanaPercaya`, `isiMobilKecil`, `stempelAksi`, `simbolSama / Ulang / Catat / Abaikan`, `ikonSilang`, `ikonBicara`), 26,128 -> 21,950 B. Grepped first: no other consumer.
+- **Stays:** `kartu.periksa` (SVG) is still used by the K11 bundle (`meja.berkas.lokasi`); `baki()`, `ikonStrip` are used by K02.
+- Old K07 / K09 phone CSS removed from `desain.css` (91 lines).
+
+**Bytes**
+| | Batch 1 build | This build |
+| --- | --- | --- |
+| Story CSS chunk | 129,866 B | 150,013 B (+20,147) |
+| Story JS chunk | 157,610 B | 162,282 B (+4,672) |
+- PNG added in the client: 6,900 B in 42 files (Designer's 6,440 B, minus the two atlases 345 B, plus their six cut cells 805 B). All inlined as base64 in the CSS chunk; no extra requests.
+- The CSS growth is those PNGs as base64 (about 9.2 KB) plus about 11 KB of new rules; I did not measure gzip sizes.
+- Removed source: 4,178 B of SVG generators, 91 lines of CSS.
+
+**Measured (id)**
+| Screen | 360x640 | 390x645 |
+| --- | --- | --- |
+| K07 board / strip / spare under the chips | 171 / 76 / 3 px | 171 / 76 / 23 px |
+| K09 board / card row / action strip / spare | 124 / 96 / 101 / 12–31 px | 124 / 82 / 101 / 31–50 px |
+| K10 papers / sentence box / stamp row / spare | 93 / 129 / 66 / 3 px | 93 / 129 / 66 / 32 px |
+- Nothing scrolls on the three screens at 360x640, 390x645, 360x740, 390x844 in Indonesian, in both engines, in every state the check walks through.
+- English and Chinese: opening state at 390x645 fits on all three (and K07 English at 360x640). **Not checked:** later states in en / zh, and K09 / K10 en / zh at 360x640.
+
+**Checks on this build** (own server on :4003, now stopped; one browser at a time)
+| Check | Result |
+| --- | --- |
+| `npm run test:client` | 742 / 742 |
+| `cek-layar-t018.mjs`, all Stage 2 families, Chromium + WebKit, four sizes | 168 / 168 |
+| `cek-piksel-t013.mjs` | 99 / 99 |
+| `cek-bahasa-t014.mjs` | 138 / 138 |
+- Tests changed: asset test covers the 42 batch 2 files and that the CSS references exactly the shipped files; text test counts 916 keys and allows the six paper cells to equal Indonesian; the K10 test now asserts the cells and the two names.
+- New case `arena-k07-rencana` (the old case of that name was really K05 and is kept as `arena-k05-rencana`); K09 and K10 assertions rewritten for the new screens.
+- Not run: chat family of `cek-gulir`, `cek-akhir`, `cek-jalan`, `cek-kaki`, `test:e2e`. `tsc --noEmit` clean.
+
+**Evidence:** `team/evidence/T-020/fullstack/batch2/`, 30 files: per screen `-awal` and the later states at 360x640 and 390x645 (id), `-awal-390x645-en` and `-zh`, `-1280`, plus `k07-rencana-awal-360x640-en`. I opened seven (K07 initial and chosen 360x640, K09 marked 360x640, K10 second stamp 360x640, K09 and K10 English, K10 at 1280).
+
+**To judge**
+- Paper rows are 22 px high, as in the README: a small touch target. The automatic move to the next difference means most players never need to tap a row.
+- K09 board is 124 px (Designer 116) and the selected card's name can take three lines at 360 ("Pengemudi mobil kecil").
+- The placed K07 card shows only "Pemeriksaan kejadian"; which slot it is in is read from the column and the strip.
+- Desktop uses the same three components at up to 560 px wide; only looked at K10 there.
+
+## T-020 batch 2 polish (2026-11-16): Designer review D-195..D-199 + final strings
+
+Fullstack · NOT committed. Same build and check run as batch 3 below.
+
+| Item | What changed | Measured |
+| --- | --- | --- |
+| D-195 | K09 action strip has one fixed height, 115 px; the name line is a fixed two-line slot | strip 115 in every state, keys do not move; 24–26 px spare at 360x640 |
+| D-196 | Card names wrap at spaces only, 11 px | "Pengemudi / mobil kecil" on two lines; card row 82 px at both sizes (was 96 at 360) |
+| D-197 | Pinned cards: 36 px portrait, name on two lines | "Petugas tol" in full |
+| D-198 | K10 paper rows 24 px; the 6 px comes from the gap above the stamps | papers 99 px; 3 px spare at 360x640 |
+| D-199 | 4 px between the glyph and "Info tugas" | |
+- Final strings applied: `belumBedaRingkas` zh "还有 {n} 处出入待盖章。"; `arena.selisih.nama.catatan` en "What is certain: the name is written differently."
+- Handoff text corrected (batch 1 FIX table, D-186 row): bottom tiles end 8 px above the board edge.
+- At 360 wide the longest card names sit 1 px from the card edge; worth a look by the Designer.
+
+## T-020 batch 3 (2026-11-16): documents (K02), K05 pictures, K11 pictures and layout, chat photo
+
+Fullstack · NOT committed. Board: T-020 note "batch 3 integrated".
+
+**Assets.** 26 PNGs, 16,452 B, copied unchanged to `client/src/cerita/seni/aktivitas/{dokumen,terusan,bundel,obrolan}/`. A document entry now has two forms: the big file at 1 : 1 and its 22 x 28 atlas cell (`SeniArena.kecil`, `<GambarSeni kecil>`) for chips, map pockets and the token on a tile.
+
+**1. K02 documents**
+- Counter scene = the shipped office stage (wall + sign + desk layer at (0, 66)), 1 : 1, cropped at y 20 and centred, **160 px high at every size**. No new file.
+- **Deviation from the brief ("picture 214, min 160"):** the art is 400 x 225 and the crop puts the counter at the bottom, so a 214 px scene would need 34 px of filler above. I kept 160 everywhere; the freed space stays empty below the trays.
+- Document object 1 : 1 at left 30, 10 px above the scene's bottom edge; name plate at left 110 / right 12 / bottom 26; "n/8" plate with eight squares in the picture's top left.
+- One fixed 48 px row between picture and trays: the instruction, then (after a placement) the feedback with Batalkan / Ubah. The trays never move.
+- Trays: atlas cell 68 x 40 (empty / with documents / full by count 0 / 1–2 / 3+), name 14 / 17, meaning 12 / 15 now visible, count badge 22 x 22 at the top right. **The badge is the "Isi (n)" button**; the separate row of three "Isi" buttons and the folded "Arti tiap baki" are gone.
+- "Pesan & info tugas" and the list-view link are below the trays as before (the scroller still has 66 px below the fold at 360x640, 31 px at 390x645, 0 at the two taller sizes).
+
+**2. K05 "Bengkel penuh"** (D-167): the five `tuju.*` pictures are 80 x 60 pixel tiles on the K04 board with the K04 frames and README anchors. The photo stack is the token: 60 x 48 in the strip, the 22 x 28 thumbnail on the chosen tile at picture (+62, -10), no ring. Context is behind "Info tugas"; the instruction line is pinned; the two strips share one height (80 px) so the board does not change size on a tap. Board 221 / 250 / 300 / 300 px at the four sizes, nothing scrolls.
+
+**3. K11 "Bundel pengajuan"** (D-166, Designer's no-scroll layout applied in the phone shell)
+- Step tabs 40 px (current step gold); "Info tugas" tab in the head.
+- Step 1: open folder 120 x 64 with "Map pengajuan" and the count; folder board with seven pockets in 4 + 3 (46 px: number, 22 x 28 thumbnail, ✓ or –); strip for the tapped pocket (72 px, red edge when not available). "Tentukan langkah" is now the bar button.
+- Step 2: pinned instruction "Pilih tindakan untuk berkas ini."; tied bundle + the "6 dari 7" reminder; three action cards with the 48 x 40 pictures. "Kembali: periksa berkas" is replaced by a tap on tab 1.
+- Step 3: pinned "Pilih satu kabar." (new key `pilihSatuKabar`: "Pilih satu kabar." / "Choose one message." / "请选一条消息。", en / zh my drafts); the chosen action as a plan row with its picture; three message rows. The "Pratinjau — belum dikirim" figure is kept for screen readers only in the shell.
+- Pocket 7 shows the "still being processed" police letter, not the issued one.
+- Spare under the content, id: 27–28 px at 360x640, 33–44 px at 390x645, in all three steps and with the choices made. Nothing scrolls at the four sizes.
+- Not built from the mock: the tender note is one line under the strip on every pocket (the mock puts it in pocket 4's strip only); the strip does not list the contents of each group.
+
+**4. Chat photo:** `foto.truk` is the 240 x 150 pixel photo at exactly that size with a 2 px frame (measured 244 x 154 with the frame), `image-rendering: pixelated`. The 2 : 1 version for wide screens is not implemented.
+
+**5. Removed vector**
+- `seni/auto-2/benda.ts`: 27 generators deleted (all document, tray, K05, K11 and helper drawings), 21,949 -> 9,512 B. `fotoTruk()` deleted from `arena.ts`. Grepped first: no other consumer.
+- **Stays:** `kartu.periksa`, `meja.kayu / map / mapBuka / kontak` (desk prototype). The desk prototype now shows the document entries as pixel pictures at 1 : 1; I did not open it.
+
+**Bytes, whole T-020 programme**
+| | Before T-020 (HEAD) | Now |
+| --- | --- | --- |
+| Activity PNG in the client | 0 | **36,933 B, 97 files** (batch 1 13,581 · batch 2 6,900 · batch 3 16,452) |
+| `benda.ts` (SVG generators) | 28,364 B | 9,512 B (−18,852) |
+| Road SVG files | 7,426 B | 0 |
+| Story CSS chunk | not measured | 178,553 B (batch 1: 129,866 · batch 2: 150,013) |
+| Story JS chunk | not measured | 163,810 B (batch 1: 157,610 · batch 2: 162,282) |
+- PNG: +36.9 KB against the expected +36.5 KB (the 0.46 KB difference is the six cut atlas cells of batch 2). Removed vector source: about 26.3 KB.
+- **400 KB gate:** I have no script for the Designer's "about 168 KB" Episode 2 figure and did not reproduce it. On that basis the episode is at about 205 KB (168 + 36.9), before subtracting the removed vector. The shipped Episode 2 room art alone (`seni/piksel/ep2-*`, 11 files) is 85.6 KB.
+- All PNGs are inlined as base64 in the story CSS chunk (no extra requests); that is why the CSS chunk grew by about 48.7 KB since batch 1. gzip sizes not measured.
+
+**Checks on this build** (own server on :4003, now stopped; one browser at a time)
+| Check | Result |
+| --- | --- |
+| `npm run test:client` | 742 / 742 |
+| `cek-layar-t018.mjs`, all families, Chromium + WebKit, four sizes | 176 / 176 |
+| `cek-piksel-t013.mjs` | 99 / 99 (after a tool fix, below) |
+| `cek-bahasa-t014.mjs` | 138 / 138 (second run) |
+- The 176 run was before four last small fixes (K02 hidden counter text, K02 badge touch area, K11 focus outline, K02 scene capped at 400 px on desktop). After them I reran K02 at the four sizes on both engines (8 / 8), unit tests, pixel and language checks, but not the other layout cases.
+- **Language check, first run 132 / 138:** K02 in en / zh failed its clipping test because of my hidden counter text and the badge's touch area sticking out 11 px. Both fixed.
+- **Pixel check, first two runs 97 / 99:** the two idle-animation cases failed because headless Chrome on this PC reported `prefers-reduced-motion: reduce` (Windows setting tonight), so nothing animates. With motion set to normal the characters blink and breathe. I changed `tools/cek-gerak-t016.mjs` to set "no-preference" itself for the normal case. No game code was involved.
+- New / changed cases in `cek-layar`: K02 (document 1 : 1 at its anchor, tray atlas cells, badge position, trays do not move), K05 rewritten, K11 new (three steps, no overflow, bar labels, picture sizes).
+- Not run: chat family of `cek-gulir`, `cek-akhir`, `cek-jalan`, `cek-kaki`, `test:e2e`. e2e selectors I know I changed: `[data-tahap-lanjut]` (now the bar button), the "Isi (n)" text (now a number with an aria-label), "Lihat 3 pilihan lainnya" (gone since batch 2).
+
+**Evidence:** `team/evidence/T-020/fullstack/batch3/`, 30 files: K02 `awal` / `taruh`, K05 `awal` / `pilih`, K11 six states, each at 360x640 and 390x645 (id); `-awal-390x645-en` / `-zh` for the three; `-1280` for the three; `obrolan-foto-truk-390x645`. I opened six (K02 after a placement 360x640, K11 pocket 7 and step 2 at 360x640, K05 chosen 360x640, the chat photo, K02 at 1280 before the width cap).
+
+**To judge / not verified**
+- en / zh: only the opening state at 390x645 was checked for fit (K02 English has 29 px below the fold there, which is the info row, not the trays).
+- K02 at 1280 after the 400 px cap, K05 and K11 at 1280: captured, not opened.
+- Real phone, DPR 3 look of the 22 x 28 thumbnails.
+
+## T-020 batch 3 FIX (2026-11-16): Designer review D-204..D-209 + 2 : 1 chat photo
+
+Fullstack · NOT committed. Same build and check run as T-021 below.
+
+| Item | What changed | Measured / asserted |
+| --- | --- | --- |
+| D-204 | The tray's "Isi" panel opens in place of the counter scene and the 48 px row (214 px), not under the trays | panel top = scene top, 214 px high, fully inside the window at the four sizes |
+| D-205 | Pixel board height is rounded down to a whole CSS px and the centre tile gets a whole-px top (K04 and K05, same code) | 360x640: K04 board 202, tile top 56; K05 board 221, tile top 73. Asserted as integers at all four sizes; I did not compare device pixels at DPR 3 |
+| D-206 | Bar labels: "Konfirmasi & kirim kabar" / "Confirm & send the news"; "Konfirmasi, tanpa kabar" / "Confirm, no news yet"; Chinese unchanged | one line asserted for the first (id) |
+| D-207 | Tender note shows with pocket 4 only | not asserted |
+| D-208 | End summary uses the tray cell by count (0 / 1–2 / 3+) | asserted |
+| D-209 | The office sign layer is left out of the K02 counter scene | asserted |
+| Chat photo | On screens 1024 px and wider the photo is exactly 2 : 1 (480 x 300) | not opened at that width |
+- Not addressed: the end summary still scrolls 17 px at 360x640 (noted under D-208).
+- **B-02 (QA T-021; fixed 2026-11-17):** the K02 end summary ("Periksa susunanmu") now fits at 360x640 without scrolling: 0 px in Chromium and WebKit (was 17 / 21), with 15 / 11 px to spare in id and en (zh 36 / 32). Spacing only, and only on locked phone screens under 700 px high (last block of `hp/desain.css`): tray rows 52 px instead of 56, gaps of 6 px instead of 8 inside the summary, and 8 px instead of 12 to 16 between the summary, "Pesan & info tugas" and the list-view link; screens of 700 px and taller are unchanged. With a tray opened, its document list scrolls in the one activity scroller and the page and send bar stay put (D-133). `cek-layar` K02 now fails when the closed summary scrolls (on the previous build: FAIL, 17 px Chromium and 21 px WebKit), also checks the opened tray with all 8 documents in it, and captures `team/evidence/T-020/fullstack/batch3/k02-ringkas-360x640.png` (I looked at it). Activities family 72 / 72 on Chromium + WebKit at four sizes; `test:client` 746 / 746. Not covered: in the list view this summary still scrolls about 60 px at 360x640 (extra hint card). Build: made in a side folder and copied into `client/dist` at 03:22 so the folder was never empty for QA on 4001; story CSS chunk 218,214 B (+432). Not committed.
+- **Tiny fix 2 (2026-11-17): K02 list view summary + English plural.** (1) List view: the B-02 spacing was already active there; the 56 / 60 px that still scrolled at 360x640 (Chromium / WebKit) came from the key-fact card that only the list view shows ("Kata Pak Hendra: surat polisi masih diurus...", 60 px). On locked screens under 700 px high that card now gives way while the K02 summary is shown (the same fact is in "Pesan & info tugas": Pak Hendra's message and the story line; the card is back as soon as a document is changed) and the summary-to-note gap is 6 px as in the picture view: 0 px scroll in both engines, 15 / 11 px to spare (id, en; zh 36 / 32); screens of 700 px and taller are unchanged. Count badge: a fixed 30 x 30 circle in both views, and list rows use three columns (name | count | arrow), so the badge no longer stretches (it was 146 px wide). (2) Total line: new optional arena text `satuanHitung` = the unit as written after a number (English "document|documents" and "witness|witnesses", singular only for a total of 1; Chinese with its measure word, "份文件" and "位证人"; Indonesian unchanged), so English reads "8 of 8 documents placed." (K02) and "5 of 5 witnesses placed." (K09 list view), and the Chinese K09 line reads "已放置 5/5 位证人。" instead of "份证人"; 1,019 text keys. `cek-layar` K02 now also switches to the list view at the summary and fails on any scroll or on a badge that is not 30 x 30 in the picture view's place (previous build: FAIL, 56 px Chromium / 60 px WebKit, badge 146 px); capture `team/evidence/T-020/fullstack/batch3/k02-daftar-360x640.png` (I looked at it). Activities family 72 / 72 on Chromium + WebKit at four sizes; `test:client` 747 / 747 (one new test for the total line in id, en, zh). Left: the English list view summary at 360x740 still scrolls 14 px (its fact card is three lines; outside the under-700 rule, not changed by this). Build: made in a side folder and copied into `client/dist` at 03:51; the previous chunk set stayed beside it until 04:03 (QA's "two builds present" note) and is now removed; story chunks CSS 218,563 B, JS 188,943 B. Not committed.
+- **`tools/e2e-browser.mjs`: run once, alone, low priority, against this build: 0 failures, 0 console / HTTP problems, exit 0.** It tests the legacy event quiz, not Episode 2, so none of the three selectors I changed in batch 3 appear in it.
+
+## T-021 (2026-11-16): cutscene from the kantor stage into the WhatsApp chat and back (POV variant)
+
+Fullstack · NOT committed. Board: T-021 -> review.
+
+**Triggers: 2** (`Episode.serahTelepon` in `episode/auto-2/episode.ts`, as decided in D-169 / D-170)
+- Forward: `buka` -> `k01` (Part 1).
+- Back: from `k15` / `k15-a..e` to `akhir-puas` / `akhir-catatan` / `akhir-kurang` (Part 4).
+- Every other chat hand-over is a plain cut as before. If Miss Raksa is not on the stage at a trigger, it also falls back to the cut.
+
+**What plays**
+| | Timeline |
+| --- | --- |
+| Forward, 1,000 ms | 0: arm cell "lifting" + notification bubble · 175: "reading" cell, camera 2x towards the phone · 350: POV picture replaces the stage picture 1 : 1 · then whole steps 2, 3, 4 and "fill" (4.3x at 360 wide, 4.7x at 390), the screen covers the box by about 720–750 ms · 800: the chat is mounted, a chat-green cover fades for 200 ms and the chat settles 8 px |
+| Back, 700 ms | the same frames backwards: POV from "fill" down to 1 by 300 ms · "reading" cell · "lifting" cell at 425 · arms gone at 550, camera back by 700 |
+| Short, 300 ms | arm up, cut, 100 ms fade. Used after the full version has played in the same Part in this browser session |
+- Tap anywhere during the move: straight to the end state.
+- Reduced motion (and `?gerak=ikut` with the system asking for it): plain cut, no frame at all.
+- With only two triggers, each in its own Part, the short version cannot occur in a normal playthrough today; it is there for later triggers. Not exercised by the check.
+
+**How it is built**
+- `ui/latar/piksel/teleponTangan.ts`: a small store; `PanggungPiksel` draws the arm cell, the phone back and the bubble on the stage canvas after her body and before the counter layer, at the README offsets (frame (2, 54), (26, 56 / 69), (50, 18)). The stage publishes the phone-screen centre so the camera can aim at it.
+- `hp/transisiTelepon.tsx` + `.css`: the timeline and the POV layer. The layer is `position: fixed` exactly over the visible stage box (it stops at the dialogue card), so the stage box never changes size and nothing is added to the page.
+- `PemainHP` is now a thin wrapper: during the first 800 ms of the forward move the inner player keeps drawing the old stage state with input frozen.
+- Camera "in on her" is a 2x CSS scale of the stage canvas about the phone screen (whole factor, pixels stay square), not a move of the stage camera itself.
+- The lit-screen files (`layar-menyala*.png`) and the 336 crop of the POV are not shipped: the POV variant does not need them, and the 366 picture is simply centred in the narrower box.
+
+**Bytes**
+- Art in the client: 4,317 B, 4 files (`pov-366x229` 3,489 · `lengan-dua` 571 · `gelembung-notif` 150 · `punggung-telepon` 107).
+- Story JS chunk 163,810 -> 175,054 B (+11.2 KB: code plus the four PNGs inlined); story CSS chunk 178,553 -> 180,316 B (this also contains the batch 3 fixes).
+
+**Checks on this build** (own server on :4003, now stopped; one browser at a time)
+| Check | Result |
+| --- | --- |
+| `tools/cek-telepon-t021.mjs` (new) | 10 / 10 |
+| `npm run test:client` | 742 / 742, plus 3 new tests in `hp/transisiTelepon.test.ts` (run on their own: 3 / 3) |
+| `cek-layar-t018.mjs`, all families, both engines, four sizes | 176 / 176 |
+| `cek-piksel-t013.mjs` | 99 / 99 |
+| `cek-bahasa-t014.mjs` | 138 / 138 |
+- `cek-telepon` at 390x844 and 360x740, Chromium with motion forced to normal: an in-page recorder logs every frame (about 31 ms apart). Measured, 390x844 / 360x740: reading cell at 195 / 209 ms; POV from 358 / 371 ms; screen covers the box at 749 / 727 ms; chat mounted at 816 / 825 ms; layer gone at 1,043 / 1,020 ms; back finished at 709 / 711 ms. Page scroll 0 and no extra page height or width in any frame; stage box height constant. Plus reduced motion = cut (both directions) and tap = skip.
+- The "back" case starts from the `akhir-puas` state stepped back one line into the chat; the other two endings are covered by the unit test of the list only.
+- **Layout check, first run 168 / 176:** the eight failures were the opening scene on WebKit. The check went on measuring the old stage during the new 800 ms hold; it now stops when the view changes. Chromium did not show it because headless Chrome on this PC reports reduced motion tonight, so the layout, pixel and language checks ran the Chromium side with the cut, not the cutscene.
+- The three new unit tests were not in the suite at first: `test:client` lists its files, so I added the file to `package.json`. The 742 figure is from before that; the full suite was not rerun after the one-line script change.
+- Not run: chat family of `cek-gulir`, `cek-akhir`, `cek-jalan`, `cek-kaki`.
+
+**Evidence:** `team/evidence/T-021/fullstack/`: six captures per direction per size (`maju-*`, `balik-*`) and `hasil.json`. A capture takes about 100 ms, so each shows the frame roughly 100 ms after the time in its name. I opened two (forward 390x844, first and third).
+
+**To judge / not verified**
+- Feel of the timing and of the 2x camera step; nobody has watched it at full speed on a phone.
+- In the first build I looked at, the POV layer covered the top edge of the dialogue card; I then clipped it at the card. I did not open a capture after that change.
+- The back move on the two other endings, WebKit, and sizes other than the two in the brief.
+- Sound: nothing is played for the move.
+
+## T-021 FIX (2026-11-17): Designer review D-210..D-214 + motion-independent checks
+
+Fullstack · NOT committed. Same build as T-022 below.
+
+| Item | What changed | Measured / asserted |
+| --- | --- | --- |
+| D-210 | The camera state is no longer reset at every frame change; it holds across the whole move | back move: camera value changes once (2x -> 1x), in all three endings |
+| D-211 | Camera = one hard step to 2x, no transition | only 1 and 2 ever measured |
+| D-212 | The POV starts at the smallest whole scale that covers the box | every POV frame covers the box (asserted); forward starts at 2x on phones |
+| D-213 | Whole-number POV scales only, one step per whole number | phones: 2, 3, 4, 5 forward and 5, 4, 3, 2, 1 back. 1280 not run |
+| D-214 | The green cover is the full stage box | asserted against the stage box height |
+- `cek-telepon-t021.mjs`: **14 / 14**. It now runs the back move once per ending (`akhir-puas` at both sizes, `akhir-catatan` and `akhir-kurang` at 390x844), with six captures each, and asserts the five items above. Captures: `team/evidence/T-021/fullstack/` (36 PNG + `hasil.json`; the old ones were replaced). I did not open the new captures.
+- Timing after the fixes, 390x844 / 360x740: reading cell 196 / 185 ms, POV from 361 / 367, screen covers the box at 708 / 708, chat at 806 / 816, done at 1,017 / 1,015; back done at 703–721.
+- **Motion-independent checks (Lead's addendum):** `cek-jalan-t017.mjs` (its page helper is also what `cek-akhir-t019.mjs` uses) and `cek-kaki-t017.mjs` now set `prefers-reduced-motion: no-preference` themselves, like `cek-gerak-t016` / `cek-piksel` and `cek-telepon`. Run once each on this PC, where Chrome reports reduced motion: cek-akhir 45 / 45, cek-jalan 8 / 8, cek-kaki 18 / 18.
+- `cek-layar`, `cek-gulir` and `cek-bahasa` still follow the PC's setting on Chromium (they measure layout, not motion).
+
+## T-022 (2026-11-17): new activity "Periksa SIM Pak Darto"
+
+Fullstack · NOT committed. Board: T-022 -> review.
+
+**Where it sits.** New node `ksim` after K09 (`k09` -> `ksim` -> `k10`), in the interview room with Pak Bima and Pak Darto, two intro lines, then the activity. It always starts at the desk.
+- **It is not a numbered decision point:** the episode keeps its 15. Pak Darto's licence is genuine, so there is no story branch and no change of trust.
+- Scoring as decided: no wrong tap = the activity's full mark and Pak Bima's line `ksim-a`; one or more wrong taps = `ksim-b` (he repeats the order of the steps). Nothing else is lost.
+
+**The game** (`hp/arena/ArenaSim.tsx`, `seni/aktivitas/sim.css`; new arena pattern `sim`)
+| Step | Player does | Wrong taps answered by Pak Bima | Stamp |
+| --- | --- | --- | --- |
+| 1 Desk | taps the wallet; Pak Darto hands the card over | the photocopy | ASLI |
+| 2 Card | taps the class box (magnifier), then the truck tag; "Balik" flips the card | the photo; name and number | COCOK |
+| 3a Places | taps Satpas SIM | Kantor Raksa; Bengkel rekanan | |
+| 3b Counter | taps the NIK line on the KTP; the terminal types, then "data found"; the power of attorney lies there | name line; address line | SATPAS |
+| 4 Print-out | drags the card onto it, or taps the card or the print-out; three rows tick one by one | | SESUAI |
+| End | clipboard with four stamps, "Cerita Pak Bima dari kasus lain" with the edited print under the glass, one line of feedback | | |
+- Clipboard with four stamp places under the scene, Pak Bima's speech box (amber after a wrong tap), "Kenapa?" note on every scene, bar label per step.
+- Every target is a named button; the drag has a tap and a keyboard equivalent (Enter / Space on the card). Under reduced motion the ticks and the terminal change at once.
+- Tapping the truck tag before the class box is not counted as wrong: Pak Bima says to read the class first (new line, my wording).
+- The article is not named; the card says "pengecualian polis". Validity is on the drawn card only.
+- No list view for this activity (the link is hidden); nothing of it is saved mid-way, so leaving and coming back restarts at the desk.
+
+**Summary note.** Two places: the line under the result scene ("Selesai tanpa ketukan keliru" / "Selesai dengan arahan Pak Bima") and a note in the player's Catatan (`catatan.simBersih` / `catatan.simRagu`, one sentence). **I did not add a line to the end screen's decision review**, because that review lists the 15 numbered points; say if it should appear there too.
+
+**Texts.** 101 new keys in `teks.id / en / zh` (Indonesian from the concept; **English and Chinese are my drafts for the Designer**). Key count test updated (916 -> 1,017).
+
+**Art.** 37 of the 39 PNGs shipped, 22,850 B, in `seni/aktivitas/sim/`; `sim-palsu-kecil` and `potret-petugas` are not used by any screen and are not shipped. Pak Darto at the desk is drawn from his existing atlas; the wall is the existing interview-room art.
+
+**Bytes**
+| | Before T-022 | Now |
+| --- | --- | --- |
+| Activity PNG in the client | 36,933 B, 97 files | **59,783 B, 134 files** (+22,850) |
+| Story CSS chunk | 180,316 B | 217,204 B (+36.9 KB: the PNGs inlined as base64, about 30.5 KB, plus rules) |
+| Story JS chunk | 175,054 B | 187,742 B (+12.7 KB) |
+- Expected about +25 KB of art; actual +22.9 KB. On the Designer's 168 KB basis (not reproduced by me) Episode 2 is at about 232 KB of the 400 KB gate, counting T-020, T-021 and T-022 art.
+
+**Checks on this build** (own server on :4003, now stopped; one browser at a time)
+| Check | Result |
+| --- | --- |
+| `npm run test:client` | 746 / 746 |
+| `cek-layar-t018.mjs`, all families, both engines, four sizes | 184 / 184 before the T-021 fixes; stage + ending families rerun after them: 112 / 112 |
+| `cek-piksel-t013.mjs` | 99 / 99 (before the T-021 fixes) |
+| `cek-bahasa-t014.mjs` | 138 / 138 (before the T-021 fixes) |
+| `cek-telepon-t021.mjs` | 14 / 14 |
+| `cek-akhir` / `cek-jalan` / `cek-kaki` | 45 / 8 / 18, all pass |
+- New case `arena-ksim` in `cek-layar`: 19 states (the 16 mock states, the wrong tap on the card, and both open notes). In every state: nothing scrolls, scene 236, clipboard 48 (62 at the end), instruction one 20 px line, bar label one line, sprites unscaled, targets inside the scene; plus the flow (wrong tap = amber + count, right tap = stamp, pointer drag, return to the story at `ksim-b`).
+- Smallest spare under the content: 36 px at 360x640, 41 at 390x645, 136 at 360x740, 240 at 390x844; same on WebKit.
+- Unit tests: several play-through helpers and the desk prototype's jump list needed a `ksim` answer; the 400 random playthroughs still all finish.
+- Not run: chat family of `cek-gulir`, `test:e2e`. `cek-bahasa` does not open this activity.
+
+**Evidence:** `team/evidence/T-022/fullstack/`: the 19 states at 360x640 and 390x645 (id), opening and magnifier states at 390x645 in en and zh, `ksim-1280.png`. I opened four (opening, magnifier and print-out at 360x640; magnifier in English).
+
+**To judge / not verified**
+- en / zh: only two states each were checked for fit; the other 17 were not.
+- The no-wrong-tap path through the browser (the check always makes four wrong taps; `ksim-a` is covered by unit tests only).
+- Desktop at 1280: captured, not opened; the game is capped at 366 px wide there.
+- Existing saved games at or after K10 are unaffected; a save sitting in K09's result will meet the new activity next.
+- Sound: existing tap / confirm / paper sounds are reused; nothing new.
+
+### T-022 Fix (2026-11-17): D-215 finger drag, D-216..D-223, final English texts, redrawn stamps
+
+Fullstack · NOT committed. Belongs to "## T-022" above. Board: note "T-022 fix done".
+
+**D-215 (blocker): fixed.** `.hp-sim .sim-kartu-seret` and everything inside it now have `touch-action: none` with more weight than `.player-ui button { touch-action: manipulation }`.
+- Verified with a real touch drag on Chromium (the touchscreen of the browser's debug protocol, so the browser applies `touch-action`): 60 px up in six steps at 360x640, 390x645, 360x740 and 390x844. The card follows the finger the full 60 px, the ghost shows, no `pointercancel`, the card drops and the three rows tick.
+- **WebKit: not a real finger.** Playwright has no touch-move input for WebKit, so there the check sends pointer events of type "touch" from script and asserts the computed `touch-action: none` on the card and its content. That covers the measured cause, not the browser's own gesture handling. A real iPhone is still unverified.
+- I did not run the drag once with the old rule to see the check fail; the Designer's review has that measurement.
+- Other draggable that is a button: the grab handle of the chat reply sheet. Its rule had the same weight as the `.player-ui button` rule, so file order decided; I added a heavier rule. Not tested with touch.
+- While at it: the card called `setPointerCapture` without a guard, which threw on WebKit for script-made pointer events; it is now guarded.
+
+| Item | Done | Note |
+| --- | --- | --- |
+| D-216 | yes | the nine final English texts applied exactly; at 360x640 both shortened instructions fit on one line (measured) |
+| D-217 | yes | 1 px dashed cream line around the photocopy and the wallet on the desk and around the three KTP rows, until the step is done |
+| D-218 | **skipped** | needs the Lead's decision (keep the wrong-tap count when the player leaves and returns, or accept) |
+| D-219 | yes | desk: the green line is around the small card; card: no green line under the magnifier |
+| D-220 | yes | clip hidden on the end screen |
+| D-221 | yes | name box 66 px; card drops at top 118, all three green boxes inside the scene (asserted) |
+| D-222 | yes | `overflow: clip` on the scene; focusing the card no longer scrolls it (asserted) |
+| D-223 | yes | at 1280 the instruction is above the scene and the 366 px column is left-aligned with the title; captured, not opened |
+| D-224 | yes | the Designer's four redrawn stamps copied in (same names, 60 x 26); set is now 22,813 B (was 22,850) |
+
+**Checks on this build** (own server on :4003, now stopped)
+| Check | Result |
+| --- | --- |
+| `npm run test:client` | 746 / 746 |
+| `cek-layar-t018.mjs`, `arena-ksim`, both engines, four sizes | 8 / 8 (first run 4 / 8: WebKit threw on the script-made pointer events, see above) |
+| `cek-bahasa-t014.mjs` | 138 / 138 |
+- New assertions in the ksim case: touch drag as above, hint lines (D-217), green boxes inside the scene (D-221), no inner scroll on focus (D-222), clip hidden at the end (D-220).
+- Not rerun: the other layout families, `cek-piksel`, `cek-telepon`, `test:e2e` (Lead runs it).
+- Story chunks now: CSS 217,457 B, JS 187,986 B.
+
+**Evidence:** `team/evidence/T-022/fix/`: the 19 states plus the mid-drag capture at 360x640 and 390x645, two English states at 360x640, `ksim-1280.png`. I opened two (mid-drag and the end screen with the new stamps, 360x640).
+- **D-225 (re-check, 2026-11-17):** on the counter step only, the hint line around the three KTP rows is now the card's dark blue `#2f4a6b` (cream had 1.20 : 1 on the light blue paper); the desk keeps cream. In the same rule I fixed a regression from D-217: a hinted target focused by keyboard showed only the 1 px hint line, not the focus ring (measured before: `1px dashed` cream; now the shell's `3px solid` ring). `test:client` 746 / 746; `arena-ksim` 8 / 8 on both engines at four sizes with new assertions for both points (run against the previous build first: 3 failures, as expected); capture `team/evidence/T-022/fix/d225.png` (390x645); the 40 state captures and the English counter capture in that folder were retaken from this build; story CSS chunk 217,596 B. **Found, not fixed (outside this brief):** in steps 1, 2 and 3b the tap targets are recreated on every re-render (`Ketuk` is a component defined inside the render in `ArenaSim.tsx`), so after a keyboard activation focus falls to the page body (measured at the counter: Enter on the name row, `document.activeElement` = `BODY`, 2 Tabs to get back in Chromium); taps and the drag show no effect in the checks; fix would be to define `Ketuk` at module level. Not committed.
+- **Keyboard focus (2026-11-17, small fix):** `Ketuk` is now a module-level component with stable keys (it was defined inside the render, so the tap targets of steps 1, 2 and 3b were recreated on every re-render and keyboard focus fell to `BODY` after each activation). After a keyboard activation focus now stays on the target (wrong tap, or the class box) or moves on: step done -> the bar button; bar button -> the new step's instruction line (tabindex -1, no ring, one Tab to the first target); "Kenapa?" -> "Tutup" -> back to "Kenapa?". Focus is moved only after a keyboard activation (trusted click with detail 0); taps, mouse and the drag are unchanged (asserted with a real mouse click). Two additions to make that safe: a held Enter no longer re-presses a button (focus may just have landed on the bar button), and in step 4 the card and the print-out stay focusable until the three ticks are done. `arena-ksim` 8 / 8 on Chromium + WebKit at four sizes with the new assertions (desk, card and counter are now played by keyboard; on the previous build they gave 12 failures, all "focus on BODY"); `test:client` 746 / 746. One-off checks, not in the suite: step 4 by keyboard (Enter on the card and on the print-out, normal and reduced motion: never `BODY`, ends on the bar button), desktop 1280 (10 / 10), Space as well as Enter. Story chunks: CSS 217,782 B, JS 188,789 B. Not committed.

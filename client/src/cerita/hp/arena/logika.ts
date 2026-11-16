@@ -30,6 +30,7 @@ export function itemArena(k: KonfigArena): string[] {
     case 'pesan': return k.benda.map((b) => b.id);
     case 'bundel': return [];
     case 'rambu': return semuaItemRambu(k);
+    case 'sim': return [k.benda];
   }
 }
 
@@ -57,6 +58,7 @@ export function sisaArena(k: KonfigArena, j: MissionAnswer): number {
       return k.benda.some((b) => p[b.id] === k.masuk) ? 0 : 1;
     }
     case 'rambu': return sisaRambu(k, j);
+    case 'sim': return petaLangkah(j, k.langkah)[k.benda] ? 0 : 1;
   }
 }
 
@@ -72,6 +74,24 @@ export function kelompokWadah(k: ArenaSusun, j: MissionAnswer): Record<string, s
   const hasil: Record<string, string[]> = Object.fromEntries(k.wadah.map((w) => [w.id, [] as string[]]));
   for (const b of k.benda) if (p[b.id] && hasil[p[b.id]!]) hasil[p[b.id]!]!.push(b.id);
   return hasil;
+}
+
+/**
+ * Bentuk hitung sebuah satuan untuk `jumlah`: teks "tunggal|jamak" (en "document|documents") memberi bentuk tunggal hanya
+ * untuk jumlah 1; teks tanpa "|" (id "dokumen", zh "份文件") sama untuk semua jumlah.
+ */
+export function bentukHitung(teks: string, jumlah: number): string {
+  const [tunggal, jamak] = teks.split('|');
+  return jamak === undefined || jumlah === 1 ? tunggal! : jamak;
+}
+
+/**
+ * Satuan untuk kalimat hitungan ringkasan susun ("{n} dari {total} dokumen sudah ditempatkan"). Bentuknya mengikuti angka yang
+ * tepat mendahului katanya (`jumlah` = total): "1 of 1 document", "8 of 8 documents". Arena tanpa `satuanHitung` = `satuan`
+ * berhuruf kecil (perilaku lama).
+ */
+export function satuanSesudahAngka(k: Pick<ArenaSusun, 'satuan' | 'satuanHitung'>, tx: (kunci: string) => string, jumlah: number): string {
+  return k.satuanHitung !== undefined ? bentukHitung(tx(k.satuanHitung), jumlah) : tx(k.satuan).toLocaleLowerCase('id');
 }
 
 /** Bagian pesan yang sedang ada di pesan (urutan tampil). */

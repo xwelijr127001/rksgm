@@ -18,6 +18,7 @@ const JAWAB: Record<string, MissionAnswer | ((k: KonfigArena) => MissionAnswer)>
   // K08 = arena rambu: tanda sama dengan tulisan rambu 1, tafsir rambu 2 bebas, kesimpulan C (alternatif tepat naskah).
   k08: { r1: { r1l3: 'tanda', r1l4: 'tanda' }, r2: { r2l1: 'tanda' }, simpul: 'c' },
   k09: { saksi: { hendra: 'ya', darto: 'ya', tol: 'ya', polisi: 'ya', mobilkecil: 'tidak' } },
+  ksim: { sim: { periksa: 'bersih' } }, // T-022: bukan titik bernomor; jalur saran = tanpa ketukan keliru
   k10: { selisih: { jam: 'catat', nama: 'catat', antisipasi: 'catat' } },
 };
 

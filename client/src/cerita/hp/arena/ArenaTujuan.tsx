@@ -45,28 +45,28 @@ export function ArenaPolaTujuan({ ep, misi, konfig, jawaban, ubah, daftar, tx, l
       ) : null}
       <KeSlot ke={SlotKepalaArena}><h3 id={idTanya} className="hp-tanya-arena">{tx(konfig.tanya)}</h3></KeSlot>
       {konfig.gaya === 'rencana' && !daftar ? (
-        <RencanaPeriksa konfig={konfig} dipilih={dipilih} tx={tx} idTanya={idTanya} onPilih={pilih} />
+        <RencanaPeriksa ep={ep} konfig={konfig} dipilih={dipilih} tx={tx} idTanya={idTanya} instruksi={misi.instruction} onPilih={pilih} />
       ) : !daftar && (konfig.gaya === 'peta' || konfig.gaya === 'teruskan') && bisaPapan(konfig.tujuan.length) ? (
-        <PapanTujuan ep={ep} tujuan={konfig.tujuan} dipilih={dipilih} token={token} tx={tx} idTanya={idTanya} onPilih={pilih} />
+        <PapanTujuan ep={ep} tujuan={konfig.tujuan} dipilih={dipilih} token={konfig.benda.tokoh ? token : <Token ep={ep} konfig={konfig} tx={tx} kecil />} tokenBenda={!konfig.benda.tokoh} tx={tx} idTanya={idTanya} onPilih={pilih} />
       ) : (
         <div className={'hp-ubin-kisi' + (konfig.gaya === 'peta' && !daftar ? ' hp-peta' : '')} role="radiogroup" aria-labelledby={idTanya} onKeyDown={panahUbin}>
           {konfig.tujuan.map((x) => <Ubin key={x.id} {...ubinProps(x)} gaya={daftar ? 'baris' : 'kotak'} />)}
         </div>
       )}
-      {/* Pilihan aktif diulang tepat di atas tombol: tidak perlu menggulir kembali untuk mengingatnya. */}
-      <p className="hp-umpan" role="status" data-kosong={tujuan ? undefined : ''}>
+      {/* Pilihan aktif diulang tepat di atas tombol: tidak perlu menggulir kembali untuk mengingatnya. K07 (papan gabus): strip di atas papan sudah memuatnya. */}
+      {konfig.gaya === 'rencana' && !daftar ? null : <p className="hp-umpan" role="status" data-kosong={tujuan ? undefined : ''}>
         {tujuan ? <span><b>{t('ceritaHp.dipilih')}</b>{selaPembicara()}{tx(tujuan.label)}</span> : null}
-      </p>
+      </p>}
       <TombolKirim label={labelKirim} siap={!!tujuan} onKirim={onKirim} alasanRingkas={tujuan ? null : t('ceritaHp.belumTujuanRingkas')} alasanBelum={tujuan ? null : t('ceritaHp.belumTujuan', { benda: namaBenda })} catatan={t('ceritaHp.pilihanBisaDiubah')} />
     </div>
   );
 }
 
 /** Benda yang dipindah: potret tokoh (surveyor) atau gambar benda (foto, kartu). */
-function Token({ ep, konfig, tx }: { ep: Episode; konfig: ArenaTujuan; tx: (k: KunciTeks) => string }) {
+function Token({ ep, konfig, tx, kecil = false }: { ep: Episode; konfig: ArenaTujuan; tx: (k: KunciTeks) => string; /** Di ubin papan: versi 22 x 28 (dokumen). */ kecil?: boolean }) {
   const b = konfig.benda;
   if (b.tokoh) return <PotretHp ep={ep} id={b.tokoh.id} ekspresi={b.tokoh.ekspresi} nama={tx(b.nama ?? b.id)} />;
-  return <GambarSeni ep={ep} id={b.seni} className="hp-token-seni" />;
+  return <GambarSeni ep={ep} id={b.seni} className="hp-token-seni" kecil={kecil} />;
 }
 
 /** Papan rencana kerja: dua slot di papan (sesudah hitungan / bersamaan) + pilihan di luar papan. */

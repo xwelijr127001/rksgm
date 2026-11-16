@@ -41,6 +41,7 @@ import { RingkasRambu } from './arena/RingkasRambu';
 import { tanggapan as tanggapanRambu } from './arena/rambu';
 import { TombolLanjut } from './bagianHp';
 import { ketukanBelumUtuh, ketukanKini, labelStatus, pandangKini } from './alur';
+import { useTransisiTelepon } from './transisiTelepon';
 import { MEJA_KASUS, mejaAktif } from './meja/bendera';
 import { akibatMeja } from './meja/logika';
 import { KUERI_CANGKANG_LAYAR, useKueri } from './cangkang';
@@ -58,7 +59,7 @@ const JEDA_AKSI_MS = 450;
 
 type Tampilan = 'obrolan' | 'adegan' | 'arena' | 'akhir';
 
-export function PemainHP({ ep, state, kendali, profil, bahasa, tx: txAsli }: {
+function PemainHPInti({ ep, state, kendali, profil, bahasa, tx: txAsli }: {
   ep: Episode;
   state: StateCerita;
   kendali: KendaliCerita;
@@ -377,4 +378,18 @@ function ingatBalasan(kunci: string, pilih: string | null): void {
 }
 function lupakanBalasan(): void {
   try { sessionStorage.removeItem(KUNCI_BALASAN); } catch { /* abaikan */ }
+}
+
+/**
+ * T-021: pembungkus tipis. Saat panggung kantor menyerahkan cerita ke obrolan (dan sebaliknya) di titik Episode.serahTelepon,
+ * pemain inti tetap digambar dengan state panggung LAMA selama 800 md pertama (aksi dibekukan; ketuk = lewati), sementara
+ * hp/transisiTelepon memutar adegan telepon. Di luar titik serah dan saat gerak dikurangi: tidak ada bedanya dengan sebelumnya.
+ */
+export function PemainHP(props: Parameters<typeof PemainHPInti>[0]) {
+  const { tampil, tahan, lapis } = useTransisiTelepon(props.ep, props.state);
+  const beku = useMemo<KendaliCerita>(() => ({ ...props.kendali, kirim: () => false, baca: () => tampil }), [props.kendali, tampil]);
+  return <>
+    <PemainHPInti {...props} state={tampil} kendali={tahan ? beku : props.kendali} />
+    {lapis}
+  </>;
 }

@@ -321,6 +321,7 @@ function periksaArena(
   switch (k.pola) {
     case 'susun': {
       teks(k.satuan, `${t}.satuan`);
+      if (k.satuanHitung !== undefined) teks(k.satuanHitung, `${t}.satuanHitung`);
       const st = langkah(k.langkah, 'assign');
       k.benda.forEach((b, i) => benda(b, `${t}.benda[${i}]`));
       k.wadah.forEach((w, i) => tujuan(w, `${t}.wadah[${i}]`));

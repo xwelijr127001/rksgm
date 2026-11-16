@@ -1,0 +1,18 @@
+/* T-021: adegan telepon (panggung kantor <-> obrolan). Lihat transisiTelepon.tsx. Semua lapisan fixed: tidak menambah tinggi halaman. */
+.tlp-lapis { position: fixed; inset: 0; z-index: 80; touch-action: none; cursor: default; }
+.tlp-kotak { position: fixed; overflow: hidden; pointer-events: none; }
+.tlp-kotak:has(.tlp-pov) { background: #8a6a45; }
+.tlp-pov { position: absolute; max-width: none; image-rendering: pixelated; will-change: transform; }
+/* Penutup hijau obrolan: memudar selama 200 md (maju) / 100 md (pendek) sesudah obrolan terpasang. */
+.tlp-tutup { position: absolute; inset: 0; background: #1f7a5a; animation: tlp-pudar .2s linear both; }
+.tlp-lapis[data-pendek] .tlp-tutup { animation-duration: .1s; }
+@keyframes tlp-pudar { from { opacity: 1; } to { opacity: 0; } }
+
+/* Kamera mendekat ke layar telepon: SATU langkah keras ke 2x (tanpa transisi, D-210 / D-211) pada kanvas panggung, berpusat di
+   layar telepon; piksel tetap persegi. Keadaannya bertahan sepanjang gerak (atribut tidak dilepas di antara bingkai). */
+.hp-vn .cer-panggung.cer-latar .cer-piksel-kanvas { transform-origin: var(--tlp-x, 50%) var(--tlp-y, 50%); }
+:root[data-telepon] .hp-vn .cer-panggung.cer-latar { overflow: hidden; }
+:root[data-telepon="dekat"] .hp-vn .cer-panggung.cer-latar .cer-piksel-kanvas { transform: scale(2); }
+/* Obrolan menetap: isi obrolan turun 8 px lalu diam. */
+:root[data-telepon="obrolan"] .hp-layar[data-tampilan="obrolan"] .hp-main { animation: tlp-menetap .2s steps(4, end) both; }
+@keyframes tlp-menetap { from { transform: translateY(-8px); } to { transform: none; } }

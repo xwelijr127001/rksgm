@@ -9,96 +9,78 @@
  * Arti tiap tujuan diturunkan dari label wadah naskah (lihat teks.id.ts "antarmuka HP"); tanpa fakta asuransi baru.
  */
 import type { MissionAnswer } from '@shared/types';
-import { rect, line } from '../../../game/art/kit';
 import {
-  AKSEN, amplopHendra, baki, bakiKomite, bundelBerkas, bundelFoto, dokFormulir, dokHitungan, dokKk, dokKtp, dokRekening, dokSim, dokSlip,
-  dokStnk, dokSuratPolisi, dokSuratPolisiAda, dokTender, kartuKontak, lembarLaporan, mapTertutup, mapTerbuka, mejaKayu, ikonBicara, ikonJam, ikonKilat, ikonSilang, ikonStrip, isiMobilKecil, kartuPemeriksaan, laciArsip,
-  lencanaPercaya, lokBengkel, lokKantor, lokMejaFoto, lokPool, mapJelas, mapPengajuan, mejaEstimator, papanLengkapi, ponselChat,
-  ponselMeja, simbolAbaikan, simbolCatat, simbolSama, simbolUlang, stempelAksi, tasPetugas, tiangPetunjuk, trukTrailer,
+  kartuKontak, mapTertutup, mapTerbuka, mejaKayu, kartuPemeriksaan,
 } from '../../seni/auto-2/benda';
 import type { IdAktivitas, KonfigArena, KunciTeks, LampiranCerita, SeniArena } from '../../tipe';
 import { lajurTertulisRambu1 } from '../../lokasi/logika';
 import { daftarNama, gabungKalimat } from '../../hp/arena/rambu';
 import { JUMLAH_LAJUR, LAJUR_TRUK } from '../../lokasi/seni/geometri';
 
-/** Pin peta & aksen netral (warna bukan pembawa arti: setiap tujuan berlabel teks). */
-const NETRAL = { tua: '#2f6b52', pucat: '#e3efe8' } as const;
-
-/** Foto truk dari Pak Hendra (lampiran obrolan K01): trailer ringsek di bahu jalan tol, rel pengaman penyok. */
-function fotoTruk(): string {
-  let tiang = '';
-  for (let x = 8; x < 240; x += 26) tiang += rect(x, 120, 3, 14, '#8f979c');
-  return `
-    ${rect(0, 0, 240, 150, '#cfe6f2')}
-    ${rect(0, 78, 240, 72, '#7b8085')}
-    ${line('M0 92 H240', '#f4f1e6', 2, 'stroke-dasharray="12 9"')}
-    ${rect(0, 116, 240, 5, '#b9c0c4')}${tiang}
-    <path d="M8 116 l14 6 10 -3 12 7 14 -5 v5 h-50z" fill="#8f979c"/>
-    <g transform="translate(24 52)">${trukTrailer({ kepala: '#d0602a', penyok: true })}</g>`;
-}
-
 const seni = (svg: string, w: number, h: number): SeniArena => ({ svg, w, h });
+const piksel = (kelas: string, w: number, h: number): SeniArena => ({ svg: '', w, h, piksel: kelas });
+/** Dokumen piksel (T-020 batch 3): berkas besar 1 : 1 + sel atlas 22 x 28 (dok-kecil.png) untuk chip, kantong map dan token. */
+const dok = (nama: string, w: number, h: number, sel: number): SeniArena => ({ svg: '', w, h, piksel: 'px-dok-' + nama, kecil: 'px-dokk px-dokk-' + sel });
 
 export const SENI_ARENA_AUTO_2: Readonly<Record<string, SeniArena>> = {
   // K02 dokumen + baki
-  'dok.formulir': seni(dokFormulir(), 104, 80),
-  'dok.stnk': seni(dokStnk(), 104, 80),
-  'dok.ktp': seni(dokKtp(), 104, 80),
-  'dok.sim': seni(dokSim(), 104, 80),
-  'dok.suratpolisi': seni(dokSuratPolisi(), 104, 80),
-  'dok.kk': seni(dokKk(), 104, 80),
-  'dok.slip': seni(dokSlip(), 104, 80),
-  'dok.rekening': seni(dokRekening(), 104, 80),
-  'baki.sekarang': seni(baki(AKSEN[0], ikonKilat), 150, 72),
-  'baki.menyusul': seni(baki(AKSEN[1], ikonJam), 150, 72),
+  'dok.formulir': dok('formulir', 64, 80, 0),
+  'dok.stnk': dok('stnk', 64, 44, 1),
+  'dok.ktp': dok('ktp', 64, 44, 2),
+  'dok.sim': dok('sim', 64, 44, 3),
+  'dok.suratpolisi': dok('suratpolisi', 64, 80, 4),
+  'dok.kk': dok('kk', 64, 48, 5),
+  'dok.slip': dok('slip', 48, 80, 6),
+  'dok.rekening': dok('rekening', 64, 80, 7),
+  'baki.sekarang': piksel('px-baki px-baki-0', 68, 40),
+  'baki.menyusul': piksel('px-baki px-baki-1', 68, 40),
   // Baki "tidak diminta" & "tidak perlu": garis datar, bukan silang (silang terbaca sebagai "salah").
-  'baki.tidak': seni(baki(AKSEN[2], ikonStrip), 150, 72),
+  'baki.tidak': piksel('px-baki px-baki-2', 68, 40),
   // K04 peta
-  'lok.kantor': seni(lokKantor(NETRAL), 132, 100),
-  'lok.foto': seni(lokMejaFoto(NETRAL), 132, 100),
-  'lok.pool': seni(lokPool(NETRAL), 132, 100),
-  'lok.bengkel': seni(lokBengkel(NETRAL, 'REKANAN', '#e7d2b4'), 132, 100),
-  'lok.langganan': seni(lokBengkel(NETRAL, 'LANGGANAN', '#d9e4ea'), 132, 100),
+  // T-020 batch 1: lima tempat = ubin PIKSEL 80 x 60 (seni/aktivitas/peta/*.png lewat kelas CSS), bukan SVG lagi.
+  'lok.kantor': piksel('px-ubin-kantor', 80, 60),
+  'lok.foto': piksel('px-ubin-meja-kantor', 80, 60),
+  'lok.pool': piksel('px-ubin-pool', 80, 60),
+  'lok.bengkel': piksel('px-ubin-bengkel-rekanan', 80, 60),
+  'lok.langganan': piksel('px-ubin-bengkel-langganan', 80, 60),
   // K05 teruskan foto
-  'foto.bundel': seni(bundelFoto(), 110, 84),
-  'tuju.mitra': seni(mejaEstimator(NETRAL), 130, 96),
-  'tuju.hendra': seni(ponselChat(NETRAL, 'H'), 110, 100),
-  'tuju.lain': seni(tiangPetunjuk(NETRAL), 110, 104),
-  'tuju.tunggu': seni(laciArsip(NETRAL), 110, 100),
-  'tuju.diam': seni(tasPetugas(NETRAL), 110, 90),
+  'foto.bundel': dok('foto-bundel', 60, 48, 12),
+  'tuju.mitra': piksel('px-ubin-mitra', 80, 60),
+  'tuju.hendra': piksel('px-ubin-hendra', 80, 60),
+  'tuju.lain': piksel('px-ubin-lain', 80, 60),
+  'tuju.tunggu': piksel('px-ubin-tunggu', 80, 60),
+  'tuju.diam': piksel('px-ubin-diam', 80, 60),
   // K07 rencana
-  'kartu.periksa': seni(kartuPemeriksaan(), 120, 80),
-  'jalur.telepon': seni(ponselMeja(NETRAL), 100, 76),
-  'jalur.jelas': seni(mapJelas(NETRAL), 100, 76),
-  'jalur.percaya': seni(lencanaPercaya(NETRAL), 100, 76),
+  'kartu.periksa': { ...seni(kartuPemeriksaan(), 120, 80), kecil: 'px-dokk-kaca' },
+  'jalur.telepon': piksel('px-ikon-telepon', 24, 24),
+  'jalur.jelas': piksel('px-ikon-lembar-cek', 24, 24),
+  'jalur.percaya': piksel('px-ikon-lencana', 24, 24),
   // K09 saksi + baki daftar
-  'saksi.mobilkecil': seni(`<g transform="translate(-10 -24)">${isiMobilKecil()}</g>`, 80, 70),
-  'baki.ya': seni(baki(AKSEN[0], ikonBicara), 150, 72),
-  'baki.tidakperlu': seni(baki(AKSEN[2], ikonStrip), 150, 72),
+  'saksi.mobilkecil': piksel('px-mobil-kecil', 48, 22),
   // K10 stempel
-  'cap.catat': seni(stempelAksi(AKSEN[0], simbolCatat), 84, 96),
-  'cap.samakan': seni(stempelAksi(AKSEN[1], simbolSama), 84, 96),
-  'cap.ulang': seni(stempelAksi(AKSEN[2], simbolUlang), 84, 96),
-  'cap.abaikan': seni(stempelAksi(AKSEN[3], simbolAbaikan), 84, 96),
-  'cap.tolak': seni(stempelAksi(AKSEN[4], ikonSilang), 84, 96),
+  'cap.catat': piksel('px-cap-0', 44, 48),
+  'cap.samakan': piksel('px-cap-1', 44, 48),
+  'cap.ulang': piksel('px-cap-2', 44, 48),
+  'cap.abaikan': piksel('px-cap-3', 44, 48),
+  'cap.tolak': piksel('px-cap-4', 44, 48),
   // K11 bundel
-  'bundel.berkas': seni(bundelBerkas(), 120, 96),
+  'bundel.berkas': piksel('px-bundel-berkas', 48, 40),
   // Map terbuka di langkah "Periksa berkas": tujuh kelompok berkas, kelompok ke-7 (surat polisi) belum tersedia.
-  'bundel.map': seni(mapPengajuan([true, true, true, true, true, true, false]), 232, 128),
-  'bundel.lengkapi': seni(papanLengkapi(), 120, 90),
-  'bundel.sekarang': seni(bakiKomite(), 120, 90),
-  'bundel.hendra': seni(amplopHendra(), 120, 90),
+  'bundel.map': piksel('px-map-pengajuan', 120, 64),
+  'bundel.lengkapi': piksel('px-aksi-lengkapi', 48, 40),
+  'bundel.sekarang': piksel('px-aksi-komite', 48, 40),
+  'bundel.hendra': piksel('px-aksi-hendra', 48, 40),
   // Meja kasus K11 (PROTOTIPE, D-68): permukaan meja, map tertutup/terbuka, kartu kontak, lembar isi map.
   'meja.kayu': seni(mejaKayu(), 360, 400),
   'meja.map': seni(mapTertutup(), 190, 140),
   'meja.mapBuka': seni(mapTerbuka(), 344, 372),
   'meja.kontak': seni(kartuKontak(), 120, 132),
-  'dok.hitungan': seni(dokHitungan(), 104, 80),
-  'dok.tender': seni(dokTender(), 104, 80),
-  'dok.laporan': seni(lembarLaporan(), 104, 80),
-  'dok.suratpolisi.ada': seni(dokSuratPolisiAda(), 104, 80),
+  'dok.hitungan': dok('hitungan', 64, 80, 8),
+  'dok.tender': dok('tender', 64, 80, 9),
+  'dok.laporan': dok('laporan', 64, 80, 10),
+  'dok.suratpolisi.ada': dok('suratpolisi-ada', 64, 80, 11),
   // Lampiran obrolan
-  'foto.truk': seni(fotoTruk(), 240, 150),
+  'foto.truk': piksel('px-foto-truk', 240, 150),
 };
 
 export const LAMPIRAN_AUTO_2: Record<string, LampiranCerita> = {
@@ -109,7 +91,7 @@ const t = (id: string) => ({ id, label: `arena.${id}`, arti: `arena.${id}.arti` 
 
 export const ARENA_AUTO_2: Record<IdAktivitas, KonfigArena> = {
   berkas: {
-    pola: 'susun', langkah: 'berkas', gaya: 'baki', tanya: 'arena.berkas.tanya', satuan: 'arena.berkas.satuan', catatan: 'arena.berkas.catatan', catatanBenda: 'suratpolisi',
+    pola: 'susun', langkah: 'berkas', gaya: 'baki', tanya: 'arena.berkas.tanya', satuan: 'arena.berkas.satuan', satuanHitung: 'arena.berkas.satuanHitung', catatan: 'arena.berkas.catatan', catatanBenda: 'suratpolisi',
     // Urutan tampil campuran (bukan dikelompokkan menurut kunci).
     benda: [
       { id: 'formulir', nama: 'arena.berkas.formulir', seni: 'dok.formulir' },
@@ -163,7 +145,7 @@ export const ARENA_AUTO_2: Record<IdAktivitas, KonfigArena> = {
     ],
   },
   saksi: {
-    pola: 'susun', langkah: 'saksi', gaya: 'papan', tanya: 'arena.saksi.tanya', satuan: 'arena.saksi.satuan', catatan: 'arena.saksi.catatan',
+    pola: 'susun', langkah: 'saksi', gaya: 'papan', tanya: 'arena.saksi.tanya', satuan: 'arena.saksi.satuan', satuanHitung: 'arena.saksi.satuanHitung', catatan: 'arena.saksi.catatan',
     benda: [
       { id: 'tol', nama: 'arena.saksi.tol', keterangan: 'arena.saksi.tol.ket', tokoh: { id: 'tol' } },
       { id: 'hendra', nama: 'arena.saksi.hendra', keterangan: 'arena.saksi.hendra.ket', tokoh: { id: 'hendra' } },
@@ -172,17 +154,19 @@ export const ARENA_AUTO_2: Record<IdAktivitas, KonfigArena> = {
       { id: 'darto', nama: 'arena.saksi.darto', keterangan: 'arena.saksi.darto.ket', tokoh: { id: 'darto' } },
     ],
     wadah: [
-      { id: 'ya', label: 'arena.saksi.wadah.ya', arti: 'arena.saksi.arti.ya', ikon: 'cek', seni: 'baki.ya' },
-      { id: 'tidak', label: 'arena.saksi.wadah.tidak', arti: 'arena.saksi.arti.tidak', ikon: 'silang', seni: 'baki.tidakperlu' },
+      { id: 'ya', label: 'arena.saksi.wadah.ya', arti: 'arena.saksi.arti.ya', ikon: 'cek' },
+      { id: 'tidak', label: 'arena.saksi.wadah.tidak', arti: 'arena.saksi.arti.tidak', ikon: 'silang' },
     ],
   },
+  // T-022: periksa SIM Pak Darto (permainan empat langkah; semua tata letak di hp/arena/ArenaSim.tsx).
+  sim: { pola: 'sim', langkah: 'sim', tanya: 'akt.sim.tanya', benda: 'periksa', bersih: 'bersih', ragu: 'ragu' },
   selisih: {
     pola: 'bandingkan', langkah: 'selisih', tanya: 'arena.selisih.tanya', fakta: { tabel: 'fakta' },
     sumber: { kiri: 'arena.selisih.kiri', kanan: 'arena.selisih.kanan' },
     selisih: [
-      { id: 'jam', label: 'arena.selisih.jam', catatan: 'arena.selisih.jam.catatan' },
-      { id: 'nama', label: 'arena.selisih.nama', catatan: 'arena.selisih.nama.catatan' },
-      { id: 'antisipasi', label: 'arena.selisih.antisipasi', catatan: 'arena.selisih.antisipasi.catatan' },
+      { id: 'jam', label: 'arena.selisih.jam', catatan: 'arena.selisih.jam.catatan', sel: { kiri: 'arena.selisih.sel.jam.kiri', kanan: 'arena.selisih.sel.jam.kanan' }, ikon: 'jam' },
+      { id: 'nama', label: 'arena.selisih.nama', catatan: 'arena.selisih.nama.catatan', sel: { kiri: 'arena.selisih.sel.nama.kiri', kanan: 'arena.selisih.sel.nama.kanan' }, ikon: 'wajah' },
+      { id: 'antisipasi', label: 'arena.selisih.antisipasi', catatan: 'arena.selisih.antisipasi.catatan', sel: { kiri: 'arena.selisih.sel.antisipasi.kiri', kanan: 'arena.selisih.sel.antisipasi.kanan' }, ikon: 'pensil' },
     ],
     perlakuan: [
       { ...t('selisih.catat'), id: 'catat', seni: 'cap.catat' },

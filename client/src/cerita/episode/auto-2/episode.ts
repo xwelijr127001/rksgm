@@ -416,8 +416,22 @@ const NODE: NodeCerita[] = [
       e: { nilai: 'tepat', delta: 6, tata: { hadir: ['tol', 'bima', 'polisi'] }, akibat: [b('k09-e.1', 'narasi')] },
     },
     akibatLain: { a2: { alt: 'a', baris: [b('k09-a.2', 'narasi')] } },
-    lanjut: 'k10',
+    lanjut: 'ksim',
   }),
+  // T-022 (owner GO 16 Nov): "Periksa SIM Pak Darto" sesudah wawancara saksi. BUKAN titik keputusan bernomor (tetap 15 titik):
+  // SIM-nya asli, jadi tidak ada cabang cerita dan tidak ada perubahan kepercayaan; yang dicatat hanya apakah pemain sempat
+  // diarahkan Pak Bima (catatan 'simRagu') atau tidak ('simBersih').
+  {
+    id: 'ksim', bab: 'b3', jenis: 'aktivitas', aktivitas: 'sim', langsung: true,
+    tata: { lokasi: 'wawancara', hadir: ['bima', 'darto'], telepon: null, objek: [] },
+    baris: [b('ksim.1', 'narasi'), b('ksim.2', 'bima')],
+    hasil: [
+      { jika: taruh('sim', 'periksa', 'ragu'), efek: { kepercayaan: 0, alasan: 'ksim.b.alasan', pasang: ['kep:ksim:b', 'sim:ragu'], catat: ['simRagu'] }, lanjut: 'ksim-b' },
+      { efek: { kepercayaan: 0, alasan: 'ksim.a.alasan', pasang: ['kep:ksim:a', 'sim:bersih'], catat: ['simBersih'] }, lanjut: 'ksim-a' },
+    ],
+  },
+  { id: 'ksim-a', bab: 'b3', jenis: 'dialog', baris: [b('ksim-a.1', 'bima')], lanjut: 'k10' },
+  { id: 'ksim-b', bab: 'b3', jenis: 'dialog', baris: [b('ksim-b.1', 'bima')], lanjut: 'k10' },
   ...titikAktivitas({
     id: 'k10', bab: 'b3', aktivitas: 'selisih',
     tata: { lokasi: 'wawancara', hadir: ['bima', 'darto'], telepon: null, objek: [] },
@@ -590,6 +604,9 @@ const istilah = (...id: string[]) => Object.fromEntries(id.map((x) => [x, { labe
 
 export const EPISODE_AUTO_2: Episode = {
   id: 'auto-2',
+  // T-021 (D-169 / D-170, keputusan Lead): adegan telepon HANYA di dua titik tempat Miss Raksa ada di panggung kantor: pembuka ->
+  // obrolan pertama (Bagian 1) dan akibat K15 -> tiga akhir (Bagian 4). Obrolan lain (pool, bengkel, tol, K11) tidak berubah.
+  serahTelepon: { tokoh: 'missRaksa', maju: [['buka', 'k01']], balik: { dari: ['k15', 'k15-a', 'k15-b', 'k15-c', 'k15-d', 'k15-e'], ke: ['akhir-puas', 'akhir-catatan', 'akhir-kurang'] } },
   versi: 1,
   produk: 'AUTO',
   judul: 'judul',
@@ -618,7 +635,7 @@ export const EPISODE_AUTO_2: Episode = {
   paham: {},
   proses: {},
   catatan: Object.fromEntries(
-    ['laporan', 'suratpolisi', 'pool', 'bengkel', 'rambu', 'lajur2', 'mobilkecil', 'selisih', 'cicilan', 'janji20', 'leasing', 'keberatan'].map((x) => [x, `catatan.${x}`]),
+    ['laporan', 'suratpolisi', 'pool', 'bengkel', 'rambu', 'lajur2', 'mobilkecil', 'simBersih', 'simRagu', 'selisih', 'cicilan', 'janji20', 'leasing', 'keberatan'].map((x) => [x, `catatan.${x}`]),
   ),
   kepercayaanAwal: 30,
   kepercayaanBatas: { min: 0, maks: 100 },

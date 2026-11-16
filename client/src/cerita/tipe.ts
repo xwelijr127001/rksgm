@@ -351,16 +351,23 @@ interface DasarArena {
 }
 
 export type KonfigArena = DasarArena & (
-  /** Benda satu per satu ke salah satu wadah (dokumen -> baki, kartu saksi -> daftar), lalu ringkasan per wadah. */
-  | { pola: 'susun'; langkah: string; satuan: KunciTeks; gaya: 'baki' | 'papan'; benda: BendaArena[]; wadah: TujuanArena[] }
+  /**
+   * Benda satu per satu ke salah satu wadah (dokumen -> baki, kartu saksi -> daftar), lalu ringkasan per wadah.
+   * `satuan` = label satuan ("Dokumen 2 dari 8"). `satuanHitung` = satuan SESUDAH angka di kalimat hitungan ringkasan ("8 dari 8
+   * dokumen sudah ditempatkan"): bahasa yang membedakan tunggal dan jamak menulis "tunggal|jamak" (en "document|documents"), zh
+   * menyertakan kata bantu bilangannya ("份文件", "位证人"), id cukup katanya ("dokumen"). Tanpa field ini: `satuan` berhuruf kecil.
+   */
+  | { pola: 'susun'; langkah: string; satuan: KunciTeks; satuanHitung?: KunciTeks; gaya: 'baki' | 'papan'; benda: BendaArena[]; wadah: TujuanArena[] }
   /** Satu benda ke satu tujuan yang terlihat: peta (penugasan), lembar teruskan (bukti), papan rencana. */
   | { pola: 'tujuan'; langkah: string; benda: BendaArena; gaya: 'peta' | 'teruskan' | 'rencana'; tujuan: TujuanArena[] }
   /** Bandingkan dua catatan: tiap perbedaan ditandai dengan satu perlakuan (stempel). */
-  | { pola: 'bandingkan'; langkah: string; sumber: { kiri: KunciTeks; kanan: KunciTeks }; selisih: { id: string; label: KunciTeks; /** Catatan bukti di bawah perbedaan: yang diketahui dan yang belum (kunci teks). */ catatan?: KunciTeks }[]; perlakuan: TujuanArena[] }
+  | { pola: 'bandingkan'; langkah: string; sumber: { kiri: KunciTeks; kanan: KunciTeks }; selisih: { id: string; label: KunciTeks; /** Catatan bukti di bawah perbedaan: yang diketahui dan yang belum (kunci teks). */ catatan?: KunciTeks; /** Isi baris ini di dua kertas (T-020: teks HTML dari tabel cerita, bukan gambar). */ sel?: { kiri: KunciTeks; kanan: KunciTeks }; /** Ikon baris di kertas (penanda netral: waktu / orang / catatan). */ ikon?: 'jam' | 'wajah' | 'pensil' }[]; perlakuan: TujuanArena[] }
   /** Periksa isi bundel (tabel), pilih tindakan atas bundel, lalu pilih kabar (gelembung pesan) untuk nasabah. */
   | { pola: 'bundel'; tindakan: { langkah: string; tanya: KunciTeks; pilihan: TujuanArena[] }; kabar: { langkah: string; tanya: KunciTeks; pilihan: TujuanArena[] }; meja?: KonfigMeja }
   /** Susun pesan: ketuk bagian untuk memasukkannya ke pesan; yang tidak dimasukkan = wadah `tidak`. */
   | { pola: 'pesan'; langkah: string; masuk: string; tidak: string; benda: BendaArena[] }
+  /** Periksa SIM (T-022): permainan empat langkah dengan tangan; jawaban = satu item ke wadah `bersih` (tanpa ketukan keliru) atau `ragu`. */
+  | { pola: 'sim'; langkah: string; benda: string; bersih: string; ragu: string }
   /** Periksa rambu di jalan (K08): ketuk rambu -> tandai lajur sendiri (satu langkah assign per rambu) -> kesimpulan (satu langkah single). */
   | { pola: 'rambu'; jumlahLajur: number; lajurTruk: number; rambu: RambuArena[]; simpul: SimpulRambu }
 );
@@ -412,7 +419,14 @@ export interface KonfigMeja {
 }
 
 /** Gambar kode untuk arena (SVG tanpa pembungkus), ukuran viewBox-nya. */
-export interface SeniArena { svg: string; w: number; h: number }
+export interface SeniArena {
+  svg: string; w: number; h: number;
+  /**
+   * (T-020) Seni PIKSEL: kelas CSS yang membawa PNG-nya sebagai latar (seni/aktivitas/piksel.css). Digambar PERSIS w x h px
+   * (1 piksel seni = 1 px CSS, tidak pernah diskalakan); `svg` dikosongkan.
+   */
+  piksel?: string; /** Versi kecil 22 x 28 (sel atlas dokumen) untuk chip, kantong map dan token di papan: kelas CSS-nya. */ kecil?: string;
+}
 
 /** Lampiran obrolan (antarmuka HP): foto/dokumen yang dikirim tokoh. */
 export interface LampiranCerita {
@@ -508,6 +522,12 @@ export interface Suasana {
 }
 
 export interface Episode {
+  /**
+   * T-021: titik serah panggung kantor <-> obrolan yang memakai adegan telepon. `tokoh` = pemeran yang memegang telepon (harus
+   * hadir di panggung, kalau tidak: potong langsung). maju = pasangan [node panggung, node obrolan]; balik = dari node obrolan mana
+   * saja di `dari` ke node panggung mana saja di `ke`.
+   */
+  serahTelepon?: { tokoh: string; maju: [string, string][]; balik: { dari: string[]; ke: string[] } };
   /** Id stabil ('auto-1'). */
   id: string;
   /** Versi konten. Naikkan bila perubahan membuat progres lama tidak cocok; sediakan `migrasi` bila bisa. */

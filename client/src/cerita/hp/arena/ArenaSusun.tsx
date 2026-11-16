@@ -6,14 +6,14 @@
  * RINGKASAN per wadah (nama tiap benda; ketuk untuk memindah), baru tombol kirim. "Ditempatkan" bukan "benar": tidak
  * ada tanda keberhasilan sebelum dikirim, dan kunci tidak pernah ditunjukkan di sini.
  */
-import { useEffect, useId, useRef, useState } from 'react';
+import { Fragment, useEffect, useId, useRef, useState } from 'react';
 import { playSfx } from '../../../audio/audio';
 import { useReducedMotion } from '../../../hooks';
 import { t } from '../../../i18n';
 import { KeSlot, SlotKepalaArena } from '../cangkang';
 import type { BendaArena, Episode, KunciTeks } from '../../tipe';
 import { GambarSeni, PotretHp, TombolKirim } from '../bagianHp';
-import { itemBerikut, kelompokWadah, lepaskan, petaLangkah, sisaArena, tetapkan, type ArenaSusun } from './logika';
+import { itemBerikut, kelompokWadah, lepaskan, petaLangkah, satuanSesudahAngka, sisaArena, tetapkan, type ArenaSusun } from './logika';
 import { PapanSaksi } from './PapanSaksi';
 import { panahUbin, type PropsPola } from './pola';
 
@@ -24,7 +24,7 @@ const catatTutorial = (): void => { try { localStorage.setItem(KUNCI_TUTORIAL, '
 /** Lama benda baru menunggu sebelum masuk sesudah penempatan (ms): cukup untuk melihat benda lama terbang. */
 const JEDA_BERIKUT = 520;
 
-export function ArenaPolaSusun({ ep, konfig, jawaban, ubah, daftar, tx, labelKirim, onKirim, onAktif }: PropsPola & { konfig: ArenaSusun }) {
+export function ArenaPolaSusun({ ep, misi, konfig, jawaban, ubah, daftar, tx, labelKirim, onKirim, onAktif }: PropsPola & { konfig: ArenaSusun }) {
   const reduced = useReducedMotion();
   const peta = petaLangkah(jawaban, konfig.langkah);
   const [aktif, setAktif] = useState<string | null>(() => itemBerikut(konfig, jawaban));
@@ -115,7 +115,7 @@ export function ArenaPolaSusun({ ep, konfig, jawaban, ubah, daftar, tx, labelKir
 
   // K09 (gaya papan, tampilan gambar): papan rencana + kartu kontak (komposisi prototipe).
   if (konfig.gaya === 'papan' && !daftar) {
-    return <PapanSaksi ep={ep} konfig={konfig} jawaban={jawaban} ubah={ubah} tx={tx} labelKirim={labelKirim} onKirim={onKirim} />;
+    return <PapanSaksi ep={ep} konfig={konfig} jawaban={jawaban} ubah={ubah} tx={tx} labelKirim={labelKirim} onKirim={onKirim} petunjuk={misi.steps.find((x) => x.id === konfig.langkah)?.hint} />;
   }
 
   return (
@@ -123,8 +123,10 @@ export function ArenaPolaSusun({ ep, konfig, jawaban, ubah, daftar, tx, labelKir
       {!ringkasan ? (
         <>
           <div className="hp-susun-fokus" ref={fokusRef}>
-            <p className="hp-progres" aria-live="polite">
-              {t('ceritaHp.progres', { satuan: tx(konfig.satuan), n: Math.min(urutan, total), total })}
+            <p className="hp-progres" aria-live="polite" data-kotak={mejaBaki ? '' : undefined}>
+              {mejaBaki ? <span className="hp-progres-kotak" aria-hidden="true">{konfig.benda.map((x, i) => <i key={x.id} data-isi={i < Math.min(urutan, total) - (benda ? 1 : 0) ? 'sudah' : i === Math.min(urutan, total) - 1 && benda ? 'kini' : undefined} />)}</span> : null}
+              <span className={mejaBaki ? 'sr-only' : 'hp-progres-teks'}>{t('ceritaHp.progres', { satuan: tx(konfig.satuan), n: Math.min(urutan, total), total })}</span>
+              {mejaBaki ? <b className="hp-progres-angka" aria-hidden="true">{Math.min(urutan, total)}/{total}</b> : null}
               {benda ? <span className="sr-only">: {namaBenda(benda)}</span> : null}
             </p>
             {mejaBaki ? null : umpanEl}
@@ -133,7 +135,8 @@ export function ArenaPolaSusun({ ep, konfig, jawaban, ubah, daftar, tx, labelKir
             </div>
           </div>
           <KeSlot ke={SlotKepalaArena}><h3 id={idTanya} className="hp-tanya-arena">{tx(konfig.tanya)}</h3></KeSlot>
-          {mejaBaki ? <p className="hp-instruksi-baki" aria-hidden={benda ? undefined : true}>{t('ceritaHp.instruksiBaki')}</p> : null}
+          {/* T-020 batch 3: SATU baris setinggi tetap di antara gambar dan baki: instruksi, atau (sesudah menaruh) umpan + Batalkan/Ubah. */}
+          {mejaBaki ? <div className="hp-baris-baki" data-umpan={umpan ? '' : undefined}>{umpanEl ?? <p className="hp-instruksi-baki" aria-hidden={benda ? undefined : true}>{t('ceritaHp.instruksiBaki')}</p>}</div> : null}
           {tutorial && benda && !mejaBaki ? (
             <div className="hp-tutorial" role="note">
               <span className="hp-tutorial-tunjuk" aria-hidden="true">
@@ -144,9 +147,9 @@ export function ArenaPolaSusun({ ep, konfig, jawaban, ubah, daftar, tx, labelKir
             </div>
           ) : null}
           <div ref={grupRef} className="hp-wadah-daftar" role="radiogroup" aria-labelledby={idTanya} onKeyDown={panahUbin}>
-            {konfig.wadah.map((w) => (
+            {konfig.wadah.map((w, iw) => (
+              <Fragment key={w.id}>
               <button
-                key={w.id}
                 ref={(el) => { wadahRef.current[w.id] = el; }}
                 type="button"
                 role="radio"
@@ -154,6 +157,7 @@ export function ArenaPolaSusun({ ep, konfig, jawaban, ubah, daftar, tx, labelKir
                 disabled={!benda}
                 className={'hp-wadah' + (benda && peta[benda.id] === w.id ? ' terpilih' : '')}
                 data-wadah={w.id}
+                data-isi={(kelompok[w.id]?.length ?? 0) >= 3 ? 2 : (kelompok[w.id]?.length ?? 0) >= 1 ? 1 : 0}
                 onClick={() => tempatkan(w.id)}
               >
                 {!daftar ? <GambarSeni ep={ep} id={w.seni} className="hp-wadah-seni" /> : null}
@@ -162,18 +166,17 @@ export function ArenaPolaSusun({ ep, konfig, jawaban, ubah, daftar, tx, labelKir
                 {mejaBaki ? <span className="hp-wadah-jumlah" aria-label={t('ceritaHp.jumlahDi', { n: kelompok[w.id]?.length ?? 0 })}>{kelompok[w.id]?.length ?? 0}</span>
                   : kelompok[w.id]?.length ? <span className="hp-wadah-isi">{t('ceritaHp.jumlahDi', { n: kelompok[w.id]!.length })}</span> : <span aria-hidden="true" />}
               </button>
+              {/* T-020 batch 3 (D-150): lencana jumlah di kanan atas kartu baki = tombol "Isi (n)". */}
+              {mejaBaki ? (
+                <button type="button" className="hp-baki-isi" style={{ ['--i' as string]: iw }} aria-expanded={isiBuka === w.id} aria-label={`${tx(w.label)}: ${t('ceritaHp.isiBaki', { n: kelompok[w.id]?.length ?? 0 })}`} data-isi-baki={w.id} onClick={() => { if (isiBuka !== w.id) playSfx('kertas'); setIsiBuka(isiBuka === w.id ? null : w.id); }}>
+                  {kelompok[w.id]?.length ?? 0}
+                </button>
+              ) : null}
+              </Fragment>
             ))}
           </div>
           {mejaBaki ? (
             <>
-              {umpanEl}
-              <div className="hp-baki-isi-baris">
-                {konfig.wadah.map((w) => (
-                  <button key={w.id} type="button" className="hp-baki-isi" aria-expanded={isiBuka === w.id} data-isi-baki={w.id} onClick={() => { if (isiBuka !== w.id) playSfx('kertas'); setIsiBuka(isiBuka === w.id ? null : w.id); }}>
-                    {t('ceritaHp.isiBaki', { n: kelompok[w.id]?.length ?? 0 })}
-                  </button>
-                ))}
-              </div>
               {isiBuka ? (
                 <section className="hp-baki-panel" aria-label={t('ceritaHp.isiBakiJudul', { wadah: namaWadah(isiBuka) })}>
                   <p className="hp-baki-panel-judul">{t('ceritaHp.isiBakiJudul', { wadah: namaWadah(isiBuka) })}</p>
@@ -250,13 +253,13 @@ function Ringkasan({ ep, konfig, kelompok, tx, daftar, namaBenda, onUbah }: {
   return (
     <section className="hp-ringkasan hp-ringkasan-ringkas" aria-labelledby="hp-ringkasan-judul">
       <h3 id="hp-ringkasan-judul" ref={judulRef} tabIndex={-1}>{t('ceritaHp.ringkasanJudul')}</h3>
-      <p className="hp-ringkasan-total" data-total={ditempatkan}>{t('ceritaHp.totalDitempatkan', { n: ditempatkan, total, satuan: tx(konfig.satuan).toLocaleLowerCase('id') })}</p>
+      <p className="hp-ringkasan-total" data-total={ditempatkan}>{t('ceritaHp.totalDitempatkan', { n: ditempatkan, total, satuan: satuanSesudahAngka(konfig, tx, total) })}</p>
       {konfig.wadah.map((w) => {
         const isi = kelompok[w.id] ?? [];
         const terbuka = buka === w.id;
         const idIsi = `hp-ringkasan-isi-${w.id}`;
         return (
-          <div key={w.id} className="hp-ringkasan-wadah" data-wadah={w.id} data-terbuka={terbuka ? '' : undefined}>
+          <div key={w.id} className="hp-ringkasan-wadah" data-wadah={w.id} data-isi={isi.length >= 3 ? 2 : isi.length >= 1 ? 1 : 0} data-terbuka={terbuka ? '' : undefined}>
             <h4>
               <button type="button" className="hp-ringkasan-kelompok" aria-expanded={terbuka} aria-controls={idIsi} data-kelompok={w.id} onClick={() => { if (!terbuka) playSfx('kertas'); setBuka(terbuka ? null : w.id); }}>
                 {!daftar ? <GambarSeni ep={ep} id={w.seni} className="hp-ringkasan-seni" /> : null}
@@ -273,7 +276,7 @@ function Ringkasan({ ep, konfig, kelompok, tx, daftar, namaBenda, onUbah }: {
                     return (
                       <li key={id}>
                         <button type="button" className="hp-chip" data-benda={id} onClick={() => onUbah(id)}>
-                          {!daftar && b.seni ? <GambarSeni ep={ep} id={b.seni} className="hp-chip-seni" /> : null}
+                          {!daftar && b.seni ? <GambarSeni ep={ep} id={b.seni} className="hp-chip-seni" kecil /> : null}
                           {!daftar && b.tokoh ? <PotretHp ep={ep} id={b.tokoh.id} ekspresi={b.tokoh.ekspresi} nama={namaBenda(b)} /> : null}
                           <span className="hp-chip-teks">
                             <span>{namaBenda(b)}</span>

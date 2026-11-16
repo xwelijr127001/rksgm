@@ -253,6 +253,7 @@ test('ulang bab 3: K08 bisa dimainkan lagi dari awal (hasil & tanda lama dilepas
   // Mainkan terus sampai akhir dengan jawaban seadanya agar snapshot bab tercatat.
   const JAWAB: Record<string, () => MissionAnswer> = {
     k09: () => ({ saksi: { hendra: 'ya', darto: 'ya', tol: 'ya', polisi: 'ya', mobilkecil: 'tidak' } }),
+    ksim: () => ({ sim: { periksa: 'bersih' } }),
     k10: () => ({ selisih: { jam: 'catat', nama: 'catat', antisipasi: 'catat' } }),
     k11: () => ({ bundel: 'lengkapi', kabar: 'persetujuan' }),
     k15: () => ({ pesan: { kabar: 'masuk', bukti: 'masuk', langkah: 'masuk', jujur: 'masuk', bintang: 'tidak', polis: 'tidak' } }),

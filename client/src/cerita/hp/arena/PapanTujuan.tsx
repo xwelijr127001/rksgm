@@ -7,7 +7,7 @@
  *  - Kirim tetap lewat TombolKirim di ArenaTujuan.
  * Posisi tempat = tata letak tetap per indeks (bukan geografi).
  */
-import { useId, type ReactNode } from 'react';
+import { useId, type ReactNode, useLayoutEffect, useRef } from 'react';
 import { playSfx } from '../../../audio/audio';
 import { t } from '../../../i18n';
 import type { Episode, KunciTeks, TujuanArena } from '../../tipe';
@@ -24,11 +24,13 @@ export function bisaPapan(jumlah: number): boolean {
   return !!TATA[jumlah];
 }
 
-export function PapanTujuan({ ep, tujuan, dipilih, token, tx, idTanya, onPilih }: {
+export function PapanTujuan({ ep, tujuan, dipilih, token, tokenBenda = false, tx, idTanya, onPilih }: {
   ep: Episode;
   tujuan: TujuanArena[];
   dipilih: string | null;
   token: ReactNode;
+  /** Token = benda (bundel foto K05), bukan potret tokoh: tanpa cincin, di sudut kanan atas gambar (+62, -10). */
+  tokenBenda?: boolean;
   tx: (k: KunciTeks) => string;
   idTanya: string;
   onPilih: (id: string) => void;
@@ -39,14 +41,44 @@ export function PapanTujuan({ ep, tujuan, dipilih, token, tx, idTanya, onPilih }
   const idDetail = useId();
   const pos = TATA[tujuan.length]!;
   const dilihat = tujuan.find((x) => x.id === lihat) ?? null;
+  // T-020 batch 1: semua gambar tujuan piksel (K04) = papan piksel (rumput, jalan tanah, pohon; jangkar px di piksel.css).
+  const piksel = tujuan.every((x) => !!(x.seni && ep.seniArena?.[x.seni]?.piksel));
+  // D-205 (T-020 batch 3): di DPR 3 ubin tengah tidak persis piksel bila tinggi papan pecahan (221,22) atau ubinnya jatuh di
+  // setengah piksel. Papan piksel: tinggi dibulatkan ke bawah ke px CSS utuh, atas ubin tengah = px utuh (dibulatkan ke bawah).
+  const papanRef = useRef<HTMLDivElement>(null);
+  useLayoutEffect(() => {
+    const el = papanRef.current;
+    if (!el || !piksel || typeof ResizeObserver === 'undefined') return;
+    const bulatkan = () => {
+      el.style.maxHeight = '';
+      const h = el.getBoundingClientRect().height; const b = Math.floor(h + 0.01);
+      if (Math.abs(h - b) > 0.01) el.style.maxHeight = `${b}px`;
+      const tengah = tujuan.length === 5 ? el.querySelectorAll<HTMLElement>('.hp-tempat')[2] : null;
+      if (tengah) { el.style.setProperty('--tengah', `${Math.floor((el.clientHeight - tengah.offsetHeight) / 2)}px`); el.setAttribute('data-tengah', ''); }
+    };
+    bulatkan();
+    const ro = new ResizeObserver(bulatkan);
+    if (el.parentElement) ro.observe(el.parentElement);
+    window.addEventListener('resize', bulatkan);
+    return () => { ro.disconnect(); window.removeEventListener('resize', bulatkan); };
+  }, [piksel, tujuan.length, dipilih]);
   // T-018 Tahap 2 / T-020: di cangkang HP peta dipendekkan supaya kelima tempat + tombol kirim terlihat; kartu detail bisa di bawah
   // lipatan, jadi sesudah sebuah tempat diketuk kartu detailnya (dengan "Pilih tujuan ini") digulir ke dalam pandangan.
   return (
     <div className="hp-papan-lok-wadah">
-      <div className="hp-papan-lok" role="group" aria-labelledby={idTanya} data-jumlah={tujuan.length}>
-        <svg className="hp-papan-lok-jalan" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
-          <path d="M22 25 C38 34 42 44 50 51 C58 56 62 34 78 25 M50 51 C46 62 34 68 22 76 M50 51 C58 64 66 68 78 76" />
-        </svg>
+      <div ref={papanRef} className={'hp-papan-lok' + (piksel ? ' hp-papan-px' : '')} role="group" aria-labelledby={idTanya} data-jumlah={tujuan.length}>
+        {piksel ? (
+          <>
+            <span className="px-jalan-v kiri" aria-hidden="true" /><span className="px-jalan-v kanan" aria-hidden="true" /><span className="px-jalan-h" aria-hidden="true" />
+            <span className="px-simpang kiri" aria-hidden="true" /><span className="px-simpang kanan" aria-hidden="true" />
+            <span className="px px-pohon-1 px-prop-a" aria-hidden="true" /><span className="px px-pohon-2 px-prop-b" aria-hidden="true" />
+            <span className="px px-semak px-prop-c" aria-hidden="true" /><span className="px px-pohon-2 px-prop-d" aria-hidden="true" />
+          </>
+        ) : (
+          <svg className="hp-papan-lok-jalan" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
+            <path d="M22 25 C38 34 42 44 50 51 C58 56 62 34 78 25 M50 51 C46 62 34 68 22 76 M50 51 C58 64 66 68 78 76" />
+          </svg>
+        )}
         {tujuan.map((x, i) => {
           const [kiri, atas] = pos[i]!;
           const pilih = x.id === dipilih;
@@ -68,7 +100,7 @@ export function PapanTujuan({ ep, tujuan, dipilih, token, tx, idTanya, onPilih }
                 {pilih ? <span className="hp-tempat-centang" aria-hidden="true">✓</span> : null}
               </span>
               <span className="hp-tempat-nama">{tx(x.label)}</span>
-              {pilih ? <span className="hp-tempat-token" aria-hidden="true">{token}</span> : null}
+              {pilih ? <span className={'hp-tempat-token' + (tokenBenda ? ' hp-tempat-token-benda' : '')} aria-hidden="true">{token}</span> : null}
             </button>
           );
         })}

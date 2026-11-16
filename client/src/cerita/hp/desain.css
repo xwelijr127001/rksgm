@@ -105,47 +105,6 @@
 .lk-penjelasan > .lk-umpan { margin-bottom: 10px; }
 
 /* ---------- K09 papan rencana wawancara ---------- */
-.hp-saksi { display: grid; gap: 12px; }
-.hp-saksi-papan {
-  display: grid; gap: 8px; padding: 12px; border-radius: 18px; background: var(--hp-hijau); border: 3px solid #5b3d1f;
-  box-shadow: inset 0 0 0 2px rgba(255, 255, 255, .12), 0 4px 0 rgba(60, 40, 20, .2); color: #f8f7f2;
-}
-.hp-saksi-papan-kepala { margin: 0; display: flex; justify-content: space-between; align-items: center; font-size: 15px; letter-spacing: .02em; }
-.hp-saksi-papan-kepala span { min-width: 30px; padding: 2px 10px; border-radius: 999px; background: var(--hp-kertas); color: var(--hp-hijau); font-weight: 800; text-align: center; }
-.hp-saksi-rencana { margin: 0; padding: 0; list-style: none; display: flex; flex-wrap: wrap; gap: 8px; }
-.hp-saksi-rencana-kartu {
-  width: 104px; min-height: 104px; padding: 6px; display: grid; justify-items: center; gap: 2px; border-radius: 12px;
-  border: 2px solid var(--hp-kuning); background: var(--hp-kertas); color: var(--hp-tinta); font: inherit; cursor: pointer; text-align: center;
-}
-.hp-saksi-rencana-kartu b { font-size: 13px; line-height: 1.15; }
-.hp-saksi-rencana-kartu > span:last-child { font-size: 13px; font-weight: 700; color: #6b4e08; }
-.hp-saksi-kosong { margin: 0; min-height: 64px; display: grid; place-items: center; border: 2px dashed rgba(248, 247, 242, .55); border-radius: 12px; font-size: 15px; }
-.hp-saksi-arti { margin: 0; font-size: 13px; line-height: 1.4; color: #dde8cf; }
-.hp-saksi-kontak { margin: 0; padding: 0; list-style: none; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
-.hp-saksi-kartu {
-  width: 100%; min-height: 64px; padding: 6px 8px; display: grid; grid-template-columns: auto minmax(0, 1fr); align-items: center; gap: 8px;
-  border-radius: 14px; border: 2px solid var(--hp-garis); background: #fff; color: var(--hp-tinta); font: inherit; cursor: pointer; text-align: left;
-}
-.hp-saksi-kartu .hp-potret .cer-potret, .hp-saksi-rencana-kartu .hp-potret .cer-potret { width: 44px !important; height: 44px !important; }
-.hp-saksi-seni { width: 44px; height: 44px; object-fit: contain; }
-.hp-saksi-kartu-teks { display: grid; gap: 1px; min-width: 0; }
-.hp-saksi-kartu-teks b { font-size: 14px; line-height: 1.2; }
-.hp-saksi-kartu-teks span { font-size: 13px; font-weight: 700; color: var(--hp-redup); }
-.hp-saksi-kartu.dilihat { border-color: var(--hp-kuning); background: #fff6d8; }
-.hp-saksi-kartu.ditandai-rencana { border-color: var(--hp-hijau); }
-.hp-saksi-kartu.ditandai-lain { border-style: dashed; border-color: #9aa39d; background: #efede4; }
-.hp-saksi-detail:empty { display: none; }
-.hp-saksi-detail { display: grid; gap: 8px; padding: 12px 14px; border-radius: 16px; background: #fff; border: 2px solid var(--hp-hijau); }
-.hp-saksi-wadah { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
-.hp-saksi-wadah-item {
-  min-height: 56px; padding: 8px 10px; display: grid; gap: 2px; text-align: left; border-radius: 12px; border: 2px solid var(--hp-hijau);
-  background: #fff; color: var(--hp-tinta); font: inherit; cursor: pointer;
-}
-.hp-saksi-wadah-item b { font-size: 15px; color: var(--hp-hijau); }
-.hp-saksi-wadah-item span { font-size: 13px; line-height: 1.3; color: var(--hp-redup); }
-.hp-saksi-wadah-item.terpilih { background: var(--hp-hijau); }
-.hp-saksi-wadah-item.terpilih b, .hp-saksi-wadah-item.terpilih span { color: #fff; }
-.hp-saksi-batal { margin: 0; font-size: 13px; color: var(--hp-redup); }
 
 /* ---------- K10 satu persoalan aktif ---------- */
 .hp-bandingkan-satu { display: grid; gap: 10px; }
@@ -287,9 +246,13 @@
   font: inherit; font-size: 16px; font-weight: 800; text-align: left; cursor: pointer;
 }
 .hp-ringkasan-kelompok[aria-expanded="true"] { border-color: var(--hp-hijau); background: var(--hp-hijau-muda); }
+/* Tampilan daftar: baris tanpa gambar wadah = tiga kolom (nama | jumlah | panah). Dengan empat kolom, lencana jumlah jatuh di
+   kolom 1fr dan melar selebar baris. */
+.hp-arena[data-tampilan="daftar"] .hp-ringkasan-kelompok { grid-template-columns: minmax(0, 1fr) auto auto; }
 .hp-ringkasan-ringkas .hp-ringkasan-seni { width: 44px; height: auto; }
+/* Lencana jumlah: lingkaran 30 px selebar TETAP (angka satu atau dua digit), di kedua tampilan. */
 .hp-ringkasan-jumlah {
-  min-width: 30px; height: 30px; padding: 0 8px; box-sizing: border-box; border-radius: 15px; display: grid; place-items: center;
+  width: 30px; height: 30px; padding: 0; box-sizing: border-box; border-radius: 15px; display: grid; place-items: center;
   background: var(--hp-tinta); color: #fff; font-size: 15px; font-weight: 800;
 }
 .hp-ringkasan-panah { width: 10px; height: 10px; border-right: 2.5px solid currentColor; border-bottom: 2.5px solid currentColor; transform: rotate(45deg) translate(-2px, -2px); }
@@ -320,55 +283,13 @@
 .cer-tahap-urutan { margin: 0; font-size: 13.5px; line-height: 1.4; color: #4d5a52; }
 
 /* K07 rencana pemeriksaan */
-.hp-rpk { display: grid; gap: 10px; }
-.hp-rpk-situasi { display: grid; gap: 4px; padding: 12px 14px; border-radius: 14px; background: #fff; border: 2px solid var(--hp-garis); }
-.hp-rpk-situasi-kepala { margin: 0; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 6px; font-size: 16px; }
-.hp-rpk-chip { padding: 2px 10px; border-radius: 999px; background: #fff3cf; border: 2px solid #b5871a; color: #6b4e08; font-size: 13px; font-weight: 800; }
-.hp-rpk-fakta { margin: 0; font-size: 15px; line-height: 1.4; color: var(--hp-redup); }
-.hp-rpk-papan {
-  display: grid; grid-template-columns: 86px repeat(2, minmax(0, 1fr)); grid-template-rows: auto auto; gap: 6px 4px; align-items: center;
-  padding: 10px; border-radius: 14px; background: #eef2e6; border: 2px solid var(--hp-sage);
-}
-.hp-rpk-baris-nama { font-size: 13px; font-weight: 800; line-height: 1.2; color: #3d4a42; }
-.hp-rpk-bar { min-height: 44px; display: grid; place-items: center; padding: 4px 8px; border-radius: 10px; font-size: 13.5px; font-weight: 800; text-align: center; line-height: 1.2; }
-.hp-rpk-bar-bengkel { grid-column: 2; background: #f6e7c0; border: 2px solid #b5871a; color: #4a3606; }
-.hp-rpk-bar-periksa { grid-column: 2 / 4; border: 2px dashed #9aa39d; color: #4d5a52; background: transparent; transition: transform .2s ease; }
-.hp-rpk-bar-periksa[data-posisi="bersama"] { grid-column: 2; border: 2px solid var(--hp-hijau); background: var(--hp-hijau-muda); color: var(--hp-hijau); }
-.hp-rpk-bar-periksa[data-posisi="sesudah"] { grid-column: 3; border: 2px solid var(--hp-hijau); background: var(--hp-hijau-muda); color: var(--hp-hijau); }
-.hp-rpk-bar-periksa[data-posisi="tanpa"] { grid-column: 2 / 4; border-style: dashed; border-color: #b5871a; color: #6b4e08; background: #fff8e3; }
-.hp-rpk-opsi-daftar { display: grid; gap: 8px; }
-.hp-rpk-opsi {
-  min-height: 56px; padding: 8px 12px; display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 10px; text-align: left;
-  border-radius: 14px; border: 2px solid var(--hp-garis); background: #fff; color: var(--hp-tinta); font: inherit; cursor: pointer;
-}
-.hp-rpk-opsi.terpilih { border-color: var(--hp-hijau); background: var(--hp-hijau-muda); }
-.hp-rpk-opsi-teks { display: grid; gap: 2px; }
-.hp-rpk-opsi-teks b { font-size: 16px; }
-.hp-rpk-opsi-teks span { font-size: 14px; line-height: 1.35; color: var(--hp-redup); }
-.hp-rpk-lain { margin: 4px 0 0; font-size: 14px; font-weight: 800; color: var(--hp-redup); }
-.hp-rpk-opsi-lain .hp-rpk-opsi { min-height: 48px; }
 @media (prefers-reduced-motion: reduce) {
   .hp-titik-ketik i { animation: none; opacity: .7; }
-  .hp-rpk-bar-periksa { transition: none; }
 }
 
 /* K07 papan: penempatan eksplisit (kolom = waktu: sekarang / sesudah hitungan) */
-.hp-rpk-papan { grid-template-rows: auto auto auto; }
-.hp-rpk-kolom { grid-row: 1; font-size: 13px; font-weight: 800; color: #5c6f58; text-align: center; }
-.hp-rpk-kolom[data-kolom="1"] { grid-column: 2; }
-.hp-rpk-kolom[data-kolom="2"] { grid-column: 3; }
-.hp-rpk-papan > .hp-rpk-baris-nama:nth-of-type(3) { grid-row: 2; grid-column: 1; }
-.hp-rpk-bar-bengkel { grid-row: 2; }
-.hp-rpk-papan > .hp-rpk-baris-nama:nth-of-type(5) { grid-row: 3; grid-column: 1; }
-.hp-rpk-bar-periksa { grid-row: 3; }
 
 /* ===================== AUDIO & RITME (15 Nov 2026) ===================== */
-.hp-rpk-buka-lain {
-  justify-self: start; min-height: 44px; padding: 0 16px; border-radius: 12px; border: 2px solid var(--hp-hijau); background: #fff; color: var(--hp-hijau);
-  font: inherit; font-size: 15px; font-weight: 800; cursor: pointer;
-}
-.hp-rpk-buka-lain:disabled { opacity: .6; cursor: default; }
-.hp-rpk-opsi-daftar[hidden] { display: none; }
 .hp-petunjuk-suara {
   display: flex; align-items: center; gap: 8px; margin: 8px auto 0; width: min(100% - 32px, var(--hp-kolom, 820px)); box-sizing: border-box;
   padding: 2px 4px 2px 12px; border-radius: 12px; background: #eaf0e1; color: var(--hp-hijau); font-size: 14px; line-height: 1.35;
@@ -638,38 +559,26 @@
   .hp-layar[data-kunci] .hp-pola-tujuan[data-papan] .hp-tempat-detail-kepala b { font-size: 15.5px; line-height: 19px; }
   .hp-layar[data-kunci] .hp-pola-tujuan[data-papan] .hp-tempat-detail-arti { font-size: 13.5px; line-height: 18px; }
   /* Ubin: kotak 96; gambar 80 x 60 dalam bingkai 84 x 64; pelat label 13 / 15 menumpang 8 px di tepi bawah gambar. */
-  .hp-layar[data-kunci] .hp-papan-lok .hp-tempat { width: 96px; margin: 0; padding: 0; gap: 0; }
-  .hp-layar[data-kunci] .hp-papan-lok .hp-tempat-gambar { box-sizing: border-box; width: 84px; height: 64px; border-radius: 12px; }
-  .hp-layar[data-kunci] .hp-papan-lok .hp-tempat-seni { width: 80px; height: 60px; max-height: 60px; }
-  .hp-layar[data-kunci] .hp-papan-lok .hp-tempat-nama { position: relative; z-index: 1; margin-top: -8px; padding: 1px 6px; border: 1px solid #9fb38a; font-size: 13px; line-height: 15px; }
-  .hp-layar[data-kunci] .hp-papan-lok .hp-tempat-token { top: -6px; right: -6px; left: auto; }
-  .hp-layar[data-kunci] .hp-papan-lok .hp-tempat-token .hp-potret .cer-potret, .hp-layar[data-kunci] .hp-papan-lok .hp-tempat-token .hp-token-seni { width: 36px !important; height: 36px !important; }
-  .hp-layar[data-kunci] .hp-papan-lok .hp-tempat-token .cer-potret svg { width: 100%; height: 100%; }
-  .hp-layar[data-kunci] .hp-papan-lok .hp-tempat-centang { left: -6px; right: auto; top: -6px; }
-  .hp-layar[data-kunci] .hp-papan-lok .hp-tempat.dilihat { transform: none; }
+  .hp-layar[data-kunci] .hp-papan-lok:not(.hp-papan-px) .hp-tempat { width: 96px; margin: 0; padding: 0; gap: 0; }
+  .hp-layar[data-kunci] .hp-papan-lok:not(.hp-papan-px) .hp-tempat-gambar { box-sizing: border-box; width: 84px; height: 64px; border-radius: 12px; }
+  .hp-layar[data-kunci] .hp-papan-lok:not(.hp-papan-px) .hp-tempat-seni { width: 80px; height: 60px; max-height: 60px; }
+  .hp-layar[data-kunci] .hp-papan-lok:not(.hp-papan-px) .hp-tempat-nama { position: relative; z-index: 1; margin-top: -8px; padding: 1px 6px; border: 1px solid #9fb38a; font-size: 13px; line-height: 15px; }
+  .hp-layar[data-kunci] .hp-papan-lok:not(.hp-papan-px) .hp-tempat-token { top: -6px; right: -6px; left: auto; }
+  .hp-layar[data-kunci] .hp-papan-lok:not(.hp-papan-px) .hp-tempat-token .hp-potret .cer-potret, .hp-layar[data-kunci] .hp-papan-lok:not(.hp-papan-px) .hp-tempat-token .hp-token-seni { width: 36px !important; height: 36px !important; }
+  .hp-layar[data-kunci] .hp-papan-lok:not(.hp-papan-px) .hp-tempat-token .cer-potret svg { width: 100%; height: 100%; }
+  .hp-layar[data-kunci] .hp-papan-lok:not(.hp-papan-px) .hp-tempat-centang { left: -6px; right: auto; top: -6px; }
+  .hp-layar[data-kunci] .hp-papan-lok:not(.hp-papan-px) .hp-tempat.dilihat { transform: none; }
   /* Lima tempat (urutan naskah: kiri atas, kiri bawah, tengah, kanan atas, kanan bawah): kolom samping 6 px dari tepi, baris
      8 px dari atas / bawah, ubin tengah di tengah. Posisi persen bawaan (style) ditimpa. */
-  .hp-layar[data-kunci] .hp-papan-lok[data-jumlah="5"] .hp-tempat:nth-of-type(1) { left: 6px !important; top: 8px !important; }
-  .hp-layar[data-kunci] .hp-papan-lok[data-jumlah="5"] .hp-tempat:nth-of-type(2) { left: 6px !important; top: auto !important; bottom: 8px; }
+  .hp-layar[data-kunci] .hp-papan-lok:not(.hp-papan-px)[data-jumlah="5"] .hp-tempat:nth-of-type(1) { left: 6px !important; top: 8px !important; }
+  .hp-layar[data-kunci] .hp-papan-lok:not(.hp-papan-px)[data-jumlah="5"] .hp-tempat:nth-of-type(2) { left: 6px !important; top: auto !important; bottom: 8px; }
   .hp-layar[data-kunci] .hp-papan-lok[data-jumlah="5"] .hp-tempat:nth-of-type(3) { left: calc(50% - 48px) !important; top: 50% !important; translate: 0 -50%; }
-  .hp-layar[data-kunci] .hp-papan-lok[data-jumlah="5"] .hp-tempat:nth-of-type(4) { left: auto !important; right: 6px; top: 8px !important; }
-  .hp-layar[data-kunci] .hp-papan-lok[data-jumlah="5"] .hp-tempat:nth-of-type(5) { left: auto !important; right: 6px; top: auto !important; bottom: 8px; }
+  .hp-layar[data-kunci] .hp-papan-lok:not(.hp-papan-px)[data-jumlah="5"] .hp-tempat:nth-of-type(4) { left: auto !important; right: 6px; top: 8px !important; }
+  .hp-layar[data-kunci] .hp-papan-lok:not(.hp-papan-px)[data-jumlah="5"] .hp-tempat:nth-of-type(5) { left: auto !important; right: 6px; top: auto !important; bottom: 8px; }
   .hp-layar[data-kunci] .hp-papan-lok:not([data-jumlah="5"]) .hp-tempat { margin-left: -48px; margin-top: -40px; }
-  .hp-layar[data-kunci] .hp-papan-lok-label { left: 50%; bottom: 4px; transform: translateX(-50%); padding: 1px 8px; font-size: 11.5px; white-space: nowrap; }
+  .hp-layar[data-kunci] .hp-papan-lok:not(.hp-papan-px) .hp-papan-lok-label { left: 50%; bottom: 4px; transform: translateX(-50%); padding: 1px 8px; font-size: 11.5px; white-space: nowrap; }
 }
 
-/* ---------- T-018 Tahap 2 / T-020 (owner 16 Nov): K09 kartu saksi: papan rencana + 5 kartu + tombol muat di 360x640 ----------
-   Hanya tata letak (jarak & tinggi minimum); gaya visual menunggu angka Designer T-020. */
-@media (max-width: 1023.98px) and (min-height: 560px) {
-  .hp-layar[data-kunci] .hp-saksi { gap: 8px; }
-  .hp-layar[data-kunci] .hp-saksi-papan { gap: 6px; padding: 10px; }
-  .hp-layar[data-kunci] .hp-saksi-kosong { min-height: 44px; font-size: 14.5px; }
-  .hp-layar[data-kunci] .hp-saksi-arti { line-height: 1.3; }
-  .hp-layar[data-kunci] .hp-saksi-kontak { gap: 6px; }
-  .hp-layar[data-kunci] .hp-saksi-kartu { min-height: 56px; padding: 5px 8px; }
-  .hp-layar[data-kunci] .hp-saksi-kartu .hp-potret .cer-potret, .hp-layar[data-kunci] .hp-saksi-kartu .hp-saksi-seni { width: 40px !important; height: 40px !important; }
-  .hp-layar[data-kunci] .hp-saksi-kartu .cer-potret svg { width: 100%; height: 100%; }
-}
 
 /* ===================== T-018 Tahap 2 FIX (16 Nov malam): D-175, D-177..D-180 ===================== */
 /* D-175: petunjuk suara tidak lagi memakan satu baris di layar terkunci. Jangkarnya setinggi 0; petunjuknya menumpang di tepi
@@ -695,5 +604,165 @@
 /* D-178: papan lokasi pendek (layar < 740 px = papan 202 px): pelat "Papan ilustrasi, bukan peta" jatuh di bawah label ubin, jadi
    disembunyikan dari pandangan (teksnya tetap ada untuk pembaca layar). */
 @media (max-width: 1023.98px) and (min-height: 560px) and (max-height: 739.98px) {
-  .hp-layar[data-kunci] .hp-papan-lok-label { width: 1px; height: 1px; padding: 0; overflow: hidden; clip: rect(0 0 0 0); clip-path: inset(50%); white-space: nowrap; background: none; transform: none; }
+  .hp-layar[data-kunci] .hp-papan-lok:not(.hp-papan-px) .hp-papan-lok-label { width: 1px; height: 1px; padding: 0; overflow: hidden; clip: rect(0 0 0 0); clip-path: inset(50%); white-space: nowrap; background: none; transform: none; }
+}
+
+/* T-020 batch 1: papan lokasi PIKSEL (K04) memakai aturannya sendiri (seni/aktivitas/piksel.css); di cangkang hanya tinggi lentur 202..300 yang dipakai. */
+@media (max-width: 1023.98px) and (min-height: 560px) {
+  .hp-layar[data-kunci] .hp-pola-tujuan[data-papan] .hp-papan-lok.hp-papan-px { border-radius: 0; }
+}
+
+/* ===================== T-020 batch 1: K08 kesimpulan = LEMBAR di atas jalan (pola lembar balasan obrolan) ===================== */
+.hp-arena-kembali-pendek { display: none; }
+.hp-lembar-wajah { display: grid; place-items: center; overflow: hidden; background-image: none; }
+.hp-lembar-wajah .hp-potret, .hp-lembar-wajah .cer-potret { display: block; width: 32px !important; height: 32px !important; border: 0; border-radius: 0; }
+.hp-lembar-wajah .cer-potret svg { width: 100%; height: 100%; }
+.hp-lembar-tanda { display: grid; gap: 10px; padding: 8px 2px 2px; }
+@media (max-width: 1023.98px) and (min-height: 560px) {
+  /* Kepala aktivitas satu baris 44 px: TUGAS · judul · Kembali. Jarak dirapatkan (padding atas 8, tanpa celah) supaya lembar 488 px
+     muat di 360x640 dengan 43 px jalan di atasnya (hitungan Designer). */
+  .hp-layar[data-kunci]:has([data-lembar-simpul]) > .hp-main { padding-top: 4px; }
+  .hp-layar[data-kunci] .hp-arena:has([data-lembar-simpul]) { gap: 0; }
+  .hp-layar[data-kunci] .hp-arena:has([data-lembar-simpul]) .hp-arena-kepala { display: flex; align-items: center; min-height: 44px; gap: 8px; }
+  .hp-layar[data-kunci] .hp-arena:has([data-lembar-simpul]) .hp-arena-judul { flex: 1 1 auto; min-width: 0; }
+  .hp-layar[data-kunci] .hp-arena:has([data-lembar-simpul]) .hp-arena-kembali { flex: none; }
+  .hp-layar[data-kunci] .hp-arena:has([data-lembar-simpul]) .hp-arena-tugas { order: 1; grid-row: auto; }
+  .hp-layar[data-kunci] .hp-arena:has([data-lembar-simpul]) .hp-arena-judul { order: 2; grid-column: auto; font-size: 17px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .hp-layar[data-kunci] .hp-arena:has([data-lembar-simpul]) .hp-arena-kembali { order: 3; }
+  .hp-layar[data-kunci] .hp-arena:has([data-lembar-simpul]) .hp-arena-kembali-penuh { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+  .hp-layar[data-kunci] .hp-arena:has([data-lembar-simpul]) .hp-arena-kembali-pendek { display: inline; }
+  /* Potongan atas adegan di atas lembar (>= 43 px); lembar di slot bilah bawah, selebar layar; hanya daftar pilihan yang boleh menggulir. */
+  .hp-layar[data-kunci] .hp-arena:has([data-lembar-simpul]) > .hp-arena-gulir { flex: 1 1 0; min-height: 43px; padding-bottom: 0; overflow: hidden; }
+  .hp-layar[data-kunci] .hp-arena:has([data-lembar-simpul]) > .hp-arena-kirim {
+    flex: 0 1 auto; min-height: 0; display: flex; flex-direction: column; padding: 0;
+    margin: 0 calc(-1 * max(12px, env(safe-area-inset-right))) 0 calc(-1 * max(12px, env(safe-area-inset-left)));
+  }
+  .hp-layar[data-kunci] .hp-arena-kirim > .hp-lembar-simpul { animation: none; }
+  .hp-layar[data-kunci] .hp-arena-kirim .hp-lembar .hp-kirim-tombol, .hp-layar[data-kunci] .hp-arena-kirim .hp-lembar .hp-kirim-tombol:disabled {
+    height: 48px; min-height: 0; padding: 0 16px; font-size: 16px; letter-spacing: 0;
+  }
+  .hp-layar[data-kunci] .hp-arena-kirim .hp-lembar .hp-kirim { display: block; margin-top: 6px; }
+  /* Lembar kesimpulan tanpa pegangan (tidak bisa ditutup): jarak dirapatkan 16 px supaya kelima pilihan muat di 360x640. */
+  .hp-layar[data-kunci] .hp-lembar-simpul { padding-bottom: calc(6px + env(safe-area-inset-bottom)); }
+  .hp-layar[data-kunci] .hp-lembar-simpul .hp-lembar-pegangan { height: 4px; }
+  .hp-layar[data-kunci] .hp-lembar-simpul .hp-opsi-daftar { margin-top: 4px; gap: 4px; padding-bottom: 1px; }
+}
+
+/* T-020 batch 1, K08 langkah MENANDAI di cangkang HP: kartu bunyi rambu ringkas + instruksi 16 / 20 + adegan 236 + legenda muat tanpa
+   menggulir (kalimat konteks hanya di langkah pertama; label cincin truk membawa hal yang sama). */
+@media (max-width: 1023.98px) and (min-height: 560px) {
+  .hp-layar[data-kunci] .hp-rambu { gap: 8px; }
+  .hp-layar[data-kunci] .hp-rambu[data-tahap="tandai"] .lk-konteks { display: none; }
+  .hp-layar[data-kunci] .hp-rambu .lk-bukti-kartu { gap: 4px; padding: 8px 12px 10px; border-radius: 12px; }
+  .hp-layar[data-kunci] .hp-rambu .lk-bukti-isi { font-size: 16.5px; line-height: 22px; }
+  .hp-layar[data-kunci] .hp-rambu .lk-instruksi { font-size: 16px; line-height: 20px; }
+  .hp-layar[data-kunci] .hp-rambu .lk-konteks { font-size: 14.5px; line-height: 19px; }
+}
+
+/* ===================== T-020 batch 2 (16 Nov): K07 papan gabus, K09 papan saksi, K10 kertas banding =====================
+   Seni & tata letak komponennya = seni/aktivitas/piksel.css. Di sini hanya cangkang HP: tab "Info tugas" di baris judul
+   (isi info yang terlipat dibuka dari tab itu, di atas penggulir), jarak, dan baris instruksi. */
+.hp-arena-info { display: none; }
+@media (max-width: 1023.98px) and (min-height: 560px) {
+  .hp-layar[data-kunci] .hp-arena[data-tab-info] .hp-arena-kepala { position: relative; }
+  .hp-layar[data-kunci] .hp-arena[data-tab-info] .hp-arena-kepala .hp-arena-judul { grid-column: 1 / -1; padding-right: 108px; }
+  .hp-layar[data-kunci] .hp-arena[data-tab-info] .hp-kirim-catatan { display: none; }
+  .hp-layar[data-kunci] .hp-arena[data-tab-info] .hp-arena-gulir { padding-bottom: 2px; }
+  .hp-layar[data-kunci] .hp-arena-info {
+    position: absolute; right: 0; bottom: 1px; white-space: nowrap; display: inline-flex; align-items: center; min-height: 28px; padding: 0 10px; border-radius: 6px;
+    border: 2px solid #b5871a; background: #ffe08a; color: #4a3606; box-shadow: 0 2px 0 #b5871a; font: inherit; font-size: 13px; font-weight: 800; cursor: pointer; transform: rotate(-2deg);
+  }
+  .hp-layar[data-kunci] .hp-arena-info::after { content: ''; position: absolute; inset: -8px -6px; }
+  .hp-layar[data-kunci] .hp-arena-info[aria-expanded="true"] { background: #215c40; border-color: #153d2a; box-shadow: 0 2px 0 #153d2a; color: #fff; }
+  .hp-layar[data-kunci] .hp-arena[data-tab-info] .hp-arena-gulir > .hp-arena-konteks { order: -1; }
+  .hp-layar[data-kunci] .hp-arena[data-tab-info] .hp-arena-konteks:not(:has(.hp-tahu[open])) { display: none; }
+  .hp-layar[data-kunci] .hp-arena[data-tab-info] .hp-arena-konteks .hp-tahu > summary { display: none; }
+  .hp-layar[data-kunci] .hp-arena[data-tab-info] .hp-arena-konteks .hp-tahu { padding-top: 10px; }
+  .hp-layar[data-kunci] .hp-arena[data-tab-info] .hp-arena-gulir > .hp-arena-alih { display: none; }
+  .hp-layar[data-kunci] .hp-arena[data-tab-info] .hp-arena-konteks:has(.hp-tahu[open]) ~ .hp-arena-alih { display: block; }
+  .hp-layar[data-kunci] .hp-arena[data-pola="bandingkan"] .bd-instruksi { min-height: 40px; }
+  .hp-layar[data-kunci] .hp-saksi-px .sk-papan { margin-top: 2px; }
+}/* Inggris di 360x640: pertanyaan tiga baris, label "Or skip the board:" disembunyikan dari mata (D-147; tetap dibaca pembaca layar). */
+@media (max-width: 374.98px) and (min-height: 560px) and (max-height: 659.98px) {
+  :lang(en) .hp-layar[data-kunci] .rp-lain { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+}
+/* T-020 batch 1 FIX D-183: tab "Tandamu" 8 px lebih tinggi (34 px di atas lembar) supaya tidak menutupi baris pertama pertanyaan. */
+@media (max-width: 1023.98px) and (min-height: 480px) {
+  .hp-lembar-simpul .hp-lembar-catatan { top: -34px; }
+}
+
+/* ===================== T-020 batch 3 (16 Nov): cangkang HP untuk K02 konter, K05 papan terusan, K11 bundel (D-166, D-167) =====================
+   Seni & komponen = seni/aktivitas/piksel.css. Di sini hanya jarak/ukuran di layar terkunci supaya tiap langkah muat tanpa menggulir. */
+@media (max-width: 1023.98px) and (min-height: 560px) {
+  /* K02: gambar 160 + baris instruksi/umpan 44 + tiga baki; tidak ada baris "Isi baki" terpisah (lencana = tombolnya). */
+  .hp-layar[data-kunci] .hp-arena[data-tampilan="gambar"] .hp-susun[data-gaya="baki"] { gap: 6px; }
+  .hp-layar[data-kunci] .hp-arena[data-tampilan="gambar"] .hp-susun[data-gaya="baki"] .hp-susun-fokus { gap: 0; }
+  /* K05: strip benda / strip pilihan setinggi sama (arti bisa dua baris), supaya papan tidak berubah tinggi saat memilih. */
+  .hp-layar[data-kunci] .hp-pola-tujuan[data-gaya="teruskan"][data-papan] > .hp-tujuan-benda, .hp-layar[data-kunci] .hp-pola-tujuan[data-gaya="teruskan"][data-papan] .hp-tempat-detail { min-height: 80px; box-sizing: border-box; }
+  /* K11 */
+  .hp-layar[data-kunci] .hp-bundel { gap: 8px; }
+  .hp-layar[data-kunci] .hp-bundel-langkah { gap: 8px; }
+  .hp-layar[data-kunci] .hp-tahap ol { gap: 4px; }
+  .hp-layar[data-kunci] .hp-tahap-item { min-height: 40px; padding: 2px 6px; border: 2px solid #1c2b24; border-radius: 0; font-size: 12.5px; line-height: 14px; }
+  .hp-layar[data-kunci] .hp-tahap-item[aria-current] { background: #ffe9a8; border-color: #1c2b24; box-shadow: 0 2px 0 #b5871a; }
+  .hp-layar[data-kunci] .hp-tahap-no { width: 20px; height: 20px; border-radius: 0; background: #e8efe2; }
+  .hp-layar[data-kunci] .hp-tahap-item[aria-current] .hp-tahap-no { background: #1c2b24; color: #fff; }
+  .hp-layar[data-kunci] .hp-mapt { gap: 6px; padding: 0; border: 0; border-radius: 0; background: none; box-shadow: none; }
+  .hp-layar[data-kunci] .hp-mapt-kepala { display: grid; grid-template-columns: 120px minmax(0, 1fr); grid-template-rows: auto auto; align-content: center; gap: 2px 10px; height: 64px; flex-wrap: nowrap; }
+  .hp-layar[data-kunci] .hp-mapt-kepala .hp-seni-piksel { grid-row: 1 / span 2; }
+  .hp-layar[data-kunci] .hp-mapt-kepala b { align-self: end; white-space: normal; font-size: 15px; line-height: 18px; }
+  .hp-layar[data-kunci] .hp-mapt-hitung { align-self: start; justify-self: start; padding: 0; border-radius: 0; background: none; font-size: 13px; line-height: 16px; color: #3d4a42; }
+  .hp-layar[data-kunci] .hp-mapt-tab { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 4px; padding: 6px; border: 2px solid #1c2b24; background: #d9b676; }
+  .hp-layar[data-kunci] .hp-mapt-tab-item { min-height: 46px; height: 46px; display: flex; align-items: center; justify-content: center; gap: 3px; border: 2px solid #1c2b24; border-radius: 0; background: #fffdf6; color: #1c2b24; transform: none; }
+  .hp-layar[data-kunci] .hp-mapt-tab-item b { font-size: 13px; }
+  .hp-layar[data-kunci] .hp-mapt-tab-item > span:last-child { font-size: 14px; color: #215c40; }
+  .hp-layar[data-kunci] .hp-mapt-tab-item[data-ada="tidak"] { border-style: dashed; background: #f6e3c8; }
+  .hp-layar[data-kunci] .hp-mapt-tab-item[data-ada="tidak"] > span:last-child { color: #8a2c1c; }
+  .hp-layar[data-kunci] .hp-mapt-tab-item[aria-selected="true"] { background: #ffe9a8; box-shadow: 0 0 0 2px #e0b84f; transform: none; }
+  .hp-layar[data-kunci] .hp-mapt-lembar { min-height: 72px; box-sizing: border-box; display: grid; grid-template-columns: minmax(0, 1fr) auto; align-content: center; gap: 1px 8px; padding: 6px 10px; border: 2px solid #1c2b24; border-radius: 0; box-shadow: 0 2px 0 #c9c2a8; }
+  .hp-layar[data-kunci] .hp-mapt-lembar[data-ada="tidak"] { border-color: #8a2c1c; box-shadow: 0 2px 0 #8a2c1c; }
+  .hp-layar[data-kunci] .hp-mapt-no { font-size: 11.5px; line-height: 15px; }
+  .hp-layar[data-kunci] .hp-mapt-status { grid-column: 2; grid-row: 1; padding: 0 6px; font-size: 12px; line-height: 15px; }
+  .hp-layar[data-kunci] .hp-mapt-nama { grid-column: 1 / -1; font-size: 15px; line-height: 19px; }
+  .hp-layar[data-kunci] .hp-mapt .hp-bundel-catatan { font-size: 12px; line-height: 15px; }
+  .hp-layar[data-kunci] .hp-bundel .hp-ingat { min-height: 52px; box-sizing: border-box; padding: 6px 10px; border: 2px solid #1c2b24; border-radius: 0; background: #fff4d8; font-size: 13px; line-height: 16px; }
+  .hp-layar[data-kunci] .hp-bundel .hp-opsi-daftar { gap: 6px; }
+  .hp-layar[data-kunci] .hp-bundel .hp-opsi-ikon { min-height: 56px; padding: 6px 8px; gap: 8px; border: 2px solid #1c2b24; border-radius: 0; box-shadow: 0 2px 0 #c9c2a8; }
+  .hp-layar[data-kunci] .hp-bundel .hp-opsi-ikon.dipilih { background: #e8efe2; box-shadow: 0 2px 0 #215c40; }
+  .hp-layar[data-kunci] .hp-bundel .hp-opsi-ikon .hp-opsi-tanda, .hp-layar[data-kunci] .hp-bundel .hp-opsi-ikon .hp-ubin-tanda { display: none; }
+  .hp-layar[data-kunci] .hp-bundel .hp-opsi-teks b { font-size: 14.5px; line-height: 18px; }
+  .hp-layar[data-kunci] .hp-bundel .hp-opsi-teks span { font-size: 12.5px; line-height: 16px; }
+  .hp-layar[data-kunci] .hp-bundel .hp-kembali-langkah { display: none; }
+  .hp-layar[data-kunci] .hp-bundel .hp-rencana { min-height: 52px; box-sizing: border-box; gap: 8px; padding: 4px 4px 4px 8px; border: 2px solid #1c2b24; border-radius: 0; background: #f1f6ee; justify-content: flex-start; }
+  .hp-layar[data-kunci] .hp-bundel .hp-rencana p { flex: 1 1 auto; min-width: 0; }
+  .hp-layar[data-kunci] .hp-bundel .hp-rencana span { font-size: 11px; line-height: 13px; }
+  .hp-layar[data-kunci] .hp-bundel .hp-rencana b { font-size: 14.5px; line-height: 18px; }
+  .hp-layar[data-kunci] .hp-bundel .hp-rencana small { display: none; }
+  .hp-layar[data-kunci] .hp-bundel .hp-pratinjau, .hp-layar[data-kunci] .hp-bundel .hp-pratinjau-kosong { position: absolute; width: 1px; height: 1px; margin: 0; padding: 0; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+}
+/* D-199: jarak 4 px antara glif dan tulisan tab Info tugas. */
+.hp-arena-info > span[aria-hidden] { margin-right: 4px; }
+/* K11: judul langkah difokuskan lewat skrip saat langkah berganti (tabindex -1): tanpa garis fokus. */
+.hp-arena-sematan > .hp-tanya-arena:focus { outline: none; }
+/* D-215 (T-022 FIX), sasaran seret lain yang berupa tombol: pegangan lembar balasan. Aturan lama setara beratnya dengan
+   .player-ui button { touch-action: manipulation }, jadi urutan berkas yang menentukan; ini memastikannya. */
+.player-ui .hp-lembar-pegangan button { touch-action: none; }
+/* B-02 (QA T-021, 17 Nov): ringkasan akhir susun ("Periksa susunanmu", K02) di layar terkunci yang pendek. Di 360 x 640 isinya
+   melebihi jendela penggulir 17 px (Chromium) / 21 px (WebKit: garis 1,5 px tidak dibulatkan ke 1 px). Dirapatkan saja, tanpa
+   mengubah isi: baris kelompok 52 px (gambar baki 40 + 4 + 4 + garis 2 + 2), jarak di dalam ringkasan 6 px, dan jarak antarbagian
+   penggulir 8 px selama ringkasan tampil. Hasil di 360 x 640: muat, sisa 11 px (WebKit) / 15 px (Chromium).
+   Bila satu kelompok dibuka, isinya menggulir di SATU penggulir yang sama (.hp-arena-gulir, aturan D-133); halaman dan bilah
+   kirim tetap diam. Layar 700 px ke atas tidak berubah (di sana sudah muat).
+   TAMPILAN DAFTAR (17 Nov, perbaikan kecil 2): aturan di atas sudah berlaku di sana, tetapi ringkasannya masih melewati jendela
+   56 px (Chromium) / 60 px (WebKit) karena tampilan daftar punya satu kartu lagi, yaitu kartu fakta kunci (.hp-konteks-catatan,
+   60 px; di tampilan gambar fakta itu ada di kartu dokumennya). Di layar pendek kartu itu mengalah selama ringkasan K02 tampil:
+   isinya sudah ada di "Pesan & info tugas" (pesan Pak Hendra dan kalimat cerita), dan kartunya muncul lagi begitu satu dokumen
+   diubah. Jarak ringkasan ke catatan disamakan dengan tampilan gambar (6 px). Hasil: sama dengan tampilan gambar, sisa 11 / 15 px. */
+@media (max-width: 1023.98px) and (min-height: 560px) and (max-height: 699.98px) {
+  .hp-layar[data-kunci] .hp-ringkasan-ringkas { gap: 6px; }
+  .hp-layar[data-kunci] .hp-ringkasan-ringkas .hp-ringkasan-kelompok { min-height: 52px; padding-top: 4px; padding-bottom: 4px; }
+  .hp-layar[data-kunci] .hp-arena > .hp-arena-gulir:has(.hp-ringkasan-ringkas) { gap: 8px; }
+  .hp-layar[data-kunci] .hp-arena > .hp-arena-gulir:has(.hp-ringkasan-ringkas) > .hp-arena-alih { margin-top: 0; }
+  .hp-layar[data-kunci] .hp-arena[data-tampilan="daftar"] .hp-susun:has(> .hp-ringkasan-ringkas) { gap: 6px; }
+  .hp-layar[data-kunci] .hp-arena[data-tampilan="daftar"] > .hp-arena-gulir:has(.hp-susun[data-gaya="baki"] .hp-ringkasan-ringkas) .hp-konteks-catatan { display: none; }
 }

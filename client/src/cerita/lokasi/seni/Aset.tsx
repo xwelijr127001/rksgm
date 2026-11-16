@@ -4,10 +4,6 @@
  */
 import { useId } from 'react';
 import './font.css';
-import jalanSvg from './svg/jalan-empat-lajur.svg?raw';
-import trukSvg from './svg/truk-biru.svg?raw';
-import arsirSvg from './svg/arsir-lajur.svg?raw';
-import arsirBiruSvg from './svg/arsir-lajur-biru.svg?raw';
 import ikonPeriksaSvg from './svg/ikon-periksa.svg?raw';
 import { unikkan } from './svg';
 
@@ -16,12 +12,7 @@ function Inline({ markup, kelas }: { markup: string; kelas?: string }) {
   return <span className={`lk-svg${kelas ? ' ' + kelas : ''}`} aria-hidden="true" dangerouslySetInnerHTML={{ __html: unikkan(markup, sufiks) }} />;
 }
 
-/** Jalan empat lajur dengan pinggir hijau, pepohonan, dan tekstur halus (ruang 360 x 360). */
-export function JalanEmpatLajur() { return <Inline markup={jalanSvg} kelas="lk-svg-jalan" />; }
-/** Truk biru-krem tampak atas (viewBox 60 x 170). */
-export function TrukBiru() { return <Inline markup={trukSvg} kelas="lk-svg-truk" />; }
-/** Arsiran satu lajur: merah untuk rambu 1, biru (turunan) untuk rambu 2. Direntang mengikuti kotak lajur. */
-export function ArsirLajur({ varian }: { varian: 'merah' | 'biru' }) { return <Inline markup={varian === 'merah' ? arsirSvg : arsirBiruSvg} kelas="lk-svg-arsir" />; }
+// T-020 batch 1: JalanEmpatLajur, TrukBiru dan ArsirLajur (SVG) diganti seni piksel (seni/aktivitas/jalan, lihat Adegan.tsx).
 /** Ikon kaca pembesar "periksa" (mengikuti warna teks). */
 export function IkonPeriksa({ ukuran = 24 }: { ukuran?: number }) {
   return <span className="lk-svg lk-svg-ikon" style={{ width: ukuran, height: ukuran }}><Inline markup={ikonPeriksaSvg} /></span>;

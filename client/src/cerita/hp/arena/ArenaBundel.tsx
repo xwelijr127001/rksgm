@@ -11,7 +11,6 @@
  */
 import { useEffect, useId, useRef, useState, type KeyboardEvent, type ReactNode } from 'react';
 import { playSfx } from '../../../audio/audio';
-import { Arrow } from '../../../components/PlayerShell';
 import { t } from '../../../i18n';
 import { KeSlot, SlotKepalaArena } from '../cangkang';
 import type { KunciTeks, TujuanArena } from '../../tipe';
@@ -97,9 +96,8 @@ export function ArenaPolaBundel({ ep, misi, konfig, jawaban, ubah, daftar, tx, o
 
         {langkah === 'periksa' ? (
           <>
-            {!daftar ? <MapBertab baris={baris} tersedia={tersedia} catatan={tabel?.note} judul={tabel?.title} /> : (<>
+            {!daftar ? <MapBertab ep={ep} seni={konfig.meja?.berkas.map((x) => x.seni)} baris={baris} tersedia={tersedia} catatan={tabel?.note} judul={tabel?.title} /> : (<>
             <div className="hp-map">
-              {!daftar ? <GambarSeni ep={ep} id="bundel.map" className="hp-map-seni" /> : null}
               <p className="hp-map-hitung"><b>{t('ceritaHp.hitungKelompok', { n: tersedia, total: baris.length })}</b></p>
             </div>
             {kosong.map((k) => (
@@ -122,15 +120,14 @@ export function ArenaPolaBundel({ ep, misi, konfig, jawaban, ubah, daftar, tx, o
               {tabel?.note ? <p className="hp-bundel-catatan">{tabel.note}</p> : null}
             </details>
             </>)}
-            <button type="button" className="primary-action hp-lanjut" data-tahap-lanjut="" onClick={() => ke('tindakan')}>
-              {tx('arena.bundel.keTindakan')} <Arrow />
-            </button>
+            <TombolKirim key="ke-tindakan" label={tx('arena.bundel.keTindakan')} siap onKirim={() => ke('tindakan')} />
           </>
         ) : null}
 
         {langkah === 'tindakan' ? (
           <>
-            <p className="hp-ingat">{t('ceritaHp.ingatBerkas', { n: tersedia, total: baris.length, kosong: kosong.join(tx('daftar.pemisah')) })}</p>
+            <KeSlot ke={SlotKepalaArena}><p className="hp-instruksi-arena">{tx('arena.bundel.belumTindakan')}</p></KeSlot>
+            <p className="hp-ingat">{!daftar ? <GambarSeni ep={ep} id="bundel.berkas" /> : null}{t('ceritaHp.ingatBerkas', { n: tersedia, total: baris.length, kosong: kosong.join(tx('daftar.pemisah')) })}</p>
             <Pilihan
               idLabel="hp-bundel-judul"
               pilihan={konfig.tindakan.pilihan}
@@ -147,6 +144,7 @@ export function ArenaPolaBundel({ ep, misi, konfig, jawaban, ubah, daftar, tx, o
               siap={!!pilihT}
               onKirim={() => ke('kabar')}
               alasanBelum={pilihT ? null : tx('arena.bundel.belumTindakan')}
+              alasanRingkas={pilihT ? null : tx('arena.bundel.belumTindakan')}
             />
             <p className="hp-kembali-langkah"><button type="button" className="hp-tautan" onClick={() => ke('periksa')}>{tx('arena.bundel.kembaliPeriksa')}</button></p>
           </>
@@ -154,7 +152,9 @@ export function ArenaPolaBundel({ ep, misi, konfig, jawaban, ubah, daftar, tx, o
 
         {langkah === 'kabar' && pilihT ? (
           <>
+            <KeSlot ke={SlotKepalaArena}><p className="hp-instruksi-arena">{t('ceritaHp.pilihSatuKabar')}</p></KeSlot>
             <div className="hp-rencana">
+              {!daftar && pilihT.seni ? <GambarSeni ep={ep} id={pilihT.seni} /> : null}
               <p><span>{tx('arena.bundel.rencana')}</span><b>{tx(pilihT.label)}</b>{pilihT.arti ? <small>{tx(pilihT.arti)}</small> : null}</p>
               <button type="button" className="hp-tautan" onClick={() => ke('tindakan')} aria-label={`${t('ceritaHp.ubah')}: ${tx('arena.bundel.rencana')}`}>{t('ceritaHp.ubah')}</button>
             </div>
@@ -185,6 +185,7 @@ export function ArenaPolaBundel({ ep, misi, konfig, jawaban, ubah, daftar, tx, o
               siap={!!pilihK}
               onKirim={onKirim}
               alasanBelum={pilihK ? null : tx('arena.bundel.belumKabar', { nama: nasabah })}
+              alasanRingkas={pilihK ? null : t('ceritaHp.pilihSatuKabar')}
               catatan={t('ceritaHp.konfirmasiFinal')}
             />
           </>
@@ -241,7 +242,7 @@ function Pilihan({ idLabel, pilihan, terpilih, daftar, kutip = false, tx, ep, la
  * Map pengajuan bertab (prototipe Claude Design): tab bernomor per kelompok berkas (centang = tersedia, lingkaran putus = belum;
  * bukan warna saja), SATU lembar terbuka di depan map. Status = data tabel naskah apa adanya (tidak ditebak).
  */
-function MapBertab({ baris, tersedia, catatan, judul }: { baris: { label: string; ada: boolean }[]; tersedia: number; catatan?: string; judul?: string }) {
+function MapBertab({ ep, seni, baris, tersedia, catatan, judul }: { ep: PropsPola['ep']; /** Gambar tiap kelompok berkas, seurutan tabel (T-020: sel kecil 22 x 28 di kantong map; berkas yang belum ada memakai gambar "masih diurus", bukan versi ".ada"). */ seni?: (string | undefined)[]; baris: { label: string; ada: boolean }[]; tersedia: number; catatan?: string; judul?: string }) {
   const [buka, setBuka] = useState(0);
   const idPanel = useId();
   const r = baris[buka];
@@ -256,6 +257,7 @@ function MapBertab({ baris, tersedia, catatan, judul }: { baris: { label: string
   return (
     <div className="hp-mapt">
       <div className="hp-mapt-kepala">
+        <GambarSeni ep={ep} id="bundel.map" className="hp-map-seni" />
         <b>{t('ceritaHp.mapPengajuan')}</b>
         <span className="hp-mapt-hitung">{t('ceritaHp.hitungKelompok', { n: tersedia, total: baris.length })}</span>
       </div>
@@ -274,7 +276,7 @@ function MapBertab({ baris, tersedia, catatan, judul }: { baris: { label: string
             aria-label={`${t('ceritaHp.lembarKe', { n: i + 1, total: baris.length })}: ${x.label}. ${x.ada ? t('ceritaHp.tersedia') : t('ceritaHp.belumTersedia')}`}
             onClick={() => { if (i !== buka) playSfx('kertas'); setBuka(i); }}
           >
-            <b>{i + 1}</b><span aria-hidden="true">{x.ada ? '✓' : '○'}</span>
+            <b>{i + 1}</b>{seni?.[i] && seni.length === baris.length ? <GambarSeni ep={ep} id={!x.ada && seni[i]!.endsWith('.ada') ? seni[i]!.slice(0, -4) : seni[i]} kecil /> : null}<span aria-hidden="true">{x.ada ? '✓' : '–'}</span>
           </button>
         ))}
       </div>
@@ -283,7 +285,8 @@ function MapBertab({ baris, tersedia, catatan, judul }: { baris: { label: string
         <b className="hp-mapt-nama">{r.label}</b>
         <span className="hp-mapt-status"><span aria-hidden="true">{r.ada ? '✓' : '○'}</span>{r.ada ? t('ceritaHp.tersedia') : t('ceritaHp.belumTersedia')}</span>
       </div>
-      {catatan ? <p className="hp-bundel-catatan">{catatan}</p> : null}
+      {/* D-207: catatan tabel (tentang "hasil tender") hanya bersama kantong tender; tanpa daftar gambar = selalu tampil. */}
+      {catatan && (!seni || seni.length !== baris.length || !seni.includes('dok.tender') || seni[buka] === 'dok.tender') ? <p className="hp-bundel-catatan">{catatan}</p> : null}
     </div>
   );
 }

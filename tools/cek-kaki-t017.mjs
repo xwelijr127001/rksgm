@@ -31,6 +31,7 @@ for (const kasus of KASUS) for (const vp of VP) {
   const ctx = await b.createBrowserContext();
   const p = await ctx.newPage();
   await p.setViewport({ width: vp.w, height: vp.h, deviceScaleFactor: vp.dpr, isMobile: vp.w < 800, hasTouch: vp.w < 800 });
+  await p.emulateMediaFeatures([{ name: 'prefers-reduced-motion', value: 'no-preference' }]); // tidak bergantung pada setelan animasi Windows
   await p.evaluateOnNewDocument((pj, st) => { localStorage.setItem('raksa:bahasa', 'id'); localStorage.setItem('raksa:profil', pj); sessionStorage.setItem('raksa:loader:v1', '1'); localStorage.setItem('raksa:cerita', st); }, PROFIL, STATES[kasus].nilai);
   await p.goto(BASE + '/cerita/auto-2', { waitUntil: 'domcontentloaded' });
   await p.waitForFunction(() => document.querySelector('.cer-piksel[data-siap]'), { timeout: 15000 }).catch(() => null);

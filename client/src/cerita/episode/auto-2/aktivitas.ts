@@ -134,6 +134,13 @@ const RANCANGAN: Rancangan[] = [
       rows: [1, 2, 3].map((n) => ({ label: tx(`akt.jalur.tabel.${n}`), value: tx(`akt.jalur.tabel.${n}.isi`) })),
     }],
   },
+  // T-022 (sesudah K09): periksa SIM Pak Darto. Satu item ke wadah 'bersih' (tanpa ketukan keliru) / 'ragu' (ada ketukan keliru).
+  {
+    id: 'sim',
+    titik: 'ksim',
+    langkah: (tx) => [susun('sim', 'sim', [['periksa', 'dokumen']], [['bersih', 'cek'], ['ragu', 'jam']], 'match')(tx)],
+    kunci: [{ stepId: 'sim', weight: 1, explanation: '', assign: { periksa: 'bersih' } }],
+  },
   // K08: tandai lajur untuk dua rambu, lalu kesimpulan (satu dari lima kalimat naskah). Kunci rambu 1 = lajur yang disebut
   // tulisannya (hanya untuk ketepatan sesaat); tafsir rambu 2 ("lajur kiri") BELUM dikonfirmasi, jadi tanpa kunci. Hasil cabang
   // hanya dari kesimpulan (akt:rambu:pilih:<alt>); tanda lajur dibaca tanggapan tokoh dan ringkasan.

@@ -25,6 +25,7 @@ import { ADEGAN_SIAP } from '../hangatkan';
 import { titikTeks } from './hurufPiksel';
 import { titikPapanKantor } from './papan';
 import { muatPng, siap } from './muat';
+import { SENI_TELEPON, useTeleponTangan } from './teleponTangan';
 import { nasabahDiPanggung, type KomposisiLatar } from '../komposisi';
 import type { AdeganPiksel } from './adegan';
 import { kameraPiksel, kotakLuarSisipan, langkahJalan, LANGKAH_JALAN_MS, POSE_JALAN_MAKS, posisiJalan, punyaJalan, rencanaJalan, sisipanAdegan, susunAdeganPiksel } from './tata';
@@ -189,6 +190,8 @@ export function PanggungPiksel({ ep, komposisi, adegan, tx, nama, suasana, statu
   const kunciBaris = adegan.tokoh.map((x) => `${x.id}:${x.bicara}:${x.ekspresi}`).join('|');
   const gerak = useGerak(kurang, kunciBaris);
   const hidup = useHidup(kurang, adegan.tokoh.find((x) => x.bicara)?.id ?? '', adegan.tokoh.map((x) => x.id).join(' '));
+  // T-021: telepon di tangan tokoh (lapisan tambahan selama adegan serah ke obrolan); digambar di bawah lapisan meja.
+  const tlp = useTeleponTangan();
   const lapisLama = useRef<HTMLCanvasElement>(null);
   const ruangLama = useRef<string | null>(null);
   const menungguPudar = useRef(false);
@@ -256,6 +259,7 @@ export function PanggungPiksel({ ep, komposisi, adegan, tx, nama, suasana, statu
       g.drawImage(img, sx, sy, sw, sh, dx(wx), dy(wy), dx(wx + ww) - dx(wx), dy(wy + wh) - dy(wy));
     };
     const adaPembicara = tokoh.some((x) => x.t.bicara);
+    let pusatTelepon: string | null = null;
     const tokohDi = (tempat: string) => {
       for (const x of tokoh) {
         if (x.t.tempat !== tempat) continue;
@@ -284,6 +288,16 @@ export function PanggungPiksel({ ep, komposisi, adegan, tx, nama, suasana, statu
         if (x.t.cermin) { g.translate(2 * dx(x.kakiX + geser), 0); g.scale(-1, 1); }
         for (const l of x.s.lapisan) {
           gambar(x.s.url, l.sumber.x, l.sumber.y, l.sumber.w, l.sumber.h, x.x + geser + (l.x - tubuh.x) * K, x.y - naik + (l.y - tubuh.y) * K, l.sumber.w * K, l.sumber.h * K);
+        }
+        if (tlp && tlp.tokoh === x.t.id) {
+          // Titik (0, 0) bingkai tokoh di dunia; offset README telepon-v2 dalam koordinat bingkai. Ikut naik 1 piksel bila tokoh bernapas.
+          const bx = x.x + geser - tubuh.x * K, by = x.y - naik - tubuh.y * K;
+          const { lengan, punggung, gelembung, pusat } = SENI_TELEPON;
+          gambar(lengan.url, tlp.sel * lengan.w, 0, lengan.w, lengan.h, bx + lengan.x * K, by + lengan.y * K, lengan.w * K, lengan.h * K);
+          gambar(punggung.url, 0, 0, punggung.w, punggung.h, bx + punggung.x * K, by + punggung.y[tlp.sel] * K, punggung.w * K, punggung.h * K);
+          if (tlp.gelembung) gambar(gelembung.url, 0, 0, gelembung.w, gelembung.h, bx + gelembung.x * K, by + gelembung.y * K, gelembung.w * K, gelembung.h * K);
+          const px = dx(bx + pusat.x * K), cermin = x.t.cermin ? 2 * dx(x.kakiX + geser) - px : px;
+          pusatTelepon = `${Math.round((cermin / dpr) * 10) / 10},${Math.round((dy(by + pusat.y * K) / dpr) * 10) / 10}`;
         }
         g.restore();
       }
@@ -349,6 +363,9 @@ export function PanggungPiksel({ ep, komposisi, adegan, tx, nama, suasana, statu
       menungguPudar.current = false;
       requestAnimationFrame(() => { atas.setAttribute('data-pudar', ''); window.setTimeout(() => { atas.removeAttribute('data-aktif'); atas.removeAttribute('data-pudar'); }, 200); });
     }
+    // T-021: pusat layar telepon di kotak panggung (px CSS) untuk kamera/zoom; sel yang sedang digambar untuk alat uji.
+    const el = akar.current;
+    if (el) { if (pusatTelepon) { el.setAttribute('data-telepon-pusat', pusatTelepon); el.setAttribute('data-telepon-sel', String(tlp?.sel ?? '')); } else { el.removeAttribute('data-telepon-pusat'); el.removeAttribute('data-telepon-sel'); } }
     window.dispatchEvent(new Event(ADEGAN_SIAP));
   });
 

@@ -19,7 +19,9 @@ export async function sampelGerak(b, BASE, nilai, kurang, detik = 10, shot = nul
   const ctx = await b.createBrowserContext();
   const p = await ctx.newPage();
   await p.setViewport({ width: 360, height: 740, deviceScaleFactor: 2, isMobile: true, hasTouch: true });
-  if (kurang) await p.emulateMediaFeatures([{ name: 'prefers-reduced-motion', value: 'reduce' }]);
+  // Gerak normal = 'no-preference' secara eksplisit: bila Windows di PC ini sedang 'kurangi animasi', Chrome headless ikut melapor
+  // reduce dan kasus normal gagal tanpa ada yang rusak (terjadi 16 Nov malam).
+  await p.emulateMediaFeatures([{ name: 'prefers-reduced-motion', value: kurang ? 'reduce' : 'no-preference' }]);
   await p.evaluateOnNewDocument((pj, st) => { localStorage.setItem('raksa:bahasa', 'id'); localStorage.setItem('raksa:profil', pj); sessionStorage.setItem('raksa:loader:v1', '1'); localStorage.setItem('raksa:cerita', st); }, PROFIL, nilai);
   await p.goto(BASE + '/cerita/auto-2' + (kurang ? '?gerak=ikut' : ''), { waitUntil: 'domcontentloaded' });
   await p.waitForFunction(() => document.querySelector('.cer-piksel[data-siap]'), { timeout: 15000 }).catch(() => null);

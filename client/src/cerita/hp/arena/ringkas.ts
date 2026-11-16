@@ -37,5 +37,10 @@ export function ringkasTindakan(ep: Episode, idAktivitas: string, jawaban: Missi
     // Rambu: tanda yang dibuat pemain di jalan (apa yang dilakukan, bukan penilaiannya); tanggapan tokoh tampil di adegan akibat.
     case 'rambu':
       return ringkasTanda(k, jawaban, tx);
+    // T-022: satu kalimat hasil pemeriksaan SIM (tanpa ketukan keliru / dengan arahan Pak Bima).
+    case 'sim': {
+      const w = petaLangkah(jawaban, k.langkah)[k.benda];
+      return w ? tx(w === k.ragu ? 'akt.sim.wadah.ragu' : 'akt.sim.wadah.bersih') : null;
+    }
   }
 }

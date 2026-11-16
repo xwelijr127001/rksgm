@@ -232,6 +232,7 @@ function jalankanDari(node: string, jawaban: MissionAnswer): string[] {
     k07: () => tujuanArena('k07', 'paralel'),
     k08: () => ({ r1: { r1l3: 'tanda', r1l4: 'tanda' }, r2: { r2l1: 'tanda' }, simpul: 'c' }),
     k09: () => ({ saksi: { hendra: 'ya', darto: 'ya', tol: 'ya', polisi: 'ya', mobilkecil: 'tidak' } }),
+    ksim: () => ({ sim: { periksa: 'bersih' } }),
     k10: () => ({ selisih: { jam: 'catat', nama: 'catat', antisipasi: 'catat' } }),
     k11: () => ({ bundel: 'lengkapi', kabar: 'persetujuan' }),
   };

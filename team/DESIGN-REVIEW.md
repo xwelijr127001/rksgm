@@ -2850,3 +2850,655 @@ Method (run light: one headless Chrome at a time, closed between sizes, below-no
 
 ### Not verified by me
 WebKit and a real iPhone. The banner fix I propose is not built. English and Chinese only for the three labels at 360 × 640. The row and button animations. K09-e and the result beats. The test suites (Fullstack reports them green on this build).
+
+---
+
+## T-020 — batch 1 review (2026-11-16)
+
+Reviewer: Designer · Folder: C:\Users\User\Desktop\rksgm-episode2 · No source edits, no commit, BOARD.md not touched.
+Build: production build in client/dist of 20:41:29 for all six runs (checked after each run). Fullstack rebuilt at 21:14:53, after my last run; I did not look at that build. My own server on :4002, started and stopped by me; other ports not touched.
+Method (run light: one headless Chrome at a time, closed between runs, below-normal priority, no test suite): read HANDOFF "T-020 batch 1"; six runs: 360 × 640 at DPR 2 and 3, 390 × 645 at DPR 2 and 3, 390 × 844 at DPR 3 (Indonesian), 360 × 640 at DPR 2 in Chinese. In each run: K04 start, keyboard focus, tap pool, tap two other places; K08 first step, sign 1 marked, sign 2 marked (also with one lane carrying both marks), sign 1 reopened through its post, conclusion sheet, row chosen, "Tandamu" side and back, one "Periksa lagi" chip. **Crispness is measured, not judged by eye:** each screenshot is compared with the source PNGs; a sprite passes when every art pixel is a DPR × DPR block of exactly the source colour. I opened 10 screenshots and crops and my 3 mocks. K07, K09, K10 ignored as asked. Evidence: `team/evidence/T-020/designer/batch1-review/` (screenshots, `zoom-*.png` crops, `ukur-*.txt`).
+
+### Verdict: FIX NEEDED, no blocker. The art is integrated correctly and is crisp at DPR 2 and 3. Three layout items first (D-182 to D-184), five polish.
+
+### Crispness at DPR 2 and 3: PASS
+| Sprite | Result at all sizes and both DPRs |
+| --- | --- |
+| Map: five pictures 80 × 60, five frames, focus frame, chosen frame, two trees, bush, tree, grass, dirt road | 0 device pixels differ from the source |
+| Road: asphalt strip (lane 4, 66 × 130), four arrows, keycaps in the three states used, sign post 1 (without the corner under its number badge), trees and bushes, sign face in the card and on the lanes, legend swatches | 0 differ |
+- The map pictures and the road scene report `image-rendering: pixelated` with no background scaling, and every sprite measures exactly its file's size.
+- The map sits at a fractional height (y 270.39: the pinned question block is 49.39 high) and the legend swatches at a fractional x (82.7). Chrome snaps both by one device pixel; the blocks stay uniform. I would still give the pinned block a whole-pixel height, because other browsers may not snap the same way.
+- Differences that are by design: the truck's last 4 rows are under keycap 2 (114 art pixels; my own anchors), arrows and asphalt under a hatch, and the two items D-188 and D-189 below.
+- At 360 × 640 DPR 2 in Indonesian the map was checked for one tile only and the legend swatch not at all (that run predates the snap-tolerant check); the Chinese run at the same size and DPR passed in full.
+
+### K04 map against `mock-k04-peta-*.png`
+| Check | Built |
+| --- | --- |
+| Board | 336 × 202 (360 × 640), 366 × 202 (390 × 645), 366 × 300 (390 × 844) |
+| Tile | box 96 wide; picture exactly 80 × 60; frame 84 × 64 at (−2, −2); chosen and focus frames 88 × 68 at (−4, −4) |
+| Label plate | 13 / 15, overlaps the frame by 8, gold `#e0b84f` when chosen |
+| Pin | 40 × 42 at picture (+52, −8); 4 px inside the board on the top row and the right column |
+| Roads, trees | present, on whole pixels |
+| Tap = choose | one tap chooses, a tap elsewhere moves the pin; keyboard focus shows the focus frame |
+| Strip and bar | strip 72; bar 74 in both states; "Ketuk satu tujuan." → "Tugaskan Mas Rudi" |
+| Chinese, 360 × 640 | four labels on one line, board 202, nothing collides |
+- [D-186] Anchors · every tile sits 2 px further in than the README: picture x 16 and 16 from the right (spec 14), top row y 12 (spec 10), bottom row ends 10 px above the edge (spec 8); the anchors were applied inside the 2 px border. On the 202 px board the two right-hand tiles are 2 px apart (spec 6): with "Bengkel langganan" chosen its gold frame touches the "Bengkel rekanan" plate and the pin overlaps that plate by 4 px (no text covered; `zoom-k04-kanan-*.png`) · measure the anchors from the outer edge: 4 / 6 / 6 px inside the border · low.
+- [D-187] "Kantor Raksa" · needs 97.6 px on one line, the plate allows 96, so it wraps to two lines (one line in the mock) · plate padding 5 px instead of 6 · low.
+- [D-189] Pin · the portrait draws its own smooth round border over the inner rim of the pixel ring (140 of the ring's art pixels are anti-aliased) · draw the ring above the portrait and drop the portrait's border there · low.
+- Still open from Stage 2, not batch 1: the map screen scrolls 62 px at 360 × 640 and 57 at 390 × 645 (in the Stage 2 review this was the list link under the strip; I did not look at it again).
+
+### K08 road against `mock-k08-jalan-*.png`
+| Check | Built (336 wide / 366 wide; x from the outer edge of the scene, y inside its 2 px border) |
+| --- | --- |
+| Scene | W × 236; road block 278 centred at x 29 / 44 |
+| Lanes | 66 wide at 36, 102, 168, 234 / 51, 117, 183, 249 |
+| Truck and shadow | 40 × 124 at lane 2 + 13, top 80 inside the border; shadow at (+3, +3) |
+| Arrows, keycaps | arrow at lane + 24, top 14; keycap at lane + 13, top 200, 2 px lower when marked; plain / forbidden / left-lane cells |
+| Marks | hatch 64 wide at lane + 1, opacity 0.55; border 2 px solid `#b3261e` / 2 px dashed `#2f5f8f`; sign face at lane + 22, top 8 |
+| Sign posts | real buttons, 24 × 44 with a 44 × 56 tap area that receives the tap; left 4 / 10; active gold badge, done green, locked 55 % and disabled; a done post reopens its sign ("Selesai mengubah") |
+| Old controls | "Rambu 1" button and "Lihat lagi" chips gone |
+| Context sentence | first step only |
+- The scene's 2 px border is inside the 236, so 232 px of road show. Fine.
+- Accepted differences from the mock: no dashed ring and "Truk · menurut supir" plate around the truck (the context line and the legend say it); marked keycaps use the hatched cells, not the gold one.
+- Fullstack's question, a lane marked for both signs: sign 2's face under sign 1's at top 34 is right.
+
+| Marking step (Indonesian) | 360 × 640 | 390 × 645 | 390 × 844 |
+| --- | --- | --- | --- |
+| Sign card / instruction / scene / legend, sign 1 | 92 / 20 / 236 / 39.2 | same | same |
+| Same, sign 2 with a mark | 70 / 40 / 236 / 58.8 | same | same |
+| Content end against the fold, sign 1 | 557.2 of 558 | 557.2 of 563 | fits |
+| Content end against the fold, sign 2 | **574.8 of 558** | **574.8 of 563** | fits |
+| Scroller, sign 2 | 412 / 441 | 417 / 441 | no scroll |
+- [D-182] Marking step, sign 2, both short sizes · **the legend is three lines once sign 2 has a mark and its last line ("Bukan denah kejadian.") is under the bar**: 17 px cut at 360 × 640, 12 px at 390 × 645. The handoff says nothing scrolls. My numbers were card 87, legend 18–36; built 92 and 39–59. In Chinese at 360 × 640 it fits · **build the README's 204 px scene on screens under 700 px high** (crop 32 px from the top, arrows at top 6, keycaps 36 above the bottom): that leaves 15 and 20 px spare with the three-line legend. This is the missing crop the brief asks about, and it is needed · **med**.
+- [D-188] Lane with both marks · sign 1's face is under the blue hatch (a third of its pixels are tinted) · draw both faces above both hatches · low.
+
+### K08 conclusion against `mock-k08-simpul-*.png`
+| Check | 360 × 640 | 390 × 645 | 390 × 844 | 360 × 640 zh |
+| --- | --- | --- | --- | --- |
+| Sheet height | 492 (mock 488) | 454 (mock 469) | 454 | 383 |
+| Road visible above the sheet | 43 | 86 | whole scene | 152 |
+| List, visible / content | 382 / 382 | 344 / 344 | 344 / 344 | 277 / 277 |
+| Rows | 73 × 5 | 73, 73, 54, 73, 54 | same | 54 × 4, 44 |
+| Sheet moves when a row is chosen | 0 | 0 | 0 | 0 |
+- Full width, activity head one 44 px row with "Kembali", Pak Bima's face and question on top, "Pilih 1 kesimpulan" → "Sampaikan ke Pak Bima", content behind the sheet cannot scroll. Handoff says 459 / 81 at 390 × 645; I measured 454 / 86.
+- The "Tandamu" side shrinks the sheet to 276 (360 × 640) / 224 (390 × 645), so the whole road with the marks shows above it. Good; keep it. Back and the choice survive; the chips reopen a sign.
+- [D-183] Tab over the question · **the "Tandamu" tab covers the top of the question's first line**: its lower edge is 8.75 px below the top of that line, over 24 px of text at 360 wide ("ini") and 79 px at 390 wide ("melanggar"; `zoom-k08-simpul-atas-390x645-d2.png`). It comes from tightening the sheet. Chinese is clear · raise the tab 8 px (it then stands 34 px above the sheet instead of 26) · **med**.
+- [D-184] "Tandamu" side · **the Rambu 1 swatch is invisible** (12 × 12, no fill, no border) and the Rambu 2 swatch is the old grey box with a dashed light-blue edge (`zoom-k08-pilihanmu-*.png`). Likely cause: the sheet is drawn outside the container that defines the red · use the 14 × 14 pixel swatches of the legend for both · **med**.
+- [D-185] Truck in the conclusion view · at 360 × 640 one pixel row of the truck shows above the sheet, although the question says "truk di lajur 2 ini". The README's "truck top 40" was my number for 67 px of road; with 43 px it does not work · truck top 12 in this view: 29 px of cab at 360 × 640, the whole cab at 390 × 645 · low.
+
+### Final text of the four new strings
+| Key | id | en | zh |
+| --- | --- | --- | --- |
+| `tandamu` | Tandamu | Your marks | 你的标记 |
+| `kembaliPilihan` | Kembali ke pilihan | Back to choices | 返回选项 |
+| `pilihSatuKesimpulan` | Pilih 1 kesimpulan | Choose 1 conclusion | 请选 1 个结论 |
+| `kembali` | Kembali | Back | 返回 |
+- One change: English "Back to the choices" → "Back to choices", to match the chat sheet's "Back to replies". The rest stands; "Choose 1 conclusion" and "请选 1 个结论" already mirror "Choose 1 reply" and "请选 1 条回复".
+- I am not a native Chinese reader; the three Chinese strings read correctly to me and match their sibling strings.
+
+### Order of work
+- **Before the owner looks:** D-182 (204 px scene), D-183 (tab), D-184 (swatches).
+- **Polish:** D-185, D-186, D-187, D-188, D-189.
+
+### Not verified by me
+A real phone and WebKit (headless Chromium only). The 21:14:53 build. English layouts. 360 × 740; 390 × 844 at DPR 2. Desktop 1280, the K08 result screen and the `/lokasi` page, which use the same scene. The entrance animations (my runs use reduced motion). Returning from "Selesai mengubah" to the conclusion after a chip. Sending the answer. The byte numbers of the handoff. The test suites.
+
+---
+
+## T-022 — concept (2026-11-16)
+
+Designer · Working under C:\Users\User\Desktop\rksgm-episode2 · No client source edits, no commit, BOARD.md not touched. Run light: no server; one headless Chrome once per mock pass on a local file, below-normal priority; art built by one script.
+Sources read: the module text "Modul Kasus Klaim SIM Palsu", `team/specs/2026-11-16-modul-vs-game.md` (P2), `docs/cerita/PANDUAN-EPISODE.md` §5.
+Evidence: `team/evidence/T-022/designer/`: 28 mock screenshots,`papan-cerita-1.png` and `-2.png` (all 16 states at 390 × 645), `seni-strip.png` and `-2.png` (the art at 2x), `seni/` (the mock art), `mock.html`, `mock-ukur.json`.
+
+### [D-190] The game: "Periksa SIM Pak Darto"
+The player does what the module's surveyor did, with the hands: take the real card, read its class, go to the office that issued it, hand over the ID number, lay the card on the print-out. Four steps, five screens, about eleven taps. No list of answers anywhere.
+| Step | What the player does | What it teaches (from the module) | Stamp |
+| --- | --- | --- | --- |
+| 1. Minta yang asli | Two things lie on the interview table: the photocopy in the claim folder and Pak Darto's wallet. Tap the wallet; he hands over the card and it lands under the player's thumb | Ask to see the original licence | ASLI |
+| 2. Baca golongannya | The licence fills the scene. Tap its class box: a magnifying glass shows "B II UMUM" large. Then tap the tag on the truck ("Perlu SIM: B II UMUM"). A "Balik" button turns the card over; the back names the issuer, Satpas SIM | The licence must fit the vehicle; look at how the class is printed | COCOK |
+| 3a. Ke mana dicek | A small place board (the K04 look): Kantor Raksa, Bengkel rekanan, Satpas SIM. Tap one | The check is done at Satpas SIM | |
+| 3b. Loket Satpas | At the counter: Pak Darto's KTP, a terminal, his signed power of attorney, a wall notice "Bawa KTP atau KK dan surat kuasa". Tap the line on the KTP the officer needs; the number runs into the terminal | The search uses the NIK (KTP or KK), with a power of attorney or a family member named on the KK | SATPAS |
+| 4. Cocokkan cetakan | The Satpas print-out lies above, the card is in hand below. Drag the card onto it (a tap does the same); name, class and number are ticked one by one | Compare the card with the register | SESUAI |
+| End | The clipboard with four stamps, Pak Bima's card "Cerita Pak Bima dari kasus lain" with the edited print under the magnifying glass, one line of feedback | The module's case: refusal, admission, SIM A in the register, the exclusion | |
+- **Progress** is a clipboard under the scene with four slots; each finished step gets a green ink stamp.
+- **A wrong tap never says "salah".** The object gets an amber dashed frame and Pak Bima answers in one sentence in his speech box (amber). Nothing is lost and the player taps again.
+- **At most three facts per screen.** Step 1: copy / original. Step 2: class on the card / class the truck needs. Step 3a: Satpas. Step 3b: NIK / KTP or KK / power of attorney. Step 4: name / class / number.
+- **"Kenapa?"** is a yellow sticky note on the top right corner of every scene; tapped, it unfolds over the scene with one sentence (68 to 102 px high, always inside the scene).
+- **Pak Darto's licence is genuine** (B II Umum, found in the register, everything matches), so Episode 2 stays a valid claim. The fake appears only on Pak Bima's card at the end.
+- **Every drag has a tap.** Step 4 is the only drag; all targets are buttons with names (keyboard and screen reader). Under reduced motion the states change without sliding.
+
+### [D-191] Screens and numbers (Stage 2 shell, no page scroll)
+Story header 57, top padding 12, activity head 69, gaps 8, pinned bar 74 with a 58 px button: as today.
+| Block | Height |
+| --- | --- |
+| Instruction line, 16 / 20, green | 20 (one line in every state) |
+| Scene, pixel art at 1 art px = 1 CSS px, 2 px border | 236 |
+| Clipboard with four stamp slots | 48 |
+| Pak Bima's line: 32 px portrait + box, 14 / 18 | 36 to 69 (1 to 3 lines) |
+| Spare above the bar, 360 × 640 | 23 to 56 |
+| Spare above the bar, 390 × 645 | 46 to 61 |
+| End screen: clipboard 62, case card 207 / 190, feedback 69; spare | 66 / 88 |
+- Measured in the mock for all 16 states at both sizes: page width 360 / 390, nothing sticks out of the scene, every bar label on one line.
+- Scene content is anchored to the centre or to an edge, so one set of art serves 336 and 366 px.
+- Bar labels, one line each: "Ketuk satu benda di meja." → "Lanjut: baca kartunya"; "Ketuk kartu, lalu label truk." → "Lanjut: cek datanya"; "Ketuk satu tempat." → "Ke loket Satpas"; "Ketuk satu baris di KTP." → "Lanjut: cocokkan cetakan"; "Seret kartu ke cetakan." → "Selesai periksa"; "Kembali ke cerita".
+- Mocks, both sizes: `mock-1-minta-asli`, `mock-1-minta-asli-dapat`, `mock-2-golongan`, `mock-2-golongan-lensa`, `mock-3a-tempat`, `mock-3b-loket`, `mock-3b-loket-ketemu`, `mock-4-cetakan`, `mock-4-cetakan-sama`, `mock-5-akhir`. At 390 × 645 only: the three "ragu" states, `-balik`, `-cocok`, `-satpas`, and the open note (`mock-2-golongan-kenapa`; `mock-3b-loket-kenapa` is at 360 × 640).
+
+### [D-192] Text (Indonesian; every line under 20 words, the longest is 17)
+| Step | Instruction | "Kenapa?" note |
+| --- | --- | --- |
+| 1 | Ketuk SIM yang perlu kita periksa. | Fotokopi bisa diedit. Kartu asli bisa diperiksa cetakannya. |
+| 2 | Ketuk golongan SIM di kartu ini. Then: Cocokkan: ketuk label di truk. | SIM harus sesuai kendaraan yang dibawa. Truk trailer ini perlu B II Umum. |
+| 3a | Ke mana kita cek data SIM ini? | Satpas SIM menerbitkan dan menyimpan data SIM. |
+| 3b | Ketuk nomor yang dicari Satpas di KTP. | Dicari lewat NIK di KTP atau KK. Perlu surat kuasa pemilik SIM, atau ditemani keluarga di KK. |
+| 4 | Cocokkan kartu dengan cetakan Satpas. | Kalau cetakan kartu berbeda dari data Satpas, SIM itu perlu ditelusuri. |
+- **Done lines** (replace the instruction, green with a tick): "Kartu asli sudah di tanganmu." · "Golongan SIM cocok dengan truknya." · "Data SIM dicek di Satpas." · "Data ditemukan lewat NIK." · "Nama, golongan, dan nomor sama."
+- **Pak Bima, guiding:** "Pak Darto supir truknya. Sebelum lanjut, kita lihat SIM-nya dulu." · "Golongan menentukan kendaraan apa yang boleh dibawa." · "B II Umum, cetakannya rapi. Sekarang bandingkan dengan truknya." · "Cocok. Tapi kartu yang rapi belum tentu tercatat. Kita cek datanya." · "Siapa yang menyimpan data SIM?" · "Betul. Bawa KTP dan surat kuasa Pak Darto ke loketnya." · "Petugas mencari data dari satu nomor di KTP. Yang mana?" · "Ketemu. Minta cetakannya, lalu cocokkan dengan kartu." · "Geser kartu ke cetakan. Lihat tiga baris: nama, golongan, nomor." · "Tiga-tiganya sama dengan data Satpas."
+- **Pak Bima, after a wrong tap** (the photocopy, workshop and KTP-name cases are drawn; the rest is text only)**:** photocopy: "Fotokopi gampang diedit. Kita minta kartu aslinya ke Pak Darto, ya." · photo on the card: "Itu fotonya. Golongan SIM dicetak besar di pojok kanan atas." · name or number on the card: "Itu nama dan nomornya. Kita cari golongannya dulu." · workshop: "Bengkel paham truk, bukan data SIM. Data SIM ada di Satpas." · office: "Dari meja kita cuma melihat kartunya. Datanya ada di Satpas." · name on the KTP: "Nama bisa sama dengan orang lain. Satpas mencari lewat NIK." · address: "Alamat bisa berubah. Satpas mencari lewat NIK."
+- **Pak Darto, handing the card over:** "Ini SIM saya. Silakan diperiksa." **Card turned over:** "Di belakang tertulis penerbitnya: Satpas SIM. Nanti kita ke sana."
+- **End feedback:** "SIM Pak Darto asli dan sesuai truknya. Bagian ini beres; pemeriksaan klaim lanjut."
+- **Pak Bima's card from the other case:** "Pengemudi menolak menunjukkan SIM asli, lalu mengaku." · "Cetakan golongannya berbeda. Di Satpas tercatat SIM A." · "Tidak punya SIM sesuai peruntukan: masuk pengecualian polis."
+- **The article is not named** anywhere; the card says "pengecualian polis". No line says "ditolak" or promises an outcome. The module's real names, plate, policy and licence numbers are not used; card number and NIK are plainly invented (1234-5678-000042, 1234567890123456).
+
+### [D-193] Pixel art list
+The cards look like the real documents: red top band, "SURAT IZIN MENGEMUDI", a boxed class, photo, name, number, validity, signature, hologram; a made-up shield instead of any official emblem. Printed text is baked into the art in Indonesian (a document stays in its language); all game text around it is live text.
+| File | Size (px) | Bytes in the mock |
+| --- | --- | --- |
+| `sim-depan.png` (licence, front, in hand) | 240 × 152 | 4,013 |
+| `sim-belakang.png` (licence, back) | 240 × 152 | 1,861 |
+| `sim-kecil.png` (licence, small, on the table) | 120 × 76 | 1,139 |
+| `sim-pin.png` (licence as the pin on the place board) | 32 × 21 | 320 |
+| `berkas-fotokopi.png` (claim folder with the grey photocopy) | 140 × 98 | 711 |
+| `lensa-asli.png` (magnifying glass, even print) | 124 × 124 | 751 |
+| `lensa-palsu.png` (magnifying glass, edited print (end card)) | 124 × 124 | 844 |
+| `ktp.png` (KTP) | 190 × 120 | 2,269 |
+| `dompet.png` (wallet) | 64 × 46 | 189 |
+| `jempol.png` (the player's thumb) | 32 × 46 | 194 |
+| `truk-mini.png` (the trailer, reduced from the pool art) | 120 × 58 | 2,016 |
+| `meja.png` (table top tile) | 48 × 32 | 161 |
+| `ubin-satpas.png` (Satpas SIM place tile) | 80 × 60 | 309 |
+| `loket-dinding.png` (Satpas counter wall with window and notice) | 366 × 104 | 2,570 |
+| `monitor-kosong.png` (terminal, waiting) | 124 × 92 | 271 |
+| `monitor-isi.png` (terminal, data found) | 124 × 92 | 379 |
+| `cetakan.png` (Satpas print-out) | 300 × 112 | 632 |
+| `surat-kuasa.png` (power of attorney slip) | 124 × 46 | 322 |
+| `klip.png` (clipboard clip) | 48 × 16 | 155 |
+| `stempel-asli / -cocok / -satpas / -sesuai.png` (ink stamps) | 60 × 26 each | 949 |
+| `sim-palsu-kecil.png` (edited licence, small; drawn, not used in the mock) | 120 × 76 | 581 |
+| **Total, 24 new files** | | **20,636** |
+- **Reused, no new bytes:** Pak Darto and the police officer from the side-character atlas (in the mock the officer is baked into the counter wall), the portraits, the interview room wall, the K04 tiles (Kantor Raksa, Bengkel rekanan), grass, dirt roads, trees, bush.
+- **The brief's 120 × 76 card** is the small card on the table. In the hand it is 240 × 152: at 120 × 76 the name and number cannot be read at 1 art px = 1 CSS px.
+- **Estimate for production art:** about 23 to 27 KB in about 26 indexed PNGs (the mock art is close to final; the licence front and the KTP want hand-tuning, and a "data not found" terminal may be added). One art dispatch, the size of T-020 batch 1. Client work is the Lead's and Fullstack's to estimate; in screens it is about one K08.
+
+### [D-194] For the Lead and PIC Claim to decide
+- **New statements that are not in the module** (PIC Claim sign-off, PANDUAN §5): "truk trailer ini perlu B II Umum"; "Satpas SIM menerbitkan dan menyimpan data SIM"; "nama bisa sama dengan orang lain"; "alamat bisa berubah"; "fotokopi bisa diedit". Everything else paraphrases the module.
+- **Validity** is printed on the card but is not a step: the module does not teach it. Say so if it should be one.
+- **Step 1 needs a photocopy in the folder.** If the player did not ask for the SIM in K02, the folder should show an empty slot and only the wallet can be tapped.
+- **Outcome:** the activity cannot fail. The number of amber answers is the only score; I suggest it changes one sentence of Pak Bima's closing line and nothing else.
+- **"Kenapa?" in step 3b names the NIK**, which is the answer. It is help the player has to open; it can be held back until after the first tap if that is too easy.
+- **Pak Bima's card** could be kept as a collectable in the summary; not designed here.
+
+### Not verified by me
+Nothing is built in the game; the mocks are a static page with the game font, measured in headless Chromium at 360 × 640 and 390 × 645 only. English and Chinese text lengths. 360 × 740, 390 × 844 and desktop. How the drag feels on a phone. Whether the baked 3 × 5 pixel lettering on the cards is readable enough on a real screen at device pixel ratio 2 and 3 (it is in the screenshots). The total against the 400 KB gate. The legal accuracy of the licence class for this truck. The test suites.
+
+---
+
+## T-020 — batch 2 review (2026-11-16)
+
+Reviewer: Designer · Folder: C:\Users\User\Desktop\rksgm-episode2 · No source edits, no commit, BOARD.md not touched.
+Build: production build in client/dist of 22:01:04 for five of the six runs (checked before and after each). Fullstack was rebuilding while I started: the 360 × 640 DPR 3 run began on the 21:58:39 build and the build changed to 22:01:04 during it; its numbers equal the DPR 2 run on 22:01:04. An earlier 360 × 640 DPR 2 run that straddled two builds was repeated. My own server on :4002, started and stopped by me; other ports not touched.
+Method (run light: one headless Chrome at a time, closed between runs, below-normal priority, no test suite): read HANDOFF "T-020 batch 1 FIX" and "T-020 batch 2"; six runs: 360 × 640 at DPR 2 and 3, 390 × 645 at DPR 2 and 3, 390 × 844 at DPR 3 (Indonesian), 360 × 640 at DPR 2 in Chinese. In each run K07 (start, "Info tugas" open, slot chosen, chip chosen), K09 (start, card selected, one planned + one not needed, all five marked, a marked card selected again, undo), K10 (start, stamp pressed, after the automatic move, all three stamped, back by tapping a paper row), then the batch 1 walk of K04 and K08 again. **Pixel check as in batch 1:** every sprite against its source PNG; for every nine-slice frame the four corners and the four edges against the source file. I opened 9 screenshots and crops and my 3 mocks. K02, K05, K11 and the chat photo ignored as asked. Evidence: `team/evidence/T-020/designer/batch2-review/` (screenshots, `zoom-*.png`, `ukur-*.txt`).
+
+### Verdict: PASS with polish. No blocker and nothing that scrolls. Batch 1 fixes D-182 to D-189 all confirmed. Five small items for batch 2, none of them about blur.
+
+### Batch 1 fixes: PASS at DPR 2 and 3
+| Item | Measured (360 × 640 / 390 × 645) |
+| --- | --- |
+| D-182 204 px scene | scene 204 high; with a mark on sign 2 the three-line legend ends at 542.8, fold at 558 / 563; scroller 412 / 412 and 417 / 417. At 390 × 844 the scene stays 236 |
+| D-183 tab | "Tandamu" tab clear of the question text (the boxes overlap by 0.75 px, no glyph is touched; seen in `zoom-k08-simpul-atas-390x645-d2.png`) |
+| D-184 swatches | both swatches on the "Tandamu" side are the 14 × 14 PNGs, exact |
+| D-185 truck | 29 px / 72 px of cab above the sheet; sheet 492 / 454, road 43 / 86, no list scroll |
+| D-186 tile anchors | pictures at x 14 and 14 from the right, top row y 10, both bottom tiles end 8 px above the edge; pin overlaps the plate above by 0 px |
+| D-187 "Kantor Raksa" | one line (95.6 of 96 px), tile 75 high |
+| D-188 faces | sign 1's face on a lane with both marks: 0 device pixels differ from the source |
+| D-189 pin ring | 0 of the ring's pixels differ from the source |
+- The handoff says the bottom row ends 21 px above the edge; I measured 8 px for both bottom tiles, which is the README value.
+
+### Crispness of batch 2 at DPR 2 and 3: PASS
+| What | Result at all sizes and both DPRs |
+| --- | --- |
+| Sprites: magnifiers, clock, "+" key, pushpin on the filled slot, three chip icons; car, "?" badge, pin and dash icons, undo badge; row icons, "not equal" marker, progress squares, small and large stamps normal and pressed, header bands | 0 device pixels differ from the source |
+| Nine-slice frames, corners: cork frame, column plates, token, job card, empty and filled slots, chips normal and chosen, witness cards normal / selected / ghost, keys normal and pressed | 0 differ |
+| Nine-slice frames, edges, wherever nothing is drawn over them | 0 differ |
+- **The six cells cut from the two atlases show no seam and no blur**, also at the fractional widths of K09 (slots 56.8 and 62.8 px, cards 62.4 and 68.4 px). I accept the cut files as the delivery; I will ship single files in future.
+- Not exact, by design: the sticky note (rotated 1.5°) and the pinned witness cards with their pins (rotated 2°), as in my mocks; the ghost card (40 % opacity); frames where something lies on top (header band on the paper, undo badge on the card corner, stamp impression and marker on the highlight, text that reaches into a border).
+- On the dashed slots the repeated dashes start a fraction of an art pixel away from the corner pieces when the slot is an odd number of pixels wide (149 at 360 wide). The dashes themselves stay whole blocks; I can see it only in the numbers.
+
+### Layout (Indonesian)
+| Screen | 360 × 640 | 390 × 645 | 390 × 844 | 360 × 640 zh |
+| --- | --- | --- | --- | --- |
+| K07 strip / board / chips | 76 / 171 / 68 | 76 / 171 / 53 | 76 / 171 / 53 | 76 / 156 / 48 |
+| K07 spare under the chips | 3.2 | 23.2 | 222 | 38.2 |
+| K09 board / card row / action strip | 124 / 96 / 101 or 115 | 124 / 82 / 101 or 115 | same as 390 × 645 | 124 / 82 / 101 |
+| K09 spare | 15.6, or 1.6 with the car driver selected | 34.6 or 20.6 | 234 or 220 | 29.6 |
+| K10 papers / sentence box / stamp row | 93 / 129 / 66 | 93 / 129 / 66 | 93 / 129 / 90 (large stamps) | 93 / 93 / 52 |
+| K10 spare | 3.2 | 31.6 | 207 | 76.6 |
+- Nothing scrolls in any state; page height = screen; no sideways overflow. Board, card row and stamp row do not move when a choice is made (0.0 px in every run).
+- All three match the mocks: K07 cork, plates, yellow job card with the clock, tilted note, dashed slots with the "+" key, pinned card with pushpin and magnifier, three chips; K09 five slots, count box, card states, "–" undo badge, car card with "?", two keys with pressed state; K10 blue and brown bands, Wahyudi / Wahyudin, highlight in both papers with the red marker, impressions on the rows, progress squares, five stamps.
+- "Info tugas": yellow tab on the title row, 98 × 31 with a larger touch area, receives the tap; opened, it turns green and the info panel pushes the board down inside the scroller (357 / 636 at 360 × 640), which is the only time these screens scroll.
+- Undo: the "–" badge is 18 × 18 with a 38 × 41 touch area and receives the tap; the card returns to unmarked and the bar goes back to "Tandai 1 kartu lagi."
+
+- [D-195] K09, both widths · **the two keys move 14 px when the car driver is selected**: its line ("Pengemudi mobil kecil · Memotong jalur; pergi dan tidak dikenali.") takes two lines, so the action strip is 115 instead of 101 and the keys the player has just been tapping shift down, then back up at the next card. At 360 × 640 the spare falls to 1.6 px · give the strip one fixed height of 115 (two-line head always); it still fits · low.
+- [D-196] K09 at 360 wide · "Pengemudi mobil kecil" breaks inside the word ("Pengemud / i mobil / kecil") and makes the card row 96 instead of 82 · never break inside a word on these cards; a smaller size for this one name (about 10.5 px) is fine · low.
+- [D-197] K09 pinned cards · every name on the board is cut: "Petug…", "Penge…", "Polisi J…", "Pak Da…" (Chinese too). It was like that in my mock and it reads badly · on the pinned card use a 36 px portrait and the name on two lines of 11 / 12, which fits the 58 px inside the slot, or drop the name there (the full names stay on the row below) · low.
+- [D-198] K10 paper rows · **verdict on the 22 px rows: acceptable to show the owner, change to 24 px before release.** Each row is two buttons 159 to 174 wide and 22 high, stacked without a gap; they receive their taps, and the automatic move means they are only needed to change an earlier stamp. But 22 px is under the 24 px minimum of WCAG 2.2 (target size) and half of our 44 · rows 24 px (papers 99) and 4 px less padding in the stamp buttons (66 → 62, still 64 wide): net +2 px, 1.2 px spare at 360 × 640 · low.
+- [D-199] "Info tugas" tab · the "≡" sign touches the word ("≡Info tugas") · 4 px between them · low.
+- Accepted as built: K09 board 124 px (my 116); the placed K07 card showing only "Pemeriksaan kejadian" (column and strip say where); the small stamps without symbols (the labels carry the meaning; the large ones at 844 have them).
+
+### Final text of the draft strings
+| Key | id | en | zh |
+| --- | --- | --- | --- |
+| `infoTugas` | Info tugas | Task info | 任务信息 |
+| `belumBedaRingkas` | Cap {n} perbedaan dulu. | Differences left to stamp: {n}. | 还有 {n} 处出入待盖章。 |
+| `arena.selisih.nama.catatan` | Yang pasti, namanya tertulis berbeda. | What is certain: the name is written differently. | 可以确定的是，两处姓名写法不同。 |
+- **"Cap" is right now** that the stamps exist (my earlier objection was to "Catat", which is also the name of one answer).
+- **Chinese bar text:** the draft "还需盖章 {n} 处出入。" puts an object after "盖章", which reads wrong to me; "还有 {n} 处出入待盖章。" keeps the same words. I am not a native reader, so the translator should confirm.
+- **English note:** shortened from "What is certain is that the name is written differently." Same meaning, one "is" less.
+- The other two stand as drafted.
+
+### Not verified by me
+A real phone and WebKit (headless Chromium only). English on all three screens; Chinese only at 360 × 640. 360 × 740 and desktop. The list view behind "Info tugas". Sending the three answers and the result beats. The entrance and press animations (my runs use reduced motion). 390 × 844 at DPR 2. Batch 3 screens. The byte numbers of the handoff. The test suites.
+
+---
+
+## T-022 — art (2026-11-16)
+
+Designer · Working under C:\Users\User\Desktop\rksgm-episode2 · No client source edits, no commit, BOARD.md not touched. No browser and no server used; one build script at below-normal priority.
+Scope: production pixel art for "Periksa SIM Pak Darto" after the owner's go on the concept [D-190..D-194], with the Lead's decisions (licence genuine; always start at the desk; validity drawn, not taught; "Kenapa?" may name the NIK; article behind "pengecualian polis").
+
+### Delivered
+- **Folder:** `character/aktivitas-ep2-pixel-v1/sim/`: **39 indexed PNGs, 24,171 B**, with `README.md` (files, sizes, which step uses what, positions, tap areas, the drag handle and drop target, states, nine-slice values). `BYTE.md` rewritten for all sets: 132 files, 60,644 B.
+- **Build script:** `character/aktivitas-ep2-pixel-v1/alat/bangun-sim.mjs`.
+- **Preview strip at 2x:** `team/evidence/T-022/designer/seni-produksi-strip.png`: the five scenes and the clipboard / speech box / note / end card assembled from the files, then every file. The same scenes at 1x are in the folder as `pratinjau-adegan-*.png` (not assets).
+- **Palette:** every pixel is one of the 668 colours already used by the Ep2 rooms, the side-character atlas and the other activity sets; the script counts 0 pixels outside it.
+- **Lettering:** a 5 × 7 pixel alphabet for all words on cards and papers (the 3 × 5 one of the mock made M, N and U hard to tell apart); long numbers keep the 3 × 5 digits at double size.
+
+### Byte table
+| File | Size (px) | Palette entries | Bytes |
+| --- | --- | --- | --- |
+| berkas-fotokopi.png | 140 × 98 | 9 | 703 |
+| cap-asli.png | 60 × 26 | 2 | 228 |
+| cap-cocok.png | 60 × 26 | 2 | 227 |
+| cap-kosong.png | 120 × 26 | 3 | 135 |
+| cap-satpas.png | 60 × 26 | 2 | 244 |
+| cap-sesuai.png | 60 × 26 | 2 | 250 |
+| catatan-9i.png | 20 × 20 | 4 | 137 |
+| centang.png | 44 × 18 | 5 | 154 |
+| cetakan.png | 300 × 112 | 7 | 719 |
+| dompet.png | 64 × 46 | 9 | 189 |
+| gelembung-9i.png | 18 × 18 | 2 | 92 |
+| gelembung-ekor.png | 16 × 10 | 5 | 151 |
+| gelembung-ragu-9i.png | 18 × 18 | 2 | 92 |
+| jempol.png | 32 × 46 | 6 | 194 |
+| kartu-kasus-9i.png | 18 × 20 | 2 | 92 |
+| klip.png | 48 × 16 | 4 | 155 |
+| ktp.png | 190 × 120 | 58 | 2636 |
+| label-lubang.png | 8 × 8 | 3 | 114 |
+| label-truk-9i.png | 18 × 20 | 3 | 104 |
+| label-truk-cocok-9i.png | 18 × 20 | 3 | 104 |
+| label-truk-ketuk-9i.png | 18 × 20 | 3 | 104 |
+| lensa-asli.png | 124 × 124 | 9 | 784 |
+| lensa-palsu.png | 124 × 124 | 11 | 881 |
+| loket-dinding.png | 366 × 104 | 62 | 2261 |
+| meja.png | 48 × 32 | 4 | 161 |
+| monitor-isi.png | 124 × 92 | 9 | 478 |
+| monitor-ketik.png | 124 × 92 | 7 | 371 |
+| monitor-kosong.png | 124 × 92 | 6 | 294 |
+| papan-jalan-9i.png | 18 × 18 | 3 | 104 |
+| potret-petugas.png | 32 × 32 | 43 | 732 |
+| sim-belakang.png | 240 × 152 | 10 | 1930 |
+| sim-depan.png | 240 × 152 | 70 | 4304 |
+| sim-hantu.png | 240 × 152 | 3 | 308 |
+| sim-kecil.png | 120 × 76 | 55 | 1125 |
+| sim-palsu-kecil.png | 120 × 76 | 11 | 589 |
+| sim-pin.png | 32 × 21 | 14 | 338 |
+| surat-kuasa.png | 124 × 46 | 6 | 349 |
+| truk-mini.png | 120 × 58 | 25 | 2016 |
+| ubin-satpas.png | 80 × 60 | 13 | 322 |
+| **Total, 39 files** | | | **24,171** |
+
+### Mapping notes for Fullstack
+- [D-200] **Scenes are built from pieces at fixed pixel positions** in a W × 236 box with a 2 px border (drawing area (W − 4) × 232, W = 336 or 366). Each position is given from the left, the right or the centre, so one set of art serves both widths. The README has one table per step.
+- [D-201] **Tap areas and the drag** (all in the README): step 1 photocopy 148 × 106 and wallet 108 × 76; step 2 three areas on the card, the right one is the class box (88 × 56), then the whole truck tag; step 3a the three tile boxes; step 3b three rows on the KTP, the right one is the NIK row (134 × 24); step 4 the visible card is the drag handle (240 × 96) and the print-out grown by 12 px is the drop target, with a 24 px upward drag or a plain tap counting as the drop.
+- [D-202] **Frames are nine-slice files** for `border-image` with `repeat`, each a single file (no atlases this time): truck tag in three states, clipboard board, speech box normal and amber, sticky note, end card. Tick box, stamp place and speech tail are small cell atlases used as plain backgrounds.
+- [D-203] **Reused without new bytes:** the interview room wall (shown 1:1 through a 366 × 88 window), Pak Darto and the portraits from the side-character atlas, the K04 tiles Kantor Raksa and Bengkel rekanan with their frames, grass, dirt roads, trees and bush. Hints and wrong / right outlines on tappable things are CSS borders.
+- **The Satpas officer is a new person:** the Polisi figure mirrored, with glasses and a gold cap badge, drawn into the counter wall; `potret-petugas.png` (32 × 32) is there in case the officer gets a line.
+- **Terminal:** three files (waiting, eight digits typed, found). Under reduced motion go straight to "found".
+- **Drag ghost:** `sim-hantu.png` is a dashed outline of the card with its three landmarks; it stays where the card started while the card itself follows the finger.
+
+### Differences from the concept
+- **39 files instead of 24:** states and frames became files of their own (typing terminal, ghost, tag in three states with its hole, tick box, clipboard board, empty stamp places, speech boxes and tail, sticky note, end-card frame, officer portrait). Bytes: 24,171, inside my estimate of 23 to 27 KB.
+- **Card layout changed slightly for readability:** the title is two lines of large letters, the class box is 80 × 48 with "B II" and "UMUM" at the same size, the hologram moved down so the number has room. The KTP rows moved by a few pixels; the README has the new tap areas.
+- **Counter wall:** the "SATPAS SIM" sign is now a band across the top, so the "Kenapa?" tab in the corner covers nothing; a "Loket 1" plate was added; the notice reads "Cek data SIM / bawa KTP/KK dan surat kuasa".
+- `sim-palsu-kecil.png` is delivered as a spare; the end card uses `lensa-palsu.png`.
+
+### Not verified by me
+Nothing is wired into the game and no browser was used: the scenes in the strip are assembled by the script, not rendered by CSS. Whether the 5 × 7 lettering reads well on a real phone at device pixel ratio 2 and 3. The nine-slice frames in a browser (same technique as batch 2, which was exact). The positions were carried over from the concept mock and adjusted by calculation for the new card layout, not re-measured in a page. English and Chinese text lengths around the art. The total against the 400 KB gate. The test suites.
+
+---
+
+## T-020 — batch 3 review (2026-11-16)
+
+Reviewer: Designer · Folder: C:\Users\User\Desktop\rksgm-episode2 · No source edits, no commit, BOARD.md not touched.
+Build: Fullstack was rebuilding for T-021 while I worked. Four runs (390 × 645 at DPR 2 and 3, 390 × 844 at DPR 3, Chinese) and the desktop look were on the 23:08:39 build, unchanged before and after each. The two 360 × 640 runs each saw a rebuild land while they ran (23:01:45 → 23:05:27 and 23:05:27 → 23:08:39); an earlier 360 × 640 DPR 2 pass of the batch 3 screens alone, entirely on 23:01:45, gave the same numbers. My own server on :4002, started and stopped by me; other ports not touched.
+Method (run light: one headless Chrome at a time, closed between runs, below-normal priority, no test suite): read HANDOFF "T-020 batch 2 polish" and "T-020 batch 3"; six runs: 360 × 640 and 390 × 645 at DPR 2 and 3, 390 × 844 at DPR 3 (Indonesian), 360 × 640 at DPR 2 in Chinese; one desktop pass at 1280 × 800 for the chat photo only. In each run: K02 through all eight documents (with the tray contents opened once), K05 with two places, K11 through its three steps with all seven pockets, the chat photo (reached by answering K01), then K07 / K09 / K10 again for the polish. **Pixel check as before:** every picture against its source PNG, and the K02 counter scene against the three stage files it is composed from. I opened 9 screenshots and crops and one mock; K05 and K11 were compared with the mock's numbers. Part 1 opening and the endings ignored as asked. Evidence: `team/evidence/T-020/designer/batch3-review/`.
+
+### Verdict: PASS with fixes. No blocker. Two things to fix before the owner looks (D-204, D-205), the rest polish. Batch 2 polish D-195 to D-199 confirmed.
+
+### Crispness at DPR 2 and 3
+| What | Result |
+| --- | --- |
+| K02: counter scene (the three stage files, 1 : 1), all eight documents, tray cells empty / with documents / full, thumbnails in the contents panel | exact at all sizes and both DPRs (43 picture checks per run) |
+| K05: four of the five tiles, photo stack in the strip, thumbnail token on the tile | exact |
+| K05: the centre tile ("Bengkel lain") | exact at DPR 2; **not exact at DPR 3** (D-205) |
+| K11: folder, pocket thumbnails, tied bundle, three action pictures, plan-row picture | exact |
+| Chat photo 240 × 150 | exact at DPR 2 and 3 (0 of 144,000 and 0 of 324,000 device pixels differ) |
+- All checked pictures are drawn at their file size.
+
+### K02 documents against `mock-k02-dokumen-*.png`
+| Check | 360 × 640 | 390 × 645 | 390 × 844 |
+| --- | --- | --- | --- |
+| Counter scene | 336 × 160 | 366 × 160 | 366 × 160 |
+| Document, name plate, "n/8" plate | document 1 : 1 at left 30, 10 above the bottom; plate left 110 / right 12 / bottom 26; "n/8" at (8, 8), eight squares | same | same |
+| Row between scene and trays | 48; instruction, then the placement with Batalkan / Ubah | same | same |
+| Trays | 107 × 171, art 68 × 40 | 117 × 141 | 117 × 141 |
+| Trays end above the fold by | 64 px | 99 px | 298 px |
+| Trays move after a placement | 0 px | 0 px | 0 px |
+| Count badge = "Isi" button | 22 × 22, touch 40 × 40, receives the tap | same | same |
+| Below the fold | 66 px (info row and list link) | 31 px | 0 |
+- **The 160 px scene is acceptable, and I have no better crop.** It is my own mock number. The stage art has only 20 rows of plain wall above this crop and floor below it; a 214 px scene would add floor under the counter and push the trays down for nothing. Keep 160 at every size.
+- Tray art changes with the count as specified (after four placements: full, with documents, empty for 3 / 1 / 0).
+- [D-204] Tray contents · **the "Isi" panel opens under the trays, mostly below the fold**: at 360 × 640 only its title is visible (58 px of 193), at 390 × 645 93 px; the document list with its "Ubah" links needs a scroll that nothing announces (`k02-isi-*.png`). On 390 × 844 it is whole · show the panel in place of the counter scene and the 48 px row while it is open (208 px are free there, the panel is 193), or scroll it into view · **med**.
+- [D-208] End summary ("Periksa susunanmu") · the three tray pictures are the empty ones although the trays hold 4 / 2 / 2 documents; at 360 × 640 this screen also scrolls 17 px · use the same cell-by-count rule as on the trays · low.
+- [D-209] Scene · the office sign shows as a fragment ("…SA") next to the "n/8" plate · leave the sign layer out of this scene · low.
+
+### K05 against `mock-k05-terusan-*.png`
+| Check | 360 × 640 | 390 × 645 | 390 × 844 | 360 × 640 zh |
+| --- | --- | --- | --- | --- |
+| Board | 336 × 221.2 | 366 × 249.6 | 366 × 300 | 336 × 264.6 |
+| Spare under the strip | 2.0 | 2.0 | 2.0 (150 after a choice) | 2.0 |
+| Tiles overlap | 0 | 0 | 0 | 0 |
+- Pictures 80 × 60 in the K04 frames at the K04 anchors (14 from both sides, top row y 10); "Info tugas" in the head; instruction pinned (40 px, Chinese 20); the two strips are both 80 px, so the board does not move or change size on a tap (0 px).
+- Token: the photo stack 60 × 48 in the strip; after a tap the 22 × 28 thumbnail at picture (+62, −10), inside the board. Bar "Ketuk satu tujuan." → "Teruskan foto", one line.
+- [D-205] Centre tile at DPR 3 · **the middle tile is not pixel-exact**: 10.6 % of its device pixels differ from the source at 360 × 640 and 390 × 844, 0.4 % at 390 × 645; at DPR 2 it is exact. The tile is centred with a half or fractional pixel (picture top 114.5 on the 300 px board; the board itself is 221.22 and 249.61 px high on the short screens), so at three device pixels per pixel its rows come out uneven. K04 uses the same code; it was exact where I measured it only because its centre tile has a two-line label · give the board a whole-pixel height and the centre tile a whole-pixel top (round down) · **med**, because most current phones are DPR 3.
+
+### K11 against `mock-k11-bundel-*.png`
+| Check | 360 × 640 | 390 × 645 | 390 × 844 | 360 × 640 zh |
+| --- | --- | --- | --- | --- |
+| Step tabs | 109 × 40 | 119 × 40 | 119 × 40 | 109 × 50 (names on two lines) |
+| Step 1: folder band / pocket / strip | 64 / 77 × 46 / 72–74 | 64 / 84.5 × 46 / 72 | same | 64 / 77 × 46 / 72 |
+| Step 2: reminder / three cards | 56 / 56, 56, 68 | 56 / 56, 56, 56 | same | 56 / 56 × 3 |
+| Step 3: plan row / three rows | 56 / 56, 56, 68 | 56 / 56 × 3 | same | 56 / 56 × 3 |
+| Spare, steps 1 / 2 / 3 | 28 / 27 / 27 | 33 / 44 / 44 | 232 / 243 / 243 | 18 / 53 / 53 |
+- Nothing scrolls in any step. Seven pockets in 4 + 3 with their thumbnails; pocket 7 dashed with "–" and a red-edged strip "Belum tersedia"; "Tentukan langkah" is the bar button; a tap on tab 1 from step 3 goes back to the pockets.
+- **Per-pocket contents missing: not a blocker.** The strip shows "Lembar n dari 7", the group's name and "Tersedia" / "Belum tersedia", and the names already say what is inside ("Formulir klaim, STNK, SIM, KTP"). The content list was my mock's idea; the script has no such data. Leave it out.
+- [D-206] Step 3 bar · "Konfirmasi tindakan & kirim kabar" takes two lines at both widths (the button stays 58 high) · a short bar label: "Konfirmasi & kirim kabar" / "Confirm & send the news"; the Chinese "确认处理并发送消息" already fits. The other label, "Konfirmasi tindakan tanpa mengabari", is longer still (not measured): "Konfirmasi, tanpa kabar" / "Confirm, no news yet" · low.
+- [D-207] Tender note · the line about "hasil tender" still waiting for confirmation stands under the strip of every pocket · show it with pocket 4 only · low.
+
+### Chat photo
+- 240 × 150 with the 2 px frame (244 × 154), exact at DPR 2 and 3, 58 px (360 wide) and 73 px (390 wide) free beside it, caption "Foto truk dari Pak Hendra".
+- **Wide screens:** at 1280 × 800 the chat column is 780 px, bubbles go to 760, and the photo is still 244 px: small, but correct and crisp (`obrolan-foto-1280x800-d1.png`). Not a blocker. When wanted: from 1024 px viewport width show it at exactly 2 : 1 (480 × 300, frame 4 px) with `image-rendering: pixelated`; no new file. Never a width in between.
+
+### Batch 2 polish: confirmed
+| Item | Measured |
+| --- | --- |
+| D-195 action strip | 115 in every state at every size; the keys stay at the same y for all five cards |
+| D-196 card names | 11 px, wrap at spaces only; "Pengemudi / mobil kecil"; card row 82 at both widths |
+| D-197 pinned cards | 36 px portrait, names in full on two lines; only "Pengemudi mobil kecil" at 360 wide is cut after two lines |
+| D-198 paper rows | 24 px, papers 99, K10 spare 3.2 at 360 × 640 and 31.6 at 390 × 645 |
+| D-199 "Info tugas" | tab 4 px wider (101.7), the sign no longer touches the word |
+- Fullstack's question, names close to the card edge at 360 wide: in Indonesian the nearest is 2.2 px from the card's outer edge, just clear of the frame line; acceptable. In Chinese "Hendra 先生" is 1.1 px from the edge and touches the frame line; allow that one name to wrap or drop to 10.5 px. Low, no number of its own.
+
+### Final text of the draft string
+| Key | id | en | zh |
+| --- | --- | --- | --- |
+| `pilihSatuKabar` | Pilih satu kabar. | Choose one message. | 请选一条消息。 |
+- Stands as drafted (it mirrors "Choose 1 reply" / "请选 1 条回复" closely enough and is one line everywhere I saw it). The two short bar labels of D-206 are new and need the translator's eye for Chinese only if the Chinese ones are changed too.
+
+### Blockers and polish
+- **Blockers:** none.
+- **Fix before the owner looks:** D-204 (tray contents below the fold), D-205 (centre tile at DPR 3).
+- **Polish:** D-206, D-207, D-208, D-209, the 2 : 1 chat photo on wide screens, the Chinese name on the witness card.
+
+### Not verified by me
+A real phone and WebKit (headless Chromium only). English on all screens; Chinese only at 360 × 640. 360 × 740. Desktop for K02, K05 and K11 (only the chat photo was looked at there). The list views. Sending the answers and the result beats. The desk prototype page. The animations (my runs use reduced motion). The byte numbers and the 400 KB gate. The test suites.
+
+---
+
+## T-021 — review (2026-11-16)
+
+Reviewer: Designer · Folder: C:\Users\User\Desktop\rksgm-episode2 · No source edits, no commit, BOARD.md not touched. (Written shortly after midnight, 17 November.)
+Build: all cutscene recordings on the production build of 23:26:37, unchanged before and after each of the three runs. Fullstack rebuilt for T-022 afterwards: the batch 3 re-check at 360 × 640 began on 23:26:37 and ended on 00:03:16, the one at 390 × 844 began on 00:03:16 and ended on 00:05:29, the 1280 photo check was on 00:05:29. My own server on :4002, started and stopped by me; other ports not touched.
+Method (run light: one headless Chrome at a time, closed between sizes, below-normal priority, no test suite): read HANDOFF "T-021" and "T-020 batch 3 FIX". At 390 × 844 DPR 3, 360 × 740 DPR 2 and 1280 × 800 I recorded the forward move (opening, third tap, into K01) and the back move into each of the three endings (the ending state stepped back one line, as Fullstack's check does). Two recordings per move: **(1) at full speed**, a frame log written inside the page (one entry per frame, about 18 ms apart, no gap longer than 20 ms); **(2) a film at one eighth speed** (timers and CSS animations slowed together), about 50 to 90 screenshots per move, from which I made frame sheets (forward and back to "puas" at every size, all three endings at 390 × 844). Tap-to-skip and reduced motion at 390 × 844. The POV picture was compared with its file pixel by pixel at its whole zoom steps. I opened 5 sheets and crops (forward 390 × 844, back to "puas" and to "kurang" at 390 × 844, forward at 1280, and a device-resolution crop of the two arm cells); the other sizes I judge from the frame logs. Evidence: `team/evidence/T-021/designer/review/` (`strip-*.png`, `log-*.json`, `ukur-*.txt`) and `team/evidence/T-020/designer/batch3-recheck/`.
+
+### Verdict: FIX NEEDED, one item (D-210: the camera pulses in the back move). Timing, box and page behaviour, tap, reduced motion and the POV zoom are as specified. Batch 3 fixes confirmed.
+
+### Timing at full speed (ms after the first cutscene frame)
+| Forward | 390 × 844 | 360 × 740 | 1280 × 800 | Spec |
+| --- | --- | --- | --- | --- |
+| Tap → first frame | 3 | 3 | 3 | |
+| Arm "lifting" + bubble | 0 | 0 | 0 | 0 |
+| Arm "reading" | 194 | 195 | 184 | about 200 |
+| Camera 1.33 / 1.67 / 2 | 248 / 301 / not seen | 249 / 303 / not seen | 237 / 290 / 343 | 2x by 350 |
+| POV 1x / 2x / 3x / 4x / fill | 357 / 465 / 555 / 643 / 715 | 356 / 465 / 554 / 644 / 715 | 361 / 450 / 557 / 648 / 720 | from 350 |
+| Fill scale | 4.69x | 4.31x | 10x | |
+| Screen covers the box | 715 | 715 | 720 | 730–750 |
+| Chat mounted | 804 | 822 | 809 | about 820 |
+| Layer gone, done | 1,020 | 1,019 | 1,008 | about 1,030 |
+- Green cover fades 100 → 0 % over 200 ms; the chat settles from −8 px to 0 in steps of 2.
+| Back (three endings each) | 390 × 844 | 360 × 740 | 1280 × 800 | Spec |
+| --- | --- | --- | --- | --- |
+| Tap → first frame | 10–11 | 10–11 | 11 | |
+| POV fill → 4x / 3x / 2x / 1x | 79–82 / 132–135 / 205–208 / 241–262 | 79–83 / 132–137 / 192–206 / 241–246 | 79–80 / 132–134 / 203–206 / 240–243 | gone by 300 |
+| Arm "lifting" | 440–443 | 427–439 | 437–443 | 425 |
+| Arms gone | 551–569 | 551–566 | 551–568 | 550 |
+| Done | 711–715 | 707–715 | 715–730 | 700 |
+- All three endings behave alike at each size (nine back recordings).
+
+### What holds
+| Check | Result |
+| --- | --- |
+| Stage box during the move | one value in every recording: 366 × 366 / 336 × 336 / 780 × 432 forward; 366 × 228.8 / 336 × 210 / 780 × 400 back |
+| Page height, width, scroll | one value in every recording (844 / 390 / 0; 740 / 360 / 0; 800 / 1280 / 0) |
+| Overlay clipped at the dialogue card | the layer box ends 0 to 0.1 px from the card's top edge in every frame; the card stays readable |
+| POV picture in whole steps | every art pixel is one flat block of the file's colour at 1x, 2x, 3x and 4x at 390 × 844 DPR 3, and at 1x, 3x and 4x at 360 × 740 DPR 2 (no film frame fell on 2x there); only the rounded corners of the box differ |
+| Tap during the move | tapped 280 ms in: cutscene over 40 ms later, chat K01 shown, no layer left |
+| Reduced motion | plain cut in both directions: the view changes 5 to 10 ms after the tap, the layer never exists |
+| Arm cells | lifting with the bubble, then reading with her eyes down; joined to her sleeves, pixel-sharp (`lengan-390x844-d3.png`) |
+| Frame pacing | 56 frames forward and 39 back, 17.7 to 17.9 ms apart, longest gap 20 ms (headless Chromium on this PC) |
+
+### What is wrong
+- [D-210] Back move, every size, every ending · **the stage camera pulses.** After the POV picture leaves at 300 ms the stage is shown at 1x, steps in to 1.33x (once as far as 1.67x) by about 385 ms, snaps back to 1x when the arm cell changes at about 440 ms, steps in again to 1.33x by about 512 ms and snaps to 1x at about 551–569 ms (times from 390 × 844). Two zoom-in-and-snap movements in 250 ms where the spec has one steady close view that then returns (`strip-balik-*-390x844-d3.png`, frames 304 / 358 / 425 / 484 / 552). The same reset happens forward, where it only means that 2x is reached for a single frame at most before the POV replaces the stage, and that the canvas keeps restarting its zoom underneath the POV picture, unseen. Cause as far as the log shows: the camera state is taken off and put back at every frame change, so each time the zoom starts again from 1x · keep the camera state through the whole move; in the back move the stage must already be at 2x when the POV leaves, hold it to 550, then return · **high for this task: fix before the owner sees it**.
+- [D-211] Camera step · the move in is three jumps of 50 ms through 1.33x and 1.67x (not whole scales), and at 2x the stage picture is enlarged softly, not pixel-sharp (third crop of `lengan-390x844-d3.png`). At today's speed neither is easy to see, but once D-210 holds the 2x view for 175 ms forward and 250 ms back it will be · make it one hard step to 2x (and one back), drawn pixel-sharp · med, with D-210.
+- [D-212] First POV frame · **the picture is letterboxed**: 366 × 229 in a box of 366 × 344 at 390 × 844 (brown bands of 57 px above and below), 336 × 314 at 360 × 740 (bands of 42 px), 780 × 410 at 1280 (bands on all four sides, 207 px left and right), for about 110 ms. On short phones the box is as flat as the picture and there is no band · start at the smallest whole scale that covers the box (2x on these two phones, 3x at 1280) · med on desktop, low on phones.
+- [D-213] Last zoom step · the "fill" scale is not a whole number on phones (4.69x, 4.31x), so the picture's pixels are uneven for the last 90 ms; at 1280 the last step jumps from 4x to 10x · round the fill up to a whole scale (5x on phones) and spread the steps evenly up to it · low.
+- [D-214] Chat arrival · the green cover is only as large as the old stage box, so the chat header and the lower part of the chat appear at once around a green block that fades (`strip-maju-390x844-d3.png`, frame 796) · let the cover span the chat area under the header · low.
+
+### What a human eye must check on a phone
+My recordings prove the order, the times and the geometry. They cannot tell how it feels. On a real phone, at normal speed, look at:
+1. **The back move after D-210:** does it read as one motion (screen shrinks, she lowers the phone, the view opens)?
+2. **The push-in before the POV** (175 to 350 ms): a quick step towards her, or a stutter?
+3. **The first POV frame:** does the cut from her face to "what she sees" read at once, or does it look like a different picture popping up?
+4. **The arrival in the chat:** does the green flash feel like the phone screen taking over, or like a blink?
+5. **Length:** one second forward and 0.7 back, twice per playthrough. Too long on the second viewing?
+6. **Tap to skip** with a thumb, anywhere on the screen, at any moment.
+7. **An iPhone and a slow Android phone:** dropped frames, and whether the steps keep their rhythm (I measured Chromium on a PC only, with no dropped frame).
+8. **Reduced motion switched on in the phone's settings:** a plain cut.
+9. There is no sound. A short notification tone with the bubble at 0 ms would help the first beat; that is the owner's call.
+
+### Batch 3 fixes: confirmed (DPR 3)
+| Item | Measured (360 × 640 / 390 × 844) |
+| --- | --- |
+| D-204 tray contents | panel 214 high exactly on the counter scene (top difference 0.0), whole inside the window (ends 241 / 445 px above the fold); the trays do not move |
+| D-205 centre tile | **pixel-exact at DPR 3 now**: K05 board 221 / 300, centre picture at (128, 75) / (143, 114), all six pictures 0 differing device pixels; K04 board 202 / 300, all five pictures exact |
+| D-206 bar label | "Konfirmasi & kirim kabar" on one line |
+| D-207 tender note | under pocket 4 only (pocket 7 has none) |
+| D-208 end summary | tray cells by count: full for 4, with documents for 2 and 2. The summary still scrolls 17 px at 360 × 640, as Fullstack notes |
+| D-209 office sign | the counter scene equals the stage files without the sign layer, exact |
+| Chat photo 2 : 1 | at 1280 × 800 the picture is 480 × 300 (frame 2 px), `image-rendering: pixelated`, 0 of 144,000 device pixels differ from the file drawn at 2x. On phones still 240 × 150, exact |
+
+### Not verified by me
+A real phone, WebKit, and any screen other than the three sizes. The short 300 ms version (it cannot occur in a normal playthrough yet). Tap and reduced motion at sizes other than 390 × 844, and a tap during the back move. Short phones (the box is 16 : 10 there; I reason about them, I did not record them). English and Chinese. The other screens of the 00:03:16 and 00:05:29 builds (T-022 in progress). The test suites.
+
+---
+
+## T-022 — review (2026-11-17)
+
+Reviewer: Designer · Folder: C:\Users\User\Desktop\rksgm-episode2 · No source edits, no commit, BOARD.md not touched.
+Build: production build of 00:27:30, unchanged before and after every run. My own server on :4002, started and stopped by me; ports 4000 and 4001 not touched.
+Method (run light: one headless Chrome at a time, closed between sizes, below-normal priority, no test suite): read HANDOFF "T-022". Reached the activity from the saved state after K09 (`k09-a2` → `ksim`, one story line with Pak Bima and Pak Darto present, then the activity). Walked every step with every wrong tap at 360 × 640, 390 × 645 and 390 × 844, each at DPR 2 and 3 (Indonesian, 26 states per run), plus English and Chinese at 360 × 640 (25 states each), the path with no wrong tap at 390 × 844 (18 states), one run with motion on, and one at 1280 × 800. In every state I measured the layout and compared each picture, device pixel by device pixel, with the shipped PNG (one art pixel = one block of DPR × DPR), and the four corners of every nine-slice frame. The drag was done three ways: mouse, finger (touch events) and keyboard. I compared the result with my 16-state storyboard and read all 101 new text lines in the three languages. Evidence: `team/evidence/T-022/designer/review/` (`sheet-*.png`, `crop-*.png`, `ukur-*.txt`).
+
+### Verdict: FIX NEEDED, one blocker (D-215: the card cannot be dragged with a finger). Everything else is polish. The art is pixel-exact and nothing scrolls.
+
+### What holds
+| Check | Result |
+| --- | --- |
+| Pictures | 262 picture checks per Indonesian run, at all three sizes and both DPRs: **0 device pixels differ** from the shipped files, except the clip on the end screen, which is half hidden (D-220). Checked: licence front, back, small, ghost and pin, both magnifiers, photocopy, wallet, thumb, truck, tag hole, Satpas tile, ID card, terminal empty and filled, power of attorney, print-out, ticks off and on, four stamps, empty stamp places, the interview-room wall and the counter wall |
+| Frames | 64 frame checks per run (truck tag in three states, note, clipboard, speech bubble white and amber, case card): all corners exact |
+| Scene and clipboard | scene 336 × 236 / 366 × 236, clipboard 48 (62 on the end screen), instruction one line of 20 px, in every state |
+| Nothing scrolls | scroll 0 in all 276 states. Smallest space left under the content: 36 px at 360 × 640, 41 at 390 × 645, 240 at 390 × 844 (Indonesian and Chinese); 23 at 360 × 640 in English (end screen, three-line speech) |
+| Text length | Indonesian: longest text 17 words (the note at the counter), every speech line at most two lines. Chinese: longest 36 characters, nothing cut. English: see D-216 |
+| Desk | photocopy tapped: amber dashed line on it and the amber line "Fotokopi gampang diedit…"; wallet tapped: Pak Darto speaks, card with thumb appears, stamp ASLI |
+| Card | photo and name taps give their own amber lines; the tag tapped before the class box gives a plain hint and is **not** counted as a wrong tap; class box → magnifier; tag → green tag, stamp COCOK; "Balik" shows the back with "Satpas SIM", "Depan" returns |
+| Places | office and workshop give their own amber lines; Satpas gets the pin and the gold plate |
+| Counter | name and address rows give their own amber lines; NIK row: terminal goes empty → typing (17 ms) → "DATA DITEMUKAN" (324 ms) with motion on; stamp SATPAS; power of attorney shown under the terminal |
+| Print-out | mouse drag: the card follows (34 px up in my test), a ghost stays behind, release drops it; three ticks 250 ms apart; three green boxes; stamp SESUAI. Tap on the card, tap on the print-out and Enter on the card do the same |
+| End | four stamps, case card with the tampered class in the magnifier and three lines, article name not shown ("pengecualian polis"); then story node `ksim-b` after wrong taps and `ksim-a` after a clean run (both reached through the browser) |
+| "Kenapa?" notes | opened in all five steps: 204 wide, 76 to 110 high, inside the scene, 7 to 17 words |
+| 1280 × 800 | 366 px column, every picture and frame exact, nothing scrolls |
+
+### Blocker
+- [D-215] Step 4, phones · **a finger cannot drag the card.** With touch events the card gets the press and 8 to 20 px of movement, then the browser cancels the gesture (`pointercancel`): the card jumps back to its start, no ghost, no drop. Same result with a slow drag (14 small steps). A finger **tap** on the card still drops it, and the mouse drag works, which is why it passed a desktop check. Cause, measured: the button's computed `touch-action` is `manipulation`, not `none`; the rule `.player-ui button { touch-action: manipulation }` in `player.css` is stronger than `.sim-kartu-seret { touch-action: none }` in `sim.css`. With `touch-action: none` forced on the card as a test style, the same finger drag works: the card follows 50 px, the ghost shows, it drops, three ticks (`ukur-t22p-390x844x2.txt`) · write the rule with more weight, for example `.hp-sim .sim-kartu-seret, .hp-sim .sim-kartu-seret * { touch-action: none; }` · **blocker: this is the one drag in the activity, the bar tells the player "Seret kartu ke cetakan.", and on a phone the card snaps back.** Needs one check on a real phone after the fix.
+
+### Polish
+- [D-216] English · two instructions are cut with "…" at 360 px, and the counter note has 30 words (five lines, 127 px high). Final text below · med, text only.
+- [D-217] Counter · the three rows on the ID card are 134 × 24, 26 and 22 px, touching each other, and nothing marks them as tappable (the storyboard had a dashed line around each). A thumb that lands one row off counts as a wrong tap and changes the ending line · draw a 1 px dashed cream line around the three rows before the first tap, and the same around the photocopy and the wallet on the desk, as in the storyboard · med.
+- [D-218] "Kembali ke cerita" in the head · leaving and coming back starts the activity again at the desk with the wrong-tap count at 0 (I left in step 2 with one wrong tap). Progress is lost, and a player can earn "tanpa ketukan keliru" by leaving and re-entering · Lead decides: keep the count across the visit, or accept · low.
+- [D-219] Green "correct" line · on the desk it stays where the wallet was (108 × 76) after the wallet has moved and the card has appeared, so it cuts across both and frames neither. On the card it peeks out at two corners behind the magnifier · put it around the small card on the desk; hide it under the magnifier · low.
+- [D-220] End screen, phones · the clip on the clipboard is half hidden under the top edge of the scroll area (about 8 of its 16 rows; whole at 1280) · hide the clip on the end screen, as in the storyboard · low.
+- [D-221] Print-out after the drop · the green box around the name ends on the last letter of the name (62 px wide; it needs about 4 px more), and the box around the number loses its bottom line under the scene edge (card at top 122: the box ends at 233 of 232) · name box about 66 wide; drop the card at top 118 · low.
+- [D-222] Step 4, keyboard · when the card gets focus with Tab, the scene scrolls 56 px inside itself (the card reaches below the scene, and a hidden-overflow box still scrolls on focus): the print-out moves out of view (`q-4-fokus-360x640-d2.png`). Touch and mouse do not trigger it · `overflow: clip` on `.sim-isi` · low.
+- [D-223] 1280 × 800 · the instruction line sits **under** the button, last on the page, and the 366 px column is centred while the title is at the left edge of the 780 px column (207 px apart) (`end-1280x800.png`) · instruction above the scene, as on phones · low (phones first). I did not check whether other activities do the same at 1280.
+- [D-224] Stamps (my art, not the build) · the lettering inside the four stamps is hard to read at 1 : 1; "COCOK" and "SATPAS" need a second look (`crop-end-360x640-d3.png`) · I redraw the four 60 × 26 files with cleaner letters, same size and names, no code change · low, Designer.
+- Note on the card step covers the class box and "Balik" completely while it is open; "Tutup" is 28 px high. Acceptable: the note must be closed to go on, and it closes with one tap · no change asked.
+
+### English and Chinese
+Chinese: accepted as final. Nothing is cut at 360 px, terms are consistent (准驾类别, 半挂卡车, 保单除外责任). Two optional word changes: 办事员 → 工作人员 (`bima.loket`); 授权书 → 委托书 (`bima.satpas`, `kenapa.loket`, `benda.kuasa`).
+English: accepted with these final texts.
+| Key (`arena.sim.`) | Draft | Final | Why |
+| --- | --- | --- | --- |
+| `inst.loket` | Tap the number Satpas looks up on the ID card. | **Tap the number Satpas searches by.** | cut at 360 px |
+| `inst.cetakan` | Compare the card with the Satpas print-out. | **Compare the card with the print-out.** | cut at 360 px |
+| `kenapa.loket` | It is looked up by the NIK on the ID card or family card. It needs the holder’s power of attorney, or a family member named on the family card. | **Searched by NIK, from the ID or family card. Bring the holder’s power of attorney, or a listed relative.** | 30 words → 19 |
+| `akhir.umpan` | …This part is done; the claim check goes on. | **Mr Darto’s licence is genuine and fits the truck. Now back to the claim check.** | three lines → two |
+| `bima.cocok` | It fits. But a tidy card is not yet a recorded one. Let’s check the record. | **It matches. But a neat card may not be on record. Let’s check.** | reads more naturally |
+| `bima.lensa` | B II Umum, evenly printed. … | **B II Umum, cleanly printed. Now compare it with the truck.** | wording |
+| `kasus.1` | The driver refused to show the original licence, then admitted it. | **The driver would not show the original licence, then confessed.** | "admitted it" is unclear |
+| `kasus.2` | The class was printed differently. At Satpas it was recorded as SIM A. | **The class print looked different. Satpas had it on record as SIM A.** | wording |
+| `bilah.meja` | Tap one thing on the table. | **Tap one item on the desk.** | wording |
+The other 92 English lines stand as drafted. I measured English at 360 × 640 only; the final texts above are shorter than lines that already fit there, but they were not run in the build.
+
+### Is it "a game, not a quiz"?
+Yes, with D-215 fixed. There is no option list anywhere: the player takes the card from a wallet, reads it under a magnifier, matches it to a truck, picks a building on a map, finds a number on an ID card, and lays the card on a print-out, collecting four stamps. A wrong tap costs nothing and gets one kind sentence. The documents look like documents. A player who knows nothing about claims needs two or three taps per step and has done the four checks in the right order. What still feels flat: everything appears at once (wallet → card, magnifier, terminal), and the one physical gesture is the broken drag.
+Cheap to add, in order of value:
+1. An up arrow between the card and the print-out before the drag, as in the storyboard (one small CSS shape or sprite).
+2. Step numbers on the clipboard ("1. Minta asli" … "4. Cocokkan"), current one bold, as in the storyboard; the labels are 10.5 px today.
+3. The speaker's name in bold at the start of the speech line ("Pak Bima", "Pak Darto"), as in the storyboard; today only the portrait changes.
+4. With motion on: the magnifier and the handed-over card arrive in two hard steps (about 120 ms), like the stamp does. Reduced motion stays a cut.
+The summary note is not in the end screen's decision review: I agree with leaving it out, because this node is not a numbered decision.
+
+### Not verified by me
+A real phone and WebKit (the finger drag most of all). Sound. English and Chinese at sizes other than 360 × 640. These shipped files were not compared pixel by pixel: the desk tile, the terminal "typing" frame, the speech-bubble tail, Pak Darto's figure on the desk, and the edges (not corners) of the nine-slice frames. The test suites. Whether other activities also restart when left (D-218).
+
+**D-224 delivered (2026-11-17, Designer):** the four stamps are redrawn in `character/aktivitas-ep2-pixel-v1/sim/`, same names and size (60 × 26, one green, indexed): `cap-asli.png` 218 B (was 228), `cap-cocok.png` 225 B (227), `cap-satpas.png` 237 B (244), `cap-sesuai.png` 232 B (250); set 39 files, 24,134 B (was 24,171). Letters are now hand-drawn 6 × 10 with 2 px strokes and are not broken by ink holes; the holes stay on the frame. No other file in the set changed (checked by hash); `BYTE.md` and the sim README are updated. Before and after at 2x: `team/evidence/T-022/designer/cap-v2-strip.png` (top row old, bottom row new). The client copies in `client/src/cerita/seni/aktivitas/sim/` are still the old ones: Fullstack copies the four files and rebuilds, no mapping or CSS change.
+
+---
+
+## T-021 — re-check (2026-11-17)
+
+Reviewer: Designer · Folder: C:\Users\User\Desktop\rksgm-episode2 · No source edits, no commit, BOARD.md not touched.
+Build: 00:27:30, unchanged before and after both runs. Method: read HANDOFF "T-021 FIX". Recorded the forward move once and the back move once per ending at 390 × 844 DPR 3 and at 1280 × 800, with the same recorder as the review (frame log at full speed, film at one eighth speed); tap-to-skip and reduced motion again at 390 × 844. I opened the forward sheet and the back sheet for "puas" at 390 × 844 and a device-resolution crop of the 2x camera frame; the other recordings I judge from the frame logs. Evidence: `team/evidence/T-021/designer/recheck/`.
+
+### Verdict: PASS. D-210 to D-214 are fixed at both sizes, in all eight recordings.
+
+| Item | Measured (390 × 844 / 1280 × 800) |
+| --- | --- |
+| D-210 camera pulse in the back move | camera values in the back move: 2x from the first frame, then 1x at 550–554 / 549–565 ms. **One change** in each of the six back recordings. No return to 1x between frames |
+| D-211 one hard step to 2x | forward: 1x, then 2x at 196 / 196 ms, in one frame; no 1.33x or 1.67x in any frame. The canvas has no transition and stays `pixelated`: figure pixels are hard-edged blocks in the 2x frame (`camera-2x-crop-390x844-d3.png`) |
+| D-212 no letterbox | the POV picture covers the box in every frame that shows it (25 forward, 17–18 back, per recording): smallest overhang 51 / 127 px forward, 0 / 143 px back. First forward frame is 2x / 3x |
+| D-213 whole-number scales | forward 2, 3, 4, 5 / 3, 4, 5, 6, 7, 8, 9, 10; back 5, 4, 3, 2, 1 / 10, 9, 8, 7, 6, 5, 4, 3. No other value in any frame. The 4x → 10x jump at 1280 is gone (eight steps 53 to 72 ms apart) |
+| D-214 full-box cover | the green cover is the whole stage box, 366 × 366 / 780 × 432 (was 366 × 344 / 780 × 410). It fades 100 → 0 % in 200 ms |
+
+| Timing, forward | 390 × 844 | 1280 × 800 |
+| --- | --- | --- |
+| Arm "reading" and camera 2x | 196 | 196 |
+| POV from | 359 | 357 |
+| Screen covers the box | 700 | 770 |
+| Chat mounted | 810 | 806 |
+| Layer gone, done | 1,010 | 1,023 |
+| Timing, back (three endings) | 390 × 844 | 1280 × 800 |
+| --- | --- | --- |
+| Last POV step | 244–259 | 277–280 |
+| Arm "lifting" | 424–443 | 439–442 |
+| Arms gone, camera 1x | 550–554 | 549–565 |
+| Done | 714–717 | 709–711 |
+
+Unchanged and still good: one stage box and one page size through every recording, the layer ends 0 to 0.1 px from the dialogue card, 39 to 56 frames about 18 ms apart with no gap over 20 ms, tap during the move ends it 39 ms later in the chat, reduced motion is a plain cut in both directions.
+One remark, no change asked: on a phone the cover is the 366 × 366 square under the chat header; the chat area below it (from 487 px down) shows at once. The chat is still empty at that moment, so nothing pops in beside the cover. Whether it reads as "the phone screen takes over" is point 4 of the list for the human eye in the review, which still stands in full: no recording can judge the feel.
+
+Not verified by me: a real phone, WebKit, short phones, 360 × 740 after the fix (Fullstack measured it), English and Chinese, the test suites.
+
+---
+
+## T-022 — re-check (2026-11-17)
+
+Reviewer: Designer · Folder: C:\Users\User\Desktop\rksgm-episode2 · No source edits, no commit, BOARD.md not touched.
+Build: production build of 01:17:38, unchanged before and after every run. My own server on :4002, started and stopped by me; ports 4000 and 4001 not touched.
+Method (run light: one headless Chrome at a time, closed between sizes, below-normal priority, no test suite): read HANDOFF "T-022 Fix". Same tools as the review. Finger drag with Chromium touch events at 390 × 645 and 360 × 640 (DPR 2), six cases each. Full walk with every wrong tap at 360 × 640 and 390 × 645, DPR 2 and 3 (Indonesian, 26 states per run), English once at 360 × 640 (25 states) and one walk at 1280 × 800 for D-223, with every picture and frame corner compared with the shipped PNGs as before. Keyboard focus and leave-and-return at 360 × 640. I opened two device-resolution crop sheets (desk before and after, card with magnifier, counter; print-out after the drop, end screen), the English sheet with the counter, print-out and end, the finger-drag capture at 360 × 640 and the counter at 1280. Evidence: `team/evidence/T-022/designer/recheck/`.
+
+### Verdict: PASS. The blocker D-215 is fixed, and D-216, D-219 to D-224 are done as asked. One new polish item, D-225: the hint line of D-217 is too faint on the ID card (my own colour choice).
+
+### D-215, finger drag (same result at 390 × 645 and 360 × 640)
+Computed `touch-action` is now `none` on the card and on the picture inside it (was `manipulation`).
+| Case | Result |
+| --- | --- |
+| 50 px up in 4 steps | the card follows the full 50 px (top 136 → 86), ghost shown, **no `pointercancel`**; on lift it drops to top 118, three ticks, step done |
+| 48 px up in 14 small steps | follows 48 px, 14 move events, no cancel; drops, three ticks |
+| Diagonal, 30 px right and 40 px up | follows 40 px up, no cancel; drops |
+| 16 px up (under the 24 px threshold) | follows 16 px; on lift the card returns to 136, no drop, no tick |
+| 34 px down | the card stays at 136; page and scroll area do not move (scroll 0) |
+| Tap on the card | drops, three ticks |
+- Mouse drag (card 34 px up, ghost, drop at 118, three ticks) still works at every size walked; Enter on the card still drops it (360 × 640).
+- Reply-sheet handle in the chat (the second rule Fullstack made heavier): computed `touch-action: none`, 96 × 44; a finger drag of 50 px down gives four move events and no cancel, and the sheet closes on lift. The sheet did not move while the finger was down (its top stayed at 159 / 135 px); I did not look into whether it is meant to follow.
+- This is Chromium with touch events from the debug protocol, the same method that showed the failure. A real phone and WebKit are still not verified.
+
+### The other items
+| Item | Result | Measured |
+| --- | --- | --- |
+| D-216 English | done | all nine final texts are in `teks.en.ts` word for word. At 360 × 640: no instruction is cut ("Tap the number Satpas searches by.", "Compare the card with the print-out." on one line of 20 px); the counter note is 19 words, four lines, 110 px high (was 30 words, 127 px); the end speech is two lines; smallest space left 36 px (was 23) |
+| D-217 hint lines | done as asked; **see D-225** | 1 px dashed line on the photocopy and the wallet until the desk is done, and on the three ID-card rows until the counter is done; the tapped wrong row shows the amber line instead |
+| D-218 leave and return | unchanged, accepted by the Lead | back at the desk with the wrong-tap count at 0 |
+| D-219 green line | done | desk: 124 × 80 around the small card (2 px clear on each side); card: no green line behind the magnifier (0 device pixels of the line colour in the screenshot at DPR 3; 882 in the review build), only the dark class box of the card itself shows |
+| D-220 clip on the end screen | done | hidden at every size; the end screen has six pictures, all exact |
+| D-221 print-out after the drop | done | card at top 118; boxes 80 × 48, 66 × 26 and 130 × 23, all inside the scene (the lowest ends at 229 of 232); the name is whole inside its box |
+| D-222 scene scroll on focus | done | `overflow: clip`; with the card focused the scene's scroll stays 0 (was 56) |
+| D-223 1280 × 800 | done | instruction above the scene; activity column and title both start at 250 px |
+| D-224 stamps | done | the four client files are byte-identical to my redrawn ones; in the running build every stamp is pixel-exact at DPR 2 and 3 at both sizes, and ASLI, COCOK, SATPAS and SESUAI read clearly at 1 : 1 (`crop-printout-end-stamps-360x640-d3.png`) |
+
+Whole walk on this build: 261 picture checks and 64 frame checks per Indonesian run, **0 device pixels differ** in all four runs, in English and at 1280; nothing scrolls in any state; smallest space left 36 px at 360 × 640 and 41 px at 390 × 645; wrong taps still end on `ksim-b`.
+
+### New, polish
+- [D-225] Counter, the hint line of D-217 · on the ID card the cream line (255, 243, 217) lies on light blue paper (207, 227, 238): contrast **1.20 : 1**, so at 1 : 1 the three rows still look unmarked (`counter-1280x800.png`; at 3x one can just see it in `crop-desk-card-counter-360x640-d3.png`). On the desk the same line has 2.0 to 2.8 : 1 against the wood and reads well. The colour was my instruction, so this is my miss, not Fullstack's · on the counter step only, draw the line in the card's dark blue `#2f4a6b` (6.9 : 1 on that paper), still 1 px dashed · low to med, one CSS value; not a blocker.
+
+### Not verified by me
+A real phone and WebKit (the finger drag most of all). The clean path to `ksim-a`, the motion-on timings, Chinese, and 390 × 844 on this build (all passed on the build of 00:27:30). English at sizes other than 360 × 640. The same files as in the review were not compared pixel by pixel (desk tile, terminal "typing" frame, bubble tail, Pak Darto's figure, frame edges). The test suites. The four cheap additions from the review (drag arrow, step numbers, speaker name, two-step arrival) were not part of this fix and are still only ideas.

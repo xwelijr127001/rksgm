@@ -20,6 +20,8 @@ import { ringkasTindakan } from '../../hp/arena/ringkas';
 import { alihLajur, daftarLajur, paramTanggapan, pilihSimpul, ringkasTanda, tanggapan, type ArenaRambu } from '../../hp/arena/rambu';
 import { PESAN_AUTO_2 } from './arena';
 import type { KunciTeks } from '../../tipe';
+import { aturBahasa, t as teksUi } from '../../../i18n';
+import { bentukHitung, satuanSesudahAngka } from '../../hp/arena/logika';
 
 const ID = TEKS_AUTO_2.id;
 const LAIN: Bahasa[] = ['en', 'zh'];
@@ -28,10 +30,10 @@ const param = (s: string) => [...new Set(s.match(/\{(\w+)\}/g) ?? [])].sort().jo
 const PARAM = new RegExp("[{][a-z]+[}]", "gi");
 const punya = (o: object, k: string) => Object.prototype.hasOwnProperty.call(o, k);
 
-/** Sengaja SAMA dengan teks Indonesia: nama orang/perusahaan, merek papan nama, kata serapan. */
+/** Sengaja SAMA dengan teks Indonesia: nama orang/perusahaan, merek papan nama, kata serapan; T-020: isi sel kertas K10 (jam, nama fiktif, "?"). */
 const SAMA_DENGAN_ID: Record<string, string[]> = {
-  en: ['pemeran.missRaksa.nama', 'lokasi.kantor', 'istilah.surveyor.label', 'istilah.leasing.label', 'arena.surveyor.rudi.ket', 'daftar.pemisah', 'daftar.titik', 'daftar.titikDua', 'daftar.antarKalimat', 'arena.rambu.lajurPemisah'],
-  zh: ['pemeran.missRaksa.nama', 'lokasi.kantor', 'istilah.leasing.label'],
+  en: ['pemeran.missRaksa.nama', 'lokasi.kantor', 'istilah.surveyor.label', 'istilah.leasing.label', 'arena.surveyor.rudi.ket', 'daftar.pemisah', 'daftar.titik', 'daftar.titikDua', 'daftar.antarKalimat', 'arena.rambu.lajurPemisah', 'arena.selisih.sel.jam.kiri', 'arena.selisih.sel.jam.kanan', 'arena.selisih.sel.nama.kiri', 'arena.selisih.sel.nama.kanan', 'arena.selisih.sel.antisipasi.kiri', 'arena.sim.tempat.satpas'],
+  zh: ['pemeran.missRaksa.nama', 'lokasi.kantor', 'istilah.leasing.label', 'arena.selisih.sel.jam.kiri', 'arena.selisih.sel.jam.kanan', 'arena.selisih.sel.nama.kiri', 'arena.selisih.sel.nama.kanan', 'arena.selisih.sel.antisipasi.kiri', 'arena.sim.tempat.satpas'],
 };
 /** Kata yang hanya ada di kalimat Indonesia (bukan nama): penanda teks yang lupa diterjemahkan. */
 const KATA_ID = /\b(yang|dan|tidak|untuk|dengan|sudah|belum|saya|kamu|truk|Pak|Mas|Bapak|klaim|bengkel|lajur|rambu|supir|surat|berkas)\b/i;
@@ -43,7 +45,7 @@ test('T-014: Episode.bahasa memuat id, en, zh dan episode tetap sah', () => {
 
 test('T-014: kunci id/en/zh sama persis, tanpa nilai kosong, parameter identik', () => {
   const kunciId = Object.keys(ID).sort();
-  assert.equal(kunciId.length, 910);
+  assert.equal(kunciId.length, 1019);
   for (const b of LAIN) {
     const t = TEKS_AUTO_2[b];
     assert.deepEqual(Object.keys(t).sort(), kunciId, `kunci ${b}`);
@@ -201,4 +203,24 @@ test('T-014 fix: tidak ada penyambung Indonesia tertulis di kode sumber antarmuk
   const temuan: string[] = [];
   for (const f of berkas.filter((x) => !KECUALI.some((k) => x.endsWith(k)))) fs.readFileSync(f, 'utf8').split('\n').forEach((baris, i) => { const b = baris.trim(); if (!b.startsWith('//') && !b.startsWith('*') && !b.startsWith('/*') && pola.test(b)) temuan.push(`${path.relative(akar, f)}:${i + 1}: ${b.slice(0, 120)}`); });
   assert.deepEqual(temuan, []);
+});
+
+test('Kalimat hitungan ringkasan susun: jamak Inggris, kata bantu bilangan Mandarin, Indonesia tetap', () => {
+  assert.deepEqual(
+    [bentukHitung('document|documents', 1), bentukHitung('document|documents', 8), bentukHitung('document|documents', 0), bentukHitung('dokumen', 1), bentukHitung('份文件', 8)],
+    ['document', 'documents', 'documents', 'dokumen', '份文件'],
+  );
+  // Baris total persis seperti yang dirakit ArenaSusun (kamus antarmuka + satuan arena dalam bahasa yang sama).
+  const baris = (b: Bahasa, id: 'berkas' | 'saksi', total: number): string => {
+    const k = ARENA_AUTO_2[id];
+    if (k.pola !== 'susun') throw new Error(`${id} bukan arena susun`);
+    aturBahasa(b, false);
+    try { return teksUi('ceritaHp.totalDitempatkan', { n: total, total, satuan: satuanSesudahAngka(k, (kunci) => teksCerita(EP, kunci, b), total) }); } finally { aturBahasa('id', false); }
+  };
+  assert.deepEqual(SEMUA.map((b) => baris(b, 'berkas', 8)), ['8 dari 8 dokumen sudah ditempatkan.', '8 of 8 documents placed.', '已放置 8/8 份文件。']);
+  assert.deepEqual(SEMUA.map((b) => baris(b, 'saksi', 5)), ['5 dari 5 saksi sudah ditempatkan.', '5 of 5 witnesses placed.', '已放置 5/5 位证人。']);
+  // Tunggal hanya bila bendanya satu (angka yang tepat mendahului katanya).
+  assert.deepEqual(SEMUA.map((b) => baris(b, 'berkas', 1)), ['1 dari 1 dokumen sudah ditempatkan.', '1 of 1 document placed.', '已放置 1/1 份文件。']);
+  // Arena tanpa satuanHitung: perilaku lama (label satuan berhuruf kecil).
+  assert.equal(satuanSesudahAngka({ satuan: 'arena.berkas.satuan' }, (kunci) => teksCerita(EP, kunci, 'en'), 8), 'document');
 });

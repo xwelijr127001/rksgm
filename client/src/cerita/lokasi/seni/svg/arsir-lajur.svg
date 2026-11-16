@@ -1,9 +1,0 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 68 360" width="68" height="360" preserveAspectRatio="none">
-<defs>
-<pattern id="rk-lane-hatch" width="10" height="10" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
-<rect width="3.6" height="10" fill="#D4553B"></rect>
-</pattern>
-</defs>
-<rect width="100%" height="100%" fill="#D4553B" opacity="0.2"></rect>
-<rect width="100%" height="100%" fill="url(#rk-lane-hatch)" opacity="0.85"></rect>
-</svg>

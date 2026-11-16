@@ -85,6 +85,8 @@ function semuaJawaban(titik: string): MissionAnswer[] {
 const jawabanUntuk = (() => {
   const cache = new Map<string, MissionAnswer>();
   return (titik: string, alt: string): MissionAnswer => {
+    // T-022: periksa SIM bukan titik bernomor; jalur yang tidak menyebutnya = tanpa ketukan keliru.
+    if (titik === 'ksim') return { sim: { periksa: alt === 'b' ? 'ragu' : 'bersih' } };
     const k = `${titik}:${alt}`;
     if (!cache.has(k)) {
       const j = semuaJawaban(titik).find((x) => petakan(titik, x).alt === alt);
@@ -100,6 +102,8 @@ function mainkan(pilih: Record<string, string>, ep: Episode = EP): StateCerita {
   let s = majuSampaiKeputusan(ep, stateAwal(ep));
   for (let i = 0; i < 200 && !s.akhir; i++) {
     const n = nodeKini(ep, s)!;
+    // T-022: periksa SIM bukan titik keputusan bernomor (tanpa cabang, tanpa perubahan status); dimainkan tanpa ketukan keliru.
+    if (n.id === 'ksim') { s = majuSampaiKeputusan(ep, jalankan(ep, s, { jenis: 'aktivitas', node: 'ksim', jawaban: { sim: { periksa: pilih.ksim ?? 'bersih' } } })); continue; }
     const alt = pilih[n.id];
     assert.ok(alt, `node keputusan tak terduga: ${n.id}`);
     const b = n.jenis === 'pilihan' ? jalankan(ep, s, { jenis: 'pilih', node: n.id, pilihan: alt! })
