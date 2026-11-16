@@ -176,7 +176,9 @@ const slotDari = (slot, kaki) => Object.fromEntries(Object.entries(slot).map(([n
       tempat: { balikMeja: { x: 800, y: 756 } },
       // Pengunjung berdiri di DEPAN meja (Hendra, Pak Bima K07).
       // D-93: pengunjung menghadap KIRI (ke meja & Miss Raksa); slot 1 di x 1040.
-      slot: slotDari({ 1: [[980, 'kiri']], 2: [[980, 'kiri'], [1242, 'kiri']], 3: [[980, 'kiri'], [1182, 'kiri'], [1382, 'kiri']] }, 860),
+      // D-135 (T-019): Hendra (tiga akhir, berdiri di samping Miss Raksa) di x 1040 supaya tidak menutupi lengannya; Pak Bima
+      // K07 tetap 980. y slot tetap 860.
+      slot: slotDari({ 1: [[980, 'kiri', { hendra: 1040 }]], 2: [[980, 'kiri'], [1242, 'kiri']], 3: [[980, 'kiri'], [1182, 'kiri'], [1382, 'kiri']] }, 860),
       prop: { map: prop('ep2-ruang-prop-map.png', r.mapXY.x, r.mapXY.y, r.map), surat: prop('ep2-ruang-prop-surat.png', 196, 98, r.surat) },
       bingkai: { hp: { x: 300, y: 0, w: 1100, h: 900 }, lebar: { x: 0, y: 0, w: 1600, h: 900 } },
     },

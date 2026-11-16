@@ -549,7 +549,9 @@ const NODE: NodeCerita[] = [
     bab: 'b4',
     jenis: 'akhir',
     akhir,
-    tata: { lokasi: 'kantor', hadir: ['missRaksa'], telepon: 'hendra', objek: [] },
+    // T-019 (D-105, owner 16 Nov): akhir TATAP MUKA. Pak Hendra datang ke kantor (berjalan masuk dari kanan ke slot tamu) dan
+    // berdiri di depan Miss Raksa; tanpa sisipan telepon. Teks tidak berubah.
+    tata: { lokasi: 'kantor', hadir: ['missRaksa', 'hendra'], telepon: null, objek: [] },
     // Pak Hendra lebih dulu (wajah akhir = perasaannya, bukan "sesudahnya"), lalu fakta pembayaran, lalu Miss Raksa.
     baris: [
       b(`akhir.${akhir}.1`, 'hendra', akhir === 'puas' ? 'senang' : akhir === 'catatan' ? 'netral' : 'kesal'),
@@ -628,7 +630,8 @@ export const EPISODE_AUTO_2: Episode = {
   lampiran: LAMPIRAN_AUTO_2,
   // Cut-in potret di obrolan (momen emosional terpilih): kecemasan awal, beban cicilan & tanggal 20, protes janji (hanya
   // bila janji 12-A dibuat), dan kabar penyelesaian. Bukan tiap pesan.
-  cutIn: ['k01.2', 'k12.2', 'k14.janji.1', 'akhir.puas.1', 'akhir.catatan.1', 'akhir.kurang.1'],
+  // T-019: baris akhir kini tatap muka di panggung (bukan obrolan), jadi tidak lagi ber-cut-in.
+  cutIn: ['k01.2', 'k12.2', 'k14.janji.1'],
   suasana: [
     { min: 80, ekspresi: 'senang', label: 'suasana.puas' },
     { min: 60, ekspresi: 'lega', label: 'suasana.percaya' },

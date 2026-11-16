@@ -1068,3 +1068,150 @@ Fullstack · NOT committed. Board: T-017 stays `review`, note "D-125/D-126 fixed
 - One walk-check run failed once when the machine was busy (too few samples in 3 s); I lowered its minimum sample count from 5 to 3, since the pose count is the real assertion.
 - I did not watch the walk in motion; whether the feet now plant is for the Designer's recording.
 - `npm run build` rewrote `client/dist`.
+
+## T-018 Stage 1 (2026-11-16): chat screens never page-scroll
+
+Fullstack · NOT committed (base 23dc15d). Board: T-018 stays `doing`, note "Stage 1 built".
+
+**What changed (Episode 2 chat screens, phone and tablet widths)**
+- The page no longer scrolls on a chat screen. Before, the longest chat was 3,447 px tall on a 740 px screen; now the page is exactly the screen height at 360x740, 390x844 and 360x640.
+- Shell: `.hp-layar[data-tampilan="obrolan"]` is a column of `height: 100vh; height: 100dvh` with `overflow: hidden`; `.hp-main` is the `min-height: 0` child. Safe area: top in `.hp-kepala` (as before), bottom once in `.hp-main`. No `position: fixed`, no body/#root rule.
+- **The one scroller is `.hp-gulir`** (new `<div data-gulir>` in `Obrolan.tsx` around the "earlier messages" button, the message list and a tail slot `.hp-ekor`). It has `overflow-y: auto`, `overscroll-behavior-y: contain`, `touch-action: pan-y pinch-zoom`.
+- Chat header: no longer sticky on phones; it is a fixed row above the scroller.
+- Composer `.hp-komposer`: fixed row below the scroller. It holds the primary button (Balas / Lanjut / Kirim balasan / Mulai) or the task card. The session gate ("Mulai percakapan") is pinned the same way.
+- Reply choices: after "Balas", the question and the option list appear at the end of the scroller (the tail slot), and only "Kirim balasan" stays pinned. Otherwise the options would leave no room for the messages. Done with a React portal in `PilihBalasan.tsx`; outside the phone chat shell the block renders as one piece, as before.
+- Glossary chips and the K08 road summary (the old "sisipan") also sit in the tail slot.
+
+**Following the newest message**
+- On open: the scroller starts at the newest message.
+- On new messages: it follows. If the new group is taller than the visible area, the first new message is put at the top (so nothing is skipped); otherwise it goes to the end. It also keeps following while the typing indicator turns into messages and when the composer changes height (ResizeObserver).
+- If the player has scrolled up by more than 80 px (`BATAS_IKUT` in `hp/ekor.ts`): the position is kept and the existing pill appears above the composer; tapping it scrolls to the end. The pill text was already translated: "Pesan baru ↓" / "New message ↓" / "新消息 ↓".
+- The player's own reply is always followed.
+- "Lihat pesan sebelumnya": the view lands on the boundary between old and current messages; scrolling up reaches the first message and the "hide" button.
+
+**Where the shell applies**
+- Media query `(max-width: 1023.98px) and (min-height: 480px)`, kept identical in `hp/desain.css` and `KUERI_CANGKANG` in `hp/ekor.ts`.
+- Desktop 1024 and wider: old behaviour. The 1280 screenshots of two chat states are byte-identical to the ones taken before the change.
+- Screens lower than 480 px (phone in landscape): old page-scrolling behaviour, because header + composer would leave no room for messages.
+
+**Findings**
+- **Episode 1 has no chat screen.** It runs on the standard story player (`PemainCerita` in `pages/CeritaMain.tsx`), not on `PemainHP`; only Episode 2 has `antarmuka: 'hp'`. The Codex note that Episode 1 shares this shell is not correct for the current code. Nothing changed for Episode 1 in this stage; the check records that and takes a screenshot (`ep1-390-id-*.png`, the opening screen, which fits 844 px).
+- Old WebKit without `dvh` (iOS before 15.4) falls back to `100vh`: there the button can sit under the toolbar until it collapses. I did not add `-webkit-fill-available`, because it is unreliable without html/body rules.
+- Tightest case: 360x640 with the task card and the first-visit sound hint leaves 215 px for messages (`obrolan-tugas-360x640-id-chromium.png`). It passes, but the Designer may want the card shorter there.
+
+**Check tool: `tools/cek-gulir-t018.mjs`** (imports `prioritas-rendah.mjs`; one browser at a time)
+- States from the real story engine: `tools/cerita/state-obrolan-t018.mts` -> `team/evidence/T-018/states.json` (Part 4 with 61 messages, Part 1 owner case, a Lanjut state, a decision, a task card).
+- Result on my server (:4001, stopped): **50 / 50 PASS**: Chromium 35, WebKit 15.
+- Per screen: page height not above the screen and `window.scrollTo` does not move; primary button inside `visualViewport`; exactly one overflowing region, which scrolls to its end; both headers stay put; opened history reaches the first message.
+- Behaviour: follow after Lanjut; pill after scrolling up, in id / en / zh, and tap goes to the end; gate -> Balas -> options in the scroller with Kirim pinned -> send -> follows.
+- Sizes 360x740 DPR2, 390x844 DPR3, 360x640 DPR2. Chromium: all states in id plus the longest state in en and zh. WebKit (Playwright build 2388): the longest state and the owner case at all three sizes, en / zh at 390, and the behaviour checks at 390.
+- Wired into `tools/cek-piksel-t013.mjs` (Chromium: longest chat at the three sizes + follow): that tool now reports **99 / 99** (was 95).
+- `tools/cek-bahasa-t014.mjs`: selector extended to `.hp-ekor` so the reply choices are still scanned: 138 / 138.
+
+**Other tests**
+- `npm run test:client`: 740 / 740. `tsc --noEmit` clean. Production build OK.
+- `test:e2e`: not run (Lead runs it).
+
+**Evidence** (`team/evidence/T-018/stage1/`)
+- Chat id: `obrolan-b1-{360,390,360x640}-id-chromium.png` (owner case), `obrolan-b4-*` (longest); en / zh: `obrolan-b4-390-{en,zh}-{chromium,webkit}.png`.
+- Options open: `balas-b1-*.png`; pill: `pil-390-id-*.png`; desktop: `obrolan-b{1,4}-1280-id-chromium.png`; Episode 1: `ep1-390-id-*.png`.
+- Before the change: `sebelum/` (same names) and `sebelum/hasil.json`. Results: `hasil.json`.
+- I opened six of the screenshots (owner case 360, options at 360x640, pill 390, zh WebKit 390, task card 360x640); the rest were captured but not opened.
+
+**Needs attention**
+- **node_modules:** to get WebKit I ran `npm i -D playwright-core`, and npm removed the unsaved `puppeteer-core` with it. I reverted `package.json` / lock and reinstalled both with `npm install --no-save puppeteer-core@24 playwright-core@1.65.1`. `puppeteer-core` is now 24.43.1; I do not know which version was there before. All browser checks above ran on it. Always install the two in ONE command, or npm drops the other.
+- Not checked: a real iPhone (toolbar collapsed / expanded), which is the owner's check. There is no text input in chat, so no keyboard case.
+- `npm run build` rewrote `client/dist`, which the owner's :4000 server also serves. I did not touch that server (it was restarted by someone else during my work).
+- Running `cek-piksel-t013.mjs` rewrote the T-013 evidence screenshots, as it always does.
+
+## T-019 (2026-11-16): endings in person, Hendra walks in (D-105)
+
+Fullstack · NOT committed (base 23dc15d; T-018 Stage 1 is also uncommitted in the same tree). Board: T-019 -> `review`.
+
+**What changed**
+- The three endings (`akhir-puas`, `akhir-catatan`, `akhir-kurang`) are staged in person in the kantor: Miss Raksa behind the counter, Pak Hendra walks in from the right view edge (walk frames mirrored) to the visitor slot x 980, then stands facing left. No phone cut-in. Text unchanged.
+- The cue is in `episode/auto-2/episode.ts`, not `adegan.ts`: `tata: { lokasi: 'kantor', hadir: ['missRaksa', 'hendra'], telepon: null }`. `adegan.ts`, `tata.ts` and `PanggungPiksel.tsx` needed no change; the T-017 walk code already handles right-edge entry and mirroring.
+- Side effect of the restage: Hendra's ending line is now a spoken line on the stage, no longer a WhatsApp message with a portrait cut-in. The three `akhir.*.1` entries were removed from `Episode.cutIn`.
+- Atlas: `tools/piksel/bangun-hendra.mjs` now adds `jalan-kontak-kanan` / `jalan-lintas-kanan` (poses `jalan-a` / `jalan-b`) from `hendra-jalan-v1.png` at read pitch 4.582, mapped to the existing 40-colour palette. Result equals the Designer's table: 95 x 195 with anchor x51 / y194, and 73 x 196 with anchor x37 / y195.
+- Expression after arrival comes from the script line, as before: puas -> senang, catatan -> tenang (line says netral), kurang -> kecewa (line says kesal). I did not change kurang to cemas.
+
+**Walk, measured in the browser** (same constants as Rudi: 270 ms per pose, 3..6 poses, ends on lintas)
+
+| Size | Stage box | Poses | First pose | Walk time | Travel per pose |
+| --- | --- | --- | --- | --- | --- |
+| 360x740 | 336 x 210 | 5 | lintas | about 1.35 s | about 44 art px |
+| 390x844 | 366 x 229 | 5 | lintas | about 1.35 s | about 38 art px |
+| 1280x800 | 780 x 400 | 6 | kontak | about 1.6 s | 39 art px |
+
+- Reduced motion with `?gerak=ikut`: no walk, he is standing at once. "Lanjut" mid-walk: standing at once.
+- I did not watch it in motion; whether his feet plant at 38 to 44 art px per pose is for the Designer's recording. The travel constant (164 world px) was tuned on Rudi's drawn stride.
+
+**Bytes**
+- `hendra.png`: 18,445 -> **25,920 B (+7,475)**; Designer estimate was 7,738.
+- Episode 2 stage PNGs (rooms, props, board text, hendra, miss-raksa, samping): 161,008 -> **168,483 B**, of the 400 KB gate.
+
+**Findings for the Designer**
+- **Hendra overlaps Miss Raksa.** At slot x 980 his body covers her right arm at 360 and 1280 (`akhir-*-360-akhir.png`, `akhir-*-1280-akhir.png`). The slot is as specified; a slot further right would separate them. Not changed.
+- **His shoes are cut by the bottom edge**: 6 art px at 360 and 16 at 1280; at 390 it is the half-body close-up (44). The kantor camera is already at the top of the room and Miss Raksa's head has 6 art px of air, so the camera cannot move down enough; the T-017 foot rule deliberately does not apply to the kantor. Bima at the same slot (K07) is cut the same way today. Not changed.
+- **Existing bug, not from this task:** Miss Raksa's shoes show on the floor below the counter front at 1280 (also in the opening scene, `team/evidence/T-013/final/mentor-1280-id.png`). Not changed.
+- Name board: fully in view and not covered by either head at all three sizes.
+
+**Tests** (own server on :4001, now stopped; one browser at a time; :4000 not touched)
+- `npm run test:client`: **741 / 741** (740 + 1 new Hendra test: frames, anchors, right-edge plan, pose counts 5 / 5 / 6; four older tests updated to the new staging).
+- New `node tools/cek-akhir-t019.mjs`: **23 / 23** (3 endings x 3 sizes: walk + framing; 3 screenshot runs; reduced motion; Lanjut mid-walk).
+- `cek-piksel-t013.mjs`: 99 / 99 (the 9 cut-in cases are now 9 in-person ending cases). `cek-bahasa-t014.mjs`: 138 / 138. `cek-gulir-t018.mjs`: 50 / 50. `cek-jalan-t017.mjs`: 8 / 8. `cek-kaki-t017.mjs`: 18 / 18.
+- `tsc --noEmit` clean; production build OK. `test:e2e` not run.
+
+**Tool and state changes**
+- `tools/cerita/state-kantor-t013.mts` saves `akhir-puas|catatan|kurang`; `team/evidence/T-013/states.json` regenerated (the three `cutin-akhir-*` states no longer exist, because no script scene has a cut-in plus a figure any more).
+- `cek-sisipan-t015.mjs` standalone now reports "no cut-in states" as a note, not a failure. The T-015 head rule is still guarded by the unit test with a made-up scene.
+- `team/evidence/T-018/states.json` regenerated: the longest Part 4 chat state used to be the ending line; it is now node k15-c with 60 messages.
+
+**Evidence** (`team/evidence/T-019/`)
+- Per ending: `akhir-<x>-390-0_3d.png`, `-0_9d.png`, `-akhir.png`; `akhir-<x>-360-akhir.png`, `akhir-<x>-1280-akhir.png`; `hasil.json`.
+- Note: the 360 / 1280 / first 390 screenshots in the folder are from the measuring run before the final assertion run; the code was the same.
+- Frame sheet: `character/piksel/hendra/tinjau-jalan.png`.
+- I opened `akhir-puas-390-0_9d.png`, `akhir-kurang-1280-akhir.png`, `akhir-catatan-360-akhir.png` and the frame sheet; the rest were captured but not opened.
+
+**Notes**
+- `npm run build` rewrote `client/dist` (also served by the owner's :4000).
+- The check runs rewrote evidence under T-013, T-014, T-017 and T-018, as those tools always do.
+
+### Fix (2026-11-16, Designer review D-135..D-138)
+
+Fullstack · NOT committed. Board: T-019 stays `review`, note "D-135..138 fixed".
+
+**D-135, Hendra covered Miss Raksa: fixed.** Kantor slot 1 now carries `xTokoh: { hendra: 1040 }` (`tools/piksel/bangun-ruang-ep2.mjs` -> `ruang-ep2.json`; only that line of the JSON changed, room PNGs are byte-identical). Pak Bima at K07 stays at 980 (checked in the browser and in the unit test). Slot y stays 860; the camera was not changed.
+
+**D-136, feet sliding: fixed with a per-character stride.** `LANGKAH_JALAN_TOKOH = { hendra: 128 }` in `tata.ts` (32 art px per pose); everyone else, including Rudi, keeps 164. `POSE_JALAN_MAKS` 6 -> 7. Measured in the browser:
+
+| Size | Poses | First pose | Walk time | Travel per pose |
+| --- | --- | --- | --- | --- |
+| 360 | 6 (was 5) | kontak | about 1.6 s | 34.1 art px |
+| 390 | 5 | lintas | about 1.3 s | 34.8 |
+| 1280 | 7 (was 6) | lintas | about 1.85 s | 31.3 |
+
+Rudi at the pool is unchanged: 4 / 3 / 4 poses (`cek-jalan-t017.mjs` 8 / 8).
+
+**D-137, Miss Raksa's shoes below the counter: fixed.** In `PanggungPiksel.tsx` the behind-the-counter figure is clipped at the bottom edge of the counter layer (kantor: world y 680, read from the layer, not a typed number). Applies to every kantor scene and size.
+- Check: no dark pixel in the floor area under her feet, in the second beat of all three endings at three sizes and in the opening scene at 1280. At 360 and 390 the opening view does not reach that area, so nothing was examined there.
+- I did not run this pixel check against the old build to prove it would have failed; the before picture is `team/evidence/T-013/final/mentor-1280-id.png` from the earlier run.
+
+**D-138, status chip: fixed.** `.hp-vn .cer-suasana` may now use the stage width, so it is one line at 360 (194 x 25 px; was 181 x 42). It still touches the tip of Hendra's phone at 360 in his own beat (`akhir-catatan-360-akhir.png`); it no longer covers his hand and thigh.
+
+**Bytes:** unchanged by this round. `hendra.png` 25,920 B; Episode 2 stage PNGs 168,483 B.
+
+**Tests** (own server on :4001, now stopped; one browser at a time; :4000 not touched)
+- `npm run test:client`: 741 / 741 (Hendra test updated: x 1040, Bima 980, stride 128 / 164, max 7, poses 6 / 5 / 7, 29..37 art px per pose).
+- `node tools/cek-akhir-t019.mjs`: **45 / 45** (was 23: added chip height, shoe pixels, opening scene, Bima K07).
+- `cek-piksel-t013.mjs` 99 / 99, `cek-jalan-t017.mjs` 8 / 8, `cek-kaki-t017.mjs` 18 / 18, `cek-bahasa-t014.mjs` 138 / 138, `cek-gulir-t018.mjs` 50 / 50.
+- `tsc --noEmit` clean; production build OK. `test:e2e` not run.
+
+**Evidence** (`team/evidence/T-019/fix/`)
+- Per ending: `akhir-<x>-390-akhir.png` (his beat), `akhir-<x>-{360,390,1280}-ketukan2.png` (Miss Raksa's beat), `akhir-<x>-{360,1280}-akhir.png`, `akhir-<x>-390-0_3d.png` / `-0_9d.png`.
+- `k07-bima-1280.png` (Bima unchanged at 980), `mentor-1280.png` (opening scene, no shoes), `hasil.json`.
+- I opened `akhir-kurang-1280-akhir.png`, `akhir-catatan-360-akhir.png` and `akhir-puas-390-ketukan2.png`; the rest were captured but not opened.
+
+**Notes**
+- I did not watch the walk in motion.
+- `npm run build` rewrote `client/dist`; the check runs rewrote evidence under T-013, T-014, T-017 and T-018.

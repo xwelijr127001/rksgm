@@ -350,3 +350,47 @@ Folder confirmed: C:\Users\User\Desktop\rksgm-episode2 (own server :4001 at belo
 3. Camera: pool / bengkel / tol / wawancara-3 at 1280 and 360 changed as intended; opened pool 1280, tol 1280, wawancara-3 1280 and a kantor-staged wawancara-1 1280: shoes whole, head clear of the top edge (about 4 px), no new overlap. wawancara-1/2 room framing covered by cek-kaki (18/18), not by my own screenshots. Kantor (mentor, bima) at 360 / 390 / 1280: pixel-IDENTICAL to my T-013 final screenshots. Phone close-ups (tel-panik) were not re-diffed (no T-013 baseline file at those names).
 4. Images on a full id playthrough (500 steps, 0 console/HTTP errors, 0 webp): **160,739 B** (expected ~161 KB).
 Bugs: 0 (T-017). Open: e2e needs a quiet-machine re-run.
+
+## T-018 Stage 1 — PASS (0 bugs, 2 notes)
+I am reading and writing in C:\Users\User\Desktop\rksgm-episode2 (QA, no source edits, no commit). Evidence: `team/evidence/T-018/stage1/qa/`. Server on :4001 (mine, stopped), run at below-normal priority, one browser at a time, no e2e.
+
+**1. Project checks**
+- `cek-gulir-t018.mjs`: ALL PASS (50) (`cek-gulir.log`).
+- `cek-piksel-t013.mjs`: 99/99 on the second run (`cek-piksel2.log`). The first run (`cek-piksel.log`) failed 4 t018 items ("bukan layar obrolan") because Fullstack rebuilt `client/dist` during it (index.js 11:42); a quiet rerun passed. Not a bug.
+- `test:client`: 740 pass / 1 fail of 741. The failure is `T-019 (D-105)` (Hendra ending frames) = Fullstack's T-019 in the same tree, out of scope. No T-018 test failed (`test-client.log`).
+
+**2. Independent chat check (my own Playwright script, longest state = Part 4 with history)**
+- id/en/zh x 360x740 DPR2, 390x844 DPR3, 360x640 DPR2 in Chromium; WebKit id at all three, en/zh at 390: 14 combos all OK. `scrollingElement.scrollHeight == innerHeight` (740/844/640), no horizontal overflow, `window.scrollTo` leaves scrollY 0, the Lanjut button fully inside visualViewport (e.g. [18,670,342,722] at 360x740), exactly one overflowing region = `.hp-gulir`, which reaches its end (gap 0). Opened history: first message reachable at top, page still not scrolling (id/en; the zh history button was not matched by my selector, covered by the project check's zh run).
+- Pill: scrolled up (rem 472) then Lanjut keeps the position and shows "Pesan baru ↓" / "New message ↓" / "新消息 ↓" in Chromium and WebKit; tapping it scrolls to the end (remaining 0), 6/6.
+- Reply options: Balas -> options in `.hp-ekor` (11 tappable items, tail slot), "Kirim balasan" pinned inside the viewport, page height = screen at all three sizes in Chromium and WebKit; tapping the last item works and page stays fixed.
+- Attachments/extras: "Detail" and the glossary chip open inside the scroller at 360x640, page stays 640, no console errors (Chromium, WebKit).
+
+**3. Playthrough (id, driver, seed 11, 1,600 steps)**: reached the ending ("Klaimnya selesai … Lihat ringkasan"), stuck 0, HTTP errors 0. First 600-step run: 0 console errors. The long run logged only `WebSocket ... ERR_CONNECTION_REFUSED` errors: my :4001 server was gone mid-run (client/dist was being rebuilt by Fullstack, server log shows ENOENT index.html); not an app error. I restarted it for the regression.
+
+**4. Regression**
+- Stage/activity/end states (T-013 saved states, 390 and 1280): `.hp-layar` has `data-tampilan=adegan`, overflow visible, page scroll still allowed (e.g. akt-rambu 1072 px at 390). Chat states (akt-berkas, surat, tel-panik) use the shell at 390 and are normal at 1280 (overflow visible).
+- 1280 chat: not a shell, page scrolls (b1 1326 = identical to `sebelum`; header sticky).
+- Homepage 390: scrollHeight 912, scrollWidth 390 (no overflow); T-003..T-011 numbers not re-measured by a separate tool, no change observed.
+
+**Notes (not bugs)**
+- N-1: 1280 Part 4 chat is 2,413 px high now vs 2,548 in `sebelum`, and the chat header now shows the Hendra avatar. `cangkang:false`, sticky header and all rules unchanged; I attribute it to T-019 content in the same tree (hendra atlas, episode.ts), not to T-018 CSS. Lead may want to confirm.
+- N-2: `npm run test:client` is red only from the T-019 test above until Fullstack finishes.
+
+## T-019 — PASS (0 bugs, 2 notes)
+I am reading and writing in C:\Users\User\Desktop\rksgm-episode2 (QA, no source edits, no commit). Evidence: `team/evidence/T-019/qa/`. Own server :4001 (stopped after), below-normal priority, one browser at a time, no e2e. Build = final T-019 tree incl. Fix D-135..D-138.
+
+**1. Project checks (sequential):** `test:client` 741/741; `cek-akhir-t019` 45/45; `cek-piksel-t013` 99/99; `cek-jalan-t017` 8/8; `cek-kaki-t017` 18/18; `cek-bahasa-t014` 138/138; `cek-gulir-t018` 50/50.
+
+**2. Endings (my own Playwright script `end.log`)**
+- puas / catatan / kurang in id at 360x740 DPR2, 390x844 DPR3, 1280, plus WebKit 390 (all 3): Hendra walks in (first frame `jalan`, 9..16 samples at 120 ms), ends `hendra:berdiri:kiri:<senang|tenang|kecewa>` at x 1040 next to Miss Raksa at 800; no cut-in (`data-sisipan` empty). Expression per ending as scripted.
+- Status chip one line everywhere: 25 px high (194 / 189 px wide at 360; en 185; zh 162).
+- en (puas, 360) and zh (kurang, 360): same walk and standing result; text localised, 0 Indonesian visible.
+- Reduce + `?gerak=ikut` (puas, 360): 0 walk frames, standing at once. Lanjut mid-walk (360): standing at once (kaki 1040, no jalan).
+- Screens I opened: kurang 360, puas 1280 (Hendra beside Miss Raksa, no overlap; board "LAYANAN KLAIM RAKSA" readable; Hendra's feet are under the dialogue card, accepted per Designer notes).
+- End screen: from each saved ending state, Lanjut then "Lihat ringkasan" reaches "AKHIR CERITA" with Pak Hendra: Puas / Tenang / Kecewa; 0 console errors in all runs (Chromium + WebKit).
+
+**3. Regression:** K07 with Bima (1280) unchanged: Bima at slot 980, same framing. Kantor opening (Miss Raksa only, 1280): shoes no longer show below the counter front; nothing else clipped. Pool Rudi walk unchanged (`cek-jalan` 8/8, 4/3/4 poses).
+
+**4. Bytes (full id playthrough, seed 11, 2,200 steps, 0 console errors, 0 HTTP errors, 0 stuck):** 12 PNGs, total **168,214 B** (expected ~168.5 KB; hendra.png 25,920, samping 36,959); 0 webp. The random driver did not itself reach the end screen in 2,200 steps (stayed in Part 4 chat), which is why the end screen was verified from the saved ending states instead.
+
+**Notes (not bugs):** N-1 Hendra's feet are cut by the dialogue card at 360/1280 as already known (kantor camera rule, same as Bima). N-2 my total is 269 B below Fullstack's 168,483 (one small prop not requested on this path).

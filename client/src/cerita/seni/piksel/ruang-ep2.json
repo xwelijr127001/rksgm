@@ -59,7 +59,10 @@
      {
       "x": 980,
       "y": 860,
-      "hadap": "kiri"
+      "hadap": "kiri",
+      "xTokoh": {
+       "hendra": 1040
+      }
      }
     ],
     "2": [

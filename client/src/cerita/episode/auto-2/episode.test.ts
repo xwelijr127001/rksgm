@@ -312,12 +312,18 @@ test('cut-in obrolan: momen terpilih saja; protes janji hanya bila janji 12-A di
       if (y === x) break;
       x = y;
     }
-    // Baris akhir nasabah (sebelum layar akhir): cut-in penyelesaian.
+    // Baris akhir nasabah (sebelum layar akhir): sejak T-019 tatap muka di panggung, TANPA cut-in obrolan.
     for (let i = 0; i < 10; i++) { const t = cutInDi(x); if (t) muncul.add(t); const y = jalankan(EP, x, { jenis: 'lanjut' }); if (y === x) break; x = y; }
     return muncul;
   };
   const tepat = jalani(TEPAT);
-  assert.deepEqual([...tepat].sort(), ['akhir.puas.1', 'k01.2', 'k12.2'], 'jalur tepat: kecemasan awal, tanggal 20, penyelesaian');
+  assert.deepEqual([...tepat].sort(), ['k01.2', 'k12.2'], 'jalur tepat: kecemasan awal, tanggal 20 (akhir = tatap muka, T-019)');
+  // T-019 (D-105): tiga akhir = kantor, Miss Raksa + Pak Hendra hadir, tanpa telepon; teks baris tidak berubah.
+  for (const akhir of ['puas', 'catatan', 'kurang']) {
+    const n = EP.node[`akhir-${akhir}`] as unknown as { tata: unknown; baris: { teks: string; siapa: string }[] };
+    assert.deepEqual(n.tata, { lokasi: 'kantor', hadir: ['missRaksa', 'hendra'], telepon: null, objek: [] });
+    assert.deepEqual(n.baris.map((x) => [x.teks, x.siapa]), [[`akhir.${akhir}.1`, 'hendra'], ['akhir.bayar', 'narasi'], [`akhir.${akhir}.2`, 'missRaksa']]);
+  }
   const janji = jalani({ ...TEPAT, k12: 'a', k06: 'c', k03: 'b' });
   assert.ok(janji.has('k14.janji.1'), 'janji 12-A: protes babak 14 diberi cut-in');
   // Sesudah pemain membalas pesan pertama, cut-in hilang (kembali gelembung biasa).

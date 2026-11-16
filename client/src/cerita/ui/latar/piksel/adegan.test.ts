@@ -12,6 +12,8 @@ import { adeganPiksel, OBJEK_PIKSEL, PERAN_PIKSEL, poseHilang } from './adegan';
 import { RUANG_PIKSEL, CATATAN_RUANG } from './ruang';
 
 const ep = EPISODE_AUTO_2;
+/** T-019: jumlah pose jalan Hendra di kantor pada 360 / 390 / 1280 (sama dengan POSE_HARAPAN_HENDRA di tools/cek-jalan-t017.mjs). */
+const POSE_HENDRA = [6, 5, 7];
 const komp = (k: Partial<KomposisiLatar>): KomposisiLatar => ({ lokasi: 'kantor', hadir: [], telepon: null, objek: [], ...k });
 const tl = (id: string, ekspresi: Ekspresi = 'netral', bicara = false) => ({ id, ekspresi, bicara });
 
@@ -126,7 +128,7 @@ test('naskah AUTO-2 (SELURUH episode): setiap komposisi = piksel tanpa cadangan;
   // Arah per adegan (D-93): kantor pengunjung kiri; pool/tol kanan; bengkel admin kiri; wawancara 1 kanan, 2 saling berhadapan,
   // 3 = kiri & tengah kanan, kanan kiri.
   assert.deepEqual([...diminta].sort(), [
-    'bengkel/1:admin:kiri', 'kantor/0:missRaksa:kanan', 'kantor/1:bima:kiri', 'pool/1:rudi:kanan', 'tol/1:bima:kanan',
+    'bengkel/1:admin:kiri', 'kantor/0:missRaksa:kanan', 'kantor/1:bima:kiri', 'kantor/1:hendra:kiri', 'kantor/1:missRaksa:kanan', 'pool/1:rudi:kanan', 'tol/1:bima:kanan',
     'wawancara/1:bima:kanan', 'wawancara/2:bima:kanan', 'wawancara/2:darto:kiri', 'wawancara/3:bima:kanan', 'wawancara/3:polisi:kiri', 'wawancara/3:tol:kanan',
   ]);
 });
@@ -173,8 +175,10 @@ test('T-015: sisipan telepon tidak pernah menutupi kotak kepala tokoh (setiap ad
     const hadir = l.hadir.filter((x) => x !== l.telepon);
     if (hadir.length) adegan.set(hadir.join('+') + '/' + l.telepon, { lokasi: l.lokasi, hadir: hadir.map((id) => tl(id)), telepon: tl(l.telepon), objek: l.objek });
   }
-  // Naskah: hanya Miss Raksa + telepon Hendra (tiga akhir). Bima + telepon ikut diuji sebagai penjaga.
-  assert.deepEqual([...adegan.keys()], ['missRaksa/hendra']);
+  // T-019: tiga akhir kini tatap muka, jadi naskah TIDAK lagi punya adegan kantor bersisipan + tokoh di panggung. Aturannya
+  // tetap dijaga: Miss Raksa + telepon Hendra (susunan akhir yang lama) dan Bima + telepon.
+  assert.deepEqual([...adegan.keys()], []);
+  adegan.set('missRaksa/hendra', komp({ hadir: [tl('missRaksa')], telepon: tl('hendra') }));
   adegan.set('missRaksa+bima/hendra', komp({ hadir: [tl('missRaksa'), tl('bima')], telepon: tl('hendra') }));
   const letakHp = new Set<string>();
   for (const [nama, k] of adegan) {
@@ -208,8 +212,8 @@ test('D-102 (T-016): teks papan latar aktivitas = teks papan panggung (merek, sa
 
 test('T-017 (D-104): Rudi punya dua bingkai jalan di atlas samping; rencana jalan K04 pool = dari tepi kiri ke slot 420', async () => {
   const { kameraPiksel, LANGKAH_JALAN_MS, posisiJalan, punyaJalan, rencanaJalan, susunAdeganPiksel } = await import('./tata');
-  // Hanya Rudi (D-105: bingkai Hendra BELUM dipasang); tokoh lain tetap luncur 180 md.
-  assert.deepEqual((['missRaksa', 'hendra', 'rudi', 'bima', 'darto', 'admin', 'tol', 'polisi'] as const).filter((id) => punyaJalan(id)), ['rudi']);
+  // Rudi (T-017) dan Hendra (T-019, D-105); tokoh lain tetap luncur 180 md.
+  assert.deepEqual((['missRaksa', 'hendra', 'rudi', 'bima', 'darto', 'admin', 'tol', 'polisi'] as const).filter((id) => punyaJalan(id)), ['hendra', 'rudi']);
   const berdiri = susunTokoh('rudi', { pose: 'berdiri', hadap: 'kanan', ekspresi: 'netral' })!;
   for (const pose of ['jalan-a', 'jalan-b'] as const) {
     const s = susunTokoh('rudi', { pose: pose as never, hadap: 'kanan', ekspresi: 'cemas', mata: 'tutup' })!;
@@ -262,6 +266,61 @@ test('T-017 fix D-125: 41 piksel seni per pose -> K04 pool 4 / 3 / 4 pose di 360
     return [rj.n, posisiJalan(rj, 0)!.pose];
   });
   assert.deepEqual(hasil, [[4, 'jalan-a'], [3, 'jalan-b'], [4, 'jalan-a']]);
+});
+
+test('T-019 (D-105): akhir tatap muka: Hendra punya dua bingkai jalan, masuk dari tepi KANAN (cermin) ke x 1040 (D-135); tanpa sisipan', async () => {
+  const { kameraPiksel, langkahJalan, LANGKAH_JALAN_MS, POSE_JALAN_MAKS, posisiJalan, rencanaJalan, susunAdeganPiksel } = await import('./tata');
+  // D-136: jarak per pose per tokoh (Hendra 128 dunia = 32 piksel seni; Rudi tetap 164), paling banyak 7 pose.
+  assert.deepEqual([langkahJalan('hendra'), langkahJalan('rudi'), POSE_JALAN_MAKS], [128, 164, 7]);
+  const berdiri = susunTokoh('hendra', { pose: 'berdiri', hadap: 'kanan', ekspresi: 'netral' })!;
+  // Jangkar Designer (hendra-jalan-v1.md): kontak x51 y194, lintas x37 y195.
+  const JANGKAR = { 'jalan-a': { x: 51, y: 194 }, 'jalan-b': { x: 37, y: 195 } } as const;
+  for (const pose of ['jalan-a', 'jalan-b'] as const) {
+    const s = susunTokoh('hendra', { pose: pose as never, hadap: 'kanan', ekspresi: 'kesal', mata: 'tutup' })!;
+    assert.equal(s.pose, pose);
+    assert.equal(s.hadap, 'kanan');
+    assert.equal(s.lapisan.length, 1, 'wajah terpanggang: tanpa lapisan ekspresi / kedip');
+    assert.deepEqual(s.jangkar, JANGKAR[pose]);
+    assert.ok(Math.abs(s.ukuran.h - berdiri.ukuran.h) <= 1, 'tinggi = berdiri (kontak 1 piksel seni lebih rendah: naik-turun langkah tergambar)');
+    assert.ok(Math.abs((s.kepala.x - s.jangkar.x) - (berdiri.kepala.x - berdiri.jangkar.x)) <= 0.5, 'kepala tidak melompat mendatar');
+  }
+  // Tiga akhir di naskah: kantor, Miss Raksa di balik meja + Hendra di slot tamu hadap kiri (cermin), TANPA telepon.
+  for (const akhir of ['puas', 'catatan', 'kurang']) {
+    const t = ep.node[`akhir-${akhir}`]!.tata!;
+    const a = adeganPiksel(ep, komp({ lokasi: t.lokasi!, hadir: (t.hadir ?? []).map((id) => tl(id)), telepon: null })).piksel!;
+    assert.equal(a.telepon, null);
+    assert.deepEqual(a.tokoh.map((x) => [x.id, x.tempat, x.hadap, x.cermin]), [['missRaksa', 'balikMeja', 'kanan', false], ['hendra', 'slot', 'kiri', true]]);
+  }
+  const a = adeganPiksel(ep, komp({ hadir: [tl('missRaksa'), tl('hendra')] })).piksel!;
+  const r = RUANG_PIKSEL[a.ruang]!;
+  const tokoh = susunAdeganPiksel(a, r, { kedip: false, mulut: false });
+  const h = tokoh.find((x) => x.t.id === 'hendra')!;
+  // D-135: Hendra di x 1040 (xTokoh), Pak Bima di slot yang sama tetap 980.
+  assert.equal(h.kakiX, 1040);
+  const bima = adeganPiksel(ep, komp({ hadir: [tl('bima')] })).piksel!;
+  assert.equal(susunAdeganPiksel(bima, r, { kedip: false, mulut: false })[0]!.kakiX, 980);
+  // Kotak panggung kantor terukur (tools/cek-akhir-t019.mjs): 360 -> 336x210 DPR2, 390 -> 366x229 DPR3, 1280 -> 780x400 DPR1.
+  const hasil = ([[336, 210, 2], [366, 229, 3], [780, 400, 1]] as const).map(([W, H, dpr]) => {
+    const kam = kameraPiksel(r, tokoh, W, H, dpr, 22);
+    const rj = rencanaJalan(h.kakiX, h.s.ukuran.w * 4, kam, W, langkahJalan('hendra'));
+    const perPose = Math.abs(rj.tujuan - rj.awal) / rj.n / 4;
+    assert.ok(perPose >= 29 && perPose <= 37, `${W}: ${perPose} piksel seni per pose (gambar Hendra: 29 lalu 37)`);
+    assert.equal(rj.arah, 'kiri', 'masuk dari kanan, berjalan ke kiri');
+    assert.ok(rj.awal - h.s.ukuran.w * 4 >= kam.x + W / kam.s - 1e-6, 'mulai di luar tepi kanan pandangan');
+    assert.ok(rj.n >= 3 && rj.n <= 7);
+    assert.equal(rj.durasi, rj.n * LANGKAH_JALAN_MS);
+    let lalu = Infinity;
+    for (let t = 0; t < rj.durasi; t += 15) {
+      const p = posisiJalan(rj, t)!;
+      assert.equal((p.x - 1040) % 4 === 0, true, 'piksel seni bulat');
+      assert.ok(p.x <= lalu && p.x >= 1040, 'maju terus ke kiri, tidak melewati slot');
+      lalu = p.x;
+    }
+    assert.equal(posisiJalan(rj, rj.durasi - 1)!.pose, 'jalan-b', 'bingkai terakhir = lintas');
+    assert.equal(posisiJalan(rj, rj.durasi), null, 'tiba = berdiri');
+    return rj.n;
+  });
+  assert.deepEqual(hasil, POSE_HENDRA);
 });
 
 test('T-017 fix D-126: ruang lapangan, kamera turun sampai telapak utuh bila kepala masih punya 2 piksel seni udara; bidikan dekat & kantor tidak disentuh', async () => {

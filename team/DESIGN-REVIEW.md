@@ -1879,3 +1879,226 @@ The walk is now 0.8–1.1 s at about 135–155 art px per second, a normal walki
 
 ### Not verified by me
 The walk seen at speed by a human eye (this is again frame recordings and measurements); a real phone; wawancara at 1280 after the camera rule (Fullstack reports it whole; not in this brief); reduced motion and "Lanjut" mid-walk were verified in the first review and not repeated; no test suite was run.
+
+---
+
+## T-018 — Stage 1 review + Stage 2 rules (2026-11-16)
+
+Reviewer: Designer · Folder: C:\Users\User\Desktop\rksgm-episode2 · No source edits, no commit, BOARD.md not touched.
+Build: production build in client/dist on my own server on :4002 (started and stopped by me; :4000 not touched). **The build changed while I worked:** it was 11:24 when I started and was rewritten at 11:42 (T-019 work: the endings became stage scenes). The Stage 1 chat files (`Obrolan.tsx`, `PilihBalasan.tsx`, `desain.css`, `ekor.ts`) are the same in both, so the chat findings stand; the longest chat state (`obrolan-b4`) could no longer be opened as a chat at 360×640 in Chinese after 11:42.
+Method (run light: one headless Chrome at a time, closed between sizes, below-normal priority, no test suite): read the spec + Rev 1.1 and HANDOFF "T-018 Stage 1"; measured and photographed the chat states of `team/evidence/T-018/states.json` at 390×844 DPR 3 and 360×640 DPR 2 in id and zh (owner case, longest chat, task card, session gate, reply choices open / scrolled / chosen, opened history, the new-message pill, safe-area insets 47 / 34 emulated), desktop at 1280×800; measured the six reply prompts at the owner's real visible page size; measured today's stage, activity and end screens at 360×640 by walking forward from the 22 saved states. I opened 17 screenshots. Evidence: `team/evidence/T-018/designer/`.
+Owner's visible page: measured from `owner/balas-terlalu-tinggi-1.jpg`, the page area is **390 × 645 CSS px** (toolbar expanded). All "fits" claims below use that size, not 844.
+
+### Verdict: FIX NEEDED
+- **The scrolling shell itself: PASS.** It behaves like a chat app.
+- **The reply moment: FIX NEEDED, [D-128] high** (owner feedback 11:42): the question + reference card + choices are 878–1,037 px tall in a 347 px window. Compact, more game-like design specified below, with a mock.
+- [D-129] med (sound banner), [D-130], [D-131] low.
+
+### 1. Chat screens: what I confirmed
+| Check | 390×844 | 360×640 |
+| --- | --- | --- |
+| Page height / screen height | 844 / 844 in all 27 measured states | 640 / 640 in all chat states |
+| Horizontal overflow | none | none |
+| Story header, chat header | fixed rows, 57 px (66 when the part title wraps) and 65 px | same |
+| Message window (owner case / task card) | 573 / 441 px | 369 / 215 px |
+| Reply button | 768–826, 18 px above the screen edge | 564–622, 18 px |
+| With insets 47 top / 34 bottom | header 98 px, button ends 44 px above the edge (34 + 10) | same |
+| New-message pill | 44 px high, centred (130–260), 10 px above the composer; tap goes to the end | same (115–245) |
+| Pill wording | "Pesan baru ↓" / "新消息 ↓" | same |
+| Opened history | first message reachable inside the window (5,643 px of content) | same (5,794 px) |
+- **Reads as a chat app:** yes. Header and reply row stay put, only the messages move, the newest message sits just above the reply row, a hairline separates list and composer.
+- **Against the owner's screenshot** (`owner/chat-page-scroll.jpg`): same header, bubbles, "Kenapa" card, day chip and button. Differences: the page no longer scrolls, the chat header has rounded top corners, a hairline above the composer. No regression.
+- **Chinese:** layout holds at both sizes; the reply button reads "回复 Hendra 先生".
+- **Desktop 1280:** unchanged behaviour: the page scrolls (1,326 px), the chat header is sticky as before, the choices open inside the composer. Fullstack's before / after capture of the owner case is byte-identical (I hashed both). Their before / after of the longest chat differs in a 161 × 51 px box at the header portrait, because that state was regenerated at 11:54 on the newer build; not a layout change.
+
+### 2. [D-128] Reply moment: compact game-style sheet · high
+**Problem, measured at 390 × 645 (message window 347 px, composer 104 px, sound banner 48 px):**
+| Decision | Today: block height | of which reference card | of which choices |
+| --- | --- | --- | --- |
+| K03 "Apa yang kamu jelaskan sekarang?" | 1,037 | 464 | 508 |
+| K06 "Bagaimana kamu menjawab?" (owner's screenshot) | 1,016 | 442 | 508 |
+| K13 "Apa penjelasanmu?" | 933 (en 999) | 360 | 508 (en 553) |
+| K14 "Bagaimana kamu menanggapi keberatan ini?" | 878 | 281 | 508 |
+| K01 "Apa balasan pertamamu?" | 636 (en 681) | none (41 px first-time hint) | 530 (en 575) |
+| K12 "Bagaimana kamu membalas?" | not measured (no card; about 600) | none | about 510 |
+All six decisions of Episode 2 are chat decisions, so one component fixes every case the owner saw. Also today: the "Kirim balasan" button jumps 27 px when a choice is made, because the line "Pilih satu balasan dulu." under it disappears.
+
+**Design (one recommendation): the reply is a card that slides up from the composer.** Mock: `team/evidence/T-018/designer/balas-ringkas-mock-390x844.png` (three states: open, chosen, note open); single states `mock-*.png`; the page itself `balas-ringkas-mock.html` (real game font and texts; `#node=k13&lang=en&pilih=2&tampil=nota`).
+- **Where:** in the pinned composer slot, not at the end of the message list. Tap "Balas Pak Hendra" → the sheet slides up; the message window shrinks and stays at its end, so the tail of the customer's last message shows above the sheet.
+- **While the sheet is open:** the sound banner is hidden; the chat header becomes one slim row (44 px instead of 65).
+- **Top edge:** a grab handle; tap it or swipe down to close the sheet and read the chat (back to "Balas …"; the selection is kept).
+- **Question row:** Miss Raksa's 32 px pixel icon in a framed square, then the question.
+- **Choices:** five numbered rows with a pixel-cornered number badge. Tap = select; tap another row to change. No collapse into the "Pratinjau · belum dikirim" bubble on phones.
+- **Send button:** disabled it says "Pilih 1 balasan"; after a choice "Kirim balasan 5 →". This replaces the separate line under the button and the first-time hint paragraph, so nothing jumps.
+- **Reference card → "Catatan" sticky note:** a yellow note tab stuck on the sheet's top edge at the right, with a red unread dot until opened. Tap → the sheet body flips to the note, with "← Kembali ke balasan" where the send button was. The note is a plain list (label bold, value under it), no stepper. Only K03, K06, K13, K14 have one.
+- **Not adopted:** a Hendra-mood hint per choice. It would tell the player which answer is right.
+- **Keyboard / screen reader:** radiogroup as today; keys 1–5 select, Enter sends, Esc closes; focus moves to the question on open.
+- **Motion:** sheet 180 ms ease-out (24 px rise + fade); rows appear 30 ms apart; the chosen badge pops (scale 1 → 1.15 → 1, 140 ms). None of it under reduced motion.
+
+**Numbers (CSS px):**
+| Part | Value |
+| --- | --- |
+| Sheet | full width of the chat card; padding 0 10 8 (+ bottom inset); background `#fffdf6 → #fbf4e1`; top border 2 `#d9b45a`; radius 16 16 0 0; shadow `0 -4px 0 rgba(30,45,36,.10)` |
+| Handle | zone 10 high; bar 36 × 4, radius 2, `#d8c58f`; touch area 44 high |
+| Question row | min-height 36; gap 8; icon box 36 × 36, border 2 `#215c40`, radius 8, fill `#fbe9c8`; text 16 / 20, weight 800, max 2 lines |
+| Choice list | margin-top 6; gap 5; max 5 rows |
+| Choice row | grid 24 + 1fr, gap 8; padding 6 10 6 8; border 2 `#d9dfce`; radius 10; fill `#fff`; `inset 0 -2px 0 #e7ebdf`; text 15 / 19, weight 500; min-height 44 |
+| Number badge | 24 × 24, stepped corners by `clip-path` (2 px steps); fill `#215c40`, digit 14 / 800 `#fffdf6` |
+| Chosen row | border `#215c40`; fill `#eaf0e1`; `inset 0 -2px 0 #b9c9a4`; badge `#e0b84f` with digit `#1e2b24`. Other rows: text `#4d5a52`, badge at 55 % opacity (do not fade the whole row as the mock does) |
+| Send button | margin-top 8; height 48; radius 12; `#215c40`; label 16 / 800; `inset 0 -3px 0 #163f2c`. Disabled: `#c9d3c5`, text `#4d5a52` |
+| Note tab | height 36; sticks 26 above the sheet, 14 from the right; border 2 `#b5871a`; radius 4 4 12 4; fill `#ffe58a`; text 13.5 / 800 `#4a3606`; rotate −2°; unread dot 10 `#c2452d`; touch area 44 |
+| Note card | margin-top 8; padding 10 12 12; border 2 `#b5871a`; radius 4 4 14 4; fill `#fff3c4`; title 15 / 20 / 800; rows gap 6, label 15 / 800, value 14.5 / 19; footnote 13 / 17 `#6b4e08` |
+| Slim chat header | height 44; portrait 32; name 16 / 800; status chip inline |
+Sheet height = 218 + 19 × (text lines of the five choices), 222 with a two-line question. Room for it = screen height − 57 (story header) − 8 − 44 (slim chat header): 536 px at 390 × 645, 531 at 360 × 640.
+
+**Result, measured in the mock (all six decisions):**
+| Visible page | Language | Choice lines | Sheet height | Chat left above the sheet |
+| --- | --- | --- | --- | --- |
+| 390 × 645 (owner) | id | 12–14 | 446–484 | 52–90 px |
+| 390 × 645 | en | 12–14 | 446–484 | 52–90 px |
+| 390 × 645 | zh | 8–10 | 370–408 | 128–166 px |
+| 360 × 640 | id | 13–15 | 465–503 | 28–66 px |
+| 360 × 640 | en | 13–16 | 465–522 | 9–66 px; K01, K13 and K14 leave only 9 px, so no chat shows |
+| 360 × 640 | zh | 8–11 | 370–427 | 104–161 px |
+| 360 × 740 | id / en | 13–16 | 465–522 | 109–166 px |
+- **Target met:** at 390 × 645 the question and all five choices and the send button are visible without scrolling, in all six decisions, in id, en and zh. Note view: 366–465 px (id, en), also without scrolling. The mock has no 44 px minimum on one-line rows, which only Chinese has; with it the Chinese sheets grow by up to about 30 px and still fit.
+- **When it does not fit** (any future longer text, or a screen shorter than 640): sheet max-height = screen − story header − slim chat header − 8; the choice list becomes the one inner scroller, the send button stays pinned.
+- **Copy rule for new decisions:** five choices, each at most about 120 characters in Indonesian (150 in English), together at most about 520.
+
+**Cost:**
+| Kind | Items |
+| --- | --- |
+| CSS / TSX only | sheet, handle, numbered rows, pixel badge (`clip-path`), note tab and note card, slim header, motion; `PilihBalasan` renders the list in the composer again and gets the note view. About 1.6 KB of CSS before compression (my estimate) |
+| Existing art, no new bytes | `ikon-miss-raksa.png` (509 B, already shipped for Riwayat and the end card); Hendra's header portrait; the document icon already inline in `KartuDokumen` |
+| New raster art | none |
+The mock's Hendra portrait is cropped from my own capture of the game; the mock is a static page, not the game.
+
+### 3. Other Stage 1 items
+- [D-129] All phone screens · the first-visit sound banner takes 56 px (48 + gap) on every screen until "Tutup" is tapped; the owner's screenshots still show it in Part 2 · show it once, on the first screen of the episode only; remove it on the first tap of any primary button or after 6 s, and remember that as today; never show it while a reply sheet or an activity is open · med.
+- [D-130] Chat header · Hendra's portrait disappears from the header whenever a cut-in portrait exists in the current thread, even after that message has scrolled out of view (rule `.hp-obrolan[data-cutin] … .hp-potret { display: none }`). With the inner scroller the header is then faceless for the rest of the conversation (seen at K01 with choices open, and in Part 4) · hide it only while the cut-in is inside the visible window, or always show it · low. Older rule, not introduced by Stage 1.
+- [D-131] Task card in the composer, 360 × 640 · the card is 222 px, leaving 215 px of messages (246 in Chinese) · after D-129 that becomes 271 px, which is enough; if more is wanted, at screen heights below 700 use card padding 10, title 17 px, and clamp the instruction to one line (card about 170 px) · low.
+
+### 4. Stage 2 rules
+Measured today at 360 × 640 in Indonesian (`tahap2-360x640.json`). Fixed rows: story header 57 (66 with a two-line part title), goal line 42, top padding 12, bottom 10. Stage width 336, so the four existing stage shapes are 336 (1:1, office close-up), 252 (4:3), 210 (16:10), 168 (2:1).
+
+**[D-132] Dialogue / stage screen · what gives way, in this order**
+1. The sound banner (D-129).
+2. **The stage steps down** through the shapes that already exist (1:1 → 16:10 → 2:1 in the office close-up; 4:3 → 16:10 → 2:1 elsewhere) until stage + dialogue fit. **Minimum stage height: 168 px at 360 wide (2:1); 183 px at 390.**
+3. The goal line hides (42 px). It must then be readable in the Menu.
+4. **Only then the dialogue text scrolls** inside the dialogue box: name tab pinned at the top, the action row (Lanjut, or the task card) pinned at the bottom, 24 px fade at the bottom edge while more text is below.
+| Screen | Room for stage + dialogue | Minimum stage | What happens with today's Indonesian text |
+| --- | --- | --- | --- |
+| 360 × 640 | 519 px (561 with the goal line hidden) | 168 | Most beats keep 252 or 210. Stage drops to 168 on K05 result (296 characters) and K11 task. Goal line hides on K11 task and K09-e. Text scrolls on K09-e (402 characters, 4 px) and on the K08 result |
+| 360 × 740 | 619 px | 168 allowed; 210 is the lowest any beat uses by its own text rule | Every beat fits at its natural shape (largest total 579). Only the K08 result scrolls |
+- Tallest dialogue boxes today: K09-e 397 px, K11 with task card 369, K05 result 334, K10 with task card 330. The dialogue overlaps the stage by 22 px on close shots; that overlap stays.
+- **K08 result** (road diagram as evidence, no stage, 837 px): the dialogue box is the scroller, "Lanjut" pinned; about 441 px visible at 640.
+- Stepping through the four tested shapes needs no new camera cases. If Fullstack lets the stage shrink continuously instead, new aspect ratios appear and the head / foot checks must be re-run at 360 × 640.
+- Use the shell only from 560 px screen height for stage and activity screens (Stage 1 uses 480); below that keep page scroll.
+
+**[D-133] Activities · one scroller, pinned head and send bar**
+| Region | Rule | Size |
+| --- | --- | --- |
+| Pinned top | story header; activity head ("Tugas", "Kembali ke cerita", title); the question line | 57; 69; 23 (one line) or 47 (two) |
+| Pinned bottom | send bar, only when the activity shows its send button; the "not yet" reason goes into the disabled button label; the "cannot be changed" note moves to the end of the scroller | 8 + 52 + 8 = 68 (+ bottom inset) |
+| The one scroller | everything else: context, board or list, details, "Tampilan daftar" link | 360 × 640: 395 px with the send bar, 463 without. 360 × 740: 495 / 563 |
+- **K02, 8-document request:** order inside the scroller: progress, document picture, instruction, three trays, tray contents, then "Pesan & info tugas", tray meaning, view link (the context toggle moves below the trays). At 640 the picture (214), instruction and trays (112) are all visible at once: 395 of 463 px. When the send bar appears the picture may shrink to **160 minimum**; trays keep 112.
+- **K08, sign check:** also pin the sign row (sign button + "Ketuk rambu untuk memeriksa", 54 px). The scroller holds the context sentence, the road and its caption: 432 px at 640 without the send bar (content 436), 364 with it. Road box 336 square, **minimum 300**; the caption may fall below the fold.
+- Other activities are 975–1,247 px tall today (K04, K05, K07, K09, K10, K15); the same three regions apply. Their question is two lines in K05, K07, K10, K11, K15.
+- I did not check at which step K02 and K08 show their send button.
+
+**[D-134] End screen / summary**
+| Region | Rule | Size |
+| --- | --- | --- |
+| Pinned top | story header | 57 |
+| Pinned bottom | action bar: primary button and the second action on one row | 8 + 52 + 8 = 68 (+ inset) |
+| The one scroller | verdict card, then the decision summary | 503 px at 360 × 640; 603 at 360 × 740 |
+- First view without scrolling at 360 × 640: portrait and feeling (69), ending title (27–54), cause (96–120), lesson box (155): 387–438 px of 503. The 1,733 px summary follows below in the same scroller, with a 24 px bottom fade.
+- The retry button is 92 px tall today because "Coba lagi dari bagian Keputusan dan penyelesaian" wraps to three lines. On phones use a short label, for example "Ulangi Bagian 4", so the bar stays one row.
+- The `/cerita` episode list keeps page scroll (Rev 1.1).
+
+### Not verified by me
+A real iPhone, and WebKit (Fullstack ran WebKit; I used Chromium only). The compact sheet in the game: the numbers come from a static mock with the real font and texts. K12's current height. English and Chinese on stage, activity and end screens (Stage 2 numbers are from Indonesian at 360 × 640; 360 × 740 follows by arithmetic because widths are equal; 390 not measured for Stage 2). Activities after their first screen. The test suites. The CSS size estimate.
+
+---
+
+## T-019 — review (2026-11-16)
+
+Reviewer: Designer · Folder: C:\Users\User\Desktop\rksgm-episode2 · No source edits, no commit, BOARD.md not touched.
+Build: production build in client/dist (11:42:38, newer than `episode.ts` and `hendra.png` of 11:38) on my own server on :4002 (started and stopped by me; :4000 not touched).
+Method (run light: one headless Chrome at a time, closed between sizes, below-normal priority, no test suite): read HANDOFF "T-019"; for `akhir-puas`, `akhir-catatan`, `akhir-kurang` at 360×740 DPR 2, 390×844 DPR 3 and 1280×800 I recorded every distinct canvas frame of the walk-in with its timestamp, pose and foot x (9 recordings, 82–101 frames each), then took the canvas and a page screenshot of both ending beats (Hendra's line, then Miss Raksa's line). Offline: pose timing and travel, Hendra's shoe positions in the atlas frames, the row-by-row overlap with Miss Raksa, and the project's own layout and camera functions (`susunAdeganPiksel`, `kameraPiksel`) run read-only for candidate slots. I opened 9 images.
+Evidence: `team/evidence/T-019/designer/`: `jalan-hendra-360.gif`, `-390.gif`, `-1280.gif` (real frames at real timing, `akhir-puas`), `kandidat-slot.png` (rows: today, x 1040, x 1060; columns: 360 beat 1, 360 beat 2, 390 beat 2, 1280 beat 1; cream band = what the dialogue box covers; Miss Raksa clipped at the counter in rows 2 and 3), `wajah-hendra.png`, `jalan-tengah-1280.png`, `kaki-hendra-x6.png`, four page screenshots, `kamera.json`, `ukur-jalan.txt`.
+Limit: I cannot watch a moving picture; the walk verdict rests on frame recordings and measurements.
+
+### Verdict: FIX NEEDED — two numbers and one clip. The restage itself works.
+
+### What works
+- **The scene plays as specified.** Kantor, Miss Raksa behind the counter, Hendra walks in from the right edge with mirrored frames and stops facing her; no phone cut-in. Measured: 5 / 5 / 6 poses at 360 / 390 / 1280, first pose lintas / lintas / kontak, last pose lintas, 266–292 ms per pose, walk 1.37 / 1.36 / 1.64 s, every step on whole art px.
+- **Stop:** no jump. Head top row 20 while walking, 19–20 standing (the speaker's breathing); the silhouette widens 3–4 art px on the counter side and 7–8 on the other as his hand goes to his hip.
+- **Expression per ending** (`wajah-hendra.png`): puas = eyes closed, smiling; catatan = calm; kurang = displeased, looking aside. All three fit their lines. Keep `kecewa` for kurang; `cemas` would be wrong here.
+- **Mirrored frames:** Hendra carries no badge or lettering, so nothing reads backwards. Two arms and two legs in both walk frames; the phone stays in the hand nearest the counter while walking and standing.
+- **Board and name tab:** "LAYANAN KLAIM RAKSA" is whole and clear of both heads in all six views (three sizes × two beats; Miss Raksa's hair starts 2 art px right of the board). The dialogue name tab and the "Hadir: Miss Raksa, Pak Hendra" line read fine.
+- **Miss Raksa** changes to senyum / serius / serius on her own line.
+- **Bytes:** `hendra.png` is 25,920 B (checked). I did not re-add the Episode 2 total.
+
+### What is wrong
+- [D-135] All three endings, all sizes · **Hendra covers Miss Raksa.** At slot x 980 his frame spans art px 207–291 and hers 167–227: his arm covers her right arm by up to 10 art px on 15 rows, and their head boxes are about 4 art px apart, so the two figures read as one mass (`layar-akhir-catatan-390-b0.png`). The slot is my own number (D-100 / D-105); I re-seated it for a lone visitor and never checked it against Miss Raksa · **Hendra's x in the kantor: 980 → 1040**, as a per-character value on kantor slot 1 (`xTokoh: { hendra: 1040 }` in `bangun-ruang-ep2.mjs` / `ruang-ep2.json`), so Pak Bima at K07 stays at 980. Result: 5 art px of air between his phone hand and her sleeve, heads about 19 art px apart, the letter prop on the counter becomes visible between them · **high**.
+  - Why not further right: in the phone close-up of the second beat the view is only 220–224 art px wide and must hold the board (from art px 78). At 1040 the tip of his elbow is cut by 4 (360) and 8 (390) art px; at 1060 by 9 and 13, with his body almost at the frame edge at 390; at 1100 the 390 camera falls back to a smaller scale. 1010 is off the art-px grid, and at 1012 he still covers her by 2 art px.
+- [D-136] The walk, all sizes · **his feet slide.** The code moves him 36–46 art px per pose (the constant tuned on Rudi), but Hendra's drawn step is shorter: front heel 15 ahead of the anchor and back heel 51 behind in the contact frame, standing heel 14 behind in the passing frame, so one step is about 66 art px (Rudi: 82) and a pose should cover 29 then 37. Measured slip per pose change: **8–17 art px at 360, 3–8 at 390, 2–12 at 1280** (± 2). That is the D-125 fault again, smaller · make the travel per pose a per-character value: **Hendra 128 world px (32 art px), Rudi stays 164**; raise `POSE_JALAN_MAKS` 6 → 7 (Rudi never exceeds 4). With slot 1040 that gives:
+
+  | Size | Distance | Poses | Travel per pose | Walk time | Slip per pose change |
+  | --- | --- | --- | --- | --- | --- |
+  | 360 | 818 world px | 6 (was 5) | 34.1 art px | 1.62 s (was 1.37) | about +5 / −3 |
+  | 390 | 695 | 5 | 34.8 | 1.35 s | about +6 / −2 |
+  | 1280 | 876 | 7 (was 6) | 31.3 | 1.89 s (was 1.64) | about +2 / −6 |
+
+  The unit test and `cek-jalan-t017.mjs` expect 5 / 5 / 6 and need the new counts. Priority **high at 360**, med elsewhere.
+- [D-137] Kantor, every scene with Miss Raksa, all sizes · **her shoes stand on the floor in front of the counter.** Her frame reaches art row 189 but the counter layer ends at row 169, so 20 rows of shin and shoe are drawn below the counter front. It is not only 1280: it shows wherever the dialogue box or the status chip does not cover that spot (1280 both beats, phone second beat, opening scene). I passed the kantor in T-013 without seeing it. Next to Hendra's legs it now looks like a third pair of feet · not one line but three: clip the `balikMeja` figure to above the counter's bottom edge (world y < 680) around `tokohDi('balikMeja')` in `PanggungPiksel.tsx` · **med; fix it with this task**.
+- [D-138] 360, first beat · the status chip wraps to two lines (181 × 42 CSS px) and covers Hendra's phone hand and thigh; at 390 and 1280 it is one line (194 × 25) · let it stay on one line at 360 (it needs 194 px; the stage is 336) · low.
+
+### Answers to the three questions
+- **Hendra slot x: 1040** (D-135), for Hendra only.
+- **Kantor camera drop for these scenes: no.** The cut that Fullstack measured at the canvas edge (6 / 44 / 16 art px at 360 / 390 / 1280) is never seen, because in these scenes the dialogue box overlaps the bottom 22 CSS px of the stage. What the player sees: his legs go behind the dialogue box 28 / 61 / 27 art px above the soles in his own beat (lower shin; mid-thigh on the 390 close-up) and 7 / 10 / 11 art px in Miss Raksa's beat (through the shoes). That reads as "standing behind the dialogue box", not as a cropped picture. The most the camera could drop is 4 art px (Miss Raksa's hair has 6 of air, the rule keeps 2), which changes none of this. I also tried raising his feet by 8 and 16 art px: it frees the shoes in the second beat but moves the first-beat cut to the ankle or into the shoes, which is worse. Keep slot y 860.
+- **Miss Raksa's shoes: fix, with the three-line clip** (D-137).
+
+### Observations, no change asked
+- He is outside the view for the first 0.29–0.36 s of the walk (he starts a full frame width beyond the edge), so about 1.1–1.3 s of it is visible today. Same rule as Rudi; leave it.
+- The baked walking face (my T-017 art) looks slightly worried, and the two walk frames differ a little. On arrival it changes to the ending's expression; in `akhir-puas` that reads as worried, then relieved. Acceptable; no new art.
+- Between the two ending beats the stage box changes height, so the phone view cuts from scale 1 to 1.5 (360) and 1.33 to 1.67 (390). Older behaviour of every kantor scene.
+
+### Not verified by me
+The walk seen at speed by a human eye; a real phone; reduced motion and "Lanjut" mid-walk (Fullstack's check covers them; same code I verified for Rudi in T-017); slot 1040 and the 128 px stride in the running game (computed with the project's own layout functions and the atlas geometry, not built); English and Chinese; the Episode 2 byte total; the test suites.
+
+---
+
+## T-019 — re-check (2026-11-16)
+
+Reviewer: Designer · Folder: C:\Users\User\Desktop\rksgm-episode2 · No source edits, no commit, BOARD.md not touched.
+Build: production build in client/dist (12:19:23, newer than `tata.ts`, `PanggungPiksel.tsx` and `ruang-ep2.json` of 12:18; unchanged during my run) on my own server on :4002 (started and stopped by me; :4000 not touched).
+Method (run light: one headless Chrome at a time, closed between sizes, below-normal priority, no test suite): read HANDOFF "T-019 → Fix"; recorded every distinct canvas frame of the `akhir-puas` walk at 360×740 DPR 2, 390×844 DPR 3 and 1280×800 (98, 81 and 115 frames) and took both ending beats there; both beats of `akhir-catatan` and `akhir-kurang` at 390; K07 with Pak Bima and the opening scene (Miss Raksa alone) at 1280. Analysed the walk offline with the heel positions from my first review. I opened 8 images; `diam-kurang-390-b0.png` and `diam-catatan-390-b1.png` are saved but not opened.
+Evidence: `team/evidence/T-019/designer/recheck/`.
+Limit: I cannot watch a moving picture; the walk verdict rests on frame recordings and measurements.
+
+### Verdict: PASS. D-135, D-136, D-137 and D-138 are fixed.
+
+### What I confirmed
+- **D-135, the two figures are apart.** Hendra's foot x is 1040 in all three endings and both beats (`data-kaki`). At 360, 390 and 1280 there is air between his phone arm and her sleeve, and their heads no longer touch. In the phone close-up of Miss Raksa's beat the tip of his elbow is cropped by the frame edge, as predicted (4 and 8 art px); his body and head are well inside.
+- **D-136, the feet hold.**
+
+  | Size | Poses | First / last pose | Walk time | Travel per pose | Slip per pose change (was) |
+  | --- | --- | --- | --- | --- | --- |
+  | 360 | 6 | kontak / lintas | 1.63 s | 33–35 art px | −3 to +6 (8–17) |
+  | 390 | 5 | lintas / lintas | 1.35 s | 34–37 | −2 to +5 (3–8) |
+  | 1280 | 7 | lintas / lintas | 1.90 s | 30–33 | −6 to +4 (2–12) |
+
+  Pose length 266–284 ms, every step on whole art px. 6 art px is one more than my target of 5 and the same order as the 7 I accepted for Rudi at 360; fewer or more poses would be worse. He becomes visible 0.32–0.40 s after the start.
+- **Stop:** unchanged and clean: head top row 20 walking, 19–20 standing; the last walk frame is 1–2 art px from the slot.
+- **D-137, Miss Raksa's shoes are gone**, in the endings at all three sizes and in the opening scene at 1280 (`sepatu-sebelum-sesudah-1280.png`: my capture of 07:35 today against now). Nothing else is lost: against that older capture the stage differs only at the shoes, on her own figure above the counter (expression and breathing) and in the dialogue name tab (the older capture was English); phone, card stand, counter, board, poster, clock, plant and floor are identical.
+- **D-138, status chip:** one line, 194 × 25 CSS px, at 360 (189–194 at 390 and 1280). At 360 its right end sits directly under the tip of his phone; it no longer covers his hand or thigh. Acceptable.
+- **Pak Bima at K07, 1280:** still at x 980 (`data-kaki`), facing the counter, framed as before.
+- **Other two endings at 390:** catatan calm, kurang displeased; Miss Raksa serious in her beat; board whole.
+
+### Remaining, not caused by this task
+- At 360 the second ending beat makes the page 785 px tall on a 740 px screen. That is T-018 Stage 2 (D-132).
+
+### Not verified by me
+The walk seen at speed by a human eye; a real phone; reduced motion and "Lanjut" mid-walk (Fullstack's check; not repeated); Pak Bima and the opening scene at 360 and 390; English and Chinese; bytes; the test suites.

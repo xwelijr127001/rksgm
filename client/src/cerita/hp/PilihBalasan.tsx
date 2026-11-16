@@ -1,8 +1,12 @@
 /**
  * Keputusan percakapan di HP: pertanyaan + fakta yang perlu dibaca (di tempat) + balasan sebagai pilihan radio. Ketuk =
  * memilih (bisa diganti), "Kirim" = keputusan dijalankan SEKALI. Panah atas/bawah memindah pilihan (pola radiogroup).
+ * T-018: di cangkang obrolan HP (EkorObrolan) pertanyaan + daftar tampil di ujung penggulir pesan, dan hanya tombol Kirim yang
+ * tinggal di komposer yang disematkan; di tempat lain semuanya satu blok seperti semula.
  */
-import { useId, useState, type KeyboardEvent } from 'react';
+import { useContext, useId, useState, type KeyboardEvent } from 'react';
+import { createPortal } from 'react-dom';
+import { EkorObrolan } from './ekor';
 import { t } from '../../i18n';
 import type { Episode, KunciTeks, NodePilihan, Pilihan } from '../tipe';
 import { KartuDokumen } from '../ui/KartuDokumen';
@@ -23,6 +27,7 @@ export function PilihBalasan({ ep, node, pilihan, tx, gaya, petunjuk, onKirim, a
   onUbahPilih?: (id: string) => void;
 }) {
   const idJudul = useId();
+  const ekor = useContext(EkorObrolan);
   const sah = awal && pilihan.some((p) => p.id === awal) ? awal : null;
   const [dipilih, setDipilihMentah] = useState<string | null>(sah);
   const [lipat, setLipat] = useState(!!sah);
@@ -37,8 +42,8 @@ export function PilihBalasan({ ep, node, pilihan, tx, gaya, petunjuk, onKirim, a
     setDipilih(pilihan[i]!.id);
     (e.currentTarget.querySelectorAll<HTMLElement>('[role="radio"]')[i])?.focus();
   };
-  return (
-    <section className="hp-pilih" data-gaya={gaya} aria-labelledby={idJudul}>
+  const isi = (
+    <>
       <h2 id={idJudul} className="hp-tanya" tabIndex={-1} data-hp-fokus="">{tx(node.tanya)}</h2>
       {node.dokumen && ep.dokumen?.[node.dokumen] ? <KartuDokumen dokumen={ep.dokumen[node.dokumen]!} id={node.dokumen} tx={tx} /> : null}
       {petunjuk && !lipat ? <p className="hp-petunjuk">{t('ceritaHp.pilihPetunjuk')}</p> : null}
@@ -73,12 +78,23 @@ export function PilihBalasan({ ep, node, pilihan, tx, gaya, petunjuk, onKirim, a
           );
         })}
       </div>
+    </>
+  );
+  const kirim = (
       <TombolKirim
         label={gaya === 'obrolan' ? t('ceritaHp.kirimBalasan') : t('ceritaHp.kirimJawaban')}
         siap={dipilih !== null}
         onKirim={() => { if (dipilih) onKirim(dipilih); }}
         alasanBelum={dipilih ? null : gaya === 'obrolan' ? t('ceritaHp.belumBalasan') : t('ceritaHp.belumJawaban')}
       />
-    </section>
   );
+  if (ekor) {
+    return (
+      <>
+        {createPortal(<section className="hp-pilih" data-gaya={gaya} aria-labelledby={idJudul}>{isi}</section>, ekor)}
+        <div className="hp-pilih-kirim">{kirim}</div>
+      </>
+    );
+  }
+  return <section className="hp-pilih" data-gaya={gaya} aria-labelledby={idJudul}>{isi}{kirim}</section>;
 }

@@ -19,6 +19,11 @@
  *    naskah); tersedia untuk cue berikutnya.
  *  - D-93 (Stage 3): seni Hendra menghadap KANAN penonton (README Stage 1 keliru menyebut kiri), jadi frame bernama `-kanan`.
  *    Hadap kiri = CERMIN saat digambar di panggung (sementara: saku & ponsel pindah sisi), bukan frame atlas.
+ *  - T-019 (D-105, owner 16 Nov): frame `jalan-kontak-kanan` / `jalan-lintas-kanan` (pose `jalan-a` / `jalan-b`) dari
+ *    character/hendra-pixel-v1/hendra-jalan-v1.png (dua sel 512 x 1024, hadap kanan), dibaca pada pitch 4,582 px sumber per
+ *    piksel seni dan dipetakan ke palet yang SUDAH ada (tanpa warna baru). Jangkar kaki x = pusat kepala + selisih jangkar
+ *    frame berdiri (4,5), supaya kepala tidak melompat mendatar saat jalan berganti ke berdiri; y = telapak. Wajah terpanggang:
+ *    tanpa lapisan ekspresi/kedip. Dipakai di tiga adegan akhir (Hendra masuk dari kanan = dicerminkan di panggung).
  * Pemetaan ekspresi cerita -> seni (D-79 + keputusan owner 15 Nov: `lega` -> senang): bingung->panik, cemas->cemas,
  * kesal->kecewa, netral|serius->tenang, lega|senang|tersenyum->senang.
  */
@@ -26,13 +31,15 @@ import fs from 'node:fs';
 import path from 'node:path';
 import * as L from './lib.mjs';
 import { kemas, tulisPngIndeks } from './miss-lib.mjs';
-import { bahanNative, SEL_POSE } from './hendra-native.mjs';
+import { bahanNative, sampelIsi, SEL_POSE, SUMBER } from './hendra-native.mjs';
 
 const KELUAR = path.join(L.ROOT, 'client', 'src', 'cerita', 'seni', 'piksel');
 const TINJAU = path.join(L.ROOT, 'character', 'piksel', 'hendra');
 export const EKSPRESI_SENI = ['panik', 'cemas', 'kecewa', 'tenang', 'senang'];
 export const EKSPRESI_DARI = { bingung: 'panik', cemas: 'cemas', kesal: 'kecewa', netral: 'tenang', serius: 'tenang', lega: 'senang', senang: 'senang', tersenyum: 'senang' };
 const DENGAN_KEDIP = ['tenang', 'cemas', 'kecewa'];
+/** T-019: lembar bingkai jalan + pitch baca (hendra-jalan-v1.md). */
+export const JALAN_HENDRA = { berkas: 'hendra-jalan-v1.png', pitch: 4.582 };
 
 const buram = (img, x, y) => x >= 0 && y >= 0 && x < img.w && y < img.h && img.d[L.idx(img, x, y) + 3] >= 128;
 
@@ -104,7 +111,14 @@ export function bangunHendra() {
   const potongDari = (img, r, k) => L.potong(img, k.x - r.dx, k.y - r.dy, k.w, k.h);
 
   // Bagian atlas.
-  const bagian = [{ id: 'tubuh', img: tubuh }];
+  // T-019: dua bingkai jalan (kontak, lintas) pada skala atlas, palet yang sudah ada.
+  const sumberJalan = L.petakanPalet(L.binerkanAlpha(L.baca(path.join(SUMBER, JALAN_HENDRA.berkas))), b.palet);
+  const jalan = ['kontak', 'lintas'].map((nama, i) => {
+    const img = komponenUtama(sampelIsi(L.potong(sumberJalan, i * 512, 0, 512, 1024), JALAN_HENDRA.pitch));
+    const k = kepalaDari(img, PITA), kotak = L.kotakAlpha(img);
+    return { nama, img, kepala: { x: (k.x0 + k.x1 + 1) / 2, atas: k.atas, lebar: k.x1 - k.x0 + 1 }, telapak: kotak.y + kotak.h - 1 };
+  });
+  const bagian = [{ id: 'tubuh', img: tubuh }, ...jalan.map((f) => ({ id: `jalan-${f.nama}`, img: f.img }))];
   for (const e of ['panik', 'cemas', 'kecewa', 'tenang', 'senang']) bagian.push({ id: `wajah-${e}`, img: potongDari(eks[e], reg[e], wajah) });
   bagian.push({ id: 'kedip', img: potongDari(eks.kedip, reg.kedip, mata) });
   for (const g of SEL_POSE) bagian.push({ id: `gestur-${g}`, img: gestur[g] });
@@ -137,7 +151,12 @@ export function bangunHendra() {
       ekspresi,
     },
   };
-  const pose = { berdiri: { kanan: 'berdiri-kanan', bawaan: 'kanan' } };
+  const pose = { berdiri: { kanan: 'berdiri-kanan', bawaan: 'kanan' }, 'jalan-a': { kanan: 'jalan-kontak-kanan', bawaan: 'kanan' }, 'jalan-b': { kanan: 'jalan-lintas-kanan', bawaan: 'kanan' } };
+  const selisihJangkar = kaki.x - kepala.x; // frame berdiri: 45 - 40,5 = 4,5
+  for (const f of jalan) {
+    const kk = { x: Math.round(f.kepala.x + selisihJangkar), y: f.telapak };
+    frame[`jalan-${f.nama}-kanan`] = { rect: r(`jalan-${f.nama}`), hadap: 'kanan', jenisJangkar: 'kaki', jangkar: kk, kaki: kk, kepala: { x: f.kepala.x, y: f.kepala.atas + kepalaTinggi / 2 }, kepalaTinggi, teleponTergambar: true };
+  }
   for (const g of SEL_POSE) {
     const img = gestur[g];
     const k = kepalaDari(img, 20);
@@ -178,7 +197,7 @@ export function bangunHendra() {
     telepon: { frame: 'berdiri-kanan', jendela: jendela(56, 1, 10), catatan: 'kepala utuh + bahu (ponsel di tangan tidak masuk jendela); skala bulat' },
     registrasi: reg,
   };
-  return { atlas, manifest, tubuh, eks, gestur, laporan: b.laporan, reg, wajah };
+  return { atlas, manifest, tubuh, eks, gestur, jalan, laporan: b.laporan, reg, wajah };
 }
 
 if (import.meta.url === `file:///${process.argv[1].replace(/\\/g, '/')}`) {
@@ -196,5 +215,6 @@ if (import.meta.url === `file:///${process.argv[1].replace(/\\/g, '/')}`) {
   }
   L.tulis(path.join(TINJAU, 'tinjau-wajah.png'), L.lembarTinjau(item, { k: 4 }));
   L.tulis(path.join(TINJAU, 'tinjau-atlas.png'), L.perbesar(h.atlas, 2));
-  console.log(JSON.stringify({ atlas: [h.atlas.w, h.atlas.h], png, laporan: h.laporan, registrasi: h.reg, wajah: h.wajah }, null, 1));
+  L.tulis(path.join(TINJAU, 'tinjau-jalan.png'), L.lembarTinjau([{ label: 'berdiri', img: h.tubuh }, ...h.jalan.map((f) => ({ label: f.nama, img: f.img }))], { k: 2 }));
+  console.log(JSON.stringify({ atlas: [h.atlas.w, h.atlas.h], png, jalan: h.jalan.map((f) => ({ nama: f.nama, ukuran: [f.img.w, f.img.h], kepala: f.kepala, jangkar: h.manifest.frame[`jalan-${f.nama}-kanan`].jangkar })), laporan: h.laporan, registrasi: h.reg, wajah: h.wajah }, null, 1));
 }

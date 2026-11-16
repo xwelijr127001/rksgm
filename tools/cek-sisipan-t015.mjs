@@ -70,7 +70,9 @@ if (process.argv[1] && path.resolve(process.argv[1]) === path.resolve(import.met
     console.log(r.lulus ? 'PASS' : 'FAIL', `${nama}-${vp.n}`, JSON.stringify(r.data));
     await ctx.close();
   }
-  if (!kasus.length) { gagal++; console.log('FAIL tidak ada state cutin-* di states.json'); }
+  // T-019: tiga akhir kini tatap muka, jadi naskah tidak lagi punya adegan bersisipan + tokoh di panggung (aturan T-015 tetap
+  // dijaga uji unit adegan.test.ts dengan susunan buatan). Tanpa state = tidak ada yang diperiksa, bukan kegagalan.
+  if (!kasus.length) console.log('CATATAN tidak ada state cutin-* di states.json (T-019: akhir tatap muka)');
   fs.writeFileSync(path.join(OUT, 'hasil.json'), JSON.stringify(hasil, null, 1));
   await b.close();
   console.log(gagal ? `FAILED ${gagal}` : `ALL PASS (${hasil.length})`);

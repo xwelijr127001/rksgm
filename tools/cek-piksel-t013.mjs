@@ -15,6 +15,7 @@ import { mulaiPrioritasRendah } from './prioritas-rendah.mjs';
 mulaiPrioritasRendah(); // pemilik bekerja di PC yang sama: Node + semua Chrome otomasi ke prioritas rendah
 import { cekSisipan, majuKeSisipan } from './cek-sisipan-t015.mjs';
 import { sampelGerak, lulusGerak } from './cek-gerak-t016.mjs';
+import { cekGulirRingkas } from './cek-gulir-t018.mjs';
 
 const BASE = process.env.UI_BASE || 'http://127.0.0.1:4000';
 const OUT = path.resolve(import.meta.dirname, '..', 'team/evidence/T-013');
@@ -83,7 +84,9 @@ for (const [kasus, st] of Object.entries(STATES)) {
     // Kasus objek yang jatuh di layar obrolan (state naskah, mis. surat K13 = pesan ke Pak Hendra): cukup avatar piksel.
     // State akt-* (T-014 fix): layar sesudah aktivitas. Akibat K08 tampil TANPA panggung (diagram jalan + potret piksel Pak Bima).
     const tanpaPanggung = kasus.startsWith('akt-') && s?.gaya === undefined && (s?.potretHp ?? []).some((x) => x.seni === 'piksel');
-    const lulus = !!s && ilu.length === 0 && ep1.length === 0 && (tanpaPanggung || (obrolan || s.obrolan ? hendraPiksel : s.siap && s.gaya === 'piksel'));
+    // T-019 (D-105): tiga akhir = tatap muka: Miss Raksa + Pak Hendra di panggung kantor, TANPA sisipan telepon.
+    const akhirTatap = !kasus.startsWith('akhir-') || (s?.lokasi === 'kantor' && s?.hadir === 'missRaksa hendra' && !s?.telepon && /hendra:berdiri:kiri:/.test(s?.pose ?? ''));
+    const lulus = !!s && akhirTatap && ilu.length === 0 && ep1.length === 0 && (tanpaPanggung || (obrolan || s.obrolan ? hendraPiksel : s.siap && s.gaya === 'piksel'));
     lapor(nama, lulus, { stage: s, webp: ilu.length, webpContoh: ilu.slice(0, 3), ep1: ep1.length, png: req.filter((u) => u.endsWith('.png')).map((u) => u.split('/').pop()) });
     await ctx.close();
   }
@@ -165,6 +168,8 @@ for (const ruang of ['pool', 'bengkel']) for (const [nama, kurang] of [['normal'
   const r = await sampelGerak(b, BASE, STATES[ruang].nilai, kurang, 10);
   lapor(`gerak-${ruang}-${nama}`, lulusGerak(r, kurang), r);
 }
+// T-018 Tahap 1: layar obrolan terpanjang tidak menggulir halaman (360x740, 390x844, 360x640) + mengikuti pesan terbaru.
+for (const r of await cekGulirRingkas(b, BASE, cepat)) lapor(r.nama, r.lulus, r.data);
 fs.writeFileSync(path.join(OUT, cepat ? 'hasil-cepat.json' : 'hasil-final.json'), JSON.stringify(hasil, null, 1));
 await b.close();
 console.log(gagal ? `FAILED ${gagal}` : 'ALL PASS');

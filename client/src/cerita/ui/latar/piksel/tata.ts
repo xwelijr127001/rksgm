@@ -176,21 +176,27 @@ export const LANGKAH_JALAN_MS = 270;
  * kaki meluncur 41 % tiap langkah; pada 164 sisa selip <= 5 piksel seni per pose).
  */
 export const LANGKAH_JALAN_DUNIA = 164;
+/**
+ * D-136 (T-019): jarak per pose PER TOKOH, karena panjang langkah yang tergambar berbeda. Hendra: satu langkah ± 66 piksel seni
+ * (Rudi 82), jadi 128 dunia = 32 piksel seni per pose. Tokoh yang tidak terdaftar memakai LANGKAH_JALAN_DUNIA.
+ */
+export const LANGKAH_JALAN_TOKOH: Readonly<Record<string, number>> = { hendra: 128 };
+export const langkahJalan = (tokoh: string): number => LANGKAH_JALAN_TOKOH[tokoh] ?? LANGKAH_JALAN_DUNIA;
 /** Jumlah pose jalan paling sedikit / paling banyak. */
 export const POSE_JALAN_MIN = 3;
-export const POSE_JALAN_MAKS = 6;
+export const POSE_JALAN_MAKS = 7; // D-136: 6 -> 7 (Hendra di 1280 = 7 pose; Rudi tidak pernah lebih dari 4)
 
 export interface RencanaJalan { awal: number; tujuan: number; n: number; durasi: number; arah: 'kiri' | 'kanan' }
 
 /**
  * Rencana jalan masuk tokoh ke titik kaki `tujuan` (dunia): mulai tepat di luar tepi pandangan TERDEKAT (selebar frame),
- * jumlah pose n = bulat(jarak / LANGKAH_JALAN_DUNIA) dijepit POSE_JALAN_MIN..POSE_JALAN_MAKS, tiap pose LANGKAH_JALAN_MS.
+ * jumlah pose n = bulat(jarak / langkah) dijepit POSE_JALAN_MIN..POSE_JALAN_MAKS, tiap pose LANGKAH_JALAN_MS.
  */
-export function rencanaJalan(tujuan: number, lebarFrame: number, kamera: Kamera, W: number): RencanaJalan {
+export function rencanaJalan(tujuan: number, lebarFrame: number, kamera: Kamera, W: number, langkah: number = LANGKAH_JALAN_DUNIA): RencanaJalan {
   const vw = W / kamera.s;
   const dariKiri = tujuan < kamera.x + vw / 2;
   const awal = dariKiri ? Math.min(kamera.x, tujuan) - lebarFrame : Math.max(kamera.x + vw, tujuan) + lebarFrame;
-  const n = Math.min(POSE_JALAN_MAKS, Math.max(POSE_JALAN_MIN, Math.round(Math.abs(tujuan - awal) / LANGKAH_JALAN_DUNIA)));
+  const n = Math.min(POSE_JALAN_MAKS, Math.max(POSE_JALAN_MIN, Math.round(Math.abs(tujuan - awal) / langkah)));
   return { awal, tujuan, n, durasi: n * LANGKAH_JALAN_MS, arah: dariKiri ? 'kanan' : 'kiri' };
 }
 

@@ -6,7 +6,7 @@
  "gambar": "hendra.png",
  "ukuranAtlas": [
   512,
-  196
+  216
  ],
  "satuan": {
   "dunia": "piksel seni x 4",
@@ -140,67 +140,115 @@
    "ekspresi": {
     "panik": {
      "dasar": [
-      465,
-      54,
+      458,
+      149,
       28,
       26
      ]
     },
     "cemas": {
      "dasar": [
-      465,
-      0,
+      458,
+      95,
       28,
       26
      ],
      "kedip": [
-      177,
-      95,
+      284,
+      190,
       28,
       9
      ]
     },
     "kecewa": {
      "dasar": [
-      465,
-      27,
+      458,
+      122,
       28,
       26
      ],
      "kedip": [
-      177,
-      95,
+      284,
+      190,
       28,
       9
      ]
     },
     "tenang": {
      "dasar": [
-      148,
-      95,
+      255,
+      190,
       28,
       26
      ],
      "kedip": [
-      177,
-      95,
+      284,
+      190,
       28,
       9
      ]
     },
     "senang": {
      "dasar": [
-      465,
-      81,
+      458,
+      176,
       28,
       26
      ]
     }
    }
   },
-  "gestur-cemas-kanan": {
+  "jalan-kontak-kanan": {
+   "rect": [
+    159,
+    0,
+    95,
+    195
+   ],
+   "hadap": "kanan",
+   "jenisJangkar": "kaki",
+   "jangkar": {
+    "x": 51,
+    "y": 194
+   },
+   "kaki": {
+    "x": 51,
+    "y": 194
+   },
+   "kepala": {
+    "x": 46.5,
+    "y": 19.5
+   },
+   "kepalaTinggi": 39,
+   "teleponTergambar": true
+  },
+  "jalan-lintas-kanan": {
    "rect": [
     85,
+    0,
+    73,
+    196
+   ],
+   "hadap": "kanan",
+   "jenisJangkar": "kaki",
+   "jangkar": {
+    "x": 37,
+    "y": 195
+   },
+   "kaki": {
+    "x": 37,
+    "y": 195
+   },
+   "kepala": {
+    "x": 32.5,
+    "y": 19.5
+   },
+   "kepalaTinggi": 39,
+   "teleponTergambar": true
+  },
+  "gestur-cemas-kanan": {
+   "rect": [
+    395,
     95,
     62,
     94
@@ -224,7 +272,7 @@
   },
   "gestur-panik-kanan": {
    "rect": [
-    85,
+    255,
     0,
     84,
     94
@@ -248,7 +296,7 @@
   },
   "gestur-kecewa-kanan": {
    "rect": [
-    253,
+    423,
     0,
     71,
     94
@@ -272,8 +320,8 @@
   },
   "gestur-tenang-kanan": {
    "rect": [
-    396,
-    0,
+    326,
+    95,
     68,
     94
    ],
@@ -296,8 +344,8 @@
   },
   "gestur-senang-kanan": {
    "rect": [
-    325,
-    0,
+    255,
+    95,
     70,
     94
    ],
@@ -320,7 +368,7 @@
   },
   "gestur-menjelaskan-kanan": {
    "rect": [
-    170,
+    340,
     0,
     82,
     94
@@ -346,6 +394,14 @@
  "pose": {
   "berdiri": {
    "kanan": "berdiri-kanan",
+   "bawaan": "kanan"
+  },
+  "jalan-a": {
+   "kanan": "jalan-kontak-kanan",
+   "bawaan": "kanan"
+  },
+  "jalan-b": {
+   "kanan": "jalan-lintas-kanan",
    "bawaan": "kanan"
   },
   "gestur-cemas": {

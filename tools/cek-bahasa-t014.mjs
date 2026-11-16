@@ -55,7 +55,7 @@ const periksa = (p) => p.evaluate(() => {
   const KATA = /(^|[^A-Za-z])(yang|dan|atau|ke|di|dari|hari|minggu|ada|ini|itu|juga|tidak|untuk|dengan|sudah|belum|saya|kamu|truk|Pak|Bapak|klaim|bengkel|lajur|rambu|supir|berkas|surat)(?![A-Za-z])/;
   const W = document.documentElement.clientWidth;
   const luar = [], potong = [];
-  const sel = '.hp-ucapan-nama, .hp-ucapan-teks, .hp-vn-dialog, .hp-vn-dialog *, .hp-gelembung, .hp-gelembung *, .hp-obrolan-nama, .hp-status, .hp-tindakan, .hp-tindakan *, .hp-komposer *, .hp-opsi, .hp-opsi *, .hp-gerbang *, .hp-catatan *, .hp-vn-aksi *, .hp-arena *, .hp-susun *, .akh-kartu *, .cer-suasana, .cer-latar-lokasi, button';
+  const sel = '.hp-ucapan-nama, .hp-ucapan-teks, .hp-vn-dialog, .hp-vn-dialog *, .hp-gelembung, .hp-gelembung *, .hp-obrolan-nama, .hp-status, .hp-tindakan, .hp-tindakan *, .hp-komposer *, .hp-ekor *, .hp-opsi, .hp-opsi *, .hp-gerbang *, .hp-catatan *, .hp-vn-aksi *, .hp-arena *, .hp-susun *, .akh-kartu *, .cer-suasana, .cer-latar-lokasi, button';
   for (const el of document.querySelectorAll(sel)) {
     const teks = (el.textContent ?? '').trim();
     if (!teks || el.closest('.sr-only')) continue;
@@ -110,8 +110,8 @@ for (const lang of BAHASA) for (const vp of VP) {
       lulus = lulus && !a.gulirX && !a.luar.length && !a.potong.length && !a.indo.length;
       if (kasus === 'tel-cemas' && vp.n !== '360') await p.screenshot({ path: path.join(OUT, `aktivitas-${vp.n}-${lang}.png`) });
     }
-    // Akhir: dari state cutin-akhir-puas maju sampai layar akhir.
-    if (kasus === 'cutin-akhir-puas-missRaksa') {
+    // Akhir: dari state akhir-puas (T-019: tatap muka di kantor) maju sampai layar akhir.
+    if (kasus === 'akhir-puas') {
       for (let i = 0; i < 8 && !(await p.$('.akh-kartu')); i++) if (!(await maju(p))) break;
       await tunggu(600);
       const a = await periksa(p);

@@ -392,3 +392,35 @@
 .hp-coba-baris { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 8px; }
 .hp-coba { min-height: 44px; padding: 0 12px; border-radius: 12px; border: 1.5px solid #215c40; background: #fff; color: #215c40; font: inherit; font-size: 14px; font-weight: 700; cursor: pointer; }
 .hp-coba[aria-pressed="true"] { background: #215c40; color: #fff; }
+
+/* ===================== T-018 Tahap 1 (16 Nov 2026): layar OBROLAN tidak menggulir halaman ===================== */
+/* Pembungkus pesan + ekor (Obrolan.tsx). Di luar kueri di bawah (desktop >= 1024, layar sangat pendek) hanya grid biasa:
+   halaman tetap menggulir seperti semula. */
+.hp-gulir, .hp-ekor { display: grid; min-width: 0; }
+/* Kueri HARUS sama dengan KUERI_CANGKANG di ekor.ts. Cangkang = .hp-layar setinggi layar (dvh; vh untuk WebKit lama), kolom:
+   kepala cerita / [kepala obrolan / SATU penggulir / komposer]. Inset aman: atas di .hp-kepala, bawah di .hp-main (sekali saja).
+   Tanpa position: fixed; tanpa aturan global body/#root. */
+@media (max-width: 1023.98px) and (min-height: 480px) {
+  .hp-layar[data-tampilan="obrolan"] { display: flex; flex-direction: column; height: 100vh; height: 100dvh; min-height: 0; overflow: hidden; }
+  .hp-layar[data-tampilan="obrolan"] > * { flex: none; }
+  .hp-layar[data-tampilan="obrolan"] > .hp-main {
+    flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column; gap: 8px;
+    padding: 8px max(8px, env(safe-area-inset-right)) max(8px, env(safe-area-inset-bottom)) max(8px, env(safe-area-inset-left));
+  }
+  .hp-layar[data-tampilan="obrolan"] > .hp-main > * { flex: none; }
+  .hp-layar[data-tampilan="obrolan"] > .hp-main > .hp-obrolan { flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column; }
+  .hp-layar[data-tampilan="obrolan"] .hp-obrolan > * { flex: none; }
+  .hp-layar[data-tampilan="obrolan"] .hp-obrolan-kepala { position: static; }
+  .hp-layar[data-tampilan="obrolan"] .hp-obrolan > .hp-gulir {
+    /* position: relative = blok penampung untuk .sr-only (absolute) di dalam pesan; tanpa ini mereka memperpanjang halaman. */
+    position: relative; flex: 1 1 auto; min-height: 0; align-content: start; overflow-x: hidden; overflow-y: auto;
+    overscroll-behavior-y: contain; touch-action: pan-y pinch-zoom; -webkit-overflow-scrolling: touch;
+  }
+  .hp-layar[data-tampilan="obrolan"] .hp-utas > li { scroll-margin-top: 8px; }
+  .hp-layar[data-tampilan="obrolan"] .hp-ekor > .hp-pilih { padding: 10px 12px 12px; }
+  /* Pil "Pesan baru": melayang di atas komposer tanpa memakan tinggi (margin negatif = tinggi pil + jarak). */
+  .hp-layar[data-tampilan="obrolan"] .hp-pesan-baru { position: relative; bottom: auto; align-self: center; margin: -54px 0 10px; }
+  .hp-layar[data-tampilan="obrolan"] .hp-gerbang { margin: 8px 10px 10px; }
+  .hp-layar[data-tampilan="obrolan"] .hp-komposer { padding: 8px 10px 10px; border-top: 1px solid rgba(30, 45, 36, .14); }
+  .hp-layar[data-tampilan="obrolan"] .hp-pilih-kirim .hp-kirim { margin-top: 0; }
+}

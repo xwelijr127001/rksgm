@@ -158,7 +158,8 @@
 /* Beat pendek di balik meja (kantor): panggung 1:1, bidikan dekat (bingkai.hpDekat) = tokoh memenuhi panggung. */
 .hp-layar .hp-main .hp-vn[data-panggung="tinggi"][data-susun="dekat"] .cer-panggung.cer-latar { aspect-ratio: 1 / 1; max-height: 54dvh; }
 .hp-layar .hp-main .hp-vn[data-panggung="pendek"] .cer-panggung.cer-latar { aspect-ratio: 2 / 1; }
-.hp-vn .cer-suasana { bottom: calc(var(--hp-vn-tumpang) + 6px); }
+/* D-138 (T-019): pita status satu baris di HP 360 (butuh ± 194 px; batas bawaan 58 % membuatnya dua baris di atas tangan tokoh). */
+.hp-vn .cer-suasana { bottom: calc(var(--hp-vn-tumpang) + 6px); max-width: calc(100% - 16px); }
 .hp-vn-dialog {
   position: relative; z-index: 2; display: grid; gap: 10px; margin-top: calc(-1 * var(--hp-vn-tumpang)); padding: 12px 14px 14px;
   border-top: 2px solid #d9b45a; border-radius: 16px 16px 0 0; background: linear-gradient(180deg, #fffdf6, #fbf4e1);

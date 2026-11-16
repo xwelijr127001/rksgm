@@ -12,7 +12,8 @@
  * cut-in tampil (satu wajah utama, bukan banner tambahan). Hiasan (aria-hidden), tidak mengunci input, tanpa guncangan atau
  * kilatan; gerak dikurangi = langsung tampil. Tetap obrolan WhatsApp (label "WhatsApp"), bukan telepon/video.
  */
-import { useEffect, useLayoutEffect, useMemo, useRef, useState, type ReactNode } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type ReactNode } from 'react';
+import { BATAS_IKUT, EkorObrolan, KUERI_CANGKANG } from './ekor';
 import { selaPembicara } from '../ui/bagian';
 import { gabungKalimat } from './arena/rambu';
 import { playSfx } from '../../audio/audio';
@@ -45,7 +46,24 @@ function catatMulai(kunci: string): void {
  *  3. Narasi node kini diringkas (kalimat pertama + "Konteks"); akibat keputusan tetap utuh.
  *  4. Pesan baru TIDAK menggulir paksa bila pemain sedang membaca ke atas: muncul penanda "Pesan baru ↓".
  * Muat ulang: pesan yang sudah ada tampil langsung (tanpa mengetik); sesi yang sudah dimulai tidak bergerbang lagi.
+ *
+ * T-018 Tahap 1 (cangkang HP, lihat ekor.ts): di HP halaman TIDAK menggulir; satu-satunya penggulir = .hp-gulir (pesan + ekor).
+ *  - Pesan baru: penggulir mengikuti (pesan pertama kelompok baru di atas bila kelompoknya lebih tinggi dari layar, selain itu
+ *    ujung bawah), kecuali pemain menggulir ke atas lebih dari BATAS_IKUT px: lalu hanya pil "Pesan baru"; mengetuknya = ke ujung.
+ *  - Balasan pemain sendiri selalu diikuti. Riwayat lama dibuka = batas lama/baru di tengah layar, bisa digulir sampai pesan pertama.
+ * Desktop (>= 1024) dan layar sangat pendek: perilaku lama (halaman menggulir) tidak berubah.
  */
+function useCangkang(): boolean {
+  const [v, setV] = useState(() => typeof window !== 'undefined' && !!window.matchMedia?.(KUERI_CANGKANG).matches);
+  useEffect(() => {
+    const m = window.matchMedia(KUERI_CANGKANG);
+    const f = () => setV(m.matches);
+    f();
+    m.addEventListener('change', f);
+    return () => m.removeEventListener('change', f);
+  }, []);
+  return v;
+}
 export function Obrolan({ ep, state, tx, status, pesanAktivitas, komposer, sisipan, tujuan }: {
   ep: Episode;
   state: StateCerita;
@@ -94,7 +112,43 @@ export function Obrolan({ ep, state, tx, status, pesanAktivitas, komposer, sisip
   // ---- posisi baca: dekat bawah = pesan baru boleh digulir ke layar; jauh = penanda saja.
   const dekatBawah = useRef(true);
   const [adaBaru, setAdaBaru] = useState(false);
+  const cangkang = useCangkang();
+  const gulirRef = useRef<HTMLDivElement>(null);
+  const daftarRef = useRef<HTMLOListElement>(null);
+  const [ekor, setEkor] = useState<HTMLDivElement | null>(null);
+  /** Pesan pertama kelompok terbaru (cangkang): sasaran gulir bila kelompoknya lebih tinggi dari layar. */
+  const jangkar = useRef<string | null>(null);
+  /** Posisi "terbaru" penggulir: puncak daftar balasan yang terbuka / pesan pertama kelompok baru, paling jauh ujung bawah. */
+  const sasaran = useCallback((): number => {
+    const g = gulirRef.current;
+    if (!g) return 0;
+    const maks = Math.max(0, g.scrollHeight - g.clientHeight);
+    const el = g.querySelector<HTMLElement>('.hp-ekor > .hp-pilih') ?? (jangkar.current ? g.querySelector<HTMLElement>(`[data-pesan="${jangkar.current}"]`) : null);
+    if (!el) return maks;
+    return Math.min(maks, Math.max(0, el.getBoundingClientRect().top - g.getBoundingClientRect().top + g.scrollTop - 8));
+  }, []);
+  /** Ikuti yang terbaru (tidak pernah menggulir NAIK: pemain yang sudah di ujung bawah tidak ditarik kembali). */
+  const ikuti = useCallback(() => {
+    const g = gulirRef.current;
+    if (!g) return;
+    const s = sasaran();
+    if (s > g.scrollTop) g.scrollTop = s;
+    dekatBawah.current = true;
+  }, [sasaran]);
   useEffect(() => {
+    if (cangkang) {
+      const g = gulirRef.current;
+      if (!g) return;
+      const f = () => {
+        dekatBawah.current = g.scrollTop >= sasaran() - BATAS_IKUT;
+        if (dekatBawah.current) setAdaBaru(false);
+      };
+      g.addEventListener('scroll', f, { passive: true });
+      // Isi bertambah (pesan tampil sesudah "mengetik", gambar termuat) atau komposer berubah tinggi: tetap di yang terbaru.
+      const ro = typeof ResizeObserver === 'undefined' ? null : new ResizeObserver(() => { if (dekatBawah.current) ikuti(); });
+      if (ro) { ro.observe(g); for (const a of Array.from(g.children)) ro.observe(a); }
+      return () => { g.removeEventListener('scroll', f); ro?.disconnect(); };
+    }
     const f = () => {
       const jarak = document.documentElement.scrollHeight - (window.scrollY + window.innerHeight);
       dekatBawah.current = jarak < 240;
@@ -103,12 +157,11 @@ export function Obrolan({ ep, state, tx, status, pesanAktivitas, komposer, sisip
     f();
     window.addEventListener('scroll', f, { passive: true });
     return () => window.removeEventListener('scroll', f);
-  }, []);
+  }, [cangkang, sasaran, ikuti]);
 
   // Pesan baru sejak tampilan sebelumnya: dianimasikan bertahap, dibacakan, dan (bila pemain di bawah) digulir ke layar.
   const jumlahLalu = useRef<number | null>(null);
   const baruMulai = jumlahLalu.current === null ? pesan.length : Math.min(jumlahLalu.current, pesan.length);
-  const daftarRef = useRef<HTMLOListElement>(null);
   const [umumkan, setUmumkan] = useState('');
   const gerbangRef = useRef(gerbang);
   gerbangRef.current = gerbang;
@@ -119,30 +172,58 @@ export function Obrolan({ ep, state, tx, status, pesanAktivitas, komposer, sisip
     const baru = pesan.slice(lalu);
     setUmumkan(baru.map((p) => teksUmum(p, tx, nama)).filter(Boolean).join(' '));
     mulaiKetik(baru.find((p) => p.jenis === 'masuk')?.id);
-    if (dekatBawah.current) {
+    if (cangkang) {
+      jangkar.current = baru[0]!.id;
+      if (baru.some((p) => p.jenis === 'keluar')) dekatBawah.current = true;
+      if (dekatBawah.current) ikuti(); else setAdaBaru(true);
+    } else if (dekatBawah.current) {
       const el = daftarRef.current?.querySelector<HTMLElement>(`[data-pesan="${baru[0]!.id}"]`) ?? daftarRef.current?.lastElementChild as HTMLElement | null;
       el?.scrollIntoView({ block: 'start', behavior: reduced ? 'auto' : 'smooth' });
     } else setAdaBaru(true);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pesan, tx, nama, reduced]);
+  // Cangkang: saat dibuka (dan saat cangkang baru berlaku, mis. layar diputar) langsung di pesan terbaru.
+  useLayoutEffect(() => {
+    if (!cangkang) return;
+    const g = gulirRef.current;
+    if (g) g.scrollTop = sasaran();
+    dekatBawah.current = true;
+  }, [cangkang, sasaran]);
+  // Cangkang: riwayat lama dibuka = batas lama/baru di tengah layar (pesan lama terlihat, bisa digulir sampai pesan pertama).
+  const bukaLamaLalu = useRef(bukaLama);
+  useLayoutEffect(() => {
+    if (bukaLamaLalu.current === bukaLama) return;
+    bukaLamaLalu.current = bukaLama;
+    const g = gulirRef.current;
+    if (!cangkang || !g) return;
+    if (!bukaLama) { g.scrollTop = sasaran(); dekatBawah.current = true; return; }
+    const awal = g.querySelector<HTMLElement>(`[data-pesan="${pesan[sesiMulai]?.id ?? ''}"]`);
+    if (awal) g.scrollTop = Math.max(0, awal.getBoundingClientRect().top - g.getBoundingClientRect().top + g.scrollTop - g.clientHeight / 2);
+    dekatBawah.current = g.scrollTop >= sasaran() - BATAS_IKUT;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [bukaLama, cangkang]);
   // Saat dibuka (muat ulang / kembali ke obrolan): pesan terakhir sesi ini terlihat, bukan puncak halaman.
   useEffect(() => {
+    if (cangkang) return;
     const id = requestAnimationFrame(() => {
       const semua = daftarRef.current?.querySelectorAll<HTMLElement>('[data-pesan]');
       const akhir = semua && semua.length ? semua[Math.max(0, semua.length - 3)] : null;
       akhir?.scrollIntoView({ block: 'start', behavior: 'auto' });
     });
     return () => cancelAnimationFrame(id);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const mulaiPercakapan = () => {
     catatMulai(kunciSesi);
     setMulai(true);
     mulaiKetik(sesi.find((p) => p.jenis === 'masuk')?.id);
+    if (cangkang) { dekatBawah.current = true; requestAnimationFrame(ikuti); return; }
     requestAnimationFrame(() => daftarRef.current?.querySelector<HTMLElement>('[data-pesan], .hp-mengetik')?.scrollIntoView({ block: 'start', behavior: 'auto' }));
   };
   const keBaru = () => {
     setAdaBaru(false);
+    if (cangkang) { const g = gulirRef.current; if (g) g.scrollTop = g.scrollHeight; dekatBawah.current = true; return; }
     (daftarRef.current?.lastElementChild as HTMLElement | null)?.scrollIntoView({ block: 'end', behavior: reduced ? 'auto' : 'smooth' });
   };
 
@@ -153,7 +234,7 @@ export function Obrolan({ ep, state, tx, status, pesanAktivitas, komposer, sisip
   const lamaTersembunyi = bukaLama ? 0 : Math.min(sesiMulai, akhirTampil);
 
   return (
-    <section className="hp-obrolan" data-cutin={cutIn && !gerbang && !ketik ? '' : undefined} data-gerbang={gerbang ? '' : undefined} aria-label={t('ceritaHp.obrolanDengan', { nama })}>
+    <section className="hp-obrolan" data-cangkang={cangkang ? '' : undefined} data-cutin={cutIn && !gerbang && !ketik ? '' : undefined} data-gerbang={gerbang ? '' : undefined} aria-label={t('ceritaHp.obrolanDengan', { nama })}>
       <header className="hp-obrolan-kepala">
         <PotretHp ep={ep} id={ep.nasabah} ekspresi={wajah} nama={nama} />
         <div className="hp-obrolan-nama">
@@ -161,6 +242,8 @@ export function Obrolan({ ep, state, tx, status, pesanAktivitas, komposer, sisip
           <span className="hp-status" data-status={status}>{t('ceritaHp.statusChip', { status })}</span>
         </div>
       </header>
+      {/* SATU penggulir layar obrolan di HP (T-018); di desktop hanya pembungkus biasa. */}
+      <div ref={gulirRef} className="hp-gulir" data-gulir="">
       {lamaTersembunyi > 0 ? (
         <button type="button" className="hp-lama" onClick={() => setBukaLama(true)}>{t('ceritaHp.pesanSebelumnya', { n: lamaTersembunyi })}</button>
       ) : bukaLama && sesiMulai > 0 ? (
@@ -180,6 +263,8 @@ export function Obrolan({ ep, state, tx, status, pesanAktivitas, komposer, sisip
           </li>
         ) : null}
       </ol>
+      <div ref={setEkor} className="hp-ekor">{gerbang || ketik ? null : sisipan}</div>
+      </div>
       {gerbang ? (
         <div className="hp-gerbang" data-gerbang-sesi="">
           <p className="hp-gerbang-tujuan"><b>{t('ceritaHp.tujuan')}</b>{selaPembicara()}{tujuan}</p>
@@ -190,7 +275,7 @@ export function Obrolan({ ep, state, tx, status, pesanAktivitas, komposer, sisip
       ) : null}
       <p className="sr-only" aria-live="polite">{ketik || gerbang ? '' : umumkan}</p>
       {adaBaru && !gerbang ? <button type="button" className="hp-pesan-baru" data-pesan-baru="" onClick={keBaru}>{t('ceritaHp.pesanBaruBawah')}</button> : null}
-      {gerbang || ketik ? null : <>{sisipan}<div className="hp-komposer">{komposer}</div></>}
+      {gerbang || ketik ? null : <EkorObrolan.Provider value={cangkang ? ekor : null}><div className="hp-komposer">{komposer}</div></EkorObrolan.Provider>}
     </section>
   );
 }

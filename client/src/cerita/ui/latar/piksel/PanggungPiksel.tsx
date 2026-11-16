@@ -27,7 +27,7 @@ import { titikPapanKantor } from './papan';
 import { muatPng, siap } from './muat';
 import { nasabahDiPanggung, type KomposisiLatar } from '../komposisi';
 import type { AdeganPiksel } from './adegan';
-import { kameraPiksel, kotakLuarSisipan, LANGKAH_JALAN_MS, POSE_JALAN_MAKS, posisiJalan, punyaJalan, rencanaJalan, sisipanAdegan, susunAdeganPiksel } from './tata';
+import { kameraPiksel, kotakLuarSisipan, langkahJalan, LANGKAH_JALAN_MS, POSE_JALAN_MAKS, posisiJalan, punyaJalan, rencanaJalan, sisipanAdegan, susunAdeganPiksel } from './tata';
 import { RUANG_PIKSEL, SATUAN_RUANG } from './ruang';
 import '../../panggung/panggung.css';
 import '../latar.css';
@@ -220,7 +220,7 @@ export function PanggungPiksel({ ep, komposisi, adegan, tx, nama, suasana, statu
   const jalanKini = new Map<string, { x: number; pose: 'jalan-a' | 'jalan-b'; arah: 'kiri' | 'kanan' }>();
   if (jalan && kamera && ukuran) for (const x of tokoh) {
     if (!jalan.id.has(x.t.id)) continue;
-    const rj = rencanaJalan(x.kakiX, x.s.ukuran.w * K, kamera, ukuran.w);
+    const rj = rencanaJalan(x.kakiX, x.s.ukuran.w * K, kamera, ukuran.w, langkahJalan(x.t.tokoh));
     const pj = posisiJalan(rj, jalan.t);
     if (pj) jalanKini.set(x.t.id, { x: pj.x, pose: pj.pose, arah: rj.arah });
   }
@@ -316,7 +316,13 @@ export function PanggungPiksel({ ep, komposisi, adegan, tx, nama, suasana, statu
       g.fillText(papanTeks, dx(b.x + b.w / 2), dy(b.y + b.h / 2), Math.round(b.w * 0.9 * s));
       }
     }
+    // D-137 (T-019): tokoh di balik meja dipotong di tepi BAWAH lapisan meja (kantor: y dunia 680), supaya betis & sepatunya
+    // tidak pernah tergambar di lantai depan meja (frame badan penuh lebih panjang daripada meja).
+    const meja = r.lapisan.find((l) => l.z >= 30 && l.id !== 'latar');
+    g.save();
+    if (meja) { g.beginPath(); g.rect(0, 0, W, dy(meja.y + meja.h)); g.clip(); }
     tokohDi('balikMeja');
+    g.restore();
     for (const l of r.lapisan) if (l.z >= 30) gambar(l.url, 0, 0, l.w / K, l.h / K, l.x, l.y, l.w, l.h);
     for (const p of prop) gambar(p.url, 0, 0, p.w / K, p.h / K, p.x, p.y, p.w, p.h);
     tokohDi('slot');

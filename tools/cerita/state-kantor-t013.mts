@@ -51,6 +51,8 @@ for (let run = 0; run < 60; run++) {
       // T-015: SETIAP adegan kantor dengan sisipan telepon + tokoh di panggung (per node).
       // Disimpan state SEBELUMNYA (baris terakhir node akhir dipulihkan sebagai layar akhir); pemeriksa menekan Lanjut sekali.
       if (k.telepon && k.hadir.some((x) => x.bicara) && lalu) simpan(`cutin-${s.node}-${k.hadir.map((x) => x.id).join('+')}`, lalu);
+      // T-019 (D-105): tiga akhir tatap muka: state saat baris pertama Pak Hendra tampil (muat ulang = ia berjalan masuk).
+      { const na = nodeKini(ep, s) as { jenis?: string; akhir?: string } | null; if (na?.jenis === 'akhir' && k.hadir.some((x) => x.id === 'hendra' && x.bicara)) simpan(`akhir-${na.akhir}`, s); }
       if (k.objek.includes('berkas')) simpan('berkas', s);
       if (k.objek.includes('surat')) simpan('surat', s);
       if (k.hadir.some((x) => x.id === 'bima')) simpan('bima', s);
