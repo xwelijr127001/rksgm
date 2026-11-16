@@ -9,6 +9,9 @@
 import puppeteer from 'puppeteer-core';
 import fs from 'node:fs';
 import path from 'node:path';
+import os from 'node:os';
+// Prioritas proses rendah (owner 16 Nov): Chrome yang diluncurkan ikut rendah, PC tetap bisa dipakai.
+try { os.setPriority(os.constants.priority.PRIORITY_LOW); } catch { /* abaikan */ }
 
 const PROFIL = JSON.stringify({ nickname: 'Weli', look: { body: 0, skin: 0, hair: 0, color: 0, accessory: 'none' } });
 export const VP_SISIPAN = [{ n: '360', w: 360, h: 740, dpr: 2 }, { n: '390', w: 390, h: 844, dpr: 3 }, { n: '1280', w: 1280, h: 800, dpr: 1 }];

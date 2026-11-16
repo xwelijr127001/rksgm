@@ -134,19 +134,50 @@ export function uraiLangkah(teks: unknown): LangkahRambu | null {
 
 // ------------------------------------------------------------------ teks dan tanggapan
 
-/** "lajur 3 dan 4", "lajur 2, 3, dan 4", "belum ada lajur" (Bahasa Indonesia). */
-export function daftarLajur(n: ReadonlyArray<number>): string {
+type TxParam = (kunci: KunciTeks, param?: Record<string, string | number>) => string;
+
+const HAN = /[\u3400-\u9fff]/;
+const LATIN = /[A-Za-z0-9]/;
+/** Sambung dua potong teks; spasi disisipkan di batas aksara Han <-> Latin/angka (aturan teks zh: "和 Darto", "Hendra 先生"). */
+export function sambung(a: string, b: string): string {
+  const x = a.slice(-1), y = b.slice(0, 1);
+  return a + ((HAN.test(x) && LATIN.test(y)) || (LATIN.test(x) && HAN.test(y)) ? ' ' : '') + b;
+}
+/** "A, B dan C" dalam bahasa `tx` (kunci daftar.pemisah / daftar.dan): en "A, B and C", zh "A、B和 C". */
+export function daftarNama(nama: readonly string[], tx: TxParam): string {
+  if (nama.length <= 1) return nama.join('');
+  return sambung(sambung(nama.slice(0, -1).join(tx('daftar.pemisah')), tx('daftar.dan')), nama[nama.length - 1]!);
+}
+/** Gabung kalimat utuh: spasi di antaranya, kecuali sesudah tanda baca lebar penuh (zh "。"). */
+export function gabungKalimat(kalimat: readonly string[]): string {
+  return kalimat.reduce((a, k) => (a ? a + (/[。！？：，]$/.test(a) ? '' : ' ') + k : k), '');
+}
+
+/**
+ * Daftar lajur dalam bahasa `tx` (T-014 fix: dulu kata "lajur"/"dan" tertulis di kode dan bocor ke en/zh). id: "lajur 3 dan 4",
+ * "lajur 2, 3, dan 4", "belum ada lajur"; en: "lanes 3 and 4"; zh: "第 3、4 车道". Kata & penyambung = kunci arena.rambu.lajur*.
+ */
+export function daftarLajur(n: ReadonlyArray<number>, tx: TxParam): string {
   const u = [...n].sort((a, b) => a - b);
-  if (u.length === 0) return 'belum ada lajur';
-  if (u.length === 1) return `lajur ${u[0]}`;
-  if (u.length === 2) return `lajur ${u[0]} dan ${u[1]}`;
-  return `lajur ${u.slice(0, -1).join(', ')}, dan ${u[u.length - 1]}`;
+  if (u.length === 0) return tx('arena.rambu.lajurKosong');
+  if (u.length === 1) return tx('arena.rambu.lajurSatu', { lajur: String(u[0]) });
+  const angka = u.length === 2
+    ? `${u[0]}${tx('arena.rambu.lajurDan')}${u[1]}`
+    : `${u.slice(0, -1).join(tx('arena.rambu.lajurPemisah'))}${tx('arena.rambu.lajurDanAkhir')}${u[u.length - 1]}`;
+  return tx('arena.rambu.lajurBanyak', { lajur: angka });
 }
 
 export interface Tanggapan {
   jenis: 'tulisan' | 'sikap' | 'sama';
   teks: KunciTeks;
   param: Record<string, string>;
+  /** Daftar lajur yang masih berupa ANGKA (jenis 'tulisan'): dijadikan teks {tanda}/{tulisan} oleh paramTanggapan(tx). */
+  lajur?: { tanda: number[]; tulisan: number[] };
+}
+
+/** Parameter teks tanggapan dalam bahasa `tx` (daftar lajur dirakit di sini, bukan di logika). */
+export function paramTanggapan(t: Tanggapan, tx: TxParam): Record<string, string> {
+  return t.lajur ? { ...t.param, tanda: daftarLajur(t.lajur.tanda, tx), tulisan: daftarLajur(t.lajur.tulisan, tx) } : t.param;
 }
 
 /**
@@ -165,7 +196,7 @@ export function tanggapan(k: ArenaRambu, j: MissionAnswer): Tanggapan[] {
   const tanda = lajurDitandai(k, j, indeks);
   const sama = tanda.length === tertulis.length && tertulis.every((x) => tanda.includes(x));
   const rambu = { rambu: `${indeks + 1}` };
-  if (!sama) hasil.push({ jenis: 'tulisan', teks: 'arena.rambu.tanggap.tulisan', param: { ...rambu, tanda: daftarLajur(tanda), tulisan: daftarLajur(tertulis) } });
+  if (!sama) hasil.push({ jenis: 'tulisan', teks: 'arena.rambu.tanggap.tulisan', param: rambu, lajur: { tanda: [...tanda], tulisan: [...tertulis] } });
   const pilih = simpulDipilih(k, j);
   const sikap = pilih ? k.simpul.sikap[pilih] : undefined;
   const trukDitandai = tanda.includes(k.lajurTruk);
@@ -176,6 +207,14 @@ export function tanggapan(k: ArenaRambu, j: MissionAnswer): Tanggapan[] {
 }
 
 /** Satu kalimat tindakan pemain ("Rambu 1: lajur 3 dan 4. Rambu 2: lajur 1."), tanpa penilaian. */
-export function ringkasTanda(k: ArenaRambu, j: MissionAnswer, tx: (kunci: KunciTeks) => string): string {
-  return k.rambu.map((r, i) => `${tx(r.label)}: ${daftarLajur(lajurDitandai(k, j, i))}`).join('. ') + '.';
+export function ringkasTanda(k: ArenaRambu, j: MissionAnswer, tx: TxParam): string {
+  return k.rambu.map((r, i) => `${tx(r.label)}${tx('daftar.titikDua')}${daftarLajur(lajurDitandai(k, j, i), tx)}`).join(tx('daftar.antarKalimat')) + tx('daftar.titik');
+}
+
+/** Tulisan ilustrasi jalan (lokasi/Adegan.tsx) dalam bahasa `tx` (T-014 fix). */
+export function labelAdegan(tx: TxParam): { jalan: string; truk: string; keterangan: string; lajur: (n: number) => string; lajurTruk: (n: number) => string } {
+  return {
+    jalan: tx('arena.rambu.adegan.jalan'), truk: tx('arena.rambu.adegan.truk'), keterangan: tx('arena.rambu.adegan.keterangan'),
+    lajur: (n) => tx('arena.rambu.adegan.lajur', { lajur: String(n) }), lajurTruk: (n) => tx('arena.rambu.adegan.lajurTruk', { lajur: String(n) }),
+  };
 }

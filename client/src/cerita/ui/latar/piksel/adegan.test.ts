@@ -205,3 +205,93 @@ test('D-102 (T-016): teks papan latar aktivitas = teks papan panggung (merek, sa
   assert.ok(t && t.titik.length > 100);
   for (const [x, y] of t.titik) assert.ok(x * 4 >= papan.kotak.x && x * 4 < papan.kotak.x + papan.kotak.w && y * 4 >= papan.kotak.y && y * 4 < papan.kotak.y + papan.kotak.h);
 });
+
+test('T-017 (D-104): Rudi punya dua bingkai jalan di atlas samping; rencana jalan K04 pool = dari tepi kiri ke slot 420', async () => {
+  const { kameraPiksel, LANGKAH_JALAN_MS, posisiJalan, punyaJalan, rencanaJalan, susunAdeganPiksel } = await import('./tata');
+  // Hanya Rudi (D-105: bingkai Hendra BELUM dipasang); tokoh lain tetap luncur 180 md.
+  assert.deepEqual((['missRaksa', 'hendra', 'rudi', 'bima', 'darto', 'admin', 'tol', 'polisi'] as const).filter((id) => punyaJalan(id)), ['rudi']);
+  const berdiri = susunTokoh('rudi', { pose: 'berdiri', hadap: 'kanan', ekspresi: 'netral' })!;
+  for (const pose of ['jalan-a', 'jalan-b'] as const) {
+    const s = susunTokoh('rudi', { pose: pose as never, hadap: 'kanan', ekspresi: 'cemas', mata: 'tutup' })!;
+    assert.equal(s.pose, pose);
+    assert.equal(s.hadap, 'kanan');
+    // Wajah terpanggang: hanya lapisan tubuh (tanpa ekspresi / kedip), tinggi = berdiri (pitch 4,35: tanpa lompatan saat berhenti).
+    assert.equal(s.lapisan.length, 1, pose);
+    assert.equal(s.ukuran.h, berdiri.ukuran.h, pose);
+    assert.equal(s.jangkar.y, berdiri.jangkar.y, pose);
+    // Kepala tidak melompat mendatar: selisih pusat kepala terhadap jangkar sama dengan berdiri (± 0,5 piksel seni).
+    assert.ok(Math.abs((s.kepala.x - s.jangkar.x) - (berdiri.kepala.x - berdiri.jangkar.x)) <= 0.5, pose);
+  }
+  const a = adeganPiksel(ep, komp({ lokasi: 'pool', hadir: [tl('rudi')] })).piksel!;
+  const r = RUANG_PIKSEL[a.ruang]!;
+  const tokoh = susunAdeganPiksel(a, r, { kedip: false, mulut: false });
+  assert.equal(tokoh[0]!.kakiX, 420);
+  for (const [W, H, dpr] of [[336, 336, 2], [366, 366, 3], [780, 432, 1]] as const) {
+    const kam = kameraPiksel(r, tokoh, W, H, dpr, 0);
+    const rj = rencanaJalan(420, tokoh[0]!.s.ukuran.w * 4, kam, W);
+    assert.equal(rj.arah, 'kanan', 'masuk dari kiri, berjalan ke kanan');
+    assert.ok(rj.awal + tokoh[0]!.s.ukuran.w * 4 <= kam.x + 1e-6, 'mulai di luar tepi kiri pandangan');
+    assert.ok(rj.n >= 3 && rj.n <= 6);
+    assert.equal(rj.durasi, rj.n * LANGKAH_JALAN_MS);
+    let lalu = -Infinity;
+    for (let t = 0; t < rj.durasi; t += 15) {
+      const p = posisiJalan(rj, t)!;
+      assert.equal((p.x - 420) % 4 === 0, true, 'piksel seni bulat');
+      assert.ok(p.x >= lalu && p.x <= 420, 'maju terus, tidak melewati slot');
+      lalu = p.x;
+    }
+    assert.equal(posisiJalan(rj, rj.durasi - 1)!.pose, 'jalan-b', 'bingkai terakhir = lintas');
+    assert.notEqual(posisiJalan(rj, rj.durasi - 1 - LANGKAH_JALAN_MS)!.pose, 'jalan-b', 'bergantian');
+    assert.equal(posisiJalan(rj, rj.durasi), null, 'tiba = berdiri');
+  }
+});
+
+test('T-017 fix D-125: 41 piksel seni per pose -> K04 pool 4 / 3 / 4 pose di 360 / 390 / 1280; berakhir lintas', async () => {
+  const { kameraPiksel, LANGKAH_JALAN_DUNIA, LANGKAH_JALAN_MS, posisiJalan, rencanaJalan, susunAdeganPiksel } = await import('./tata');
+  assert.equal(LANGKAH_JALAN_DUNIA, 164);
+  assert.equal(LANGKAH_JALAN_MS, 270);
+  const a = adeganPiksel(ep, komp({ lokasi: 'pool', hadir: [tl('rudi')] })).piksel!;
+  const r = RUANG_PIKSEL[a.ruang]!;
+  const tokoh = susunAdeganPiksel(a, r, { kedip: false, mulut: false });
+  // Kotak panggung pool terukur (tools/cek-kaki-t017.mjs): 360 -> 336x252 DPR2, 390 -> 366x275 DPR3, 1280 -> 780x400 DPR1.
+  const hasil = ([[336, 252, 2], [366, 275, 3], [780, 400, 1]] as const).map(([W, H, dpr]) => {
+    const rj = rencanaJalan(420, tokoh[0]!.s.ukuran.w * 4, kameraPiksel(r, tokoh, W, H, dpr, 0), W);
+    assert.equal(posisiJalan(rj, rj.durasi - 1)!.pose, 'jalan-b');
+    const perPose = Math.abs(rj.tujuan - rj.awal) / rj.n / 4;
+    assert.ok(perPose >= 34 && perPose <= 46, `${W}: ${perPose} piksel seni per pose (gambar: 41)`);
+    return [rj.n, posisiJalan(rj, 0)!.pose];
+  });
+  assert.deepEqual(hasil, [[4, 'jalan-a'], [3, 'jalan-b'], [4, 'jalan-a']]);
+});
+
+test('T-017 fix D-126: ruang lapangan, kamera turun sampai telapak utuh bila kepala masih punya 2 piksel seni udara; bidikan dekat & kantor tidak disentuh', async () => {
+  const { kameraPiksel, susunAdeganPiksel, turunkanKeKaki } = await import('./tata');
+  const lihat = (lokasi: string, id: string, W: number, H: number, dpr: number) => {
+    const a = adeganPiksel(ep, komp({ lokasi, hadir: [tl(id)] })).piksel!;
+    const r = RUANG_PIKSEL[a.ruang]!;
+    const tokoh = susunAdeganPiksel(a, r, { kedip: false, mulut: false });
+    const k = kameraPiksel(r, tokoh, W, H, dpr, 0);
+    const x = tokoh[0]!;
+    return { k, potong: (x.y + (x.s.jangkar.y + 1) * 4 - (k.y + H / k.s)) / 4, udara: (x.y - k.y) / 4, r, tokoh };
+  };
+  // 1280 (780x400): pool, bengkel, tol dulu memotong 11 / 8 / 11 piksel seni sepatu; sekarang utuh, kepala >= 2 piksel seni dari tepi.
+  for (const [lokasi, id] of [['pool', 'rudi'], ['bengkel', 'admin'], ['tol', 'bima']] as const) {
+    const v = lihat(lokasi, id, 780, 400, 1);
+    assert.ok(v.potong <= 0, `${lokasi} 1280: kaki terpotong ${v.potong}`);
+    assert.ok(v.udara >= 2, `${lokasi} 1280: udara kepala ${v.udara}`);
+    assert.equal((v.k.y * v.k.s) % 1, 0, 'tetap di piksel perangkat bulat');
+  }
+  // 390 pool (366x275 DPR3): dulu 4,5 piksel seni terpotong.
+  const p390 = lihat('pool', 'rudi', 366, 275, 3);
+  assert.ok(p390.potong <= 0 && p390.udara >= 2, JSON.stringify([p390.potong, p390.udara]));
+  // Bidikan dekat HP (bengkel 336x252: kaki terpotong ~40 piksel seni) tidak bisa utuh -> kamera TIDAK diubah.
+  const dekat = lihat('bengkel', 'admin', 336, 252, 2);
+  assert.ok(dekat.potong > 30);
+  assert.deepEqual(turunkanKeKaki(dekat.k, dekat.r, dekat.tokoh, 336, 252, 2), dekat.k);
+  // Kantor (meja layanan): tidak pernah digeser.
+  const a = adeganPiksel(ep, komp({ hadir: [tl('missRaksa'), tl('bima')] })).piksel!;
+  const rk = RUANG_PIKSEL[a.ruang]!;
+  const tk = susunAdeganPiksel(a, rk, { kedip: false, mulut: false });
+  const kk = { s: 0.5, x: 0, y: 0 };
+  assert.equal(turunkanKeKaki(kk, rk, tk, 780, 400, 1), kk);
+});

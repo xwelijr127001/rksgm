@@ -7,7 +7,7 @@
  *
  * Kunci: '<node>.<n>' baris; '<node>.<alt>' teks pilihan; '<titik>.<alt>.alasan' kalimat sebab-akibat (netral) yang
  * tampil bersama reaksi; 'titik.<id>.*' ringkasan akhir (label alternatif, alasan Miss Raksa); 'akt.<id>.*' aktivitas.
- * Hanya bahasa Indonesia: naskah draf belum diterjemahkan (Episode.bahasa = ['id']).
+ * Terjemahan: teks.en.ts dan teks.zh.ts (T-014), kunci dan parameter sama; ubah teks di sini dulu, lalu di keduanya.
  */
 export const TEKS_AUTO_2_ID: Record<string, string> = {
   judul: 'Truk Trailer di Jalan Tol',
@@ -968,5 +968,24 @@ export const TEKS_AUTO_2_ID: Record<string, string> = {
   'arena.tutup.bintang.isi': 'Mohon beri kami nilai 5 bintang, ya, Pak.',
   'arena.tutup.polis': 'Tawaran polis baru',
   'arena.tutup.polis.isi': 'Untuk truk baru Bapak, kami punya tawaran polis.',
+  // ---- penyambung daftar yang dirakit kode (T-014 fix, QA B-01): kata sambung, tanda baca, dan kata "lajur" per bahasa.
+  // Spasi di awal/akhir nilai itu DISENGAJA (nilai disambung apa adanya).
+  'daftar.pemisah': ', ',
+  'daftar.dan': ' dan ',
+  'daftar.titik': '.',
+  'daftar.titikDua': ': ',
+  'daftar.antarKalimat': '. ',
+  'arena.rambu.lajurSatu': 'lajur {lajur}',
+  'arena.rambu.lajurBanyak': 'lajur {lajur}',
+  'arena.rambu.lajurKosong': 'belum ada lajur',
+  'arena.rambu.lajurPemisah': ', ',
+  'arena.rambu.lajurDan': ' dan ',
+  'arena.rambu.lajurDanAkhir': ', dan ',
+  // ---- tulisan di ilustrasi jalan aktivitas rambu (lokasi/Adegan.tsx; T-014 fix: dulu tertulis Indonesia di komponen).
+  'arena.rambu.adegan.jalan': 'Ilustrasi jalan empat lajur, arah lalu lintas ke atas',
+  'arena.rambu.adegan.truk': 'Truk · menurut supir',
+  'arena.rambu.adegan.keterangan': 'Ilustrasi • posisi truk menurut supir. Bukan denah kejadian.',
+  'arena.rambu.adegan.lajur': 'Lajur {lajur}',
+  'arena.rambu.adegan.lajurTruk': 'Lajur {lajur}, posisi truk menurut supir',
   'lampiran.fotoTruk': 'Foto truk dari Pak Hendra',
 };

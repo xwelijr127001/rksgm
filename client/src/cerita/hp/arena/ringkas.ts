@@ -7,7 +7,7 @@ import type { Episode, KunciTeks } from '../../tipe';
 import { petaLangkah } from './logika';
 import { ringkasTanda } from './rambu';
 
-export function ringkasTindakan(ep: Episode, idAktivitas: string, jawaban: MissionAnswer | undefined, tx: (k: KunciTeks) => string): string | null {
+export function ringkasTindakan(ep: Episode, idAktivitas: string, jawaban: MissionAnswer | undefined, tx: (k: KunciTeks, p?: Record<string, string | number>) => string): string | null {
   const k = ep.aktivitas[idAktivitas]?.arena;
   if (!k || !jawaban) return null;
   switch (k.pola) {
@@ -20,14 +20,14 @@ export function ringkasTindakan(ep: Episode, idAktivitas: string, jawaban: Missi
       return k.wadah
         .map((w) => ({ w, isi: k.benda.filter((b) => p[b.id] === w.id).map((b) => tx(b.nama ?? b.id)) }))
         .filter((x) => x.isi.length)
-        .map((x) => `${tx(x.w.label)}: ${x.isi.join(', ')}`)
-        .join('. ');
+        .map((x) => `${tx(x.w.label)}${tx('daftar.titikDua')}${x.isi.join(tx('daftar.pemisah'))}`)
+        .join(tx('daftar.antarKalimat'));
     }
     case 'bandingkan': {
       const p = petaLangkah(jawaban, k.langkah);
       const hitung = new Map<string, number>();
       for (const s of k.selisih) if (p[s.id]) hitung.set(p[s.id]!, (hitung.get(p[s.id]!) ?? 0) + 1);
-      return k.perlakuan.filter((x) => hitung.has(x.id)).map((x) => `${tx(x.label)} (${hitung.get(x.id)})`).join(', ');
+      return k.perlakuan.filter((x) => hitung.has(x.id)).map((x) => `${tx(x.label)} (${hitung.get(x.id)})`).join(tx('daftar.pemisah'));
     }
     // Bundel: baris akibatnya sendiri menyebut tindakan berkas & kabar (berlabel topik), jadi tanpa ringkasan terpisah.
     case 'bundel':

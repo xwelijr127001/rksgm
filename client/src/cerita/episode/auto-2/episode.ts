@@ -639,7 +639,7 @@ export const EPISODE_AUTO_2: Episode = {
   node: Object.fromEntries(NODE.map((n) => [n.id, n])),
   aktivitas: AKTIVITAS_AUTO_2,
   teks: TEKS_AUTO_2,
-  bahasa: ['id'],
+  bahasa: ['id', 'en', 'zh'],
   kartuAkhir: (['puas', 'catatan', 'kurang'] as const).map((akhir) => ({
     id: `kartu-${akhir}`,
     akhir,

@@ -10,6 +10,7 @@
  * berlabel (keyboard & pembaca layar setara).
  */
 import { playSfx } from '../../../audio/audio';
+import { selaPembicara } from '../../ui/bagian';
 import { useEffect, useId, useRef, useState } from 'react';
 import { t } from '../../../i18n';
 import { Adegan } from '../../lokasi/Adegan';
@@ -18,7 +19,7 @@ import '../../lokasi/lokasi.css';
 import { Kutipan, TombolKirim } from '../bagianHp';
 import { panahUbin, type PropsPola } from './pola';
 import {
-  LANGKAH_AWAL, alihLajur, bolehLanjut, bukaUlang, daftarLajur, ketukRambu, lajurDitandai, lanjutRambu, pilihSimpul, pulihkanLangkah, rambuAktif,
+  LANGKAH_AWAL, alihLajur, bolehLanjut, bukaUlang, daftarLajur, ketukRambu, labelAdegan, lajurDitandai, lanjutRambu, pilihSimpul, pulihkanLangkah, rambuAktif,
   rambuTerbuka, serialLangkah, simpulDipilih, tahap, uraiLangkah, type ArenaRambu, type LangkahRambu,
 } from './rambu';
 
@@ -67,8 +68,8 @@ const simpanRef = (el: HTMLElement | null) => { petunjukRef.current = el; };
         <li key={i}>
           <span className={`lk-warna ${i === 0 ? 'merah' : 'biru'}`} aria-hidden="true" />
           {tanda[i]!.length
-            ? <><b>{nama(i)}:</b> {tx('arena.rambu.pilihanmu', { lajur: daftarLajur(tanda[i]!) })}</>
-            : <><b>{nama(i)}:</b> {tx('arena.rambu.belum')}</>}
+            ? <><b>{nama(i)}</b>{selaPembicara()}{tx('arena.rambu.pilihanmu', { lajur: daftarLajur(tanda[i]!, tx) })}</>
+            : <><b>{nama(i)}</b>{selaPembicara()}{tx('arena.rambu.belum')}</>}
         </li>
       ) : null))}
     </ul>
@@ -101,7 +102,7 @@ const simpanRef = (el: HTMLElement | null) => { petunjukRef.current = el; };
             </div>
           ) : <p className="lk-instruksi" ref={simpanRef} tabIndex={-1} aria-live="polite">{tx(r.petunjuk)}</p>}
 
-          <Adegan tanda1={tanda[0] ?? []} tanda2={tanda[1] ?? []} bisaTandai={tahapKini === 'tandai'} aktifTanda={tanda[aktif] ?? []}
+          <Adegan label={labelAdegan(tx)} tanda1={tanda[0] ?? []} tanda2={tanda[1] ?? []} bisaTandai={tahapKini === 'tandai'} aktifTanda={tanda[aktif] ?? []}
             onLajur={(n) => { playSfx('ketuk'); ubah(alihLajur(konfig, jawaban, aktif, n)); }} />
 
           {tahapKini === 'tandai' ? (
@@ -125,7 +126,7 @@ const simpanRef = (el: HTMLElement | null) => { petunjukRef.current = el; };
         </>
       ) : (
         <>
-          <Adegan tanda1={tanda[0] ?? []} tanda2={tanda[1] ?? []} statis cincinTruk />
+          <Adegan label={labelAdegan(tx)} tanda1={tanda[0] ?? []} tanda2={tanda[1] ?? []} statis cincinTruk />
           <Pilihanmu />
           <Kutipan ep={ep} baris={kutipan ?? null} tx={tx} namaPemain={namaPemain} />
           <h3 id={idTanya} className="hp-tanya-arena" ref={simpanRef} tabIndex={-1}>{tx(konfig.simpul.tanya)}</h3>

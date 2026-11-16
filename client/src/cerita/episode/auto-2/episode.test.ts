@@ -408,10 +408,10 @@ function mainkanSampai(target: string): StateCerita {
   return s;
 }
 
-test('naskah hanya Bahasa Indonesia: bahasa lain jatuh ke teks Indonesia', () => {
-  assert.deepEqual(EP.bahasa, ['id']);
-  assert.equal(teksCerita(EP, 'k01.2', 'en'), teksCerita(EP, 'k01.2', 'id'));
-  assert.equal(Object.keys(EP.teks.en).length, 0);
+test('T-014: naskah tersedia dalam id, en, zh (kelengkapan diuji di teks.test.ts)', () => {
+  assert.deepEqual(EP.bahasa, ['id', 'en', 'zh']);
+  assert.notEqual(teksCerita(EP, 'k01.2', 'en'), teksCerita(EP, 'k01.2', 'id'));
+  assert.notEqual(teksCerita(EP, 'k01.2', 'zh'), teksCerita(EP, 'k01.2', 'id'));
 });
 
 // ------------------------------------------------------------------ audit bias penyajian balasan

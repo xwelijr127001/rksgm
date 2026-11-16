@@ -18,6 +18,7 @@ import {
 } from '../../seni/auto-2/benda';
 import type { IdAktivitas, KonfigArena, KunciTeks, LampiranCerita, SeniArena } from '../../tipe';
 import { lajurTertulisRambu1 } from '../../lokasi/logika';
+import { daftarNama, gabungKalimat } from '../../hp/arena/rambu';
 import { JUMLAH_LAJUR, LAJUR_TRUK } from '../../lokasi/seni/geometri';
 
 /** Pin peta & aksen netral (warna bukan pembawa arti: setiap tujuan berlabel teks). */
@@ -252,11 +253,8 @@ export const ARENA_AUTO_2: Record<IdAktivitas, KonfigArena> = {
 
 type Tx = (k: KunciTeks, param?: Record<string, string | number>) => string;
 
-/** "A, B, dan C" (Bahasa Indonesia). */
-function daftar(nama: string[]): string {
-  if (nama.length <= 1) return nama.join('');
-  return `${nama.slice(0, -1).join(', ')} dan ${nama[nama.length - 1]}`;
-}
+/** Pengantar + daftar ("A, B dan C" per bahasa, T-014 fix D-123) + titik; tanpa spasi sesudah tanda baca lebar penuh (zh "："). */
+const kalimatDaftar = (pengantar: string, nama: string[], tx: Tx): string => gabungKalimat([pengantar, daftarNama(nama, tx)]) + tx('daftar.titik');
 
 const peta = (j: MissionAnswer, langkah: string): Record<string, string> => {
   const v = j[langkah];
@@ -271,15 +269,15 @@ export const PESAN_AUTO_2: Partial<Record<IdAktivitas, (j: MissionAnswer, tx: Tx
     const nama = (w: string) => urut.filter((b) => p[b.id] === w).map((b) => tx(b.nama!));
     const sekarang = nama('sekarang');
     const menyusul = nama('menyusul');
-    const kalimat = [sekarang.length ? `${tx('arena.berkas.pesan.sekarang')} ${daftar(sekarang)}.` : tx('arena.berkas.pesan.kosong')];
-    if (menyusul.length) kalimat.push(`${tx('arena.berkas.pesan.menyusul')} ${daftar(menyusul)}.`);
-    return kalimat.join(' ');
+    const kalimat = [sekarang.length ? kalimatDaftar(tx('arena.berkas.pesan.sekarang'), sekarang, tx) : tx('arena.berkas.pesan.kosong')];
+    if (menyusul.length) kalimat.push(kalimatDaftar(tx('arena.berkas.pesan.menyusul'), menyusul, tx));
+    return gabungKalimat(kalimat);
   },
   // Kabar yang dipilih = pesan terkirim di obrolan (sebelum akibatnya); "tidak mengabari dulu" = tanpa pesan.
   bundel: (j, tx) => (j.kabar === 'disetujui' || j.kabar === 'persetujuan' ? tx(`arena.bundel.${j.kabar}`) : null),
   tutup: (j, tx) => {
     const p = peta(j, 'pesan');
     const isi = (ARENA_AUTO_2.tutup as Extract<KonfigArena, { pola: 'pesan' }>).benda.filter((b) => p[b.id] === 'masuk').map((b) => tx(b.keterangan!));
-    return isi.length ? isi.join(' ') : null;
+    return isi.length ? gabungKalimat(isi) : null;
   },
 };

@@ -17,7 +17,7 @@ import { useEffect, useLayoutEffect, useMemo, useRef, useState, type RefObject }
 import { useReducedMotion } from '../../../../hooks';
 import { t } from '../../../../i18n';
 import { useDpr } from '../../../../game/tokoh';
-import { teleponSisipan } from '../../../seni/piksel';
+import { susunTokoh, teleponSisipan } from '../../../seni/piksel';
 import type { Episode, IdPembicara, KunciTeks } from '../../../tipe';
 import { qPiksel } from '../../panggung/kamera';
 import { DUNIA_H, DUNIA_W, type Kotak } from '../../panggung/dunia';
@@ -27,7 +27,7 @@ import { titikPapanKantor } from './papan';
 import { muatPng, siap } from './muat';
 import { nasabahDiPanggung, type KomposisiLatar } from '../komposisi';
 import type { AdeganPiksel } from './adegan';
-import { kameraPiksel, kotakLuarSisipan, sisipanAdegan, susunAdeganPiksel } from './tata';
+import { kameraPiksel, kotakLuarSisipan, LANGKAH_JALAN_MS, POSE_JALAN_MAKS, posisiJalan, punyaJalan, rencanaJalan, sisipanAdegan, susunAdeganPiksel } from './tata';
 import { RUANG_PIKSEL, SATUAN_RUANG } from './ruang';
 import '../../panggung/panggung.css';
 import '../latar.css';
@@ -123,6 +123,44 @@ function useHidup(mati: boolean, pembicara: string, hadir: string): { lompat: bo
   return { lompat, napas, masuk };
 }
 
+/** T-017: tokoh yang SUDAH tiba di ruang ('<ruang>:<id>'), lintas pasang-ulang panggung (aktivitas, obrolan): tidak jalan lagi. */
+const sudahTiba = new Set<string>();
+
+/**
+ * T-017 (D-104): jalan masuk tokoh yang punya bingkai jalan, setiap kali ia baru hadir di ruang (termasuk panggung/ruang yang
+ * baru dipasang). Mengembalikan { id, t } selama berjalan (t md sejak mulai), null bila tidak. Jam baru mulai saat PNG siap.
+ * Gerak dikurangi = tidak pernah jalan (langsung berdiri). `kunciLangkah` berganti (pemain menekan Lanjut) = langsung berdiri.
+ */
+function useJalan(mati: boolean, siapGambar: boolean, ruang: string, pejalan: string, kunciLangkah: string | undefined): { id: Set<string>; t: number } | null {
+  const [jalan, setJalan] = useState<{ id: Set<string>; t: number } | null>(null);
+  const langkahMulai = useRef<string | undefined>(undefined);
+  const raf = useRef(0);
+  useLayoutEffect(() => {
+    const hadir = pejalan.split(' ').filter(Boolean);
+    for (const k of [...sudahTiba]) if (k.startsWith(ruang + ':') && !hadir.includes(k.slice(ruang.length + 1))) sudahTiba.delete(k);
+    if (!siapGambar) return;
+    const baru = hadir.filter((id) => !sudahTiba.has(ruang + ':' + id));
+    for (const id of hadir) sudahTiba.add(ruang + ':' + id);
+    if (mati || !baru.length) return;
+    const id = new Set(baru);
+    const t0 = performance.now();
+    langkahMulai.current = kunciLangkah;
+    const langkah = () => {
+      const t = performance.now() - t0;
+      if (t >= POSE_JALAN_MAKS * LANGKAH_JALAN_MS) { setJalan(null); return; }
+      setJalan({ id, t });
+      raf.current = requestAnimationFrame(langkah);
+    };
+    setJalan({ id, t: 0 });
+    raf.current = requestAnimationFrame(langkah);
+    return () => { cancelAnimationFrame(raf.current); setJalan(null); };
+  }, [mati, siapGambar, ruang, pejalan]); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => {
+    if (jalan && kunciLangkah !== langkahMulai.current) { cancelAnimationFrame(raf.current); setJalan(null); }
+  }, [kunciLangkah]); // eslint-disable-line react-hooks/exhaustive-deps
+  return jalan;
+}
+
 export interface PropsPanggungPiksel {
   ep: Episode;
   komposisi: KomposisiLatar;
@@ -133,13 +171,15 @@ export interface PropsPanggungPiksel {
   status?: boolean;
   ruangBawah?: number;
   className?: string;
+  /** Kunci langkah cerita (node + baris): berganti saat pemain menekan Lanjut; jalan masuk yang sedang berlangsung dihentikan. */
+  kunciLangkah?: string;
   /** 'penuh' = kartu episode: adegan mengisi kotak (cover), bukan letterbox. */
   isi?: 'penuh';
   /** Ada PNG adegan yang gagal dimuat: pemakai menampilkan kotak latar polos. */
   onGagal?: () => void;
 }
 
-export function PanggungPiksel({ ep, komposisi, adegan, tx, nama, suasana, status = false, ruangBawah = 0, className = '', isi, onGagal }: PropsPanggungPiksel) {
+export function PanggungPiksel({ ep, komposisi, adegan, tx, nama, suasana, status = false, ruangBawah = 0, className = '', isi, onGagal, kunciLangkah }: PropsPanggungPiksel) {
   const akar = useRef<HTMLDivElement>(null);
   const kanvas = useRef<HTMLCanvasElement>(null);
   const ukuran = useUkuranKotak(akar);
@@ -170,10 +210,20 @@ export function PanggungPiksel({ ep, komposisi, adegan, tx, nama, suasana, statu
     return () => { hidup = false; };
   }, [kunciUrl]); // eslint-disable-line react-hooks/exhaustive-deps
 
+  // T-017: jalan masuk (hanya tokoh slot yang atlasnya punya bingkai jalan; kartu episode 'penuh' tidak pernah).
+  const pejalan = isi === 'penuh' ? '' : adegan.tokoh.filter((x) => x.tempat === 'slot' && punyaJalan(x.tokoh)).map((x) => x.id).join(' ');
+  const jalan = useJalan(kurang, siapUrl, adegan.ruang, pejalan, kunciLangkah);
   const papanTeks = r.papan ? tx(r.papan.teksKunci) : '';
   const kamera = ukuran ? kameraPiksel(r, tokoh, ukuran.w, ukuran.h, dpr, ruangBawah, isi === 'penuh') : null;
   // T-015: sisipan telepon tidak pernah menutupi kepala tokoh (letak dipilih dari kotak kepala di layar).
   const letakSisipan = sisipan && ukuran && kamera ? sisipanAdegan(r, tokoh, kamera, ukuran.w, ukuran.h, dpr, ruangBawah, sisipan.jendela.sisi) : null;
+  const jalanKini = new Map<string, { x: number; pose: 'jalan-a' | 'jalan-b'; arah: 'kiri' | 'kanan' }>();
+  if (jalan && kamera && ukuran) for (const x of tokoh) {
+    if (!jalan.id.has(x.t.id)) continue;
+    const rj = rencanaJalan(x.kakiX, x.s.ukuran.w * K, kamera, ukuran.w);
+    const pj = posisiJalan(rj, jalan.t);
+    if (pj) jalanKini.set(x.t.id, { x: pj.x, pose: pj.pose, arah: rj.arah });
+  }
   const css = (b: Kotak) => [b.x, b.y, b.w, b.h].map((v) => Math.round((v / dpr) * 10) / 10).join(',');
   useLayoutEffect(() => {
     const c = kanvas.current;
@@ -209,6 +259,17 @@ export function PanggungPiksel({ ep, komposisi, adegan, tx, nama, suasana, statu
     const tokohDi = (tempat: string) => {
       for (const x of tokoh) {
         if (x.t.tempat !== tempat) continue;
+        // T-017: sedang berjalan masuk = bingkai jalan (wajah terpanggang, tanpa kedip/lompat/napas/luncur), kaki di x jalan.
+        const j = jalanKini.get(x.t.id);
+        const sj = j ? susunTokoh(x.t.tokoh, { pose: j.pose as never, hadap: x.t.satuArah ?? j.arah, ekspresi: x.t.ekspresi }) : null;
+        if (j && sj) {
+          const kakiY = x.y + x.s.jangkar.y * K;
+          g.save();
+          if (x.t.satuArah && x.t.satuArah !== j.arah) { g.translate(2 * dx(j.x), 0); g.scale(-1, 1); }
+          for (const l of sj.lapisan) gambar(sj.url, l.sumber.x, l.sumber.y, l.sumber.w, l.sumber.h, j.x - sj.jangkar.x * K + l.x * K, kakiY - sj.jangkar.y * K + l.y * K, l.sumber.w * K, l.sumber.h * K);
+          g.restore();
+          continue;
+        }
         const tubuh = x.s.lapisan[0]!;
         // D-96: lompat/napas pembicara (piksel seni bulat) + luncur masuk dari tepi pandangan terdekat.
         const naik = (x.t.bicara ? (hidup.lompat ? 2 : hidup.napas ? 1 : 0) : !adaPembicara && x.t.tempat === 'slot' && hidup.napas !== (x.t.slot % 2 === 1) ? 1 : 0) * K;
@@ -306,7 +367,7 @@ export function PanggungPiksel({ ep, komposisi, adegan, tx, nama, suasana, statu
       data-kamera={kamera ? `${Math.round(kamera.x)},${Math.round(kamera.y)},${Math.round(ukuran!.w / kamera.s)}x${Math.round(ukuran!.h / kamera.s)}` : undefined}
     >
       <div className="cer-piksel" data-siap={siapUrl ? '' : undefined} aria-hidden="true">
-        <canvas ref={kanvas} className="cer-piksel-kanvas" data-pose={tokoh.map((x) => `${x.t.id}:${x.s.pose}:${x.t.hadap}:${x.s.ekspresi}`).join(' ') || undefined} data-mata={gerak.kedip ? 'tutup' : 'buka'} data-napas={hidup.napas ? '1' : '0'} />
+        <canvas ref={kanvas} className="cer-piksel-kanvas" data-pose={tokoh.map((x) => `${x.t.id}:${x.s.pose}:${x.t.hadap}:${x.s.ekspresi}`).join(' ') || undefined} data-mata={gerak.kedip ? 'tutup' : 'buka'} data-napas={hidup.napas ? '1' : '0'} data-jalan={[...jalanKini].map(([id, j]) => `${id}:${j.pose}:${Math.round(j.x)}`).join(' ') || undefined} data-kaki={tokoh.map((x) => `${x.t.id}:${Math.round(jalanKini.get(x.t.id)?.x ?? x.kakiX)}`).join(' ') || undefined} />
         <canvas ref={lapisLama} className="cer-piksel-kanvas cer-piksel-lama" />
       </div>
       {/* Label lokasi hanya untuk ruang KOSONG tanpa papan: dengan tokoh, chip menutupi kepala (wawancara tiga saksi); di kantor

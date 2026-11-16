@@ -11,7 +11,7 @@ import { IkonCentang, IkonUlang } from '../../lokasi/seni/Aset';
 import '../../lokasi/lokasi.css';
 import type { Episode, KunciTeks } from '../../tipe';
 import { PotretHp } from '../bagianHp';
-import { lajurDitandai, tanggapan, type ArenaRambu } from './rambu';
+import { labelAdegan, lajurDitandai, paramTanggapan, tanggapan, type ArenaRambu } from './rambu';
 
 export function RingkasRambu({ ep, konfig, jawaban, tx }: { ep: Episode; konfig: ArenaRambu; jawaban: MissionAnswer; tx: (k: KunciTeks, p?: Record<string, string | number>) => string }) {
   const kartu = tanggapan(konfig, jawaban);
@@ -22,14 +22,14 @@ export function RingkasRambu({ ep, konfig, jawaban, tx }: { ep: Episode; konfig:
   const nama = tx(ep.pemeran.bima?.nama ?? 'bima');
   return (
     <div className="hp-rambu-ringkas lk lk-tertanam" data-rambu-ringkas="">
-      <Adegan tanda1={lajurDitandai(konfig, jawaban, 0)} tanda2={lajurDitandai(konfig, jawaban, 1)} statis cincinTruk />
+      <Adegan tanda1={lajurDitandai(konfig, jawaban, 0)} tanda2={lajurDitandai(konfig, jawaban, 1)} statis cincinTruk label={labelAdegan(tx)} />
       {utama ? (
         <div className="lk-tanggapan" role="group" aria-label={tx('arena.rambu.tanggapGrup')}>
           <div className={`lk-umpan lk-umpan-utama ${utama.jenis === 'sama' ? 'lk-umpan-sama' : 'lk-umpan-beda'}`} data-tanggapan={utama.jenis}>
             {ep.pemeran.bima ? <PotretHp ep={ep} id="bima" nama={nama} /> : null}
             <div className="lk-umpan-isi">
               <p className="lk-umpan-nama"><b>{nama}</b>{utama.jenis === 'sama' ? <IkonCentang /> : <IkonUlang />}</p>
-              <p>{tx(utama.teks, utama.param)}</p>
+              <p>{tx(utama.teks, paramTanggapan(utama, tx))}</p>
             </div>
           </div>
           {lain.length ? (

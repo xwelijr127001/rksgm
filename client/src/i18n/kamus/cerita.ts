@@ -393,7 +393,7 @@ const kamus: KamusRuang = {
     suasanaChip: '{nama} · {suasana}',
     suasanaAria: '{nama}的心情：{suasana}',
     statusChip: '{nama}状态：{suasana}',
-    statusAria: '与{nama}的关系状态：{suasana}',
+    statusAria: '与 {nama}的关系状态：{suasana}',
     'arah.naik': '心情好转',
     'arah.turun': '心情变差',
     'arah.tetap': '心情未变',

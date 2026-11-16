@@ -8,6 +8,7 @@
  * Bila tokoh yang dipindah juga yang memberi tugas, kalimatnya tampil di kartu tokoh itu (Arena tidak mengulanginya).
  */
 import { useId } from 'react';
+import { selaPembicara } from '../../ui/bagian';
 import { t } from '../../../i18n';
 import type { Episode, KunciTeks, TujuanArena } from '../../tipe';
 import { GambarSeni, PotretHp, TombolKirim } from '../bagianHp';
@@ -48,7 +49,7 @@ export function ArenaPolaTujuan({ ep, konfig, jawaban, ubah, daftar, tx, labelKi
       )}
       {/* Pilihan aktif diulang tepat di atas tombol: tidak perlu menggulir kembali untuk mengingatnya. */}
       <p className="hp-umpan" role="status" data-kosong={tujuan ? undefined : ''}>
-        {tujuan ? <span><b>{t('ceritaHp.dipilih')}:</b> {tx(tujuan.label)}</span> : null}
+        {tujuan ? <span><b>{t('ceritaHp.dipilih')}</b>{selaPembicara()}{tx(tujuan.label)}</span> : null}
       </p>
       <TombolKirim label={labelKirim} siap={!!tujuan} onKirim={onKirim} alasanBelum={tujuan ? null : t('ceritaHp.belumTujuan', { benda: namaBenda })} catatan={t('ceritaHp.pilihanBisaDiubah')} />
     </div>

@@ -99,7 +99,7 @@ export function AdeganTatap({ ep, state, tx, namaPemain, status, tindakan, bukti
   return (
     <div className="hp-adegan hp-vn" data-panggung={tanpaPanggung ? 'tanpa' : tinggi} data-tumpang={dekat ? '' : undefined} data-susun={jenisSusun}>
       <div className="hp-vn-bingkai" ref={bingkai}>
-        {tanpaPanggung ? null : <PanggungLatar ep={ep} komposisi={k} tx={tx} nama={nama} suasana={status} status ruangBawah={dekat ? TUMPANG_DIALOG : 0} />}
+        {tanpaPanggung ? null : <PanggungLatar ep={ep} komposisi={k} tx={tx} nama={nama} suasana={status} status ruangBawah={dekat ? TUMPANG_DIALOG : 0} kunciLangkah={`${state.node}:${state.baris}`} />}
         <article className="hp-vn-dialog" aria-live="polite">
           {tindakan ? <p className="hp-tindakan"><b>{t('ceritaHp.tindakanmu')}</b>{selaPembicara()}{tindakan}</p> : null}
           {buktiTindakan}
@@ -125,7 +125,7 @@ export function AdeganTatap({ ep, state, tx, namaPemain, status, tindakan, bukti
             </div>
           ) : null}
           {k.hadir.length >= 2 ? (
-            <p className="hp-vn-hadir">{t('ceritaHp.hadir', { daftar: k.hadir.map((x) => nama(x.id)).join(', ') })}</p>
+            <p className="hp-vn-hadir">{t('ceritaHp.hadir', { daftar: k.hadir.map((x) => nama(x.id)).join(tx('daftar.pemisah')) })}</p>
           ) : null}
           {aksiDiDialog ? <>{sisipan}<div className="hp-vn-aksi">{komposer}</div></> : null}
         </article>

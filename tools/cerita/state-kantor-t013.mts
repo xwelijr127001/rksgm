@@ -26,6 +26,7 @@ const { komposisiLatar } = await import('../../client/src/cerita/ui/latar/kompos
 const { simpanProgres } = await import('../../client/src/cerita/simpan');
 const { susunTokoh } = await import('../../client/src/cerita/seni/piksel');
 import type { AksiCerita, StateCerita } from '../../client/src/cerita/tipe';
+const { alihLajur, pilihSimpul } = await import('../../client/src/cerita/hp/arena/rambu');
 
 const ep = EPISODE_AUTO_2!;
 const hasil: Record<string, { nilai: string; node: string; baris: number; ekspresi?: string }> = {};
@@ -64,6 +65,23 @@ for (let run = 0; run < 60; run++) {
     const calon: AksiCerita[] = [];
     if (n.jenis === 'pilihan') calon.push(...n.pilihan.map((p) => ({ jenis: 'pilih', node: n.id, pilihan: p.id }) as AksiCerita).sort(() => acak() - 0.5));
     if (n.jenis === 'aktivitas') {
+      // T-014 fix (QA B-01): state SESUDAH aktivitas yang kalimatnya dirakit kode (daftar dokumen di obrolan, daftar lajur di
+      // ringkasan & tanggapan rambu), dengan jawaban buatan berisi daftar 2 dan 3+ butir. Tidak mengubah jalur acak utama.
+      const idAkt = (n as unknown as { aktivitas: string }).aktivitas;
+      if (!hasil[`akt-${idAkt}`] && (idAkt === 'berkas' || idAkt === 'rambu' || idAkt === 'saksi')) {
+        let jb: Record<string, unknown> = {};
+        if (idAkt === 'berkas') jb = { berkas: { stnk: 'sekarang', ktp: 'sekarang', formulir: 'menyusul', kk: 'menyusul', slip: 'menyusul', rekening: 'tidak', sim: 'tidak', suratpolisi: 'tidak' } };
+        if (idAkt === 'saksi') jb = { saksi: { hendra: 'ya', darto: 'ya', tol: 'ya', polisi: 'tidak', mobilkecil: 'tidak' } };
+        if (idAkt === 'rambu') {
+          const kr = (ep.aktivitas as Record<string, { arena?: unknown }>).rambu!.arena as never;
+          let j = {} as never;
+          for (const x of [1, 3]) j = alihLajur(kr, j, 0, x) as never;
+          for (const x of [1, 2, 3]) j = alihLajur(kr, j, 1, x) as never;
+          jb = pilihSimpul(kr, j, 'c') as never;
+        }
+        const t = jalankan(ep, s, { jenis: 'aktivitas', node: n.id, jawaban: jb as never });
+        if (t !== s) simpan(`akt-${idAkt}`, t);
+      }
       // Separuh putaran: jawaban KUNCI aktivitas (mencapai cabang seperti K09-E tiga saksi), selebihnya kosong.
       const def = (ep.aktivitas as Record<string, { kunci?: { stepId: string; assign?: unknown; answer?: unknown }[] }> | undefined)?.[(n as unknown as { aktivitas: string }).aktivitas];
       const kunci = def?.kunci ? Object.fromEntries(def.kunci.map((x) => [x.stepId, x.assign ?? x.answer])) : {};

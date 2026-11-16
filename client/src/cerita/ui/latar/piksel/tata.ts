@@ -62,7 +62,7 @@ export function kameraPiksel(r: RuangPiksel, tokoh: readonly TokohTersusun[], W:
   const q = qPiksel(dpr);
   // D-95: layar lebar memperlihatkan ruangnya (perbesaran maks 1,15); HP boleh lebih dekat (wajah terbaca).
   const k = pasKamera(W, H, rect, kepala, { atas: 0, kiri: 0, kanan: 0, bawah }, { q, wajib: gabungKotak(r.papan?.kotak ?? null, r.fokus), maksLebih: jenis === 'lebar' ? MAKS_LEBIH_LEBAR : MAKS_LEBIH });
-  if (!penuh) return k;
+  if (!penuh) return turunkanKeKaki(k, r, tokoh, W, H, dpr);
   const jepit = (v: number, maks: number) => Math.min(Math.max(0, v), Math.max(0, maks));
   // Kartu episode. (1) D-97 "cover": bila pandangan kamera biasa lebih besar daripada dunia, pakai skala bulat berikutnya yang
   // MENGISI kotak. (2) D-101: skala tidak boleh memperlihatkan kurang dari 125 piksel seni lebarnya (turun skala bulat).
@@ -133,4 +133,81 @@ const keLayar = (b: Kotak, k: Kamera, dpr: number): Kotak => ({ x: (b.x - k.x) *
 export function sisipanAdegan(r: RuangPiksel, tokoh: readonly TokohTersusun[], kamera: Kamera, W: number, H: number, dpr: number, bawah: number, sisiSeni: number): { tata: TataSisipan; kepala: Kotak[] } {
   const kepala = tokoh.map((x) => { const b = kotakKepalaPiksel(x); return keLayar({ x: b.x - 2 * K, y: b.y - 2 * K, w: b.w + 4 * K, h: b.h + 4 * K }, kamera, dpr); });
   return { tata: tataSisipan(Math.round(W * dpr), Math.round(H * dpr), dpr, Math.round(bawah * dpr), sisiSeni, kepala, r.papan ? keLayar(r.papan.kotak, kamera, dpr) : null), kepala };
+}
+
+/** Udara minimum di atas kepala sesudah kamera diturunkan (dunia) = 2 piksel seni. */
+const UDARA_KEPALA = 2 * K;
+
+/**
+ * D-126: di ruang LAPANGAN (tanpa meja layanan: pool, bengkel, tol, wawancara) tokoh berdiri berbadan penuh, jadi telapaknya
+ * harus terlihat. Bila tepi bawah pandangan memotong kaki SEDIKIT, kamera diturunkan sebanyak itu (kelipatan piksel seni),
+ * asalkan kepala tertinggi masih punya 2 piksel seni udara, kotak wajib ruang (fokus/papan) tetap utuh, dan tidak keluar dunia;
+ * bila syarat itu tidak terpenuhi (bidikan dekat), kamera dibiarkan.
+ * Skala tidak berubah. Kantor (tokoh di balik meja, bingkai disetujui) dan kartu episode tidak disentuh.
+ */
+export function turunkanKeKaki(k: Kamera, r: RuangPiksel, tokoh: readonly TokohTersusun[], W: number, H: number, dpr: number): Kamera {
+  if (r.tempat.balikMeja || !tokoh.length) return k;
+  const vh = H / k.s;
+  if (vh > DUNIA_H) return k;
+  // Telapak = titik kaki + 1 piksel seni (baris jangkar ikut terlihat).
+  const kaki = Math.max(...tokoh.map((x) => x.y + (x.s.jangkar.y + 1) * K));
+  const perlu = Math.ceil((kaki - (k.y + vh)) / K - 1e-6) * K;
+  if (perlu <= 0) return k;
+  const kepala = Math.min(...tokoh.map((x) => x.y));
+  const wajib = gabungKotak(r.papan?.kotak ?? null, r.fokus);
+  const boleh = Math.min(perlu, kepala - UDARA_KEPALA - k.y, DUNIA_H - vh - k.y, wajib ? wajib.y - k.y : Infinity);
+  // Hanya bila kaki bisa UTUH: bidikan dekat HP saat tokoh berbicara (setengah badan, kaki terpotong ~40 piksel seni) memang
+  // disengaja dan tidak digeser setengah-setengah.
+  if (boleh < perlu) return k;
+  const geser = perlu;
+  const s = k.s * dpr;
+  return { ...k, y: Math.round((k.y + geser) * s) / s };
+}
+
+// ------------------------------------------------------------------ T-017: jalan masuk (D-104)
+
+/**
+ * Lama satu pose jalan (md) = LANGKAH_MS Bu Rina di Episode 1 (ui/panggung/rencana.ts; tidak diimpor: modul itu berat).
+ * SATU-SATUNYA angka tempo: bila owner merasa langkahnya terlalu cepat di HP, ubah ke 300 di baris ini saja (D-125).
+ */
+export const LANGKAH_JALAN_MS = 270;
+/**
+ * Jarak tempuh sasaran per pose (dunia) = 41 piksel seni = panjang langkah yang TERGAMBAR di bingkai Rudi (D-125: pada 96
+ * kaki meluncur 41 % tiap langkah; pada 164 sisa selip <= 5 piksel seni per pose).
+ */
+export const LANGKAH_JALAN_DUNIA = 164;
+/** Jumlah pose jalan paling sedikit / paling banyak. */
+export const POSE_JALAN_MIN = 3;
+export const POSE_JALAN_MAKS = 6;
+
+export interface RencanaJalan { awal: number; tujuan: number; n: number; durasi: number; arah: 'kiri' | 'kanan' }
+
+/**
+ * Rencana jalan masuk tokoh ke titik kaki `tujuan` (dunia): mulai tepat di luar tepi pandangan TERDEKAT (selebar frame),
+ * jumlah pose n = bulat(jarak / LANGKAH_JALAN_DUNIA) dijepit POSE_JALAN_MIN..POSE_JALAN_MAKS, tiap pose LANGKAH_JALAN_MS.
+ */
+export function rencanaJalan(tujuan: number, lebarFrame: number, kamera: Kamera, W: number): RencanaJalan {
+  const vw = W / kamera.s;
+  const dariKiri = tujuan < kamera.x + vw / 2;
+  const awal = dariKiri ? Math.min(kamera.x, tujuan) - lebarFrame : Math.max(kamera.x + vw, tujuan) + lebarFrame;
+  const n = Math.min(POSE_JALAN_MAKS, Math.max(POSE_JALAN_MIN, Math.round(Math.abs(tujuan - awal) / LANGKAH_JALAN_DUNIA)));
+  return { awal, tujuan, n, durasi: n * LANGKAH_JALAN_MS, arah: dariKiri ? 'kanan' : 'kiri' };
+}
+
+/**
+ * Keadaan jalan pada waktu t (md): null = sudah tiba (berdiri). Gerak linear, x dipaskan ke piksel seni BULAT relatif tujuan.
+ * Bingkai bergantian kontak ('jalan-a') / lintas ('jalan-b'); bingkai TERAKHIR selalu lintas (serah-terima ke berdiri), jadi
+ * untuk n ganjil urutan dimulai dari lintas.
+ */
+export function posisiJalan(r: RencanaJalan, t: number): { x: number; pose: 'jalan-a' | 'jalan-b'; bingkai: number } | null {
+  if (!(t < r.durasi)) return null;
+  const tt = Math.max(0, t);
+  const i = Math.min(r.n - 1, Math.floor(tt / LANGKAH_JALAN_MS));
+  const x = r.awal + (r.tujuan - r.awal) * (tt / r.durasi);
+  return { x: r.tujuan + Math.round((x - r.tujuan) / K) * K, pose: (r.n - 1 - i) % 2 === 0 ? 'jalan-b' : 'jalan-a', bingkai: i };
+}
+
+/** true = atlas tokoh punya kedua bingkai jalan (tanpa cadangan pose). */
+export function punyaJalan(tokoh: TokohDiPiksel['tokoh']): boolean {
+  return (['jalan-a', 'jalan-b'] as const).every((pose) => susunTokoh(tokoh, { pose: pose as never, ekspresi: 'netral' })?.pose === pose);
 }

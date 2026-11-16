@@ -1516,3 +1516,366 @@ Measured, not guessed: the two atlas-scale frames of each character written as a
 
 ### What I will check in the review after integration
 360 id / 390 en / 1280 zh: Rudi enters from the left edge and stops on his slot without a sideways head jump; feet do not slide; pixels stay on the integer grid while moving; no walk under reduced motion + `?gerak=ikut`; "Lanjut" mid-walk lands on the standing frame; byte table; and Hendra's entrance if D-105 is approved.
+
+---
+
+## T-014 — translation review (2026-11-16)
+
+Reviewer: Designer · Build: production build in client/dist (07:15, newer than `teks.en.ts` 07:06 and `teks.zh.ts` 07:10) on my own server on :4002 (`PORT=4002 RAKSA_LEGACY=on npm start`, started and stopped by me; :4000 and :4001 not touched) · No source edits, no commit.
+Method: read team/HANDOFF.md "T-014"; built a key-by-key side-by-side of `teks.id.ts` / `teks.en.ts` / `teks.zh.ts` and read **all 894 keys in both languages** (dialogue, choices, chat, activities, arena labels, documents, endings, summary cards, glossary). Checked by script: every glossary label still occurs in the line that carries its button (7 / 7 in en and zh), no straight quotes, no ASCII punctuation or missing space in the Chinese. In-game: my own CDP captures at 390×844 DPR 3 and 1280×800, en and zh: kantor, K01 chat + choice list, K08 tol, K13 chat + choice list (the longest English choice, 153 characters), wawancara 3, the K02 activity, the ending scene and the full end screen. Eight of them are in `team/evidence/T-014/designer/`.
+Limit, stated plainly: this is a careful meaning and tone review, not a native-speaker sign-off. The Chinese proposals in particular should still be read once by a native speaker before a public release.
+
+### Verdict
+- **One blocker in both languages, in code, not in the text files (D-123): Indonesian words are assembled at run time into English and Chinese sentences.** After the K02 activity the player's own chat message reads "…Truck registration, Mr Hendra’s ID card **dan** Mr Darto’s driving licence.", and in the K08 sign check the feedback reads "your choice **lajur 3 dan 4**" / "Mr Bima looks at your marks for Sign 1: **lajur 2, 3, dan 4**. The sign itself says **lajur 3 dan 4**." Same in Chinese. Neither the completeness test nor `cek-bahasa-t014.mjs` can see it, because the strings do not exist until the player acts.
+- **English text: PASS.** Faithful, natural British register, names and titles consistent ("Claims Officer", "Mr Hendra", "Rudi"). 36 keys of polish in 7 items below, none blocking.
+- **Chinese text: FIX NEEDED.** The meaning is right almost everywhere and the layout is clean, but two things would make a native player stumble at once (D-113 the title's vehicle word, D-114 a misused insurance term), and the player's own chat lines read as translated because of a repeated bare "先生" (D-117). 97 keys in 8 items, all with paste-ready text.
+- **Layout (both languages, 390 and 1280): PASS.** No clipped or overflowing text, no horizontal scroll, choice buttons wrap cleanly (English up to 5 lines at 390), chat bubbles, nameplates ("Miss Raksa · Claims Officer / 理赔专员", "Mr Hendra / Hendra 先生"), status chips and the end screen all hold. Chinese renders in the system CJK font and looks consistent.
+- All replacement texts are also in **`team/specs/T-014-teks-fixes.json`** (`en` / `zh` → D-item → key → text) so Fullstack can paste or script them. Each one was checked against `teks.id.ts`: key exists, same `{placeholders}`, same numbers (the validator's rule), glossary labels still inside their lines.
+
+### 1. English: items
+- [D-106] K08 and its arena feedback · "break the sign" reads as physically breaking a sign · use "go against the signs" · med.
+
+| Key | Replace with |
+| --- | --- |
+| `k08.2` | In your view, did the truck go against the signs by being in lane 2? |
+| `k08.a` | It did: a truck should always be in the leftmost lane. Let’s just reject the claim. |
+| `arena.rambu.tanggap.sikapMelanggar` | By your marks, a truck in lane {truk} was not in a banned lane. Mr Bima asks: what is the basis for “it went against the signs”? |
+| `arena.rambu.tanggap.sikapTidak` | Your marks put lane {truk} among the banned lanes, yet you concluded it did not go against the signs. Mr Bima asks: which do you mean? |
+
+- [D-107] K08 choices · the player says "sir" to Mr Bima, a colleague; "sir" suits the customer (Pak Hendra) but sounds servile between colleagues · drop it in the four K08 lines (k08.a is already in D-106) · low.
+
+| Key | Replace with |
+| --- | --- |
+| `k08.b` | Those signs have nothing to do with the claim. They needn’t go in the report. |
+| `k08.d` | We can’t conclude yet. Let’s just ask Mr Hendra to explain where his truck was at the time. |
+| `k08.e` | Let the police decide about the signs. We’ll wait for their official answer. |
+
+- [D-108] K11 bundle · "Complete the police report" reads as if the player writes the police report; the source means "complete the file with it" · med.
+
+| Key | Replace with |
+| --- | --- |
+| `k11.akibat.berkas.lengkapi` | You got the police report into the file first. The file reaches the Committee with nothing marked as missing. |
+| `akt.bundel.opsi.lengkapi` | Add the police report first, then submit to the Committee |
+| `arena.bundel.lengkapi` | Complete the file first |
+| `arena.bundel.lengkapi.arti` | Add the police report, then submit to the Committee. |
+
+- [D-109] K10 · "the claim deserves cover" is not idiomatic · low.
+
+| Key | Replace with |
+| --- | --- |
+| `k10-d.1` | Mr Bima’s report is tidy and honest. Its conclusion: the incident really happened and the claim should be covered. |
+| `titik.k10.alasan` | What matters is whether the core facts match. Small differences are recorded, not hidden, and not used as grounds for rejection. In the real case, the investigation found that the claim should be covered. |
+
+- [D-110] Instalments · "the instalments keep running" is a calque of "cicilan tetap jalan"; and "asking in instalments" (K02) collides with the truck instalments · low.
+
+| Key | Replace with |
+| --- | --- |
+| `catatan.cicilan` | The truck instalments to Leasing Sentosa still have to be paid; Mr Hendra hopes it is settled before the 20th. |
+| `k12.2` | Roughly when will it be approved? It’s getting hard for me: I still have to pay the truck instalments to the leasing company even though the truck can’t work. I hope it can be settled before the 20th. |
+| `titik.k12.judul` | The instalments are still due |
+| `k02.a.alasan` | Asking bit by bit makes Mr Hendra go back and forth. |
+
+- [D-111] Ending "Selesai dengan catatan" · "Closed with notes" is literal and a little opaque as an ending title · low.
+
+| Key | Replace with |
+| --- | --- |
+| `akhir.catatan.judul` | Closed, with reservations |
+| `kartu.catatan.sebab` | Mr Hendra’s final status is 45-69, so the case ends Closed, with reservations: there were times he waited with no news or got an unclear answer. |
+
+- [D-112] Small naturalness fixes, the KK label, and one cross-episode term ("Cemas" is "Worried" in Episode 1, "Anxious" here) · low.
+
+| Key | Replace with |
+| --- | --- |
+| `k03.a.alasan` | A timescale that is too short sets an expectation that is hard to meet. |
+| `titik.k03.e` | Sent a brochure for him to read on his own |
+| `k05.d.alasan` | Nothing moves, and the file is forgotten. |
+| `k05-d.1` | Nothing moves. The file is forgotten for several days. |
+| `k12.e.alasan` | A message left on read leaves Mr Hendra hanging. |
+| `k12-e.1` | His message is left on read. Mr Hendra feels left hanging at the hardest moment. |
+| `k12-c.1` | I was only saying. |
+| `akt.jalur.lokasi` | Claims officer’s desk |
+| `akt.bundel.lokasi` | Claims officer’s desk |
+| `akt.bundel.instruksi` | Check the bundle, then decide your next step and what to tell Mr Hendra. |
+| `akt.berkas.petunjuk` | Pick a document, then a tray: ask now, may follow, or not needed. |
+| `akt.berkas.item.kk` | Copy of the Family Card (KK) |
+| `arena.berkas.kk` | Copy of the Family Card (KK) |
+| `arena.berkas.pesan.sekarang` | Mr Hendra, please send these documents: |
+| `arena.berkas.pesan.kosong` | Mr Hendra, there are no documents you need to send for now. |
+| `arena.tutup.kabar.isi` | Mr Hendra, the settlement has been paid to Leasing Sentosa. |
+| `suasana.cemas` | Worried |
+
+Accepted as they are: "heavy-damage claim" (clear and used consistently), "Motor" as the product line, British spelling with "truck", "Alhamdulillah" rendered as "thank goodness", "passed from pillar to post" for "dipingpong".
+
+### 2. Chinese: items
+- [D-113] Title, summary, K01, K05 · "挂车卡车" is not a word a Chinese speaker uses for a trailer truck (it is in the episode **title**), and "收费公路" is correct but formal; in speech people say "高速" · use "半挂卡车" and "高速公路" ("高速" inside Pak Hendra's own line) · **high**.
+
+| Key | Replace with |
+| --- | --- |
+| `judul` | 高速公路上的半挂卡车 |
+| `ringkas` | Hendra 先生的卡车撞上了高速公路的护栏。重损理赔需要时间：从第一次报案到付款，帮他始终清楚进展到了哪一步。 |
+| `lokasi.tol` | 高速公路路段 |
+| `catatan.laporan` | Hendra 先生的半挂卡车夜间撞上了高速公路的护栏。司机平安。 |
+| `buka.2` | 车主是 Hendra 先生，做货运生意。昨晚他的卡车在高速公路上出了事故。 |
+| `k01.1` | 第 1 天，上午。市场部转来一条报案：Hendra 先生的半挂卡车昨晚撞上了高速公路的护栏。你通过 WhatsApp 联系他。 |
+| `k01.2` | 你好，对，是这样。我的卡车昨晚在高速上撞了护栏，车头全毁了。司机没事，可我不知道该怎么办。这个能理赔吧？ |
+| `akt.berkas.cerita` | Hendra 先生的卡车撞上高速公路护栏后严重受损。警方证明还在办理，还要几天才能拿到。 |
+| `k05.c.alasan` | 替换的修理厂不一定修得了半挂卡车。 |
+| `k05-c.1` | 也许会快一些，但替换的修理厂不一定修得了半挂卡车，得先核实。 |
+
+- [D-114] K08, K10 · "承保" means underwriting (accepting a policy), not paying a claim; "理赔是否承保" / "理赔应予承保" is wrong insurance Chinese · **high**.
+
+| Key | Replace with |
+| --- | --- |
+| `k08.e.alasan` | 赔不赔由 Raksa 决定，不由警方决定。 |
+| `k08-e.1` | 警方只是记录事故，赔不赔仍由 Raksa 决定。流程卡住了，在等一个本不该由警方给的答复。 |
+| `k10-d.1` | Bima 先生的报告条理清楚、实事求是。结论是：事故确实发生，应予赔付。 |
+| `titik.k10.alasan` | 关键是主要事实是否吻合。小出入要记录下来，不隐瞒，也不当作拒赔理由。在真实案例中，调查结论是应予赔付。 |
+
+- [D-115] K02 activity · the episode text says "资料盘" while the game's own interface on the same screen says "托盘" ("点击托盘放入这份文件", "每个托盘的含义"); "资料盘" also reads like a data disc · use "托盘", and make the hint name the trays as they are labelled · med.
+
+| Key | Replace with |
+| --- | --- |
+| `k02-b.2` | 当天文件就进了文件托盘，流程马上开始。 |
+| `akt.berkas.tanya` | 把每份文件放进合适的托盘 |
+| `akt.berkas.petunjuk` | 先选文件，再选托盘：现在索要、可以后补，或不需要。 |
+| `akt.berkas.wadah.sekarang` | 现在索要 · 流程要等这个托盘里的文件到齐 |
+
+- [D-116] Role names · "公路管理员" and "公路警察" are understandable but not what these people are called; natural: "高速巡查员" and "高速交警" · med.
+
+| Key | Replace with |
+| --- | --- |
+| `pemeran.tol.nama` | 高速巡查员 |
+| `pemeran.polisi.nama` | 高速交警 |
+| `catatan.selisih` | 陈述有出入：时间为 20.10（警方）和 20.15（高速巡查员）；小货车司机的姓名不一致；高速巡查员写了“预判不足”。 |
+| `akt.saksi.item.tol` | 记录事故的高速巡查员 |
+| `akt.saksi.item.polisi` | 高速交警 |
+| `akt.selisih.item.jam` | 事发时间：警方记为 20.10，高速巡查员记为 20.15 |
+| `akt.selisih.item.antisipasi` | 高速巡查员写司机“预判不足” |
+| `titik.k09.e` | 车主、司机、高速巡查员和交警 |
+| `arena.saksi.tol` | 高速巡查员 |
+| `arena.saksi.polisi` | 高速交警 |
+| `arena.selisih.kanan` | 高速巡查员记录 |
+| `arena.selisih.jam` | 事发时间：警方记为 20.10，高速巡查员记为 20.15。 |
+| `arena.selisih.antisipasi` | 高速巡查员写司机“预判不足”（视为不够谨慎，不属于违规）。 |
+| `arena.selisih.antisipasi.catatan` | 在这段摘录中，只有巡查员的记录提到了这一点。警方记录是否有类似内容，尚不清楚。 |
+
+- [D-117] Player's chat lines (K01, K03, K06, K08, K12, K13, K14, two activity messages) · "Pak" was rendered as a bare "先生" in almost every line ("好的，先生。", "放心，先生，…"); once is fine, 34 times it reads like a translated script, and to a colleague (Mr Bima, K08) it is wrong · drop the bare vocative, keep "您", use "Hendra 先生" where a message opens with an address. Politeness is kept equal across right and wrong answers so the tone does not give the answer away · med.
+
+| Key | Replace with |
+| --- | --- |
+| `k01.b` | 您放心，一定全赔。维修费用您完全不用操心。 |
+| `k01.c` | 怎么会撞上护栏呢？司机是不是犯困了？夜里出事一般都是这个原因吧？ |
+| `k01.d` | 好的。请您先在 Raksa 网站上填写理赔申请表，我现在把链接发给您。 |
+| `k01.e` | 好的。请您准备理赔申请表、行驶证、身份证、驾驶证、警方证明和卡车损坏照片。 |
+| `k03.a` | 最多一个星期就好。送货安排您可以从下周起重新排。 |
+| `k03.b` | 现在还说不准。一有进展我马上告诉您。 |
+| `k03.c` | 损坏很严重，所以比刮蹭理赔要久。这是各个阶段，每到一步我都会通知您。 |
+| `k03.d` | 好的，文件我收到了。谢谢您。 |
+| `k03.e` | 流程确实分几个阶段。细节都在我发的 PDF 手册里，请您先看一看。 |
+| `k06.a` | 下周就会有决定。送货安排您现在就可以重新排了。 |
+| `k06.b` | 我按阶段给您说明吧，每个阶段大概多久。每完成一步，我都通知您。 |
+| `k06.c` | 这要看修理厂和管理层。流程掌握在几个部门手里。 |
+| `k06.d` | 请您耐心等待。我们都在按规定流程办理。 |
+| `k06.e` | 哎，这个不在我的权限范围内。我只负责转交案卷。 |
+| `k08.a` | 违反了，卡车应该一直走最左侧车道。直接拒赔吧。 |
+| `k08.b` | 标志牌和理赔没有关系。不用写进报告。 |
+| `k08.d` | 现在还下不了结论。就请 Hendra 先生说明一下事发时卡车的位置吧。 |
+| `k08.e` | 标志牌的事就让警方来定吧。我们等他们的正式答复。 |
+| `k12.a` | 您放心，20 号之前一定办好。我保证您这个月的分期没问题。 |
+| `k12.b` | 我明白这对您很不容易。理赔正在委员会审批，大约 14 个工作日；我会一直盯着。 |
+| `k12.c` | 分期是您和租赁公司之间的事。那不在 Raksa 办理的理赔流程之内。 |
+| `k12.d` | 我请上级帮忙加快办理。希望能比平时快一些。 |
+| `k13.a` | 规定就是这样。这类理赔向来寄给双方，您不用多想。 |
+| `k13.c` | 哦，那是寄错了。寄给租赁公司的那份您别管就行。 |
+| `k13.d` | 请您先仔细看看通知书。里面什么都写清楚了，包括租赁公司的事。 |
+| `k14.a` | 抱歉，这是委员会的决定，金额不能再改了。 |
+| `k14.b` | 我尽量争取把金额提高到您说的价格。 |
+| `k14.c` | 方便发些参照给我吗，比如同类卡车的出售广告？我来申请复核；需要一些时间，有进展我会告诉您。 |
+| `k14.d` | 请您向总部提交书面异议。地址和格式请您自己在 Raksa 网站上查一下。 |
+| `k14.e` | 还是接受吧。要是申诉，赔款到账更慢，您办起来也更麻烦。 |
+| `arena.berkas.pesan.sekarang` | Hendra 先生，麻烦您发一下这些文件： |
+| `arena.berkas.pesan.kosong` | Hendra 先生，目前还没有需要您发的文件。 |
+| `arena.tutup.kabar.isi` | Hendra 先生，赔款已经打到 Leasing Sentosa 账上了。 |
+| `arena.tutup.bintang.isi` | 麻烦您给我们打个 5 星。 |
+
+- [D-118] K01 best answer · "很遗憾听到这个消息" is English syntax ("I'm sorry to hear that"); this is the answer the episode teaches, so it should sound like a person · med.
+
+| Key | Replace with |
+| --- | --- |
+| `k01.a` | 听到这事我也替您着急，还好司机平安。我是 Raksa 的 {nama}。方便简单说说经过，再发几张卡车的照片吗？ |
+
+- [D-119] End screen and summary cards · "理赔已付" / "理赔支付完毕" (a claim is "paid" as 赔款, not 理赔), "在没有消息的情况下等待" is heavy, "流程和告诉我的一样" is stiff · med.
+
+| Key | Replace with |
+| --- | --- |
+| `akhir.puas.ringkas` | 赔款已付，Hendra 先生很满意：他始终知道理赔到了哪一步。 |
+| `akhir.catatan.ringkas` | 赔款已付，但 Hendra 先生有好几次苦等不到消息。 |
+| `akhir.kurang.ringkas` | 赔款已付，但整个过程中 Hendra 先生觉得孤立无援。 |
+| `akhir.bayar` | Leasing Sentosa 已经收到赔款。Hendra 先生的理赔全部赔付完毕。 |
+| `akhir.puas.1` | 非常满意。整个流程和你当初说的一样。谢谢你，{nama}。 |
+| `akhir.catatan.1` | 我的理赔款已经付了，谢谢。不过流程很长，我常常收不到消息。 |
+| `akhir.catatan.2` | 理赔办完了，{nama}。但有好几次，Hendra 先生苦等不到消息。我们来看看哪些场景还能做得更好。 |
+| `kartu.catatan.sebab` | Hendra 先生的最终状态为 45-69，所以结局是“结案，但有不足”：有些时候他苦等不到消息，或者得到的回答不够清楚。 |
+| `kartu.kurang.sebab` | Hendra 先生的最终状态低于 45，所以结局是“不太满意”：赔款付了，但他常常觉得没人听他说、没人告诉他进展，或者得到的承诺落了空。 |
+
+- [D-120] Polish · "警察分局" → "派出所" (the everyday word for a local police post); "线路 1/2" reads like a bus line → "工作线"; "指令" → "委托单"; KK label; a few idioms; "担心" as in Episode 1 · low.
+
+| Key | Replace with |
+| --- | --- |
+| `catatan.suratpolisi` | 警方证明还在由 Hendra 先生公司的人到派出所办理，还要几天。 |
+| `k02.2` | 我要准备哪些文件？对了，警方证明还在让公司的人去派出所办，可能还要几天才能拿到。 |
+| `arena.berkas.catatan` | Hendra 先生说：警方证明还在派出所办理，还要几天才能拿到。 |
+| `arena.berkas.suratpolisi.ket` | 还在派出所办理；还要几天。 |
+| `akt.jalur.cerita` | 损坏严重，还有另一辆车被撞。工作线 1（修理厂核算费用）正在进行。 |
+| `akt.jalur.labelInteraksi` | 安排调查的工作线 |
+| `akt.jalur.wadah.setelah` | 工作线 1，等修理厂核算完之后 |
+| `akt.jalur.wadah.paralel` | 工作线 2，现在开始，与修理厂核算同时进行 |
+| `akt.jalur.tabel.1` | 工作线 1 |
+| `akt.jalur.tabel.2` | 工作线 2 |
+| `akt.berkas.item.kk` | 家庭卡（KK）复印件 |
+| `arena.berkas.kk` | 家庭卡（KK）复印件 |
+| `k04-d.1` | Rudi 在车场查勘了卡车。当天就给修理厂发出了核算维修费用的委托单。 |
+| `k05.1` | 第 6 天。核算维修费用的委托单已经发给 Mitra 修理厂。 |
+| `k06-b.2` | Hendra 先生现在心里有数了，可以安排日程了。 |
+| `k12-e.1` | 他的消息被已读不回。在最难的时候，Hendra 先生觉得被晾在一边。 |
+| `k14.a.alasan` | Hendra 先生觉得吃了闭门羹。 |
+| `akt.berkas.judul` | 资料清单 |
+| `akt.bundel.kirim` | 确定 |
+| `latar.bengkel.antrean` | 本周排期 |
+| `suasana.cemas` | 担心 |
+
+- [D-121] Interface string, not the episode file · the reply button reads "回复Hendra 先生" (no space before the Latin name; the episode text always spaces Han and Latin) · `i18n/kamus/ceritaHp.ts` zh `balasNama`: `'回复 {nama}'` · low.
+Accepted as they are: "理赔专员", "Hendra 先生 / Bima 先生 / Darto 先生", "查勘员", "事故调查组", "理赔委员会", "赔偿方案通知书", "全损", "重损理赔", "小货车", "抢道", "被踢了皮球", "只读不回".
+
+### 3. Blocker in code: Indonesian assembled at run time
+- [D-123] K02 chat message and K08 sign check, en and zh · two helper functions are Indonesian-only: `daftar()` in `episode/auto-2/arena.ts` (joins with " dan ") and `daftarLajur()` in `hp/arena/rambu.ts` ("lajur 3 dan 4", "belum ada lajur"), used by `arena.rambu.pilihanmu`, `arena.rambu.tanggap.tulisan` and the K08 action summary. Rendered with the project's own functions (output in `team/evidence/T-014/designer/teks-rakitan-en-zh.txt`) · make both language-aware; the wording I want on screen:
+
+| Case | English | Chinese |
+| --- | --- | --- |
+| one lane | lane 3 | 第 3 车道 |
+| two lanes | lanes 3 and 4 | 第 3、4 车道 |
+| three lanes | lanes 2, 3 and 4 | 第 2、3、4 车道 |
+| no lane | no lane yet | 还没有车道 |
+| list of documents | A, B and C (no comma before "and") | A、B 和 C (items joined with "、", "和" before the last) |
+| K02 message, after D-112 / D-117 | Mr Hendra, please send these documents: Claim form, Truck registration, Mr Hendra’s ID card and Mr Darto’s driving licence. These may follow once they are ready: Police report. | Hendra 先生，麻烦您发一下这些文件：理赔申请表、卡车行驶证、Hendra 先生的身份证和 Darto 先生的驾驶证。以下可以办好后再补：警方证明。 |
+
+  In Chinese the sentence must end with "。" and have no space after "：" (today the code adds " " and "."). Also check `teksLajur()` and the Indonesian sentence in `lokasi/logika.ts` (line 149): it is imported by `auto-2/arena.ts`; I did not trace whether its text can reach Episode 2 · **high, blocks both languages**. Please add a test that renders these composed strings in en and zh and scans them for Indonesian words.
+- [D-124] Chinese only · other joiners in code put ASCII punctuation into Chinese sentences: seen in-game on wawancara 3: "你的行动：访谈: 公路管理员, Hendra 先生, 公路警察, Darto 先生. 不需要: 小轿车司机" and "在场：公路管理员, Bima 先生, 公路警察" (`hp/arena/ringkas.ts` lines 23–30, `hp/AdeganTatap.tsx` line 128; the same pattern is in `ArenaBundel.tsx` 132, `PapanSaksi.tsx` 106, `ArenaBandingkan.tsx` 105) · in zh join names with "、", use "：" after a label and "。" between groups: "访谈：高速巡查员、Hendra 先生、高速交警、Darto 先生。不需要：小轿车司机" · med.
+
+### 4. In-game look and the kantor board
+- **The board stays Latin "Layanan Klaim Raksa" in en and zh: OK.** It is a brand sign on the wall of an Indonesian office, in pixel lettering that matches the room; next to it the interface is fully translated, so nobody needs the board to understand the screen. A system-font Chinese label drawn on the pixel canvas would look worse than an untranslated sign. Same reasoning for the small board in the activity backdrop.
+- Nothing to fix in layout. One note for the owner's phone check: the Chinese depends on the device's CJK font; on my Windows capture it is clean.
+
+### 5. Lettering inside the activity illustrations (`seni/auto-2/benda.ts`)
+**Recommendation: keep it Indonesian, as in-world props. No redraw now.** [D-122, decision, low]
+- What it is: 20 short labels drawn at about 9 px inside small pictures (FORMULIR, STNK, KTP, SIM, POLISI, KARTU KELUARGA, SLIP GAJI, REK. KORAN, DIPROSES, ESTIMASI, BENGKEL LAIN, PEMERIKSAAN, JELAS, KOMITE, KONTAK, BIAYA BENGKEL, TENDER, LAPORAN, POOL, RAKSA).
+- Why keep: (1) every picture has its translated caption directly beside or under it (checked in zh: "FORMULIR" card next to "理赔申请表"), so no meaning is lost; (2) seven of them are names of the real documents in the case (STNK, KTP, SIM, Kartu Keluarga, the police letter, payslip, bank statement), which a translated version would make less true to it; (3) it is the same decision as the kantor board, so the world stays consistent: the story happens in Indonesia, the interface speaks the player's language.
+- Cost if the owner wants them translated anyway: Fullstack threads the language through about 20 art functions and their callers in `arena.ts` and fits 20 labels × 2 languages into fixed card headers (Chinese needs a system font inside the SVG, so every card must be re-checked at three widths): about half a day to one day of Fullstack plus 2–3 hours of Designer review; bytes are negligible. If it is ever done, translate only the 13 workflow words and leave the 7 document names.
+
+### Counts
+Blocker: 1, in code, both languages (D-123). English text: 36 keys in 7 items (2 med, 5 low). Chinese text: 97 keys in 8 items (2 high, 5 med, 1 low), plus 2 interface items (D-121 low, D-124 med). Layout: 0 items. `benda.ts`: keep (D-122).
+
+### Not verified by me
+A native speaker's read of either language; a real phone (iOS / Android CJK fonts); a full manual playthrough of every branch in en/zh (I read every string; in-game I captured 11 screens per language and width and opened 14 of them, 8 zh and 6 en; the rest passed only my no-horizontal-scroll probe); the K02 and K08 activities played by hand to the end (D-123 was found by reading the code and rendering the strings with the project's functions, not by playing); `npm run test:client` / `test:e2e` / `cek-bahasa-t014.mjs` after the fixes (Fullstack to re-run; my replacement texts were only checked for keys, placeholders, numbers and glossary labels).
+
+---
+
+## T-017 — motion review (2026-11-16)
+
+Reviewer: Designer · Build: production build in client/dist (07:34, newer than the walk sources of 07:32–07:33) on my own server on :4002 (started and stopped by me; :4000 and :4001 not touched) · No source edits, no commit.
+Method: read team/HANDOFF.md "T-017"; reloaded the saved K04 state (`pool`) at 360×740 DPR 2, 390×844 DPR 3 and 1280×800 and recorded **every distinct canvas frame** in the page with its timestamp, pose and foot x (`data-jalan` / `data-kaki`): 90, 77 and 108 frames. From those: pose timing, travel per frame, speed, when Rudi becomes visible, head movement at the stop. Measured the shoes of the shipped atlas frames against the foot anchor to judge foot planting, and did the same for Bu Rina's Episode 1 frames and entrance path. Also recorded reduced motion with `?gerak=ikut` and `?gerak=penuh`, and "Lanjut" pressed 0.5 s into the walk.
+Evidence in `team/evidence/T-017/designer/`: `jalan-360.gif`, `jalan-390.gif`, `jalan-1280.gif` (the real frames at their real timing), `diam-4-360/390/1280.png` (four stills each), `geser-kaki-24-vs-41.png` (the foot-planting diagram), `ukur-gerak.json`.
+Limit: I cannot watch a moving picture; this verdict rests on the frame recordings, the measurements and the stills, not on an eye watching it at speed. The owner's phone check is the real test of feel.
+
+### Verdict: FIX NEEDED — one number, and it is my own spec error. Everything else PASS.
+
+### What works
+- **Integration is exactly as specified.** 270 ms per pose (measured 254–288 ms), kontak / lintas alternating, linear travel on whole art px (every step a multiple of 4 world px, usually 4 or 8 per screen frame), ends on lintas and then stands at x 420 at all three sizes. 360: 6 poses, 576 world px, 1.62 s. 390: 5 poses (starts on lintas, as Fullstack explained), 452 px, 1.35 s. 1280: 7 poses, 684 px, 1.90 s.
+- **The stop is clean.** From the last walk frame to the standing frame the head moves 1 art px right (2 at 360, the final snap to the slot) and 1 art px up, and the head is the same width (70 / 140 / 70 device px before and after). No jump. Fullstack's choice of read pitch 4.35 was right.
+- **Scale next to the truck:** the walking figure is the same 198 art px as the standing one; against the cab it reads as the same man.
+- **Reduced motion + `?gerak=ikut`:** no walk, one frame in 3 s, he is simply standing. With `?gerak=penuh` he walks. **"Lanjut" mid-walk:** pressed at 874 ms, standing at x 420 in the next frame (13 ms later).
+- **Leading leg:** a two-frame cycle always leads with the same leg; over 3–4 poses that is not noticeable. No change.
+- **Mirrored case:** none exists in the game today (Rudi only walks right at K04; Hendra waits on D-105), so it is untested.
+
+### What is wrong: the feet slide
+- [D-125] K04 walk, all sizes · the body travels **24 art px (96 world px) per pose**, but the drawn legs cover **41 art px per pose**: one drawn step is 82 art px (in the kontak frame the front heel is 28 art px ahead of the anchor and the back heel 54 behind; in the lintas frame the standing heel is 15 behind). So a heel lands, and one pose later it is drawn 17–22 art px behind that spot, and after the full step 34 art px behind: **41 % of every step is slip**, like walking on ice (`geser-kaki-24-vs-41.png`, left panel; measured the same from the live recordings). My T-017 spec said the stride was "≈ 50 art px" and that 24 per frame would not slide; that measurement was wrong, and Fullstack built what I wrote.
+  **Change:** nominal travel per pose **96 → 164 world px (41 art px)**; frame count n = round(distance / 164), clamped **3..6** (was 3..7); travel per pose stays distance / n; keep 270 ms; keep "ends on lintas". With today's start points:
+
+  | Size | Distance | Poses | Travel per pose | Walk time | First pose |
+  | --- | --- | --- | --- | --- | --- |
+  | 360 | 576 world px | 4 | 144 world px (36 art) | 1.08 s (was 1.62) | kontak |
+  | 390 | 452 | 3 | 151 (37.7 art) | 0.81 s (was 1.35) | lintas |
+  | 1280 | 684 | 4 | 171 (42.8 art) | 1.08 s (was 1.90) | kontak |
+
+  That leaves at most 5 art px of slip per pose (12 %), which the diagram's right panel shows as feet staying where they land. Plausibility check: 41 art px per 270 ms on a 198-art-px man is a normal walking pace (about 1.3 m/s at about 110 steps a minute); today's 24 is a stroll taken with full-length strides, which is why it slips.
+  Priority: **high** (it is the one visible flaw of the walk), small change.
+
+### Timing feel against Bu Rina (Episode 1)
+Same 270 ms cadence. Bu Rina covers 260 world px in 1.2 s, 14.6 art px per pose, with a drawn step of about 57 art px (a rough figure from her shoe positions): she also slips (she covers 51 % of her stride), but her long skirt hides the legs and only the shoes show. Rudi covers 59 % of his, in open trousers with a wide stride, so the same technique shows on him. After D-125 he will be clearly brisker than Bu Rina (about 150 against 54 art px per second) and the entrance shorter (0.8–1.1 s against her 1.2 s). I think that suits a surveyor crossing a yard; if the owner finds it too quick on the phone, lengthen the pose to 300 ms (0.9–1.2 s) rather than shortening the travel again.
+
+### Observations, no change asked
+- He starts further left than he needs to: the leading edge of the first frame is 63 (360), 166 (390) and 167 (1280) world px outside the view, so nothing is on screen for the first 234–287 ms. At the new speed that becomes about 0.1–0.27 s; harmless.
+- On phones the view's left edge is close to his slot (world x 131 at 360, 254 at 390), so he is fully inside the picture only for the last pose. It reads as "he steps in from the left", which is fine.
+
+### Follow-up, not caused by T-017
+- [D-126] Pool camera, 1280 and 390 · the view cuts the bottom of the standing figure: **10 art px at 1280** (the shoes; view 390×200 art px, figure top 12 art px below the view top) and **3.5 art px at 390** (the soles); at 360 he is whole. My capture of 15 November shows the same framing, so it predates the walk, and my T-013 final review wrongly said "down to the shoes" for the pool at 1280. With a walk the feet matter more · move the pool camera down by **10 art px at 1280** and **4 art px at 390** (head keeps 2 and 7.75 art px of air), or give the wide stage about 10 art px more height; check bengkel and tol at 1280 for the same cut · med.
+
+### Not verified by me
+The walk seen at speed by a human eye; a real phone; that it plays only once per visit; the byte table (161,008 B as reported); `test:client`, `test:e2e`, `cek-jalan-t017.mjs`. After D-125, `cek-jalan-t017.mjs` will need its expected frame counts and timings updated.
+
+---
+
+## T-014 — re-check (2026-11-16)
+
+Reviewer: Designer · Build: production build in client/dist (08:07, newer than every file under client/src) on my own server on :4002 (started and stopped by me; :4000 and :4001 not touched) · No source edits, no commit.
+Method: read team/HANDOFF.md "T-014 → Fix"; compared the current `teks.en.ts` / `teks.zh.ts` with `team/specs/T-014-teks-fixes.json` by script; read the 16 new keys; then in-game at 390×844 DPR 3 in en and zh: the three new after-activity states (`akt-berkas`, `akt-rambu`, `akt-saksi`), the K08 sign check played by hand from the tol scene (start the task, open Sign 1, mark lanes 3 and 4), two endings up to the end screen (`catatan`, `puas`) and the episode list. I read the page text of every screen and opened 5 screenshots (K02 chat zh, K08 result zh and en, K08 activity zh, end screen zh). Evidence: `team/evidence/T-014/designer/recheck/`.
+
+### Verdict: PASS. D-123 (the blocker), D-121 and D-124 are fixed; all 133 text fixes are in.
+
+### What I confirmed
+- **Text fixes:** en 36 / 36 and zh 97 / 97 keys are identical to my file. None of the old terms is left (收费公路, 挂车卡车, 承保, 资料盘, 公路管理员, 公路警察, 警察分局, 线路, a bare 先生; "break the sign", "deserves cover", "keep running", "workroom"). Key sets are 910 / 910 / 910.
+- **K02 chat message after the activity (D-123):** en "Mr Hendra, please send these documents: Truck registration and Mr Hendra’s ID card. These may follow once they are ready: Claim form, Copy of the Family Card (KK) and Driver’s payslip." · zh "Hendra 先生，麻烦您发一下这些文件：卡车行驶证和 Hendra 先生的身份证。以下可以办好后再补：理赔申请表、家庭卡（KK）复印件和司机工资单。" No Indonesian word; the Chinese uses "、", "和", "：" and "。" and keeps the space before the Latin name. This is the wording of my review.
+- **K08 sign check (D-123):** in the activity: en "Sign 1: your choice lanes 3 and 4" · zh "标志牌 1：你的选择：第 3、4 车道". In the result: en "Mr Bima looks at your marks for Sign 1: lanes 1 and 3. The sign itself says lanes 3 and 4." and "Your action: Sign 1: lanes 1 and 3. Sign 2: lanes 1, 2 and 3." · zh "Bima 先生看了你对标志牌 1 的标记：第 1、3 车道。标志牌上写的是第 3、4 车道。" and "你的行动：标志牌 1：第 1、3 车道。标志牌 2：第 1、2、3 车道。"
+- **Road illustration labels (the third leak Fullstack found):** en "Truck · per the driver", "Illustration • truck position per the driver. Not a plan of the incident.", lane buttons "Lane 1 … Lane 2, the truck’s position per the driver" · zh "卡车 · 据司机说", "示意图 • 卡车位置据司机所述。并非事故现场图。", "第 2 车道，据司机说卡车在此". Natural in both; the label fits its pill at 390.
+- **D-124, Chinese punctuation from code:** witness summary "你的行动：访谈：高速巡查员、Hendra 先生、Darto 先生。不需要：小轿车司机、高速交警"; labels "原因：", "目标：", "标志牌 1：" are full-width. I found no ASCII comma, colon or full stop between Chinese characters on any screen I read.
+- **D-121:** the reply button is "回复 {nama}" in the dictionary (read in `i18n/kamus/ceritaHp.ts`).
+- **Title, endings, end screen:** zh title "高速公路上的半挂卡车" on the episode list and in the end-screen header; en "A Trailer Truck on the Toll Road". Ending line zh "Leasing Sentosa 已经收到赔款。Hendra 先生的理赔全部赔付完毕。"; en ending title "Closed, with reservations" with its matching card sentence; zh "结案，但有不足" with "…有些时候他苦等不到消息…"; status word "Worried" / "担心". Layout holds at 390, no horizontal scroll.
+
+### Polish, does not block (interface dictionary, not the episode text)
+- [D-127] Chinese status line under a reason card · "Hendra 先生仍是担心，但有所下降" / "…仍是平静，但有所好转" reads oddly ("is still worried, but has declined") · `i18n/kamus/ceritaHp.ts` zh `statusTetapTurun`: `'{nama}的状态仍是“{ke}”，但略有下降'`, `statusTetapNaik`: `'{nama}的状态仍是“{ke}”，但略有好转'` · low. Older string, not introduced by T-014.
+- Two screen-reader-only Chinese strings still have small slips that sighted players never see: the chat speaker label "Hendra 先生:" (ASCII colon) and `cerita.ts` zh `statusAria` "与Hendra 先生的关系状态" (no space before the Latin name). Low; fix when that file is next touched.
+
+### Not verified by me
+A native speaker's read (still advised before public release, as in the first review); 360 and 1280 in this round (the brief asked for 390; layout was checked at 390 and 1280 in the first review); a real phone; the K02 activity played by hand (I used Fullstack's saved after-activity state for it; K08 I played myself); the test suites (Fullstack reports 738 / 738, e2e clean, `cek-bahasa-t014.mjs` 138 / 138).
+
+---
+
+## T-017 — motion re-check (2026-11-16)
+
+Reviewer: Designer · Build: production build in client/dist (08:44, no source file newer) on my own server on :4002, started at below-normal priority and stopped by me; :4000 not touched · No source edits, no commit.
+Run light, as asked: one headless browser at a time, closed after each size, everything at below-normal priority, no test suite. One recording of the K04 pool walk per size (360×740 DPR 2, 390×844 DPR 3, 1280×800; every distinct canvas frame with timestamp, pose and foot x) and one still each of bengkel and tol at 1280 and 360. Evidence: `team/evidence/T-017/designer/recheck/` (`jalan-360/390/1280.gif`, `diam-1280-pool-bengkel-tol.png`, `diam-360-pool-bengkel-tol.png`, `diam-390-pool.png`, `ukur-gerak.json`).
+
+### Verdict: PASS. D-125 and D-126 are fixed.
+
+### D-125, foot slip
+| Size | Poses (first) | Travel per pose | Walk time | Slip at each pose change |
+| --- | --- | --- | --- | --- |
+| 360 | 4 (kontak) | 140–152 world px (35–38 art) | 1.08 s | 5, 4, 7 art px behind |
+| 390 | 3 (lintas) | 148–152 (37–38 art) | 0.82 s | 1, 5 art px behind |
+| 1280 | 4 (kontak) | 168–176 (42–44 art) | 1.10 s | 1 ahead, 3 ahead, 0 |
+
+Before the fix every pose change put the planted heel 14–22 art px behind. Now it is within 5 art px everywhere except one change at 360 (7 art px, the kontak → lintas change, which needs 43 art px and gets 36). That is 3.5 CSS px on the phone and I accept it: 3 poses at 360 would overshoot by more. Pose length measured 266–284 ms; travel on whole art px; he ends standing at x 420 at all three sizes.
+
+### The stop
+Clean. From the last walk frame to the standing frame the head does not move vertically at any size and moves 2, 2 and 0 art px sideways (360 / 390 / 1280); head width is unchanged.
+
+### D-126, feet and heads
+- **1280:** pool, bengkel and tol all show the standing figure whole, shoes included, with the head clear of the top (pool measured: 2 art px of air, figure 198 art px tall, soles on the last row of the canvas). There is no ground under the shoes at 1280; that is the price of a 200-art-px-high view and I accept it.
+- **390 pool:** whole, 7.75 art px of air above the head.
+- **360:** pool and tol whole. Bengkel at 360 shows the admin from the hips up: this is the phone close-up while she is the speaker, which Fullstack left alone on purpose. Agreed, it is a designed framing, not a cut.
+
+### Tempo: keep 270 ms; 300 ms is not advisable as a default
+The walk is now 0.8–1.1 s at about 135–155 art px per second, a normal walking pace at about 110 steps a minute. On phones he is on screen for roughly the last 0.5–0.9 s of it (first visible 166 ms after the start at 360, 282 ms at 390). Going to 300 ms would add only 0.1 s and slow the cadence without making him more visible, because on phones the length of the entrance is set by how close the view's left edge is to his slot, not by the tempo. Change `LANGKAH_JALAN_MS` to 300 only if the owner says on the phone that he rushes in.
+
+### Not verified by me
+The walk seen at speed by a human eye (this is again frame recordings and measurements); a real phone; wawancara at 1280 after the camera rule (Fullstack reports it whole; not in this brief); reduced motion and "Lanjut" mid-walk were verified in the first review and not repeated; no test suite was run.

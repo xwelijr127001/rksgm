@@ -19,13 +19,22 @@ export interface PropsAdegan {
   statis?: boolean;
   /** Lingkaran putus-putus kuning + label "Truk · menurut supir" di sekeliling truk. */
   cincinTruk?: boolean;
+  /** Tulisan ilustrasi dalam bahasa pemakai (Episode 2: tabel teks). Tanpa ini = Indonesia (prototipe /lokasi). */
+  label?: LabelAdegan;
 }
+
+export interface LabelAdegan { jalan: string; truk: string; keterangan: string; lajur: (n: number) => string; lajurTruk: (n: number) => string }
+const LABEL_ID: LabelAdegan = {
+  jalan: 'Ilustrasi jalan empat lajur, arah lalu lintas ke atas',
+  truk: 'Truk · menurut supir',
+  keterangan: 'Ilustrasi • posisi truk menurut supir. Bukan denah kejadian.',
+  lajur: (n) => `Lajur ${n}`,
+  lajurTruk: (n) => `Lajur ${n}, posisi truk menurut supir`,
+};
 
 const LAJUR = Array.from({ length: JUMLAH_LAJUR }, (_, i) => i + 1);
 
-function NamaLajur(n: number): string {
-  return n === LAJUR_TRUK ? `Lajur ${n}, posisi truk menurut supir` : `Lajur ${n}`;
-}
+const namaLajur = (n: number, l: LabelAdegan): string => (n === LAJUR_TRUK ? l.lajurTruk(n) : l.lajur(n));
 
 /** Isi visual satu lajur: tanda rambu 1 (merah) dan rambu 2 (biru) dengan arsiran, garis tepi, dan lencana. */
 function IsiLajur({ n, tanda1, tanda2 }: { n: number; tanda1: boolean; tanda2: boolean }) {
@@ -49,12 +58,12 @@ function IsiLajur({ n, tanda1, tanda2 }: { n: number; tanda1: boolean; tanda2: b
   );
 }
 
-export function Adegan({ tanda1, tanda2, bisaTandai = false, aktifTanda = [], onLajur, statis = false, cincinTruk = false }: PropsAdegan) {
+export function Adegan({ tanda1, tanda2, bisaTandai = false, aktifTanda = [], onLajur, statis = false, cincinTruk = false, label = LABEL_ID }: PropsAdegan) {
   const hidup = !statis && bisaTandai;
   const t = persenLajur(LAJUR_TRUK);
   return (
     <figure className="lk-adegan">
-      <div className={`lk-kotak${hidup ? ' lk-hidup' : ''}`} role="group" aria-label="Ilustrasi jalan empat lajur, arah lalu lintas ke atas">
+      <div className={`lk-kotak${hidup ? ' lk-hidup' : ''}`} role="group" aria-label={label.jalan}>
         <div className="lk-seni"><JalanEmpatLajur /></div>
 
         {LAJUR.map((n) => {
@@ -65,7 +74,7 @@ export function Adegan({ tanda1, tanda2, bisaTandai = false, aktifTanda = [], on
             <div key={n} className="lk-lajur lk-lajur-statis" style={gaya} aria-hidden="true"><IsiLajur n={n} tanda1={a} tanda2={b} /></div>
           ) : (
             <button key={n} type="button" className={`lk-lajur${aktifTanda.includes(n) ? ' is-on' : ''}`} style={gaya} disabled={!bisaTandai}
-              aria-pressed={bisaTandai ? aktifTanda.includes(n) : undefined} aria-label={NamaLajur(n)} onClick={() => onLajur?.(n)}>
+              aria-pressed={bisaTandai ? aktifTanda.includes(n) : undefined} aria-label={namaLajur(n, label)} onClick={() => onLajur?.(n)}>
               <IsiLajur n={n} tanda1={a} tanda2={b} />
             </button>
           );
@@ -76,7 +85,7 @@ export function Adegan({ tanda1, tanda2, bisaTandai = false, aktifTanda = [], on
         {cincinTruk ? (
           <div className="lk-cincin lk-cincin-masuk" aria-hidden="true"
             style={{ left: `${t.tengah - (TRUK_LEBAR_PERSEN + 3.3) / 2}%`, top: `${TRUK_ATAS_PERSEN - 1.67}%`, width: `${TRUK_LEBAR_PERSEN + 3.3}%`, height: `${tinggiTrukPersen() + 3.3}%` }}>
-            <span className="lk-cincin-label">Truk · menurut supir</span>
+            <span className="lk-cincin-label">{label.truk}</span>
           </div>
         ) : null}
 
@@ -84,7 +93,7 @@ export function Adegan({ tanda1, tanda2, bisaTandai = false, aktifTanda = [], on
           <span key={n} aria-hidden="true" className={`lk-num${tanda1.includes(n) ? ' on-merah' : ''}${tanda2.includes(n) ? ' on-biru' : ''}`} style={{ left: `${persenLajur(n).tengah}%` }}>{n}</span>
         ))}
       </div>
-      <figcaption className="lk-keterangan">Ilustrasi • posisi truk menurut supir. Bukan denah kejadian.</figcaption>
+      <figcaption className="lk-keterangan">{label.keterangan}</figcaption>
     </figure>
   );
 }

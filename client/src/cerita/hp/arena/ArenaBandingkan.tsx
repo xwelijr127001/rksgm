@@ -102,7 +102,7 @@ export function ArenaPolaBandingkan({ ep, konfig, jawaban, ubah, daftar, tx, lab
         label={labelKirim}
         siap={sisa === 0}
         onKirim={onKirim}
-        alasanBelum={sisa ? t('ceritaHp.belumDitandaiNo', { daftar: konfig.selisih.map((x, i) => (sah(x.id) ? null : i + 1)).filter((x) => x !== null).join(', ') }) : null}
+        alasanBelum={sisa ? t('ceritaHp.belumDitandaiNo', { daftar: konfig.selisih.map((x, i) => (sah(x.id) ? null : i + 1)).filter((x) => x !== null).join(tx('daftar.pemisah')) }) : null}
         catatan={t('ceritaHp.pilihanBisaDiubah')}
       />
     </div>

@@ -26,6 +26,8 @@ export interface PropsPanggungLatar {
   className?: string;
   /** Pita bawah panggung (px CSS) yang ditumpangi kotak dialog; kepala tokoh dibingkai di atasnya. */
   ruangBawah?: number;
+  /** Kunci langkah cerita (node + baris), lihat PanggungPiksel (T-017). */
+  kunciLangkah?: string;
   /** 'penuh' = kartu episode mengisi kotaknya (D-97). */
   isi?: 'penuh';
 }
@@ -34,7 +36,7 @@ export function PanggungLatar(p: PropsPanggungLatar) {
   const [gagal, setGagal] = useState(false);
   const piksel = gagal ? null : adeganPiksel(p.ep, p.komposisi).piksel;
   if (piksel) {
-    return <PanggungPiksel ep={p.ep} komposisi={p.komposisi} adegan={piksel} tx={p.tx} nama={p.nama} suasana={p.suasana} status={p.status} ruangBawah={p.ruangBawah} className={p.className} isi={p.isi} onGagal={() => setGagal(true)} />;
+    return <PanggungPiksel ep={p.ep} komposisi={p.komposisi} adegan={piksel} tx={p.tx} nama={p.nama} suasana={p.suasana} status={p.status} ruangBawah={p.ruangBawah} className={p.className} isi={p.isi} kunciLangkah={p.kunciLangkah} onGagal={() => setGagal(true)} />;
   }
   const lok = p.ep.latar?.lokasi[p.komposisi.lokasi];
   return (

@@ -291,3 +291,62 @@ Folder confirmed: C:\Users\User\Desktop\rksgm-episode2 (own server :4001 with RA
 4. Build: 0 `*avatar-320*` files in client/dist; only 3 `karakter/*-besar.webp` (public). Playthrough images total **152,251 B** (= 151,462 + 789), 0 webp requests.
 5. Checks: cek-piksel-t013 86/86; cek-gerak-t016 8/8; `test:e2e` exit 0, kegagalan 0; `test:client` 729/730 — the 1 failure is `episode.test.ts` "naskah hanya Bahasa Indonesia", caused by Fullstack's in-progress T-014 edits (episode.ts/teks/test modified, en/zh now present), not T-016. Re-run after T-014 settles.
 - Bugs: 0 (T-016).
+
+## T-014 — FAIL (1 medium bug) (2026-11-16)
+
+Folder confirmed: C:\Users\User\Desktop\rksgm-episode2 (own server :4001, RAKSA_LEGACY=on; :4000/:4002 untouched). No source edited, nothing committed. Evidence: `team/evidence/T-014/qa/`. Fullstack's T-017 edits were in the tree; no build break hit.
+
+**B-01 (medium): hard-coded Indonesian list words in en and zh player text.**
+- `client/src/cerita/hp/arena/rambu.ts:137-143` builds "lajur 1 dan 3" / "lajur 2, 3, dan 4" (the lane-sign activity); `client/src/cerita/episode/auto-2/arena.ts:255-258` joins document names with ", dan ". Neither goes through the text table.
+- Seen in en: "Sign 1: your choice lajur 1 dan 3", "Your action: Sign 1: lajur 1 dan 3. Sign 2: lajur 1, 2, dan 3.", "Mr Bima looks at your marks for Sign 1: lajur 1 dan 3. The sign itself says lajur 3 dan 4.", "Sir, please send these documents: Truck registration dan Mr Hendra's ID card. These may follow...: Claim form, Copy of the Family Card, Driver's payslip dan Business bank statements."
+- Seen in zh: "标志牌 1: 你的选择：lajur 1 dan 3", "你的行动：标志牌 1: lajur 1 dan 3. 标志牌 2: lajur 2 dan 4.", "先生，请发送以下文件： 警方证明 dan 家庭卡复印件. 以下可以办好后再补： 卡车行驶证, Hendra 先生的身份证 dan 公司银行流水."
+- Why the automated checks missed it: cek-bahasa/teks.test scan saved states and text tables, not the activity-generated sentences.
+- Fix: language-aware joiner/"lajur"/lane word via the text table (en "and", "lane"; zh "和", "车道").
+
+**Other Indonesian text found (known / not bugs):** lettering inside activity illustrations (FORMULIR, POLISI, BENGKEL...), the kantor board "Layanan Klaim Raksa", the homepage tagline "anytime anywhere with our smile" (English brand line, same in all languages). Nothing else Indonesian in ~690 (en) / ~670 (zh) distinct visible lines of the playthroughs (scan of common Indonesian words).
+
+1. Automated: `test:client` 736/736 (HANDOFF said 735; one more test was added); `test:e2e` kegagalan 0; cek-bahasa-t014 120/120; cek-piksel-t013 86/86.
+2. Playthroughs en and zh (driver, seed 21, 600 steps, 0 console errors, 0 HTTP errors, not stuck): reached Parts 1-4 and the ending screens (en "Poor ending: Not satisfied", "Summary from the script", recap). Not finished by hand in Chrome; the zh run's end screen and summary text were scanned from the page text, not viewed. Only one (poor) ending path per language.
+3. Language switch: homepage select EN -> "Story mode" list -> Episode 2 in en (stored `raksa:bahasa=en`); `?lang=zh` deep link switches to zh and persists to the homepage; mid-episode switch en/zh/id/en on saved states (bengkel, tel-cemas) keeps the saved progress (same length, same location), and the activity opens in zh.
+4. Layout: cek-bahasa covers 360/390/1280 x en/zh with no overflow. WebKit 390 zh (mentor, wawancara-3, tel-panik, ending, pool): no horizontal overflow, 0 errors; ending screenshot opened and looks right (nameplate Latin, zh status pill and text fit). Not checked: real phone CJK fonts.
+5. Regression: id first scene OK; Episode 1 en first scene OK (screenshot opened).
+Bugs: 1 medium.
+
+## T-017 — PASS (2026-11-16)
+
+Folder confirmed: C:\Users\User\Desktop\rksgm-episode2 (own server :4001, RAKSA_LEGACY=on; :4000 untouched). No source edited, nothing committed. Evidence: `team/evidence/T-017/qa/`.
+
+1. Automated: `test:client` 736/736; `test:e2e` exit 0, kegagalan 0; `cek-piksel-t013` 86/86; `cek-jalan-t017` 7/7 on re-run. First run was 6/7: `tangkapan-390` found no walk at 0.9 s, because the 390 walk takes ~1.0-1.4 s and e2e was running at the same time (screenshot timing only); the re-run on a quiet server passed.
+2. K04 pool (id), own sampler every ~40 ms (pool-matrix*.log):
+   - Chromium 360 / 390 / 1280 and WebKit 390: Rudi starts outside the left edge (x -152 / -28 / -260 at the first sample), alternates jalan-a / jalan-b, and is standing at x 420 facing right (`rudi:berdiri:kanan:netral`) after about 1.6 s / 1.4 s / 1.9 s (WebKit 1.4 s). 0 console errors everywhere.
+   - "Lanjut" mid-walk (360, 390, 1280, WebKit 390, at 0.3 s and 0.7 s): standing at 420 within 250 ms, no walk afterwards.
+   - Reduce + `?gerak=ikut`: no walk frames, 1 canvas frame, standing at 420 (360, 390, WebKit). `?gerak=penuh` under reduce: walks like normal. One run of 390 penuh timed out waiting for the stage on its first attempt (15 s); 3 re-runs were fine (not reproduced).
+   - My first Lanjut probe clicked the wrong "Lanjut" button and looked like a failure; with the app's own button selector it passes in all 8 cases.
+3. Other rooms (rooms.log): kantor (Miss Raksa x 800), bengkel (admin 940), tol (Bima 620), wawancara-3 (500 / 830 / 1160), kantor-Bima (980) at 390 and 1280: no walk, standing poses, 0 errors. `tata.ts` change is additive only (39 lines added, none removed). Slide-in timing itself was not measured frame by frame (the stage is ready before my sampler starts).
+4. Image bytes, id playthrough (500 steps, 0 console/HTTP errors, 0 webp): **160,739 B** (rooms/props 8,705 + 2,404 + 11,013 + 6,691 + 22,249 + 21,001 + 12,252 + 259, board 789, miss-raksa 19,972, hendra 18,445, samping 36,959); HANDOFF 161,008 B (some props not hit). samping.png 36,959 B as expected.
+5. Pool 390 (reduce) screenshot opened: Rudi standing left, facing the truck. I did not watch the walk as motion (foot sliding is for the Designer's review).
+Bugs: 0.
+
+## T-014 re-check — FAIL (1 medium: e2e regression, cause not in T-014 text) (2026-11-16)
+
+Folder confirmed: C:\Users\User\Desktop\rksgm-episode2 (own server :4001, RAKSA_LEGACY=on; :4000/:4002 untouched). No source edited, nothing committed. Evidence: `team/evidence/T-014/qa-recheck/`. Fullstack's T-017 fix is in the same tree.
+
+**All T-014 content checks PASS:**
+1. `test:client` 738/738; `cek-bahasa-t014` 138/138; `cek-piksel-t013` 95/95.
+2. en and zh playthroughs (seed 21, 600 steps, ends reached, 0 console errors, 0 HTTP errors) plus saved states right after the K02 / K08 / witness activities and tol, 390 and 1280: **0 Indonesian words** in ~690 (en) / ~680 (zh) visible lines. B-01 fixed: en "lanes 1 and 3", "lanes 2, 3 and 4", "Truck registration and Mr Hendra's ID card", "Sign 1: you have not marked any lane yet"; zh "第 1、3 车道", "第 3、4 车道", "你的行动：标志牌 1：第 1、3 车道…". K08 road illustration label: en "Truck · per the driver", zh "卡车 · 据司机说"; caption under it translated. Chinese: no ASCII punctuation next to Han in visible text; reply button "回复 Hendra 先生" (spaced) seen. Designer replaced keys seen verbatim on screen: 18 of 36 (en), 60 of 97 (zh), e.g. k08.2, k08.a, arena.bundel.lengkapi, k12.2 / judul, buka.2, k01.1, k01.2, pemeran.tol.nama, arena.saksi.tol, akt.selisih.item.jam.
+3. Layout zh and en at 390x844 DPR3 and 1280 (title, chat, choices, activities, tol, wawancara-3): no horizontal overflow, 0 errors; zh akt-rambu 390 screenshot opened: full-width punctuation, label and caption fit. Ending screens: covered by cek-bahasa and the earlier playthrough, not re-viewed as screenshots.
+- Observation (low): the visually hidden screen-reader labels in zh chat ("你:", "Hendra 先生:") still use an ASCII colon; not visible.
+
+**B-02 (medium): `npm run test:e2e` fails, 3 of 3 runs (one concurrent with other load, two on a quiet server).** `kegagalan: 2`, exit 1: "langkah berkas: daftar-barang tidak masuk baki HTML (draft adegan & HTML tidak sinkron)" and "misi 3: jawaban benar Ani mendapat poin penuh (+840 / +889)" (needs >= 1000). This is the legacy room game mission 3 (the e2e's step after a page reload), not Episode 2 text. e2e passed in my earlier runs today (T-014, T-016, T-017) and Fullstack reports 0 on :4011 before its last edits. The T-014 fix changed no legacy-game file; the tree also holds T-017's in-progress edits (`PanggungLatar.tsx`, `PanggungPiksel.tsx`, `tata.ts`, samping atlas), so the cause was NOT isolated (I could not run against a clean HEAD without touching the tree). Lead: have Fullstack re-run e2e on a quiet server and, if it still fails, bisect the T-017 / T-014-fix edits.
+Bugs: 1 medium (B-02), 0 in T-014 text.
+
+## T-017 re-check — PASS (e2e not confirmed by me) (2026-11-16)
+
+Folder confirmed: C:\Users\User\Desktop\rksgm-episode2 (own server :4001 at below-normal priority, stopped afterwards; :4000 untouched). No source edited, nothing committed. Ran light: one browser at a time, suites never alongside browser checks. Evidence: `team/evidence/T-017/qa-recheck/`.
+
+1. `test:client` 740/740. Browser checks, in sequence, all PASS: pixel 95/95, walk 8/8, foot 18/18, cek-bahasa 138/138.
+   **`npm run test:e2e` (run ONCE, below-normal priority, owner's PC busy): did NOT pass — kegagalan 194, 124 of them "timeout …" lines (mode bermain, adegan siap, ack), failing from mission 1.** This is the CPU-starvation signature Fullstack described (their below-normal run also failed this way), not a pass or a code finding; I did not re-run (instruction: once only). T-014's "done" condition (e2e pass) is therefore not met by my run. Fullstack's two clean passes on this tree are unconfirmed by QA. Needs one run at normal priority on a quiet machine.
+2. K04 pool (id), own sampler: Chromium 360 / 390 / 1280 and WebKit 390: walk 4 / 3 / 4 / 3 poses, standing at x 420 after 1.13 s / 0.80 s / 1.09 s / 0.86 s (from first walk sample; limit 1.2 s); reduce + `?gerak=ikut`: no walk, standing at 420; Lanjut mid-walk: standing at 420 within 300 ms in all four; 0 console errors.
+3. Camera: pool / bengkel / tol / wawancara-3 at 1280 and 360 changed as intended; opened pool 1280, tol 1280, wawancara-3 1280 and a kantor-staged wawancara-1 1280: shoes whole, head clear of the top edge (about 4 px), no new overlap. wawancara-1/2 room framing covered by cek-kaki (18/18), not by my own screenshots. Kantor (mentor, bima) at 360 / 390 / 1280: pixel-IDENTICAL to my T-013 final screenshots. Phone close-ups (tel-panik) were not re-diffed (no T-013 baseline file at those names).
+4. Images on a full id playthrough (500 steps, 0 console/HTTP errors, 0 webp): **160,739 B** (expected ~161 KB).
+Bugs: 0 (T-017). Open: e2e needs a quiet-machine re-run.

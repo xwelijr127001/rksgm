@@ -103,7 +103,7 @@ export function PapanSaksi({ ep, konfig, jawaban, ubah, tx, labelKirim, onKirim 
         label={labelKirim}
         siap={sisa === 0}
         onKirim={onKirim}
-        alasanBelum={sisa ? t('ceritaHp.belumSemuaKontak', { daftar: konfig.benda.filter((x) => !peta[x.id]).map(nama).join(', ') }) : null}
+        alasanBelum={sisa ? t('ceritaHp.belumSemuaKontak', { daftar: konfig.benda.filter((x) => !peta[x.id]).map(nama).join(tx('daftar.pemisah')) }) : null}
         catatan={t('ceritaHp.pilihanBisaDiubah')}
       />
     </div>

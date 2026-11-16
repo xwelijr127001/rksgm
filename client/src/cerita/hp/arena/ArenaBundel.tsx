@@ -129,7 +129,7 @@ export function ArenaPolaBundel({ ep, misi, konfig, jawaban, ubah, daftar, tx, o
 
         {langkah === 'tindakan' ? (
           <>
-            <p className="hp-ingat">{t('ceritaHp.ingatBerkas', { n: tersedia, total: baris.length, kosong: kosong.join(', ') })}</p>
+            <p className="hp-ingat">{t('ceritaHp.ingatBerkas', { n: tersedia, total: baris.length, kosong: kosong.join(tx('daftar.pemisah')) })}</p>
             <Pilihan
               idLabel="hp-bundel-judul"
               pilihan={konfig.tindakan.pilihan}

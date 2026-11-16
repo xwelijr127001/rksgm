@@ -30,6 +30,8 @@ import puppeteer from 'puppeteer-core';
 import fs from 'node:fs';
 import path from 'node:path';
 import { io as ioClient } from 'socket.io-client';
+import { mulaiPrioritasRendah } from './prioritas-rendah.mjs';
+mulaiPrioritasRendah(); // pemilik bekerja di PC yang sama: Node + semua Chrome otomasi ke prioritas rendah
 
 const BASE = process.env.UI_BASE || 'http://127.0.0.1:4000';
 const CHROME = process.env.RAKSA_CHROME || 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe';
@@ -403,6 +405,8 @@ const LUNCUR = {
   protocolTimeout: 180000,
 };
 const semuaBrowser = [];
+// Satu proses Chrome per pemain (konteks terpisah dalam satu Chrome terbukti mematikan input sentuh/rAF di tab tersembunyi:
+// 194 kegagalan, 2026-11-16). Beban CPU ditekan lewat prioritas rendah (prioritas-rendah.mjs), bukan lewat berbagi proses.
 async function browserBaru() { const b = await puppeteer.launch(LUNCUR); semuaBrowser.push(b); return b; }
 const br = await browserBaru();
 

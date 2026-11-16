@@ -13,6 +13,8 @@
  * kilatan; gerak dikurangi = langsung tampil. Tetap obrolan WhatsApp (label "WhatsApp"), bukan telepon/video.
  */
 import { useEffect, useLayoutEffect, useMemo, useRef, useState, type ReactNode } from 'react';
+import { selaPembicara } from '../ui/bagian';
+import { gabungKalimat } from './arena/rambu';
 import { playSfx } from '../../audio/audio';
 import { useReducedMotion } from '../../hooks';
 import { t } from '../../i18n';
@@ -180,7 +182,7 @@ export function Obrolan({ ep, state, tx, status, pesanAktivitas, komposer, sisip
       </ol>
       {gerbang ? (
         <div className="hp-gerbang" data-gerbang-sesi="">
-          <p className="hp-gerbang-tujuan"><b>{t('ceritaHp.tujuan')}</b>: {tujuan}</p>
+          <p className="hp-gerbang-tujuan"><b>{t('ceritaHp.tujuan')}</b>{selaPembicara()}{tujuan}</p>
           <button type="button" className="primary-action hp-gerbang-mulai" data-mulai-percakapan="" onClick={mulaiPercakapan}>
             {t('ceritaHp.mulaiPercakapan')} <span aria-hidden="true">→</span>
           </button>
@@ -196,7 +198,7 @@ export function Obrolan({ ep, state, tx, status, pesanAktivitas, komposer, sisip
 function teksUmum(p: PesanObrolan, tx: (k: KunciTeks) => string, nama: string): string {
   if (p.jenis === 'masuk') return t('ceritaHp.pesanBaru', { nama, teks: tx(p.teks) });
   if (p.jenis === 'catatan') return p.topik ? `${tx(p.topik)}: ${tx(p.teks)}` : tx(p.teks);
-  if (p.jenis === 'status') return `${t('ceritaHp.kenapa')}: ${tx(p.teks)} ${judulStatus(nama, tx(p.sebelum), tx(p.sesudah), p.arah)}.`;
+  if (p.jenis === 'status') return gabungKalimat([`${t('ceritaHp.kenapa')}${selaPembicara()}${tx(p.teks)}`, `${judulStatus(nama, tx(p.sebelum), tx(p.sesudah), p.arah)}${tx('daftar.titik')}`]);
   return '';
 }
 
@@ -207,7 +209,7 @@ function ItemPesan({ ep, p, tx, nama, baru, gaya, cutIn = false, kini = false }:
       <li className={'hp-pesan hp-masuk' + (cutIn ? ' hp-dengan-cutin' : '')} {...umum}>
         {cutIn ? <CutIn ep={ep} id={ep.nasabah} ekspresi={p.ekspresi} /> : null}
         <div className="hp-gelembung-kolom">
-          <p className="hp-gelembung"><span className="sr-only">{nama}: </span>{tx(p.teks)}</p>
+          <p className="hp-gelembung"><span className="sr-only">{nama}{selaPembicara()}</span>{tx(p.teks)}</p>
           {p.lampiran ? <Lampiran ep={ep} id={p.lampiran} tx={tx} /> : null}
         </div>
       </li>
@@ -216,7 +218,7 @@ function ItemPesan({ ep, p, tx, nama, baru, gaya, cutIn = false, kini = false }:
   if (p.jenis === 'keluar') {
     return (
       <li className="hp-pesan hp-keluar" {...umum}>
-        <p className="hp-gelembung"><span className="sr-only">{t('ceritaHp.kamu')}: </span>{p.teks ? tx(p.teks) : p.isi}</p>
+        <p className="hp-gelembung"><span className="sr-only">{t('ceritaHp.kamu')}{selaPembicara()}</span>{p.teks ? tx(p.teks) : p.isi}</p>
         <span className="hp-terkirim">{t('ceritaHp.terkirim')}</span>
       </li>
     );

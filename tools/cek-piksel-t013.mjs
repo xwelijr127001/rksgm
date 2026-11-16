@@ -11,6 +11,8 @@
 import puppeteer from 'puppeteer-core';
 import fs from 'node:fs';
 import path from 'node:path';
+import { mulaiPrioritasRendah } from './prioritas-rendah.mjs';
+mulaiPrioritasRendah(); // pemilik bekerja di PC yang sama: Node + semua Chrome otomasi ke prioritas rendah
 import { cekSisipan, majuKeSisipan } from './cek-sisipan-t015.mjs';
 import { sampelGerak, lulusGerak } from './cek-gerak-t016.mjs';
 
@@ -79,7 +81,9 @@ for (const [kasus, st] of Object.entries(STATES)) {
     const obrolan = kasus.startsWith('tel-');
     const hendraPiksel = (s?.potretHp ?? []).some((x) => x.seni === 'piksel' && x.tokoh === 'hendra');
     // Kasus objek yang jatuh di layar obrolan (state naskah, mis. surat K13 = pesan ke Pak Hendra): cukup avatar piksel.
-    const lulus = !!s && ilu.length === 0 && ep1.length === 0 && (obrolan || s.obrolan ? hendraPiksel : s.siap && s.gaya === 'piksel');
+    // State akt-* (T-014 fix): layar sesudah aktivitas. Akibat K08 tampil TANPA panggung (diagram jalan + potret piksel Pak Bima).
+    const tanpaPanggung = kasus.startsWith('akt-') && s?.gaya === undefined && (s?.potretHp ?? []).some((x) => x.seni === 'piksel');
+    const lulus = !!s && ilu.length === 0 && ep1.length === 0 && (tanpaPanggung || (obrolan || s.obrolan ? hendraPiksel : s.siap && s.gaya === 'piksel'));
     lapor(nama, lulus, { stage: s, webp: ilu.length, webpContoh: ilu.slice(0, 3), ep1: ep1.length, png: req.filter((u) => u.endsWith('.png')).map((u) => u.split('/').pop()) });
     await ctx.close();
   }

@@ -16,7 +16,7 @@ import { TEKS_AUTO_2_ID } from '../episode/auto-2/teks.id';
 import { ketukanBelumUtuh } from './alur';
 import { jawabanKirim } from './arena/logika';
 import {
-  LANGKAH_AWAL, alihLajur, bolehLanjut, bukaUlang, daftarLajur, ketukRambu, lajurDitandai, lanjutRambu, pulihkanLangkah, rambuAktif, rambuTerbuka,
+  LANGKAH_AWAL, alihLajur, bolehLanjut, bukaUlang, daftarLajur, ketukRambu, paramTanggapan, lajurDitandai, lanjutRambu, pulihkanLangkah, rambuAktif, rambuTerbuka,
   ringkasTanda, selesaiPeriksa, serialLangkah, simpulDipilih, sisaRambu, tahap, tanggapan, uraiLangkah, pilihSimpul, type ArenaRambu,
 } from './arena/rambu';
 import { ringkasTindakan } from './arena/ringkas';
@@ -177,7 +177,7 @@ test('tanggapan: tanda sama dengan tulisan rambu dan sejalan -> satu kalimat net
 test('tanggapan: tanda berbeda dari tulisan rambu disebut apa adanya, tanpa kata penilaian', () => {
   const r = tanggapan(K, jawab([1, 2], [1], 'e'));
   assert.deepEqual(r.map((x) => x.jenis), ['tulisan']);
-  const teks = tx(r[0]!.teks, r[0]!.param);
+  const teks = tx(r[0]!.teks, paramTanggapan(r[0]!, tx));
   assert.match(teks, /lajur 1 dan 2/); assert.match(teks, /lajur 3 dan 4/);
   assert.doesNotMatch(teks, /salah|benar/i);
 });
@@ -194,7 +194,7 @@ test('rambu 2: tafsir "lajur kiri" tidak pernah dibandingkan atau dinilai (belum
   assert.equal(K.rambu[1]!.tulisan, undefined);
   // Kunci aktivitas pun tidak mengarang jawaban benar untuk rambu 2.
   assert.deepEqual(EP.aktivitas.rambu!.kunci.find((x) => x.stepId === 'r2')!.assign, {});
-  assert.equal(daftarLajur([2, 3, 4]), 'lajur 2, 3, dan 4'); assert.equal(daftarLajur([]), 'belum ada lajur');
+  assert.equal(daftarLajur([2, 3, 4], tx), 'lajur 2, 3, dan 4'); assert.equal(daftarLajur([], tx), 'belum ada lajur'); assert.equal(daftarLajur([3], tx), 'lajur 3'); assert.equal(daftarLajur([4, 3], tx), 'lajur 3 dan 4');
 });
 
 test('teks antarmuka rambu: tanpa penilaian atau hasil klaim; tulisan rambu dikutip apa adanya dari naskah', () => {

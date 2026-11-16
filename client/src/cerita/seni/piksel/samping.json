@@ -10,7 +10,7 @@
    "gambar": "samping.png",
    "ukuranAtlas": [
     512,
-    204
+    394
    ],
    "skala": {
     "unitDuniaPerPikselSeni": 4,
@@ -41,7 +41,7 @@
    "frame": {
     "berdiri-kanan": {
      "rect": [
-      144,
+      255,
       0,
       71,
       198
@@ -84,38 +84,92 @@
      "ekspresi": {
       "netral": {
        "dasar": [
-        431,
         155,
+        199,
         27,
         30
        ],
        "kedip": [
-        272,
-        197,
+        323,
+        206,
         27,
         6
        ]
       },
       "prihatin": {
        "dasar": [
-        459,
-        155,
+        183,
+        199,
         27,
         30
        ],
        "kedip": [
-        300,
-        197,
+        351,
+        206,
         27,
         6
        ]
       }
      }
+    },
+    "jalan-kontak-kanan": {
+     "rect": [
+      0,
+      0,
+      110,
+      198
+     ],
+     "hadap": "kanan",
+     "jenisJangkar": "kaki",
+     "jangkar": {
+      "x": 54,
+      "y": 197
+     },
+     "kaki": {
+      "x": 54,
+      "y": 197
+     },
+     "kepala": {
+      "x": 54,
+      "y": 21
+     },
+     "kepalaTinggi": 42
+    },
+    "jalan-lintas-kanan": {
+     "rect": [
+      327,
+      0,
+      67,
+      198
+     ],
+     "hadap": "kanan",
+     "jenisJangkar": "kaki",
+     "jangkar": {
+      "x": 37,
+      "y": 197
+     },
+     "kaki": {
+      "x": 37,
+      "y": 197
+     },
+     "kepala": {
+      "x": 37.5,
+      "y": 21
+     },
+     "kepalaTinggi": 42
     }
    },
    "pose": {
     "berdiri": {
      "kanan": "berdiri-kanan",
+     "bawaan": "kanan"
+    },
+    "jalan-a": {
+     "kanan": "jalan-kontak-kanan",
+     "bawaan": "kanan"
+    },
+    "jalan-b": {
+     "kanan": "jalan-lintas-kanan",
      "bawaan": "kanan"
     }
    },
@@ -222,7 +276,7 @@
    "gambar": "samping.png",
    "ukuranAtlas": [
     512,
-    204
+    394
    ],
    "skala": {
     "unitDuniaPerPikselSeni": 4,
@@ -253,7 +307,7 @@
    "frame": {
     "berdiri-kanan": {
      "rect": [
-      0,
+      111,
       0,
       71,
       198
@@ -296,28 +350,28 @@
      "ekspresi": {
       "netral": {
        "dasar": [
-        431,
-        124,
+        99,
+        199,
         27,
         30
        ],
        "kedip": [
-        431,
-        186,
+        211,
+        199,
         27,
         7
        ]
       },
       "prihatin": {
        "dasar": [
-        459,
-        124,
+        127,
+        199,
         27,
         30
        ],
        "kedip": [
-        459,
-        186,
+        239,
+        199,
         27,
         7
        ]
@@ -434,7 +488,7 @@
    "gambar": "samping.png",
    "ukuranAtlas": [
     512,
-    204
+    394
    ],
    "skala": {
     "unitDuniaPerPikselSeni": 4,
@@ -465,7 +519,7 @@
    "frame": {
     "berdiri-kanan": {
      "rect": [
-      72,
+      183,
       0,
       71,
       198
@@ -508,28 +562,28 @@
      "ekspresi": {
       "netral": {
        "dasar": [
-        431,
-        62,
+        467,
+        124,
         28,
         30
        ],
        "kedip": [
-        328,
-        197,
+        211,
+        207,
         28,
         5
        ]
       },
       "prihatin": {
        "dasar": [
-        460,
-        62,
+        467,
+        155,
         28,
         30
        ],
        "kedip": [
-        0,
-        199,
+        211,
+        213,
         28,
         5
        ]
@@ -646,7 +700,7 @@
    "gambar": "samping.png",
    "ukuranAtlas": [
     512,
-    204
+    394
    ],
    "skala": {
     "unitDuniaPerPikselSeni": 4,
@@ -677,8 +731,8 @@
    "frame": {
     "berdiri-kanan": {
      "rect": [
-      360,
       0,
+      199,
       70,
       195
      ],
@@ -720,28 +774,28 @@
      "ekspresi": {
       "netral": {
        "dasar": [
-        431,
-        93,
+        467,
+        186,
         27,
         30
        ],
        "kedip": [
-        216,
-        197,
+        267,
+        206,
         27,
         6
        ]
       },
       "prihatin": {
        "dasar": [
-        459,
-        93,
+        71,
+        199,
         27,
         30
        ],
        "kedip": [
-        244,
-        197,
+        295,
+        206,
         27,
         6
        ]
@@ -858,7 +912,7 @@
    "gambar": "samping.png",
    "ukuranAtlas": [
     512,
-    204
+    394
    ],
    "skala": {
     "unitDuniaPerPikselSeni": 4,
@@ -889,8 +943,8 @@
    "frame": {
     "berdiri-kanan": {
      "rect": [
-      288,
-      0,
+      395,
+      197,
       71,
       196
      ],
@@ -932,28 +986,28 @@
      "ekspresi": {
       "netral": {
        "dasar": [
-        431,
-        31,
+        467,
+        62,
         30,
         30
        ],
        "kedip": [
-        360,
-        196,
+        331,
+        199,
         30,
         6
        ]
       },
       "prihatin": {
        "dasar": [
-        462,
-        31,
+        467,
+        93,
         30,
         30
        ],
        "kedip": [
-        391,
-        196,
+        362,
+        199,
         30,
         6
        ]
@@ -1070,7 +1124,7 @@
    "gambar": "samping.png",
    "ukuranAtlas": [
     512,
-    204
+    394
    ],
    "skala": {
     "unitDuniaPerPikselSeni": 4,
@@ -1101,7 +1155,7 @@
    "frame": {
     "berdiri-kanan": {
      "rect": [
-      216,
+      395,
       0,
       71,
       196
@@ -1144,28 +1198,28 @@
      "ekspresi": {
       "netral": {
        "dasar": [
-        431,
+        467,
         0,
         31,
         30
        ],
        "kedip": [
-        431,
-        194,
+        267,
+        199,
         31,
         6
        ]
       },
       "prihatin": {
        "dasar": [
-        463,
-        0,
+        467,
+        31,
         31,
         30
        ],
        "kedip": [
-        463,
-        194,
+        299,
+        199,
         31,
         6
        ]

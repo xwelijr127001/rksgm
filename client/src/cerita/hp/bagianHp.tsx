@@ -3,6 +3,7 @@
  * kutipan konteks, dan tombol kirim yang tidak mengirim dua kali. Gambar seni kode = GambarSeni (ui/gambarIlustrasi).
  */
 import { useRef, useState, type ReactNode } from 'react';
+import { selaPembicara } from '../ui/bagian';
 import type { MissionPublic } from '@shared/types';
 import { Arrow } from '../../components/PlayerShell';
 import { t } from '../../i18n';
@@ -28,7 +29,7 @@ export function judulStatus(nama: string, sebelum: string, sesudah: string, arah
 export function CatatanStatus({ nama, sebelum, sesudah, arah, alasan }: { nama: string; sebelum: string; sesudah: string; arah: 'naik' | 'turun' | 'tetap'; alasan: string }) {
   return (
     <>
-      <p className="hp-kenapa"><b>{t('ceritaHp.kenapa')}:</b> {alasan}</p>
+      <p className="hp-kenapa"><b>{t('ceritaHp.kenapa')}</b>{selaPembicara()}{alasan}</p>
       <p className="hp-status-baris">
         <span className="hp-status-ikon" aria-hidden="true"><IkonArah arah={arah} /></span>
         <span>{judulStatus(nama, sebelum, sesudah, arah)}</span>

@@ -8,6 +8,8 @@
 import puppeteer from 'puppeteer-core';
 import fs from 'node:fs';
 import path from 'node:path';
+import { mulaiPrioritasRendah } from './prioritas-rendah.mjs';
+mulaiPrioritasRendah(); // pemilik bekerja di PC yang sama: Node + semua Chrome otomasi ke prioritas rendah
 
 const PROFIL = JSON.stringify({ nickname: 'Weli', look: { body: 0, skin: 0, hair: 0, color: 0, accessory: 'none' } });
 export const RUANG_GERAK = ['pool', 'bengkel', 'tol', 'wawancara-1'];

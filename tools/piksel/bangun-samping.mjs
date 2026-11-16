@@ -29,6 +29,25 @@ const LEBAR_KEPALA = 36;
 const PITCH_BADAN = 945 / 198;
 /** id naskah -> sel (baris lalu kolom) + warna celana & sepatu (dari palet sheet badan, dipilih per kostum). */
 export const SAMPING = { rudi: { sel: 0 }, bima: { sel: 1 }, darto: { sel: 2 }, admin: { sel: 3 }, tol: { sel: 4 }, polisi: { sel: 5 } };
+/**
+ * T-017 (D-104): bingkai JALAN per tokoh. Lembar 1024 x 1024 = dua sel 512 x 1024 (kiri kontak, kanan lintas), hadap kanan,
+ * grid sama dengan badan v2. `pitch` = px sumber per piksel seni. Rudi: 4,35 (BUKAN 4,444 Designer): pada 4,444 bingkai jalan
+ * 194 piksel seni vs berdiri 198, jadi kepala naik 4 piksel seni saat berhenti; pada 4,35 tinggi 198 dan lebar kepala tetap
+ * 36/35 (= berdiri 35), tanpa lompatan. Jangkar x = pusat kepala terukur dibulatkan ke bawah (aturan Designer "pusat kepala
+ * - 0,5", sama dengan bingkai berdiri: pusat 36,5 -> 36), y = telapak. Wajah terpanggang: tanpa lapisan ekspresi/kedip.
+ * Tokoh lain (mis. Hendra, D-105 menunggu owner) cukup ditambah di sini / memanggil bingkaiJalan() dari pembangunnya sendiri.
+ */
+export const JALAN = { rudi: { berkas: 'rudi-jalan-v1.png', pitch: 4.35 } };
+/** Dua bingkai jalan (kontak, lintas) pada skala atlas, dipetakan ke palet yang SUDAH ada (tanpa warna baru). */
+export function bingkaiJalan(berkasPng, palet, pitch) {
+  const src = L.petakanPalet(L.binerkanAlpha(L.baca(berkasPng)), palet);
+  return ['kontak', 'lintas'].map((nama, i) => {
+    const img = komponenUtama(sampelIsi(L.potong(src, i * 512, 0, 512, 1024), pitch));
+    const k = kepalaDari(img, 22), kotak = L.kotakAlpha(img);
+    const pusat = (k.x0 + k.x1 + 1) / 2;
+    return { nama, img, kepala: { x: pusat, atas: k.atas, lebar: k.x1 - k.x0 + 1 }, kaki: { x: Math.floor(pusat), y: kotak.y + kotak.h - 1 } };
+  });
+}
 const EKSPRESI_DARI = { netral: 'netral', tersenyum: 'netral', senang: 'netral', lega: 'netral', cemas: 'prihatin', serius: 'prihatin', bingung: 'prihatin', kesal: 'prihatin' };
 const sel = (img, i) => L.potong(img, (i % 3) * 512, Math.floor(i / 3) * 512, 512, 512);
 const buram = (img, x, y) => x >= 0 && y >= 0 && x < img.w && y < img.h && img.d[L.idx(img, x, y) + 3] >= 128;
@@ -103,8 +122,13 @@ export function bangunSamping() {
     hasil[id] = { tubuh, wajah, potongE, potongN, kB, mata, kedipN: stripKedip(potongN, m), kedipE: stripKedip(potongE, m) };
     laporan[id] = { pitchBadan: +PITCH_BADAN.toFixed(3), pitchEkspresi: +pE.toFixed(3), lebarKepala: +wB.toFixed(1), badan: [tubuh.w, tubuh.h], tinggi: tubuh.h, registrasi: r };
   }
+  // T-017: bingkai jalan (palet tetap; bagian lama tidak berubah isinya).
+  for (const [id, j] of Object.entries(JALAN)) {
+    hasil[id].jalan = bingkaiJalan(path.join(SUMBER, j.berkas), palet, j.pitch);
+    laporan[id].jalan = { pitch: j.pitch, bingkai: hasil[id].jalan.map((f) => ({ nama: f.nama, ukuran: [f.img.w, f.img.h], lebarKepala: f.kepala.lebar, pusatKepala: f.kepala.x, kaki: f.kaki })) };
+  }
   // Atlas.
-  const bagian = Object.entries(hasil).flatMap(([id, h]) => [{ id: `${id}-tubuh`, img: h.tubuh }, { id: `${id}-netral`, img: h.potongN }, { id: `${id}-prihatin`, img: h.potongE }, { id: `${id}-kedip-netral`, img: h.kedipN }, { id: `${id}-kedip-prihatin`, img: h.kedipE }]);
+  const bagian = Object.entries(hasil).flatMap(([id, h]) => [{ id: `${id}-tubuh`, img: h.tubuh }, { id: `${id}-netral`, img: h.potongN }, { id: `${id}-prihatin`, img: h.potongE }, { id: `${id}-kedip-netral`, img: h.kedipN }, { id: `${id}-kedip-prihatin`, img: h.kedipE }, ...(h.jalan ?? []).map((f) => ({ id: `${id}-jalan-${f.nama}`, img: f.img }))]);
   const kotak = bagian.map((x) => ({ id: x.id, kunci: x.id, w: x.img.w, h: x.img.h }));
   const W = 512;
   const H = kemas(kotak, W);
@@ -126,6 +150,7 @@ export function bangunSamping() {
     const kepalaTinggi = h.wajah.y + h.wajah.h - h.kB.atas;
     const kepala = { x: (h.kB.x0 + h.kB.x1 + 1) / 2, y: h.kB.atas + kepalaTinggi / 2 };
     const jendela = (sisi, skala, gy = 0) => ({ frame: 'berdiri-kanan', x: Math.round(kepala.x - sisi / 2), y: Math.round(kepala.y - sisi / 2 + gy), sisi, skala, tampil: sisi * skala });
+    const frameJalan = Object.fromEntries((h.jalan ?? []).map((f) => [`jalan-${f.nama}-kanan`, { rect: r(`${id}-jalan-${f.nama}`), hadap: 'kanan', jenisJangkar: 'kaki', jangkar: f.kaki, kaki: f.kaki, kepala: { x: f.kepala.x, y: f.kepala.atas + kepalaTinggi / 2 }, kepalaTinggi }]));
     manifest[id] = {
       versi: 1,
       dibuat: 'tools/piksel/bangun-samping.mjs',
@@ -143,8 +168,9 @@ export function bangunSamping() {
           wajah: { kotak: [h.wajah.x, h.wajah.y, h.wajah.w, h.wajah.h], mata: [h.mata.x, h.mata.y, h.mata.w, h.mata.h], mulut: [h.wajah.x + 4, h.wajah.y + 20, 8, 4] },
           ekspresi: { netral: { dasar: r(`${id}-netral`), kedip: r(`${id}-kedip-netral`) }, prihatin: { dasar: r(`${id}-prihatin`), kedip: r(`${id}-kedip-prihatin`) } },
         },
+        ...frameJalan,
       },
-      pose: { berdiri: { kanan: 'berdiri-kanan', bawaan: 'kanan' } },
+      pose: { berdiri: { kanan: 'berdiri-kanan', bawaan: 'kanan' }, ...(h.jalan ? { 'jalan-a': { kanan: 'jalan-kontak-kanan', bawaan: 'kanan' }, 'jalan-b': { kanan: 'jalan-lintas-kanan', bawaan: 'kanan' } } : {}) },
       pandang: { lawan: { arah: 'kanan' }, pemain: { arah: 'kanan' }, depan: { arah: 'kanan' }, bawah: {} },
       potret: {
         frame: 'berdiri-kanan',
