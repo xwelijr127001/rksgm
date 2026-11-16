@@ -12,6 +12,7 @@ import puppeteer from 'puppeteer-core';
 import fs from 'node:fs';
 import path from 'node:path';
 import { cekSisipan, majuKeSisipan } from './cek-sisipan-t015.mjs';
+import { sampelGerak, lulusGerak } from './cek-gerak-t016.mjs';
 
 const BASE = process.env.UI_BASE || 'http://127.0.0.1:4000';
 const OUT = path.resolve(import.meta.dirname, '..', 'team/evidence/T-013');
@@ -155,24 +156,10 @@ for (const vp of [...VP, ...(cepat ? [] : [{ n: '768', w: 768, h: 900, dpr: 1 },
 }
 // D-96: hidup di luar kantor. Pool (Rudi, tanpa Miss Raksa): hash kanvas tiap 100 md selama 9 d harus BERUBAH (kedip) pada
 // gerak normal dan TIDAK berubah saat sistem meminta gerak dikurangi (?gerak=ikut).
-for (const [nama, kurang] of [['normal', false], ['dikurangi', true]]) {
-  const ctx = await b.createBrowserContext();
-  const p = await ctx.newPage();
-  await p.setViewport({ width: 360, height: 740, deviceScaleFactor: 2, isMobile: true, hasTouch: true });
-  if (kurang) await p.emulateMediaFeatures([{ name: 'prefers-reduced-motion', value: 'reduce' }]);
-  await p.evaluateOnNewDocument((pj, st) => { localStorage.setItem('raksa:bahasa', 'id'); localStorage.setItem('raksa:profil', pj); sessionStorage.setItem('raksa:loader:v1', '1'); localStorage.setItem('raksa:cerita', st); }, PROFIL, STATES.pool.nilai);
-  await p.goto(BASE + '/cerita/auto-2' + (kurang ? '?gerak=ikut' : ''), { waitUntil: 'domcontentloaded' });
-  await p.waitForFunction(() => document.querySelector('.cer-piksel[data-siap]'), { timeout: 15000 }).catch(() => null);
-  await tunggu(500);
-  const r = await p.evaluate(async () => {
-    const c = document.querySelector('.cer-piksel-kanvas');
-    const hash = () => { const d = c.getContext('2d').getImageData(0, 0, c.width, c.height).data; let h = 0; for (let i = 0; i < d.length; i += 97) h = (h * 31 + d[i]) | 0; return h; };
-    const lihat = new Set(); let ganti = 0, lalu = null, mata = 0;
-    for (let i = 0; i < 90; i++) { const h = hash(); if (lalu !== null && h !== lalu) ganti++; lalu = h; lihat.add(h); if (c.getAttribute('data-mata') === 'tutup') mata++; await new Promise((ok) => setTimeout(ok, 100)); }
-    return { bingkaiBeda: lihat.size, perubahan: ganti, mataTutup: mata };
-  });
-  lapor(`gerak-pool-${nama}`, kurang ? r.perubahan === 0 : r.perubahan >= 2, r);
-  await ctx.close();
+// T-016: sampel hash kanvas 10 d untuk pool DAN bengkel (tools/cek-gerak-t016.mjs): normal = kedip + napas terlihat; dikurangi = 0.
+for (const ruang of ['pool', 'bengkel']) for (const [nama, kurang] of [['normal', false], ['dikurangi', true]]) {
+  const r = await sampelGerak(b, BASE, STATES[ruang].nilai, kurang, 10);
+  lapor(`gerak-${ruang}-${nama}`, lulusGerak(r, kurang), r);
 }
 fs.writeFileSync(path.join(OUT, cepat ? 'hasil-cepat.json' : 'hasil-final.json'), JSON.stringify(hasil, null, 1));
 await b.close();

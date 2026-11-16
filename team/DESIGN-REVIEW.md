@@ -1464,3 +1464,55 @@ All six stand on drawn legs with knees, hems and real shoes; the owner's "legs l
 
 ### Not verified by me
 Slide-in (180 ms) and room crossfade (150 ms) on a live transition; the chat cut-in; real iOS WebKit and the owner phone check; a full manual playthrough in en/zh; `npm run test:client` / `test:e2e` / `cek-piksel-t013.mjs` (Fullstack reports 728/728, e2e clean, 73/73); Fullstack's byte table.
+
+---
+
+## T-017 — walk frames (2026-11-16)
+
+Author: Designer · Art only; no source edits, no commit. Follows D-103 (owner go 2026-11-16).
+
+### 1. Delivered
+| File | What |
+| --- | --- |
+| `character/hendra-pixel-v1/hendra-jalan-v1.png` (+ `.md`) | 1024×1024 RGBA, two 512×1024 cells (same grid as `tokoh-samping-badan-v2.png`): left = **kontak** (contact), right = **lintas** (passing). Full body, faces and walks RIGHT, soles on cell y 983 |
+| `character/tokoh-samping-ep2-pixel-v1/rudi-jalan-v1.png` (+ `.md`) | same layout for Mas Rudi (clipboard stays under his arm) |
+| `…-jalan-v1-sumber.png` next to each | the generator output as it came (standing copy + two walk frames); trace only |
+| `team/evidence/T-017/jalan-strip-3x.png` | **preview strip for approval**: standing (the frame that ships today) · contact · passing, both characters, 3×, built at real atlas scale and palette |
+| `team/evidence/T-017/jalan-hendra-3x.gif`, `jalan-rudi-3x.gif` | the walk at the proposed timing: six frames in, then the standing frame |
+| `team/evidence/T-017/native-*.png`, `ukur.json` | the four frames exactly as the atlas builder will produce them, and every measurement below |
+
+Frame boxes (px in each sheet) and atlas-scale result, measured with the project's own `sampelIsi` / `kepalaDari`:
+
+| Frame | Cell | Alpha box (x, y, w, h) | Read pitch | Native art px | Head width (standing) | Suggested foot anchor |
+| --- | --- | --- | --- | --- | --- | --- |
+| hendra `jalan-kontak` | 0, 0, 512, 1024 | 39, 93, 434, 891 | 4.582 | 95 × 195 | 37.1 (36.1) | x 51, y 194 |
+| hendra `jalan-lintas` | 512, 0, 512, 1024 | 600, 88, 336, 896 | 4.582 | 73 × 196 | 36.7 (36.1) | x 37, y 195 |
+| rudi `jalan-kontak` | 0, 0, 512, 1024 | 17, 124, 479, 860 | 4.444 | 108 × 194 | 35.1 (35) | x 53, y 193 |
+| rudi `jalan-lintas` | 512, 0, 512, 1024 | 622, 123, 292, 861 | 4.444 | 66 × 194 | 34.6 (35) | x 36, y 193 |
+
+Scale check: the pitch comes from the standing figure that sits in the same generated sheet (Hendra 898 px = 196 art px, Rudi 880 px = 198 art px), and that figure's head measures 36.2 / 34.4 art px against 36.1 / 35 in the shipped atlas, so walk and standing frames are the same size. The anchor is "head centre + the standing frame's own head-to-anchor offset", so the head does not jump sideways when the walk hands over to the standing frame.
+
+Honest notes on the art: it took three passes. Pass 1 drew the heads 16 % (Hendra) and 8 % (Rudi) too big and gave Rudi a third arm; pass 2 over-corrected (Hendra's head 17 % too small, body too slim). Pass 3, the one delivered, puts the shipped standing figure on the canvas and adds the two walk poses at its scale. Checked: two arms and two legs in every frame, facing right, no text. Limits: faces are baked (no expression or blink overlay while walking); Rudi's walk frames are 4 art px shorter than his standing frame, so he straightens up as he stops (a read pitch of 4.35 removes it if it looks like a jump); a 2-frame cycle always leads with the same leg, as Bu Rina's does.
+
+### 2. Where the walk plays
+- **Rudi: K04, the pool (not the bengkel; the bengkel scene is the admin's).** K04 is the first time the pool appears and Rudi is its only character (`hadir: ['rudi']`). He walks in from the left edge of the view (the gate side) to his slot (x 420), walking right, and stops facing the truck. No script change; every player sees it.
+- **Hendra: there is no scene for it today, and K01 cannot be it.** K01 is a WhatsApp conversation (`k01.1`: "Kamu menghubunginya lewat WhatsApp"; staging `TELEPON_HENDRA`), and every later Hendra line is on the phone as well. His only full-body appearance is the /cerita cover. So his walk needs one staging decision from the owner/Lead (D-105). My recommendation: **the ending** (`akhir-puas` / `-catatan` / `-kurang`, kantor with Miss Raksa): stage him in person (`hadir: ['missRaksa', 'hendra']`, no phone cut-in) so the man the player has only texted for thirteen weeks walks up to the counter for his last line. He enters from the right edge walking left (mirrored frames) to the visitor slot (x 980) and stops facing Miss Raksa. All three ending lines read naturally in person, so no text changes; every player sees it. Until that is decided, do not add Hendra's frames to the atlas (no unused bytes).
+
+### 3. Timing
+- **Frame rate: 270 ms per frame (3.7 frames per second)**, the same `LANGKAH_MS` as Bu Rina in Episode 1. Order kontak → lintas → kontak → …; start on kontak, the last walk frame is lintas, then the standing frame.
+- **Travel: 24 art px (96 world px) per frame**, moved continuously (linear, no easing) and snapped to whole art px; about 89 art px per second. The drawn stride is ≈ 50 art px between the same point of both shoes, so two frames cover one step and the feet do not slide.
+- **Length:** distance d = from just outside the nearest view edge to the slot; frames n = round(d / 96 world px), clamped to 3–7; per-frame travel = d / n (stays within 80–120 world px). That gives 0.8–1.9 s: about 1.1–1.6 s on a phone, up to 1.9 s on the 1280 view.
+- No extra bob in code: the passing frame is already 1 art px taller than the contact frame.
+- Walking left = the same frames mirrored around the foot anchor (D-93). On arrival the figure takes its slot facing (`hadap`).
+- The walk replaces the 180 ms slide-in only for characters that have walk frames; everyone else keeps the slide-in. Blink, speaker hop and breathing start after arrival. The dialogue text is not held back; "Lanjut" during the walk skips to the standing frame (as Episode 1's entrance does).
+- **Reduced motion (system setting, unless `?gerak=penuh`): no walk**; the character is simply standing at the slot, as today.
+
+### 4. Bytes
+Measured, not guessed: the two atlas-scale frames of each character written as an indexed PNG with the shipped palette (no new colours): **Hendra 7,738 B, Rudi 7,297 B, together ≈ 15.0 KB**. Mirrored use costs nothing. Episode 2 stage: ≈ 152 KB today → **≈ 159 KB with Rudi only, ≈ 167 KB with both**, of the 400 KB gate. Inside the atlases it will be slightly less (shared header and palette); the atlas sheets get taller, which compresses to almost nothing.
+
+### Items
+- [D-104] K04 pool, Rudi · today he gets at most the 180 ms slide-in, and nothing at all when the stage was not mounted in the beat before (`useHidup` skips the first mount; I did not observe which case K03 → K04 is), so the first field scene opens almost static · add `jalan-kontak` / `jalan-lintas` to the samping atlas for `rudi` and play the walk-in above whenever he becomes present, including when the stage or the room itself is new; reduced motion = no walk · med.
+- [D-105] Hendra's walk · no scene stages him on the pixel stage (K01 is WhatsApp) · owner/Lead decision: stage the three endings in person as described in section 2 (recommended), or keep the frames in reserve; integrate his frames only once a scene uses them · med, needs a decision before Fullstack starts on Hendra.
+
+### What I will check in the review after integration
+360 id / 390 en / 1280 zh: Rudi enters from the left edge and stops on his slot without a sideways head jump; feet do not slide; pixels stay on the integer grid while moving; no walk under reduced motion + `?gerak=ikut`; "Lanjut" mid-walk lands on the standing frame; byte table; and Hendra's entrance if D-105 is approved.

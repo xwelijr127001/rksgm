@@ -35,7 +35,8 @@ function disc(cx: number, cy: number, rad: number, step = 4): string {
   }
   return d;
 }
-const LATAR_AWAN: Kotak[] = [...cloud(36, 14), ...cloud(318, 14), ...r(176, 8, 4, 4, WIN)];
+// D-48 (T-016): awan di y 4 (tidak lagi terpotong jadi garis tipis di HP 420-445 px); piksel lepas (176, 8) dihapus.
+const LATAR_AWAN: Kotak[] = [...cloud(36, 4), ...cloud(318, 4)];
 const LATAR_KOTA: Kotak[] = [
   ...box(22, 96, 56, 70, PALE), ...windows(34, 108, 3, 3),
   ...r(88, 112, 52, 4, SALMON), ...r(92, 108, 44, 4, SALMON), ...r(100, 104, 28, 4, SALMON),
@@ -49,7 +50,8 @@ const MEJA: Kotak[] = [
   ...r(-10, 20, 440, 34, INK), ...r(-10, 22, 440, 8, CREAM), ...r(-10, 30, 440, 20, GREEN), ...r(-10, 50, 440, 4, INK),
   ...Array.from({ length: 12 }, (_, i): Kotak => [14 + i * 36, 34, 4, 14, INK]),
   ...r(96, 8, 32, 14, INK), ...r(98, 10, 28, 12, CREAM), ...r(98, 6, 12, 4, SALMON), ...r(104, 14, 16, 2, GLASS), ...r(104, 18, 12, 2, GLASS),
-  ...r(248, 12, 16, 10, INK), ...r(250, 14, 12, 8, SALMON), ...r(252, 0, 8, 4, GLASS), ...r(246, 4, 20, 6, GLASS), ...r(250, 10, 12, 2, GLASS),
+  // D-50 (T-016): tanaman digeser 4 satuan ke kiri, daunnya tidak lagi menyentuh garis menara.
+  ...r(244, 12, 16, 10, INK), ...r(246, 14, 12, 8, SALMON), ...r(248, 0, 8, 4, GLASS), ...r(242, 4, 20, 6, GLASS), ...r(246, 10, 12, 2, GLASS),
 ];
 const rects = (k: Kotak[]) => k.map(([x, y, width, height, fill], i) => <rect key={i} x={x} y={y} width={width} height={height} fill={fill} />);
 /** Latar piksel di BELAKANG sprite (420x190 satuan). */

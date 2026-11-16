@@ -194,3 +194,14 @@ test('T-015: sisipan telepon tidak pernah menutupi kotak kepala tokoh (setiap ad
   // HP: kanan atas = di atas kepala Miss Raksa (bug owner), jadi sisipan pindah ke kiri di bawah papan (papan tetap terbaca).
   assert.deepEqual([...letakHp], ['kiri-bawah-papan']);
 });
+
+test('D-102 (T-016): teks papan latar aktivitas = teks papan panggung (merek, sama di semua bahasa) dan muat di papan', async () => {
+  const { TEKS_PAPAN_KANTOR, titikPapanKantor } = await import('./papan');
+  const { titikTeks } = await import('./hurufPiksel');
+  const { TEKS_AUTO_2_ID: TEKS_ID } = await import('../../../episode/auto-2/teks.id');
+  const papan = RUANG_PIKSEL['kantor-ep2']!.papan!;
+  assert.equal(TEKS_ID[papan.teksKunci], TEKS_PAPAN_KANTOR);
+  const t = titikPapanKantor(papan.kotak, 4, titikTeks)!;
+  assert.ok(t && t.titik.length > 100);
+  for (const [x, y] of t.titik) assert.ok(x * 4 >= papan.kotak.x && x * 4 < papan.kotak.x + papan.kotak.w && y * 4 >= papan.kotak.y && y * 4 < papan.kotak.y + papan.kotak.h);
+});

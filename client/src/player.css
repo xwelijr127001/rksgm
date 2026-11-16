@@ -373,6 +373,8 @@ button.alur-spanduk-gabung { border: 0; cursor: pointer; font: inherit; }
 /* T-008 (D-40, D-44, D-47): balon sapaan selebar bingkai (HP + kolom tablet); logo/tombol header rata dengan kartu (20px).
    Sprite/Raki kini di tengah sumbu halaman (padding-right slot dihapus, D-42.5). */
 @media (max-width: 900px) { .lp-halaman .lp-kota-balon { flex: 1 1 auto; max-width: none; } }
+/* D-49 (T-016): tablet 701-900, potret sejajar tepi kiri bingkai (HP <= 700 sudah 0; desktop tetap 4 %). */
+@media (max-width: 900px) { .lp-halaman .lp-kota-sapa { padding-left: 0; } }
 @media (max-width: 700px) { .lp-halaman .player-header { padding-left: 20px; padding-right: 20px; } }
 
 /* T-003 tata letak HP halaman awal (team/DESIGN-REVIEW.md D-01..D-13). Semua di bawah .lp-halaman: JoinGame juga dipakai

@@ -23,6 +23,7 @@ import { qPiksel } from '../../panggung/kamera';
 import { DUNIA_H, DUNIA_W, type Kotak } from '../../panggung/dunia';
 import { ADEGAN_SIAP } from '../hangatkan';
 import { titikTeks } from './hurufPiksel';
+import { titikPapanKantor } from './papan';
 import { muatPng, siap } from './muat';
 import { nasabahDiPanggung, type KomposisiLatar } from '../komposisi';
 import type { AdeganPiksel } from './adegan';
@@ -77,7 +78,8 @@ function useGerak(mati: boolean, kunciBaris: string): { kedip: boolean; mulut: b
 
 /**
  * D-96: hidup di luar kantor, semuanya MATI saat gerak dikurangi. `lompat` = pembicara naik 2 piksel seni 160 md saat mulai
- * berbicara; `napas` = pembicara naik 1 piksel seni bergantian tiap 1,2 d; `masuk` = tokoh yang baru bergabung meluncur dari
+ * berbicara; `napas` = pembicara naik 1 piksel seni bergantian tiap 1,2 d (T-016: tanpa pembicara = SEMUA tokoh slot bernapas,
+ * selang-seling per slot, supaya adegan narasi tidak beku); `masuk` = tokoh yang baru bergabung meluncur dari
  * tepi terdekat 180 md (p 0..1; bukan pada pemasangan pertama panggung).
  */
 function useHidup(mati: boolean, pembicara: string, hadir: string): { lompat: boolean; napas: boolean; masuk: { id: Set<string>; p: number } | null } {
@@ -113,10 +115,11 @@ function useHidup(mati: boolean, pembicara: string, hadir: string): { lompat: bo
     return () => bersih.forEach((fn) => fn());
   }, [mati, pembicara, hadir]);
   useEffect(() => {
-    if (mati || !pembicara) return;
+    // T-016: napas juga berjalan saat TIDAK ada pembicara (baris narasi: pool, bengkel), asal ada tokoh di panggung.
+    if (mati || !hadir) return;
     const iv = window.setInterval(() => setNapas((n) => !n), 1200);
     return () => { window.clearInterval(iv); setNapas(false); };
-  }, [mati, pembicara]);
+  }, [mati, !hadir]); // eslint-disable-line react-hooks/exhaustive-deps
   return { lompat, napas, masuk };
 }
 
@@ -202,12 +205,13 @@ export function PanggungPiksel({ ep, komposisi, adegan, tx, nama, suasana, statu
       if (!img) return;
       g.drawImage(img, sx, sy, sw, sh, dx(wx), dy(wy), dx(wx + ww) - dx(wx), dy(wy + wh) - dy(wy));
     };
+    const adaPembicara = tokoh.some((x) => x.t.bicara);
     const tokohDi = (tempat: string) => {
       for (const x of tokoh) {
         if (x.t.tempat !== tempat) continue;
         const tubuh = x.s.lapisan[0]!;
         // D-96: lompat/napas pembicara (piksel seni bulat) + luncur masuk dari tepi pandangan terdekat.
-        const naik = x.t.bicara ? (hidup.lompat ? 2 : hidup.napas ? 1 : 0) * K : 0;
+        const naik = (x.t.bicara ? (hidup.lompat ? 2 : hidup.napas ? 1 : 0) : !adaPembicara && x.t.tempat === 'slot' && hidup.napas !== (x.t.slot % 2 === 1) ? 1 : 0) * K;
         let geser = 0;
         if (hidup.masuk?.id.has(x.t.id)) {
           const vw = W / s, kiri = x.kakiX < kamera.x + vw / 2;
@@ -241,10 +245,9 @@ export function PanggungPiksel({ ep, komposisi, adegan, tx, nama, suasana, statu
       const b = r.papan.kotak;
       g.fillStyle = r.papan.warna;
       // D-88: huruf piksel 3x5 pada skala piksel seni (sama dengan ruang); teks di luar font / terlalu lebar = fillText.
-      const tt = titikTeks(papanTeks);
-      if (tt && tt.w <= b.w / K - 4) {
-        const ax = Math.round(b.x / K + (b.w / K - tt.w) / 2), ay = Math.round(b.y / K + (b.h / K - tt.h) / 2);
-        for (const [px, py] of tt.titik) { const wx = (ax + px) * K, wy = (ay + py) * K; g.fillRect(dx(wx), dy(wy), dx(wx + K) - dx(wx), dy(wy + K) - dy(wy)); }
+      const tt = titikPapanKantor(b, K, titikTeks, papanTeks);
+      if (tt) {
+        for (const [px, py] of tt.titik) { const wx = px * K, wy = py * K; g.fillRect(dx(wx), dy(wy), dx(wx + K) - dx(wx), dy(wy + K) - dy(wy)); }
       } else {
       g.font = `700 ${Math.max(8, Math.round(b.h * 0.5 * s))}px system-ui, sans-serif`;
       g.textAlign = 'center';
@@ -303,7 +306,7 @@ export function PanggungPiksel({ ep, komposisi, adegan, tx, nama, suasana, statu
       data-kamera={kamera ? `${Math.round(kamera.x)},${Math.round(kamera.y)},${Math.round(ukuran!.w / kamera.s)}x${Math.round(ukuran!.h / kamera.s)}` : undefined}
     >
       <div className="cer-piksel" data-siap={siapUrl ? '' : undefined} aria-hidden="true">
-        <canvas ref={kanvas} className="cer-piksel-kanvas" data-pose={tokoh.map((x) => `${x.t.id}:${x.s.pose}:${x.t.hadap}:${x.s.ekspresi}`).join(' ') || undefined} data-mata={gerak.kedip ? 'tutup' : 'buka'} />
+        <canvas ref={kanvas} className="cer-piksel-kanvas" data-pose={tokoh.map((x) => `${x.t.id}:${x.s.pose}:${x.t.hadap}:${x.s.ekspresi}`).join(' ') || undefined} data-mata={gerak.kedip ? 'tutup' : 'buka'} data-napas={hidup.napas ? '1' : '0'} />
         <canvas ref={lapisLama} className="cer-piksel-kanvas cer-piksel-lama" />
       </div>
       {/* Label lokasi hanya untuk ruang KOSONG tanpa papan: dengan tokoh, chip menutupi kepala (wawancara tiga saksi); di kantor

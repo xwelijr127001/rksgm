@@ -819,3 +819,48 @@ Fullstack · NOT committed · base 11c8c75. Board status: review.
 - I opened the `akhir-puas` screenshots at 390 and 1280; the other seven passed the automated check but I did not open them.
 - On phones the cut-in's lower-right corner comes close to the desk phone handset (no overlap of the handset body seen at 390).
 - Not checked on a real iPhone.
+
+
+## T-016 (2026-11-16): polish bundle (T-009 hero, D-102 board, idle motion, stray WebPs)
+
+Fullstack · NOT committed · base 722014f. Board: T-009 done (folded in), T-016 review.
+
+**1. T-009 hero art (D-48, D-49, D-50): all three done.**
+- D-48: both clouds moved to y 4 and the stray 4x4 pixel at (176, 8) removed (`art/WelcomeArt.tsx`, `team/specs/T-004-hero-art.txt`). At 430 wide there are no cloud slivers; at 800 and 1280 the clouds show whole.
+- D-49: `.lp-halaman .lp-kota-sapa { padding-left: 0 }` at <= 900 (`player.css`). At 800 the portrait and the frame both start at x 190. Desktop keeps 4 %.
+- D-50: counter plant moved 4 units left (x 244/246/248/242/246); the leaves no longer touch the tower outline.
+- Homepage numbers unchanged: "Masuk" bottom 566 / 578 / 778 / 515 at 360 / 390 / 800 / 1280, no horizontal scroll.
+
+**2. D-102 activity backdrop: the board now reads LAYANAN KLAIM RAKSA.**
+- New `seni/piksel/ep2-papan-kantor.png` (789 B, transparent, same 400x225 size as the kantor wall, text only). `hp.css` stacks it over the wall with the same background size and position, so the text lands exactly on the board at any card size.
+- Built by `tools/piksel/bangun-papan-ep2.mts` from the same pixel font, board box and colour as the stage. The placement maths moved to `ui/latar/piksel/papan.ts`, used by both the stage and the tool.
+- Same text in id/en/zh (en and zh have no own entry and fall back to id). New unit test checks the text matches `lokasi.kantor` and fits the board.
+
+**3. Idle motion in pool and bengkel.**
+- Root cause: blink did work in every room, but it is only 140 ms long every 3-5 s, so a sampler slower than that misses it. The idle bob ran only while a character was speaking; the pool and bengkel scenes QA sampled are narration lines with no speaker, so nothing else moved.
+- Fix (`PanggungPiksel.tsx`): the 1.2 s bob timer now runs whenever a character is on stage. With no speaker, every standing (slot) character bobs 1 art px, alternating by slot. With a speaker, behaviour is as before. Blink unchanged. All off under reduced motion.
+- Measured over 10 s at 100 ms (before -> after, distinct frames / bob toggles): pool 2 / 0 -> 3 / 8, bengkel 2 / 0 -> 3 / 8, tol 2 / 0 -> 4 / 8, wawancara-1 2 / 0 -> 3 / 8. Blink seen in all four. Reduce + `?gerak=ikut`: 1 frame, 0 changes in all four.
+- New `tools/cek-gerak-t016.mjs` (canvas hash + `data-mata` + new `data-napas`); `tools/cek-piksel-t013.mjs` now runs it for pool and bengkel (normal + reduced).
+- Side effect: Bima in the kantor (K07) also bobs during narration lines. Miss Raksa behind the counter does not.
+
+**4. Stray WebPs: gone from the build.**
+- Names: `bima-avatar-320`, `hendra-cemas-avatar-320`, `hendra-tenang-avatar-320` (`.webp`, about 50 KB).
+- What emitted them: the prototype pages `ProtoKejadian` / `ProtoLokasi`. `App.tsx` gated their `import()` on the exported `KEJADIAN` flag, which the bundler could not remove, so the normal build still emitted both page chunks and their avatars.
+- Fix: `App.tsx` now tests the build constant `__KEJADIAN__` directly, so the normal build drops the pages and the WebPs. `client/dist` has 0 prototype WebPs (the 3 remaining `.webp` are `karakter/*-besar.webp` from `public/`, used elsewhere).
+- Sources NOT deleted: they still have a consumer, the `VITE_KEJADIAN=1` prototype build. I did not rebuild that prototype to confirm it still works.
+
+**Tests** (own server on :4001; :4000 not touched)
+- `npm run test:client`: 730 / 730 pass.
+- `npm run test:e2e` (RAKSA_LEGACY=on): exit 0, kegagalan 0.
+- `node tools/cek-piksel-t013.mjs`: 86 / 86 PASS (84 + bengkel normal/reduced).
+- `node tools/cek-gerak-t016.mjs`: 8 / 8 PASS.
+- `tsc --noEmit` clean; production build OK.
+
+**Screenshots** (`team/evidence/T-016/`)
+- Homepage: `beranda-{360,390,430,800,1280}.png`.
+- Activity backdrop: `latar-aktivitas-papan-{id,en,zh}.png` (backdrop only), `aktivitas-390-{id,en,zh}.png` (whole screen).
+- Motion, two different frames: `gerak-{pool,bengkel,tol,wawancara-1}-{a,b}.png`; numbers in `gerak.json`.
+
+**Notes**
+- I opened `latar-aktivitas-papan-id.png`, `beranda-800.png` and `beranda-430.png`. The rest were captured but not opened.
+- `npm run build` rewrote `client/dist`; a :4000 server serving that folder now serves these uncommitted changes.

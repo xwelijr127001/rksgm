@@ -280,3 +280,14 @@ Folder confirmed: C:\Users\User\Desktop\rksgm-episode2 (own server on :4001; :40
 - `npm run test:client` 729/729; `npm run test:e2e` exit 0, kegagalan 0 (needs the server started with `RAKSA_LEGACY=on`; without it the e2e hangs at socket connect, not a bug).
 - Visual: cut-in's lower-right corner is close to the desk phone handset at 390 (no overlap), as the HANDOFF notes. Not checked on a real iPhone.
 - Bugs: 0.
+
+## T-016 — PASS (2026-11-16)
+
+Folder confirmed: C:\Users\User\Desktop\rksgm-episode2 (own server :4001 with RAKSA_LEGACY=on; :4000 untouched). No source edited, nothing committed. Evidence: `team/evidence/T-016/qa/`. Tested in id only; Fullstack was editing T-014 (en/zh text) in the same tree during the run.
+
+1. Homepage (home.log, home-*.png): Masuk bottom 566/578/525/572/778/515 at 360/390/320/375/800/1280 = unchanged; 844x390 landscape 334; no horizontal scroll, 0 console errors, loader gone. Opened 390 and 1280: hero, Miss Raksa greeting bubble, clouds whole at 1280 (none at 390), no regression seen. Legacy banner not re-run (T-016 did not touch it). 800 not opened.
+2. Activity backdrop: "Permintaan dokumen" (tel-cemas) at 390 DPR3 shows LAYANAN KLAIM RAKSA on the board, crisp; `ep2-papan-kantor` PNG requested once. The second activity I opened ("Bundel pengajuan", map screen) has no kantor backdrop, so it does not show the board; only ONE backdrop activity was viewed. Whole id playthrough (500 steps, 0 console/HTTP errors) also loaded the 789 B PNG once.
+3. Idle motion (act-motion.log, cek-gerak.log 8/8): normal: pool 2 distinct frames in 10 s, bengkel 3, kantor (mentor) 2, wawancara 3; reduce+?gerak=ikut: 1 frame in 15 s everywhere; reduce+?gerak=penuh: frames change (pool 3, bengkel 3, mentor 3, wawancara 2).
+4. Build: 0 `*avatar-320*` files in client/dist; only 3 `karakter/*-besar.webp` (public). Playthrough images total **152,251 B** (= 151,462 + 789), 0 webp requests.
+5. Checks: cek-piksel-t013 86/86; cek-gerak-t016 8/8; `test:e2e` exit 0, kegagalan 0; `test:client` 729/730 — the 1 failure is `episode.test.ts` "naskah hanya Bahasa Indonesia", caused by Fullstack's in-progress T-014 edits (episode.ts/teks/test modified, en/zh now present), not T-016. Re-run after T-014 settles.
+- Bugs: 0 (T-016).

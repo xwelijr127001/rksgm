@@ -26,7 +26,6 @@ import { useAppConfig } from './story/appConfig';
 import './historyHold';
 
 import { MEJA_KASUS } from './cerita/hp/meja/bendera';
-import { KEJADIAN } from './cerita/kejadian/bendera';
 
 const Landing = lazy(() => import('./pages/Landing'));
 const StoryJoin = lazy(() => import('./pages/story/StoryJoin'));
@@ -51,8 +50,11 @@ const Projector = lazy(() => import('./pages/Projector'));
 // PROTOTIPE meja kasus K11 (D-68): halaman lompat /meja hanya ada di build VITE_MEJA_KASUS=1.
 const ProtoMeja = MEJA_KASUS ? lazy(() => import('./pages/ProtoMeja')) : null;
 // PROTOTIPE "Kejadian" (irisan K10): halaman /kejadian hanya ada di build VITE_KEJADIAN=1.
-const ProtoKejadian = KEJADIAN ? lazy(() => import('./pages/ProtoKejadian')) : null;
-const ProtoLokasi = KEJADIAN ? lazy(() => import('./pages/ProtoLokasi')) : null;
+// T-016: syaratnya konstanta `define` LANGSUNG (bukan ekspor KEJADIAN), supaya import() dibuang saat build biasa; lewat ekspor,
+// Rollup tetap mengeluarkan chunk halaman prototipe + 3 avatar WebP-nya (tak pernah diminta) ke dist.
+declare const __KEJADIAN__: boolean | undefined;
+const ProtoKejadian = typeof __KEJADIAN__ === 'boolean' && __KEJADIAN__ ? lazy(() => import('./pages/ProtoKejadian')) : null;
+const ProtoLokasi = typeof __KEJADIAN__ === 'boolean' && __KEJADIAN__ ? lazy(() => import('./pages/ProtoLokasi')) : null;
 
 /** Halaman pemain yang boleh dipindah otomatis mengikuti fase pertandingan. */
 const RUTE_PEMAIN = ['/lobby', '/tutorial', '/main', '/hasil'];
