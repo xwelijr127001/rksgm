@@ -2,7 +2,9 @@
  * Potongan tampilan bersama antarmuka HP: potret tokoh (avatar ilustrasi), kartu fakta yang dibutuhkan saat memutuskan,
  * kutipan konteks, dan tombol kirim yang tidak mengirim dua kali. Gambar seni kode = GambarSeni (ui/gambarIlustrasi).
  */
-import { useRef, useState, type ReactNode } from 'react';
+import { useContext, useRef, useState, type ReactNode } from 'react';
+import { createPortal } from 'react-dom';
+import { SlotKirimArena } from './cangkang';
 import { selaPembicara } from '../ui/bagian';
 import type { MissionPublic } from '@shared/types';
 import { Arrow } from '../../components/PlayerShell';
@@ -91,18 +93,20 @@ export function Kutipan({ ep, baris, tx, namaPemain }: { ep: Episode; baris: Bar
 /**
  * Tombol kirim keputusan: sekali tekan = sekali kirim (ketukan ganda/Enter beruntun diabaikan sampai komponen diganti).
  * `catatan` tampil di bawahnya (mis. "Belum dikirim. Setelah dikirim tidak bisa diubah.").
+ * T-018 Tahap 2 (D-133): di cangkang aktivitas HP (SlotKirimArena) tombolnya pindah ke bilah bawah yang disematkan; alasan "belum"
+ * menjadi label tombol yang nonaktif, dan catatan tetap di tempat asalnya (ujung isi yang menggulir).
  */
-export function TombolKirim({ label, siap, onKirim, catatan, alasanBelum }: { label: string; siap: boolean; onKirim: () => void; catatan?: ReactNode; alasanBelum?: string | null }) {
+export function TombolKirim({ label, siap, onKirim, catatan, alasanBelum, alasanRingkas }: { label: string; siap: boolean; onKirim: () => void; catatan?: ReactNode; alasanBelum?: string | null; /** (D-180) versi pendek alasan untuk label tombol di bilah bawah cangkang HP. */ alasanRingkas?: string | null }) {
   const sudah = useRef(false);
   const [mengirim, setMengirim] = useState(false);
-  return (
-    <div className="hp-kirim">
+  const slot = useContext(SlotKirimArena);
+  const tombol = (
       <button
         type="button"
         className="primary-action hp-kirim-tombol"
         data-kirim=""
         disabled={!siap || mengirim}
-        aria-describedby={alasanBelum ? 'hp-kirim-belum' : undefined}
+        aria-describedby={alasanBelum && !slot ? 'hp-kirim-belum' : undefined}
         onClick={() => {
           if (!siap || sudah.current) return;
           sudah.current = true;
@@ -110,8 +114,13 @@ export function TombolKirim({ label, siap, onKirim, catatan, alasanBelum }: { la
           onKirim();
         }}
       >
-        {label} <Arrow />
+        {slot ? <span className="hp-kirim-label">{!siap && (alasanRingkas || alasanBelum) ? (alasanRingkas || alasanBelum) : label}</span> : label} <Arrow />
       </button>
+  );
+  if (slot) return <>{createPortal(tombol, slot)}{catatan ? <p className="hp-kirim-catatan">{catatan}</p> : null}</>;
+  return (
+    <div className="hp-kirim">
+      {tombol}
       {alasanBelum ? <p id="hp-kirim-belum" className="hp-kirim-belum">{alasanBelum}</p> : null}
       {catatan ? <p className="hp-kirim-catatan">{catatan}</p> : null}
     </div>

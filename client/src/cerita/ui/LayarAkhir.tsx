@@ -12,6 +12,7 @@
  */
 import './akhir.css';
 import { useId, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { Link } from 'react-router-dom';
 import type { Bahasa } from '@shared/bahasa';
 import { TOKOH } from '@shared/brand';
@@ -29,7 +30,7 @@ import { PemilihBagian } from './PemilihBagian';
 import { PerjalananKu, TandaNada } from './PerjalananKu';
 import { kartuAkhir } from './tinjauan';
 
-export function LayarAkhir({ ep, state, bahasa, tx, ditemukan, onUlangBab, onUlangEpisode }: {
+export function LayarAkhir({ ep, state, bahasa, tx, ditemukan, onUlangBab, onUlangEpisode, slotAksi = null }: {
   ep: Episode;
   state: StateCerita;
   bahasa: Bahasa;
@@ -40,6 +41,8 @@ export function LayarAkhir({ ep, state, bahasa, tx, ditemukan, onUlangBab, onUla
   ditemukan: IdAkhir[];
   onUlangBab: (bab: IdBab) => void;
   onUlangEpisode: () => void;
+  /** (cangkang HP, T-018 Tahap 2 D-134) bilah aksi dipindah ke elemen ini (tersemat di bawah) dan label ulang dipendekkan. */
+  slotAksi?: HTMLElement | null;
 }) {
   const [dialog, setDialog] = useState<'pemilih' | 'perjalanan' | null>(null);
   const [tanyaUlang, setTanyaUlang] = useState(false);
@@ -101,7 +104,8 @@ export function LayarAkhir({ ep, state, bahasa, tx, ditemukan, onUlangBab, onUla
         </div>
       ) : null}
 
-      <div className="akh-aksi">
+      {(() => { const aksi = (
+      <div className="akh-aksi" data-tersemat={slotAksi ? '' : undefined}>
         {baik ? (
           <>
             <Link className="primary-action akh-utama" to="/cerita" data-ukur="aksi-utama">
@@ -115,8 +119,8 @@ export function LayarAkhir({ ep, state, bahasa, tx, ditemukan, onUlangBab, onUla
         ) : (
           <>
             {ulang ? (
-              <button type="button" className="primary-action akh-utama" data-ukur="aksi-utama" data-bab={ulang} aria-describedby={idKet} onClick={() => onUlangBab(ulang)}>
-                <span>{t('ceritaAkhir.cobaLagiDari', { judul: babUlang ? tx(babUlang.judul) : ulang })}</span>
+              <button type="button" className="primary-action akh-utama" data-ukur="aksi-utama" data-bab={ulang} aria-label={slotAksi ? t('ceritaAkhir.cobaLagiDari', { judul: babUlang ? tx(babUlang.judul) : ulang }) : undefined} aria-describedby={idKet} onClick={() => onUlangBab(ulang)}>
+                <span>{slotAksi ? t('ceritaAkhir.ulangiBagian', { n: ep.bab.findIndex((b) => b.id === ulang) + 1 }) : t('ceritaAkhir.cobaLagiDari', { judul: babUlang ? tx(babUlang.judul) : ulang })}</span>
                 <IkonUlang />
               </button>
             ) : (
@@ -129,6 +133,7 @@ export function LayarAkhir({ ep, state, bahasa, tx, ditemukan, onUlangBab, onUla
           </>
         )}
       </div>
+      ); return slotAksi ? createPortal(aksi, slotAksi) : aksi; })()}
       {baik ? null : <p id={idKet} className="akh-ket">{ulang ? t('ceritaAkhir.ulangKet') : t('cerita.ulangIsi')}</p>}
 
       <div className="akh-kaki">

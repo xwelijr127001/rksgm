@@ -11,8 +11,11 @@
  */
 import { playSfx } from '../../../audio/audio';
 import { selaPembicara } from '../../ui/bagian';
-import { useEffect, useId, useRef, useState } from 'react';
+import { useContext, useEffect, useId, useLayoutEffect, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
+import { Arrow } from '../../../components/PlayerShell';
 import { t } from '../../../i18n';
+import { KeSlot, SlotKepalaArena, SlotKirimArena } from '../cangkang';
 import { Adegan } from '../../lokasi/Adegan';
 import { ContohArsir, IkonPeriksa } from '../../lokasi/seni/Aset';
 import '../../lokasi/lokasi.css';
@@ -38,7 +41,7 @@ function simpanLangkah(kunjungan: string, langkah: LangkahRambu): void {
 export function ArenaPolaRambu({ ep, konfig, jawaban, ubah, tx, labelKirim, onKirim, kutipan, kunjungan, namaPemain }: PropsPola & { konfig: ArenaRambu }) {
   const idTanya = useId();
   const [langkah, setLangkahMentah] = useState<LangkahRambu>(() => pulihkanLangkah(konfig, jawaban, bacaLangkah(kunjungan ?? '')) ?? LANGKAH_AWAL);
-  const ke = (l: LangkahRambu) => { setLangkahMentah(l); simpanLangkah(kunjungan ?? '', l); };
+  const ke = (l: LangkahRambu) => { catatJalan(); setLangkahMentah(l); simpanLangkah(kunjungan ?? '', l); };
 
   const aktif = rambuAktif(konfig, langkah);
   const tahapKini = tahap(konfig, langkah);
@@ -62,6 +65,29 @@ const simpanRef = (el: HTMLElement | null) => { petunjukRef.current = el; };
     petunjukRef.current?.focus({ preventScroll: true });
   }, [tandaLangkah]);
 
+  // T-018 Tahap 2 (owner 16 Nov, K08): saat langkah berganti (mis. sesudah menandai lajur -> kesimpulan) isi di ATAS gambar jalan
+  // bertambah / hilang. Di cangkang HP posisi gulir dikoreksi sebesar pergeseran gambar jalan, jadi jalan tetap di tempatnya
+  // dan pilihan kesimpulan + tombol muncul tanpa layar melompat.
+  const akarRef = useRef<HTMLDivElement>(null);
+  const jalanAtas = useRef<number | null>(null);
+  /** Posisi gambar jalan di LAYAR tepat sebelum langkah berganti (dipanggil dari ke()). */
+  function catatJalan(): void { jalanAtas.current = akarRef.current?.querySelector<HTMLElement>('.lk-adegan')?.getBoundingClientRect().top ?? null; }
+  useLayoutEffect(() => {
+    const lama = jalanAtas.current;
+    jalanAtas.current = null;
+    const g = akarRef.current?.closest<HTMLElement>('[data-gulir-arena]'); const j = akarRef.current?.querySelector<HTMLElement>('.lk-adegan');
+    if (lama === null || !g || !j || !/(auto|scroll)/.test(getComputedStyle(g).overflowY)) return;
+    // D-176: bila langkah baru menampilkan KARTU BUNYI RAMBU (yang harus dibaca), kartu itu utuh di puncak penggulir dan jalan
+    // boleh bergeser. Selain itu (mis. ke kesimpulan) gambar jalan tetap di tempatnya.
+    const kartu = akarRef.current?.querySelector<HTMLElement>('.lk-bukti-kartu');
+    if (kartu) { g.scrollTop += kartu.getBoundingClientRect().top - g.getBoundingClientRect().top - 2; return; }
+    g.scrollTop += j.getBoundingClientRect().top - lama;
+  }, [tandaLangkah]);
+
+  // D-177: di cangkang HP tombol langkah ("Lanjut ke rambu berikutnya" / "Lanjut ke kesimpulan") ada di bilah bawah yang
+  // tersemat, seperti tombol kirim; alasan "tandai dulu" menjadi label tombol nonaktif.
+  const slotKirim = useContext(SlotKirimArena);
+
   const Pilihanmu = () => (
     <ul className="lk-pilihanmu" aria-live="polite">
       {konfig.rambu.map((_, i) => ((terbuka.includes(i) || tanda[i]!.length) ? (
@@ -76,7 +102,7 @@ const simpanRef = (el: HTMLElement | null) => { petunjukRef.current = el; };
   );
 
   return (
-    <div className="hp-rambu lk lk-tertanam" data-tahap={tahapKini}>
+    <div ref={akarRef} className="hp-rambu lk lk-tertanam" data-tahap={tahapKini}>
       {tahapKini !== 'putus' ? (
         <>
           <p className="lk-konteks">{tx('arena.rambu.konteks', { truk: konfig.lajurTruk })}</p>
@@ -93,13 +119,13 @@ const simpanRef = (el: HTMLElement | null) => { petunjukRef.current = el; };
           ) : null}
 
           {tahapKini === 'ketuk' ? (
-            <div className="lk-tag-baris">
+            <KeSlot ke={SlotKepalaArena}><div className="lk-tag-baris">
               <button type="button" className="lk-tag" data-hp-fokus="" onClick={() => ke(ketukRambu(konfig, langkah))} aria-label={tx('arena.rambu.periksa', { rambu: nama(aktif) })}>
                 <span className="lk-tag-ikon" aria-hidden="true"><IkonPeriksa ukuran={22} /></span>
                 <span>{nama(aktif)}</span>
               </button>
               <p className="lk-instruksi" ref={simpanRef} tabIndex={-1} aria-live="polite">{tx('arena.rambu.ketuk')}</p>
-            </div>
+            </div></KeSlot>
           ) : <p className="lk-instruksi" ref={simpanRef} tabIndex={-1} aria-live="polite">{tx(r.petunjuk)}</p>}
 
           <Adegan label={labelAdegan(tx)} tanda1={tanda[0] ?? []} tanda2={tanda[1] ?? []} bisaTandai={tahapKini === 'tandai'} aktifTanda={tanda[aktif] ?? []}
@@ -109,10 +135,21 @@ const simpanRef = (el: HTMLElement | null) => { petunjukRef.current = el; };
             <>
               <Pilihanmu />
               {adaTanda ? <p className="lk-catatan-tanda"><ContohArsir />{tx('arena.rambu.catatanTanda')}</p> : null}
-              <button type="button" className="lk-btn lk-btn-utama" disabled={!bolehLanjut(konfig, jawaban, langkah)} onClick={() => ke(lanjutRambu(konfig, jawaban, langkah))}>
-                {langkah.lihat !== null ? tx('arena.rambu.selesaiUbah') : akhirRambu ? tx('arena.rambu.lanjutSimpul') : tx('arena.rambu.lanjutRambu')}
-              </button>
-              {!bolehLanjut(konfig, jawaban, langkah) ? <p className="lk-alasan">{tx('arena.rambu.tandaiMin')}</p> : null}
+              {(() => {
+                const boleh = bolehLanjut(konfig, jawaban, langkah);
+                const label = langkah.lihat !== null ? tx('arena.rambu.selesaiUbah') : akhirRambu ? tx('arena.rambu.lanjutSimpul') : tx('arena.rambu.lanjutRambu');
+                const maju = () => ke(lanjutRambu(konfig, jawaban, langkah));
+                if (slotKirim) return createPortal(
+                  <button type="button" className="primary-action hp-kirim-tombol" data-lanjut-rambu="" disabled={!boleh} onClick={maju}>
+                    <span className="hp-kirim-label">{boleh ? label : tx('arena.rambu.tandaiMin')}</span> <Arrow />
+                  </button>, slotKirim);
+                return (
+                  <>
+                    <button type="button" className="lk-btn lk-btn-utama" data-lanjut-rambu="" disabled={!boleh} onClick={maju}>{label}</button>
+                    {!boleh ? <p className="lk-alasan">{tx('arena.rambu.tandaiMin')}</p> : null}
+                  </>
+                );
+              })()}
             </>
           ) : null}
 
@@ -129,7 +166,7 @@ const simpanRef = (el: HTMLElement | null) => { petunjukRef.current = el; };
           <Adegan label={labelAdegan(tx)} tanda1={tanda[0] ?? []} tanda2={tanda[1] ?? []} statis cincinTruk />
           <Pilihanmu />
           <Kutipan ep={ep} baris={kutipan ?? null} tx={tx} namaPemain={namaPemain} />
-          <h3 id={idTanya} className="hp-tanya-arena" ref={simpanRef} tabIndex={-1}>{tx(konfig.simpul.tanya)}</h3>
+          <KeSlot ke={SlotKepalaArena}><h3 id={idTanya} className="hp-tanya-arena" ref={simpanRef} tabIndex={-1}>{tx(konfig.simpul.tanya)}</h3></KeSlot>
           <div className="lk-pilihan" role="radiogroup" aria-labelledby={idTanya} onKeyDown={panahUbin}>
             {konfig.simpul.pilihan.map((p) => (
               <button key={p.id} type="button" role="radio" aria-checked={dipilih === p.id} data-simpul={p.id} className={`lk-opsi${dipilih === p.id ? ' dipilih' : ''}`}

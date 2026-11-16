@@ -13,7 +13,7 @@
  * kilatan; gerak dikurangi = langsung tampil. Tetap obrolan WhatsApp (label "WhatsApp"), bukan telepon/video.
  */
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type ReactNode } from 'react';
-import { BATAS_IKUT, EkorObrolan, KUERI_CANGKANG } from './ekor';
+import { BATAS_IKUT, LembarObrolan, KUERI_CANGKANG } from './ekor';
 import { selaPembicara } from '../ui/bagian';
 import { gabungKalimat } from './arena/rambu';
 import { playSfx } from '../../audio/audio';
@@ -64,7 +64,7 @@ function useCangkang(): boolean {
   }, []);
   return v;
 }
-export function Obrolan({ ep, state, tx, status, pesanAktivitas, komposer, sisipan, tujuan }: {
+export function Obrolan({ ep, state, tx, status, pesanAktivitas, komposer, sisipan, tujuan, lembar = false }: {
   ep: Episode;
   state: StateCerita;
   tx: (k: KunciTeks) => string;
@@ -77,6 +77,8 @@ export function Obrolan({ ep, state, tx, status, pesanAktivitas, komposer, sisip
   sisipan?: ReactNode;
   /** Tujuan bagian cerita: tampil SEKALI di gerbang sesi, tidak di tiap pesan. */
   tujuan?: string;
+  /** Komposer sedang berisi daftar balasan (di HP = lembar balasan terbuka: kepala obrolan jadi satu baris ramping). */
+  lembar?: boolean;
 }) {
   const reduced = useReducedMotion();
   const { pesan, sesiMulai } = useMemo(() => utasObrolan(ep, state, pesanAktivitas), [ep, state, pesanAktivitas]);
@@ -115,15 +117,14 @@ export function Obrolan({ ep, state, tx, status, pesanAktivitas, komposer, sisip
   const cangkang = useCangkang();
   const gulirRef = useRef<HTMLDivElement>(null);
   const daftarRef = useRef<HTMLOListElement>(null);
-  const [ekor, setEkor] = useState<HTMLDivElement | null>(null);
   /** Pesan pertama kelompok terbaru (cangkang): sasaran gulir bila kelompoknya lebih tinggi dari layar. */
   const jangkar = useRef<string | null>(null);
-  /** Posisi "terbaru" penggulir: puncak daftar balasan yang terbuka / pesan pertama kelompok baru, paling jauh ujung bawah. */
+  /** Posisi "terbaru" penggulir: pesan pertama kelompok baru, paling jauh ujung bawah. */
   const sasaran = useCallback((): number => {
     const g = gulirRef.current;
     if (!g) return 0;
     const maks = Math.max(0, g.scrollHeight - g.clientHeight);
-    const el = g.querySelector<HTMLElement>('.hp-ekor > .hp-pilih') ?? (jangkar.current ? g.querySelector<HTMLElement>(`[data-pesan="${jangkar.current}"]`) : null);
+    const el = jangkar.current ? g.querySelector<HTMLElement>(`[data-pesan="${jangkar.current}"]`) : null;
     if (!el) return maks;
     return Math.min(maks, Math.max(0, el.getBoundingClientRect().top - g.getBoundingClientRect().top + g.scrollTop - 8));
   }, []);
@@ -189,6 +190,14 @@ export function Obrolan({ ep, state, tx, status, pesanAktivitas, komposer, sisip
     if (g) g.scrollTop = sasaran();
     dekatBawah.current = true;
   }, [cangkang, sasaran]);
+  // Lembar balasan dibuka/ditutup: jendela pesan mengecil/membesar; bila pemain sedang mengikuti, tetap di UJUNG bawah
+  // (ekor pesan terakhir nasabah terlihat di atas lembar), bukan di puncak kelompok pesan terakhir.
+  useLayoutEffect(() => {
+    if (!cangkang || !dekatBawah.current) return;
+    if (lembar) jangkar.current = null;
+    const g = gulirRef.current;
+    if (g) g.scrollTop = sasaran();
+  }, [lembar, cangkang, sasaran]);
   // Cangkang: riwayat lama dibuka = batas lama/baru di tengah layar (pesan lama terlihat, bisa digulir sampai pesan pertama).
   const bukaLamaLalu = useRef(bukaLama);
   useLayoutEffect(() => {
@@ -234,7 +243,7 @@ export function Obrolan({ ep, state, tx, status, pesanAktivitas, komposer, sisip
   const lamaTersembunyi = bukaLama ? 0 : Math.min(sesiMulai, akhirTampil);
 
   return (
-    <section className="hp-obrolan" data-cangkang={cangkang ? '' : undefined} data-cutin={cutIn && !gerbang && !ketik ? '' : undefined} data-gerbang={gerbang ? '' : undefined} aria-label={t('ceritaHp.obrolanDengan', { nama })}>
+    <section className="hp-obrolan" data-cangkang={cangkang ? '' : undefined} data-berlembar={lembar && cangkang && !gerbang && !ketik ? '' : undefined} data-cutin={cutIn && !gerbang && !ketik ? '' : undefined} data-gerbang={gerbang ? '' : undefined} aria-label={t('ceritaHp.obrolanDengan', { nama })}>
       <header className="hp-obrolan-kepala">
         <PotretHp ep={ep} id={ep.nasabah} ekspresi={wajah} nama={nama} />
         <div className="hp-obrolan-nama">
@@ -263,7 +272,7 @@ export function Obrolan({ ep, state, tx, status, pesanAktivitas, komposer, sisip
           </li>
         ) : null}
       </ol>
-      <div ref={setEkor} className="hp-ekor">{gerbang || ketik ? null : sisipan}</div>
+      <div className="hp-ekor">{gerbang || ketik ? null : sisipan}</div>
       </div>
       {gerbang ? (
         <div className="hp-gerbang" data-gerbang-sesi="">
@@ -275,7 +284,7 @@ export function Obrolan({ ep, state, tx, status, pesanAktivitas, komposer, sisip
       ) : null}
       <p className="sr-only" aria-live="polite">{ketik || gerbang ? '' : umumkan}</p>
       {adaBaru && !gerbang ? <button type="button" className="hp-pesan-baru" data-pesan-baru="" onClick={keBaru}>{t('ceritaHp.pesanBaruBawah')}</button> : null}
-      {gerbang || ketik ? null : <EkorObrolan.Provider value={cangkang ? ekor : null}><div className="hp-komposer">{komposer}</div></EkorObrolan.Provider>}
+      {gerbang || ketik ? null : <LembarObrolan.Provider value={cangkang}><div className="hp-komposer">{komposer}</div></LembarObrolan.Provider>}
     </section>
   );
 }

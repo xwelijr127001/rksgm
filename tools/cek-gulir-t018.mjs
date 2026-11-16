@@ -10,11 +10,20 @@
  *  4. riwayat   : "Lihat pesan sebelumnya" -> pesan pertama bisa dicapai dengan menggulir; halaman tetap tidak menggulir
  *  5. ikut      : Lanjut menambah pesan -> penggulir di ujung (atau pesan baru pertama di puncak bila kelompoknya lebih tinggi)
  *  6. pil       : digulir ke atas > 80 px lalu Lanjut -> posisi tetap + pil "Pesan baru" (id/en/zh) di layar; ketuk -> ke ujung
- *  7. balas     : Mulai percakapan -> Balas -> daftar pilihan di dalam penggulir, Kirim tersemat -> kirim -> mengikuti
+ *  7. lembar    : (Tahap 1b, D-128) setiap keputusan obrolan x id/en/zh x 390x645, 360x640, 390x844: lembar balasan di dalam
+ *                 visualViewport, semua pilihan terlihat tanpa menggulir (360x640: fallback daftar menggulir dicatat), label kirim
+ *                 berubah, tab Catatan membalik lembar, Esc menutup + pilihan diingat, angka memilih, Enter mengirim
  *  8. desktop 1280: BUKAN cangkang (halaman menggulir seperti semula). Episode 1: tidak punya layar obrolan (pemain standar),
  *     dicatat + tangkapan layar saja.
  *
  *   UI_BASE=http://127.0.0.1:4001 node tools/cek-gulir-t018.mjs [--tanpa-webkit] [--ukur folder]   (exit 1 bila ada yang gagal)
+ *   --tanpa-tahap2 = hanya keluarga obrolan (Tahap 1 / 1b). Keluarga adegan, aktivitas dan layar akhir (Tahap 2) ada di
+ *   tools/cek-layar-t018.mjs dan ikut dijalankan dari sini.
+ *   --keluarga obrolan,adegan,aktivitas,akhir   hanya keluarga itu (bawaan: semua). obrolan = alat ini; yang lain = cek-layar-t018.mjs.
+ *   --vp 360x740,390x844                         (keluarga Tahap 2) hanya ukuran itu, untuk kedua mesin.
+ *   --batas-menit N                              penjaga seluruh proses (bawaan 45): browser dimatikan, keluar kode 2.
+ *   Tiap kasus berbatas waktu (obrolan 120 d, Tahap 2 150 d): yang macet dilaporkan FAIL "batas waktu ..." lalu lanjut.
+ *   Satu browser pada satu waktu, ditutup tiap ganti ukuran layar. Pembantu bersama: tools/t018-umum.mjs (lihat catatan siklus di sana).
  *   --ukur = hanya mengukur + tangkapan layar (untuk "sebelum"), tanpa menilai.
  * Butuh: npm install --no-save puppeteer-core@24 playwright-core@1.65.1 (SATU perintah: npm membuang paket --no-save lain).
  * Dipakai juga oleh tools/cek-piksel-t013.mjs (cekGulirRingkas, Chromium).
@@ -22,60 +31,15 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { pathToFileURL } from 'node:url';
+import { BatasWaktu, PerambanPerUkuran, argumen, bukaGulir, denganBatas, luncur, pasangPenjaga, siap, tunggu } from './t018-umum.mjs';
+// Diekspor ulang untuk pemakai lama (cek-piksel-t013.mjs).
+export { bukaGulir, luncur, siap };
 
 const ROOT = path.resolve(import.meta.dirname, '..');
-const PROFIL = JSON.stringify({ nickname: 'Weli', look: { body: 0, skin: 0, hair: 0, color: 0, accessory: 'none' } });
 export const VP_GULIR = [{ n: '360', w: 360, h: 740, dpr: 2 }, { n: '390', w: 390, h: 844, dpr: 3 }, { n: '360x640', w: 360, h: 640, dpr: 2 }];
 const PIL = { id: 'Pesan baru ↓', en: 'New message ↓', zh: '新消息 ↓' };
-const tunggu = (ms) => new Promise((r) => setTimeout(r, ms));
 export const stateGulir = () => JSON.parse(fs.readFileSync(path.join(ROOT, 'team/evidence/T-018/states.json'), 'utf8'));
 
-export async function luncur(mesin) {
-  if (mesin === 'chromium') {
-    const pp = (await import('puppeteer-core')).default;
-    return pp.launch({ executablePath: process.env.RAKSA_CHROME || 'C:/Program Files/Google/Chrome/Application/chrome.exe', headless: 'new' });
-  }
-  const { webkit } = await import('playwright-core');
-  return webkit.launch({ headless: true });
-}
-
-/** Halaman baru (konteks sendiri) di `mesin` dengan profil, bahasa dan progres tersimpan. */
-export async function bukaGulir(mesin, b, base, vp, lang, state, url = '/cerita/auto-2') {
-  const awal = { pj: PROFIL, lang, st: state ?? null };
-  const skrip = (a) => {
-    localStorage.setItem('raksa:bahasa', a.lang); localStorage.setItem('raksa:profil', a.pj);
-    sessionStorage.setItem('raksa:loader:v1', '1');
-    if (a.st) localStorage.setItem('raksa:cerita', a.st);
-  };
-  const hp = vp.w < 800;
-  let ctx, p;
-  if (mesin === 'chromium') {
-    ctx = await b.createBrowserContext();
-    p = await ctx.newPage();
-    await p.setViewport({ width: vp.w, height: vp.h, deviceScaleFactor: vp.dpr, isMobile: hp, hasTouch: hp });
-    await p.evaluateOnNewDocument(skrip, awal);
-  } else {
-    ctx = await b.newContext({ viewport: { width: vp.w, height: vp.h }, deviceScaleFactor: vp.dpr, isMobile: hp, hasTouch: hp });
-    p = await ctx.newPage();
-    await p.addInitScript(skrip, awal);
-  }
-  const galat = [];
-  p.on('pageerror', (e) => galat.push(String(e?.message ?? e).slice(0, 160)));
-  await p.goto(base + url + (lang === 'id' ? '' : `?lang=${lang}`), { waitUntil: 'domcontentloaded' });
-  return { p, galat, tutup: () => ctx.close() };
-}
-
-/** Tunggu layar cerita siap dan indikator "sedang mengetik" selesai. */
-export async function siap(p, ms = 15000) {
-  const t0 = Date.now();
-  while (Date.now() - t0 < ms) {
-    const s = await p.evaluate(() => ({ ada: !!document.querySelector('.hp-obrolan, .hp-vn, .cer-layar main'), ketik: !!document.querySelector('.hp-mengetik') })).catch(() => null);
-    if (s?.ada && !s.ketik) break;
-    await tunggu(150);
-  }
-  await p.evaluate(() => document.fonts?.ready.then(() => true)).catch(() => null);
-  await tunggu(450);
-}
 const klik = (p, sel) => p.evaluate((s) => { const el = [...document.querySelectorAll(s)].find((x) => !x.disabled && x.getBoundingClientRect().width > 0); if (!el) return false; el.click(); return true; }, sel);
 
 /** Ukuran layar obrolan saat ini. Menggulir penggulir ke puncak lalu ke ujung (posisi akhir = ujung). */
@@ -188,41 +152,121 @@ export async function cekPil(p, lang) {
   const lulus = !!a && a.baru > 0 && a.gulir <= 2 && a.pil === PIL[lang] && a.pilDalam && a.halaman <= a.layar + 0.5 && z.sisa <= 2 && z.pil === null;
   return { lulus, data: { sesudahLanjut: a, sesudahPil: z } };
 }
-/** 7: (Mulai percakapan) -> Balas -> pilihan di penggulir + Kirim tersemat -> pilih -> kirim -> mengikuti. */
-export async function cekBalas(p, kirim = true) {
+export const VP_LEMBAR = [{ n: '390x645', w: 390, h: 645, dpr: 3 }, { n: '360x640', w: 360, h: 640, dpr: 2 }, { n: '390x844', w: 390, h: 844, dpr: 3 }, { n: '360x740', w: 360, h: 740, dpr: 2 }];
+const LABEL = {
+  id: { pilih: 'Pilih 1 balasan', kirim: (n) => `Kirim balasan ${n}`, kembali: 'Kembali ke balasan' },
+  en: { pilih: 'Choose 1 reply', kirim: (n) => `Send reply ${n}`, kembali: 'Back to replies' },
+  zh: { pilih: '请选 1 条回复', kirim: (n) => `发送回复 ${n}`, kembali: '返回回复' },
+};
+/** Ukuran lembar balasan (T-018 Tahap 1b, D-128) saat ini; null = lembar tidak terbuka. */
+export const ukurLembar = (p) => p.evaluate(() => {
+  const vv = window.visualViewport; const se = document.scrollingElement;
+  const L = document.querySelector('[data-lembar]'); if (!L) return null;
+  const k = (el) => el?.getBoundingClientRect() ?? null;
+  const dalam = (r) => !!r && r.left >= -0.5 && r.top >= -0.5 && r.right <= vv.width + 0.5 && r.bottom <= vv.height + 0.5;
+  const r = k(L); const badan = L.querySelector('[data-gulir-lembar]'); const br = k(badan);
+  const tab = L.querySelector('[data-catatan]'); const tombol = L.querySelector('[data-kirim], [data-kembali-balasan]'); const tr = k(tombol);
+  const opsi = [...L.querySelectorAll('.hp-opsi')];
+  const g = document.querySelector('.hp-gulir'); const gr = k(g);
+  const akhir = [...g.querySelectorAll('[data-pesan]')].at(-1);
+  window.scrollTo(0, 99999); const gulirHalaman = Math.round(window.scrollY); window.scrollTo(0, 0);
+  return {
+    tampil: L.getAttribute('data-tampil'), tinggi: Math.round(r.height), atas: Math.round(r.top), dalamVV: dalam(r) && (!tab || dalam(k(tab))),
+    fallback: badan.scrollHeight > badan.clientHeight + 1, badan: [badan.clientHeight, badan.scrollHeight],
+    opsi: opsi.length, opsiTerlihat: opsi.every((x) => { const o = k(x); return o.top >= br.top - 0.5 && o.bottom <= br.bottom + 0.5 && dalam(o); }),
+    dipilih: opsi.findIndex((x) => x.getAttribute('aria-checked') === 'true') + 1,
+    tanyaTerlihat: dalam(k(L.querySelector('.hp-tanya'))), tombol: tombol?.textContent.replace(/[→←]/g, '').trim() ?? null, tombolMati: !!tombol?.disabled, tombolDalam: dalam(tr), tombolAtas: tr ? Math.round(tr.top * 10) / 10 : null, tombolTinggi: tr ? Math.round(tr.height) : null,
+    tabUtuh: tab ? k(tab).top >= k(document.querySelector('.hp-obrolan-kepala')).bottom - 0.5 && dalam(k(tab)) : null,
+    // QA B-01: tab bisa diketuk = elemen di titik tengahnya adalah tab itu sendiri (tidak tertutup kepala obrolan / pesan).
+    tabBisaDiketuk: tab ? (() => { const t = k(tab); const e = document.elementFromPoint(t.left + t.width / 2, t.top + t.height / 2); return !!e && (e === tab || tab.contains(e)); })() : null, lebar: Math.round(r.width), lebarLayar: window.innerWidth,
+    adaCatatan: !!tab, catatanDibaca: tab ? tab.hasAttribute('data-dibaca') : null, nota: !!L.querySelector('.hp-nota'),
+    kepalaObrolan: Math.round(k(document.querySelector('.hp-obrolan-kepala')).height), potretKepala: !!document.querySelector('.hp-obrolan-kepala .hp-potret')?.getBoundingClientRect().width,
+    sisaObrolan: Math.round(gr.height), ujungPesanTerlihat: akhir ? k(akhir).bottom <= gr.bottom + 1 : true,
+    petunjukSuara: !!document.querySelector('[data-petunjuk-suara]'), halaman: se.scrollHeight, layar: window.innerHeight, gulirHalaman,
+    fokusDiLembar: L.contains(document.activeElement),
+  };
+});
+/**
+ * 7 (Tahap 1b): (Mulai percakapan) -> Balas -> LEMBAR: di dalam visualViewport, pertanyaan + semua pilihan + tombol terlihat tanpa
+ * menggulir (atau hanya daftar yang menggulir = fallback, dicatat), label "Pilih 1 balasan" -> "Kirim balasan N" tanpa tombol
+ * melompat, tab Catatan membalik lembar & "Kembali ke balasan", Esc menutup dan pilihan diingat, halaman tidak menggulir.
+ * `bolehFallback` = ukuran di luar sasaran. `kirim` = kirim lalu periksa penggulir mengikuti. `foto(tahap)` = jalur PNG atau null.
+ */
+export async function cekLembar(p, lang, { bolehFallback = false, kirim = false, foto = () => null, pilih = 3 } = {}) {
   await siap(p);
-  const sebab = [];
-  let gerbang = null;
-  if (await p.evaluate(() => !!document.querySelector('[data-mulai-percakapan]'))) {
-    gerbang = await ukur(p);
-    sebab.push(...nilaiHp(gerbang).map((x) => 'gerbang: ' + x));
-    await klik(p, '[data-mulai-percakapan]');
-    await tunggu(600);
-    await siap(p);
+  const sebab = []; const T = LABEL[lang];
+  const potret = async (tahap) => { const f = foto(tahap); if (f) { await tunggu(250); await p.screenshot({ path: f }); } };
+  if (await p.evaluate(() => !!document.querySelector('[data-mulai-percakapan]'))) { await klik(p, '[data-mulai-percakapan]'); await tunggu(600); await siap(p); }
+  if (!await klik(p, '[data-balas]')) return { lulus: false, data: { sebab: ['tanpa tombol Balas'] } };
+  await tunggu(550);
+  const a = await ukurLembar(p);
+  if (!a) return { lulus: false, data: { sebab: ['lembar tidak terbuka'] } };
+  await potret('buka');
+  const umum = (d, nama) => {
+    if (!d) { sebab.push(nama + ': lembar hilang'); return; }
+    if (!d.dalamVV) sebab.push(nama + ': lembar di luar visualViewport');
+    if (d.halaman > d.layar + 0.5 || d.gulirHalaman !== 0) sebab.push(nama + ': halaman menggulir');
+    if (!d.tanyaTerlihat || !d.tombolDalam) sebab.push(nama + ': pertanyaan/tombol tidak terlihat');
+    if (d.fallback && !bolehFallback) sebab.push(nama + ': daftar harus digulir');
+    if (d.kepalaObrolan !== 44) sebab.push(nama + ': kepala obrolan ' + d.kepalaObrolan + ' (harus 44)');
+    if (d.petunjukSuara) sebab.push(nama + ': petunjuk suara tampil');
+    // D-139: tab Catatan utuh di bawah kepala obrolan (>= 28 px jendela pesan); D-140: lembar selebar layar.
+    if (d.adaCatatan && (!d.tabUtuh || !d.tabBisaDiketuk || d.sisaObrolan < 28)) sebab.push(nama + ': tab Catatan tertutup kepala obrolan (jendela pesan ' + d.sisaObrolan + ' px)');
+    if (d.lebar !== d.lebarLayar) sebab.push(nama + ': lembar ' + d.lebar + ' px, layar ' + d.lebarLayar);
+  };
+  umum(a, 'buka');
+  if (a.opsi < 2 || (!a.fallback && !a.opsiTerlihat)) sebab.push('buka: pilihan tidak semuanya terlihat');
+  if (a.tombol !== T.pilih || !a.tombolMati) sebab.push('buka: label "' + a.tombol + '"');
+  if (a.tombolTinggi !== 48) sebab.push('tombol kirim ' + a.tombolTinggi + ' px');
+  if (!a.fokusDiLembar) sebab.push('fokus tidak pindah ke lembar');
+  if (a.fallback) {
+    const ujung = await p.evaluate(() => { const b = document.querySelector('[data-gulir-lembar]'); b.scrollTop = b.scrollHeight; const o = [...b.querySelectorAll('.hp-opsi')].at(-1).getBoundingClientRect(); return o.bottom <= b.getBoundingClientRect().bottom + 1; });
+    if (!ujung) sebab.push('fallback: pilihan terakhir tidak tercapai');
   }
-  if (!await klik(p, '[data-balas]')) return { lulus: false, data: { sebab: ['tanpa tombol Balas'], gerbang } };
-  await tunggu(600);
-  const buka = await p.evaluate(() => {
-    const g = document.querySelector('.hp-gulir'); const gr = g.getBoundingClientRect();
-    const tanya = document.querySelector('.hp-ekor > .hp-pilih .hp-tanya')?.getBoundingClientRect();
-    return { pilihDiPenggulir: !!document.querySelector('.hp-gulir .hp-ekor > .hp-pilih .hp-opsi'), kirimDiKomposer: !!document.querySelector('.hp-komposer [data-kirim]'), tanyaTerlihat: !!tanya && tanya.top >= gr.top - 1 && tanya.bottom <= gr.bottom + 1 };
-  });
-  const terbuka = await ukur(p);
-  sebab.push(...nilaiHp(terbuka).map((x) => 'pilihan terbuka: ' + x));
-  if (!buka.pilihDiPenggulir || !buka.kirimDiKomposer) sebab.push('pilihan/kirim tidak di tempatnya');
-  if (!buka.tanyaTerlihat) sebab.push('pertanyaan tidak terlihat sesudah Balas');
+  // pilih
+  const n = Math.min(pilih, a.opsi);
+  await p.evaluate((n) => document.querySelectorAll('[data-lembar] .hp-opsi')[n - 1].click(), n);
+  await tunggu(300);
+  const b = await ukurLembar(p);
+  await potret('pilih');
+  umum(b, 'pilih');
+  if (b && (b.tombol !== T.kirim(n) || b.tombolMati || b.dipilih !== n)) sebab.push('pilih: label "' + b.tombol + '"');
+  if (b && (Math.abs(b.tombolAtas - a.tombolAtas) > 0.5 || b.tinggi !== a.tinggi)) sebab.push('pilih: tombol/lembar melompat');
+  // catatan
+  let c = null;
+  if (a.adaCatatan) {
+    if (a.catatanDibaca) sebab.push('catatan: titik belum-dibaca hilang sebelum dibuka');
+    await klik(p, '[data-catatan]'); await tunggu(350);
+    c = await ukurLembar(p);
+    await potret('nota');
+    if (c) { const fb = c.fallback; c.fallback = false; umum(c, 'nota'); c.fallback = fb; }
+    if (!c || c.tampil !== 'nota' || !c.nota || c.tombol !== T.kembali || !c.catatanDibaca) sebab.push('nota: tidak berbalik ke catatan');
+    await klik(p, '[data-kembali-balasan]'); await tunggu(300);
+    const d = await ukurLembar(p);
+    if (!d || d.tampil !== 'balas' || d.dipilih !== n || d.tombol !== T.kirim(n)) sebab.push('nota: kembali ke balasan kehilangan pilihan');
+  }
+  // Esc menutup; buka lagi = pilihan diingat
+  await p.evaluate(() => document.querySelector('[data-lembar] [data-hp-fokus]')?.focus());
+  await p.keyboard.press('Escape'); await tunggu(350);
+  const tutup = await p.evaluate(() => ({ lembar: !!document.querySelector('[data-lembar]'), balas: !!document.querySelector('[data-balas]'), fokus: document.activeElement?.hasAttribute('data-balas') ?? false, kepala: Math.round(document.querySelector('.hp-obrolan-kepala').getBoundingClientRect().height) }));
+  if (tutup.lembar || !tutup.balas || !tutup.fokus) sebab.push('Esc tidak menutup lembar / fokus tidak kembali ke Balas');
+  await klik(p, '[data-balas]'); await tunggu(450);
+  const e = await ukurLembar(p);
+  if (!e || e.dipilih !== n) sebab.push('pilihan tidak diingat sesudah lembar ditutup');
+  // angka + Enter (papan ketik): angka 1 memilih baris 1
+  await p.keyboard.press('1'); await tunggu(200);
+  const f = await ukurLembar(p);
+  if (!f || f.dipilih !== 1 || f.tombol !== T.kirim(1)) sebab.push('tombol angka 1 tidak memilih');
   let sesudah = null;
   if (kirim) {
     const lama = await daftarId(p);
-    await klik(p, '.hp-opsi');
-    await tunggu(350);
-    await klik(p, '[data-kirim]');
-    await tunggu(2000);
+    await p.keyboard.press('Enter');
+    await tunggu(2200);
     sesudah = await posisiBaru(p, lama);
-    if (sesudah && !mengikuti(sesudah)) sebab.push('tidak mengikuti balasan');
     if (!sesudah) sesudah = { pindahTampilan: true };
+    else if (!mengikuti(sesudah)) sebab.push('Enter tidak mengirim / penggulir tidak mengikuti');
   }
-  return { lulus: sebab.length === 0, data: { sebab, buka, tombol: terbuka.tombol, tombolKotak: terbuka.tombolKotak, penggulir: terbuka.penggulir, sesudah } };
+  return { lulus: sebab.length === 0, data: { sebab, tinggi: a.tinggi, sisaObrolan: a.sisaObrolan, ujungPesanTerlihat: a.ujungPesanTerlihat, fallback: a.fallback, badan: a.badan, opsi: a.opsi, potretKepala: a.potretKepala, nota: c ? { tinggi: c.tinggi, fallback: c.fallback } : null, kepalaTutup: tutup.kepala, sesudah } };
 }
 
 /** Ringkas untuk cek-piksel-t013.mjs (Chromium, browser puppeteer `b` milik pemanggil). */
@@ -248,26 +292,40 @@ if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) 
   const BASE = process.env.UI_BASE || 'http://127.0.0.1:4001';
   const iUkur = process.argv.indexOf('--ukur');
   const UKUR = iUkur >= 0;
-  const OUT = path.resolve(UKUR ? process.argv[iUkur + 1] : path.join(ROOT, 'team/evidence/T-018/stage1'));
+  const OUT = path.resolve(UKUR ? process.argv[iUkur + 1] : path.join(ROOT, 'team/evidence/T-018/stage1b'));
   fs.mkdirSync(OUT, { recursive: true });
   const S = stateGulir();
   const hasil = []; let gagal = 0;
   const lapor = (nama, lulus, data) => { hasil.push({ nama, lulus, ...data }); if (!lulus && !UKUR) gagal++; console.log(lulus ? 'PASS' : UKUR ? 'UKUR' : 'FAIL', nama, JSON.stringify(data)); };
   const DESKTOP = { n: '1280', w: 1280, h: 800, dpr: 1 };
   const mesinDaftar = process.argv.includes('--tanpa-webkit') || UKUR ? ['chromium'] : ['chromium', 'webkit'];
+  const KELUARGA = new Set((argumen('--keluarga', 'obrolan,adegan,aktivitas,akhir')).split(',').map((x) => x.trim()).filter(Boolean));
+  const BATAS_KASUS = 120000;
+  let peramban = null;
+  const tulisHasil = () => fs.writeFileSync(path.join(OUT, 'hasil.json'), JSON.stringify(hasil, null, 1));
+  const batalPenjaga = pasangPenjaga(Number(argumen('--batas-menit', '45')), () => { lapor('penjaga', false, { sebab: 'seluruh proses melewati batas waktu', selesai: hasil.length }); tulisHasil(); peramban?.bunuh(); });
   for (const mesin of mesinDaftar) {
-    let b;
-    try { b = await luncur(mesin); } catch (e) { lapor(`${mesin}-luncur`, false, { sebab: String(e?.message ?? e).slice(0, 200), petunjuk: 'npm install --no-save puppeteer-core@24 playwright-core@1.65.1' }); continue; }
+    peramban = new PerambanPerUkuran(mesin);
+    try { await peramban.untuk(VP_GULIR[0]); } catch (e) { lapor(`${mesin}-luncur`, false, { sebab: String(e?.message ?? e).slice(0, 200), petunjuk: 'npm install --no-save puppeteer-core@24 playwright-core@1.65.1' }); continue; }
     const wk = mesin === 'webkit';
+    // Satu kasus: browser untuk ukuran itu (diluncurkan ulang bila ukuran berganti), batas waktu per kasus, halaman selalu ditutup.
     const jalan = async (nama, vp, lang, state, fn, foto, url) => {
-      const h = await bukaGulir(mesin, b, BASE, vp, lang, state, url);
+      let h = null;
       try {
-        const r = await fn(h.p);
-        if (foto) await h.p.screenshot({ path: path.join(OUT, `${nama}.png`) });
-        lapor(nama, r.lulus && h.galat.length === 0, { ...r.data, ...(h.galat.length ? { galat: h.galat } : {}) });
-      } catch (e) { lapor(nama, false, { sebab: 'galat alat: ' + String(e?.message ?? e).slice(0, 200) }); }
-      await h.tutup();
+        await denganBatas((async () => {
+          const b = await peramban.untuk(vp);
+          h = await bukaGulir(mesin, b, BASE, vp, lang, state, url);
+          const r = await fn(h.p);
+          if (foto) await h.p.screenshot({ path: path.join(OUT, `${nama}.png`) });
+          lapor(nama, r.lulus && h.galat.length === 0, { ...r.data, ...(h.galat.length ? { galat: h.galat } : {}) });
+        })(), BATAS_KASUS, nama);
+      } catch (e) {
+        lapor(nama, false, { sebab: (e instanceof BatasWaktu ? '' : 'galat alat: ') + String(e?.message ?? e).slice(0, 200) });
+        if (e instanceof BatasWaktu) { peramban.bunuh(); h = null; } // browser yang macet tidak dipakai lagi
+      }
+      await h?.tutup();
     };
+    if (KELUARGA.has('obrolan')) {
     // 1-4: statis. Chromium: semua state x 3 ukuran (id) + b4 en/zh x 3 ukuran. WebKit: b4 + b1 x 3 ukuran (id) + b4 390 en/zh.
     for (const [kasus, bahasa] of [['obrolan-b4', ['id', 'en', 'zh']], ['obrolan-b1', ['id']], ['obrolan-tugas', ['id']], ['obrolan-pilihan', ['id']]]) {
       if (wk && (kasus === 'obrolan-tugas' || kasus === 'obrolan-pilihan')) continue;
@@ -279,13 +337,27 @@ if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) 
       }
     }
     if (!UKUR) {
-      // 5-7: perilaku.
+      // 5-6: perilaku penggulir.
       for (const vp of wk ? [VP_GULIR[1]] : VP_GULIR) {
         await jalan(`ikut-${vp.n}-id-${mesin}`, vp, 'id', S['obrolan-lanjut'].nilai, cekIkut, false);
         for (const lang of vp.n === '390' ? ['id', 'en', 'zh'] : ['id']) await jalan(`pil-${vp.n}-${lang}-${mesin}`, vp, lang, S['obrolan-lanjut'].nilai, (p) => cekPil(p, lang), vp.n === '390' && lang === 'id');
-        await jalan(`balas-${vp.n}-id-${mesin}`, vp, 'id', S['obrolan-pilihan'].nilai, (p) => cekBalas(p, true), false);
-        await jalan(`balas-b1-${vp.n}-id-${mesin}`, vp, 'id', S['obrolan-b1'].nilai, (p) => cekBalas(p, false), true);
       }
+      // 7 (Tahap 1b): lembar balasan, SETIAP keputusan obrolan x id/en/zh. Chromium: 390x645 (HP owner dengan bilah browser),
+      // 360x640, 390x844; WebKit: 390x645 + 360x640. Sasaran tanpa menggulir: 390x645 dan 390x844; 360x640 = fallback dicatat.
+      const FOTO = { 'k14-390x645-id': ['buka', 'pilih'], 'k06-390x645-id': ['nota'], 'k03-390x645-en': ['buka'], 'k13-390x645-zh': ['buka'], 'k01-360x640-id': ['buka'], 'k01-360x640-en': ['buka'] };
+      for (const kasus of Object.keys(S).filter((k) => k.startsWith('balas-')).sort()) for (const lang of ['id', 'en', 'zh']) for (const vp of wk ? VP_LEMBAR.slice(0, 2) : VP_LEMBAR) {
+        const node = kasus.slice(6); const kunci = `${node}-${vp.n}-${lang}`;
+        await jalan(`lembar-${kunci}-${mesin}`, vp, lang, S[kasus].nilai, (p) => cekLembar(p, lang, {
+          bolehFallback: vp.n === '360x640', kirim: lang === 'id' && vp.n === '390x645', pilih: node === 'k14' ? 5 : 3,
+          foto: (tahap) => (FOTO[kunci]?.includes(tahap) ? path.join(OUT, `lembar-${kunci}-${tahap}-${mesin}.png`) : null),
+        }), false);
+      }
+      // Desktop 1280: keputusan tetap blok lama (bukan lembar).
+      if (!wk) await jalan(`balas-k14-1280-id-${mesin}`, DESKTOP, 'id', S['balas-k14'].nilai, async (p) => {
+        await siap(p); await klik(p, '[data-balas]'); await tunggu(500);
+        const d = await p.evaluate(() => ({ lembar: !!document.querySelector('[data-lembar]'), blokLama: !!document.querySelector('.hp-komposer .hp-pilih .cer-dok'), kirim: document.querySelector('[data-kirim]')?.textContent.trim() }));
+        return { lulus: !d.lembar && d.blokLama, data: d };
+      }, true);
     }
     // 8: desktop 1280 = bukan cangkang, halaman menggulir seperti semula (Chromium saja); Episode 1 = tanpa layar obrolan.
     if (!wk) for (const kasus of ['obrolan-b4', 'obrolan-b1']) {
@@ -296,15 +368,24 @@ if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) 
         return { lulus: d.obrolan && !d.cangkang && d.posisiKepalaObrolan === 'sticky' && d.meluap.length === 0, data: { cangkang: d.cangkang, tinggiHalaman: d.tinggiHalaman, tinggiLayar: d.tinggiLayar, posisiKepalaObrolan: d.posisiKepalaObrolan, meluap: d.meluap } };
       }, true);
     }
-    await jalan(`ep1-390-id-${mesin}`, VP_GULIR[1], 'id', null, async (p) => {
+    if (!wk) await jalan(`ep1-390-id-${mesin}`, VP_GULIR[1], 'id', null, async (p) => {
       await siap(p);
       const d = await p.evaluate(() => ({ hpLayar: !!document.querySelector('.hp-layar'), obrolan: !!document.querySelector('.hp-obrolan'), pemain: document.querySelector('.cer-layar')?.className ?? null, tinggiHalaman: document.scrollingElement.scrollHeight, tinggiLayar: window.innerHeight }));
       return { lulus: !d.obrolan && !d.hpLayar, data: { ...d, catatan: 'Episode 1 memakai pemain cerita standar: tidak ada layar obrolan (Tahap 2)' } };
     }, true, '/cerita/auto-1');
-    await b.close();
-    await tunggu(500);
+    } // akhir keluarga obrolan
+    // Tahap 2 (D-132..D-134): keluarga adegan, aktivitas, layar akhir (tools/cek-layar-t018.mjs) -> team/evidence/T-018/stage2/.
+    // import() dinamis aman sekarang: cek-layar TIDAK lagi mengimpor berkas ini (siklus + top-level await = macet; t018-umum.mjs).
+    const keluarga2 = ['adegan', 'aktivitas', 'akhir'].filter((x) => KELUARGA.has(x));
+    if (!UKUR && !process.argv.includes('--tanpa-tahap2') && keluarga2.length) {
+      const { jalankanTahap2 } = await import('./cek-layar-t018.mjs');
+      const OUT2 = path.join(ROOT, 'team/evidence/T-018/stage2'); fs.mkdirSync(OUT2, { recursive: true });
+      await jalankanTahap2(mesin, peramban, BASE, lapor, OUT2, { keluarga: keluarga2, vp: argumen('--vp') });
+    }
+    await peramban.tutup();
   }
-  fs.writeFileSync(path.join(OUT, 'hasil.json'), JSON.stringify(hasil, null, 1));
+  batalPenjaga();
+  tulisHasil();
   console.log(UKUR ? 'UKUR selesai' : gagal ? `FAILED ${gagal} / ${hasil.length}` : `ALL PASS (${hasil.length})`);
   process.exit(!UKUR && gagal ? 1 : 0);
 }

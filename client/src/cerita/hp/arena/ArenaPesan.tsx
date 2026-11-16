@@ -6,6 +6,7 @@
  */
 import { useRef } from 'react';
 import { t } from '../../../i18n';
+import { KeSlot, SlotKepalaArena } from '../cangkang';
 import { TombolKirim } from '../bagianHp';
 import { alihBagian, bagianDiPesan, type ArenaPesan } from './logika';
 import type { PropsPola } from './pola';
@@ -16,7 +17,7 @@ export function ArenaPolaPesan({ konfig, jawaban, ubah, tx, labelKirim, onKirim 
   const drafRef = useRef<HTMLElement>(null);
   return (
     <div className="hp-pesan-susun">
-      <h3 className="hp-tanya-arena">{tx(konfig.tanya)}</h3>
+      <KeSlot ke={SlotKepalaArena}><h3 className="hp-tanya-arena">{tx(konfig.tanya)}</h3></KeSlot>
       {/* Pratinjau ada tepat di atas Kirim (tidak lengket agar tidak menutupi isi); tautan ini membawa ke sana kapan saja. */}
       <p className="hp-ke-pratinjau"><button type="button" className="hp-tautan" data-ke-pratinjau="" onClick={() => { drafRef.current?.scrollIntoView({ block: 'center' }); drafRef.current?.focus({ preventScroll: true }); }}>{t('ceritaHp.drafPesan')} ({di.length}) ↓</button></p>
       <p className="hp-draf-judul">{t('ceritaHp.bagianPesan')}</p>

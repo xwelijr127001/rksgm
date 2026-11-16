@@ -43,6 +43,7 @@ import { TombolLanjut } from './bagianHp';
 import { ketukanBelumUtuh, ketukanKini, labelStatus, pandangKini } from './alur';
 import { MEJA_KASUS, mejaAktif } from './meja/bendera';
 import { akibatMeja } from './meja/logika';
+import { KUERI_CANGKANG_LAYAR, useKueri } from './cangkang';
 import { Obrolan } from './Obrolan';
 import { PilihBalasan } from './PilihBalasan';
 import { KontrolSuara, PetunjukSuara, useAudioCerita, type TemaCerita } from './AudioCerita';
@@ -198,12 +199,13 @@ export function PemainHP({ ep, state, kendali, profil, bahasa, tx: txAsli }: {
   const misi = useMemo(() => (def ? def.misi(bahasa) : null), [def, bahasa]);
   const status = tx(suasanaNasabah(ep, state).label);
   const komposer = node.jenis === 'pilihan' && lengkap && balasUntuk !== kunciNode ? (
-    <button type="button" className="primary-action hp-balas" data-balas="" onClick={() => { playSfx('ketuk'); setBalasUntuk(kunciNode); ingatBalasan(kunciNode, null); requestAnimationFrame(() => document.querySelector<HTMLElement>('.hp-pilih [data-hp-fokus]')?.focus({ preventScroll: false })); }}>
+    <button type="button" className="primary-action hp-balas" data-balas="" onClick={() => { playSfx('ketuk'); setBalasUntuk(kunciNode); ingatBalasan(kunciNode, bacaBalasan()?.kunci === kunciNode ? bacaBalasan()!.pilih : null); requestAnimationFrame(() => document.querySelector<HTMLElement>('.hp-pilih [data-hp-fokus]')?.focus({ preventScroll: false })); }}>
       {pandang === 'obrolan' ? t('ceritaHp.balasNama', { nama: tx(ep.pemeran[ep.nasabah]?.nama ?? ep.nasabah) }) : t('ceritaHp.jawabPilihan')} <Arrow />
     </button>
   ) : node.jenis === 'pilihan' && lengkap ? (
     <PilihBalasan key={kunciNode} awal={bacaBalasan()?.kunci === kunciNode ? bacaBalasan()!.pilih : null} onUbahPilih={(id) => ingatBalasan(kunciNode, id)} ep={ep} node={node as NodePilihan} pilihan={pilihanTersedia(ep, state)} tx={tx} gaya={pandang}
-      petunjuk={!state.riwayat.some((e) => e.jenis === 'pilihan')} onKirim={pilih} />
+      petunjuk={!state.riwayat.some((e) => e.jenis === 'pilihan')} onKirim={pilih}
+      onTutup={() => { playSfx('ketuk'); setBalasUntuk(null); requestAnimationFrame(() => document.querySelector<HTMLElement>('.hp-layar [data-balas]')?.focus({ preventScroll: true })); }} />
   ) : node.jenis === 'aktivitas' && lengkap && misi ? (
     <section className="hp-aksi" aria-labelledby="hp-aksi-judul">
       <p className="hp-aksi-label">{t('ceritaHp.tugas')}</p>
@@ -218,6 +220,9 @@ export function PemainHP({ ep, state, kendali, profil, bahasa, tx: txAsli }: {
   ) : (
     <TombolLanjut onKlik={maju} />
   );
+
+  /** Daftar balasan sedang terbuka (di HP = lembar balasan): petunjuk suara disembunyikan, kepala obrolan ramping. */
+  const balasTerbuka = node.jenis === 'pilihan' && lengkap && balasUntuk === kunciNode;
 
   // Istilah baris ketukan kini ("Apa itu …?"), di atas komposer.
   const ketukan = ketukanKini(ep, state);
@@ -248,8 +253,13 @@ export function PemainHP({ ep, state, kendali, profil, bahasa, tx: txAsli }: {
     void import('../../game/engine/stage').then((m) => m.prefetchEngine()).catch(() => {});
   }, [pakaiMeja]);
 
+  // T-018 Tahap 2: cangkang layar (halaman tidak menggulir) untuk adegan beraksi-di-dialog, aktivitas, dan layar akhir.
+  const cangkangLayar = useKueri(KUERI_CANGKANG_LAYAR);
+  const [slotAkhir, setSlotAkhir] = useState<HTMLDivElement | null>(null);
+  const kunciLayar = tampilan === 'akhir' || (tampilan === 'arena' && !pakaiMeja) || (tampilan === 'adegan' && !akibatDiMeja && !(node.jenis === 'pilihan' && lengkap));
+
   return (
-    <div className="player-ui cer-layar hp-layar" data-tampilan={tampilan}>
+    <div className="player-ui cer-layar hp-layar" data-kunci={kunciLayar ? '' : undefined} data-tampilan={tampilan} data-balas-terbuka={balasTerbuka ? '' : undefined}>
       <header className="hp-kepala">
         <Link className="hp-kembali" to="/cerita" aria-label={t('cerita.kembaliDaftar')}><Arrow back /></Link>
         <div className="hp-judul">
@@ -266,7 +276,7 @@ export function PemainHP({ ep, state, kendali, profil, bahasa, tx: txAsli }: {
         <p className="hp-tujuan"><b>{t('ceritaHp.tujuan')}</b>{selaPembicara()}{tx(bab.bab.tujuan)}</p>
       ) : null}
 
-      <PetunjukSuara />
+      <PetunjukSuara idEpisode={ep.id} layarPertama={state.node === ep.mulai && !state.riwayat.some((e) => e.jenis === 'pilihan' || e.jenis === 'aktivitas')} sembunyi={balasTerbuka || tampilan === 'arena'} />
       <main className="hp-main" data-tampilan={tampilan} data-node={state.node}>
         {tampilan === 'arena' && node.jenis === 'aktivitas' && pakaiMeja && MejaKasus ? (
           <Suspense fallback={<p className="meja-muat-halaman" role="status">{t('ceritaHp.mejaMenyiapkan')}</p>}>
@@ -291,17 +301,21 @@ export function PemainHP({ ep, state, kendali, profil, bahasa, tx: txAsli }: {
             onKembali={() => setArenaUntuk(null)}
           />
         ) : tampilan === 'akhir' ? (
-          <LayarAkhir ep={ep} state={state} bahasa={bahasa} namaPemain={namaPemain} tx={tx} ditemukan={akhirDitemukan(ep.id)} onUlangBab={ulangBab} onUlangEpisode={ulangEpisode} />
+          <LayarAkhir ep={ep} state={state} bahasa={bahasa} namaPemain={namaPemain} tx={tx} ditemukan={akhirDitemukan(ep.id)} onUlangBab={ulangBab} onUlangEpisode={ulangEpisode} slotAksi={cangkangLayar ? slotAkhir : null} />
         ) : tampilan === 'obrolan' ? (
-          <Obrolan ep={ep} state={state} tx={tx} status={status} pesanAktivitas={pesanAktivitas} komposer={komposer} sisipan={<>{sisipanIstilah}{buktiTindakan}</>} tujuan={bab ? tx(bab.bab.tujuan) : undefined} />
+          <Obrolan ep={ep} state={state} tx={tx} status={status} pesanAktivitas={pesanAktivitas} komposer={komposer} sisipan={<>{sisipanIstilah}{buktiTindakan}</>} tujuan={bab ? tx(bab.bab.tujuan) : undefined} lembar={balasTerbuka} />
         ) : (
-          <AdeganTatap ep={ep} state={state} tx={tx} namaPemain={namaPemain} status={status} tindakan={tindakan} buktiTindakan={buktiTindakan} statusSesudah={statusSesudah} komposer={komposer} aksiDiDialog={!(node.jenis === 'pilihan' && lengkap)} sisipan={sisipanIstilah} />
+          <AdeganTatap ep={ep} state={state} tx={tx} namaPemain={namaPemain} status={status} tindakan={tindakan} buktiTindakan={buktiTindakan} statusSesudah={statusSesudah} komposer={komposer} aksiDiDialog={!(node.jenis === 'pilihan' && lengkap)} sisipan={sisipanIstilah}
+            tugasNanti={node.jenis === 'aktivitas' && !lengkap && misi ? { judul: misi.title, instruksi: misi.instruction, tombol: t('ceritaHp.mulaiTugas') } : null} />
         )}
         {kendali.hanyaMemori ? <p className="cer-memori" role="status">{t('cerita.hanyaMemori')}</p> : null}
       </main>
+      {tampilan === 'akhir' ? <div ref={setSlotAkhir} className="hp-akhir-aksi" /> : null}
 
       {dialog === 'menu' ? (
         <Modal judul={t('ceritaHp.menuJudul')} onTutup={() => setDialog(null)} lebar={420}>
+          {/* D-132: baris tujuan bisa disembunyikan di layar pendek, jadi selalu terbaca di Menu. */}
+          {bab && tampilan !== 'akhir' ? <p className="hp-menu-tujuan"><b>{t('ceritaHp.tujuan')}</b>{selaPembicara()}{tx(bab.bab.tujuan)}</p> : null}
           <ul className="hp-menu-daftar">
             <li><button type="button" onClick={() => setDialog('riwayat')}><IkonAlat jenis="riwayat" /><span>{t('cerita.riwayat')}</span></button></li>
             <li><button type="button" onClick={() => setDialog('catatan')}><IkonAlat jenis="catatan" /><span>{t('cerita.catatanKasus')}</span></button></li>

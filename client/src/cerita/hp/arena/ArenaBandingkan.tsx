@@ -9,6 +9,7 @@
  */
 import { useId, useState } from 'react';
 import { t } from '../../../i18n';
+import { KeSlot, SlotKepalaArena } from '../cangkang';
 import { GambarSeni, TombolKirim } from '../bagianHp';
 import { petaLangkah, sisaArena, tetapkan, type ArenaBandingkan } from './logika';
 import { panahUbin, type PropsPola } from './pola';
@@ -55,7 +56,7 @@ export function ArenaPolaBandingkan({ ep, konfig, jawaban, ubah, daftar, tx, lab
         ) : null}
       </section>
 
-      <h3 id={idTanya} className="hp-tanya-arena">{tx(konfig.tanya)}</h3>
+      <KeSlot ke={SlotKepalaArena}><h3 id={idTanya} className="hp-tanya-arena">{tx(konfig.tanya)}</h3></KeSlot>
       <div className="hp-aksi-cap" role="radiogroup" aria-labelledby={idTanya} onKeyDown={panahUbin}>
         {konfig.perlakuan.map((x, i) => {
           const on = peta[s.id] === x.id;
@@ -103,6 +104,7 @@ export function ArenaPolaBandingkan({ ep, konfig, jawaban, ubah, daftar, tx, lab
         siap={sisa === 0}
         onKirim={onKirim}
         alasanBelum={sisa ? t('ceritaHp.belumDitandaiNo', { daftar: konfig.selisih.map((x, i) => (sah(x.id) ? null : i + 1)).filter((x) => x !== null).join(tx('daftar.pemisah')) }) : null}
+        alasanRingkas={sisa ? t('ceritaHp.belumBedaRingkas', { n: sisa }) : null}
         catatan={t('ceritaHp.pilihanBisaDiubah')}
       />
     </div>

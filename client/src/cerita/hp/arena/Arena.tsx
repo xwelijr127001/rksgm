@@ -18,6 +18,7 @@ import { barisTerlihat } from '../../mesin';
 import { bacaDrafAktivitas, hapusDrafAktivitas, kunjunganAktivitas, simpanDrafAktivitas } from '../../simpan';
 import type { Episode, KunciTeks, NodeAktivitas, StateCerita } from '../../tipe';
 import { KartuFakta, Kutipan } from '../bagianHp';
+import { KUERI_CANGKANG_LAYAR, SlotKepalaArena, SlotKirimArena, useKueri } from '../cangkang';
 import { jawabanKirim } from './logika';
 import { ArenaPolaBandingkan } from './ArenaBandingkan';
 import { ArenaPolaBundel, lupakanLangkahArena } from './ArenaBundel';
@@ -96,13 +97,22 @@ export function Arena({ ep, state, node, bahasa, tx, namaPemain, onKirim, onKemb
     simpanTampilan(v);
   };
 
+  // T-018 Tahap 2 (D-133): di cangkang HP pertanyaan (dan baris rambu K08) disematkan di bawah kepala aktivitas, tombol kirim di
+  // bilah bawah, dan sisanya SATU penggulir (.hp-arena-gulir; di desktop display: contents = tata letak lama).
+  const cangkang = useKueri(KUERI_CANGKANG_LAYAR);
+  const [slotKepala, setSlotKepala] = useState<HTMLDivElement | null>(null);
+  const [slotKirim, setSlotKirim] = useState<HTMLDivElement | null>(null);
+
   return (
+    <SlotKepalaArena.Provider value={cangkang ? slotKepala : null}><SlotKirimArena.Provider value={cangkang ? slotKirim : null}>
     <div className="hp-arena" data-pola={konfig.pola} data-tampilan={daftar ? 'daftar' : 'gambar'}>
       <header className="hp-arena-kepala">
         <button type="button" className="hp-arena-kembali" onClick={onKembali}><Arrow back /><span>{t('ceritaHp.kembaliCerita')}</span></button>
         <p className="hp-arena-tugas">{t('ceritaHp.tugas')}</p>
         <h2 ref={judulRef} tabIndex={-1} className="hp-arena-judul">{misi.title}</h2>
       </header>
+      <div ref={setSlotKepala} className="hp-arena-sematan" />
+      <div className="hp-arena-gulir" data-gulir-arena="">
       {konfig.pola === 'bundel' || konfig.pola === 'rambu' ? null : <div className="hp-arena-konteks" data-ringkas={ringkas ? '' : undefined}>
         {ringkas ? (
           <>
@@ -137,7 +147,10 @@ export function Arena({ ep, state, node, bahasa, tx, namaPemain, onKirim, onKemb
           <button type="button" className="hp-tautan" onClick={ganti}>{daftar ? t('ceritaHp.tampilanVisual') : t('ceritaHp.tampilanDaftar')}</button>
         </p>
       )}
+      </div>
+      <div ref={setSlotKirim} className="hp-arena-kirim" />
     </div>
+    </SlotKirimArena.Provider></SlotKepalaArena.Provider>
   );
 }
 

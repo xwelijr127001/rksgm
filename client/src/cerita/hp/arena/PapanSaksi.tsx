@@ -8,6 +8,7 @@
  */
 import { useId, useState } from 'react';
 import { t } from '../../../i18n';
+import { KeSlot, SlotKepalaArena } from '../cangkang';
 import type { BendaArena } from '../../tipe';
 import { GambarSeni, PotretHp, TombolKirim } from '../bagianHp';
 import { lepaskan } from './dasar';
@@ -52,7 +53,7 @@ export function PapanSaksi({ ep, konfig, jawaban, ubah, tx, labelKirim, onKirim 
         <p className="hp-saksi-arti">{t('ceritaHp.rencanaArti')}</p>
       </section>
 
-      <h3 className="hp-tanya-arena">{t('ceritaHp.kontakLihat')}</h3>
+      <KeSlot ke={SlotKepalaArena}><h3 className="hp-tanya-arena">{t('ceritaHp.kontakLihat')}</h3></KeSlot>
       <ul className="hp-saksi-kontak">
         {konfig.benda.map((x) => {
           const w = peta[x.id];
@@ -104,6 +105,7 @@ export function PapanSaksi({ ep, konfig, jawaban, ubah, tx, labelKirim, onKirim 
         siap={sisa === 0}
         onKirim={onKirim}
         alasanBelum={sisa ? t('ceritaHp.belumSemuaKontak', { daftar: konfig.benda.filter((x) => !peta[x.id]).map(nama).join(tx('daftar.pemisah')) }) : null}
+        alasanRingkas={sisa ? t('ceritaHp.belumKontakRingkas', { n: sisa }) : null}
         catatan={t('ceritaHp.pilihanBisaDiubah')}
       />
     </div>

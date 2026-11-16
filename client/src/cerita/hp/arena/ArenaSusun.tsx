@@ -10,6 +10,7 @@ import { useEffect, useId, useRef, useState } from 'react';
 import { playSfx } from '../../../audio/audio';
 import { useReducedMotion } from '../../../hooks';
 import { t } from '../../../i18n';
+import { KeSlot, SlotKepalaArena } from '../cangkang';
 import type { BendaArena, Episode, KunciTeks } from '../../tipe';
 import { GambarSeni, PotretHp, TombolKirim } from '../bagianHp';
 import { itemBerikut, kelompokWadah, lepaskan, petaLangkah, sisaArena, tetapkan, type ArenaSusun } from './logika';
@@ -131,7 +132,7 @@ export function ArenaPolaSusun({ ep, konfig, jawaban, ubah, daftar, tx, labelKir
               {benda ? <KartuBenda key={benda.id} ep={ep} benda={benda} tx={tx} daftar={daftar} sekarangDi={peta[benda.id] ? namaWadah(peta[benda.id]!) : null} /> : <div className="hp-benda-kosong" aria-hidden="true" />}
             </div>
           </div>
-          <h3 id={idTanya} className="hp-tanya-arena">{tx(konfig.tanya)}</h3>
+          <KeSlot ke={SlotKepalaArena}><h3 id={idTanya} className="hp-tanya-arena">{tx(konfig.tanya)}</h3></KeSlot>
           {mejaBaki ? <p className="hp-instruksi-baki" aria-hidden={benda ? undefined : true}>{t('ceritaHp.instruksiBaki')}</p> : null}
           {tutorial && benda && !mejaBaki ? (
             <div className="hp-tutorial" role="note">

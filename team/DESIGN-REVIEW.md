@@ -2102,3 +2102,751 @@ Limit: I cannot watch a moving picture; the walk verdict rests on frame recordin
 
 ### Not verified by me
 The walk seen at speed by a human eye; a real phone; reduced motion and "Lanjut" mid-walk (Fullstack's check; not repeated); Pak Bima and the opening scene at 360 and 390; English and Chinese; bytes; the test suites.
+
+---
+
+## T-018 — Stage 1b review (2026-11-16)
+
+Reviewer: Designer · Folder: C:\Users\User\Desktop\rksgm-episode2 · No source edits, no commit, BOARD.md not touched.
+Build: production build in client/dist on my own server on :4002 (started and stopped by me; :4000 not touched). **The build was rewritten three times while I worked** (Fullstack's Stage 2): 13:31:05 for the 390×645 run, 13:55:06 for the 360×640 run, and 13:58:31 arrived during the 390×844 run. The reply-sheet files (`PilihBalasan.tsx`, `Obrolan.tsx`, `ekor.ts`, `AudioCerita.tsx`, the sheet block of `desain.css`) did not change in that time, and the 390-wide numbers agree across the runs.
+Method (run light: one headless Chrome at a time, closed between sizes, below-normal priority, no test suite): read HANDOFF "T-018 Stage 1b" and the sheet code; opened the sheet from the `balas-*` states and measured every part against my D-128 table at 390×645 DPR 3 (id K03, en K03, zh K13, id K14), 360×640 DPR 2 (id K14, K03, K01; en K13, K14, K01) and 390×844 DPR 3 (id K03: motion on, reduced motion, swipe on the handle, insets 47 / 34). Task card, header portrait and sound banner at 360×640. I opened 11 images. Evidence: `team/evidence/T-018/designer/stage1b/` (21 screenshots, four `ukur-*.txt` logs, two JSON files).
+Not captured: K06 at 390×645 (my script stopped at its session gate); its note view is covered by K03.
+
+### Verdict: FIX NEEDED — two small layout fixes ([D-139], [D-140]). The sheet itself is built to the table.
+
+### What matches the mock
+| Part | Table | Built (measured) |
+| --- | --- | --- |
+| Handle | zone 10, bar 36 × 4, touch 44 | 10; 36 × 4; touch area 96 × 44 |
+| Question row | 36; icon box 36 × 36; text 16 / 20 / 800, max 2 lines | 36 (40 with a two-line question); 36 × 36; 16 / 20 / 800 |
+| Choice list | margin-top 6, gap 5 | 6; 5 |
+| Choice row | 15 / 19; padding 6 10 6 8; border 2; min 44 | two lines 54, three lines 73 (19 per line + 16) |
+| Badge | 24 × 24, stepped corners, `#215c40` | 24 × 24; stepped; same colour |
+| Chosen row | border `#215c40`, fill `#eaf0e1`, badge `#e0b84f` / digit `#1e2b24`; others text `#4d5a52`, badge 55 % | all as specified |
+| Send button | margin-top 8; height 48; 8 below | 8; 48; 8; top edge at the same y before and after choosing (no jump) |
+| Note tab | 36 high, 26 above the sheet, 14 from the right, −2°, red dot | box top 25.6 above the sheet; right edge 368.6 of 390; dot until opened |
+| Slim chat header | 44; portrait 32; status inline | 44; 32 × 32; status on the name row |
+| Sheet height | 218 + 19 × lines (222 with a two-line question) | 484 = 218 + 19 × 14 (K03 id); 469 = 222 + 19 × 13 (K14 id) |
+- **390 × 645, the owner's size:** id K03 484 (52 px of chat above), en K03 465 (71), zh K13 408 (128), id K14 469 (58). Question, five choices and the send button are all visible; the list does not scroll; the page is 645 / 645.
+- **Send label:** "Pilih 1 balasan" / "Choose 1 reply" / "请选 1 条回复" (grey, disabled) → "Kirim balasan 2" / "Send reply 2" / "发送回复 2". Tap another row = change.
+- **Catatan flip:** the body becomes the yellow note (title 15 / 20 / 800, labels 15 / 800, values 14.5 / 19, amber numbered badges for stages, footnotes under a dashed line), "← Kembali ke balasan" where the send button was. Back keeps the choice; the red dot is gone after the first opening.
+- **Close and reopen:** handle tap, and a 60 px touch swipe down on the handle, close the sheet; the header returns to 65 px; reopening restores "Kirim balasan N" and the chosen row.
+- **Motion (390 × 844, motion on):** sheet 180 ms, 24 px rise + fade, ease-out; rows 180 ms each, 30 ms apart (all in by 300 ms); badge pop 140 ms, peak 27.6 px = 1.15. Changing the choice replays only the pop. **Reduced motion:** no animation at all (none running, sheet and rows at full opacity at once).
+- **Insets 47 / 34:** sheet padding-bottom 42 (8 + 34), button ends 42 px above the screen edge, inset applied once.
+- **Pixel quality:** Miss Raksa's icon is drawn 1 : 1 (32 art px in 32 CSS px, `pixelated`), so it is crisp at DPR 2 and 3; badge corners are clean 2 px steps; colours and the note tab look like the mock (`k14-id-390x645-2-pilih.png` against `../mock-k14-id-pilih.png`).
+
+### What is wrong
+- [D-139] Sheet with a note, when less than 26 px of chat is left above it · **the "Catatan" tab is hidden behind the chat header.** At 360 × 640 in id K14, en K13 and en K14 the chat window is 0 px, so only a 13 px yellow sliver shows and the word is gone (`k14-id-360x640-1-buka.png`). The player cannot find the reference card for that decision. At 390 × 645 the top of the tab is cut in the note view of en K03 (12 px of chat, `k03-en-390x645-3-nota.png`) and, by arithmetic, in en K13 (14 px or less) · whenever the decision has a note, keep **at least 28 px** of the message window above the sheet (tab 26 + 2); the choice list or the note scrolls inside the sheet instead · **high at 360 × 640, low at 390**.
+- [D-140] All sizes · **the sheet is 16 px narrower than the mock.** The mock's sheet spans the screen (rows 370 px at 390, 340 at 360); the built one sits inside the chat card (rows 354 / 324). My table said "full width of the chat card", so the wording was mine. The text wraps one or two lines more, which is the "about 20 px taller than the mock" in the handoff and most of the 360 × 640 fallback · let the sheet span the full screen width, side padding 10 (or the side inset if larger) · **med**. Measured by injecting one rule in my browser (`.hp-obrolan[data-berlembar] > .hp-komposer { margin: 0 -8px }`; not a source change):
+
+  | Case | Built | Full width |
+  | --- | --- | --- |
+  | 390: K03 id | 484 (14 lines) | 465 (13) |
+  | 390: K03 en | 465 | 446 |
+  | 390: K01 id | 503 | 484 |
+  | 390: K01 en, K13 en | 522 | 484 |
+  | 390: K13 zh | 408 | 398 |
+  | 360 × 640: K14 id | 522, list scrolls 23 px, tab hidden | 488, no scroll, 34 px of chat, tab whole |
+  | 360 × 640: K01 id | 522, 9 px of chat | 503, 28 px of chat |
+  | 360 × 640: K03 id | 503 | 503 |
+  | 360 × 640: K13 en | 522, list scrolls 19 px | 522, fits exactly, 0 px of chat |
+  | 360 × 640: K14 en | 522, list scrolls 4 px | 522, fits exactly, 0 px of chat |
+  | 360 × 640: K01 en | 531, list scrolls 29 px | 531, list scrolls 10 px |
+
+  The 390 results equal the mock's numbers (zh + 9 for the 44 px minimum row). With D-139 and D-140 together, 360 × 640 becomes: every Indonesian case measured fits with the tab visible; en K13 and en K14 scroll 28 px inside the list, en K01 10 px. The chat card has `overflow: clip`, so with my test rule the sheet's outer 8 px (its rounded corners) are cut by the card; the real fix needs the sheet outside that clip (`k14-id-360x640-5-uji-lebar.png`, `k03-id-390x844-uji-lebar.png`).
+- [D-141] Rows that are not chosen · the badge at 55 % opacity leaves the white digit at about 2.7 : 1, and the digit is what "Kirim balasan 5" refers to. My own number · instead of the opacity, fill those badges `#4f7d66` (digit about 4.6 : 1) · low.
+
+### Fallback at 360 × 640 (list scrolls inside)
+- It works as designed: in id K14 the list shows 400 of 423 px, the question and the send button stay, the page stays 640 / 640. The last row is cut mid-text, which is the only sign that the list scrolls.
+- The fault there is the hidden tab (D-139), not the scrolling. After D-140 the Indonesian cases no longer need the fallback.
+
+### D-129, D-130, D-131
+- **D-129 sound banner: PASS.** Fresh episode: shown on the opening scene (48 px). Gone by itself after 6 s (present at 1.1 s, gone by 6.7 s after load), stays gone after a reload, gone 150 ms after the first tap on "Lanjut", and never shown when the old key exists. No banner in any sheet state I opened. The opening screen is a stage scene and the first tap removes the banner, so it cannot meet a reply sheet in normal play.
+  - Observation for Stage 2: when it leaves after 6 s, everything below moves up by its height plus gap while the player reads. On stage screens let it float over the top of the stage instead of taking a row.
+- **D-130 header portrait always shown on phones: OK.** While the cut-in is in view there are two Hendra faces, 48 px in the header and the large one in the message (`k01-id-360x640-0-sebelum.png`). That reads like any chat app with an avatar; a faceless header for the rest of the conversation was worse.
+- **D-131 compact task card: PASS.** 360 × 640: card 164.5 px (was 222), message window 309 px (was 215), title 17 px, padding 10. The one-line instruction is cut in Indonesian ("Susun pesan penutupan untuk Pak Hen…", 10 px too long); the title above says the same, so I accept it.
+
+### Game feel
+- **Is it "more fun and game"? Yes, clearly more than the stacked form it replaces.** It reads as a choice panel in a game: Miss Raksa's pixel face asks the question, chunky numbered keys, the gold badge on the chosen key, a sticky note for the reference card, one fat send button that names the choice. The motion is short and tidy.
+- **What it still lacks is touch feedback:** the rows do not react to the finger, nothing marks the moment the send button becomes ready, and the note tab relies on a 10 px dot to be noticed.
+- [D-142] Optional, CSS only, about 0.4 KB, all off under reduced motion · low:
+  1. **Keys that press.** Rows: replace the inset shade by a hard edge `0 2px 0 #cfd6c3` (chosen row `0 2px 0 #215c40`); while pressed move the row down 2 px and drop the edge. Use the `translate` property for this: the rows' entry animation keeps `transform`, so a `transform` on `:active` would do nothing.
+  2. **Send button "armed".** When it turns green: one pop, scale 1 → 1.03 → 1 in 160 ms, and the arrow nudges 4 px to the right and back twice (0.6 s each).
+  3. **The note asks to be read.** While unread, the tab wiggles once, −2° → −6° → −2° in 0.5 s, 1.2 s after the sheet opens.
+  4. **Miss Raksa hops** once as the sheet lands: 3 px up and back in two steps, 120 ms each, after the 180 ms rise.
+- One line of code, not CSS, no new bytes: play the existing tap sound when a row is chosen (choosing a row is silent today).
+- Not recommended: changing Miss Raksa's expression on a choice (the icon strip has five faces). A smile would read as "right answer".
+
+### Observations, no change asked
+- The sheet changes height when it flips to the note (K03 id 484 → 505, K03 en 465 → 524, K14 id 469 → 372), so the tab moves under the thumb. "Kembali ke balasan" stays at the same place, which is enough.
+- Opening the note has no motion; returning replays the row stagger and the badge pop.
+- In Part 4 the story header is 66 px at 390 as well ("Keputusan dan penyelesaian" wraps), so K13 and K14 have 9 px less room than my 536.
+
+### Not verified by me
+A real iPhone and WebKit (Chromium only). Keyboard (1–5, Enter, Esc, focus) and the screen-reader names: Fullstack's check, not repeated. K06 and K12 in the game; the full-width result for K06, K12, K13 id and Chinese at 360. D-139's 28 px rule and the D-142 ideas are not built or tested; the full-width numbers come from one injected rule in my browser. Desktop 1280 (not in this brief). Sending a reply from the sheet. The test suites.
+
+---
+
+## T-020 — activity art redesign (2026-11-16)
+
+Designer · Working under C:\Users\User\Desktop\rksgm-episode2 · No client source edits, no commit, BOARD.md not touched.
+Scope: the first brief (map fit numbers, art direction and mocks for the map and the K08 road, inventory) plus the Lead's message of 15:04 (owner's five further screenshots: fit numbers, a game-like direction with a 390 × 645 mock, and the first instruction line for the plan, K08 conclusion, witness cards, compare statements, and also the map and the K02 documents).
+Naming: the owner's "k05-rencana" screenshots are the activity "Rencana pemeriksaan", node K07 in the code; I call it K07 here.
+Method (run light: one headless Chrome at a time, below-normal priority, no test suite): measured today's nine activities at 390 × 645 on the production build of 13:58 on my own server on :4002 (the build was rewritten at 14:46 during that run and again at 14:58 and 15:10; I did not re-measure; server stopped, :4000 not touched). Read the owner's six screenshots. Drew mock art with scratch scripts, built one mock page with the real game font and the real Indonesian, English and Chinese texts, and measured it at 360 × 640, 360 × 740, 390 × 645 and 390 × 844. I opened about 35 images.
+Evidence: `team/evidence/T-020/designer/`: 18 mock screenshots `mock-k*.png`, the mock page `mock.html`, `mock-ukur.txt` / `.json` (all measured numbers), `seni/` (mock art and sheets `_lembar-*.png`, `_pratinjau-jalan.png`), `byte.json`, `hari-ini/` (today's screens and measurements).
+**What the mocks are:** static pages, not the game. The art is mock quality: tiles and backdrops are derived from the Episode 2 room PNGs, small props are drawn by script, and the portraits in the K07 / K08 / K09 mocks are cut from the owner's screenshots. English strings that do not exist yet are my placeholders.
+
+### Shared numbers (today's build, 390 × 645)
+| Region | Size |
+| --- | --- |
+| Story header; top padding; activity head | 57; 12; 69 |
+| Question | 23.4 per line |
+| Gaps between head, question, body, send bar | 8 each |
+| Send bar | 74 (8 + 58 + 8) with a one-line label; 89.5–108 today where the "not yet" label wraps |
+| Body = screen − 236 − question | 360 × 640: 380.6 (one-line question), 357.2 (two lines) · 390 × 645: 385.6 / 362.2 · 360 × 740: 480.6 · 390 × 844: 584.6 |
+Today the body content is 458–1,216 px, so every activity scrolls, by 27–830 px at 390 × 645 (`hari-ini/ukur-390x645.txt`).
+
+### [D-143] Shared rules for the six screens
+- **One green instruction line first**, directly under the question (15.5 / 20, weight 800, `#215c40`), using strings that already exist in all three languages (listed per activity below).
+- **Tap = choose, tap another = change, one send button.** Same rule as the reply sheet the owner liked. It removes the "Pilih tujuan ini" step, the "Dipilih: …" line and the "Pilihanmu masih bisa diganti…" note.
+- **A strip shows the meaning of the current choice** (name 15.5 / 19 bold, meaning 13.5 / 18, 72–76 px).
+- **Task info behind a yellow "Info tugas" tab** in the title row (same look as "Catatan"), where the context does not fit.
+- **Send bar label on one line.** New short strings needed in three languages: "Tandai N kartu lagi.", "Cap N perbedaan dulu.", "Taruh N dokumen dulu.", "Pilih 1 kesimpulan", and the tab labels "Info tugas" and "Tandamu".
+- **"Gunakan tampilan daftar"** is shown only when 52 px are spare (from about 700 px of screen height); otherwise it moves to the Menu.
+
+### A. [D-144] Location map (K04) · fit numbers · Fullstack first
+Mocks: `mock-k04-peta-awal-390x645.png`, `-pilih-390x645.png`, `-pilih-360x640.png`, `-en-360x640.png`.
+First instruction: **"Tentukan di mana truk diperiksa."** (`akt.surveyor.instruksi`).
+| Part | Value (CSS px) |
+| --- | --- |
+| Instruction; context sentence | 20; 38 (two lines) or 57 (three) at 14.5 / 19 |
+| Board | takes the rest: **minimum 202, maximum 300**; 2 px dark border with stepped corners |
+| Tile | box 96 wide; picture 80 × 60 in an 84 × 64 frame; label plate 13 / 15 weight 800, 1 px border, overlapping the picture's bottom edge by 8; 75 high with a one-line label, 90 with two |
+| Tile positions | left column 6 from the board edge, centre column centred, right column 6 from the edge; top row 8 from the top, bottom row 8 from the bottom, centre tile centred. Order as today: Kantor Raksa top left, Meja kantor bottom left, Pool centre, Bengkel rekanan top right, Bengkel langganan bottom right |
+| Rudi | his start is the strip (40 px portrait + his question); once a place is tapped a 36 px portrait sits on that tile's top right corner |
+| Strip | 72–76 |
+| Send bar | 74 |
+
+| Screen | Body | Board (id / en / zh) | Result |
+| --- | --- | --- | --- |
+| 360 × 640 | 380.6 | 205.6–207.6 / 203.6–205.6 / 226.6 | fits, 0 spare, no tile overlaps |
+| 390 × 645 | 385.6 | 229.6–231.6 / 210.6–212.6 / 231.6 | fits |
+| 360 × 740 | 480.6 | 253.6–255.6 / 251.6–253.6 / 274.6 | fits, list link visible, 52 spare |
+| 390 × 844 | 584.6 | 300 / 300 / 300 | fits, list link visible, 110–131 spare |
+- **What gives way, in order:** the list link; the board from 300 down to 202; the context sentence (behind "Info tugas", 38–57 px); only then the body scrolls with the send bar pinned.
+- The same board serves K05 (forward the photos), whose context is 159 px today; there it goes behind "Info tugas".
+
+### B. Art direction
+- **[D-145] One rule for activity art:** pixel art at **1 art px = 1 CSS px**, `image-rendering: pixelated`, never scaled by CSS. I tried 2 CSS px per art px first; at tile size it is mush (`seni/_uji-kerapatan.png`: each pair is 1 : 1 on the left, 2 : 1 on the right). 1 : 1 matches the stage at 360 (scale 1) and the 32 px head icons.
+- **Palette and texture come from the rooms.** Each map tile is a miniature of the room the player later stands in: Pool = the pool stage with the trailer, Bengkel rekanan and langganan = bays of the workshop stage (langganan with blue trim and an orange plate), Meja kantor = the office counter with photos on it, Kantor Raksa = an office front built from the pool warehouse with a "RAKSA" sign.
+- **Map background:** a 48 × 48 repeating grass tile, sand roads drawn as plain rectangles in CSS, two trees and a bush as sprites. No fixed-size background picture, so it works at any board size.
+- **No words inside the art** except the brand name. Labels stay HTML.
+- **Frames and buttons:** dark 2 px outlines `#1c2b1c`, hard 2 px drop edges, gold `#e0b84f` for "chosen", stepped corners, cork and wood (`#67442c`, `#8c5938`) for boards. Keycaps and number badges as in the reply sheet.
+
+### [D-146] K08 road and sign check
+Mocks: `mock-k08-jalan-ketuk-390x645.png`, `-tandai-390x645.png`, `-tandai-360x640.png`, `mock-k08-simpul-390x645.png`, `-simpul-pilih-360x640.png`; art `seni/_pratinjau-jalan.png`.
+First instruction: **"Ketuk rambu untuk memeriksa."**, then per sign **"Ketuk lajur yang dilarang untuk truk."** (both exist).
+- **The road stays top-down with traffic going up.** I considered a side view so the stage trailer could be reused, and dropped it: sign 2 says "gunakan lajur kiri" and the lanes are "dihitung dari kiri", so left must be left on the screen.
+- **The truck is the pool trailer seen from above:** orange cab, grey ribbed container, 40 × 124 px, with a hard shadow. The current one is blue.
+- **Signs are objects in the scene:** two pixel sign posts (24 × 44, hit area 44 × 56) on the left verge with number badges; tap a post to read that sign. This replaces the "Rambu 1" button and the "Lihat lagi Rambu …" chips. Sign 2 is dimmed until sign 1 is done.
+- **Lanes as game controls:** a pixel keycap 40 × 30 with the lane number at the foot of each lane; a marked lane gets the hatch, a 2 px border, the sign's pictogram at its top, and a gold pressed keycap. The whole lane stays the tap target.
+- **Geometry:** lanes 66 px wide, road block 278 px (4 lanes + two 7 px shoulders) centred, grass verges 29 px at 336 wide and 44 at 366. Today the lanes are percentages; pixel art needs fixed pixels.
+- **Marking step, measured:** sign card 87 (two-line wording), instruction 20, scene 236, legend 18–36: 9 px spare at 360 × 640, 14 at 390 × 645, in id and en. The scene may drop to 204 (cropped at the top). The "next sign" button is the pinned bar.
+- **Conclusion step = the reply sheet over the road.** Pak Bima's face and his question head the sheet, five numbered rows, "Pilih 1 kesimpulan" → "Sampaikan ke Pak Bima", a "Tandamu" tab for the player's marks. Activity head as one 44 px row. Sheet 469 px at 390 × 645 (67 px of road visible above), 488 at 360 × 640 (43 px); English 450. Nothing scrolls, so the jump the owner saw cannot happen.
+- The caption sentence and the hatch note become one legend line under the scene.
+
+### [D-147] K07 "Rencana pemeriksaan" (owner: confusing, needs a graphic)
+Mocks: `mock-k07-rencana-awal-390x645.png`, `-pilih-390x645.png`, `-360x640.png`.
+First instruction: **"Tempatkan pemeriksaan kejadian di rencana kerja."** (`akt.jalur.instruksi`), shown in the strip next to the card to be placed (magnifier icon).
+- **Graphic: a cork wall planner.** Two columns "Sekarang" and "Sesudah hitungan". The workshop estimate is a yellow card already pinned under "Sekarang" with "Sedang berjalan"; the case note is a sticky note beside it; under them two dashed slots, "+ Mulai sekarang" and "+ Tunggu hitungan selesai". Tap a slot and the inspection card is pinned there.
+- **The three answers without an inspection** are a row of small cards under the board with a pixel icon each (phone, checked sheet, medal), under the existing label "Atau tidak lewat papan:". All five answers are visible at once; today three are hidden behind "Lihat 3 pilihan lainnya".
+- **Numbers:** strip 72–75, board 171, label 17, card row 57 (390 wide) or 72 (360). Spare: 22–25 px at 390 × 645, 2–5 at 360 × 640 in Indonesian. In English at 360 × 640 the question takes three lines and it is 18–21 px over: there the label "Atau tidak lewat papan:" hides (25 px).
+
+### [D-148] K09 "Kartu saksi" (owner: scrolling, unclear what to do)
+Mocks: `mock-k09-saksi-390x645.png`, `-360x640.png`.
+First instruction: **"Pilih kartu, lalu wawancarai atau tidak perlu."** (`akt.saksi.petunjuk`).
+- **Graphic: a cork board "Rencana wawancara" with five slots**, and under it the five people as cards in one row (44 px pixel portrait, name).
+- Tap a card: it lifts, and a strip shows who it is with two keys, "Wawancarai" and "Tidak perlu", each with its existing one-line meaning. "Wawancarai" pins the card on the board; "Tidak perlu" greys it with a dash badge. Bar: "Tandai N kartu lagi." → "Kirim daftar ke Pak Bima".
+- **Numbers:** instruction 20, board 116, card row 84–98, strip 101. Spare 40.6 px at 390 × 645 and 21.6 at 360 × 640 (id; en 26.6 / 21.6).
+
+### [D-149] K10 "Bandingkan keterangan" (owner: does not look like a game)
+Mocks: `mock-k10-banding-390x645.png`, `-3-360x640.png`.
+First instruction: **"Pilih perbedaan, lalu cara mencatatnya."** (`akt.selisih.petunjuk`); after a stamp is chosen the same line shows that stamp's meaning.
+- **Graphic: the two papers side by side**, "Laporan polisi" (blue head) and "Catatan petugas tol" (orange head), three rows each, the current difference highlighted in both with a red "≠" between them. Under them the script's sentence and its evidence note, with a 1 / 3 counter.
+- **Five rubber stamps** in a row with their names; tap a stamp to stamp the highlighted difference, then the next difference is highlighted.
+- **Content caution, needs the content owner:** the papers show only what the script states: 20.10 and 20.15; the two names as masked bars of different length; "kurang antisipasi" on the toll note and "?" on the police side, because the script says it is not known whether the police note has it. Row markers are icons, not new words.
+- **Numbers:** line 20–40, papers 97, sentence box 77–130, stamps 65 below 700 px of screen height (stamp drawn 22 × 24) and 89 above (44 × 48). Spare at 390 × 645: 102.6 px, 29.6 on the longest difference. At 360 × 640: 74.2, and 1.2 on the longest.
+
+### [D-150] K02 "Permintaan dokumen"
+Mocks: `mock-k02-dokumen-390x645.png`, `-360x640.png`.
+First instruction: **"Ketuk baki untuk menaruh dokumen ini."** (exists).
+- Keep the idea, make it one screen: the office counter 160 px high (the kantor room at 1 : 1, already pixel art) with the document as a pixel object, its name plate and a "1/8" counter inside the picture; three pixel trays below, each with its name, its one-line meaning and a count badge. "Isi (n)" opens from the badge.
+- **Numbers:** instruction 20, scene 160, trays 131 (390 wide) or 161 (360). Spare 58.6 px at 390 × 645, 23.6 at 360 × 640 (en 60.6 / 17.2).
+
+### Replacing the SVG art, and bytes
+- **Tile by tile: yes.** Every activity picture is one entry `{ svg, w, h }` in `SENI_ARENA_AUTO_2` (`episode/auto-2/arena.ts`), drawn by `GambarSeni`. An entry can be swapped for a PNG one at a time. Two conditions: the picture must be shown at exactly its pixel size (today the map picture is squeezed to 66 px), and the cleanest way is an `<img>` (an optional PNG field on the entry) rather than a PNG inside the SVG.
+- The road is separate: `lokasi/seni/svg/jalan-empat-lajur.svg` (3,641 B) and `truk-biru.svg` (2,846 B) are replaced by a 66 × 52 lane tile, the truck and two sign sprites, and `geometri.ts` changes from percentages to 66 px lanes.
+- **Bytes, estimated by my script as indexed PNG** (palette, zlib 9; not run through the project's exporter): the map and road set is **9,958 B for 13 files**: five tiles 888–1,523 B each (6,131 B), grass 527, two trees and a bush 855, truck 1,060, lane tile 994, two signs 391. The same files as RGBA are 2.8–4.9 KB per tile, so they must be exported indexed like the room PNGs.
+- It replaces about 6.5 KB of road SVG and about 3.7 KB of `benda.ts` source for the five places.
+- **Whole programme, my estimate:** about 30 KB of PNG added (map and road 10, K05 tiles and the chat photo 11, K02 documents and trays 5, K07 / K09 / K10 props 3), 10–15 KB of vector code removed. With about 168 KB today, Episode 2 stays under 200 KB of the 400 KB gate.
+
+### C. [D-151] Inventory: 53 illustrations (48 in `SENI_ARENA_AUTO_2`, 5 road SVG files)
+| Group | Count | Verdict | Priority |
+| --- | --- | --- | --- |
+| K04 map places `lok.*` | 5 | restyle pixel (mock art exists) | 1 |
+| K08 road: road, truck, two hatches, inspect icon | 5 | restyle pixel: lane tile, truck, two sign posts; hatches become CSS; the inspect icon goes | 1 |
+| K07 `kartu.periksa`, `jalur.*` | 4 | restyle as pixel icons (card, phone, sheet, medal) + cork board | 2 |
+| K09 `saksi.mobilkecil` | 1 | restyle pixel (small car) | 2 |
+| K09 `baki.ya`, `baki.tidakperlu` | 2 | drop: replaced by the board and two keys | 2 |
+| K10 stamps `cap.*` | 5 | restyle: one pixel stamp, five symbols | 2 |
+| K02 documents `dok.*` (8) and trays `baki.*` (3) | 11 | restyle pixel | 3 |
+| K05 `foto.bundel`, `tuju.*` | 6 | restyle pixel, on the K04 board | 4 |
+| Chat photo `foto.truk` | 1 | restyle: a pixel photo made from the toll stage and the trailer | 4 |
+| K11 `bundel.*` (5) and `dok.hitungan / tender / laporan / suratpolisi.ada` (4) | 9 | keep for now; restyle with the K02 documents later | 5 |
+| K11 desk prototype `meja.*` | 4 | keep; not on the phone path I measured. Drop if the prototype is retired | none |
+Totals: **restyle 38, keep 13, drop 2.** K15 has no pictures.
+
+**My art time (final art, with states, both pixel ratios and the byte check):**
+| Group | Estimate |
+| --- | --- |
+| Map and road (priority 1) | 4–6 h; about half exists as mock art |
+| K07, K09, K10 props and boards | 4–5 h |
+| K02 documents and trays | 4–5 h |
+| K05 tiles and the chat photo | 3–4 h |
+| K11 batch | about 3 h |
+| Total | 18–23 h |
+
+### Decisions for the Lead
+- **Tap = choose** on the map (and K05): it removes the "see first, then choose" step of the current board. Keeping the two steps would need a 44 px "Pilih" key inside the strip; I did not measure that variant.
+- **K10 papers:** whether the masked names and the "?" are an acceptable way to show the three differences.
+- **K08 truck colour:** orange like the pool trailer (my choice) instead of today's blue.
+
+### Not verified by me
+Nothing here is built: every "fits" is a measurement of my static mock with the real font and texts, not of the game. Chinese at the two sizes for K07, K09, K10 and K02 was measured but I did not look at those screens. K05, K11 and K15 have no mock and no fit numbers beyond today's heights. K08's sign-2 step and the "tap a sign" step were not measured separately. The byte figures are my own estimate. Later steps of K02 (tray contents, sending) and of K10 (after the third stamp) are not drawn. A real phone, WebKit, keyboard and screen-reader behaviour of the new layouts. The test suites.
+
+---
+
+## T-020 — batch 1 art (2026-11-16)
+
+Designer · Working under C:\Users\User\Desktop\rksgm-episode2 · No client source edits, no commit, BOARD.md not touched. No browser and no server used; the art is built and assembled by one script at below-normal priority.
+Scope: production pixel art for the map (K04) and the road and sign scene (K08), per the Lead's GO (tap = choose, orange truck).
+
+### Delivered
+- **Folder:** `character/aktivitas-ep2-pixel-v1/` with `peta/` (16 PNG), `jalan/` (13 PNG), a `README.md` per set (file list, sizes, anchors, states, mapping), `BYTE.md`, and the build script `alat/bangun.mjs`.
+- **Preview strip at 2x:** `team/evidence/T-020/designer/batch1-strip.png` (both scenes assembled, then every asset).
+- **Format:** 1 art px = 1 CSS px, indexed PNG with a palette (1 to 31 colours per file). All 29 files decode with the project's PNG reader.
+- **Source of the look:** the five tiles are miniatures of the pool, workshop and office stage art; asphalt and verge colours come from the toll stage; the truck uses the pool trailer's colours.
+
+### Byte table
+| File | Size (px) | Colours | Bytes |
+| --- | --- | --- | --- |
+| peta/ubin-kantor.png | 80 × 60 | 31 | 844 |
+| peta/ubin-meja-kantor.png | 80 × 60 | 28 | 968 |
+| peta/ubin-pool.png | 80 × 60 | 24 | 1396 |
+| peta/ubin-bengkel-rekanan.png | 80 × 60 | 26 | 1326 |
+| peta/ubin-bengkel-langganan.png | 80 × 60 | 25 | 1441 |
+| peta/bingkai.png | 84 × 64 | 1 | 124 |
+| peta/bingkai-pilih.png | 88 × 68 | 2 | 140 |
+| peta/bingkai-fokus.png | 88 × 68 | 2 | 140 |
+| peta/pin-cincin.png | 40 × 42 | 3 | 298 |
+| peta/rumput.png | 48 × 48 | 6 | 527 |
+| peta/jalan-tanah-h.png | 16 × 12 | 3 | 99 |
+| peta/jalan-tanah-v.png | 12 × 16 | 3 | 93 |
+| peta/jalan-tanah-simpang.png | 12 × 12 | 1 | 83 |
+| peta/pohon-1.png | 28 × 32 | 9 | 325 |
+| peta/pohon-2.png | 22 × 28 | 9 | 289 |
+| peta/semak.png | 24 × 13 | 6 | 217 |
+| jalan/jalan-strip.png | 278 × 26 | 9 | 1893 |
+| jalan/panah-marka.png | 18 × 27 | 1 | 137 |
+| jalan/truk-atas.png | 40 × 124 | 21 | 1039 |
+| jalan/truk-bayangan.png | 40 × 124 | 1 | 170 |
+| jalan/muka-rambu-1.png | 22 × 22 | 3 | 187 |
+| jalan/muka-rambu-2.png | 22 × 22 | 4 | 156 |
+| jalan/tiang-rambu-1.png | 24 × 44 | 5 | 202 |
+| jalan/tiang-rambu-2.png | 24 × 44 | 6 | 183 |
+| jalan/tuts-lajur.png | 160 × 120 | 10 | 826 |
+| jalan/arsir-merah.png | 12 × 12 | 1 | 132 |
+| jalan/contoh-arsir-merah.png | 14 × 14 | 2 | 107 |
+| jalan/arsir-biru.png | 12 × 12 | 1 | 132 |
+| jalan/contoh-arsir-biru.png | 14 × 14 | 2 | 107 |
+| **Total, 29 files** | | | **13,581** |
+
+- Map set 8,310 B, road set 5,271 B.
+- My estimate was about 10 KB for 13 files. The same 13 kinds of file are about 10.6 KB here; the other 3 KB are the extra pieces this brief asked for (three frames, the portrait ring, three dirt-road tiles, arrow, truck shadow, two sign faces, the keycap atlas, hatch tiles and legend swatches).
+
+### Mapping notes for Fullstack
+- [D-152] **Map:** `lok.kantor`, `lok.foto`, `lok.pool`, `lok.bengkel`, `lok.langganan` in `SENI_ARENA_AUTO_2` map one to one onto `ubin-kantor`, `ubin-meja-kantor`, `ubin-pool`, `ubin-bengkel-rekanan`, `ubin-bengkel-langganan`. Each must be shown at exactly 80 × 60 (today the picture is squeezed to 66 px). Frame at picture (−2, −2); chosen and focus frames at (−4, −4). Pixel anchors replace the percent table `TATA[5]`: pictures at x = 14, (W − 80) / 2 and W − 94; top row y = 10; bottom row ends 8 px above the board edge.
+- [D-153] **Rudi's pin:** `pin-cincin.png` is a 40 × 42 ring with a 32 px round hole for the existing pixel portrait, placed at picture (+52, −8). This differs from the mock, where the 36 px token sat 14 px above the picture and would be cut off on the top row.
+- [D-154] **Road:** `jalan-strip.png` (278 × 26, repeat-y, centred) with the grass tile behind replaces `jalan-empat-lajur.svg`; `truk-atas.png` (40 × 124) replaces `truk-biru.svg`. `geometri.ts` changes from percent of a 360 box to pixels: lane n left = (W − 278) / 2 + 7 + (n − 1) × 66, width 66; truck at lane left + 13, top 80 in a 236 px scene. `seni.test.ts` checks the old numbers against the SVG files and needs the new ones.
+- [D-155] **Lane controls:** `tuts-lajur.png` is one atlas, cell 40 × 30, columns = lane 1 to 4, rows = normal, chosen (gold), forbidden (red hatch, sign 1), left lane (blue hatch, sign 2); keycap at lane left + 13, top 200. Marked lanes use the 12 × 12 hatch tiles at 55 % opacity with a 2 px border, plus the sign face at the lane's top.
+- **Sign posts** stand on the left verge (left 10 at 366 wide, 2 at 336; tops 28 and 124) with a 44 × 56 tap area. Badges, the truck's dashed ring and label plates stay CSS.
+- Trees, bush and grass are shared between the two sets (they live in `peta/`).
+
+### Differences from the mocks
+- The road strip is one 278 px wide tile (shoulders and lane lines included) instead of a single lane tile: one background image for the whole road.
+- The dirt roads on the map are textured tiles, not flat CSS rectangles.
+- The "Bengkel langganan" recolour was cleaned (no stray blue pixels).
+- Keycaps carry pixel digits and have four states instead of two.
+
+### Not verified by me
+Nothing is wired into the game and I did not open a browser: the scenes in the strip are assembled by the script, not rendered by CSS. How the files look at device pixel ratio 2 and 3 on a phone. Whether the portrait component can draw Mas Rudi crisply at 32 px. Tile repeat seams of grass and asphalt on a real screen (they are noise tiles; I see none in the 2x strip). The Kantor Raksa front is my invention (the story art has no office exterior) and carries the word "RAKSA" and a "P"; no other words are in the art. The total against the 400 KB gate was not re-measured. The test suites.
+
+---
+
+## T-020 — batch 2 art (2026-11-16)
+
+Designer · Working under C:\Users\User\Desktop\rksgm-episode2 · No client source edits, no commit, BOARD.md not touched. No browser and no server used; one build script at below-normal priority.
+Scope: production pixel art for the planner board (K07), the witness board (K09) and the compare papers (K10), after the owner's go on the mocks.
+
+### Delivered
+- **Sets** in `character/aktivitas-ep2-pixel-v1/`: `papan/` 18 files 3,069 B, `saksi/` 8 files 1,309 B, `banding/` 12 files 2,062 B. **38 files, 6,440 B.** With batch 1 the folder holds 67 files, 20,021 B.
+- A `README.md` per set (files, sizes, nine-slice values, anchors, states, mapping), `BYTE.md` for all sets, build script `alat/bangun2.mjs` with shared helpers in `alat/kit.mjs`.
+- **Preview strip at 2x:** `team/evidence/T-020/designer/batch2-strip.png` (three rough assemblies without text, then every asset).
+- All 38 files are indexed PNG at 1 art px = 1 CSS px.
+
+### Byte table
+| File | Size (px) | Palette entries | Bytes |
+| --- | --- | --- | --- |
+| banding/beda.png | 22 × 22 | 4 | 157 |
+| banding/cap-kecil.png | 110 × 48 | 10 | 244 |
+| banding/cap.png | 220 × 96 | 11 | 448 |
+| banding/ikon-jam.png | 12 × 11 | 3 | 132 |
+| banding/ikon-pensil.png | 12 × 11 | 5 | 139 |
+| banding/ikon-wajah.png | 12 × 11 | 4 | 139 |
+| banding/jejak-cap.png | 220 × 20 | 2 | 265 |
+| banding/kepala-polisi.png | 6 × 18 | 3 | 96 |
+| banding/kepala-tol.png | 6 × 18 | 3 | 96 |
+| banding/kertas-9i.png | 18 × 18 | 3 | 122 |
+| banding/kotak-kemajuan.png | 30 × 10 | 5 | 132 |
+| banding/sorot-9i.png | 12 × 22 | 2 | 92 |
+| papan/bingkai-kayu-9i.png | 24 × 24 | 6 | 189 |
+| papan/chip-9i.png | 18 × 20 | 4 | 131 |
+| papan/chip-pilih-9i.png | 18 × 20 | 4 | 131 |
+| papan/gabus.png | 32 × 32 | 6 | 381 |
+| papan/ikon-jam.png | 12 × 11 | 3 | 132 |
+| papan/ikon-kaca-kecil.png | 15 × 15 | 7 | 172 |
+| papan/ikon-kaca.png | 30 × 30 | 7 | 250 |
+| papan/ikon-lembar-cek.png | 24 × 24 | 7 | 216 |
+| papan/ikon-lencana.png | 24 × 24 | 8 | 240 |
+| papan/ikon-telepon.png | 24 × 24 | 7 | 183 |
+| papan/kartu-kerja-9i.png | 18 × 20 | 5 | 135 |
+| papan/kartu-periksa-9i.png | 18 × 20 | 5 | 141 |
+| papan/nota-9i.png | 18 × 18 | 4 | 135 |
+| papan/pin.png | 8 × 10 | 4 | 125 |
+| papan/plat-kolom-9i.png | 12 × 18 | 4 | 115 |
+| papan/plus.png | 20 × 20 | 4 | 143 |
+| papan/slot-9i.png | 24 × 24 | 2 | 117 |
+| papan/slot-isi-9i.png | 18 × 18 | 4 | 133 |
+| saksi/ikon-pin.png | 12 × 15 | 5 | 155 |
+| saksi/ikon-strip.png | 12 × 12 | 3 | 114 |
+| saksi/ikon-tanya.png | 12 × 11 | 3 | 134 |
+| saksi/kartu-9i.png | 72 × 18 | 7 | 196 |
+| saksi/kartu-tidak-9i.png | 18 × 18 | 3 | 122 |
+| saksi/lencana-strip.png | 18 × 18 | 4 | 133 |
+| saksi/mobil-kecil.png | 48 × 22 | 11 | 306 |
+| saksi/tombol-9i.png | 36 × 22 | 5 | 149 |
+| **Total, 38 files** | | | **6,440** |
+
+### Mapping notes for Fullstack
+- [D-156] **Frames are nine-slice PNGs** (files ending `-9i`) for CSS `border-image` with `repeat`, so one small file serves any box size. The slice values are in each README. Cork, wooden frame, dashed slot and pin live in `papan/` and are shared by K07 and K09.
+- [D-157] **K07:** `kartu.periksa` becomes `kartu-periksa-9i` plus the magnifier (30 px in the strip, 15 px on the placed card); `jalur.telepon`, `jalur.jelas`, `jalur.percaya` become three 24 × 24 icons. New pieces: column plates, yellow job card with a clock, sticky note, dashed slots with a "+" key, chips in two states.
+- [D-158] **K09:** `saksi.mobilkecil` becomes `mobil-kecil.png` (48 × 22) with a "?" badge; `baki.ya` and `baki.tidakperlu` are dropped. Card frames come as one atlas (normal, placed, ghost, selected) plus a grey "Tidak perlu" frame and its "–" badge; the two action keys are one nine-slice atlas (normal, pressed) with a pin icon and a dash icon. The four portraits are the game's existing ones.
+- [D-159] **K10:** `cap.catat`, `cap.samakan`, `cap.ulang`, `cap.abaikan`, `cap.tolak` become columns 0 to 4 of `cap.png` (cell 44 × 48, row 0 normal, row 1 pressed) and of `cap-kecil.png` (cell 22 × 24, for screens under 700 px tall). Each large stamp carries its own symbol; the labels stay HTML. Papers, header bands (police blue, toll brown), three row icons, highlight bar, "not equal" marker and progress squares are separate small files.
+- Per the Lead's K10 decision the statement text is real story text in HTML; the art holds no words and no masked names.
+
+### Beyond the brief
+- `jejak-cap.png`: the red impression each stamp leaves on the paper (five cells 44 × 20).
+- `kartu-periksa-9i`, `chip-9i` / `chip-pilih-9i`, `plus.png`, `ikon-tanya.png`: pieces the mocks use that the brief did not list.
+
+### Not verified by me
+Nothing is wired into the game and no browser was used. Whether `border-image` with these slices renders crisply at device pixel ratio 2 and 3 in Safari and Chrome is untested; if it does not, the same files work as plain backgrounds for fixed-size boxes. The small stamps have no symbol and are told apart only by their labels. The preview assemblies are rough (no text, placeholder discs for portraits) and are not a layout check. The test suites.
+
+---
+
+## T-020 — batch 3 art (2026-11-16)
+
+Designer · Working under C:\Users\User\Desktop\rksgm-episode2 · No client source edits, no commit, BOARD.md not touched. No browser and no server used; one build script at below-normal priority.
+Scope: K02 documents and trays, K05 pictures, K11 pictures, the chat photo.
+
+### Delivered
+- **Sets** in `character/aktivitas-ep2-pixel-v1/`: `dokumen/` 15 files 6,150 B, `terusan/` 5 files 4,326 B, `bundel/` 5 files 1,283 B, `obrolan/` 1 file 4,693 B. **26 files, 16,452 B.**
+- **All three batches together: 93 files, 36,473 B**, all indexed PNG at 1 art px = 1 CSS px; all 93 decode with the project's PNG reader.
+- A `README.md` per set, `BYTE.md` for all sets, build script `alat/bangun3.mjs`.
+- **Preview strip at 2x:** `team/evidence/T-020/designer/batch3-strip.png`.
+
+### Byte table
+| File | Size (px) | Palette entries | Bytes |
+| --- | --- | --- | --- |
+| bundel/aksi-hendra.png | 48 × 40 | 6 | 247 |
+| bundel/aksi-komite.png | 48 × 40 | 8 | 232 |
+| bundel/aksi-lengkapi.png | 48 × 40 | 9 | 230 |
+| bundel/bundel-berkas.png | 48 × 40 | 8 | 202 |
+| bundel/map-pengajuan.png | 120 × 64 | 8 | 372 |
+| dokumen/baki.png | 204 × 120 | 12 | 648 |
+| dokumen/dok-formulir.png | 64 × 80 | 7 | 231 |
+| dokumen/dok-foto-bundel.png | 60 × 48 | 10 | 300 |
+| dokumen/dok-hitungan.png | 64 × 80 | 9 | 249 |
+| dokumen/dok-kecil.png | 286 × 28 | 117 | 1878 |
+| dokumen/dok-kk.png | 64 × 48 | 8 | 379 |
+| dokumen/dok-ktp.png | 64 × 44 | 11 | 255 |
+| dokumen/dok-laporan.png | 64 × 80 | 12 | 297 |
+| dokumen/dok-rekening.png | 64 × 80 | 9 | 245 |
+| dokumen/dok-sim.png | 64 × 44 | 12 | 303 |
+| dokumen/dok-slip.png | 48 × 80 | 8 | 215 |
+| dokumen/dok-stnk.png | 64 × 44 | 13 | 260 |
+| dokumen/dok-suratpolisi-ada.png | 64 × 80 | 9 | 328 |
+| dokumen/dok-suratpolisi.png | 64 × 80 | 8 | 296 |
+| dokumen/dok-tender.png | 64 × 80 | 11 | 266 |
+| obrolan/foto-truk.png | 240 × 150 | 16 | 4693 |
+| terusan/ubin-diam.png | 80 × 60 | 9 | 892 |
+| terusan/ubin-hendra.png | 80 × 60 | 14 | 1096 |
+| terusan/ubin-lain.png | 80 × 60 | 12 | 749 |
+| terusan/ubin-mitra.png | 80 × 60 | 25 | 1330 |
+| terusan/ubin-tunggu.png | 80 × 60 | 11 | 259 |
+| **Total, 26 files** | | | **16,452** |
+
+### Mapping notes for Fullstack
+- [D-160] **K02 counter scene: no new file.** It is the office stage the game already ships (`ep2-ruang-kantor-latar.png` with `ep2-ruang-kantor-meja.png` at (0, 66)), cropped at x 17, y 20 to 366 × 160 (x 32 at 336 wide). The document stands at left 30, 10 px above the scene's bottom edge.
+- [D-161] **Documents:** twelve documents and the photo stack as objects (sheets 64 × 80, cards 64 × 44, payslip 48 × 80, photo stack 60 × 48), one to one for `dok.formulir`, `dok.stnk`, `dok.ktp`, `dok.sim`, `dok.suratpolisi`, `dok.kk`, `dok.slip`, `dok.rekening`, `dok.hitungan`, `dok.tender`, `dok.laporan`, `dok.suratpolisi.ada`, `foto.bundel`. The police letter has two versions: being processed (clock, faint lines) and issued (stamp, signature). `dok-kecil.png` is the thumbnail atlas (13 cells 22 × 28) for chips and tray contents.
+- [D-162] **Trays:** `baki.png`, cell 68 × 40, columns = `baki.sekarang` (blue, bolt), `baki.menyusul` (purple, clock), `baki.tidak` (orange, dash); rows = empty, with documents (1 or 2), full (3 or more).
+- [D-163] **K05:** five 80 × 60 pictures for `tuju.mitra`, `tuju.hendra`, `tuju.lain`, `tuju.tunggu`, `tuju.diam` on the K04 board, with the K04 frames, grass, roads and anchors. The token is the photo stack (thumbnail cell 12 on the chosen tile).
+- [D-164] **K11:** `bundel.lengkapi`, `bundel.sekarang`, `bundel.hendra` become three 48 × 40 pictures; `bundel.berkas` a tied bundle; `bundel.map` an open folder 120 × 64 showing six of seven pockets ticked. That folder is a fixed picture; if the count can change, keep the CSS boxes and use it as decoration.
+- [D-165] **Chat photo:** `foto.truk` becomes `obrolan/foto-truk.png`, 240 × 150 as today, 16 colours, 4,693 B. It shows the trailer against the cracked barrier of the toll stage.
+
+### What is not done
+- **K11 has no mock.** The brief asked for a mock first; I delivered only art that replaces today's K11 pictures in today's layout. A no-scroll layout for K11 is still to be designed.
+- **K05 has no measured mock** either: its preview is the K04 board assembled by the script with the five new pictures. The K04 fit numbers apply because the board is the same; K05's 159 px context has to go behind "Info tugas".
+- Three K05 pictures (phone, filing cabinet, bag) and the signpost are drawn by rule and look flatter than the map tiles, which are miniatures of stages.
+- The thumbnail atlas is made by shrinking the documents to one third; at 22 × 28 the details are smudges, the colour bands tell the documents apart.
+
+### Bytes against the gate
+- My earlier estimate for the whole programme was about 30 KB; it is 36.5 KB for 93 files, because the briefs added frames, atlases and states.
+- I did not measure the episode total. With about 168 KB before, and the vector art it replaces still in place, it stays far below 400 KB either way.
+
+### Not verified by me
+Nothing is wired into the game and no browser was used; the strips are assembled by the scripts. Rendering at device pixel ratio 2 and 3 on a phone. Whether the K02 crop of the office stage looks right behind each of the eight documents. Whether the tray rows should switch at other counts. The damage on the chat photo against what the story says about the truck. The episode byte total. The test suites.
+
+---
+
+## T-020 — K11/K05 mocks (2026-11-16)
+
+Designer · Working under C:\Users\User\Desktop\rksgm-episode2 · No client source edits, no commit, BOARD.md not touched.
+Method (run light: one headless Chrome, below-normal priority, no server needed, no test suite): added two screens to my mock page (real game font, real id / en / zh texts, the batch 3 production PNGs at 1 : 1) and measured them at 360 × 640, 390 × 645, 360 × 740 and 390 × 844. I opened three of the eleven screenshots (K05 chosen, K11 step 1, K11 step 2, all 390 × 645 Indonesian).
+Evidence: `team/evidence/T-020/designer/`: `mock-k05-terusan-*.png` (5), `mock-k11-bundel-*.png` (6), `mock3-ukur.txt` / `.json`, `mock.html` (now nine screens).
+These are static mocks, not the game. Shell numbers as in D-143: body = screen − 236 − question (23.4 per line); send bar 74 with a one-line label.
+
+### [D-166] K11 "Bundel pengajuan": three steps, none scrolls
+Pinned: story header, activity head with the "Info tugas" tab, the question. First row of the body: the three step tabs (40 px; number square + name, current step gold).
+| Step | First instruction (existing string) | Body, top to bottom | Send bar |
+| --- | --- | --- | --- |
+| 1 Periksa berkas | the pinned sentence itself: "Sebelum diajukan ke Komite Klaim, periksa dulu isi map pengajuan." | tabs 40 · open folder 120 × 64 with "Isi bundel pengajuan" and "6 dari 7 kelompok berkas tersedia" (64) · folder board with seven pockets in 4 + 3, each 46 high with number, document thumbnail and ✓ or – (118) · strip for the tapped pocket: "Lembar n dari 7", "Ada" / "Belum ada di berkas", the contents (72–74) | "Tentukan langkah" |
+| 2 Tentukan tindakan | "Pilih tindakan untuk berkas ini." | tabs 40 · instruction 20 · tied bundle + "6 dari 7 …" + "Belum ada: Surat keterangan polisi" (52) · three action cards with the 48 × 40 pictures, name and meaning (180, or 206 when a meaning wraps) | "Pilih tindakan untuk berkas ini." → "Lanjut: kabari Pak Hendra" |
+| 3 Kabari Pak Hendra | "Pilih satu kabar." | tabs 40 · instruction 20 · the chosen action as a plan row (52) · three numbered rows as in the reply sheet (191; Chinese 142) | "Pilih satu kabar." → "Konfirmasi tindakan & kirim kabar" |
+
+| Screen | Step 1 spare | Step 2 spare | Step 3 spare |
+| --- | --- | --- | --- |
+| 360 × 640, id | 37–39 px | 15 | 30 |
+| 360 × 640, en | 37–39 | 39 | 54 |
+| 360 × 640, zh | 22–24 (tabs 55, names on three lines) | 50 | 88 |
+| 390 × 645, id | 42–44 | 46 | 35 |
+| 390 × 645, en | 42–44 | 44 | 59 |
+| 390 × 645, zh | 42–44 | 70 | 108 |
+- Body height: 357.2 at 360 × 640 and 362.2 at 390 × 645 with a two-line question (steps 1 to 3 in Indonesian); 380.6 / 385.6 with one line.
+- **Art used:** `bundel/map-pengajuan.png` (step 1 band), `dokumen/dok-kecil.png` cells 0, 12, 8, 9, 10, 4 and `papan/ikon-kaca-kecil.png` for the seven pockets, `bundel/bundel-berkas.png` (step 2), `aksi-lengkapi`, `aksi-komite`, `aksi-hendra` (step 2 cards, step 3 plan row).
+- **Pocket 7** (police letter) is dashed, tinted and marked "–"; its strip turns red-edged with "Belum ada di berkas". Pocket 4 adds the tender note to its strip (74 px).
+- **What gives way** (not needed at the two sizes): the open-folder band (64 px) first, then the plan row of step 3.
+- The step tabs replace today's three tab buttons; "Kembali: periksa berkas" becomes a tap on tab 1.
+
+### [D-167] K05 "Bengkel penuh" on the K04 board
+First instruction: **"Tentukan langkahmu dengan foto kerusakan dari Mas Rudi."** (`akt.foto.instruksi`, two lines; one in Chinese). The 159 px context goes behind "Info tugas".
+| Screen | Body | Question | Board (id / en / zh) | Result |
+| --- | --- | --- | --- | --- |
+| 360 × 640 | 357.2 (zh 380.6) | two lines (zh one) | 227–229 / 227–229 / 273 | fits, no tile overlaps |
+| 390 × 645 | 385.6 (en 362.2) | one line (en two) | 256–258 / 234 / 278 | fits |
+| 360 × 740 | 457.2 (zh 480.6) | as 360 × 640 | 275–277 / 275–277 / 300 | fits, list link visible, 52 spare |
+| 390 × 844 | 584.6 (en 561.2) | as 390 × 645 | 300 / 300 / 300 | fits, list link visible, 133–177 spare |
+- Instruction 40 (zh 20), strip 72–74, send bar 74. Board minimum 202 as on the map; the lowest measured is 227.
+- Tiles, frames, grass, roads and anchors exactly as D-144 / `peta/README.md`; the five pictures are `terusan/ubin-*.png`. Labels are one or two lines in all three languages.
+- **Token:** the photo stack. Before a choice it sits in the strip (60 × 48) with "Foto kerusakan dari Mas Rudi"; after a tap the 22 × 28 thumbnail sits on the tile's top right corner.
+- **Send bar:** today's "Ketuk satu tujuan untuk: Foto kerusakan dari Mas Rudi." wraps to two lines; the mock uses "Ketuk satu tujuan." (new short string, three languages).
+
+### New strings these two mocks assume (three languages)
+"Ketuk satu tujuan.", "Ketuk satu tujuan di papan.", "Belum ada", "Pilih satu kabar." as a bar label. "6 dari 7 kelompok berkas tersedia" and "Lembar n dari 7" already appear in today's K11; I did not look up their keys, so the English and Chinese in the mock are my placeholders.
+
+### Step 3 of the brief: T-018 Stage 2 first look
+**Skipped.** `team/HANDOFF.md` has no "## T-018 Stage 2" section yet (the last section is "T-018 Stage 1b"), so there is nothing to look at. I started no server.
+
+### Not verified by me
+Nothing is built; every "fits" is my mock. I looked at three screenshots only: the 360 × 640, English and Chinese ones were measured but not opened. K11's "Info tugas" content and the preview of the message to be sent (today's "Pratinjau — belum dikirim") are not drawn. Keyboard and screen-reader order of the pockets. A real phone. The test suites.
+
+---
+
+## T-021 — concept (2026-11-16)
+
+Designer · Working under C:\Users\User\Desktop\rksgm-episode2 · Concept only: no source edits, no commit, nothing built or measured in the game.
+Owner idea (16:30, `team/evidence/T-021/owner/kantor-sebelum-chat.png`): when a kantor beat hands over to the WhatsApp chat, Miss Raksa takes her phone, the camera goes to the phone, the phone screen becomes the chat; the reverse on the way back.
+Storyboard: `team/evidence/T-021/designer/papan-cerita-390.png` (390 wide, four frames; frames 1 to 3 are assembled from the stage art with a mock arm and phone, frame 4 is my capture of the chat).
+
+### [D-168] Recommendation: phone in hand, as an arm overlay
+| Frame | Time | What the player sees |
+| --- | --- | --- |
+| 1 Stage | 0 ms | the kantor as it is; a small notification bubble pops next to Miss Raksa |
+| 2 Phone in hand | 0–350 ms | her forearm comes up from behind the counter holding the phone; the camera moves to the existing kantor close-up |
+| 3 Zoom | 350–800 ms | the stage scales up around the phone in whole steps (about 2, 3, 4, 6 times, 90 ms each, pixels stay square); from 550 ms the chat fades in on the phone screen |
+| 4 Chat | 800–1,000 ms | the chat screen is in place; its header settles 8 px |
+- **Forward 1,000 ms, back 700 ms** (chat shrinks into the phone 300, phone goes down 250, camera returns 150).
+- **A tap anywhere ends it at once** in the end state.
+- **Full version once per Part**; later hand-overs in the same Part use a 300 ms short form (phone up, then cut), so it does not wear.
+- **Reduced motion: a cut**, exactly as today. No arm frames, no zoom.
+
+### Phone in hand or a monitor on the counter
+| | Phone in hand (arm overlay) | Monitor prop on the counter |
+| --- | --- | --- |
+| Art | two overlay frames of forearm, hand and phone (about 18 × 42 art px each) + a notification bubble; no new body or face frame | one static prop, about 28 × 24 |
+| Bytes (estimate) | about 0.6–1.0 KB | about 0.3 KB |
+| My effort (estimate) | 2–3 h, including a check at the three stage sizes and with her five expressions | about 1 h |
+| In character | yes: the chat is WhatsApp, and the screen it turns into is phone-shaped | weaker: WhatsApp on a desk monitor, and the monitor would stand on the counter in every kantor scene |
+**My pick: the arm overlay.** Her hands are behind the counter in every kantor frame, so the arm can be a separate layer drawn with her figure and hidden by the counter where it should be; her body and face art stay untouched.
+
+### Costs and risks outside the art
+- This is mainly Fullstack work: for one second the stage and the chat are both on screen, the stage canvas has to scale beyond its box, and the zoom has to end exactly on the chat's message window. Stage screens and chat screens are different shells today. They should size it; I would not call it small.
+- It only makes sense where a kantor beat is followed by a chat. I did not count how many such hand-overs Episode 2 has, or whether other rooms hand over to the chat as well.
+- The zoom must not hide a new message: the first chat message should appear only after frame 4.
+
+### Not verified by me
+Nothing is built. The timings are a proposal, not tested for feel. The byte and effort figures are estimates. Where the hand-overs occur in the episode. Whether the pixel stage can be scaled in whole steps at 360, 390 and desktop widths.
+
+---
+
+## T-021 — art (2026-11-16)
+
+Designer · Working under C:\Users\User\Desktop\rksgm-episode2 · No client source edits, no commit, BOARD.md not touched. No browser and no server used; one build script and one read-only probe of the episode data, both at below-normal priority.
+
+### Delivered
+- **Folder:** `character/miss-raksa-pixel-v4/telepon-v1/` with four indexed PNGs, `README.md` (frames, offsets, z-order, compatibility) and the build script `bangun-telepon.mjs`.
+- **Preview strip at 3x:** `team/evidence/T-021/designer/telepon-strip.png` (her standing frame with the bubble, with the lifting frame, with the reading frame and lit screen, then the pieces).
+- **Storyboard with the real frames:** `team/evidence/T-021/designer/papan-cerita-390-v2.png` (390 wide, four frames; frame 4 is an older capture of the chat and still shows the sound banner).
+
+### Files and bytes
+| File | Size (px) | Colours | Bytes |
+| --- | --- | --- | --- |
+| `lengan-telepon.png` (cell 0 lifting, cell 1 reading; 28 × 42 each) | 56 × 42 | 17 | 417 |
+| `layar-menyala.png` (lit screen, stage scale) | 9 × 15 | 5 | 125 |
+| `layar-menyala-besar.png` (lit screen for the zoom, 6 times larger) | 54 × 90 | 7 | 223 |
+| `gelembung-notif.png` | 18 × 16 | 3 | 150 |
+| **Total, 4 files** | | | **915** |
+The arm frames use only colours of her atlas palette (checked by the script: 0 pixels outside it). The lit screen needs chat greens that her palette does not have, so it is a separate file.
+
+### [D-169] Offsets and z-order
+| Piece | In `berdiri-kanan` frame coordinates | From her foot anchor (33, 183) |
+| --- | --- | --- |
+| arm cell, top left | (32, 55) | (−1, −128) |
+| lit screen, top left | (34, 57) | (+1, −126) |
+| screen centre = zoom target | (38.5, 64.5) | (+5.5, −118.5); in the kantor that is world (822, 282) |
+| notification bubble, top left | (50, 18) | (+17, −165) |
+- **Z-order:** body and face layers, then the arm cell, then the lit screen, then the counter layer as today. The counter hides everything below frame row 89 (measured from the counter art), which is where the arm's cut-off elbow end lies.
+- **Expressions:** compatible with all five and with kedip, bawah and bicara; the face box ends at row 50 and the overlay starts at row 55. Use the existing downward glance while the phone is up.
+- **Only for `berdiri-kanan` behind the kantor counter.** There is no drawn elbow joint, so it must not be used where the counter does not cover it.
+- **Reverse:** the same two frames played backwards are fine; no lowering art was made.
+- **Changed from the concept storyboard:** the phone now has a dark screen in the arm frames and a separate lit face, so the screen can light up at reading height.
+
+### [D-170] Where kantor and chat hand over in Episode 2
+Read from the episode data (staging per node; a node without its own staging keeps the previous one).
+| # | Direction | From → to | Miss Raksa on the stage? | Every play? |
+| --- | --- | --- | --- | --- |
+| 1 | kantor → chat | `buka` → `k01` (Part 1) | yes, alone | yes |
+| 2 | chat → kantor | `k15-a` … `k15-e` → `akhir-puas` / `akhir-catatan` / `akhir-kurang` (Part 4; Pak Hendra then walks in) | yes | yes |
+| 3 | kantor → chat | `k11` (the bundle on the counter) → `k11-a`, `k11-d`, `k11-b2`, `k11-d2`, `k11-d3`, `k11-e2` (chat from their first line), or → `k11-b`, `k11-c`, `k11-e` (stay on the stage) → `k12` (chat) | **no**: the kantor is empty, only the files | yes, one of the nine |
+| 4 | chat → kantor | `k06-a` … `k06-e` → `k07` (Part 3) | **no**: Pak Bima stands there | yes |
+- **The cutscene as designed can play at two points: 1 (forward) and 2 (back).** With "full version once per Part" both always play in full.
+- Points 3 and 4 are kantor hand-overs without her. To use the cutscene at 3 she would have to be added to that staging, which is a story decision, not an art one.
+- Other rooms also hand over to the chat and are not covered by this art: chat → pool (`k03-*` → `k04`), pool → chat (`k04-a`, and the second line of `k04-d`), bengkel → chat (`k05-b`, the second line of `k05-a`, and `k05-c` / `-d` / `-e` → `k06`), toll road → chat (first line of `k08-d`).
+
+### Not verified by me
+Nothing is wired into the game or rendered by it: the strip and the storyboard are assembled by the script from the shipped atlas and room art. I looked at the overlay with her neutral face only. How the overlay behaves with her idle or speaking motion. The zoom and the timings are untested. Whether the stage code can draw an extra layer between her figure and the counter is Fullstack's to confirm. The hand-over list comes from the node data; I did not play those transitions.
+
+---
+
+## T-021 — art v2 (2026-11-16)
+
+Designer · Working under C:\Users\User\Desktop\rksgm-episode2 · No client source edits, no commit, BOARD.md not touched. No browser and no server used; one build script at below-normal priority.
+Why: the owner (18:20) found the one-handed phone arm of v1 unnatural and asked for two hands and a POV.
+
+### Delivered
+- **Folder:** `character/miss-raksa-pixel-v4/telepon-v2/` with seven indexed PNGs, `README.md` (offsets, z-order, joins, compatibility) and `bangun-telepon2.mjs`. `telepon-v1/` stays on disk but is superseded.
+- **Strip at 3x:** `team/evidence/T-021/designer/telepon-v2-strip.png`: lifting, reading with lit screen and downward glance, reading with the phone back, then reading with each of the five faces, then the POV picture and the pieces.
+- **Storyboards (390 wide):** `papan-cerita-390-v3-pov.png` (A for frame 2, B for frame 3) and `papan-cerita-390-v3-langsung.png` (A only, zoom straight into her screen).
+
+### Files and bytes
+| File | Size (px) | Bytes |
+| --- | --- | --- |
+| `lengan-dua.png` (A: cell 0 lifting, cell 1 reading; 56 × 39 each) | 112 × 39 | 571 |
+| `punggung-telepon.png` (phone back) | 9 × 15 | 107 |
+| `layar-menyala.png` (lit screen, stage scale) | 9 × 15 | 125 |
+| `layar-menyala-besar.png` (lit screen for the direct zoom; from v1) | 54 × 90 | 223 |
+| `gelembung-notif.png` (from v1) | 18 × 16 | 150 |
+| `pov-366x229.png` (B, stage box at 390 wide) | 366 × 229 | 3,489 |
+| `pov-336x210.png` (B cropped for 360 wide) | 336 × 210 | 2,971 |
+- **What ships with the POV version:** arm cells, phone back, bubble, the 366 POV picture = **4,317 B** (the 336 file is only needed if the 366 one cannot be shown cropped at (15, 10)).
+- **What ships with the direct zoom:** arm cells, two lit screens, bubble = **1,069 B**.
+- The arm cells and the phone back use only colours of her atlas palette (checked by the script: 0 pixels outside it). The POV picture is 24 colours: her sleeve and skin colours, the kantor counter and floor colours, the chat greens.
+
+### [D-171] A. Two-handed pose: offsets and joins
+| Piece | In `berdiri-kanan` frame coordinates | From her foot anchor (33, 183) |
+| --- | --- | --- |
+| arm cell, top left | (2, 54) | (−31, −129) |
+| screen layer on the reading cell, top left | (26, 56) | (−7, −127) |
+| screen layer on the lifting cell, top left | (26, 69) | (−7, −114) |
+| screen centre at reading height = zoom target | (30.5, 63.5) | (−2.5, −119.5); world (790, 278) in the kantor |
+| notification bubble, top left | (50, 18) | (+17, −165) |
+- **Both forearms start on her existing upper arms** at the elbows (frame (7, 87) and (52, 87)); the joint is drawn in sleeve colour without an outline, so the yellow sleeve runs on. The hands meet at the centre of her chest on either side of the phone.
+- **No floating limbs:** the script checks that each cell is one connected shape and that it overlaps her body. Both cells pass.
+- **Z-order** as in v1: body and face, arm cell, screen layer, then the counter, which hides everything below frame row 89.
+- **Expressions:** I looked at the reading cell with each of the five base faces and with the downward glance; nothing collides (face box ends at row 50, overlay starts at row 54). I drew no head tilt; the existing downward glance does that job.
+- **Reverse:** the same two cells backwards.
+
+### [D-172] B. POV picture
+- First-person view at the stage box size: her two sleeves come in from the lower corners, white cuffs, hands at the sides of the phone with the thumbs over its front edges, the counter under them and the floor beyond; the chat screen is lit.
+- **Screen rectangle = zoom target:** x 144, y 32, 78 × 154 in the 366 file (centre (183, 109)); in the 336 crop x 129, y 22.
+- It is one flat picture shown in place of the stage, so the zoom is a scale of that picture about the screen centre (about 4.7 times until the screen fills the box). The live stage does not have to be scaled.
+
+### [D-173] Recommendation: A for frame 2, B for frame 3
+| | A + B (POV) | A only (zoom into her screen) |
+| --- | --- | --- |
+| Frame 2 | she holds the phone towards herself; we see its back | the screen has to face the viewer, which no one does |
+| Frame 3 | cut to what she sees; the screen grows into the chat | the stage is magnified until the pixels are large blocks, then the chat fades in |
+| Bytes | 4,317 | 1,069 |
+| For Fullstack | scale one still picture | scale the live stage canvas around a point |
+**My pick is A + B.** It is what the owner asked for, it removes the screen-towards-the-viewer cheat, and the zoom becomes simpler to build. Timing stays as approved: bubble and the two arm cells with the camera moving in during 0–350 ms, cut to the POV picture at 350, scale to the screen 350–800 with the chat fading in from about 650, settle to 1,000; back in 700; a tap skips; a plain cut under reduced motion.
+
+### Not verified by me
+Nothing is wired into the game or rendered by it; strip and storyboards are assembled by the script. The POV hands are simple drawn shapes, not traced from her model; whether they look natural enough is the owner's call from the strip. I checked the five base faces and the downward glance, not the blink and speaking variants. Her idle motion with the overlay. Device pixel ratio 2 and 3. The trigger points are unchanged from D-170.
+
+---
+
+## T-018 — Stage 2 review (2026-11-16)
+
+Reviewer: Designer · Folder: C:\Users\User\Desktop\rksgm-episode2 · No source edits, no commit, BOARD.md not touched.
+Build: production build in client/dist of 16:28:16, unchanged during my run, on my own server on :4002 (started and stopped by me; :4000 and :4001 not touched).
+Method (run light: one headless Chrome at a time, closed between sizes, below-normal priority, no test suite): read HANDOFF "T-018 Stage 2" with its addenda; at 360 × 640, 390 × 645, 360 × 740 and 390 × 844 in Indonesian I walked the opening (3 beats), K04, K07, K08, K09, K10, K11 and one ending beat by beat, opened eight activities, walked K08 through both signs to the conclusion, opened the end screen and two reply sheets; Chinese for the opening, K04, K09, the end screen and one sheet at 360 × 640; English for one sheet. I opened 11 screenshots. Evidence: `team/evidence/T-018/designer/stage2/` (screenshots, `ukur-*.txt`, `hasil-*.json`).
+
+### Verdict: FIX NEEDED. One high item (K08 hides the sign wording), three medium, the rest polish. Nothing scrolls the page and nothing is unreachable.
+
+### 1. Stage screens (D-132)
+| Check | 360 × 640 | 390 × 645 | 360 × 740 | 390 × 844 |
+| --- | --- | --- | --- | --- |
+| Page height = screen, in every beat | yes | yes | yes | yes |
+| Opening, three beats: stage height | 210, 210, 210 | 229, 229, 229 | 336, 336, 336 | 366, 366, 366 |
+| K04 pool, two beats | 210, 210 | 229, 229 | 252, 252 | 275, 275 |
+| K07 Pak Bima, two beats | 210 then **168** | 229, 229 | 252, 252 | 275, 275 |
+| K08 toll road, two beats | 210 then **168** | 229 then **183** | 210, 210 | 229, 229 |
+| K09, two beats | 210, 210 | 229, 229 | 252, 252 | 275, 275 |
+| K10, two beats | 210 then **168** | 229 then **183** | 210, 210 | 229, 229 |
+| K11 (task card) | 168, goal line hidden | 183, goal line hidden | 210 | 229 |
+| Ending, two beats | 210, 210 | 229, 229 | 210, 210 | 229, 229 |
+| Lowest stage | 168 | 183 | 210 | 229 |
+| Last button, lowest position | 615 of 640 | 615 of 645 | 686 of 740 | 705 of 844 |
+- **The owner's case is fixed:** the opening keeps one box through its three beats at all four sizes (Chinese too at 360 × 640).
+- **Minimum stage** 168 at 360 wide and 183 at 390, as specified. **Goal line** hides only in K11 at the two short sizes. **Dialogue text** did not scroll in any beat I reached; K09-e and the K08 result, where Fullstack reports scrolling, need a finished activity and I did not reach them.
+- **Close-up camera in the constant box:** reads well. On the tall screens the opening is the square close-up for all three beats (face, badge and the "LAYANAN KLAIM RAKSA" board are clear; the framed picture is cut by the right edge as before). On the short screens the box is 16 : 10 with the wide view; Miss Raksa is small but clear.
+
+- [D-174] Stage, short screens · **the box still changes inside a node when the task card arrives:** K07, K08 and K10 at 360 × 640 (210 → 168) and K08 and K10 at 390 × 645 (229 → 183). The handoff lists K07 and K10 but not K08. It is the same kind of jump the owner reported, at his screen size · choose the node's shape with the task-card beat included, so those nodes use 168 / 183 from their first beat · **med**.
+- [D-175] Opening, all four sizes · **the stage moves up 56 px after the first beat.** The sound banner (48 + 8) sits between the goal line and the stage on the first screen; when it leaves (first tap or 6 s) the stage top goes from 177 to 121. Same box, new position · show the banner over the top edge of the stage, or in the free space under the dialogue box, so nothing moves · **med**.
+
+### 2. Activities (D-133)
+Shell: story header 57, activity head 69, question pinned (23.4 or 46.8; K04 49.4 with its instruction line), one scroller, send bar 68 pinned. Page height = screen in every activity at every size; no sideways overflow.
+| Activity | Layout | Scroller: px of content below the fold (360 × 640 / 390 × 645 / 360 × 740 / 390 × 844) |
+| --- | --- | --- |
+| K04 map | **new (D-143 / D-144)** | 56 / 51 / 0 / 0: only the list link and its padding |
+| K02 documents | old | 175 / 170 / 75 / 0 |
+| K05 forward the photos | old | 236 / 184 / 136 / 0 |
+| K07 plan | old | 481 / 400 / 381 / 201 |
+| K08 first step | old | 24 / 27 / 0 / 0 |
+| K08 marking a sign | old | 279–364 at 360 × 640 |
+| K08 conclusion | old | 844 / 824 / 744 / 625 |
+| K09 witnesses | old | 404 / 357 / 304 / 158 |
+| K10 compare | old | 489 / 439 / 389 / 240 |
+| K11 bundle | old | 132 / 114 / 32 / 0 |
+- **K04 matches my numbers.** Board 202 at the two short sizes, about 246 at 360 × 740, 300 at 390 × 844; five tiles 96 wide, no overlaps; strip under the board; one tap chooses, a second tap on another place changes it; no "Pilih tujuan ini" step. Chinese at 360 × 640 holds.
+- **The other seven are today's layouts inside the new shell.** They do what D-133 asked (pinned head and bar, one scroller) but still need the scrolling the owner objected to. Fitting them is the T-020 work (D-145 to D-150, D-166, D-167), not a Stage 2 defect.
+- **K08 conclusion is not the reply sheet yet**: five option cards of 74–98 px in the scroller.
+
+- [D-176] K08, after tapping a sign · **the sign's wording is pushed under the pinned head.** The new scroll correction keeps the road where it was, so the card that appears above the road is cut: at 390 × 645 only its last line ("menggunakan lajur 3 dan 4.") is visible, the name "Rambu 1" and the first line are hidden; at 360 × 640 the name row is hidden (`akt-k08-tandai-*.png`). That card is what the player has to read · when a sign opens, put the top of its card at the top of the scroller and let the road move · **high**.
+- [D-177] K08 · the step button ("Lanjut ke rambu berikutnya", "Lanjut ke kesimpulan") is at the end of the scroller, 279–364 px below the fold at 360 × 640; moving from the last sign to the conclusion the road jumped 63–85 px in my run (I pressed the button without scrolling) · put the step button in the pinned bar like a send button · med.
+- [D-178] K04 at 360 × 640 and 390 × 645 · the plate "Papan ilustrasi, bukan peta" lies under the labels of "Meja kantor" and "Bengkel langganan" and reads "…apan ilustrasi, bukan pe…" · hide the plate while the board is under 230 px (keep the text for screen readers) · low.
+- [D-179] Send bar · it grows from 68 to 74 px when the button becomes ready (button 52 → 58), so the scroller loses 6 px at that moment · one height, 58, for both states · low.
+- [D-180] Send bar, disabled labels · "Tandai juga: Petugas tol, Pak Hendra, Pengemudi mobil kecil, Polisi Jalan…" is cut with an ellipsis at two lines (K09); K05 and K07 also take two lines · the short labels of D-143 ("Tandai 5 kartu lagi.", "Ketuk satu tujuan.") · low.
+
+### 3. End screen (D-134): PASS
+| Check | 360 × 640 | 390 × 645 | 360 × 740 | 390 × 844 |
+| --- | --- | --- | --- | --- |
+| Header pinned / scroller / action bar | 57 / 514 / 69 | 57 / 519 / 69 | 57 / 614 / 69 | 57 / 718 / 69 |
+| "Ulangi Bagian 4" + "Selesai", one row, 52 high | 239 + 89 wide | 269 + 89 | 239 + 89 | 269 + 89 |
+- Verdict, cause and lesson end at 503 px at 360 × 640 ("kurang", the longest), above the bar at 571; the summary follows in the same scroller under a fade.
+- The short label carries the full sentence as its accessible name ("Coba lagi dari bagian Keputusan dan penyelesaian"). Chinese: "重玩第 4 部分" + "完成" on one row. The good ending shows "Selesai" + "Coba jalur lain" on one row.
+
+### 4. Stage 1b fixes: PASS
+| Item | Built |
+| --- | --- |
+| D-139 note tab | whole and on top at all four sizes; at 360 × 640 the chat keeps 28–32 px above the sheet (K14 id 32, K03 id 28, K13 en 28) |
+| D-140 full width | sheet 0 to 360 / 390, rows 340 / 370 wide |
+| Sheet heights | 390 wide: K14 471, K03 467 (my mock 469 / 465). 360 wide: K14 490 without list scroll, K03 503 (list scrolls 2 px), K13 en 494 (list scrolls 30 px, as predicted) |
+| D-141 badges | unchosen badges filled `#4f7d66`, no opacity |
+| D-142 game feel | rows have a hard 2 px edge; with motion on: Miss Raksa hops, the unread note tab wiggles, the send button pops and its arrow nods when ready, the chosen badge pops; the global reduced-motion rule turns them off (not re-measured this time) |
+- K14 in Chinese at 360 × 640: sheet 419, 112 px of chat above.
+
+### Blockers and polish
+- **Fix before the owner looks again:** D-176 (high), then D-174, D-175, D-177 (medium). They are all "something jumps or hides" on the screens he has already commented on.
+- **Polish:** D-178, D-179, D-180.
+- **Not Stage 2:** the seven old activity layouts and the K08 conclusion sheet (T-020).
+
+### Not verified by me
+A real iPhone and WebKit (Chromium only; QA is on the same build). K09-e, the K05 result and the K08 result beats (they need a finished activity). English on stage, activity and end screens; Chinese only at 360 × 640. Activities beyond their first screen, except K04 and K08. Whether the row press and the send-button pop feel right (I confirmed the animations exist, I cannot watch them). Desktop 1280 and Episode 1 (not in this brief). The test suites.
+
+---
+
+## T-018 — Stage 2 re-check (2026-11-16)
+
+Reviewer: Designer · Folder: C:\Users\User\Desktop\rksgm-episode2 · No source edits, no commit, BOARD.md not touched.
+Build: production build in client/dist of 19:16:31, unchanged during my run, on my own server on :4002 (started and stopped by me; other ports not touched).
+Method (run light: one headless Chrome at a time, closed between sizes, below-normal priority, no test suite): read HANDOFF "Fix (… D-174..D-180)"; at 360 × 640 and 390 × 645 in Indonesian, and once at 390 × 844, I opened a brand-new episode (banner showing) and walked its three beats, walked K07, K08, K10, K04, K09, K11 beat by beat, walked K08 through both signs to the conclusion, opened the K04 map and read the disabled bar labels of K04, K05, K07, K09, K10; English and Chinese labels at 360 × 640. I opened 4 screenshots. Evidence: `team/evidence/T-018/designer/stage2-recheck/`.
+
+### Verdict: FIX NEEDED, one item. D-174 and D-176 to D-180 are fixed. The D-175 fix stops the jump but now puts the banner on Miss Raksa's head.
+
+### What I confirmed
+| Item | 360 × 640 | 390 × 645 | 390 × 844 |
+| --- | --- | --- | --- |
+| D-176 K08: sign card after tapping a sign | whole: 147.8–260.4 in a scroller that starts at 146 (sign 2: 147.8–236.1) | whole: 148.4–261 (sign 2: to 236.7) | whole |
+| D-177 K08: step button | in the pinned bar; none left in the scroller | same | same |
+| K08 bar label | "Tandai setidaknya satu lajur." → "Lanjut ke rambu berikutnya" → "Lanjut ke kesimpulan" | same | same |
+| D-174 stage box, K07 / K08 / K10 | 168 on both beats, top 121 | 183 on both beats, top 121 | 275 / 229 / 229 on both beats |
+| K04 and K09 | 210, 210 | 229, 229 | 275, 275 |
+| D-175 stage top, new episode, beats 0 / 1 / 2 | 121 / 121 / 121 | 121 / 121 / 121 | 121 / 121 / 121 |
+| D-178 map plate | hidden (board 202), still in the page for screen readers | hidden (board 202) | shown (board 300) |
+| D-179 send bar | 74 before and after choosing; button 58; scroller unchanged (355) | 74 / 74; scroller 360 | 74 / 74 |
+| D-180 labels, one line each | "Ketuk satu tujuan." (K04, K05, K07), "Tandai 5 kartu lagi." (K09), "Catat 3 perbedaan lagi." (K10) | same | same |
+- Page height = screen in every state I opened.
+- When a sign opens the road moves down 46 px (262.8 → 308.7 at 360 × 640) so that its card is whole; that is the trade I asked for.
+
+### What is wrong
+- [D-181] First screen of a new episode, short screens · **the sound banner now lies on Miss Raksa.** It is drawn over the content from y 115 to 163 and the stage starts at 121, so it covers the top 42 px of the picture. At 360 × 640 that hides her hair and forehead down to the eyes (`buka-spanduk-360x640.png`); at 390 × 645 it hides the top of her hair and the "LAYANAN KLAIM RAKSA" board. It stays until the first tap or 6 s. My D-175 text offered "over the top edge of the stage" as one option; that was the wrong one for the wide view · put it in the empty space under the dialogue box instead: 12 px above the bottom edge (plus the bottom inset), same 48 px height, still not taking a row. On that screen the dialogue box ends about 138 px (390 × 645) and 153 px (360 × 640) above the bottom edge, read from the screenshots, and far more on tall screens · **med**.
+
+### K07 at 390 × 645: 183 on both beats where 229 used to fit
+**Acceptable.** Pak Bima is framed from head to belt and reads well (`adegan-k07-390x645-b0.png`); K08 and K10, which follow it, need 183 at this size anyway, so the three now share one box. The cost is 46 px of picture in one node while about 60 px stay free under the dialogue box on the task-card beat (its button ends at 569 of 645). If Fullstack wants it back: count the 22 px overlap when the last beat has a speaker. Low priority, not required.
+
+### Remaining, not from this fix
+- Going from the last sign to the K08 conclusion the road still moves up 131 px (308.7 → 177.4), because the conclusion screen starts at the road. It goes away when the conclusion becomes the reply sheet over the road (D-146).
+
+### Final wording of the three short bar labels
+| Key | id | en | zh |
+| --- | --- | --- | --- |
+| `belumTujuanRingkas` | Ketuk satu tujuan. | Tap one destination. | 请点选一个去向。 |
+| `belumKontakRingkas` | Tandai {n} kartu lagi. | Cards left to mark: {n}. | 还需标记 {n} 张卡片。 |
+| `belumBedaRingkas` | Tentukan {n} perbedaan lagi. | Differences left to decide: {n}. | 还需决定 {n} 处出入。 |
+- **Destination and cards (id, zh):** Fullstack's drafts stand.
+- **English, both counted labels:** "Mark {n} more cards." and "Record {n} more differences." read wrong at n = 1 ("1 more cards"). The forms above have no plural to get wrong.
+- **K10, neither "Catat" nor "Cap":** "Catat apa adanya" is one of the five answers, so "Catat 3 perbedaan lagi" reads like a hint to choose it; the same goes for "Record" / "记录" next to that answer in the other languages. "Cap" would only make sense once the stamps are built. "Tentukan" matches the task's own instruction ("Tentukan cara mencatat tiap perbedaan di laporan.") and works before and after the stamps.
+- **Chinese, K10:** the draft says "差异", but this activity calls the differences "出入" everywhere ("先选一处出入，再选记录方式。", "这处出入怎么写进报告？") and its instruction uses "决定". My line reuses those words. I am not a native reader, so the translator should confirm it.
+
+### Not verified by me
+WebKit and a real iPhone. The banner fix I propose is not built. English and Chinese only for the three labels at 360 × 640. The row and button animations. K09-e and the result beats. The test suites (Fullstack reports them green on this build).

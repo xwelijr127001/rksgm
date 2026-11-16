@@ -7,9 +7,11 @@
  * Pilihan bisa diganti sebelum dikirim; kartu umpan balik menulis tujuan & artinya (pembaca layar: live region).
  * Bila tokoh yang dipindah juga yang memberi tugas, kalimatnya tampil di kartu tokoh itu (Arena tidak mengulanginya).
  */
-import { useId } from 'react';
+import { useContext, useId } from 'react';
+import { createPortal } from 'react-dom';
 import { selaPembicara } from '../../ui/bagian';
 import { t } from '../../../i18n';
+import { KeSlot, SlotKepalaArena } from '../cangkang';
 import type { Episode, KunciTeks, TujuanArena } from '../../tipe';
 import { GambarSeni, PotretHp, TombolKirim } from '../bagianHp';
 import { petaLangkah, tetapkan, type ArenaTujuan } from './logika';
@@ -17,8 +19,11 @@ import { Ubin, panahUbin, type PropsPola } from './pola';
 import { PapanTujuan, bisaPapan } from './PapanTujuan';
 import { RencanaPeriksa } from './RencanaPeriksa';
 
-export function ArenaPolaTujuan({ ep, konfig, jawaban, ubah, daftar, tx, labelKirim, onKirim, kutipan }: PropsPola & { konfig: ArenaTujuan }) {
+export function ArenaPolaTujuan({ ep, misi, konfig, jawaban, ubah, daftar, tx, labelKirim, onKirim, kutipan }: PropsPola & { konfig: ArenaTujuan }) {
   const idTanya = useId();
+  // T-020 (D-143): di cangkang HP, papan lokasi diawali SATU baris instruksi hijau tepat di bawah pertanyaan (tersemat).
+  const slotKepala = useContext(SlotKepalaArena);
+  const pakaiPapan = !daftar && (konfig.gaya === 'peta' || konfig.gaya === 'teruskan') && bisaPapan(konfig.tujuan.length);
   const dipilih = petaLangkah(jawaban, konfig.langkah)[konfig.benda.id] ?? null;
   const tujuan = konfig.tujuan.find((x) => x.id === dipilih) ?? null;
   const pilih = (id: string) => ubah(tetapkan(jawaban, konfig.langkah, konfig.benda.id, id));
@@ -30,14 +35,15 @@ export function ArenaPolaTujuan({ ep, konfig, jawaban, ubah, daftar, tx, labelKi
   });
 
   return (
-    <div className="hp-pola-tujuan" data-gaya={konfig.gaya}>
+    <div className="hp-pola-tujuan" data-gaya={konfig.gaya} data-papan={pakaiPapan ? '' : undefined} data-dipilih={dipilih ? '' : undefined}>
+      {pakaiPapan && slotKepala && misi.instruction ? createPortal(<p className="hp-instruksi-arena">{misi.instruction}</p>, slotKepala) : null}
       {!daftar && konfig.gaya !== 'rencana' ? (
         <div className="hp-tujuan-benda">
           <span className={'hp-token-awal' + (dipilih ? ' pergi' : '')}>{token}</span>
           <span className="hp-tujuan-benda-teks"><b>{namaBenda}</b>{konfig.benda.keterangan ? <span>{tx(konfig.benda.keterangan)}</span> : null}{kutipan ? <q>{tx(kutipan.teks)}</q> : null}</span>
         </div>
       ) : null}
-      <h3 id={idTanya} className="hp-tanya-arena">{tx(konfig.tanya)}</h3>
+      <KeSlot ke={SlotKepalaArena}><h3 id={idTanya} className="hp-tanya-arena">{tx(konfig.tanya)}</h3></KeSlot>
       {konfig.gaya === 'rencana' && !daftar ? (
         <RencanaPeriksa konfig={konfig} dipilih={dipilih} tx={tx} idTanya={idTanya} onPilih={pilih} />
       ) : !daftar && (konfig.gaya === 'peta' || konfig.gaya === 'teruskan') && bisaPapan(konfig.tujuan.length) ? (
@@ -51,7 +57,7 @@ export function ArenaPolaTujuan({ ep, konfig, jawaban, ubah, daftar, tx, labelKi
       <p className="hp-umpan" role="status" data-kosong={tujuan ? undefined : ''}>
         {tujuan ? <span><b>{t('ceritaHp.dipilih')}</b>{selaPembicara()}{tx(tujuan.label)}</span> : null}
       </p>
-      <TombolKirim label={labelKirim} siap={!!tujuan} onKirim={onKirim} alasanBelum={tujuan ? null : t('ceritaHp.belumTujuan', { benda: namaBenda })} catatan={t('ceritaHp.pilihanBisaDiubah')} />
+      <TombolKirim label={labelKirim} siap={!!tujuan} onKirim={onKirim} alasanRingkas={tujuan ? null : t('ceritaHp.belumTujuanRingkas')} alasanBelum={tujuan ? null : t('ceritaHp.belumTujuan', { benda: namaBenda })} catatan={t('ceritaHp.pilihanBisaDiubah')} />
     </div>
   );
 }

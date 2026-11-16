@@ -13,6 +13,7 @@ import { useEffect, useId, useRef, useState, type KeyboardEvent, type ReactNode 
 import { playSfx } from '../../../audio/audio';
 import { Arrow } from '../../../components/PlayerShell';
 import { t } from '../../../i18n';
+import { KeSlot, SlotKepalaArena } from '../cangkang';
 import type { KunciTeks, TujuanArena } from '../../tipe';
 import { GambarSeni, TombolKirim } from '../bagianHp';
 import { pilihOpsi, type ArenaBundel } from './logika';
@@ -89,10 +90,10 @@ export function ArenaPolaBundel({ ep, misi, konfig, jawaban, ubah, daftar, tx, o
 
       <section ref={bagianRef} className="hp-bundel-langkah" aria-labelledby="hp-bundel-judul" data-tahap={langkah}>
         {/* Nomor langkah sudah terlihat di penanda langkah; pembaca layar mendengarnya bersama judul. */}
-        <h3 id="hp-bundel-judul" ref={judulRef} tabIndex={-1} className="hp-tanya-arena">
+        <KeSlot ke={SlotKepalaArena}><h3 id="hp-bundel-judul" ref={judulRef} tabIndex={-1} className="hp-tanya-arena">
           <span className="sr-only">{t('ceritaHp.langkahKe', { n: nomor, total: URUTAN.length })}: </span>
           {langkah === 'periksa' ? tx('arena.bundel.pengantar') : langkah === 'tindakan' ? tx(konfig.tindakan.tanya) : tx(konfig.kabar.tanya)}
-        </h3>
+        </h3></KeSlot>
 
         {langkah === 'periksa' ? (
           <>

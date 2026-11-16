@@ -7,6 +7,7 @@
  *   - obrolan-lanjut:  tombol Lanjut yang menambah pesan dan tetap di obrolan (uji "mengikuti pesan terbaru" + pil)
  *   - obrolan-pilihan: keputusan yang sesudah balasan pertama tetap di obrolan, teks pilihan terpanjang
  *   - obrolan-tugas:   kartu tugas di komposer (bila ada)
+ *   - balas-<node>:    setiap keputusan obrolan (K01, K03, K06, K12, K13, K14) untuk lembar balasan (Tahap 1b)
  *
  *   npx tsx --tsconfig client/tsconfig.json tools/cerita/state-obrolan-t018.mts > team/evidence/T-018/states.json
  */
@@ -55,6 +56,8 @@ for (let run = 0; run < 60; run++) {
       if (bab === 1 && n.jenis === 'pilihan' && lengkap) calon('obrolan-b1', s, u.pesan.length);
       if (bab === 4 && !(n.jenis === 'akhir' && lengkap)) calon('obrolan-b4', s, u.pesan.length); // akhir lengkap dipulihkan sebagai layar akhir
       if (n.jenis === 'aktivitas' && lengkap) calon('obrolan-tugas', s, u.pesan.length);
+      // Tahap 1b (D-128): SETIAP keputusan obrolan (lembar balasan), state pertama yang ditemukan.
+      if (n.jenis === 'pilihan' && lengkap) calon('balas-' + n.id, s, 1);
       if (n.jenis === 'pilihan' && lengkap) {
         const p = pilihanTersedia(ep, s);
         const t = p[0] ? utuh(jalankan(ep, s, { jenis: 'pilih', node: n.id, pilihan: p[0].id })) : s;

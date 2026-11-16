@@ -7,7 +7,7 @@
  *  - Kirim tetap lewat TombolKirim di ArenaTujuan.
  * Posisi tempat = tata letak tetap per indeks (bukan geografi).
  */
-import { useId, useState, type ReactNode } from 'react';
+import { useId, type ReactNode } from 'react';
 import { playSfx } from '../../../audio/audio';
 import { t } from '../../../i18n';
 import type { Episode, KunciTeks, TujuanArena } from '../../tipe';
@@ -33,13 +33,17 @@ export function PapanTujuan({ ep, tujuan, dipilih, token, tx, idTanya, onPilih }
   idTanya: string;
   onPilih: (id: string) => void;
 }) {
-  const [lihat, setLihat] = useState<string | null>(dipilih);
+  // T-020 (D-143, keputusan Lead 16 Nov): KETUK = PILIH (ketuk tempat lain = ganti); tombol kirim di bilah bawah = konfirmasi.
+  // Tidak ada lagi langkah "Pilih tujuan ini"; strip di bawah papan menampilkan nama + arti tempat yang dipilih.
+  const lihat = dipilih;
   const idDetail = useId();
   const pos = TATA[tujuan.length]!;
   const dilihat = tujuan.find((x) => x.id === lihat) ?? null;
+  // T-018 Tahap 2 / T-020: di cangkang HP peta dipendekkan supaya kelima tempat + tombol kirim terlihat; kartu detail bisa di bawah
+  // lipatan, jadi sesudah sebuah tempat diketuk kartu detailnya (dengan "Pilih tujuan ini") digulir ke dalam pandangan.
   return (
     <div className="hp-papan-lok-wadah">
-      <div className="hp-papan-lok" role="group" aria-labelledby={idTanya}>
+      <div className="hp-papan-lok" role="group" aria-labelledby={idTanya} data-jumlah={tujuan.length}>
         <svg className="hp-papan-lok-jalan" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
           <path d="M22 25 C38 34 42 44 50 51 C58 56 62 34 78 25 M50 51 C46 62 34 68 22 76 M50 51 C58 64 66 68 78 76" />
         </svg>
@@ -57,7 +61,7 @@ export function PapanTujuan({ ep, tujuan, dipilih, token, tx, idTanya, onPilih }
               aria-controls={idDetail}
               aria-label={`${tx(x.label)}${pilih ? `, ${t('ceritaHp.tujuanTerpilih')}` : ''}`}
               data-tujuan={x.id}
-              onClick={() => setLihat(x.id)}
+              onClick={() => { if (x.id !== dipilih) { playSfx('konfirmasi'); onPilih(x.id); } }}
             >
               <span className="hp-tempat-gambar">
                 <GambarSeni ep={ep} id={x.seni} className="hp-tempat-seni" />
@@ -70,16 +74,11 @@ export function PapanTujuan({ ep, tujuan, dipilih, token, tx, idTanya, onPilih }
         })}
         <span className="hp-papan-lok-label">{t('ceritaHp.papanIlustrasi')}</span>
       </div>
-      <div id={idDetail} className={'hp-tempat-detail' + (dilihat && dilihat.id === dipilih ? ' terpilih' : '')} aria-live="polite">
+      <div id={idDetail} className={'hp-tempat-detail' + (dilihat ? ' terpilih' : '')} data-strip={dilihat ? 'pilihan' : 'kosong'} aria-live="polite">
         {dilihat ? (
           <>
-            <p className="hp-tempat-detail-kepala"><b>{tx(dilihat.label)}</b><span>{dilihat.id === dipilih ? t('ceritaHp.tujuanTerpilih') : t('ceritaHp.sedangDilihat')}</span></p>
+            <p className="hp-tempat-detail-kepala"><b>{tx(dilihat.label)}</b><span>{t('ceritaHp.tujuanTerpilih')}</span></p>
             {dilihat.arti ? <p className="hp-tempat-detail-arti">{tx(dilihat.arti)}</p> : null}
-            {dilihat.id === dipilih ? null : (
-              <button type="button" className="hp-tempat-pilih" data-pilih-tujuan="" onClick={() => { playSfx('konfirmasi'); onPilih(dilihat.id); }}>
-                {t('ceritaHp.pilihTujuanIni')}
-              </button>
-            )}
           </>
         ) : <p className="hp-tempat-detail-arti">{t('ceritaHp.lihatTempat')}</p>}
       </div>

@@ -1215,3 +1215,227 @@ Rudi at the pool is unchanged: 4 / 3 / 4 poses (`cek-jalan-t017.mjs` 8 / 8).
 **Notes**
 - I did not watch the walk in motion.
 - `npm run build` rewrote `client/dist`; the check runs rewrote evidence under T-013, T-014, T-017 and T-018.
+
+## T-018 Stage 1b (2026-11-16): reply sheet (D-128), sound banner (D-129), D-130, D-131
+
+Fullstack · NOT committed (base 56ffbb0). Board: T-018 note "Stage 1b built".
+
+**D-128, reply sheet: built to the Designer's table.**
+- On phones (the Stage 1 chat shell) "Balas ..." now opens a sheet that slides up from the composer (180 ms rise + fade; rows 30 ms apart; chosen badge pops; none under reduced motion). The Stage 1 placement (choices at the end of the message list) is gone.
+- Parts: grab handle; Miss Raksa 32 px icon (`ikon-miss-raksa.png`, no new art) + question 16 / 20; numbered rows 15 / 19 with pixel-cornered badges (padding 6 / 10, gap 5, min 44); send button 48 px.
+- Send label: "Pilih 1 balasan" (disabled) -> "Kirim balasan N". New keys in `i18n/kamus/ceritaHp.ts`: `pilihSatuBalasan`, `kirimBalasanN`, `catatan`, `catatanBaru`, `kembaliBalasan`, `tutupBalasan` (id / en / zh; en and zh wording from the mock: "Choose 1 reply", "Send reply N", "Note", "Back to replies"; "请选 1 条回复", "发送回复 N", "备注", "返回回复"). The button no longer jumps when a choice is made.
+- No collapse into the preview bubble on phones: tap selects, tap another row changes.
+- Reference card: behind the yellow "Catatan" tab (red dot until opened). The sheet flips to a plain note list with "Kembali ke balasan". Staged documents become a numbered list; the "order of explanation, not a schedule" line of parallel stages is kept as a footnote.
+- While the sheet is open: chat header is one 44 px row (portrait 32, status inline), the sound banner is hidden, the message window shrinks and stays at its end.
+- Close: tap the handle, swipe it down, or Esc. The selection is kept and restored when "Balas" is tapped again.
+- Keyboard: radiogroup and arrows as before; keys 1-5 select; Enter on the selected row sends; focus moves to the question on open and back to "Balas" on close. Accessible names unchanged (question labels the group).
+- The sheet reaches the bottom of the screen (the page's bottom padding moves inside the sheet, safe-area inset still applied once).
+- Desktop (1024 and wider) and face-to-face decisions keep the old block.
+- Code: `hp/PilihBalasan.tsx` (sheet + note), `hp/ekor.ts` (`LembarObrolan` context replaces the Stage 1 portal slot), `hp/Obrolan.tsx`, `hp/PemainHP.tsx`, `hp/desain.css`.
+
+**Sheet heights, measured in the built game** (six chat decisions K01, K03, K06, K12, K13, K14; Chromium and WebKit gave the same numbers except two zh cases at 360x640)
+
+| Visible page | Language | Sheet height | Chat left above the sheet | List scrolls? |
+| --- | --- | --- | --- | --- |
+| 390 x 645 (owner) | id | 465-503 | 33-62 px | no |
+| 390 x 645 | en | 446-522 | 14-90 | no |
+| 390 x 645 | zh | 388-427 | 109-148 | no |
+| 390 x 844 | id / en / zh | same heights | 213-347 | no |
+| 360 x 640 | id | 503-522 | 0-28 | K14 only |
+| 360 x 640 | en | 484-531 | 0-47 | K01, K13, K14 |
+| 360 x 640 | zh | 388-446 | 85-143 | no |
+
+- Per decision at 390 x 645, id / en / zh: K01 503 / 522 / 427, K03 484 / 465 / 388, K06 484 / 446 / 398, K12 484 / 484 / 398, K13 465 / 522 / 408, K14 469 / 503 / 407.
+- **Target at 390 x 645 met**: question, all five choices and the send button visible without scrolling in all 18 cases, both engines.
+- **Fallback cases (360 x 640 only, 4 of 18):** K14 id (list 23 px too tall), K01 en (29), K13 en (19), K14 en (4). There only the choice list scrolls; question and send button stay. Note view: K03 en at 360 x 640 scrolls inside the note.
+- Why 360 x 640 does not match the mock's "fits": in Part 4 the story header is 66 px, not 57 (the part title wraps at 360), and rows have the 44 px minimum the mock lacks. Sheets are about 20 px taller than the mock overall.
+
+**D-129, sound banner: done.** Shown once per episode, only if the player is on the episode's first screen; removed on the first tap of any primary button or after 6 s, remembered per episode (the old global key still counts as dismissed). Never rendered while a reply sheet or an activity is open. Applies at every width, so the desktop chat screenshot no longer shows the banner mid-episode.
+
+**D-130: my call = always show the header portrait on phones.** The rule that hid it during a cut-in is switched off inside the phone shell only; desktop keeps the old rule.
+
+**D-131: done.** At heights under 700 px the task card in the chat composer uses padding 10, title 17 px and a one-line instruction (ellipsis).
+
+**Tests** (own server on :4001, now stopped; one browser at a time; :4000 not touched)
+- `npm run test:client`: 741 / 741. `tsc --noEmit` clean. Production build OK.
+- `node tools/cek-gulir-t018.mjs`: **132 / 132** (Chromium 84, WebKit 48). Of these, 90 are sheet runs: every decision x id / en / zh at 390x645, 360x640 (both engines) and 390x844 (Chromium).
+- Each sheet run checks: sheet and note tab inside `visualViewport`; no page scroll; all choices visible (or the list-only fallback at 360x640); label change without a jump; 48 px button; 44 px header; no banner; note flip and back keeping the selection; Esc closes and focus returns; selection restored on reopen; key "1" selects. At 390x645 in Indonesian, Enter sends and the chat follows.
+- `cek-piksel-t013.mjs`: 99 / 99. `cek-bahasa-t014.mjs`: 138 / 138.
+- `test:e2e`: not run (Lead).
+
+**Evidence** (`team/evidence/T-018/stage1b/`)
+- Mock states at 390x645 id: `lembar-k14-390x645-id-buka-*.png`, `lembar-k14-390x645-id-pilih-*.png`, `lembar-k06-390x645-id-nota-*.png` (Chromium and WebKit).
+- `lembar-k03-390x645-en-buka-*.png`, `lembar-k13-390x645-zh-buka-*.png`, `lembar-k01-360x640-id-buka-*.png`, `lembar-k01-360x640-en-buka-*.png` (a fallback case).
+- Desktop: `obrolan-b1-1280-id-chromium.png`, `balas-k14-1280-id-chromium.png` (old block). `hasil.json`.
+- I opened four: K14 open (before the spacing fix), K14 chosen, K06 note (WebKit), K01 en at 360x640. The rest were captured but not opened.
+
+**Not done / to judge**
+- Swipe-down on the handle is implemented but not exercised by the check (tap and Esc are).
+- Desktop is not byte-identical to Stage 1 any more: the mid-episode sound banner is gone (D-129). Layout checks for desktop pass; I did not diff the pixels beyond that.
+- Not checked on a real iPhone.
+- `team/evidence/T-018/states.json` regenerated with a `balas-<node>` state per chat decision. `npm run build` rewrote `client/dist`.
+
+## T-018 Stage 2 (2026-11-16): stage, activity and end screens fit the phone (D-132..D-134) + addenda
+
+Fullstack · NOT committed (base 56ffbb0; Stage 1b is uncommitted in the same tree). Board: T-018 note "Stage 2 built".
+
+### A. Stage 2 proper
+
+**Shell.** `PemainHP` marks the screen `data-kunci` for stage beats (action inside the dialogue box), activities and the end screen. From 560 px screen height and below 1024 px width the page is the screen height and does not scroll (`hp/cangkang.tsx`, block "T-018 Tahap 2" in `hp/desain.css`). Desktop and shorter screens keep page scroll. `PanggungPiksel` camera math is untouched.
+
+**D-132 stage screens** (`AdeganTatap.tsx`)
+- Gives way in order: stage steps down through the existing shapes (never below 2:1 = 168 px at 360, 183 at 390), then the goal line hides (it is now also in the Menu), then only the dialogue text scrolls (`.hp-vn-isi`), with the name tab sticky, the action row pinned and a 24 px fade.
+- Measured, Indonesian (stage height in px; "goal hidden", "text scrolls" where they apply):
+
+  | Beat | 360x640 | 390x645 | 360x740 | 390x844 |
+  | --- | --- | --- | --- | --- |
+  | Opening (3 beats) | 210 | 229 | 336 | 366 |
+  | K04 pool (2 beats) | 210 | 229 | 252 | 275 |
+  | K07 Bima (2 beats) | 210 then 168 | 229 | 252 | 275 |
+  | K10 (2 beats) | 210 then 168 | 229 then 183 | 210 | 229 |
+  | K05 result | 168 | 183 | 210 | 229 |
+  | K11 task | 168, goal hidden | 183, goal hidden | 210 | 229 |
+  | K09-e | 168, goal hidden, text scrolls 4 px | 183, goal hidden | 168 | 183 |
+  | K08 result (no stage) | text scrolls | text scrolls | text scrolls | text scrolls |
+
+**Frame jump between beats (owner 16:25) and its root cause.**
+- Root cause: two rules, neither an animation. (1) By design since the visual-novel rhythm work, the stage shape was chosen per beat from the text length (`tinggiPanggung`: up to 140 characters = tall, up to 260 = medium, more = short); in the kantor the tall shape is 1:1, and for a square box the T-013 camera uses the close-up frame. (2) My first Stage 2 build added a per-beat "does it fit" step-down, which on the owner's phone made the short greeting keep the tall box and the next, longer beat drop to the wide one. The canvas simply redraws in the new box; no zoom was ever animated.
+- Fix: the shape is now chosen per node from its longest beat and remembered per room and screen width; while the location does not change it may only step down (when a beat does not fit), never back up. On screens under 700 px high the tall shape is not used at all.
+- Result: at 360x740 and 390x844 every checked node keeps one stage height across its beats (asserted in the check). At 360x640 two nodes still step down once when the task card appears (K07, K10: 210 then 168), and K10 at 390x645 (229 then 183).
+- Not changed: the camera rules themselves. Within one box the camera can still frame differently when the speaker changes; I did not touch that (Codex: no camera math changes).
+
+**D-133 activities** (`arena/Arena.tsx` + the six pattern files)
+- Pinned: story header, activity head, the question (and K08's sign row), moved with a portal into a slot under the head. Pinned send bar at the bottom: `TombolKirim` portals its button there; the "not yet" reason becomes the disabled label (two lines at most); the "can still be changed" note stays at the end of the scroller.
+- One scroller: `.hp-arena-gulir`.
+- K02: picture 214 + instruction + trays visible at once at all four sizes; "Pesan & info tugas" below the trays; after 8 documents the send button is in the bar.
+- K08: sign row pinned; road box 336 / 366 wide. **Scroll jump fixed**: when the step changes, the scroll position is corrected so the road stays where it was (conclusion step: 69 -> 68 px at 360x640, 43 -> 43 at 390x645). It cannot be corrected when the scroller is already at its limit (sign 1 -> sign 2 on screens where everything fits: the road moves 30 to 85 px because the sign card above it changes).
+- K05: info card is collapsed by default (it already was in code; asserted). K09: plan box + 5 cards in two columns visible at once at all four sizes (spacing tightened only). K10: same three regions.
+
+**D-134 end screen** (`ui/LayarAkhir.tsx`, optional `slotAksi`): header pinned; action bar pinned as one 52 px row; retry label on phones is "Ulangi Bagian N" / "Retry Part N" / "重玩第 N 部分" (full text stays as the accessible name); verdict + lesson visible without scrolling; the summary follows in the same scroller with a 24 px fade.
+
+**Episode 1.** It does not use these screens (standard player `PemainCerita`, as reported in Stage 1). Nothing changed for it; the check records its opening screen at two sizes. If Episode 1 must also stop page-scrolling, that is separate work on `pages/CeritaMain.tsx` / `ui/cerita.css`.
+
+### B. Addenda in the same round
+
+**Stage 1b review (Designer D-139..D-142, QA B-01)**
+- D-139 / B-01: when a decision has a note, at least 28 px of chat stays above the sheet, so the "Catatan" tab is whole and tappable. The check now fails if the tab is not fully in the viewport or not the element at its centre.
+- D-140: the sheet spans the full screen width.
+- D-141: unchosen badges are filled #4f7d66 instead of 55 % opacity.
+- D-142 (CSS only, off under reduced motion): rows press down 2 px with a hard edge; the send button pops once and its arrow nods when it becomes ready; the unread note tab wiggles once after 1.2 s; Miss Raksa hops once. Plus the tap sound when a row is chosen.
+
+**T-020 location map (D-143 / D-144, K04)**
+- One green instruction line under the question; context 14.5 / 19; board takes the rest (202..300 px); tiles 96 wide with the label overlapping the picture; fixed positions (6 px from the sides, 8 px from top and bottom, centre tile centred); strip of 72 px under the board (Rudi and his question, then name + meaning of the chosen place).
+- **Tap = choose**, tap another = change; the send bar confirms. The "Pilih tujuan ini" step is gone (all widths).
+- Measured board height: 202 at 360x640 and 390x645, 246 at 360x740, 300 at 390x844; all five tiles whole, no overlap, strip and send button visible.
+- Not built from D-143: the yellow "Info tugas" tab (context always fits in the four sizes), and hiding the list-view link. The link stays at the end of the scroller, below the fold on short screens, because it is the non-visual alternative and I did not want it unreachable.
+- Tile art is today's art; only layout changed.
+
+### C. Checks
+
+- `node tools/cek-gulir-t018.mjs` now also runs the Stage 2 families from `tools/cek-layar-t018.mjs` (stage beats, K02, K04 map, K05, K08, K09, K10, three endings + summary; 360x640, 390x645, 360x740, 390x844).
+- Result of the last run on the final build: **incomplete.** The combined run hung in its Stage 2 part (started 16:29, no output after 16:35) and I stopped it. What did pass, all Chromium, each on the build of its time: chat families 102 / 102 (with D-139..D-142 and the tappable-tab assertion, four sizes); stage beats 32 / 32 on the final build (with the same-height assertion); activities K02, K04 map, K05, K09, K10 at four sizes 20 / 20 and K08 4 / 4 (before the frame-jump change, which does not touch activity code); three endings + summary 12 / 12 on the first Stage 2 build only.
+- **Not verified on the final build:** WebKit for anything in this round; the endings + summary case; `cek-piksel`, `cek-akhir`, `cek-jalan`, `cek-kaki`; `cek-bahasa` after the badge fix (it was 134 / 138 before it). Why the combined run hangs while `cek-layar-t018.mjs` alone passes is not diagnosed; run `cek-gulir-t018.mjs --tanpa-tahap2` and `cek-layar-t018.mjs` separately until it is.
+- `npm run test:client`: 741 / 741 (run before the frame-jump change; not rerun after it). `tsc --noEmit` clean. Production build OK. `test:e2e` not run.
+- QA's 4 `cek-bahasa` fails in the 8-document activity: cause was the tray count badges being clipped by 2 px at the scroller edge; fixed with 6 px side room.
+
+**Evidence:** `team/evidence/T-018/stage2/` (per case and size, `hasil.json` when run standalone), `team/evidence/T-018/stage1b/` for the sheet. I opened: K09-e, K02 summary, K08, end screen (kurang) and the map at 360x640; the rest were captured but not opened.
+
+**Open / to judge**
+- Real iPhone not tested by me.
+- The server I used (:4003) is stopped. `npm run build` rewrote `client/dist` many times (port 4000 now serves a frozen copy).
+
+### Tooling (2026-11-16 evening): why the combined check hung, and the fix (tools only; no game code, no rebuild)
+
+**Root cause.** A circular import, not a browser or network wait. `cek-gulir-t018.mjs` loads `cek-layar-t018.mjs` with a dynamic `import()` from inside its top-level main block, and `cek-layar-t018.mjs` statically imported `cek-gulir-t018.mjs` for `luncur` / `bukaGulir` / `siap`. The first module was still being evaluated (waiting on that very `import()`), so the import never resolved. The open browser kept the process alive, so it sat there silently. Reproduced with two 3-line files (Node reports "unsettled top-level await"). `cek-layar` run on its own never hit it, which is why it passed alone.
+
+**Fix.**
+- New `tools/t018-umum.mjs` holds the shared helpers; both tools import from it and `cek-layar` no longer imports `cek-gulir`.
+- Every case has a time limit (chat 120 s, Stage 2 150 s): a stuck case prints `FAIL <case> batas waktu ...`, its browser is killed, the run goes on. Page actions and navigation also have 20 s / 30 s defaults.
+- Families can be run alone: `--keluarga obrolan,adegan,aktivitas,akhir` (any subset), `--vp 360x740,390x844` for the Stage 2 families, `--kasus <part of name>` in `cek-layar`. One line is printed per case as it finishes.
+- Whole-run watchdog: `--batas-menit N` (default 45 in `cek-gulir`, 30 in `cek-layar`): writes `hasil.json`, kills the browser, exits with code 2. Verified with a 3-second limit (exit code 2).
+- One browser at a time, closed and relaunched whenever the screen size changes (`PerambanPerUkuran`); Stage 2 loops are size-outer so that is one launch per size.
+
+**Runs after the fix** (existing `client/dist`, own server on :4003, now stopped; :4000 and :4001 not touched)
+
+| Run (through `cek-gulir-t018.mjs`) | Result | Time |
+| --- | --- | --- |
+| `--keluarga adegan --vp 360x740,390x844` (Chromium + WebKit) | 32 / 32 (16 + 16) | 1 min 23 s |
+| `--keluarga aktivitas,akhir --vp 360x740,390x844` (Chromium + WebKit) | 36 / 36 (18 + 18) | 2 min 48 s |
+| `--keluarga obrolan --tanpa-webkit` (chat + reply sheet, all sizes) | 102 / 102 | 7 min |
+
+- These cover, on the current build: stage beats incl. the same-height assertion, K02, K04 map, K05, K08, K09, K10, and the three endings + summary, on both engines at 360x740 and 390x844.
+- Still not run on the current build: the Stage 2 families at 360x640 and 390x645 on WebKit; the chat families on WebKit; `cek-piksel`, `cek-akhir`, `cek-jalan`, `cek-kaki`, `cek-bahasa`.
+- Dead-server behaviour: a refused connection is reported as a failed case at once (checked against a closed port).
+
+### Fix (2026-11-16 evening, Designer Stage 2 review D-174..D-180)
+
+Fullstack · NOT committed. Board: T-018 note "Stage 2 fix done".
+
+- **D-176 (high), K08 sign wording hidden: fixed.** When a step shows the sign's wording card, the scroller now puts that card at its top (the road moves). The road is only held in place when no card is shown (the conclusion step). Asserted for both signs at four sizes: the card is whole inside the scroller.
+- **D-177, K08 step button: fixed.** "Lanjut ke rambu berikutnya" / "Lanjut ke kesimpulan" is in the pinned bar on phones; while nothing is marked the disabled label is the existing "mark first" reason. Desktop keeps the old inline button.
+- **D-174, box changing when the task card arrives: fixed by measuring, not guessing.** For an activity node whose task card is not shown yet, an invisible copy of the last beat plus the task card is laid out and measured; if it would not fit, the stage steps down from the first beat. (A first attempt with a character-count estimate changed K04's box on tall screens, so I dropped it.)
+
+  | Node | 360x640 | 390x645 | 360x740 | 390x844 |
+  | --- | --- | --- | --- | --- |
+  | K07 Pak Bima (2 beats) | 168, 168 (was 210, 168) | 183, 183 (was 229, 229) | 252, 252 | 275, 275 |
+  | K08 toll road (2 beats) | 168, 168 (was 210, 168) | 183, 183 (was 229, 183) | 210, 210 | 229, 229 |
+  | K10 (2 beats) | 168, 168 (was 210, 168) | 183, 183 (was 229, 183) | 210, 210 | 229, 229 |
+  | K04 pool, K09 (2 beats) | 210, 210 | 229, 229 | 252, 252 | 275, 275 |
+  | Opening (3 beats) | 210 x3 | 229 x3 | 336 x3 | 366 x3 |
+
+  K07 at 390x645 is now 183 on both beats although 229 fitted before: the measurement leaves out the 22 px dialogue overlap, because the task-card beat often has no speaker and then has no overlap.
+- **D-175, banner moving the stage: fixed.** On locked screens the sound banner no longer takes a row; it sits over the top of the content area and disappears in place. Stage top is 121 px with the banner and after it, at all four sizes (new episode and opening state).
+- **D-178:** the "Papan ilustrasi, bukan peta" plate is visually hidden on screens under 740 px high (board 202 px); it stays in the page for screen readers.
+- **D-179:** the send bar is one height (button 58 px) in both states.
+- **D-180:** short disabled labels in the bar: "Ketuk satu tujuan." / "Tandai N kartu lagi." / "Catat N perbedaan lagi." (new keys `belumTujuanRingkas`, `belumKontakRingkas`, `belumBedaRingkas`, id / en / zh; en and zh are my drafts). I wrote "Catat N perbedaan lagi" instead of the Designer's "Cap N perbedaan dulu" because the existing text for that activity says "mencatat"; say if "Cap" is wanted. Outside the bar the full reasons are unchanged.
+
+**Checks on this build** (own server on :4003, now stopped; one browser at a time, families run separately)
+
+| Check | Result |
+| --- | --- |
+| `cek-layar-t018.mjs` stage family, Chromium, four sizes | 44 / 44 |
+| `cek-layar-t018.mjs` activities + endings, Chromium, four sizes | 36 / 36 |
+| `cek-layar-t018.mjs` all Stage 2 families, WebKit, four sizes | 80 / 80 |
+| `cek-gulir-t018.mjs --keluarga obrolan` (chat + sheet) | 150 / 150 (Chromium 102, WebKit 48) |
+| `npm run test:client` | 741 / 741 |
+| `cek-bahasa-t014.mjs` | 138 / 138 |
+| `cek-piksel-t013.mjs` | 99 / 99 |
+| `cek-akhir-t019.mjs` | 45 / 45 |
+| `cek-jalan-t017.mjs`, `cek-kaki-t017.mjs` | 8 / 8, 18 / 18 |
+
+- New assertions in `cek-layar-t018.mjs`: same stage height AND same stage top across beats in a room at all four sizes; cases for K08, K09 and a brand-new episode (banner showing); K08 card whole and step button in the bar; bar height unchanged when ready; short labels; plate hidden on the short board.
+- This also closes the "not verified" list of the Stage 2 report: every check above ran on the final build.
+- `tsc --noEmit` clean; production build OK; `test:e2e` not run.
+
+**Evidence:** `team/evidence/T-018/stage2/fix/` (K08, map, K09, K07, K10, K08 stage, new-episode opening; Chromium and WebKit). I opened the K08 conclusion at 360x640; the rest were captured but not opened.
+
+**Not done:** real iPhone; watching the K08 flow by eye (the card rule is asserted by position only).
+
+### Fix 2 (2026-11-16 evening, Designer re-check D-181 + final labels)
+
+Fullstack · NOT committed. Board: T-018 note "fix 2 done".
+
+- **D-181, banner covering the top of the stage: fixed.** The sound banner is still an overlay (no row, no reflow) but now sits in the free space under the dialogue box, 10 px above the bottom edge. Measured on the first screen, both engines: banner at 582-630 px on 360x640 (stage 121-331, dialogue ends 486) and 587-635 px on 390x645 (stage 121-350, dialogue ends 505). Dismiss rules unchanged (first primary tap or 6 s, once per episode).
+- The check now fails if the banner overlaps the stage or the dialogue box, or leaves the screen.
+- **Final labels** (replacing my drafts exactly):
+
+  | Key | id | en | zh |
+  | --- | --- | --- | --- |
+  | `belumTujuanRingkas` | Ketuk satu tujuan. | Tap one destination. | 请点选一个去向。 |
+  | `belumKontakRingkas` | Tandai {n} kartu lagi. | Cards left to mark: {n}. | 还需标记 {n} 张卡片。 |
+  | `belumBedaRingkas` | Tentukan {n} perbedaan lagi. | Differences left to decide: {n}. | 还需决定 {n} 处出入。 |
+
+**Checks on this build** (own server on :4003, now stopped; one family at a time, Chromium + WebKit, four sizes)
+
+| Check | Result |
+| --- | --- |
+| `cek-gulir-t018.mjs --keluarga adegan` | 88 / 88 |
+| `--keluarga aktivitas` | 48 / 48 |
+| `--keluarga akhir` | 24 / 24 |
+| `--keluarga obrolan` | 150 / 150 |
+| `cek-bahasa-t014.mjs` | 138 / 138 |
+| `npm run test:client` | 741 / 741 |
+
+- `tsc --noEmit` clean; production build OK; `test:e2e` not run. `cek-piksel`, `cek-akhir`, `cek-jalan`, `cek-kaki` were not rerun in this round (last green in the Fix round; this round changed one CSS position and three strings).
+
+**Evidence:** `team/evidence/T-018/stage2/fix2/layar-pertama-{360x640,390x645}-{chromium,webkit}.png` (captured, not opened by me; positions above are measured).

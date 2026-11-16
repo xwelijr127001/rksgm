@@ -91,16 +91,34 @@ export function KontrolSuara({ temaUji, onTemaUji }: { temaUji: TemaCerita | nul
 }
 
 const KUNCI_PETUNJUK = 'raksa:cerita:petunjuk-suara';
-export function PetunjukSuara() {
+/** Lama petunjuk suara tampil sebelum hilang sendiri (md). */
+export const LAMA_PETUNJUK_SUARA = 6000;
+/**
+ * D-129 (T-018 Tahap 1b): petunjuk suara tampil SEKALI per episode, hanya di layar pertamanya; hilang pada ketukan pertama tombol
+ * utama mana pun atau sesudah 6 detik, dan itu diingat (per episode; kunci lama tanpa episode = sudah pernah ditutup). Tidak
+ * pernah tampil saat lembar balasan atau aktivitas terbuka (`sembunyi`).
+ */
+export function PetunjukSuara({ idEpisode, layarPertama, sembunyi = false }: { idEpisode: string; layarPertama: boolean; sembunyi?: boolean }) {
   const p = useAudioPrefs();
-  const [tampil, setTampil] = useState(() => { try { return localStorage.getItem(KUNCI_PETUNJUK) === null; } catch { return false; } });
-  if (!tampil || p.muted) return null;
-  const tutup = () => { setTampil(false); try { localStorage.setItem(KUNCI_PETUNJUK, '1'); } catch { /* sekali per sesi */ } };
+  const kunci = `${KUNCI_PETUNJUK}:${idEpisode}`;
+  // Dinilai SEKALI saat pemain dipasang: bukan layar pertama episode = tidak pernah tampil di sesi ini.
+  const [tampil, setTampil] = useState(() => { try { return layarPertama && localStorage.getItem(kunci) === null && localStorage.getItem(KUNCI_PETUNJUK) === null; } catch { return false; } });
+  const terlihat = tampil && !p.muted;
+  useEffect(() => {
+    if (!terlihat) return;
+    const tutup = () => { setTampil(false); try { localStorage.setItem(kunci, '1'); } catch { /* sekali per sesi */ } };
+    const ketuk = (e: Event) => { if (e.target instanceof Element && e.target.closest('.hp-layar .primary-action')) tutup(); };
+    const waktu = window.setTimeout(tutup, LAMA_PETUNJUK_SUARA);
+    document.addEventListener('click', ketuk, true);
+    return () => { window.clearTimeout(waktu); document.removeEventListener('click', ketuk, true); };
+  }, [terlihat, kunci]);
+  if (!terlihat || sembunyi) return null;
+  const tutup = () => { setTampil(false); try { localStorage.setItem(kunci, '1'); } catch { /* sekali per sesi */ } };
   return (
-    <p className="hp-petunjuk-suara" data-petunjuk-suara="">
+    <div className="hp-petunjuk-suara-jangkar"><p className="hp-petunjuk-suara" data-petunjuk-suara="">
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M11 5 6 9H3v6h3l5 4V5Z" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round" /><path d="M15 8c2 2 2 6 0 8" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" /></svg>
       <span>{t('ceritaHp.petunjukSuara')}</span>
       <button type="button" className="hp-tautan" onClick={tutup}>{t('ceritaHp.tutupPetunjuk')}</button>
-    </p>
+    </p></div>
   );
 }

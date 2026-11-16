@@ -394,3 +394,44 @@ I am reading and writing in C:\Users\User\Desktop\rksgm-episode2 (QA, no source 
 **4. Bytes (full id playthrough, seed 11, 2,200 steps, 0 console errors, 0 HTTP errors, 0 stuck):** 12 PNGs, total **168,214 B** (expected ~168.5 KB; hendra.png 25,920, samping 36,959); 0 webp. The random driver did not itself reach the end screen in 2,200 steps (stayed in Part 4 chat), which is why the end screen was verified from the saved ending states instead.
 
 **Notes (not bugs):** N-1 Hendra's feet are cut by the dialogue card at 360/1280 as already known (kantor camera rule, same as Bima). N-2 my total is 269 B below Fullstack's 168,483 (one small prop not requested on this path).
+
+## T-018 Stage 1b — FAIL (1 medium bug, 3 notes)
+I am reading and writing in C:\Users\User\Desktop\rksgm-episode2 (QA, no source edits, no commit). Evidence: `team/evidence/T-018/stage1b/qa/`. Own server :4001 (stopped after), below-normal priority, one browser at a time, no e2e. Tree also contains Stage 2 work in progress (ignored as briefed).
+
+**1. Project checks:** `test:client` 741/741; `cek-piksel-t013` 99/99; `cek-gulir-t018` **131/132** (1 FAIL: `lembar-k01-360x640-zh-webkit` "tanpa tombol Balas": did not reproduce in my own matrix, same state/size/engine passed, so load flake: see N-1); `cek-bahasa-t014` **134/138** (4 FAIL: `tel-cemas-360/390-en/zh`, the 8-document request activity: `hp-arena-gulir` clipped; this is an activity screen = Stage 2 work in the tree, see N-2).
+
+**2. Reply sheets (my own Playwright matrix, `lembar-*.log`):** K01, K03, K06, K12, K13, K14 x id/en/zh x 390x645, 360x640, 390x844 (Chromium) + 390x645, 360x640 (WebKit) = 90 runs: 82 fully OK, 8 = B-01. Per run: gate -> Balas -> sheet inside visualViewport, question + all five choices + send visible, no page scroll, send disabled "Pilih 1 balasan" until a choice, then "Kirim balasan 2", Catatan flip + "Kembali" keeps the selection, Esc closes and the selection is restored on reopen, key 3 selects, Enter sends, sheet gone and chat continues, 0 console errors. At 390x645 and 390x844 all 36 combinations pass in both engines for every language (en and zh prompts answered in all of them).
+- **B-01 (medium)**: at **360x640** in **K13 and K14, id and en** (4 combos; both Chromium and WebKit = 8 runs) the sheet is taller than the space under the chat header, so its top, including the yellow **Catatan tab** (y 92..131), sits UNDER the header (`hp-obrolan-kepala` intercepts pointer events; Playwright click on `[data-catatan]` times out). The reference card (document contents) is unreachable there; the grab handle shows but the tab is clipped (`k14-360x640-id-catatan.png`). The Handoff lists K14 id, K01 en, K13 en, K14 en as 360x640 fallbacks with "only the list scrolls"; the Catatan tab being covered is not documented, and K13 id also hits it while K01 en does not (its tab was clickable). Suggested fix: cap the sheet at viewport height minus header and let the list (not the sheet) scroll, or let the sheet top stay below the header.
+
+**3. D-129 sound banner:** Episode 2 first screen shows it; it vanishes after ~6 s with no tap; vanishes on the first primary tap; stays gone after reload; not shown mid-episode (K03, K14) and not with a sheet open. **Episode 1: the banner never existed** (`PetunjukSuara` is only used by `PemainHP`, Episode 2; same at git HEAD), so "still shows once on Episode 1" cannot be met; not a regression.
+
+**4. D-131/D-130:** task card at 360x640 / 390x645: composer 183 px (vs 200 at 390x844, 222 at 360x740) = compact; message area 309/314 px. Header portrait 48 px visible in the chat header on phones through whole threads (b4, lanjut, K06, b1 steps; None only after the chat leaves for a stage scene).
+
+**5. Playthrough id (driver, seed 3, via the sheets):** reached "AKHIR CERITA / Akhir kurang baik: Kurang puas" at step 233, 0 console errors, 0 HTTP errors, no stuck screen. (Seed 11 wandered 2,200 steps in Part 4 chat without finishing; the driver is random, last screen was a normal typing indicator, 0 errors.)
+
+**6. Regression:** desktop 1280 chat: not a shell (overflow visible, page scrolls: b1 1270 vs 1326 before = the banner gone), K14 still uses the old inline block, no banner. Stage/activity/end screens not re-examined beyond the cek-piksel 99/99.
+
+**Notes:** N-1 cek-gulir 1 flaky fail under load (rerun cost: ~9 min, not repeated). N-2 cek-bahasa 4 fails are on the activity arena clipping (Stage 2 area). N-3 `cek-gulir` passed its K13/K14 360x640 runs while Catatan was covered, so the tool misses this case (it should click `[data-catatan]` with a real pointer, not a scripted click).
+
+## T-018 Stage 2 — PASS (0 bugs, 3 notes)
+I am reading and writing in C:\Users\User\Desktop\rksgm-episode2 (QA, no source edits, no commit). Evidence: `team/evidence/T-018/stage2/qa/`. Own server :4001 (stopped after), below-normal priority, tools run one at a time (runner with 15-min kill), no e2e. Final Stage 2 build, no hung tool.
+
+**1. Tools (no hang; durations 27 s to 610 s)**
+- `test:client` 741/741.
+- `cek-bahasa-t014` 138/138 (the 4 arena fails from Stage 1b are fixed).
+- `cek-kaki-t017` 18/18.
+- `cek-gulir-t018 --tanpa-tahap2` (chat family, Chromium + WebKit) **150/150**.
+- `cek-layar-t018` (stage beats, K02, K04 map, K05, K08, K09, K10, three endings + summary, desktop, Episode 1; Chromium + WebKit) **106/106**.
+- First run of `cek-piksel-t013` FAILED 2 (`gerak-pool-normal`, `gerak-bengkel-normal`: idle motion 0 changes), `cek-akhir-t019` FAILED (all walk-in checks: 0 walk samples) and `cek-jalan-t017` FAILED 7 (same, 0 walk samples), all in one back-to-back run. Reruns of each alone: `cek-jalan` 8/8, `cek-akhir` 45/45, `cek-piksel` ALL PASS (99). My own probe (Playwright) showed the walk playing (Rudi 6 frames, Hendra 10) and reduced motion not walking; so I classify the first-run failures as a timing flake of the Chrome-based tools, not a game regression (N-1). Logs: `cek-*.log` (first run), `cek-*-2.log` (reruns).
+
+**2. Own matrix (Chromium AND WebKit; 360x640, 360x740, 390x645, 390x844; `mat2-*.log`)**
+- (a) Stage beats: opening (the owner's case, 3 beats), K04 pool, K07 Bima, K10 wawancara-2, K11 task: page never scrolls, action button inside the viewport, <=1 scroller, stage always >= 2:1 (168 at 360, 183 at 390). **Owner's case fixed**: opening keeps ONE stage height over its three beats at every size (210 / 336 / 229 / 366), same in both engines. Pool is also constant (210/252/229/275). Only the documented step-downs remain when a task card appears: Bima and K10 210 -> 168 at 360x640, K10 229 -> 183 at 390x645 (identical in Chromium and WebKit).
+- (b) Activities K02, K04 map, K05, K08, K09, K10 at four sizes: covered by `cek-layar` 106/106 in both engines (no page scroll, send button in the viewport, one scroller, 5 tiles + CTA, K08 conclusion no jump per its assertion). I did not write my own K08 pixel-jump probe.
+- (c) End screens (puas, catatan, kurang x 4 sizes x 2 engines = 24): page fits, one scroller (`hp-main`), verdict visible, pinned bar one 52 px row: kurang/catatan show "Ulangi Bagian 4" + "Selesai"; puas (no retry by design) shows "Selesai" + "Coba jalur lain" (my first script wrongly expected a retry on puas). Opened `chromium-akhir-puas-end-360x640.png` and `webkit-akhir-kurang-end-360x640.png`: verdict + lesson visible without scrolling.
+- (d) Chat + reply sheet regression at 360x640, 6 decisions x id/en/zh x both engines = **36/36 OK; B-01 fixed** (Catatan tab tappable, including K13/K14 id/en); send continues the story, 0 console errors.
+
+**3. Playthrough id (driver seed 3)**: reached "AKHIR CERITA / Akhir kurang baik" at step 221, 0 console errors, 0 HTTP errors. en and zh: K02 document activity opened and an ending screen reached at 360x740, page fits, 0 errors, text localised (`en-*`, `zh-*` PNGs); full en/zh coverage also by `cek-bahasa` 138/138.
+
+**4. Desktop / hub / bytes:** desktop 1280 mentor and akhir-puas: no lock (`data-kunci` empty, overflow visible); /cerita hub page-scrolls (390: 1361 > 844; 1280: 996 > 800), no horizontal overflow. Image bytes, full id playthrough: 13 PNGs, **168,723 B** (168,214 in T-019 + 509 B `ikon-miss-raksa.png` for the reply sheet), 0 webp.
+
+**Notes:** N-1 the three tools above flaked once (rerun green) when run right after each other; the Lead may rerun `cek-jalan`/`cek-akhir` once on a quiet machine. N-2 step-downs on task cards at 360x640 and 390x645 are documented, not bugs. N-3 Episode 1 (standard player) is unchanged and was not part of Stage 2. Real iPhone not tested.
