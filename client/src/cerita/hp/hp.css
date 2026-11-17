@@ -61,7 +61,7 @@
 .hp-lanjut { width: 100%; }
 .hp-kirim { display: grid; gap: 6px; margin-top: 12px; }
 .hp-kirim-tombol { width: 100%; }
-.hp-kirim-tombol:disabled { opacity: .5; cursor: not-allowed; }
+.hp-kirim-tombol:disabled { cursor: not-allowed; } /* tampilan nonaktif: .primary-action:disabled di player.css (D-289); dulu opasitas 50 % */
 .hp-kirim-catatan, .hp-kirim-belum { margin: 0; font-size: 13.5px; color: var(--hp-redup); text-align: center; }
 .hp-kirim-belum { font-weight: 700; color: #7a3e00; }
 .hp-tautan {

@@ -35,7 +35,7 @@ import { LayarAkhir } from '../ui/LayarAkhir';
 import { IsiRiwayat } from '../ui/Riwayat';
 import type { KendaliCerita } from '../ui/useCerita';
 import { AdeganTatap, type StatusSesudah } from './AdeganTatap';
-import { Arena, adaDrafArena } from './arena/Arena';
+import { Arena, adaDrafArena, bacaTampilan } from './arena/Arena';
 import { ringkasTindakan } from './arena/ringkas';
 import { RingkasRambu } from './arena/RingkasRambu';
 import { tanggapan as tanggapanRambu } from './arena/rambu';
@@ -342,6 +342,7 @@ function PemainHPInti({ ep, state, kendali, profil, bahasa, tx: txAsli }: {
                 {ep.statusNaskah ? <span>{tx(ep.statusNaskah)}</span> : null}
               </li>
             ) : null}
+            {tampilan === 'arena' ? <li><button type="button" data-menu-tampilan="" onClick={() => { setDialog(null); window.dispatchEvent(new Event('raksa:alih-tampilan')); }}><IkonAlat jenis="bantuan" /><span>{bacaTampilan() === 'daftar' ? t('ceritaHp.tampilanVisual') : t('ceritaHp.tampilanDaftar')}</span></button></li> : null}
             <li className="hp-menu-baris"><span>{t('ceritaHp.menuBahasa')}</span><PilihBahasa /></li>
             <li className="hp-menu-suara"><span className="hp-menu-suara-judul">{t('ceritaHp.menuSuara')}</span><KontrolSuara temaUji={temaUji} onTemaUji={setTemaUji} /></li>
           </ul>

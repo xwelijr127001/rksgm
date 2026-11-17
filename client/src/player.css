@@ -51,7 +51,11 @@
 .primary-action { display: inline-flex; align-items: center; justify-content: space-between; gap: 28px; padding: 17px 23px; min-height: 58px; border: 1px solid #b25c00; background: #ff9000; color: var(--di-utama); border-radius: 13px; font-size: 17px; font-weight: 600; text-decoration: none; cursor: pointer; transition: background .16s,transform .16s; }
 .primary-action:hover:not(:disabled) { background: #e07e00; }
 .primary-action:active:not(:disabled) { transform: translateY(2px); }
-.primary-action:disabled { opacity: .45; cursor: not-allowed; }
+/* T-029 Fix 1 (D-289): SATU tampilan tombol utama nonaktif di mana pun: isi #E0E0E0, label #5F5F5F (4,84 : 1), tepi = isi,
+   tanpa ekstrusi, tidak tembus. Dulu jingga 45 %: tampak setengah aktif, dan di proyektor gelap labelnya tak terbaca.
+   Pasangannya: .btn:disabled (theme.css), .lk-btn-utama:disabled (lokasi.css). Pengecualian yang disengaja: "Kamu siap" di
+   lobi kuis lama (.lobby-focus, di bawah) = keadaan SELESAI, bukan tombol yang belum bisa dipakai. */
+.primary-action:disabled { opacity: 1; background: #e0e0e0; border-color: #e0e0e0; color: #5f5f5f; box-shadow: none; cursor: not-allowed; }
 .quiet-link,.text-button { display: inline-flex; align-items: center; justify-content: center; gap: 10px; background: transparent; border: 0; padding: 11px 0; min-height: 44px; color: #5f5f5f; text-decoration: none; font-size: 14px; cursor: pointer; }
 .quiet-link:hover,.text-button:hover { color: #7a3e00; text-decoration: underline; text-underline-offset: 4px; }
 .centered { justify-content: center; text-align: center; }
@@ -91,7 +95,7 @@
 .practice-list > div { display: grid; }
 .practice-list button { display: flex; align-items: center; gap: 15px; text-align: left; background: transparent; border: 0; border-top: 1px solid #e0e0e0; color: #212121; padding: 17px 0; font-size: 14px; cursor: pointer; }
 .practice-list button b { flex: 1; font-weight: 500; }
-.practice-list button > span { color: #8c8c8c; font-size: 12px; }
+.practice-list button > span { color: #5f5f5f; font-size: 12px; }
 .practice-note { font-size: 12px !important; }
 .game-main { width: min(1000px,100%); margin: 16px auto auto; padding: 15px 30px 50px; }
 .game-heading { display: flex; align-items: center; justify-content: space-between; gap: 15px; margin-bottom: 30px; }
@@ -237,7 +241,7 @@
 .lp-utama { flex: 1; width: min(1160px,100%); margin: 0 auto; padding: 4px 40px 28px; display: grid; grid-template-columns: minmax(0,1fr) minmax(0,1fr); align-items: center; gap: 56px; }
 .lp-kiri { display: flex; flex-direction: column; min-width: 0; max-width: 540px; }
 .lp-judul { font-size: clamp(52px,4.6vw,68px); line-height: 1.02; margin: 14px 0 16px; font-weight: 650; letter-spacing: -.06em; text-wrap: balance; }
-.lp-judul span { color: #9a4f00; }
+.lp-judul span { color: var(--utama-tepi); } /* T-029 Fix 1 (D-294): teks BESAR (34-68 px) boleh #B25C00, 4,55 : 1 pada halaman; #9A4F00 terbaca cokelat di ukuran ini */
 .lp-isi { font-size: 18px; line-height: 1.55; color: #5f5f5f; margin: 0 0 22px; max-width: 470px; }
 /* Pintu mode lama: seluruh kartu adalah tautan (target sentuh >= 80px). */
 .lp-pintu-daftar { display: flex; flex-direction: column; gap: 12px; }
@@ -252,7 +256,7 @@
 button.alur-spanduk-gabung { border: 0; cursor: pointer; font: inherit; }
 /* Join Game (PRD v0.2, review staf #2/#4/#6): kode + "Masuk" dalam satu panel. T-029: panel blush, Masuk = tombol kedua
    (tinta, label putih); satu-satunya tombol jingga di halaman awal adalah Mulai (D-271). */
-.lp-join { display: flex; flex-direction: column; gap: 14px; padding: 16px 18px 18px; border-radius: 18px; background: #f9eeea; color: #212121; box-shadow: inset 0 0 0 1px #ecd5cb; /* garis tepi 1 px seperti mock yang disetujui (warna diambil dari gambar mock; tidak ada di PALET.md) */ }
+.lp-join { display: flex; flex-direction: column; gap: 14px; padding: 16px 18px 18px; border-radius: 18px; background: #f9eeea; color: #212121; box-shadow: inset 0 0 0 1px var(--panel-tepi); /* garis tepi 1 px seperti mock yang disetujui (D-298: token --panel-tepi) */ }
 .lp-join-kepala { display: flex; align-items: center; gap: 14px; }
 .lp-join-teks { min-width: 0; }
 .lp-join-judul { margin: 0; font-family: var(--font-judul); font-size: 24px; font-weight: 650; letter-spacing: -.02em; line-height: 1.2; color: #212121; }
@@ -346,6 +350,13 @@ button.alur-spanduk-gabung { border: 0; cursor: pointer; font: inherit; }
 .lp-halaman .lp-join-mulai:active:not(:disabled) { transform: translateY(4px); box-shadow: 0 0 0 #000000; }
 .lp-halaman .lp-pintu-aksi { border: 2px solid var(--utama-tepi); box-shadow: 0 3px 0 var(--utama-tepi); font-weight: 700; transition: transform 80ms ease-out, box-shadow 80ms ease-out; }
 .lp-halaman .lp-pintu:active .lp-pintu-aksi { transform: translateY(3px); box-shadow: 0 0 0 var(--utama-tepi); }
+/* T-029 Fix 1 (D-290): di layar lebar dan HP mendatar pintu kedua punya tombol lebih besar (Masuk 126,5 x 57, Mulai 98 x 43).
+   Mulai = pintu utama juga dalam bobot: setinggi Masuk (57 px = tinggi kolom kode), label 17 px, ekstrusi 4 px seperti Masuk.
+   HP (<= 700 px) tidak berubah: di sana aturan T-027 (Mulai selebar kartu, 54 / 50 px) yang berlaku. */
+@media (min-width: 701px) {
+  .lp-halaman .lp-pintu-cerita-solo .lp-pintu-aksi { justify-content: center; gap: 10px; min-height: 57px; padding: 12px 24px; border-radius: 14px; font-size: 17px; box-shadow: 0 4px 0 var(--utama-tepi); margin-bottom: 4px; }
+  .lp-halaman .lp-pintu:active .lp-pintu-aksi { transform: translateY(4px); }
+}
 .lp-halaman .lp-pintu-judul { font-size: 20px; }
 /* D-29: kartu Mode Cerita di HP = grid 2 kolom, "Mulai" di bawah teks; tetap SATU tautan, urutan DOM = urutan baca. */
 @media (max-width: 700px) {
@@ -466,7 +477,7 @@ button.alur-spanduk-gabung { border: 0; cursor: pointer; font: inherit; }
 .alur-tokoh { justify-content: center; }
 .alur-kenalan-judul { margin: 10px 0 16px; font-size: 31px; text-align: center; }
 .alur-kenalan-form { display: flex; flex-direction: column; gap: 12px; }
-.alur-catatan { margin: 0; font-size: 12px; color: #818181; text-align: center; }
+.alur-catatan { margin: 0; font-size: 12px; color: #5f5f5f; text-align: center; }
 
 /* --- Bar aksi (dipakai /kenalan dan /join). Versi lengket mengikuti pola .misi-aksi: bagian dari alur
    halaman, jadi saat digulir sampai habis ia berada di bawah isian dan tidak ada yang tertutup.
@@ -632,6 +643,16 @@ html:has(.lp-pemuat) { overflow: hidden; }
   .lp-halaman .lp-kiri { display: grid; grid-template-columns: minmax(0,1fr) minmax(0,1fr); column-gap: 16px; align-items: start; width: min(820px,100%); }
   .lp-halaman .lp-kiri > .lp-join { margin-top: 0; }
   .lp-halaman .lp-catatan { grid-column: 1 / -1; }
+  /* T-029 Fix 1 (D-290): Mulai kini setinggi Masuk (57 px). Di kolom sesempit ini tombol sebesar itu di samping teks memeras
+     kalimat kartu menjadi 4-9 baris, jadi Mulai turun ke bawah teks, selebar kolom teks (kisi D-29 seperti di HP tegak). */
+  .lp-halaman .lp-pintu-cerita-solo { display: grid; grid-template-columns: auto 1fr; grid-template-areas: "potret teks" "potret aksi"; column-gap: 12px; row-gap: 8px; align-items: start; }
+  .lp-halaman .lp-pintu-cerita-solo .lp-pintu-potret { grid-area: potret; }
+  .lp-halaman .lp-pintu-cerita-solo .lp-pintu-teks { grid-area: teks; }
+  .lp-halaman .lp-pintu-cerita-solo .lp-pintu-aksi { grid-area: aksi; justify-self: stretch; }
+  /* Kalimat kartu pendek seperti di HP tegak (D-258): dengan Mulai di bawah teks, kalimat panjang membuat kolom kiri lebih
+     tinggi daripada baris kode dan halaman menggulir 12 px bila ada profil. Kalimat panjang tetap keterangan tautan. */
+  .lp-halaman .lp-pintu-isi-lebar { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; margin: 0; padding: 0; border: 0; }
+  .lp-halaman .lp-pintu-isi-hp { display: block; }
 }
 /* D-255: hero turun di bawah 640 px tinggi (dulu 620) dan, seperti dulu, di bawah 360 px lebar. */
 @media (max-width: 700px) and (orientation: portrait) and (max-height: 639px) { .lp-halaman .lp-kota-bingkai { display: none; } }

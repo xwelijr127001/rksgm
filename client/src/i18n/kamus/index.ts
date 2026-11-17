@@ -19,10 +19,11 @@ import ceritaAkhir from './ceritaAkhir';
 import ceritaAkt from './ceritaAkt';
 import ceritaHp from './ceritaHp';
 import ruang from './ruang';
+import langkah from './langkah';
 
 export type KamusRuang = Record<Bahasa, Record<string, string>>;
 
-export const KAMUS: Record<string, KamusRuang> = { umum, tokoh, adegan, pemain, misi, layar, host, server, alur, solo, bank, cerita, ceritaAkhir, ceritaAkt, ceritaHp, ruang };
+export const KAMUS: Record<string, KamusRuang> = { umum, tokoh, adegan, pemain, misi, layar, host, server, alur, solo, bank, cerita, ceritaAkhir, ceritaAkt, ceritaHp, ruang, langkah };
 
 /**
  * Ruang kamus khusus fitur PRD v0.2 (MVP berbahasa Indonesia, en untuk kesiapan terjemahan). Mandarin adalah fitur mode

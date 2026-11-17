@@ -42,6 +42,7 @@
   --utama-teks: #9a4f00; /* jingga sebagai TEKS: tautan, judul kecil (6,01 : 1 pada putih, 5,28 pada blush) */
   --utama-teks-tua: #7a3e00; /* hover teks jingga */
   --panel: #f9eeea; /* panel blush: baris kode, latar obrolan, hover */
+  --panel-tepi: #ecd5cb; /* garis tepi 1 px panel blush di atas halaman (blush pada halaman hanya 1,07 : 1); D-298 */
   --pilih: #fff5ec; /* baris / kartu terpilih, catatan terang */
   --catatan: #f8e3c8; /* catatan tempel, gelembung terkirim */
   --persik: #e8a87c; /* garis aksen terang, latar potret cut-in */
@@ -247,8 +248,12 @@ h1[data-fokus-halaman]:focus-visible {
   outline: 3px solid var(--fokus);
   outline-offset: 3px;
 }
+/* T-029 Fix 1 (D-289): satu tampilan nonaktif untuk semua varian .btn (sama dengan .primary-action:disabled di player.css). */
 .btn:disabled {
-  opacity: 0.45;
+  opacity: 1;
+  background: #e0e0e0;
+  border-color: #e0e0e0;
+  color: #5f5f5f;
   cursor: not-allowed;
 }
 /* Aksi utama: warna sama, hanya lebih besar (tidak lagi kuning). */
@@ -781,6 +786,10 @@ a.mrk:focus-visible { outline: 3px solid var(--fokus); outline-offset: 4px; bord
 .proyektor .btn-garis:hover:not(:disabled) { background: rgba(255, 249, 245, 0.1); color: var(--krem); }
 /* T-029: cincin fokus antarmuka kini tinta; di atas latar gelap proyektor ia harus terang (putih 16,1 : 1). */
 .proyektor :focus-visible { outline-color: var(--putih); }
+/* T-029 Fix 1 (D-289): tombol nonaktif di atas latar gelap proyektor: isi #424242, label #A4A4A4 (abu terang di atas tinta tak terbaca). */
+.proyektor .btn:disabled,
+.proyektor .btn:not(.btn-netral):not(.btn-garis):disabled,
+.proyektor .primary-action:disabled { background: #424242; border-color: #424242; color: #a4a4a4; }
 
 /* ------------------------------------------------------------------ utilitas */
 

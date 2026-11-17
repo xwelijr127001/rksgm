@@ -44,7 +44,7 @@ const HEX = {
   putih: 0xffffff,
   krem: 0xfff9f5,
   hijau: 0x2f7d57, // vonis tepat (isi, label putih 5,01 : 1)
-  hijauTua: 0x1f5c3f, // vonis terlewat (garis + teks tepat di atas putih)
+  hijauTua: 0x2c5a6b, // vonis terlewat "Yang seharusnya" (garis + teks di atas putih): keluarga kurang, sama dengan .tanda-terlewat (D-292)
   merah: 0xd32f2f,
   biru: 0x3e7285,
   kayuTua: 0x9c6b3f,
@@ -492,7 +492,7 @@ export function defineMissionScene(P: Ph) {
 
     buatVerdict(v: ObjView, verdict: NonNullable<ObjectState['verdict']>, instan: boolean): Phaser.GameObjects.Container {
       const warna = verdict === 'tepat' ? HEX.hijau : verdict === 'kurang' ? HEX.merah : HEX.putih;
-      const teksWarna = verdict === 'terlewat' ? '#1f5c3f' : '#ffffff';
+      const teksWarna = verdict === 'terlewat' ? '#2c5a6b' : '#ffffff';
       const kata = v.spec.label;
       const t = this.teks(12, 0, kata, 19, teksWarna);
       const w = t.width + 50;

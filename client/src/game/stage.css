@@ -337,8 +337,9 @@
 .tanda-ikon { width: 22px; height: 22px; flex: 0 0 22px; border-radius: 50%; display: grid; place-items: center; color: #fff; }
 .tanda-tepat { background: #2f7d57; }
 .tanda-salah { background: #d32f2f; }
-/* "Yang seharusnya": sama dengan tanda di gambar (putih bertepi hijau, tanda seru hijau). */
-.tanda-terlewat { background: #fff; color: #9a4f00; box-shadow: inset 0 0 0 2px #ff9000; }
+/* "Yang seharusnya": sama dengan tanda di gambar (kanvas: MissionScene.ts, vonis terlewat). T-029 Fix 1 (D-292): ini STATUS,
+   bukan warna merek: keluarga kurang, teks dan tepi #2C5A6B di atas putih. */
+.tanda-terlewat { background: #fff; color: #2c5a6b; box-shadow: inset 0 0 0 2px #2c5a6b; }
 .hasil-inti { margin: 0; padding-left: 12px; border-left: 3px solid #ff9000; font-size: 15px; line-height: 1.5; color: #212121; }
 /* Alasan singkat: langsung terlihat (tidak dilipat), sebelum tombol aksi. */
 .hasil-alasan { margin: 0; font-size: 15px; line-height: 1.5; color: #212121; }

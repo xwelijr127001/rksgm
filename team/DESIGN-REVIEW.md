@@ -3909,3 +3909,126 @@ Two things are worth fixing before the owner looks (D-289, D-290). The rest is s
 
 ### Not verified by me
 A real phone, and WebKit: headless Chrome only. English and Chinese only on the home page; every other screen in Indonesian. Hover and pressed states. A screen reader. Inside the activities only the first state and one tap; right and wrong feedback inside K02 to K10 not played. Phone calls and the location scene. The old quiz inside a room (lobby, match with a host, results, its projector with a room); CMS and admin behind the sign-in. The final summary of the Episode 2 room: I played the demo room to the end instead. The numbers of the home page are from my build of the working tree at 21:26, not from a build in `client/dist`.
+
+---
+
+## T-030 — mock (2026-11-17): pixel keys, with T-031 pixel cards and grounds
+
+Designer · Folder: C:\Users\User\Desktop\rksgm-episode2 · No client source edits, no commit, BOARD.md not touched. Spec: `team/specs/2026-11-17-T-030-T-031-gaya-game.md` (owner picked A; Lead picked K1/K4, grounds 8/6; variant B dropped). Method: the rules were injected into the real pages of `client/dist` (22:31) on my server :4002 (stopped), one headless Chrome, low priority; now and mock measured on the same page state at 390 × 745, 360 × 640 and 1280 (id). Evidence: `team/evidence/T-030/designer/`: `mock-T-030-031.png` (composite, 900 wide), `mock-rules-T-030.css`, `mock-rules-T-031.css`, `kontras.txt`, `ukur-*.txt`, `screens/` (now/mock, pressed, focus).
+
+### Verdict: ready for Fullstack. No blocker.
+
+| Check | Result |
+| --- | --- |
+| Fit | 0 px new scroll anywhere. Home 390/360: 0 → 0; end card 390/360: 0 → 0; K11 360/390: 0 → 0; sheet, K10, chat, staff 390: unchanged. No box grew; 0 boxes moved on home and the end card. K4 cards get shorter (label leaves the flow): TUGAS −28.5 px, PELAJARAN at 1280 −36 px (end page 1025 → 989 scroll at 1280; K11 1280 38 → 10) |
+| Tap targets | none under 44 px on the measured screens |
+| Pressed | real mouse hold: translateY 2 px, base gone, on Mulai, Kirim balasan, Selesai, host Mulai cerita |
+| Focus | today's ring (3 px #212121) kept and whole on card, Masuk, reply row, end-card main |
+| Cost | no backdrop-filter, filter, blur, image, clip-path or pseudo-element; key = 9 plain-colour layers, K1 = 12, K4 = 6, ground 6 = 3, ground 8 = 8; static paint, no animation beyond today's 80 ms transform |
+
+### Items
+- **D-299 · Method: layers, not clip-path.** The reference CSS cuts corners with `clip-path`; that also cuts the focus ring (spec: ring unchanged), the K4 hanging tab and the 2 px corner brackets. All shapes are plain-colour background layers inside the element's own box; border widths are kept and made transparent, so no box changes size. Fullstack copies the two files as they are.
+- **D-300 · Key A in palette colours.** Face #FF9000, sheen band 2 px top and left #FFD9A8 (reference #FFB74D is not in the palette), shade 2 px right #E07E00, base 3 px #9A4F00 (reference #8E4F00 not in the palette), 2 px stepped corners. Pressed: face #E07E00, bands off, base off, down 2 px. Label #212121 7.09 : 1 (pressed 5.49). Secondary (ink): white face, 2 px #212121 line, 3 px #212121 base, ink label 16.1 : 1; pressed face #F9EEEA. Danger: #D32F2F, white 4.98 : 1, base #B71C1C. Disabled (D-289 in key shape): #E0E0E0 flat, already down, label #5F5F5F 4.84 : 1. Round icons (`.pilih-bahasa .sound-button .hp-kembali`): circle kept, base `0 2px 0 #A4A4A4`.
+- **D-301 · Masuk becomes the ink-outlined secondary** (as in the artifact the owner picked). This also settles D-290: Mulai is now the heavier key at every width.
+- **D-302 · Reply rows are keys:** white, 2 px #A4A4A4 line (2.49 : 1 on white), 3 px #E0E0E0 base; chosen = #F9EEEA face, orange line, stays down; others' label #5F5F5F (6.39 : 1).
+- **D-303 · K1** on `.lp-pintu`, `.cer-ep`, `.stf-kartu`, `.stf-masuk-kartu` (white, 2 px #FF9000, 5 px #E07E00 base inside, 3 px stepped corners); blush panels `.lp-join` take K1 in #ECD5CB, not orange, so orange stays on what leads to play; reply sheet `.hp-lembar` K1 without base. K1 light (1 px line, 2 px steps, no base) on `.hp-gelembung` (#ECD5CB; sent #E8A87C on #F8E3C8), `.lp-kota-balon`, `.hp-status-catatan`.
+- **D-304 · K4** on `section.hp-aksi` (tab = its TUGAS label), `.akh-pelajaran` and the phone `.akh-pelajaran-tombol .akh-gelembung` (tab = its Pelajaran label; its pixel border-image gives way to K4, the tail stays; padding-top 12 px = the label's height, so the bubble keeps its height) and `.hp-vn-dialog:has(.hp-tindakan)` (tab = "Tindakanmu"). Tab: #212121, white 11 px 800 caps, 16.1 : 1. No new text keys, no webfont.
+- **D-305 · Grounds.** 8 on `.lp-halaman`, `.cer-hub-layar`: #FFE4C2 0–168 px, #FFF1E2 to 272 px, then #FFF9F5; cream 10 px dots and two pixel clouds. 6 on `.hp-layar`, `.stf`: 12 px #F3DED3 lines, #FFD9A8 dot, on #FFF9F5 (the reference #FFF6F0 is not in the palette); `.hp-obrolan` turns transparent so the tiles show behind the bubbles. Worst text on the tiles: #5F5F5F on #F3DED3 4.93 : 1, #9A4F00 4.64 : 1. The four tones are added to PALET.md section 11.
+
+### Not verified
+The result card (`.hp-vn-dialog` with Tindakanmu): no saved state reached it, the rule is untested. Hover (mouse) states looked at only in code. Activity screens other than K10, CMS/admin, projector (dark ground: keep the old dark `.proyektor` rules; my sheet does not target it but `.btn` there takes the key). en/zh. WebKit and a real low-end phone. The composite's crop of "Mulai ditekan" is cut badly; the full picture is `screens/home-mulai-390x745-pressed-mock.png`.
+
+---
+
+## T-033 — concept (2026-11-18)
+
+Designer · Folder: C:\Users\User\Desktop\rksgm-episode2 · No client source edits, no commit. Mock injected into the real K08 (client/dist, built 23:06, not 22:31) on my server :4002 (stopped), one headless Chrome. Evidence `team/evidence/T-033/designer/`: `mock-T-033.png`, `mock-rules-T-033.css`, now/step1/step2/coach pictures.
+
+**Fit (K08):** page scroll 0 → 0 at 390 × 745 id, 360 × 640 id, 390 × 745 zh, in step 1, step 2 and with the coach card. The strip takes the slot of the instruction sentence (146–174); the hint takes the slot of the caption under the picture; the context line "Truk berada di lajur 2…" moves into step 1's hint.
+
+- **D-306 · Step strip** `ol.lgk-langkah`: one row, 28 px, pixel chips; current = orange 2 px frame on #FFF5EC with an orange number; done = green #2F7D57 tick + word kept (#1F5C3F); later = grey. It replaces `p.hp-instruksi-arena`.
+- **D-307 · Pixel pointer** `span.lgk-penunjuk` (20 px down-arrow, ink with orange core, 2-frame steps() bounce 4 px) plus `.lgk-sasaran` (2 px orange outline blinking to ink; outline, so no layout change) on the next target; removed after the first correct tap of that step; reduced motion = static. At build give the arrow a 2 px #FFF9F5 outline: on the grass of K08 the ink arrow is dark on dark.
+- **D-308 · Hint line** `p.lgk-petunjuk` (15 px 700 ink, orange pixel bullet), aria-live polite, changes per step; the send bar stays disabled with its reason until the last step.
+- **D-309 · Coach mark** `.lgk-pelatih` (K1 card at the foot, "Mengerti" key), once per device per activity type (localStorage `raksa:pelatih:<type>`), only for K05 (drag), K-SIM and K10 (compare), where tapping alone is not the action.
+- **D-310 · New text keys** (id / en / zh):
+  `langkah.k08.1` Baca rambu / Read the signs / 阅读标志 · `langkah.k08.2` Ketuk lajur / Tap a lane / 点击车道 · `petunjuk.k08.1` Ketuk rambu 1 dan 2 untuk membacanya / Tap signs 1 and 2 to read them / 点击标志 1 和 2 阅读 · `petunjuk.k08.2` Sekarang ketuk lajur yang dilarang / Now tap the closed lane / 现在点击禁止通行的车道 · `pelatih.judul` Cara main / How to play / 玩法 · `pelatih.isi` Ketuk benda yang ditunjuk panah. Langkah di atas menandai yang sudah selesai. / Tap what the arrow points at. The steps above show what is done. / 点击箭头指向的物体。上方步骤会标出已完成的部分。 · `pelatih.ok` Mengerti / Got it / 明白了.
+- **D-311 · Step lists for the other activities** (keys `langkah.<k>.<n>` + one `petunjuk` per step, same pattern):
+  K02 documents: 1 Buka dokumen · 2 Pilih yang perlu · 3 Kirim. K04: 1 Baca pesan · 2 Pilih jawaban · 3 Kirim. K05 board: 1 Ambil kartu · 2 Taruh di tempatnya · 3 Kirim. K07: 1 Lihat foto · 2 Tandai kerusakan · 3 Kirim. K09: 1 Baca kesaksian · 2 Tempel ke papan · 3 Kirim. K10 papers: 1 Bandingkan baris · 2 Cap 3 perbedaan · 3 Kirim ke lapangan. K11 bundle: 1 Buka berkas · 2 Susun urutan · 3 Kirim. K-SIM: the sim already has steps (`arena.sim.lanjut.*`): show them in the strip, 1 Atur · 2 Jalankan · 3 Lihat hasil. Pointer targets: the first unopened item of the current step. (Names from the screens and keys I saw; Fullstack maps each to its existing step key where one exists.)
+
+**Not verified:** the strip on the other activities (only K08 rendered); en; a real phone; screen reader reading of the strip (use `aria-current="step"` on the current item).
+
+---
+
+## T-034 — concept + art (2026-11-18)
+
+Designer · Folder: C:\Users\User\Desktop\rksgm-episode2 · No client source edits, no commit. Mock injected into the real K15 (client/dist built 23:06) on my server :4002 (stopped); K15 opened from a saved state set to node k15. Evidence `team/evidence/T-034/designer/`: `mock-T-034.png`, `mock-rules-T-034.css`, `fit.txt`, now/mock pictures. Art: `character/aktivitas-ep2-pixel-v1/penutup/` (README, BYTE.md).
+
+**Fit:** today K15 needs 542 px of inner scroll at 390 × 745 (667 at 360 × 640). Mock: **0 px page scroll and 0 px inner scroll** at 390 × 745 and 360 × 640, in id, en and zh, with 0 and with 4 parts chosen (12 cases, `fit.txt`). Send bar unchanged (679–737 / 574–632).
+
+- **D-312 · Six parts, not seven.** K15 has six `data-bagian` (kabar, bukti, langkah, jujur, bintang, polis); scoring and texts unchanged.
+- **D-313 · Chips:** 2-column grid of pixel chips (2 px steps, line #A4A4A4, 5 px #E0E0E0 base), 32 px icon + the part title; the part's sentence leaves the chip (it shows in the preview). Chosen: #FFF5EC face, orange line, no base, down 2 px, mark = ink-framed orange square with a tick; not chosen: grey "+" square. `aria-pressed` carries the state.
+- **D-314 · Preview:** the existing draft (`.hp-draf`) moves to the top, out of its sticky place, as Pak Hendra's received bubble (peach #F8E3C8, #E8A87C line, pixel phone at the left); it shows up to 3 lines (2 on screens ≤ 700 px high) and "…"; tapping it opens it fully (`data-buka`, needs a small JS toggle).
+- **D-315 · Cuts to fit:** the "preview" jump link, the "Bagian yang bisa dimasukkan" title and the "Draf ini belum terkirim…" note go; the context sentence is clamped to 2 lines (1 on short screens); the "Gunakan tampilan daftar" switch moves to the Menu (keep it reachable for accessibility).
+- **D-316 · Art:** six 16 px icons + 2× strip, 9 palette colours, 871 bytes for the six.
+
+**Not verified:** the expanded preview (needs the JS), the list view, a real phone, the T-033 step strip on K15 (would take the question slot: 47 px → 28 px, more room).
+
+---
+
+## T-030/T-031 — review (2026-11-18)
+
+Designer · Folder: C:\Users\User\Desktop\rksgm-episode2 · No source edits, no commit. **Build:** the working tree built at 01:15 into my scratch folder (`client/dist` is stale; Fullstack is on T-033 in the same tree, so this snapshot may contain early T-033 work) and served on my :4002 with my test database (stopped). Method: my T-029 review scripts again (one headless Chrome, low priority), 110 screens at 390 × 745 and 1280 (home also 360 × 640, 844 × 390, id/en/zh), with the four colour checks plus a new one: any box with a corner radius > 2 px that is not a round icon, a field or art. Evidence `team/evidence/T-030/designer/review/`: `ukur-r1..r4.txt`, `screens/`.
+
+### Verdict: FIX NEEDED (one area). The player story path PASSES.
+
+**PASS:** home, picker, K01 chat and reply sheet, K02, K05, K08, K10, K11, K13, K-SIM, end card and its sheets, host sign-in, staff cards: 0 colour faults, 0 colours outside PALET.md + the four tones, no rounded corner except the language pill; pixel keys, K1 cards, K4 tabs (on the line, 14 px inset), sky and tile grounds as in the rules. Page scroll unchanged at 390 (picker 616 as before); 1280: end card 994 (was 1025), K11 48 (was 38, the 14 px inset), K05 161.
+
+- **D-317 · FIX (blocker for the hosted event) · The story room is still rounded inside pixel screens.** Join (`.sr-kartu` r16, `.sr-kode` r10, `.sr-pemberitahuan` r12), lobby, round (`.sr-chat` r18, `.sr-chat-kepala` r17, `.sr-opsi-kartu` r14 ×5, `.sr-baki-bar` r14, `.sr-waktu` r12), consequence (`.sr-hasil-nilai` r14, `.sr-pelajaran` r12), leaderboard (`.sr-peringkat-baris` r12), host console (stat tiles `div` r10 ×6, room code r14, `.sr-timer` r14, QR frame), host picker options (`.stf-opsi` r12), projector (`.sr-proyektor-sisi` r20, `.sr-pembuka` r14, `.sr-baris` r12): rounded boxes beside pixel keys and K1 cards in the same container (`08-round-answering-chosen-390x745.png`, `08-host-answering-1280.png`). Apply K1 (cards/panels), K1 light (chat bubbles, rows, tiles: 2 px steps, 1 px line) and K4 for `.sr-pelajaran`; the round's options take the reply-row key (`.hp-opsi` look); bars and pills (`.sr-waktu-bar`, `.sr-timer-bar`) become square pixel bars. Ground 6 behind the room pages.
+- **D-318 · FIX (minor) · The old quiz and `.panel`** (solo map, missions: `.solo-kartu` r16, `.opsi` r14, `.misi-tugas` r16, `.baki` r14, `.tokoh-balon` r16, `section.panel` r16, `.bank-paket-tombol` r14): same treatment, lower priority (legacy mode).
+- **D-319 · Language pill** `.pilih-bahasa` (r999, 52 × 46): accepted as a pill like the round icons, but give it the same 2 px #A4A4A4 base (it has it) — no change.
+- **D-320 · Fullstack's points:** (1) disabled keys not sinking: agreed, the no-jump rule wins; (2) reply rows −4 px inner padding: agreed, seen at 390, text width equal; (3) wrong-code lines 15 px: fine; (4) `#ECD5CB` into PALET.md: yes, add it to section 11 as "code-row and panel edge" (I will not edit PALET.md during this review); (5) other framed boxes square, not stepped: accepted for boxes with a 1 px line; boxes with a 2 px line or a base take steps.
+- **D-321 · Back button** (`.hp-kembali`): the 2 px base under a borderless circle reads as a grey arc; give it the 1 px #E0E0E0 circle line of `.sound-button` so the base sits under a visible shape.
+
+**Not verified:** pressed and focus states on the new build (seen in the T-030 mock only), reduced motion, 360 × 640 outside the home page (Fullstack's checks cover K11 and the end card), en/zh outside the home page, CMS behind the sign-in, real phone and WebKit.
+
+---
+
+## T-033 — review (2026-11-18)
+
+Designer · Folder: C:\Users\User\Desktop\rksgm-episode2 · No source edits, no commit. Build: the working tree at 03:34 into my scratch folder (Fullstack is on T-034 in the same tree), served on my :4002 with my test database (stopped). Method: K08, K02, K05, K10, K11 and K-SIM opened from saved states at 390 × 745 and 360 × 640 (id), K08 also in en; at each step I logged strip, hint, pointer target, coach card and send state, then tapped the pointed target (a script `click()`, up to 4 times) and logged again. Evidence `team/evidence/T-033/designer/review/` (`ukur-t33.txt`, `screens/<k>-<size>-<lang>-<n>.png`).
+
+### Verdict: FIX NEEDED. The look passes; the step logic does not yet follow the player in four of six activities.
+
+**PASS:** strip (current orange, done ticked, the word kept for screen readers), hint `aria-live`, pointer with its cream outline, ring, coach card copy and "Mengerti" (closes, stays closed) on K05 / K10 / K-SIM; no page scroll anywhere; en text fits. **K08 (the owner's case) is now clear for step 1**: strip "1 Baca rambu", pointer and ring on sign 1, hint "Ketuk rambu 1 dan 2…".
+
+- **D-322 · FIX · K08 step 1 ends after one sign.** After sign 1 the strip ticks "Baca rambu" while the hint asked for signs 1 and 2. Step 1 ends when both signs are read; the pointer then moves to sign 2.
+- **D-323 · FIX · K08 step 2 has no pointer.** "Ketuk lajur" is current but nothing points at a lane (`k08-390x745-id-1.png`); per D-307 the pointer and ring go on lane 1 (or the first lane) until one lane is tapped. The dashed lane outlines and the line "Ketuk lajur yang dilarang untuk truk." help, so this is less severe than D-322.
+- **D-324 · FIX · Pointer on the wrong kind of thing (K02, K05).** K02 step 1 "Lihat dokumen / Ketuk dokumen" points at a tray ("Minta sekarang"), and tapping it never advances step 2. K05 step 1 "Ambil kartu / Ketuk kartu" points at a destination ("Bengkel Mitra"). The target must be what the hint names: K02 a document, then the tray; K05 the hint should say "Ketuk tujuan" (one tap finishes both steps there, which is fine).
+- **D-325 · FIX · Pointer stuck (K10, K-SIM).** Tapping the pointed row in K10 ("20.10") or the pointed object in K-SIM ("Fotokopi di berkas") four times leaves strip, hint and pointer unchanged, while the send bar still waits ("Cap 3 perbedaan dulu", "Ketuk satu benda di meja"). After the row or object opens, the pointer must move to the next control (the stamp / the choice). Note: my taps are script clicks; if these screens need a different gesture, the pointer still has to show it.
+- **D-326 · K11: drop the strip, keep the pointer (decision).** The strip repeats K11's own stage tabs, and the pointer sits on a tab ("2 Tentukan tindakan") while step 1 says "Periksa berkas"; tapping it flips between steps 1 and 2. On K11 the stage tabs are the strip: hide `.lgk-langkah`, keep hint and pointer, and point at the first unopened file of the current stage, not at a tab.
+- **D-327 · Short phones (< 700 px high): not acceptable as is (decision).** At 360 × 640 the strip and hint are hidden, but K08 leaves about 350 px empty under the picture (`k08-360x640-id-0.png`), and the old instruction line and caption are back. Use a compact strip there: numbers only (current one with its word, as on narrow screens), 24 px high, the hint in the old instruction slot (one line, ellipsis). Show it where the activity's own fit allows it (K08, K05, K10, K11, K-SIM measured at 0 inner scroll here); K02 at 360 × 640 already has 66 px of inner scroll, so leave K02 on the fallback.
+- **D-328 · Pointer overlaps text at 360 × 640.** On K08 the arrow above sign 1 covers the context line ("Tr k berada…"). Keep the pointer inside the picture (point from the right, `data-arah="kiri"`) when the target is at the picture's top edge.
+
+**Not verified:** K04, K07, K09 (not opened), real touch gestures (drag), a screen reader, a real phone.
+
+### T-030/T-031 re-check (2026-11-18, same snapshot): D-317 PASS, D-318 nearly
+Room (join, lobby, round, chosen answer, sent, consequence, leaderboard, final), host console and projector: no rounded corners left except the DEMO pill (`.sr-tanda-demo`, a pill, accepted); pixel keys, K1 cards, ground 6; the projector reads well at 1280 (ink on white cards, 22 px timer). The round's answer options are square boxes rather than reply-row keys (minor, can stay). Old quiz: still rounded `.tokoh-balon` r16 (the guide's speech bubble), `.bank-paket-tombol` r14, `div.pesan.pesan-info` r12 and the connection pill: **D-329 · minor FIX**, same K1 treatment; icon tiles (`.solo-ikon`, `.opsi-ikon`) may stay rounded. No colour faults on the 62 screens (`ukur-r3b.txt`, `ukur-r4b.txt`).
+
+---
+
+## T-034 — review (2026-11-18)
+
+Designer · Folder: C:\Users\User\Desktop\rksgm-episode2 · No source edits, no commit. Build: the stable tree built into my scratch folder (`client/dist` 04:27 is the same tree), served on my :4002 with my test database (stopped). Evidence `team/evidence/T-034/designer/review/` (`ukur-t034.txt`, `ukur-t33b.txt`, `screens/`).
+
+### Verdict: PASS (one check to make).
+K15 at 390 × 745 and 360 × 640, id / en / zh: **0 px page scroll and 0 px inner scroll** with 0 parts and with 4 parts (12 cases). Six chips in 2 columns, heights 60–87 px; chosen = orange frame with the ticked orange square, not chosen = grey "+". **Preview fills in part order** (tapped jujur, kabar, langkah, bukti → reads kabar, bukti, langkah, jujur), 3 lines and "…" (2 on short screens); the toggle sets `aria-expanded` and opens the whole message (`k15-390x745-id-open.png`); "Gunakan tampilan daftar" is in the Menu. Icons sharp at DPR 2 (pixelated scaling, no blur).
+- **D-330 · Accepted: the open preview scrolls.** Opened, the message needs 15 px (390 × 745) / 98 px (360 × 640) of inner scroll. It is the player's own choice and closes with one tap; keep it.
+- **D-331 · Check: un-tapping a part while the preview is open.** In my run a tap on "Minta penilaian jujur" after opening and closing the preview did not remove it (`aria-pressed` stayed true). A script click may be the cause; Fullstack, please confirm with a real tap that toggling still works after the preview has been opened.
+- Not verified: DPR 3 (my crop missed the chip), a real phone.
+
+### T-033 Fix 1 re-check (2026-11-18, same build)
+**PASS for K05, K04 (Pool), K09 (rencana Bima), K10, K11, K-SIM**: the pointer names the object the hint names, moves after each tap (K10: row → stamp → next row, then send; K-SIM: object → object → "Kenapa?"), and leaves a tapped control; K11 uses its own stage tabs, no extra strip, pointer on the next file (D-326 done). **K08**: both signs are now required (step 1 ticks only after sign 2), pointer goes sign → lane → "Lanjut" → sign 2 → lane → "Lanjut ke kesimpulan".
+- **D-332 · minor · K08 hint lags the pointer.** While the pointer is on a lane during sign 1, the hint still says "Ketuk rambu 1 dan 2 untuk membacanya". Use the lane hint ("Sekarang ketuk lajur yang dilarang") whenever the pointer is on a lane. In the conclusion step there is no pointer and the list needs 112 px (161 at 360 × 640) of inner scroll: point at the first conclusion.
+- **D-333 · FIX (remaining) · K02 pointer does not move.** It sits on "Formulir klaim" on the table and stays there after six taps; the hint says "Baca dokumen di meja, lalu ketuk bakinya". After the document is opened the pointer must move to the tray. (If K02 needs another gesture than a click, the pointer still has to show that next target.)
+- **D-334 · Short phones: accepted.** Compact strip on K05 and K11; pointer + spoken hint on K08, K10, K-SIM, where the screen is full. No 1-line variant needed: the pointer carries the step there.
+- Not verified: K07 (my saved state did not open its guided view), real drag gestures, a screen reader.

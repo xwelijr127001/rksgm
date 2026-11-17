@@ -175,7 +175,7 @@
 .rp-strip[data-strip="pilihan"] { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-content: center; gap: 0 8px; background: #f9eeea; border-color: #ff9000; box-shadow: 0 2px 0 #ff9000; }
 .rp-token { flex: none; box-sizing: border-box; width: 42px; height: 44px; display: grid; place-items: center; border-style: solid; border-color: transparent; border-width: 6px 6px 8px; border-image: url('./papan/kartu-periksa-9i.png') 6 6 8 6 fill / 6px 6px 8px repeat; image-rendering: pixelated; }
 .rp-token > .px { margin: -3px; }
-.rp-strip-instruksi { margin: 0; font-size: 15.5px; line-height: 20px; font-weight: 800; color: #9a4f00; }
+.rp-strip-instruksi { margin: 0; font-size: 15.5px; line-height: 20px; font-weight: 800; color: #212121; }
 .rp-strip-nama { font-size: 15px; line-height: 19px; }
 .rp-strip-benda { font-size: 11px; line-height: 19px; font-weight: 800; letter-spacing: .05em; text-transform: uppercase; color: #9a4f00; }
 .rp-strip-arti { grid-column: 1 / -1; font-size: 13.5px; line-height: 17px; color: #212121; }
@@ -250,7 +250,7 @@
 .sk-mobil { position: relative; width: 48px; height: 44px; display: grid; place-items: center; }
 .sk-mobil .px-tanya { position: absolute; right: -2px; top: 2px; }
 .hp-saksi-px .hp-saksi-kartu.dilihat { border-image-source: url('./saksi/kartu-pilih-9i.png'); transform: translateY(-4px); }
-.hp-saksi-px .hp-saksi-kartu.ditandai-rencana { border-image-source: url('./saksi/kartu-bayangan-9i.png'); color: #848484; }
+.hp-saksi-px .hp-saksi-kartu.ditandai-rencana { border-image-source: url('./saksi/kartu-bayangan-9i.png'); color: #5f5f5f; }
 .hp-saksi-px .hp-saksi-kartu.ditandai-rencana .hp-potret, .hp-saksi-px .hp-saksi-kartu.ditandai-rencana .sk-mobil { opacity: .4; }
 .hp-saksi-px .hp-saksi-kartu.ditandai-lain { border-image-source: url('./saksi/kartu-tidak-9i.png'); color: #5f5f5f; }
 .hp-saksi-px .hp-saksi-kartu.ditandai-lain .hp-potret, .hp-saksi-px .hp-saksi-kartu.ditandai-lain .sk-mobil { filter: grayscale(1); opacity: .6; }
@@ -396,7 +396,7 @@
 .hp-progres-kotak i[data-isi="sudah"] { background: #212121; }
 .hp-progres-kotak i[data-isi="kini"] { background: #ff9000; box-shadow: 0 0 0 1px #212121; }
 .hp-baris-baki { min-height: 48px; display: grid; align-items: center; }
-.hp-baris-baki .hp-instruksi-baki { margin: 0; font-size: 15.5px; line-height: 20px; font-weight: 800; color: #9a4f00; }
+.hp-baris-baki .hp-instruksi-baki { margin: 0; font-size: 15.5px; line-height: 20px; font-weight: 800; color: #212121; }
 .hp-baris-baki .hp-umpan { min-height: 44px; box-sizing: border-box; padding: 2px 4px 2px 10px; border-radius: 0; font-size: 13.5px; line-height: 17px; }
 .hp-arena[data-tampilan="gambar"] .hp-susun.hp-susun[data-gaya="baki"] .hp-wadah {
   min-height: 0; gap: 2px; padding: 8px 4px 8px; border: 2px solid #212121; border-radius: 0; background: #fffdf6; box-shadow: 0 2px 0 #e0e0e0;

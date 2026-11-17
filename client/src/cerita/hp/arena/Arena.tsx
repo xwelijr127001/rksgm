@@ -28,6 +28,7 @@ import { ArenaPolaSim } from './ArenaSim';
 import { ArenaPolaSusun } from './ArenaSusun';
 import { ArenaPolaTujuan } from './ArenaTujuan';
 import type { PropsPola } from './pola';
+import { KODE_PANDU, PanduLangkah } from './Pandu';
 
 /** Pilihan tampilan gambar / daftar pemain, berlaku untuk semua arena (juga meja kasus prototipe). */
 const KUNCI_TAMPILAN = 'raksa:cerita:tampilan-arena';
@@ -96,6 +97,8 @@ export function Arena({ ep, state, node, bahasa, tx, namaPemain, onKirim, onKemb
     onKirim(jawabanKirim(konfig, jawaban));
   };
   const props: PropsPola = { ep, misi, jawaban, ubah: setJawaban, daftar, tx, labelKirim: tx(def.labelKirim), onKirim: kirim, namaPemain, kutipan: kutipanDiPola ? kutipan : null, onAktif: setAktifSusun, kunjungan };
+  // T-034 (D-315): pengalih tampilan gambar / daftar juga ada di Menu cerita (di K15 tautan di bawah aktivitas tidak tampil).
+  useEffect(() => { const f = () => ganti(); window.addEventListener('raksa:alih-tampilan', f); return () => window.removeEventListener('raksa:alih-tampilan', f); });
   const ganti = () => {
     const v = daftar ? 'gambar' : 'daftar';
     setTampilan(v);
@@ -108,10 +111,14 @@ export function Arena({ ep, state, node, bahasa, tx, namaPemain, onKirim, onKemb
   const cangkang = useKueri(KUERI_CANGKANG_LAYAR);
   const [slotKepala, setSlotKepala] = useState<HTMLDivElement | null>(null);
   const [slotKirim, setSlotKirim] = useState<HTMLDivElement | null>(null);
+  // T-033: langkah terpandu (pita, petunjuk, penunjuk, kartu cara main) di tampilan gambar aktivitas Episode 2 yang terdaftar.
+  const [akarArena, setAkarArena] = useState<HTMLDivElement | null>(null);
+  const kodePandu = !daftar && (KODE_PANDU as readonly string[]).includes(node.id) ? node.id : null;
+  const adaIsian = !!jawaban && typeof jawaban === 'object' && Object.values(jawaban as Record<string, unknown>).some((v) => v !== null && v !== undefined && v !== '' && !(Array.isArray(v) && v.length === 0) && !(typeof v === 'object' && !Array.isArray(v) && Object.keys(v as object).length === 0));
 
   return (
     <SlotKepalaArena.Provider value={cangkang ? slotKepala : null}><SlotKirimArena.Provider value={cangkang ? slotKirim : null}>
-    <div className="hp-arena" data-pola={konfig.pola} data-tampilan={daftar ? 'daftar' : 'gambar'} data-tab-info={tabInfo ? '' : undefined}>
+    <div ref={setAkarArena} className="hp-arena" data-pandu={kodePandu ?? undefined} data-pola={konfig.pola} data-tampilan={daftar ? 'daftar' : 'gambar'} data-tab-info={tabInfo ? '' : undefined}>
       <header className="hp-arena-kepala">
         <button type="button" className="hp-arena-kembali" onClick={onKembali}><Arrow back /><span className="hp-arena-kembali-penuh">{t('ceritaHp.kembaliCerita')}</span><span className="hp-arena-kembali-pendek" aria-hidden="true">{t('ceritaHp.kembali')}</span></button>
         <p className="hp-arena-tugas">{t('ceritaHp.tugas')}</p>
@@ -144,6 +151,7 @@ export function Arena({ ep, state, node, bahasa, tx, namaPemain, onKirim, onKemb
           </>
         )}
       </div>}
+      {kodePandu ? <PanduLangkah kode={kodePandu} arena={akarArena} adaIsian={adaIsian} slotKepala={cangkang ? slotKepala : null} /> : null}
       {gagal ? <p className="hp-arena-gagal" role="status">{t('ceritaHp.gagalVisual')}</p> : null}
       <BatasArena key={daftar ? 'daftar' : 'gambar'} onGagal={() => { if (!daftar) setGagal(true); }}>
         {konfig.pola === 'susun' ? <ArenaPolaSusun {...props} konfig={konfig} />

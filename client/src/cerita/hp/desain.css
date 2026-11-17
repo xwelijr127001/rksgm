@@ -8,7 +8,7 @@
 /* ---------- K02 meja dokumen: baki ringkas sejajar ---------- */
 .hp-arena[data-tampilan="gambar"] .hp-susun[data-gaya="baki"] { gap: 8px; }
 .hp-arena[data-tampilan="gambar"] .hp-susun[data-gaya="baki"] .hp-tanya-arena { margin-top: 2px; }
-.hp-instruksi-baki { margin: -2px 0 0; font-size: 15px; font-weight: 700; color: var(--utama-teks); }
+.hp-instruksi-baki { margin: -2px 0 0; font-size: 15px; font-weight: 700; color: var(--hp-tinta); } /* D-294: kalimat instruksi bukan tautan atau label -> tinta */
 .hp-arena[data-tampilan="gambar"] .hp-susun[data-gaya="baki"] .hp-wadah-daftar {
   display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px;
 }
@@ -559,7 +559,7 @@ body > .akh-lembar-latar {
    tersemat] kalimat konteks 14,5 / 19 -> papan (mengambil sisa ruang, min 202, maks 300) -> strip 72-76 (awal: tokoh + pertanyaannya;
    sesudah ketuk: nama + arti tempat) -> tautan tampilan daftar. Ketuk = pilih (PapanTujuan.tsx). Yang mengalah: tautan daftar (turun
    ke bawah lipatan, tetap bisa digulir), lalu papan 300 -> 202, baru isi menggulir. */
-.hp-instruksi-arena { order: 2; margin: 0; font-size: 15.5px; line-height: 20px; font-weight: 800; color: #9a4f00; }
+.hp-instruksi-arena { order: 2; margin: 0; font-size: 15.5px; line-height: 20px; font-weight: 800; color: #212121; }
 @media (max-width: 1023.98px) and (min-height: 560px) {
   .hp-layar[data-kunci] .hp-arena:has(.hp-pola-tujuan[data-papan]) .hp-arena-gulir { gap: 8px; }
   .hp-layar[data-kunci] .hp-arena:has(.hp-pola-tujuan[data-papan]) .hp-konteks-cerita { font-size: 14.5px; line-height: 19px; }

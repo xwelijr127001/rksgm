@@ -11,16 +11,17 @@
  *       build  : <dist>/assets/*.css -> tidak boleh ada, kecuali di dalam url(data:...) (seni piksel yang disisipkan);
  *                <dist>/assets/*.js -> setiap temuan harus warna yang memang ada di berkas seni sumber (kode seni ikut
  *                terbundel sebagai teks; pemindaian sumber menjamin warna itu tidak dipakai di luar seni);
- *                <dist>/index.html -> seperti sumbernya.
+ *                <dist>/index.html -> seperti sumbernya; client/public/*.svg dan <dist>/*.svg (favicon) -> tidak boleh ada.
  *  B. TOKEN: nilai token di CSS build (--hijau = --kuning = --utama = #ff9000, --fokus = #212121, ...) dan kontras WCAG pasangan
  *     yang dijanjikan PALET: cincin fokus >= 3 : 1 pada halaman #FFF9F5, blush #F9EEEA dan putih; label di atas jingga, jingga
  *     sebagai teks, teks status di atas pucatnya, putih di atas isi status >= 4,5 : 1.
  *  C. LAYAR (butuh server uji): 12 layar kunci x 390x745 (DPR 2) dan 1280x800, untuk Designer: beranda, pemilih episode, obrolan
  *     K01, aktivitas berkas K02, K-SIM, ruang Komite (K11), kartu akhir, host, proyektor, join, lobi, masuk CMS; ditambah lembar
  *     balasan K01 (nomor pilihan, D-284), pemilih skenario host, tiga layar babak 1 room (peserta, proyektor, host) dan, bila
- *     mode lama aktif di server uji, halaman /solo. Tiap layar diperiksa dari gaya TERHITUNG: tidak ada teks terang di atas
- *     isi jingga, tidak ada teks jingga di latar terang (kecuali wordmark .mrk, PALET 6), dan di beranda cincin fokus tiap
- *     perhentian Tab >= 3 : 1 terhadap latarnya. Kontras teks di bawah 4,5 : 1 (3 : 1 untuk teks besar) DICATAT, bukan gagal:
+ *     mode lama aktif di server uji, halaman /solo dan proyektor kuis lama tanpa room (/acara/layar, latar gelap). Tiap layar diperiksa dari gaya TERHITUNG: tidak ada teks terang di atas
+ *     isi jingga, tidak ada teks jingga di latar terang (kecuali wordmark .mrk, PALET 6), tombol utama nonaktif memakai satu
+ *     tampilan (D-289: isi #E0E0E0, label #5F5F5F, tepi = isi, opasitas 1), dan di beranda cincin fokus tiap perhentian Tab
+ *     >= 3 : 1 terhadap latarnya. Kontras teks di bawah 4,5 : 1 (3 : 1 untuk teks besar) DICATAT, bukan gagal:
  *     latar bergambar tidak bisa dihitung dan sebagian adalah teks nonaktif.
  *
  *   node tools/cek-palet-t029.mjs --dist <folder build> --tanpa-layar
@@ -112,7 +113,15 @@ function pindai() {
   const indeks = fs.readFileSync(path.join(ROOT, 'client/index.html'), 'utf8'); const diLuar = temuan(luarTemplat(indeks));
   for (const t of temuan(indeks)) seniHex.add(t.hex);
   lapor('sumber-index', diLuar.length === 0, { ...ringkas(diLuar.map((t) => `index.html:${baris(indeks, t.i)} ${t.bentuk}`)), catatan: 'di luar <template id="pra-tpl"> (gambar Raki)' });
+  // client/public/*.svg di tingkat atas (favicon, D-296): ikon antarmuka, bukan seni tokoh; subfolder (karakter/) = seni, tidak dipindai.
+  const publik = path.join(ROOT, 'client/public'); const svgSalah = [];
+  for (const n of fs.existsSync(publik) ? fs.readdirSync(publik).filter((x) => x.endsWith('.svg')) : []) { const s = fs.readFileSync(path.join(publik, n), 'utf8'); for (const t of temuan(s)) svgSalah.push(`${n}:${baris(s, t.i)} ${t.bentuk}`); }
+  lapor('sumber-publik', svgSalah.length === 0, { ...ringkas(svgSalah), catatan: 'client/public/*.svg (favicon)' });
 
+  // T-030 / T-031: setiap hex di client/src/gaya-game.css ada di PALET.md (atau empat rona baru T-031).
+  const palet = new Set([...fs.readFileSync(path.join(ROOT, 'character/palet-raksa-v1/PALET.md'), 'utf8').matchAll(/#[0-9a-fA-F]{6}\b/g)].map((m) => m[0].toLowerCase()).concat(['#f3ded3', '#ffd9a8', '#ffe4c2', '#fff1e2', '#ecd5cb']));
+  const gg = path.join(SRC, 'gaya-game.css'); const hexBaru = fs.existsSync(gg) ? [...new Set([...tanpaKomentarBlok(fs.readFileSync(gg, 'utf8')).matchAll(/#[0-9a-fA-F]{6}\b/g)].map((m) => m[0].toLowerCase()))].filter((h) => !palet.has(h)) : ['gaya-game.css tidak ada'];
+  lapor('gaya-game-hex', hexBaru.length === 0, { diluarPalet: hexBaru });
   // ---- build
   const aset = path.join(DIST, 'assets');
   if (!fs.existsSync(aset)) { lapor('bangun', false, { sebab: [`folder build tidak ada: ${aset} (--dist)`] }); return; }
@@ -134,11 +143,13 @@ function pindai() {
   lapor('bangun-js', jsB.length > 0 && salahJs.length === 0, { berkas: jsB.length, ...ringkas(salahJs, 20), dijelaskanSeni: dijelaskan, merekDiSeni: Object.fromEntries(merekSeni) });
   const idx = path.join(DIST, 'index.html');
   if (fs.existsSync(idx)) { const h = fs.readFileSync(idx, 'utf8'); const d = temuan(luarTemplat(h)); lapor('bangun-index', d.length === 0, ringkas(d.map((t) => `${t.bentuk} | ${sekitar(h, t.i)}`))); }
+  const svgB = []; for (const n of fs.readdirSync(DIST).filter((x) => x.endsWith('.svg'))) { const s = fs.readFileSync(path.join(DIST, n), 'utf8'); for (const t of temuan(s)) svgB.push(`${n} ${t.bentuk}`); }
+  lapor('bangun-publik', svgB.length === 0, { ...ringkas(svgB), catatan: '<dist>/*.svg (favicon)' });
 
   // ================================================================ B. token dan kontras
   const semuaCss = cssB.map((f) => fs.readFileSync(f, 'utf8')).join('\n');
   const tok = (nama) => { const m = new RegExp(`--${nama}:\\s*(#[0-9a-fA-F]{3,8})`).exec(semuaCss); if (!m) return null; let x = m[1].slice(1).toLowerCase(); if (x.length === 3) x = [...x].map((c) => c + c).join(''); return '#' + x.slice(0, 6); };
-  const harap = { hijau: '#ff9000', kuning: '#ff9000', utama: '#ff9000', 'hijau-tua': '#e07e00', 'utama-tekan': '#e07e00', 'utama-tepi': '#b25c00', 'di-utama': '#212121', 'utama-teks': '#9a4f00', 'utama-teks-tua': '#7a3e00', krem: '#fff9f5', panel: '#f9eeea', pilih: '#fff5ec', tinta: '#212121', 'tinta-lembut': '#5f5f5f', garis: '#e0e0e0', fokus: '#212121', putih: '#ffffff',
+  const harap = { hijau: '#ff9000', kuning: '#ff9000', utama: '#ff9000', 'hijau-tua': '#e07e00', 'utama-tekan': '#e07e00', 'utama-tepi': '#b25c00', 'di-utama': '#212121', 'utama-teks': '#9a4f00', 'utama-teks-tua': '#7a3e00', krem: '#fff9f5', panel: '#f9eeea', 'panel-tepi': '#ecd5cb', pilih: '#fff5ec', tinta: '#212121', 'tinta-lembut': '#5f5f5f', garis: '#e0e0e0', fokus: '#212121', putih: '#ffffff',
     tepat: '#2f7d57', 'tepat-teks': '#1f5c3f', 'tepat-pucat': '#e6f1ea', kurang: '#3e7285', 'kurang-teks': '#2c5a6b', 'kurang-pucat': '#e4eef2', keliru: '#d32f2f', 'keliru-teks': '#b3261e', 'keliru-pucat': '#fdecea', 'hp-hijau': '#ff9000', 'hp-latar': '#fff9f5', 'hp-kertas': '#ffffff', 'hp-tinta': '#212121' };
   const T = Object.fromEntries(Object.keys(harap).map((k) => [k, tok(k)]));
   const bedaToken = Object.keys(harap).filter((k) => T[k] !== harap[k]).map((k) => `--${k}: ${T[k]} (seharusnya ${harap[k]})`);
@@ -169,7 +180,7 @@ const auditHalaman = () => {
   const hex = (c) => '#' + [c.r, c.g, c.b].map((v) => Math.round(v).toString(16).padStart(2, '0')).join('');
   const jingga = (c) => { const r = c.r / 255, g = c.g / 255, b = c.b / 255; const mx = Math.max(r, g, b), mn = Math.min(r, g, b), l = (mx + mn) / 2; if (mx === mn) return false; const d = mx - mn; const s = l > 0.5 ? d / (2 - mx - mn) : d / (mx + mn); let h = mx === r ? ((g - b) / d) % 6 : mx === g ? (b - r) / d + 2 : (r - g) / d + 4; h = (h * 60 + 360) % 360; return h >= 24 && h <= 40 && s >= 0.85 && l >= 0.4 && l <= 0.56; };
   /** Latar efektif: lapisan warna leluhur sampai yang padat; null bila ada gambar latar di jalan (tidak bisa dihitung). */
-  const latar = (el) => { const lapis = []; for (let e = el; e; e = e.parentElement) { const c = getComputedStyle(e); if (c.backgroundImage && c.backgroundImage !== 'none') return null; const w = rgb(c.backgroundColor); if (w && w.a > 0.01) { lapis.push(w); if (w.a >= 0.99) break; } } let d = { r: 255, g: 255, b: 255, a: 1 }; for (const w of lapis.reverse()) d = campur(w, d); return d; };
+  const latar = (el) => { const lapis = []; for (let e = el; e; e = e.parentElement) { const c = getComputedStyle(e); let w = rgb(c.backgroundColor); if (c.backgroundImage && c.backgroundImage !== 'none') { const muka = (c.getPropertyValue('--k-muka') || c.getPropertyValue('--c-muka')).trim(); if (/^#[0-9a-f]{6}$/i.test(muka)) w = { r: parseInt(muka.slice(1, 3), 16), g: parseInt(muka.slice(3, 5), 16), b: parseInt(muka.slice(5, 7), 16), a: 1 }; else if (!w || w.a < 0.99) return null; } if (w && w.a > 0.01) { lapis.push(w); if (w.a >= 0.99) break; } } let d = { r: 255, g: 255, b: 255, a: 1 }; for (const w of lapis.reverse()) d = campur(w, d); return d; };
   const nama = (el) => { const k = typeof el.className === 'string' && el.className.trim() ? '.' + el.className.trim().split(/\s+/).slice(0, 2).join('.') : ''; return el.tagName.toLowerCase() + k; };
   const tampak = (el) => { const r = el.getBoundingClientRect(); if (r.width < 3 || r.height < 3) return false; for (let e = el; e; e = e.parentElement) { const c = getComputedStyle(e); if (c.display === 'none' || c.visibility === 'hidden' || Number(c.opacity) < 0.05) return false; if (c.position === 'absolute' && (c.clip === 'rect(0px, 0px, 0px, 0px)' || (parseFloat(c.width) <= 1 && parseFloat(c.height) <= 1))) return false; } return true; };
   const putihDiJingga = [], jinggaDiTerang = [], rendah = []; let teks = 0;
@@ -187,8 +198,50 @@ const auditHalaman = () => {
   // ikon garis / isi terang di dalam isi jingga (currentColor ikut label; yang dicari = putih yang ditulis langsung)
   const ikon = [];
   for (const el of document.querySelectorAll('svg, svg *')) { if (!tampak(el)) continue; const c = getComputedStyle(el); for (const p of ['stroke', 'fill']) { const w = rgb(c[p]); if (!w || w.a < 0.5 || lum(w) < 0.7) continue; const induk = el.closest('svg')?.parentElement; const bg = induk ? latar(induk) : null; if (bg && jingga(bg) && el.closest('svg').getBoundingClientRect().width <= 40) ikon.push(`${nama(induk)} > svg ${p} ${hex(w)}`); } }
+  // D-289 (T-029 Fix 1): tombol utama nonaktif punya SATU tampilan: isi #E0E0E0, label #5F5F5F, tepi = isi, opasitas 1; di atas
+  // proyektor gelap isi #424242, label #A4A4A4. Pengecualian yang disengaja: "Kamu siap" di lobi kuis lama (.lobby-focus).
+  const nonaktifSalah = []; let nonaktif = 0;
+  for (const el of document.querySelectorAll('button.primary-action:disabled, button.btn:disabled, button.lk-btn-utama:disabled')) {
+    if (!tampak(el) || el.closest('.lobby-focus')) continue; nonaktif++;
+    const c = getComputedStyle(el); const gelap = !!el.closest('.proyektor'); const isi = gelap ? 'rgb(66, 66, 66)' : 'rgb(224, 224, 224)'; const label = gelap ? 'rgb(164, 164, 164)' : 'rgb(95, 95, 95)';
+    const tepi = ['Top', 'Right', 'Bottom', 'Left'].filter((s) => parseFloat(c['border' + s + 'Width']) > 0 && c['border' + s + 'Color'] !== isi);
+    const hx = (v) => { const m = /^#([0-9a-f]{6})$/i.exec(String(v).trim()); return m ? `rgb(${parseInt(m[1].slice(0, 2), 16)}, ${parseInt(m[1].slice(2, 4), 16)}, ${parseInt(m[1].slice(4, 6), 16)})` : null; };
+    const muka = hx(c.getPropertyValue('--k-muka')) ?? c.backgroundColor; const tepiK = hx(c.getPropertyValue('--k-tepi'));
+    const tepiSalah = tepiK ? (tepiK !== isi ? [tepiK] : []) : tepi;
+    if (muka !== isi || c.color !== label || Number(c.opacity) !== 1 || tepiSalah.length) nonaktifSalah.push(`${nama(el)} "${el.textContent.trim().slice(0, 24)}" isi ${muka} label ${c.color} opasitas ${c.opacity}${tepiSalah.length ? ' tepi ' + tepiSalah[0] : ''}`);
+  }
+  // T-030: setiap tombol bergaya tombol memakai tanda pixel key: --k-muka terisi, >= 9 lapis gradien, sudut 0. Tombol jingga polos
+  // yang tidak ikut daftar kelas juga dicari (warna isi #FF9000 tanpa gradien). Tombol ikon bundar: lingkaran + alas 2 px.
+  const KUNCI = '.primary-action, .btn, .lp-pintu-aksi, .akh-kedua, .hp-lembar-kembali, .akh-navigasi button, .hp-opsi, .lk-btn, .kj-kedua, .meja-sekunder, .cer-tombol-garis, .bank-btn';
+  const kunciSalah = []; let kunci = 0;
+  for (const el of document.querySelectorAll(KUNCI)) { if (!tampak(el)) continue; kunci++; const c = getComputedStyle(el); const lapis = (c.backgroundImage.match(/linear-gradient/g) || []).length;
+    if (!c.getPropertyValue('--k-muka').trim() || lapis < 9 || parseFloat(c.borderTopLeftRadius) > 0) kunciSalah.push(`${nama(el)} "${el.textContent.trim().slice(0, 20)}" lapis ${lapis} sudut ${c.borderTopLeftRadius}`); }
+  for (const el of document.querySelectorAll('button, a')) { if (!tampak(el) || el.matches(KUNCI) || el.closest('svg')) continue; const c = getComputedStyle(el); if (c.backgroundColor === 'rgb(255, 144, 0)' && c.backgroundImage === 'none' && el.getBoundingClientRect().height >= 32) kunciSalah.push(`${nama(el)} "${el.textContent.trim().slice(0, 20)}" tombol jingga polos tanpa pixel key`); }
+  const bundarSalah = []; for (const el of document.querySelectorAll('.pilih-bahasa, .sound-button, .hp-kembali')) { if (!tampak(el)) continue; const c = getComputedStyle(el); if (!/0px 2px 0px/.test(c.boxShadow)) bundarSalah.push(`${nama(el)} alas ${c.boxShadow}`); }
+  // T-031: kartu K1 / K1 ringan / K4 bersudut tangga (border-radius <= 2 px, --c-muka terisi)
+  const kartuSalah = []; let kartu = 0;
+  for (const el of document.querySelectorAll('.lp-halaman .lp-pintu, .cer-ep, .stf-kartu, .stf-masuk-kartu, .lp-join, .hp-lembar, .hp-gelembung, .lp-kota-balon, .hp-status-catatan, section.hp-aksi, .akh-pelajaran')) { if (!tampak(el)) continue; kartu++; const c = getComputedStyle(el); if (parseFloat(c.borderTopLeftRadius) > 2 || !c.getPropertyValue('--c-muka').trim()) kartuSalah.push(`${nama(el)} sudut ${c.borderTopLeftRadius}`); }
+  const latarPiksel = [...document.querySelectorAll('.lp-halaman, .cer-hub-layar, .hp-layar, .stf')].filter((e) => /gradient/.test(getComputedStyle(e).backgroundImage)).map((e) => e.tagName.toLowerCase() + '.' + [...e.classList].join('.'));
+  // Catatan pemilik 2 (18 Nov): (A) tidak ada sudut > 2 px di cangkang cerita / beranda / pemilih kecuali lingkaran ikon dan avatar;
+  // (B) isi teks pertama kartu K1/K4 >= 14 px dari tepi kiri luar; (C) tab K4 di garis atas; (D) tombol di dalam kartu terinset >= 14 px.
+  const KECUALI = /penanda|skala|mood|potret|avatar|ikon|titik|tokoh|tanda|nada|arah|bulat|wajah|pilih-bahasa|sound-button|hp-kembali/;
+  const sudutSalah = [];
+  for (const el of document.querySelectorAll(':is(.hp-layar, .hp-tema, .lp-halaman, .cer-hub-layar, .akh-kartu, .player-ui, .stf, .sr-layar, .proyektor) *')) {
+    if (el.closest('svg') || el.tagName === 'IMG' || !tampak(el)) continue; const c = getComputedStyle(el);
+    if (parseFloat(c.borderTopLeftRadius) > 2 && !el.matches('input[type="checkbox"], input[type="radio"]') && !KECUALI.test(String(el.className)) && !(el.parentElement && el.parentElement.getAttribute('role') === 'radio')) sudutSalah.push(nama(el) + ' ' + c.borderTopLeftRadius);
+  }
+  const RINGAN = '.hp-gelembung, .lp-kota-balon, .hp-status-catatan, .cer-istilah-tombol, .cer-istilah-tombol-bentuk, .akh-gelembung';
+  const dalamSalah = []; let bingkai = 0;
+  for (const k of document.querySelectorAll('*')) {
+    if (!tampak(k)) continue; const c = getComputedStyle(k); if (!c.getPropertyValue('--c-muka').trim() || k.matches(RINGAN) || !/gradient/.test(c.backgroundImage)) continue; bingkai++;
+    const kr = k.getBoundingClientRect(); const tab = k.querySelector('.hp-aksi-label, .akh-pelajaran-label, .hp-tindakan > b');
+    const teks = [...k.querySelectorAll('*')].find((e) => e !== tab && !e.closest('button, a.primary-action, .lp-pintu-aksi') && tampak(e) && [...e.childNodes].some((n) => n.nodeType === 3 && n.textContent.trim()));
+    if (teks && teks.getBoundingClientRect().left - kr.left < 13.5) dalamSalah.push(nama(k) + ': teks "' + teks.textContent.trim().slice(0, 18) + '" ' + Math.round(teks.getBoundingClientRect().left - kr.left) + ' px dari tepi');
+    for (const t of k.querySelectorAll(KUNCI)) { if (!tampak(t)) continue; const r = t.getBoundingClientRect(); const ins = [r.left - kr.left, kr.right - r.right, kr.bottom - r.bottom].map((x) => Math.round(x * 10) / 10); if (ins.some((x) => x < 13.5)) dalamSalah.push(nama(k) + ': tombol "' + t.textContent.trim().slice(0, 14) + '" inset ' + ins.join('/')); }
+    if (tab) { const tr = tab.getBoundingClientRect(); const pusat = tr.top + tr.height / 2 - kr.top; if (Math.abs(pusat - 1.5) > 2) dalamSalah.push(nama(k) + ': tab pusat ' + Math.round(pusat * 10) / 10 + ' px dari tepi atas'); }
+  }
   rendah.sort((a, b) => a[0] - b[0]);
-  return { teks, putihDiJingga: [...new Set(putihDiJingga)], jinggaDiTerang: [...new Set(jinggaDiTerang)], ikonTerangDiJingga: [...new Set(ikon)].slice(0, 8), kontrasRendah: [...new Map(rendah.map((x) => [x[1], x])).values()].slice(0, 10).map(([k, s]) => `${k} : 1 ${s}`), kontrasRendahJumlah: new Set(rendah.map((x) => x[1])).size };
+  return { teks, sudutSalah, dalamSalah, bingkai, nonaktif, nonaktifSalah, kunci, kunciSalah, bundarSalah, kartu, kartuSalah, latarPiksel, putihDiJingga: [...new Set(putihDiJingga)], jinggaDiTerang: [...new Set(jinggaDiTerang)], ikonTerangDiJingga: [...new Set(ikon)].slice(0, 8), kontrasRendah: [...new Map(rendah.map((x) => [x[1], x])).values()].slice(0, 10).map(([k, s]) => `${k} : 1 ${s}`), kontrasRendahJumlah: new Set(rendah.map((x) => x[1])).size };
 };
 
 async function layar() {
@@ -233,20 +286,31 @@ async function layar() {
   const tangkap = async (h, nama, vpNama, tambahan = {}) => {
     await tenang(h.p, 1100); // animasi masuk selesai dulu
     const a = await denganBatas(h.p.evaluate(auditHalaman), 20000, 'audit ' + nama);
-    // Halaman penuh HANYA bila halamannya memang menggulir: tangkapan halaman penuh mengubah ukuran layar sesaat, dan layar
-    // terkunci (cangkang HP 100dvh) lalu memutar ulang animasi masuknya (lembar balasan tertangkap setengah pudar).
-    const menggulir = await h.p.evaluate(() => document.scrollingElement.scrollHeight > window.innerHeight + 1);
-    await h.p.screenshot({ path: path.join(OUT, `${nama}-${vpNama}.png`), fullPage: menggulir });
-    const sebab = [...a.putihDiJingga.map((x) => 'teks terang di atas jingga: ' + x), ...a.jinggaDiTerang.map((x) => 'teks jingga di latar terang: ' + x), ...h.galat.map((x) => 'galat halaman: ' + x)];
-    lapor(`${nama}-${vpNama}`, sebab.length === 0, { sebab, teks: a.teks, ikonTerangDiJingga: a.ikonTerangDiJingga, kontrasRendah: a.kontrasRendahJumlah, contohKontrasRendah: a.kontrasRendah, ...tambahan });
+    // Tangkapan `fullPage` mengubah ukuran layar SAAT menangkap, dan animasi masuk lalu berputar ulang (lembar balasan dan
+    // adegan beranda tertangkap setengah pudar). Jadi: halaman yang menggulir ditinggikan dulu setinggi isinya, animasi
+    // berhingga ditunggu selesai, baru ditangkap sebagai layar biasa; layar terkunci (cangkang HP 100dvh) ditangkap apa adanya.
+    const selesaiAnimasi = () => h.p.evaluate(() => Promise.race([
+      Promise.all(document.getAnimations().filter((x) => { const t = x.effect?.getComputedTiming?.(); return t && t.iterations !== Infinity; }).map((x) => x.finished.catch(() => null))),
+      new Promise((r) => setTimeout(r, 2500)),
+    ]).then(() => true)).catch(() => null);
+    const tinggi = await h.p.evaluate(() => ({ isi: document.scrollingElement.scrollHeight, layar: window.innerHeight }));
+    const vp0 = h.p.viewport();
+    if (tinggi.isi > tinggi.layar + 1 && vp0) { await h.p.setViewport({ ...vp0, height: Math.min(tinggi.isi, 8000) }); await tunggu(500); }
+    await selesaiAnimasi();
+    await h.p.screenshot({ path: path.join(OUT, `${nama}-${vpNama}.png`) });
+    if (tinggi.isi > tinggi.layar + 1 && vp0) { await h.p.setViewport(vp0); await tunggu(200); }
+    const LATAR = { '01-beranda': 'lp-halaman', '02-pemilih': 'cer-hub-layar', '03-obrolan': 'hp-layar', '03b-lembar': 'hp-layar', '04-berkas': 'hp-layar', '05-ksim': 'hp-layar', '06-ruang': 'hp-layar', '07-kartu': 'hp-layar', '08-host': 'stf', '12-cms': 'stf', '15-host': 'stf' };
+    const perlu = Object.entries(LATAR).find(([k]) => nama.startsWith(k))?.[1]; const tanpaLatar = perlu && !a.latarPiksel.some((x) => x.includes('.' + perlu)) ? ['latar piksel ' + perlu + ' tidak ada'] : [];
+    const sebab = [...a.sudutSalah.map((x) => 'sudut membulat: ' + x), ...a.dalamSalah.map((x) => 'kartu: ' + x), ...a.kunciSalah.map((x) => 'tombol tanpa pixel key: ' + x), ...a.bundarSalah.map((x) => 'tombol bundar tanpa alas 2 px: ' + x), ...a.kartuSalah.map((x) => 'kartu tidak bersudut tangga: ' + x), ...tanpaLatar, ...a.putihDiJingga.map((x) => 'teks terang di atas jingga: ' + x), ...a.jinggaDiTerang.map((x) => 'teks jingga di latar terang: ' + x), ...a.nonaktifSalah.map((x) => 'tombol utama nonaktif bukan tampilan D-289: ' + x), ...h.galat.map((x) => 'galat halaman: ' + x)];
+    lapor(`${nama}-${vpNama}`, sebab.length === 0, { sebab, teks: a.teks, bingkaiDiukur: a.bingkai, tombolKunci: a.kunci, kartu: a.kartu, latar: a.latarPiksel, tombolNonaktif: a.nonaktif, ikonTerangDiJingga: a.ikonTerangDiJingga, kontrasRendah: a.kontrasRendahJumlah, contohKontrasRendah: a.kontrasRendah, ...tambahan });
   };
   const mau = (nama) => !hanyaKasus || nama.includes(hanyaKasus);
   // ---- 00 uji diri: pemeriksaan gaya terhitung harus menemukan tiga pelanggaran buatan (kalau tidak, hasil "bersih" tidak berarti)
   {
     const ctx = await b.createBrowserContext(); const p = await ctx.newPage();
-    await p.setContent('<body style="background:#fff9f5"><button style="background:#ff9000;color:#fff;border:0">Putih di jingga</button><p style="color:#ff9000">Jingga di terang</p><span style="color:#a4a4a4">Abu lemah</span><p style="color:#212121">Tinta</p></body>');
+    await p.setContent('<body style="background:#fff9f5"><button style="background:#ff9000;color:#fff;border:0">Putih di jingga</button><p style="color:#ff9000">Jingga di terang</p><span style="color:#a4a4a4">Abu lemah</span><p style="color:#212121">Tinta</p><button class="btn" disabled style="background:#ff9000;color:#212121;opacity:.45;border:1px solid #b25c00">Nonaktif salah</button></body>');
     const a = await p.evaluate(auditHalaman); await ctx.close();
-    lapor('00-uji-diri-audit', a.putihDiJingga.length === 1 && a.jinggaDiTerang.length === 1 && a.kontrasRendahJumlah === 3 && a.teks === 4, { putihDiJingga: a.putihDiJingga, jinggaDiTerang: a.jinggaDiTerang, kontrasRendah: a.kontrasRendah });
+    lapor('00-uji-diri-audit', a.putihDiJingga.length === 1 && a.jinggaDiTerang.length === 1 && a.kontrasRendahJumlah === 3 && a.teks === 5 && a.nonaktifSalah.length === 1, { putihDiJingga: a.putihDiJingga, jinggaDiTerang: a.jinggaDiTerang, kontrasRendah: a.kontrasRendah, nonaktifSalah: a.nonaktifSalah });
   }
   const coba = async (nama, fn) => { if (!mau(nama)) return; try { await denganBatas(fn(), 110000, nama); } catch (e) { lapor(nama, false, { sebab: ['galat alat: ' + String(e?.message ?? e).slice(0, 220)] }); } };
 
@@ -330,6 +394,14 @@ async function layar() {
       if (!ada) { console.log('LEWAT 16-solo-' + vp.n + ' (mode lama tidak aktif di server uji)'); await h.tutup(); return; }
       await tangkap(h, '16-solo', vp.n); await h.tutup();
     });
+    // ---- 17 proyektor kuis lama tanpa room (mode lama saja): latar tinta; tombol "Tampilkan layar" nonaktif = D-289 di latar gelap
+    await coba('17-proyektor-lama', async () => {
+      const h = await bukaPolos(vp, '/acara/layar', vp === HP);
+      await tenang(h.p, 1500);
+      const ada = await h.p.evaluate(() => !!document.querySelector('.proyektor'));
+      if (!ada) { console.log('LEWAT 17-proyektor-lama-' + vp.n + ' (mode lama tidak aktif di server uji)'); await h.tutup(); return; }
+      await tangkap(h, '17-proyektor-lama', vp.n); await h.tutup();
+    });
     // ---- 12 masuk CMS
     await coba('12-cms-masuk', async () => {
       const h = await bukaPolos(vp, '/cms');
@@ -339,7 +411,7 @@ async function layar() {
   }
 
   // ---- 08 host, 09 proyektor, 10 join, 11 lobi: satu room uji (lalu babak 1: 13 peserta, 14 proyektor, 15 host)
-  if (mau('08-host') || mau('09-proyektor') || mau('10-join') || mau('11-lobi') || mau('13-') || mau('14-') || mau('15-')) {
+  if (mau('08-host') || mau('09-proyektor') || mau('10-join') || mau('11-lobi') || mau('13-') || mau('14-') || mau('15-') || mau('18-') || mau('19-')) {
     let host = null; const orang = []; let pry = null;
     try {
       await denganBatas((async () => {
@@ -372,7 +444,7 @@ async function layar() {
         await sampai(pry.p, (k) => document.body.innerText.includes(k), kode, 30000, 'proyektor memuat room');
         if (mau('09-proyektor')) await duaUkuran(pry, '09-proyektor', { fase: 'lobi' });
         // babak 1 (adegan): host menekan tombol utama satu kali
-        if (mau('13-') || mau('14-') || mau('15-')) {
+        if (mau('13-') || mau('14-') || mau('15-') || mau('18-') || mau('19-')) {
           await sampai(host.p, () => { const t = document.querySelector('.stf-room-kendali .stf-tombol .btn-utama'); return t && !t.disabled; }, null, 15000, 'tombol mulai host');
           await host.p.click('.stf-room-kendali .stf-tombol .btn-utama');
           await sampai(orang[0].p, () => !!document.querySelector('.sr-ronde[data-fase]'), null, 30000, 'babak 1 di HP peserta');
@@ -381,6 +453,24 @@ async function layar() {
           if (mau('13-')) { await tangkap(orang[0], '13-room-babak1', HP.n, { fase }); await tangkap(orang[1], '13-room-babak1', LEBAR.n, { fase }); }
           if (mau('14-')) await duaUkuran(pry, '14-proyektor-babak1', { fase });
           if (mau('15-')) await duaUkuran(host, '15-host-babak1', { fase });
+          // T-030 Fix 1: babak 1 sampai akibat dan peringkat (kedua peserta menjawab pilihan pertama)
+          if (mau('18-') || mau('19-')) {
+            const faseDari = (p) => p.evaluate(() => document.querySelector('.sr-ronde[data-fase]')?.getAttribute('data-fase') ?? '');
+            const tombolHost = async (labels) => { const t0 = Date.now(); while (Date.now() - t0 < 40000) { const ok = await host.p.evaluate((ls) => { const b = document.querySelector('.stf-room-kendali .stf-tombol .btn-utama'); if (b && !b.disabled && ls.some((l) => b.textContent.includes(l))) { b.click(); return true; } return false; }, labels).catch(() => false); if (ok) return true; await tunggu(400); } return false; };
+            await tombolHost(['Buka pilihan']);
+            for (const x of orang) {
+              await sampai(x.p, () => document.querySelectorAll('[data-pilihan]').length > 0, null, 40000, 'pilihan tampil');
+              await x.p.evaluate(() => { const k = document.querySelector('[data-pilihan]'); k.scrollIntoView({ block: 'center' }); k.click(); });
+              await tunggu(300); await x.p.evaluate(() => document.querySelector('[data-kirim]')?.click()); await tunggu(500);
+            }
+            const t1 = Date.now(); while (Date.now() - t1 < 45000 && (await faseDari(orang[0].p)) !== 'consequence') await tunggu(500);
+            await tunggu(1200);
+            if (mau('18-')) { await tangkap(orang[0], '18-akibat', HP.n, { fase: await faseDari(orang[0].p) }); await tangkap(orang[1], '18-akibat', LEBAR.n, { fase: await faseDari(orang[1].p) }); }
+            await tombolHost(['Lanjut ke peringkat', 'peringkat']);
+            const t2 = Date.now(); while (Date.now() - t2 < 30000 && (await faseDari(orang[0].p)) !== 'leaderboard') await tunggu(500);
+            await tunggu(1200);
+            if (mau('19-')) { await tangkap(orang[0], '19-peringkat', HP.n, { fase: await faseDari(orang[0].p) }); await tangkap(orang[1], '19-peringkat', LEBAR.n, { fase: await faseDari(orang[1].p) }); await duaUkuran(pry, '19-proyektor-peringkat', {}); }
+          }
         }
       })(), 240000, 'room uji');
     } catch (e) { lapor('room-uji', false, { sebab: ['galat alat: ' + String(e?.message ?? e).slice(0, 220)] }); }

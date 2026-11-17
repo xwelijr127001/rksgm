@@ -46,7 +46,7 @@
 .meja-bar-teks .hp-tautan { min-height: 40px; padding: 0; font-size: 14.5px; }
 .meja-bar > .meja-utama { flex: 0 0 auto; max-width: 52%; min-height: 48px; padding-inline: 14px; font-size: 16px; line-height: 1.2; }
 .meja-bar[data-daftar] > .meja-utama { max-width: none; width: 100%; }
-.meja-bar > .meja-utama:disabled { opacity: .5; cursor: not-allowed; }
+.meja-bar > .meja-utama:disabled { cursor: not-allowed; } /* tampilan nonaktif: .primary-action:disabled (D-289) */
 .meja-petunjuk b { color: var(--utama-teks, #9a4f00); }
 .meja-sekunder { flex: 0 0 auto; }
 .meja .hp-arena-alih { margin: 0; text-align: center; }

@@ -1,0 +1,78 @@
+/* T-033 langkah terpandu: aturan Designer (team/evidence/T-033/designer/mock-rules-T-033.css) + penyesuaian build di akhir. */
+/* 1. step strip: one row, 28 px, chips of pixel cards */
+.lgk-langkah { display: flex; gap: 6px; margin: 0; padding: 0; list-style: none; min-height: 28px; overflow: hidden; }
+.lgk-langkah li { display: inline-flex; align-items: center; gap: 6px; min-width: 0; height: 28px; padding: 0 9px 0 4px; font-size: 13.5px; font-weight: 800; line-height: 1; white-space: nowrap; color: #5f5f5f;
+  background: linear-gradient(#ffffff, #ffffff) 1px 1px / calc(100% - 2px) calc(100% - 2px) no-repeat, linear-gradient(#e0e0e0, #e0e0e0) 1px 0 / calc(100% - 2px) 100% no-repeat, linear-gradient(#e0e0e0, #e0e0e0) 0 1px / 100% calc(100% - 2px) no-repeat; }
+.lgk-langkah li b { display: grid; place-items: center; width: 20px; height: 20px; font-size: 12px; background: #e0e0e0; color: #5f5f5f; }
+.lgk-langkah li[data-status="kini"] { flex: 1 1 auto; color: #212121;
+  background: linear-gradient(#fff5ec, #fff5ec) 2px 2px / calc(100% - 4px) calc(100% - 4px) no-repeat, linear-gradient(#ff9000, #ff9000) 2px 0 / calc(100% - 4px) 100% no-repeat, linear-gradient(#ff9000, #ff9000) 0 2px / 100% calc(100% - 4px) no-repeat; }
+.lgk-langkah li[data-status="kini"] b { background: #ff9000; color: #212121; }
+.lgk-langkah li[data-status="selesai"] { color: #1f5c3f; }
+.lgk-langkah li[data-status="selesai"] b { background: #2f7d57; color: #ffffff; font-size: 0; }
+.lgk-langkah li[data-status="selesai"] b::after { content: '\2713'; font-size: 13px; }   /* tick; the word stays, so colour is not alone */
+.lgk-langkah li span { overflow: hidden; text-overflow: ellipsis; }
+
+/* 2. pixel pointer: a 2-frame bouncing arrow (pointing down at the target) */
+.lgk-penunjuk { position: absolute; z-index: 3; width: 20px; height: 20px; pointer-events: none;
+  background:
+    linear-gradient(#212121, #212121) 6px 0 / 8px 10px no-repeat,
+    linear-gradient(#212121, #212121) 0 8px / 20px 4px no-repeat,
+    linear-gradient(#212121, #212121) 2px 12px / 16px 2px no-repeat,
+    linear-gradient(#212121, #212121) 4px 14px / 12px 2px no-repeat,
+    linear-gradient(#212121, #212121) 6px 16px / 8px 2px no-repeat,
+    linear-gradient(#212121, #212121) 8px 18px / 4px 2px no-repeat,
+    linear-gradient(#ff9000, #ff9000) 8px 2px / 4px 8px no-repeat; /* orange core */
+  animation: lgk-lompat .8s steps(1) infinite; }
+.lgk-penunjuk[data-arah="kiri"] { transform: rotate(90deg); }
+@keyframes lgk-lompat { 0% { translate: 0 0; } 50% { translate: 0 4px; } }
+/* the target itself: a blinking 2 px orange pixel ring (outline, so it never changes layout) */
+.lgk-sasaran { outline: 2px solid #ff9000; outline-offset: 2px; animation: lgk-kedip .8s steps(1) infinite; }
+@keyframes lgk-kedip { 50% { outline-color: #212121; } }
+@media (prefers-reduced-motion: reduce) { .lgk-penunjuk, .lgk-sasaran { animation: none; } }
+
+/* 3. hint line under the picture: same slot as the old caption, one line, ink on the page */
+.lgk-petunjuk { display: flex; align-items: center; gap: 8px; margin: 8px 0 0; min-height: 20px; font-size: 15px; font-weight: 700; line-height: 20px; color: #212121; }
+.lgk-petunjuk::before { content: ''; flex: none; width: 8px; height: 8px; background: #ff9000; box-shadow: 0 0 0 2px #fff5ec; }
+
+/* 4. coach mark: K1 card at the foot of the activity, first time per activity type, once per device */
+.lgk-pelatih { position: absolute; left: 12px; right: 12px; bottom: 12px; z-index: 5; display: grid; gap: 10px; padding: 14px 14px 16px; color: #212121;
+  background: linear-gradient(#ffffff, #ffffff) 2px 2px / calc(100% - 4px) calc(100% - 9px) no-repeat, linear-gradient(#ff9000, #ff9000) 2px 0 / calc(100% - 4px) calc(100% - 5px) no-repeat,
+    linear-gradient(#ff9000, #ff9000) 0 2px / 100% calc(100% - 9px) no-repeat, linear-gradient(#e07e00, #e07e00) 2px 100% / calc(100% - 4px) 5px no-repeat; }
+.lgk-pelatih h3 { margin: 0; font-size: 17px; } .lgk-pelatih p { margin: 0; font-size: 15px; line-height: 1.4; }
+.lgk-pelatih .primary-action { justify-self: end; min-height: 48px; padding: 8px 20px; }
+
+/* ---- build (Fullstack) ---- */
+.lgk { display: grid; gap: 0; min-width: 0; }
+.lgk .lgk-petunjuk { margin-top: 6px; }
+/* D-306: pita + petunjuk menggantikan kalimat instruksi lama di slot kepala (kalimat itu kini petunjuk langkah). */
+@media (min-height: 700px) { .hp-arena[data-pandu]:not([data-pandu="ksim"]) .hp-arena-sematan .hp-instruksi-arena { display: none; } }
+.hp-arena[data-pandu] { position: relative; }
+/* D-307: garis krem 2 px pada panah supaya terbaca di atas rumput / jalan gelap K08 (tanpa blur). */
+.lgk-penunjuk { filter: drop-shadow(2px 0 0 #fff9f5) drop-shadow(-2px 0 0 #fff9f5) drop-shadow(0 2px 0 #fff9f5) drop-shadow(0 -2px 0 #fff9f5); }
+@media (prefers-reduced-motion: reduce) { :root:not([data-gerak="penuh"]) .lgk-penunjuk, :root:not([data-gerak="penuh"]) .lgk-sasaran { animation: none; } }
+/* Layar sempit: langkah yang bukan langkah kini hanya nomor / centang; katanya tetap untuk pembaca layar. */
+@media (max-width: 400px) {
+  .lgk-langkah li:not([data-status="kini"]) { padding-right: 4px; }
+  .lgk-langkah li:not([data-status="kini"]) .lgk-nama { display: none; }
+}
+/* K-SIM: kalimat instruksi papan SIM sudah per langkah (role=status, satu baris): tetap tampil; petunjuk T-033 hanya dibacakan. */
+.hp-arena[data-pandu="ksim"] .lgk-petunjuk { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; margin: 0; }
+/* T-033 Fix 1 (D-326): K11 memakai tab tahapnya sendiri sebagai langkah; pita tidak tampil (petunjuk + penunjuk tetap). */
+.hp-arena[data-pandu="k11"] .lgk-langkah { display: none; }
+.hp-arena[data-pandu="k11"] .lgk .lgk-petunjuk { margin-top: 0; }
+/* D-328: penunjuk dari kanan (sasaran di tepi atas gambar). */
+.lgk-penunjuk[data-arah="kiri"] { transform: rotate(90deg); }
+/* Layar pendek (tinggi < 700 px). D-327 (diukur: muat hanya di K05 dan K11; K08 +28..46 px, K10 +5, K-SIM +6): K05, K11 = pita RINGKAS (24 px, nomor saja kecuali langkah kini) + petunjuk
+   satu baris di tempat kalimat instruksi (K-SIM: instruksi papannya sendiri tetap, petunjuk dibacakan). K02, K04, K07, K09 (isi sudah
+   pas): pita keluar dari alur, hanya penunjuk + petunjuk yang dibacakan; instruksi lama tetap. */
+@media (max-height: 699px) {
+  .hp-arena[data-pandu] .lgk:not([data-kompak]) { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+  .lgk[data-kompak] .lgk-langkah { min-height: 24px; gap: 4px; }
+  .lgk[data-kompak] .lgk-langkah li { height: 24px; padding: 0 4px; }
+  .lgk[data-kompak] .lgk-langkah li[data-status="kini"] { padding-right: 8px; }
+  .lgk[data-kompak] .lgk-langkah li b { width: 18px; height: 18px; }
+  .lgk[data-kompak] .lgk-langkah li:not([data-status="kini"]) .lgk-nama { display: none; }
+  .lgk[data-kompak] .lgk-petunjuk { display: block; margin-top: 4px; font-size: 14px; line-height: 18px; min-height: 18px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .lgk[data-kompak] .lgk-petunjuk::before { display: inline-block; margin-right: 6px; vertical-align: 1px; }
+  .hp-arena:is([data-pandu="k05"], [data-pandu="k11"]) .hp-arena-sematan .hp-instruksi-arena { display: none; }
+}

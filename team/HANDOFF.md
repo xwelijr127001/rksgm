@@ -2370,3 +2370,148 @@ Bundle against the build of 17:44 in `client/dist`: CSS 1.07 KB smaller gzipped,
 **State left behind.** My server on :4003 is stopped and no browser of mine is running. It used the test database in my scratch folder (the palette tool opened two rooms there). Client builds went to my scratch folder; `client/dist`, `client/dist-rilis` and `server/dist` are untouched, so the owner's server on :4000 still shows the old colours until the client is built there. The check tools write into their own evidence folders, as always: the pictures in `team/evidence/T-014`, `T-018/stage1b` and `stage2`, `T-019/fix`, `T-020/fullstack`, `T-022/fix`, `T-024/fullstack`, `T-025/fullstack` and `T-026` were replaced by today's runs and now show the new colours. `character/` was only read (the Designer's `peta.mjs` was run as a copy in my scratch folder, so their three lists are as they delivered them).
 
 **Files.** Changed: 25 style sheets under `client/src` (all except `seni.css` and `font.css`), `client/index.html`, `client/src/cerita/seni/akhir/token-keputusan.png`, `client/src/art/Raki.tsx`, `art/Avatar.tsx`, `ui/kit.tsx`, `pages/Projector.tsx`, `pages/soloBagian.tsx`, `unity/UnityStage.tsx`, `game/GameStage.tsx`, `game/engine/MissionScene.ts`, `game/engine/stage.ts`, `components/MissionStage.tsx`, `interactions/Interaction.tsx`, `cerita/lokasi/seni/Aset.tsx`, `cerita/hp/meja/MejaScene.ts`, `tools/cek-tag-t026.mjs` (the tag colours it expects). New: `tools/cek-palet-t029.mjs`, `tools/cek-palet-t029.data.json`.
+
+## T-029 Fix 1 (2026-11-17): Designer review D-289 to D-298
+
+Fullstack · edited under `C:\Users\User\Desktop\rksgm-episode2` · NOT committed (on top of 5c5200c). Board: note under "Shipped 2026-11-17".
+Review: `team/DESIGN-REVIEW.md` "## T-027/T-029 — review (2026-11-17)", PASS with no blocker. Every item, in its order:
+
+| Item | What I did |
+| --- | --- |
+| D-289 disabled main button | **One look everywhere**: fill `#E0E0E0`, label `#5F5F5F` (4.84 : 1), edge the same as the fill, no extrusion, not transparent. It is the rule of `.primary-action:disabled` (`player.css`), of every `.btn` variant (`theme.css`) and of the location scene's main button; the two rules that only made the send bar and the table prototype half transparent are gone. On the dark old projector: fill `#424242`, label `#A4A4A4`. Checked on screens: K-SIM on a phone (the brown edge is gone) and at 1280 (was pale orange), CMS sign-in, and the old projector page without a room (`17-proyektor-lama-*.png`: fill `#424242`, label `#A4A4A4`). The palette tool now checks this look on every screen it opens: six disabled buttons on this run's screens, all right |
+| | Left as it was, on purpose: "Kamu siap" in the lobby of the old quiz (`.lobby-focus`). It is a finished state, not a button that cannot be used yet: blush with an ink label. Say if it should take the grey look too. Other disabled controls (option cards, icon buttons, the pause button of `/solo`, the end card's arrows) keep their faded look: D-289 is about the main button |
+| D-290 Mulai and Masuk on wide screens | From 701 px wide Mulai is as tall as Masuk: 129.4 x 57 against 126.5 x 57 at 1280 x 800 and 768 x 1024 (was 98 x 43), label 17 px, the same 4 px extrusion. Phones are unchanged (318 x 54 and 288 x 50) |
+| | **Landscape phones changed more than the review asked.** In those narrow columns a button of that size beside the text squeezed the card sentence into 4 to 9 lines (card 131 px at 844 x 390, 235 px at 740 x 360). So there Mulai sits under the text and is as wide as the text column (280 x 57; 228 x 57 at 740 x 360), and the card shows the short line of the portrait phones ("Main sendiri. Tanpa timer."). 844 x 390 still scrolls 0 px with and without a profile; 740 x 360 scrolls 27 px (was 32). Screens `mendatar-*.png` in `team/evidence/T-027/fullstack/` |
+| D-291 keliru cap | border `#B3261E`, its text colour |
+| D-292 "Yang seharusnya" | kurang family: text and ring `#2C5A6B` on white, on the page (`.tanda-terlewat`) and on the canvas (the tag of a missed object in the old mission engine, which I had made green in T-029; the two are meant to be the same mark) |
+| D-293 weak greys | `#5F5F5F` for the five named: `.alur-catatan`, `.cer-bab-sela`, `.practice-list button > span`, `.hp-saksi-kartu.ditandai-rencana`, `.cms-hitung`. I searched the style sheets for every grey text under 4.5 : 1 on white: three more exist and stay, as the review allows: the placeholder of the code field (`#BDBDBD`), the disabled label of the end-card arrows (`#909090`) and the "+" of an empty slot (`#929292`, a sign, 3.1 : 1) |
+| D-294 polish | (1) the accent word of the big headline is `#B25C00`. (2) The instruction sentence of an activity is ink (four rules: the tray line in both layouts, the line above the board, the strip line of the inspection plan). The bold lead of the K10 line (`.bd-instruksi b`) is a label and keeps the orange text colour |
+| D-295 | nothing, as the review says |
+| D-296 favicon | `client/public/favicon.svg` is the Designer's `favicon-proposed.svg`, byte for byte. There are no PNG or ICO variants: `client/public` holds only this file besides `audio/` and `karakter/`, and `index.html` links only it |
+| D-297 `shared/brand.ts` | `BRAND.colors` holds the new values (`kuning` and `hijau` `#FF9000`, `krem` `#FFF9F5`, `tinta` `#212121`, `hijauMuda` `#2F7D57`, `merah` `#D32F2F`, `biru` `#3E7285`, `cokelat` as it was) and its comment names PALET.md as the source. Uniform, skin and hair colours are untouched |
+| D-298 | the code row's edge is a token now: `--panel-tepi: #ECD5CB` |
+
+**For the Lead.** `BRAND.assetNote` in the same file still says that the official logo and colours are not yet verified from raksaonline.com. It is shown on the old host page in three languages (`kamus/host.ts`, `catatanAset`). The colours now are the site's, so the sentence is half out of date; I did not change wording.
+
+**Tools.**
+- `tools/cek-palet-t029.mjs`: a check of the disabled look on every screen it opens (it plants one wrong button in its self-test and must find it); the favicon is scanned in the source and in the build (run against the shipped build of 22:31 it fails on the old favicon's four colours and on the missing token, as it should); `--panel-tepi` joins the token values (31); the old projector page without a room is a screen, for the dark variant of D-289. Pages that scroll are no longer captured with the browser's full-page mode: that mode replays the entrance animations, and the home page at 1280 was caught with a half-faded street scene; the tool now makes the window as tall as the page, waits for the animations to end and captures that.
+- `tools/cek-beranda-t027.mjs`: on wide screens and on landscape phones Mulai must not be shorter than Masuk.
+
+**Build gate** (my server on :4003 with a test database, one headless browser at a time, below-normal priority)
+
+| Check | Result |
+| --- | --- |
+| typecheck (server and client) | 0 errors |
+| `test:client` | 771 / 771 |
+| cek-palet | ALL PASS (49), run against `client/dist` after the rebuild: 0 old colours in source and build (favicon included), 31 token values, 21 contrast pairs, 37 screens with the disabled-look check |
+| cek-beranda | ALL PASS (37), Chromium and WebKit |
+| cek-akhir | ALL PASS (105) |
+
+All five on the final tree; nothing in `client/`, `shared/` or `server/` changed after them.
+
+**`client/dist` rebuilt.** When this task started, `client/dist` already held the shipped build of 5c5200c (22:31, the same bundle as `client/dist-rilis`, palette included), so the brief's "first rebuild" had been done by the deploy. At the end I built the working tree into my scratch folder (22:52), ran the checks above on that build, and copied it into `client/dist`: 146 files, the old bundle removed first, `diff -r` against the checked build identical. The previous `client/dist` is kept in my scratch folder. Neither running server serves `client/dist`: the owner's :4000 and QA's :4001 both still served the 22:31 bundle after the copy. `client/dist-rilis` and `server/dist` not touched.
+
+**Not verified.** The old quiz inside a room (its lobby with "Kamu siap", a mission with the "Yang seharusnya" tag on the canvas, the projector with a room): the rules were changed and read, the screens were not opened. Hover and pressed states. A real phone.
+
+**State left behind.** My server on :4003 is stopped and no browser of mine is running; the test database in my scratch folder holds a few more test rooms. QA's server on :4001 (PID 54684, started 22:20, not mine) was still running when I finished; I did not touch it.
+
+**Files.** Changed: `client/src/player.css`, `theme.css`, `cerita/hp/hp.css`, `cerita/hp/desain.css`, `cerita/hp/meja/meja.css`, `cerita/lokasi/lokasi.css`, `cerita/seni/aktivitas/piksel.css`, `cerita/ui/akhir.css`, `cerita/ui/cerita.css`, `pages/cms/cms.css`, `game/stage.css`, `game/engine/MissionScene.ts`, `client/public/favicon.svg`, `shared/brand.ts`, `tools/cek-palet-t029.mjs`, `tools/cek-beranda-t027.mjs`. Log of the 27 edits with reasons: `team/evidence/T-029/fullstack/alat/perbaikan1.csv`.
+
+## T-030/T-031 (2026-11-18): pixel-key buttons, pixel cards, pixel grounds
+
+Fullstack · edited under `C:\Users\User\Desktop\rksgm-episode2` · NOT committed (T-029 Fix 1 still in the tree). Spec `team/specs/2026-11-17-T-030-T-031-gaya-game.md`; Designer rules `team/evidence/T-030/designer/mock-rules-T-030.css` and `-T-031.css`; owner flags 1 and 2 on the K4 task card (18 Nov 00:10 and 00:2x) applied.
+
+**How.** One new sheet, `client/src/gaya-game.css`, imported last in `main.tsx`. It is the Designer's two rule files copied as measured, made from a script (`team/evidence/T-030/fullstack/alat/buat-gaya.cjs`), plus the owner's rules. The drawing properties (background, border-color, border-radius, box-shadow, color) carry `!important`, because the part sheets (hp, desain, akhir, staff) load later and some old rules are more specific; states change only through the variables (`--k-*` keys, `--c-*` cards). No component changed.
+
+- **Buttons (T-030):** pixel key on `.primary-action`, every `.btn`, the home Mulai, end-card buttons, reply rows, location buttons, staff active tab; secondary (ink outline) on `.btn-garis`, `.btn-netral`, `.akh-kedua`, Masuk on home, and the classes the Designer listed as "same rule". Disabled = the D-289 grey in the key shape (dark variant on the old projector). Round icon buttons keep the circle with a 2 px base. Reduced motion: no pressed transition.
+- **Cards (T-031):** K1 on home doors, code row, picker cards, staff cards, reply sheet; light K1 on chat bubbles, the home bubble, notes and the glossary chip; K4 with the hanging tab on the task card (TUGAS), the result (Tindakanmu) and the Pelajaran.
+- **Grounds:** sky (ground 8) on home and picker, tile (ground 6) on the story shell (activities and end card inside it) and staff pages; CSS gradients only.
+- **Owner flags:** K4 inner padding 14 px; tab centred on the top line (`top: 1.5px; translateY(-50%)`), left 12 px; no corner squares on the task card, 2 px L-brackets on HASIL / PELAJARAN; 21 px above the card (10 px clear of the text above the tab); K1 cards 14 px side padding, reply sheet 14 px; no rounded corners left in the story shell, end card, home and picker except icon circles, avatars and portraits; the stage frame is stepped (clip-path, 2 px orange line drawn inside); the desktop Pelajaran tab shows the word only (the mentor portrait made it 42 px tall).
+
+**Mine, for the Designer:**
+1. Disabled buttons do not sink 2 px (the mock had them "already down"): the send button would move 2 px when it turns on, which breaks the no-jump rule of the reply sheet (D-128).
+2. Reply rows lose 4 px inner padding per side and 2 px of number gap, so their text width equals before; with the 14 px sheet inset alone the English K13 / K14 lists needed a scroll at 390x645.
+3. The wrong-code message on the phone home uses 15 px lines, so two lines stay 30 px and the code row stays 110 px.
+4. `#ECD5CB` (D-298 code-row edge) is allowed by the tool next to the four new tones; it is not in PALET.md yet.
+5. The stage frame and pills are stepped; other framed boxes inside the story shell are square (0 radius), not stepped.
+
+**Checks** (my server :4003, test database, one headless browser, below-normal priority), final build:
+
+| Check | Result |
+| --- | --- |
+| typecheck / `test:client` | 0 errors / 771 of 771 |
+| `cek-palet-t029` (extended) | ALL PASS (50): 37 screens; 76 key buttons with the pixel-key signature, 36 cards, 84 frames measured for padding, button inset and tab; no rounded corner > 2 px in the shells; grounds present; no hex outside PALET.md in `gaya-game.css` |
+| `cek-tugas-t030` (new) | ALL PASS (9): task cards K02, K04, K05, K07, K08, K09, K10, K11, K-SIM at 390x745: padding 14+, tab on the line, Mulai inset 14+, 10 px clear above, 0 px scroll; `tugas-*.png` |
+| `cek-beranda` | ALL PASS (37) |
+| `cek-akhir` | ALL PASS (105) |
+| `cek-layar` end family / K11 / K-SIM | 18 / 18 / 6, all pass |
+| `cek-gulir --tanpa-tahap2` (reply sheet and chat) | ALL PASS (150) |
+
+Screens: `team/evidence/T-030/fullstack/` (37 pictures of the key screens at 390x745 and 1280, `tugas-*.png`, `hasil-cek-palet.json`, `tugas-hasil.json`). Not verified: real phone, hover / pressed states seen, WebKit for the new palette screens, `client/dist` not rebuilt (scratch build only).
+
+## T-033 (2026-11-18): guided steps, pixel pointer and per-step hint in every activity
+
+Fullstack · edited under `C:\Users\User\Desktop\rksgm-episode2` · NOT committed (T-029 Fix 1 and T-030/T-031 still in the tree). Concept `team/DESIGN-REVIEW.md` "## T-033 — concept" D-306..D-311; owner 18 Nov 00:16 (K08: nothing says to tap the signs first).
+
+**Built.** One component, `client/src/cerita/hp/arena/Pandu.tsx` (+ `pandu.css` = the Designer's rules + build notes), mounted once by `Arena.tsx` for K02, K04, K05, K07, K08, K09, K10, K11 and K-SIM in the picture view. No activity pattern was changed: the component reads the current step from the arena's DOM (K08 `data-tahap`; K11 `data-langkah` periksa / tindakan / kabar; K-SIM `data-langkah` meja / middle / akhir; others: nothing filled = step 1, send enabled = step 3, otherwise step 2).
+- Step strip `ol.lgk-langkah` (aria-current="step", done = tick with the word kept for screen readers) and hint `p.lgk-petunjuk` (aria-live polite) in the instruction slot; the old instruction line is hidden while the strip shows (K-SIM keeps its own line: it is already per step, and the hint is read only).
+- Pixel pointer + blinking ring on the next tap target (the target is an existing focusable button, so keyboard reaches it as before); 2-frame bounce, static under reduced motion, 2 px cream outline (D-307). K08: points at the sign to read; the lane step has no pointer (that would give the answer away).
+- Coach card "Cara main" once per device for K05, K10 and K-SIM (`raksa:pelatih:<k>`, try/catch), "Mengerti" closes it.
+- The send bar keeps its own disabled state and reason (unchanged per pattern).
+- Texts: new dictionary `client/src/i18n/kamus/langkah.ts` (id / en / zh): K08 exactly as D-310; the others from D-311, adjusted to what each screen really asks (K04 places on the map, K11 its three existing stages, K-SIM check / match / result).
+
+**Decided by me (Designer to look at).**
+1. **Short phones (height < 700 px: 360x640, 390x645): the strip and hint do not show; only the pointer, the ring, the coach card and the spoken hint.** The strip was measured by the Designer for K08 only; on short screens it made the activity content overflow by 3 to 59 px (cek-layar). On 390x745 and taller the strip and hint show.
+2. Narrow screens (≤ 400 px wide): steps other than the current one show the number / tick only (the English words clipped).
+3. K11 already has its own step tabs; the strip repeats them in words.
+
+**Checks** (my server :4003, test database, one headless browser, below-normal priority), final build:
+
+| Check | Result |
+| --- | --- |
+| typecheck / `test:client` | 0 errors / 771 of 771 |
+| `cek-layar --keluarga aktivitas` | ALL PASS (54), Chromium + WebKit |
+| `cek-bahasa` | ALL PASS (138) |
+| `cek-langkah-t033` (new) | ALL PASS (54): 9 activities x 390x745 / 360x640 x id / en / zh: strip text = dictionary, one current step, hint = step key and aria-live, pointer on a focusable target inside the screen, coach card only on K05 / K10 / K-SIM and gone after "Mengerti" + reload, 0 px page scroll; one tap on the target moves K08 to step 2 ("Ketuk lajur") |
+| `cek-tugas-t030`, `cek-palet` | 9 and 56, all pass |
+
+Screens: `team/evidence/T-033/fullstack/` (64: each activity per step and size and language, after-tap, coach). Not verified: a real phone, a screen reader, the list view (no guided steps there).
+
+## T-030/T-031 Fix 1 (2026-11-18): Designer D-317 / D-318, story room and old quiz
+
+Same tree, not committed. `client/src/gaya-game.css` (generator `team/evidence/T-030/fullstack/alat/buat-gaya.cjs`, rules `fix1.css`): no rounded corners left in the story room, host, staff, projector and old quiz (`.player-ui`, `.stf`, `.sr-layar`, `.proyektor`), except icon circles, avatars, portraits, markers and form checkboxes; K1 stepped frames on `.panel`, `.sr-kartu`, `.sr-pembuka`, `.sr-chat`, `.sr-meja` (blush ones with the `#ECD5CB` edge, 14 px padding); ground 6 behind the story room (`.sr-halaman`, `.sr-layar`); the old projector's panels in palette greys. `#ECD5CB` added to `character/palet-raksa-v1/PALET.md`. `cek-palet` now checks corners on those screens too and opens a room through round 1 to the consequence and the leaderboard (screens 18 and 19): ALL PASS (56). Not covered: a match of the old quiz (needs a legacy room), status-coloured story cards (they keep their own fills with square corners).
+
+## T-034 (2026-11-18): K15 "Pesan penutupan" as a pixel message composer
+
+Fullstack · edited under `C:\Users\User\Desktop\rksgm-episode2` · NOT committed (earlier uncommitted work kept). Concept + art `team/DESIGN-REVIEW.md` "## T-034 — concept + art" D-312..D-316.
+
+**Built.** `client/src/cerita/hp/arena/ArenaPesan.tsx` + new `pesan.css` (the Designer's rules, icon paths adjusted); the six icons copied to `client/src/cerita/seni/aktivitas/penutup/`.
+- Draft preview at the top: Pak Hendra's pixel phone bubble, fills with the chosen parts in part order, 3 lines (2 on short screens) then "…"; the whole bubble is one button with `aria-expanded` that opens / closes it. Its sentences are plain text now (a part leaves the message from its chip).
+- Six parts as pixel chips in two columns with their icons; chosen = orange chip with a tick, not chosen = outline with "+"; `aria-pressed`, Enter / Space toggle, 60–64 px high.
+- Gone: the "preview" jump link, the parts title, the "draft not sent" note. The picture / list switch is not under the activity any more but in the story Menu (new item, shown while an activity is open; it works for every activity).
+- Scoring, texts and the chosen set: unchanged (same `alihBagian` / `bagianDiPesan`).
+
+**Checks** (my server :4003, test database): `tools/cek-k15-t034.mjs` (new) ALL PASS (12): 390x745 and 360x640 x id / en / zh x 0 and 4 parts: 0 px page scroll and 0 px inner scroll, 6 chips in 2 columns with icons, ≥ 44 px, preview on top in part order, opens and closes, helper lines gone, switch in the Menu, send bar off / on. `cek-layar` has a new case `arena-k15` (state "surat" moved to node k15; no K15 state is saved yet): pass in Chromium (4 sizes) and WebKit (2). Screens `team/evidence/T-034/fullstack/`.
+
+## T-033 Fix 1 (2026-11-18): Designer D-322..D-329, step logic
+
+- **D-322** K08 step 1 ends only after both signs are read; **D-323** in the marking stage the pointer goes to the first lane until one is marked, then to the "next" button. The test walks it: sign 1 → lane → next → sign 2 → step 2.
+- **D-324** K02 points at the document on the desk (hint "Baca dokumen di meja, lalu ketuk bakinya"); K05 hint now names the destination ("Ketuk tempat tujuan…").
+- **D-325** the pointer never stays on what was just tapped (taps are remembered); K10: after a row, the pointer goes to the stamps; K-SIM: after an object, to the control that appeared.
+- **D-326** K11: no strip (its own stage tabs are the steps); pointer on the files / choices, never on a tab.
+- **D-327** short phones: the compact strip (24 px, numbers only, hint in one line) is used where it fits: **K05 and K11 only**. Measured with cek-layar: in K08 the content overflowed by 28–46 px (sign card + legend), in K10 by 5 px and in K-SIM by 6 px, so those keep the pointer + spoken hint fallback, like K02, K04, K07, K09. Designer: decide whether something else on those screens may give way.
+- **D-328** a target at the top edge of the picture gets the arrow from the right, inside the picture.
+- **D-329** the old quiz's guide bubble, question-pack buttons, info messages and the connection pill are square.
+- `cek-langkah-t033` now asserts the step-1 pointer target of every activity, the both-signs rule, that the pointer leaves a tapped control, K11 without strip, and the compact strip where it applies.
+
+**Gate** (final build): typecheck 0, `test:client` 771 / 771, `cek-layar --keluarga aktivitas` ALL PASS (60, incl. K15), `cek-bahasa` 138, `cek-langkah-t033` 54, `cek-k15-t034` 12, `cek-palet` 56, `cek-tugas` 9. Not verified: a real phone, a screen reader.
+
+## T-033 Fix 2 + T-034 check (2026-11-18): Designer D-331..D-333
+
+Fullstack · edited under `C:\Users\User\Desktop\rksgm-episode2` · NOT committed.
+- **D-333** K02: after the document on the desk is tapped, the pointer moves to a tray; after a tray, back to the (next) document. The pointer listener now also records taps on the document picture.
+- **D-332** K08: the hint follows the pointer (marking a lane = "Sekarang ketuk lajur yang dilarang" also during sign 1); the conclusion sheet gets the pointer on its first conclusion and hint 3, then the send button once one is chosen.
+- **D-331** K15: checked with real touch taps (`page.tap`, touch-enabled phone viewport): a chosen part taken out after the preview was opened and closed, and while it is open, registers in all 6 size and language runs. Nothing to fix.
+- Tools: `cek-langkah-t033` asserts K02 tray after the document, the K08 lane hint and the conclusion pointer; `cek-k15-t034` the two touch un-taps.
+- Gate (final build): typecheck 0, `test:client` 771 / 771, `cek-langkah-t033` 54, `cek-k15-t034` 12, `cek-layar --keluarga aktivitas` 60.
+- `client/dist` rebuilt = an exact copy of the checked scratch build (146 files, `diff -r` identical; previous copy kept in my scratch folder). Neither :4000 (dist-rilis) nor QA's :4001 serves `client/dist`; both unchanged after the copy.

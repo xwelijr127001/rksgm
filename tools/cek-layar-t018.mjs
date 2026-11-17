@@ -25,6 +25,7 @@ import path from 'node:path';
 import { pathToFileURL } from 'node:url';
 // PENTING: jangan impor ./cek-gulir-t018.mjs dari sini (siklus dengan import() dinamisnya = proses macet); pakai t018-umum.mjs.
 import { BatasWaktu, PerambanPerUkuran, argumen, bukaGulir, denganBatas, pasangPenjaga, siap, tunggu } from './t018-umum.mjs';
+import { bukaK15, nilaiK15, stateK15, ukurK15 } from './cek-k15-t034.mjs';
 
 const ROOT = path.resolve(import.meta.dirname, '..');
 export const VP_LAYAR = [{ n: '360x640', w: 360, h: 640, dpr: 2 }, { n: '390x645', w: 390, h: 645, dpr: 3 }, { n: '360x740', w: 360, h: 740, dpr: 2 }, { n: '390x844', w: 390, h: 844, dpr: 3 }];
@@ -660,6 +661,14 @@ const K10 = async (p, d, sebab, data) => {
  * Meja, kartu dan loket dimainkan lewat KEYBOARD (fokus + Enter): sesudah tiap aktivasi fokus tidak jatuh ke <body> (tetap di sasaran,
  * atau pindah ke tombol bilah / baris instruksi / Tutup / "Kenapa?"); papan tempat lewat klik skrip + klik tetikus (fokus tidak dipindah).
  */
+/** T-034: K15 penyusun pesan: 0 px gulir halaman dan isi, chip, pratinjau (tools/cek-k15-t034.mjs), dengan 0 lalu 4 bagian. */
+async function k15(p) {
+  await bukaK15(p); const d0 = await ukurK15(p); const sebab = nilaiK15(d0, 0).map((x) => '0 bagian: ' + x);
+  const id = await p.evaluate(() => [...document.querySelectorAll('.hp-pesan-bagian')].map((c) => c.dataset.bagian));
+  for (const x of id.slice(0, 4)) { await p.click('.hp-pesan-bagian[data-bagian="' + x + '"]'); await tunggu(150); }
+  const d4 = await ukurK15(p); sebab.push(...nilaiK15(d4, 4).map((x) => '4 bagian: ' + x));
+  return { lulus: sebab.length === 0, data: { sebab, gulir: [d0.gulirHalaman, d0.gulirIsi, d4.gulirHalaman, d4.gulirIsi], chipMin: d4.tinggiMin, pratinjau: [d0.tinggiPratinjau, d4.tinggiPratinjau] } };
+}
 const SIM = async (p, d, sebab, data) => {
   const ukur = () => p.evaluate(() => {
     const g = document.querySelector('.hp-arena-gulir'); const q = (x) => document.querySelector(x); const h = (x) => Math.round(q(x)?.getBoundingClientRect().height ?? 0);
@@ -844,6 +853,7 @@ export const BATAS_KASUS_LAYAR = 150000;
  */
 export async function jalankanTahap2(mesin, peramban, BASE, lapor, OUT, { vp: hanyaVp = null, ukur = false, kasus: hanyaKasus = null, keluarga = ['adegan', 'aktivitas', 'akhir'] } = {}) {
   const S = JSON.parse(fs.readFileSync(path.join(ROOT, 'team/evidence/T-013/states.json'), 'utf8'));
+  S.k15 = { nilai: stateK15() }; // T-034: belum ada state K15 tersimpan; dibuat dari state 'surat'
   const wk = mesin === 'webkit';
   const pilihVp = hanyaVp ? String(hanyaVp).split(',').map((x) => x.trim()) : null;
   const daftarVp = VP_LAYAR.filter((v) => (pilihVp ? pilihVp.includes(v.n) : !wk || v.n === '360x640' || v.n === '390x645'));
@@ -854,7 +864,7 @@ export async function jalankanTahap2(mesin, peramban, BASE, lapor, OUT, { vp: ha
     ['adegan-k08-tol', 'tol', (p) => adegan(p)], ['adegan-k09', 'wawancara-1', (p) => adegan(p)], ['adegan-awal-baru', null, (p) => adegan(p)],
     ['akhir-puas', 'akhir-puas', (p) => adegan(p, 'akhir')], ['akhir-catatan', 'akhir-catatan', (p) => adegan(p, 'akhir')], ['akhir-kurang', 'akhir-kurang', (p) => adegan(p, 'akhir')],
     ['arena-k02', 'tel-cemas', (p) => aktivitas(p, K02)], ['arena-k04-peta', 'pool', (p) => aktivitas(p, K04)],
-    ['arena-k05-rencana', 'bengkel', (p) => aktivitas(p, K05)], ['arena-k07-rencana', 'bima', (p) => aktivitas(p, K07)], ['arena-k09-saksi', 'wawancara-1', (p) => aktivitas(p, K09)], ['arena-k10-banding', 'wawancara-2', (p) => aktivitas(p, K10)], ['arena-k08', 'tol', (p) => aktivitas(p, K08)], ['arena-k11-bundel', 'berkas', (p) => aktivitas(p, K11)], ['arena-ksim', 'akt-saksi', (p) => aktivitas(p, SIM)],
+    ['arena-k05-rencana', 'bengkel', (p) => aktivitas(p, K05)], ['arena-k07-rencana', 'bima', (p) => aktivitas(p, K07)], ['arena-k09-saksi', 'wawancara-1', (p) => aktivitas(p, K09)], ['arena-k10-banding', 'wawancara-2', (p) => aktivitas(p, K10)], ['arena-k08', 'tol', (p) => aktivitas(p, K08)], ['arena-k11-bundel', 'berkas', (p) => aktivitas(p, K11)], ['arena-ksim', 'akt-saksi', (p) => aktivitas(p, SIM)], ['arena-k15', 'k15', (p) => k15(p)],
   ];
   const FOTO = new Set(['360x640', '390x844']);
   const dipakai = KASUS.filter((x) => keluarga.includes(keluargaKasus(x[0])) && (!hanyaKasus || x[0].includes(hanyaKasus)));

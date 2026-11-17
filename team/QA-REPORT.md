@@ -600,3 +600,52 @@ Testing under `C:\Users\User\Desktop\rksgm-episode2` (QA; no source edits, no co
 3. Rooms show Indonesian only (Fullstack's point 1), and Pak Hendra has no portrait (point 3); both are known and accepted.
 4. Not tested: a real phone, the CMS pages, more than four players, WebKit as host or projector, and Linode. Rooms left unfinished by the tool were reported as interrupted at restart, as designed.
 5. The seed is published at every server start including production (Fullstack's point 2); the owner's :4000 only gets it after `server/dist` is rebuilt, which I did not do.
+
+## T-027/T-029 (2026-11-17) — PASS (0 bugs; 1 handover finding, 4 notes)
+
+Testing under `C:\Users\User\Desktop\rksgm-episode2` (QA; no source edits, no commit, no e2e). Evidence: `team/evidence/T-029/qa/`.
+
+**Read first (handover finding):** the shared `client/dist` is still the build of T-026: its `theme-color` is `#176B45` and the home page and palette are the old ones. The first full run (kept in `run1-dist-lama/`) failed `cek-palet` (5 of 45) and `cek-beranda` (36 of 37) for that reason only. T-027 and T-029 are in the source tree but not yet in `client/dist`, which Fullstack's handoff says too ("`client/dist` untouched"). I therefore built the working tree into my own folder (`vite build --outDir` under `server/qa-t029`, removed afterwards) and tested that; `client/dist` and `client/dist-rilis` were not touched. Before the Lead's e2e or any commit/deploy check, `client/dist` has to be rebuilt from this tree.
+
+**Server:** a fresh `tsc` server build in `server/qa-t029/dist` (git-ignored, removed afterwards), a scratch database outside the repo, :4001, stopped afterwards. The tools that refuse ports 4000-4002 (`cek-palet`, `cek-beranda`, `cek-room`) ran as copies from my scratch folder with only that rule, the import paths and the evidence folder changed; the files in `tools/` are untouched. `uji-room-cerita` ran on a start without legacy mode and with `STORY_MAX_PARTICIPANTS=4`, as its header asks.
+
+**Full suites on the new build, all pass (one at a time):** `test:client` 771/771; typecheck 0 errors; `cek-palet` 45/45; `cek-beranda` 37/37; `cek-layar` 148/148; `cek-akhir` 105/105; `cek-gulir` 298/298 (full, all families); `cek-bahasa` 138/138; `cek-tag` 18/18; `cek-piksel` ALL PASS (incl. komite); `cek-telepon` 14/14; `cek-jalan` 8/8; `cek-kaki` 18/18; `cek-sisipan` ALL PASS (0 cases: the tool says there are no `cutin-*` states); `cek-gerak` 8/8; `cek-room` 6/6; `uji-room-cerita` 179/179 (all phases).
+
+**My own checks (Chromium and WebKit):**
+- **Home page** at 390x745, 360x640, a landscape phone (844x390) and 1280x800, in id/en/zh, first visit and returning player: 0 px page scroll on the portrait phones, Mode Cerita first, Mulai and Masuk on the first screen, no horizontal scroll, the profile state right, one `h1`. Tab order in Chromium: wordmark, language, sound, Mode Cerita card, "ubah" (returning player only), code field, Masuk, "Untuk panitia". Page background is the blush `#FFF9F5`.
+- **Event banner with an open room** (the endpoint answered in the browser): shown at all four sizes in both engines, does not cover the code field or Masuk; its button fills the code and moves focus to Masuk. The page then scrolls 78 px on phones, as Fullstack documented.
+- **Mulai and Masuk** flows (3 languages, both engines): Mulai opens `/cerita`; a code goes to `/join`. The only console messages are the expected 404s for a made-up room code.
+- **Nothing green by mistake:** a computed-style scan of 14 screens (home, picker, K01 chat, committee room, end card, host, join, CMS and admin sign-in, solo, tutorial, the legacy host and join pages and the lobby) for any green outside the tepat family in PALET.md (pixel art excluded): 0 hits. The screens I looked at (home, picker, a mid-game chat at K13) are in the Raksa orange and blush with ink text.
+- **Episode 2 playthrough** (id, seed 5) to an ending in 254 steps: 0 console errors, 0 HTTP errors; it passes through the committee room and the end card.
+- **Legacy quiz** (legacy mode on): host created a room, a player joined on a phone, tutorial started, an option tapped; no page errors, no stray greens.
+- **Story room round 1** and staff sign-in pages: covered by `cek-room` and `uji-room-cerita`, and the CMS and admin sign-in pages render.
+
+**Notes (not bugs):**
+1. In WebKit, Tab skips links (the Mode Cerita card, the wordmark, "Untuk panitia"): the engine's default link-focus setting, as in T-024.
+2. The server on :4001 stopped on its own once between `cek-akhir` and `cek-gulir`; I restarted it and re-ran everything after that point. I do not know the cause (I had deleted its log file while it was running, which may be the reason); it did not recur in about 2 hours.
+3. `cek-sisipan` has nothing to check without `cutin-*` states, so "ALL PASS (0)" is not evidence.
+4. Not tested: a real phone or on-screen keyboard, a browser without `svh`, the pages behind the CMS and admin sign-in, hover and pressed states, the old quiz projector in a real round.
+
+## T-030/T-031 (2026-11-18) — PASS (0 high, 0 medium, 1 low bug; 3 notes)
+
+Testing under `C:\Users\User\Desktop\rksgm-episode2` (QA; no source edits, no commit, no e2e). I built the working tree (client and server) into my own folder `server/qa-t030` (git-ignored, removed afterwards), ran :4001 on that build with `RAKSA_LEGACY=on` and a scratch database, and stopped it afterwards. `client/dist` and `client/dist-rilis` were not touched. `cek-palet`, `cek-tugas` (and for beranda and room) refuse port 4001, so they ran as copies from my scratch folder with only that rule, the import paths and the evidence folder changed. Evidence: `team/evidence/T-030/qa/`.
+
+**Full suites, all pass, one at a time:** `test:client` 771/771; typecheck 0 errors; `cek-palet` 50/50; `cek-tugas-t030` 9/9; `cek-beranda` 37/37; `cek-layar` 148/148 (all families); `cek-akhir` 105/105; `cek-gulir` 298/298; `cek-bahasa` 138/138; `cek-tag` 18/18; `cek-piksel` ALL PASS (incl. komite); `cek-telepon` 14/14; `cek-jalan` 8/8; `cek-kaki` 18/18; `cek-gerak` 8/8; `cek-room` 6/6. `uji-room-cerita` was not in this brief's suite list, so I did not run it (the legacy flow and story room round 1 are covered below). `cek-sisipan` is not in this list either.
+
+**My own matrix, Chromium and WebKit, 227 checks each:**
+- **Task cards K02, K04, K05, K07, K08, K09, K10, K11 and the ksim (K-SIM) card**, at 390x745 and 360x640: text inset 14 px or more on all four sides, the TUGAS tab centred on the top line, 0 px page scroll, no console errors.
+- **0 px page scroll:** home at 390x745 and 360x640 (id/en/zh), the end card (id/en/zh), K11, ksim, K13 and K14 reply sheet in English and Indonesian, at 390x645/390x745 and 360x640.
+- **Corners:** no rounded corner over 2 px on chat bubbles, the reply sheet, an activity, home, picker, host and CMS sign-in (icon circles, avatars and portraits excepted).
+- **Button types** (Chromium, mouse and keyboard): home Mulai and Masuk, picker Mulai, end-card main and second button, task Mulai, host and CMS sign-in, the activity send button and the reply sheet send button. The enabled ones move 2 px down when pressed and show an ink focus ring; the disabled ones are the grey key shape and not orange. The reply rows show a pressed state in the screenshot. WebKit gave the same results.
+- **Grounds:** home and picker show the sky pattern; story, activities, end card and staff pages show the tile ground (screens `*-home-*`, `*-kartu-*`, `*-akhir-*`, `stf-*`).
+- **Episode 2 playthrough** (id, seed 7) to an ending in 221 steps: 0 console errors, 0 HTTP errors.
+- **Legacy quiz** (legacy mode on): room created, a player joined, tutorial started and an option tapped; no page errors.
+- **Story room round 1:** `cek-room` (6/6) covers it. **Host, CMS, admin sign-in and projector** (and the host on a phone) render in both engines without horizontal scroll or page errors.
+
+**Bug (low):**
+1. **B-01 low:** the room join page `/join?room=…` (the name and consent form) still has a card with 16 px rounded corners (`form.sr-kartu.sr-join-kode`), in both engines. Every other screen I scanned is stepped. The spec's list (home doors, code row, picker, staff cards, reply sheet) does not name this page, so the Lead may decide it is out of scope.
+
+**Notes (not bugs):**
+1. WebKit skips links when tabbing (home Mulai, picker Mulai and the end-card second button are links), so my keyboard-focus check could not reach them in WebKit; this is the engine's default, as in T-024.
+2. My pressed-state check only reads the transform; the reply-row pressed state is a colour change, so I confirmed that one in the screenshot (`chromium-btn-sheet-opsi-tekan.png`).
+3. Not tested: a real phone or touch pressed state held on a real finger, hover, and the pages behind the CMS and admin sign-in.

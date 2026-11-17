@@ -1,0 +1,72 @@
+/* T-034 K15 'Pesan penutupan' sebagai penyusun pesan piksel: aturan Designer (team/evidence/T-034/designer/mock-rules-T-034.css), ikon
+   cerita/seni/aktivitas/penutup/ (Designer, 6 x 16 px). Penyesuaian build di akhir berkas. */
+.hp-arena[data-pola="pesan"] .hp-pesan-susun { display: flex; flex-direction: column; gap: 8px; }
+/* things that move or go: the list-view switch moves to the Menu; the "preview" jump link and the two sub-titles are not needed */
+.hp-arena[data-pola="pesan"] .hp-ke-pratinjau,
+.hp-arena[data-pola="pesan"] .hp-pesan-susun > .hp-draf-judul,
+.hp-arena[data-pola="pesan"] .hp-kirim-catatan,
+.hp-arena[data-pola="pesan"] .hp-arena-alih { display: none; }
+.hp-arena[data-pola="pesan"] .hp-konteks-cerita { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden; margin: 0; font-size: 14px; line-height: 19px; }
+
+/* 1. preview: Pak Hendra's phone, a WhatsApp-style sent bubble that fills as parts are chosen (K1 light, pixel phone corner) */
+.hp-arena[data-pola="pesan"] .hp-draf { order: -1; position: relative; margin: 0; padding: 8px 12px 8px 40px; min-height: 58px; max-height: 98px; overflow: hidden; border: 0; border-radius: 0; box-shadow: none;
+  background:
+    linear-gradient(#fff9f5, #fff9f5) 12px 13px / 14px 20px no-repeat,      /* screen */
+    linear-gradient(#ff9000, #ff9000) 14px 16px / 10px 3px no-repeat,       /* a message line on the screen */
+    linear-gradient(#e8a87c, #e8a87c) 14px 22px / 7px 3px no-repeat,
+    linear-gradient(#212121, #212121) 10px 9px / 18px 30px no-repeat,      /* pixel phone: body */
+    linear-gradient(#f8e3c8, #f8e3c8) 1px 1px / calc(100% - 2px) calc(100% - 2px) no-repeat,
+    linear-gradient(#e8a87c, #e8a87c) 2px 0 / calc(100% - 4px) 100% no-repeat, linear-gradient(#e8a87c, #e8a87c) 0 2px / 100% calc(100% - 4px) no-repeat; }
+.hp-arena[data-pola="pesan"] .hp-draf .hp-draf-judul { margin: 0 0 2px; font-size: 12px; line-height: 16px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; color: #7a3e00; }
+.hp-arena[data-pola="pesan"] .hp-draf .hp-draf-kosong { margin: 0; font-size: 14px; line-height: 19px; color: #5f5f5f; }
+/* collapsed: 3 lines of the message then "...", the whole bubble is a button that opens it (JS: data-buka) */
+.hp-arena[data-pola="pesan"] .hp-draf:not([data-buka])::after { content: '\2026'; position: absolute; right: 10px; bottom: 4px; padding-left: 16px; font-weight: 800; color: #7a3e00; background: linear-gradient(90deg, transparent, #f8e3c8 14px); }
+.hp-arena[data-pola="pesan"] .hp-draf[data-buka] { max-height: none; }
+
+/* 2. the parts as pixel chips, 2 columns, icon + title; the sentence lives in the preview */
+.hp-arena[data-pola="pesan"] .hp-pesan-bagian-daftar { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.hp-arena[data-pola="pesan"] .hp-pesan-bagian { position: relative; display: flex; align-items: center; min-height: 64px; margin: 0; padding: 6px 30px 9px 48px; border: 0; border-radius: 0; box-shadow: none; text-align: left; color: #212121; cursor: pointer;
+  image-rendering: pixelated;
+  background:
+    var(--ikon) 10px calc(50% - 2px) / 32px 32px no-repeat,
+    linear-gradient(var(--c-muka), var(--c-muka)) 4px 2px / calc(100% - 8px) calc(100% - 7px) no-repeat, linear-gradient(var(--c-muka), var(--c-muka)) 2px 4px / calc(100% - 4px) calc(100% - 11px) no-repeat,
+    linear-gradient(var(--c-tepi), var(--c-tepi)) 2px 0 / calc(100% - 4px) calc(100% - 3px) no-repeat, linear-gradient(var(--c-tepi), var(--c-tepi)) 0 2px / 100% calc(100% - 7px) no-repeat,
+    linear-gradient(var(--c-dasar), var(--c-dasar)) 2px 100% / calc(100% - 4px) 5px no-repeat;
+  --c-muka: #ffffff; --c-tepi: #a4a4a4; --c-dasar: #e0e0e0; transition: transform 80ms ease-out; }
+.hp-arena[data-pola="pesan"] .hp-pesan-bagian[aria-pressed="true"] { --c-muka: #fff5ec; --c-tepi: #ff9000; --c-dasar: transparent; transform: translateY(2px); }
+.hp-arena[data-pola="pesan"] .hp-pesan-bagian:active { transform: translateY(2px); --c-dasar: transparent; }
+.hp-arena[data-pola="pesan"] .hp-pesan-bagian-teks { display: block; min-width: 0; }
+.hp-arena[data-pola="pesan"] .hp-pesan-bagian-teks b { display: block; font-size: 14.5px; line-height: 18px; font-weight: 800; overflow-wrap: anywhere; }
+.hp-arena[data-pola="pesan"] .hp-pesan-bagian-teks span { display: none; }
+/* the state mark at the right: "+" in an outline square, or a tick on orange (word kept for screen readers by aria-pressed) */
+.hp-arena[data-pola="pesan"] .hp-pesan-bagian-aksi { position: absolute; right: 8px; top: 8px; width: 18px; height: 18px; padding: 0; border: 2px solid #a4a4a4; border-radius: 0; background: #ffffff; font-size: 0; color: transparent; display: grid; place-items: center; }
+.hp-arena[data-pola="pesan"] .hp-pesan-bagian-aksi::before { content: '+'; font-size: 15px; line-height: 1; font-weight: 800; color: #5f5f5f; }
+.hp-arena[data-pola="pesan"] .hp-pesan-bagian[aria-pressed="true"] .hp-pesan-bagian-aksi { border-color: #212121; background: #ff9000; }
+.hp-arena[data-pola="pesan"] .hp-pesan-bagian[aria-pressed="true"] .hp-pesan-bagian-aksi::before { content: '\2713'; color: #212121; font-size: 13px; }
+/* icons (build: import the PNGs) */
+.hp-arena[data-pola="pesan"] [data-bagian="kabar"] { --ikon: url(../../seni/aktivitas/penutup/ikon-kabar.png); }
+.hp-arena[data-pola="pesan"] [data-bagian="bukti"] { --ikon: url(../../seni/aktivitas/penutup/ikon-bukti.png); }
+.hp-arena[data-pola="pesan"] [data-bagian="langkah"] { --ikon: url(../../seni/aktivitas/penutup/ikon-langkah.png); }
+.hp-arena[data-pola="pesan"] [data-bagian="jujur"] { --ikon: url(../../seni/aktivitas/penutup/ikon-jujur.png); }
+.hp-arena[data-pola="pesan"] [data-bagian="bintang"] { --ikon: url(../../seni/aktivitas/penutup/ikon-bintang.png); }
+.hp-arena[data-pola="pesan"] [data-bagian="polis"] { --ikon: url(../../seni/aktivitas/penutup/ikon-polis.png); }
+@media (prefers-reduced-motion: reduce) { .hp-arena[data-pola="pesan"] .hp-pesan-bagian { transition: none; } }
+/* the draft is sticky in the built sheet: here it sits in the flow at the top */
+.hp-arena[data-pola="pesan"] .hp-pesan-susun .hp-draf { position: relative; top: auto; }
+.hp-arena[data-pola="pesan"] .hp-draf .hp-gelembung, .hp-arena[data-pola="pesan"] .hp-draf li, .hp-arena[data-pola="pesan"] .hp-draf p:not(.hp-draf-judul) { margin: 0; padding: 0; background: none; border: 0; font-size: 14px; line-height: 19px; }
+/* short screens (360 x 640 and below): the preview shows 2 lines, the context 1 line, chips a little tighter */
+@media (max-height: 700px) {
+  .hp-arena[data-pola="pesan"] .hp-draf { max-height: 64px; min-height: 0; }
+  .hp-arena[data-pola="pesan"] .hp-konteks-cerita { -webkit-line-clamp: 1; }
+  .hp-arena[data-pola="pesan"] .hp-draf .hp-draf-kosong { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 1; overflow: hidden; }
+  .hp-arena[data-pola="pesan"] .hp-pesan-bagian-daftar { gap: 6px; }
+  .hp-arena[data-pola="pesan"] .hp-pesan-bagian { min-height: 60px; }
+}
+
+/* ---- build (Fullstack) ---- */
+/* Pratinjau = satu tombol (aria-expanded) yang membuka / menutup; kalimatnya teks biasa (keluarkan bagian lewat chipnya). */
+.hp-arena[data-pola="pesan"] .hp-draf { display: block; width: 100%; text-align: left; font: inherit; color: #212121; cursor: pointer; }
+.hp-arena[data-pola="pesan"] .hp-draf-kalimat { display: inline; margin: 0; padding: 0; border: 0; background: none; font: inherit; color: inherit; }
+.hp-arena[data-pola="pesan"] .hp-draf-kalimat + .hp-draf-kalimat::before { content: ' '; }
+.hp-arena[data-pola="pesan"] .hp-pesan-bagian-daftar { margin: 0; padding: 0; list-style: none; }
+.hp-arena[data-pola="pesan"] .hp-pesan-bagian-daftar li { display: grid; }

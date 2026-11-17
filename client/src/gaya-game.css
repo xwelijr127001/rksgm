@@ -1,0 +1,315 @@
+/* ==================================================================== T-030 TOMBOL "PIXEL KEY" + T-031 KARTU & LATAR PIKSEL
+   Spec team/specs/2026-11-17-T-030-T-031-gaya-game.md; aturan terukur Designer team/evidence/T-030/designer/mock-rules-T-030.css dan
+   mock-rules-T-031.css (disalin, diperluas ke kelas yang Designer sebut "same rule, not seen in the mock"). Dimuat TERAKHIR dari
+   main.tsx; sifat gambar (background, border-color, border-radius, box-shadow, color) memakai !important supaya satu tampilan
+   menang atas lembar gaya bagian yang dimuat belakangan (hp.css, desain.css, akhir.css, staff.css) dan atas aturan lama yang lebih
+   spesifik. Keadaan diubah lewat variabel (--k-* tombol, --c-* kartu), bukan lewat background. Tata letak tidak berubah. */
+/* T-030 pixel key, variant A (Designer, 2026-11-17). Apply by class; place after theme.css/player.css/hp.css/desain.css/akhir.css/staff.css.
+   Primary: .primary-action .btn .btn-utama .lp-pintu-aksi (.akh-utama .hp-kirim-tombol are .primary-action). Secondary (ink): .btn-garis .btn-netral .akh-kedua .hp-lembar-kembali .akh-navigasi button .lp-join-mulai.
+   Danger: .btn-bahaya. Reply rows: .hp-opsi (.dipilih, .lain). Round: .pilih-bahasa .sound-button .hp-kembali.
+   Same rule, not seen in the mock: .kj-utama .lk-btn-utama .meja-utama (primary); .kj-kedua .meja-sekunder .cer-tombol-garis .lk-btn .bank-btn (secondary). Text links stay links. */
+/* T-030 pixel key (variant A). Every value below is from PALET.md (+ #FFD9A8, added by T-031). Layout: no change. */
+.primary-action,
+.btn,
+.lp-halaman .lp-pintu-aksi,
+.akh-kedua,
+.hp-lembar-kembali,
+.akh-navigasi button,
+.hp-opsi,
+.lk-btn-utama,
+.stf-alat a.aktif,
+.kj-kedua,
+.meja-sekunder,
+.cer-tombol-garis,
+.lk-btn:not(.lk-btn-utama),
+.bank-btn {
+  --k-muka: #ff9000; --k-tepi: #ff9000; --k-terang: #ffd9a8; --k-kanan: #e07e00; --k-dasar: #9a4f00; --k-label: #212121; --k-tekan: #e07e00; --k-tepi-tekan: #e07e00;
+  border-color: transparent !important; border-radius: 0 !important; box-shadow: none !important; opacity: 1;
+  color: var(--k-label) !important; text-decoration: none;
+  background: linear-gradient(var(--k-terang), var(--k-terang)) left 2px top 0 / calc(100% - 4px) 2px no-repeat,
+    linear-gradient(var(--k-terang), var(--k-terang)) left 0 top 2px / 2px calc(100% - 7px) no-repeat,
+    linear-gradient(var(--k-kanan), var(--k-kanan)) right 0 top 2px / 2px calc(100% - 7px) no-repeat,
+    linear-gradient(var(--k-muka), var(--k-muka)) left 4px top 2px / calc(100% - 8px) calc(100% - 7px) no-repeat,
+    linear-gradient(var(--k-muka), var(--k-muka)) left 2px top 4px / calc(100% - 4px) calc(100% - 11px) no-repeat,
+    linear-gradient(var(--k-tepi), var(--k-tepi)) left 2px top 0px / calc(100% - 4px) calc(100% - 3px) no-repeat,
+    linear-gradient(var(--k-tepi), var(--k-tepi)) left 0px top 2px / 100% calc(100% - 7px) no-repeat,
+    linear-gradient(var(--k-dasar), var(--k-dasar)) left 2px top 3px / calc(100% - 4px) calc(100% - 3px) no-repeat,
+    linear-gradient(var(--k-dasar), var(--k-dasar)) left 0px top 5px / 100% calc(100% - 7px) no-repeat !important;
+  background-origin: border-box; background-clip: border-box;
+  transition: transform 80ms ease-out; -webkit-tap-highlight-color: transparent;
+}
+/* kinds */
+.btn-garis,
+.btn-netral,
+.akh-kedua,
+.hp-lembar-kembali,
+.akh-navigasi button,
+.kj-kedua,
+.meja-sekunder,
+.cer-tombol-garis,
+.lk-btn:not(.lk-btn-utama),
+.bank-btn,
+.lp-halaman .lp-join-mulai { --k-muka: #ffffff; --k-tepi: #212121; --k-terang: transparent; --k-kanan: transparent; --k-dasar: #212121; --k-label: #212121; --k-tekan: #f9eeea; --k-tepi-tekan: #212121; }
+.btn-bahaya { --k-muka: #d32f2f; --k-tepi: #d32f2f; --k-terang: #ef9a9a; --k-kanan: #b3261e; --k-dasar: #b71c1c; --k-label: #ffffff; --k-tekan: #b3261e; --k-tepi-tekan: #b3261e; }
+.hp-opsi { --k-muka: #ffffff; --k-tepi: #a4a4a4; --k-terang: transparent; --k-kanan: transparent; --k-dasar: #e0e0e0; --k-label: #212121; --k-tekan: #f9eeea; --k-tepi-tekan: #a4a4a4; }
+.hp-opsi.lain { --k-label: #5f5f5f; }
+/* hover (mouse only): the face takes the pressed colour */
+.primary-action:hover:not(:disabled):not([aria-disabled="true"]),
+.btn:hover:not(:disabled):not([aria-disabled="true"]),
+.lp-halaman .lp-pintu-aksi:hover:not(:disabled):not([aria-disabled="true"]),
+.akh-kedua:hover:not(:disabled):not([aria-disabled="true"]),
+.hp-lembar-kembali:hover:not(:disabled):not([aria-disabled="true"]),
+.akh-navigasi button:hover:not(:disabled):not([aria-disabled="true"]),
+.hp-opsi:hover:not(:disabled):not([aria-disabled="true"]),
+.lp-halaman .lp-pintu:hover .lp-pintu-aksi,
+.lk-btn-utama:hover:not(:disabled):not([aria-disabled="true"]),
+.stf-alat a.aktif:hover:not(:disabled):not([aria-disabled="true"]),
+.kj-kedua:hover:not(:disabled):not([aria-disabled="true"]),
+.meja-sekunder:hover:not(:disabled):not([aria-disabled="true"]),
+.cer-tombol-garis:hover:not(:disabled):not([aria-disabled="true"]),
+.lk-btn:not(.lk-btn-utama):hover:not(:disabled):not([aria-disabled="true"]),
+.bank-btn:hover:not(:disabled):not([aria-disabled="true"]) { --k-muka: var(--k-tekan); }
+/* pressed: sinks 2 px, the base is gone, the sheen goes flat */
+.primary-action:active:not(:disabled):not([aria-disabled="true"]),
+.btn:active:not(:disabled):not([aria-disabled="true"]),
+.lp-halaman .lp-pintu-aksi:active:not(:disabled):not([aria-disabled="true"]),
+.akh-kedua:active:not(:disabled):not([aria-disabled="true"]),
+.hp-lembar-kembali:active:not(:disabled):not([aria-disabled="true"]),
+.akh-navigasi button:active:not(:disabled):not([aria-disabled="true"]),
+.hp-opsi:active:not(:disabled):not([aria-disabled="true"]),
+.lk-btn-utama:active:not(:disabled):not([aria-disabled="true"]),
+.stf-alat a.aktif:active:not(:disabled):not([aria-disabled="true"]),
+.kj-kedua:active:not(:disabled):not([aria-disabled="true"]),
+.meja-sekunder:active:not(:disabled):not([aria-disabled="true"]),
+.cer-tombol-garis:active:not(:disabled):not([aria-disabled="true"]),
+.lk-btn:not(.lk-btn-utama):active:not(:disabled):not([aria-disabled="true"]),
+.bank-btn:active:not(:disabled):not([aria-disabled="true"]),
+.lp-halaman .lp-pintu:active .lp-pintu-aksi { --k-muka: var(--k-tekan); --k-tepi: var(--k-tepi-tekan); --k-terang: transparent; --k-kanan: transparent; --k-dasar: transparent; transform: translateY(2px); }
+/* chosen reply row: stays down */
+.hp-opsi.dipilih { --k-muka: #f9eeea; --k-tepi: #ff9000; --k-terang: transparent; --k-kanan: transparent; --k-dasar: transparent; --k-label: #212121; --k-tekan: #f9eeea; --k-tepi-tekan: #ff9000; transform: translateY(2px); }
+/* disabled (D-289 in the key shape): one grey, flat, already down; label #5F5F5F on #E0E0E0 = 4.84 : 1 */
+.primary-action:disabled,
+.btn:disabled,
+.lp-halaman .lp-pintu-aksi:disabled,
+.akh-kedua:disabled,
+.hp-lembar-kembali:disabled,
+.akh-navigasi button:disabled,
+.hp-opsi:disabled,
+.primary-action[aria-disabled="true"],
+.btn[aria-disabled="true"],
+.lp-halaman .lp-pintu-aksi[aria-disabled="true"],
+.akh-kedua[aria-disabled="true"],
+.hp-lembar-kembali[aria-disabled="true"],
+.akh-navigasi button[aria-disabled="true"],
+.lk-btn-utama:disabled,
+.stf-alat a.aktif:disabled,
+.kj-kedua:disabled,
+.meja-sekunder:disabled,
+.cer-tombol-garis:disabled,
+.lk-btn:not(.lk-btn-utama):disabled,
+.bank-btn:disabled,
+.hp-opsi[aria-disabled="true"] { --k-muka: #e0e0e0; --k-tepi: #e0e0e0; --k-terang: transparent; --k-kanan: transparent; --k-dasar: transparent; --k-label: #5f5f5f; --k-tekan: #e0e0e0; --k-tepi-tekan: #e0e0e0; cursor: not-allowed; }
+/* focus: the ring of today (3 px #212121) is kept and is whole, because nothing is clipped */
+/* round icon buttons (language, sound, back): keep the circle, gain a 2 px base; pressed sinks onto it */
+.pilih-bahasa,
+.sound-button,
+.hp-kembali { box-shadow: 0 2px 0 #a4a4a4 !important; transition: transform 80ms ease-out; }
+.pilih-bahasa:active,
+.sound-button:active,
+.hp-kembali:active { box-shadow: none !important; transform: translateY(2px); }
+@media (prefers-reduced-motion: reduce) { .lk-btn-utama, .stf-alat a.aktif, .kj-kedua, .meja-sekunder, .cer-tombol-garis, .lk-btn:not(.lk-btn-utama), .bank-btn, .primary-action, .btn, .lp-halaman .lp-pintu-aksi, .akh-kedua, .hp-lembar-kembali, .akh-navigasi button, .hp-opsi, .pilih-bahasa, .sound-button, .hp-kembali { transition: none; } }
+
+/* T-031 pixel cards + grounds (Designer, 2026-11-17). Hover of cards: change --c-muka, not background. */
+/* T-031 pixel cards and grounds. Every value below is from PALET.md (+ #F3DED3 #FFD9A8 #FFE4C2 #FFF1E2). Layout: no change. */
+/* K1 "kotak bertangga": 3 px stepped corners, 2 px line, 5 px base, all inside the box */
+.lp-halaman .lp-pintu,
+.cer-ep,
+.stf-kartu,
+.stf-masuk-kartu,
+.lp-join,
+.hp-lembar {
+  border-color: transparent !important; border-radius: 0 !important; box-shadow: none !important;
+  background: linear-gradient(var(--c-muka), var(--c-muka)) left 5px top 2px / calc(100% - 10px) calc(100% - 9px) no-repeat,
+    linear-gradient(var(--c-muka), var(--c-muka)) left 4px top 3px / calc(100% - 8px) calc(100% - 11px) no-repeat,
+    linear-gradient(var(--c-muka), var(--c-muka)) left 3px top 4px / calc(100% - 6px) calc(100% - 13px) no-repeat,
+    linear-gradient(var(--c-muka), var(--c-muka)) left 2px top 5px / calc(100% - 4px) calc(100% - 15px) no-repeat,
+    linear-gradient(var(--c-tepi), var(--c-tepi)) left 3px top 0px / calc(100% - 6px) calc(100% - 5px) no-repeat,
+    linear-gradient(var(--c-tepi), var(--c-tepi)) left 2px top 1px / calc(100% - 4px) calc(100% - 7px) no-repeat,
+    linear-gradient(var(--c-tepi), var(--c-tepi)) left 1px top 2px / calc(100% - 2px) calc(100% - 9px) no-repeat,
+    linear-gradient(var(--c-tepi), var(--c-tepi)) left 0px top 3px / 100% calc(100% - 11px) no-repeat,
+    linear-gradient(var(--c-dasar), var(--c-dasar)) left 3px top 5px / calc(100% - 6px) calc(100% - 5px) no-repeat,
+    linear-gradient(var(--c-dasar), var(--c-dasar)) left 2px top 6px / calc(100% - 4px) calc(100% - 7px) no-repeat,
+    linear-gradient(var(--c-dasar), var(--c-dasar)) left 1px top 7px / calc(100% - 2px) calc(100% - 9px) no-repeat,
+    linear-gradient(var(--c-dasar), var(--c-dasar)) left 0px top 8px / 100% calc(100% - 11px) no-repeat !important;
+  background-origin: border-box; background-clip: border-box;
+}
+.lp-halaman .lp-pintu,
+.cer-ep,
+.stf-kartu,
+.stf-masuk-kartu { --c-muka: #ffffff; --c-tepi: #ff9000; --c-dasar: #e07e00; }
+.lp-join { --c-muka: #f9eeea; --c-tepi: #ecd5cb; --c-dasar: #ecd5cb; }
+.hp-lembar { --c-muka: #ffffff; --c-tepi: #ff9000; --c-dasar: transparent; }
+.lp-halaman .lp-pintu:hover { --c-muka: #fff5ec; }
+/* K1 light: chat bubbles and notes (2 px stepped corners, 1 px line, no base) */
+.hp-gelembung,
+.lp-kota-balon,
+.hp-status-catatan {
+  border-color: transparent !important; border-radius: 0 !important; box-shadow: none !important;
+  background: linear-gradient(var(--c-muka), var(--c-muka)) left 3px top 1px / calc(100% - 6px) calc(100% - 2px) no-repeat,
+    linear-gradient(var(--c-muka), var(--c-muka)) left 2px top 2px / calc(100% - 4px) calc(100% - 4px) no-repeat,
+    linear-gradient(var(--c-muka), var(--c-muka)) left 1px top 3px / calc(100% - 2px) calc(100% - 6px) no-repeat,
+    linear-gradient(var(--c-tepi), var(--c-tepi)) left 2px top 0px / calc(100% - 4px) 100% no-repeat,
+    linear-gradient(var(--c-tepi), var(--c-tepi)) left 1px top 1px / calc(100% - 2px) calc(100% - 2px) no-repeat,
+    linear-gradient(var(--c-tepi), var(--c-tepi)) left 0px top 2px / 100% calc(100% - 4px) no-repeat !important;
+  background-origin: border-box; background-clip: border-box;
+}
+.hp-gelembung,
+.lp-kota-balon,
+.hp-status-catatan { --c-muka: #ffffff; --c-tepi: #ecd5cb; }
+.hp-keluar .hp-gelembung { --c-muka: #f8e3c8; --c-tepi: #e8a87c; }
+.hp-status-catatan { --c-muka: #fff5ec; --c-tepi: #e8a87c; }
+/* K4 "dialog RPG": 3 px ink frame, orange 10 px corners, the card's own label hangs over the top edge as a tab */
+section.hp-aksi,
+.hp-vn-dialog:has(.hp-tindakan),
+.akh-pelajaran,
+.akh-pelajaran-tombol .akh-gelembung {
+  border-color: transparent !important; border-radius: 0 !important; box-shadow: none !important;
+  background: linear-gradient(var(--c-siku), var(--c-siku)) left 0 top 0 / 10px 10px no-repeat,
+    linear-gradient(var(--c-siku), var(--c-siku)) right 0 top 0 / 10px 10px no-repeat,
+    linear-gradient(var(--c-siku), var(--c-siku)) left 0 bottom 0 / 10px 10px no-repeat,
+    linear-gradient(var(--c-siku), var(--c-siku)) right 0 bottom 0 / 10px 10px no-repeat,
+    linear-gradient(var(--c-muka), var(--c-muka)) left 3px top 3px / calc(100% - 6px) calc(100% - 6px) no-repeat,
+    linear-gradient(var(--c-tepi), var(--c-tepi)) 0 0 / 100% 100% no-repeat !important;
+  background-origin: border-box; background-clip: border-box;
+}
+section.hp-aksi,
+.hp-vn-dialog:has(.hp-tindakan),
+.akh-pelajaran,
+.akh-pelajaran-tombol .akh-gelembung { --c-muka: #ffffff; --c-tepi: #212121; --c-siku: #ff9000; position: relative; border-image: none; }
+section.hp-aksi .hp-aksi-label,
+.hp-vn-dialog:has(.hp-tindakan) .hp-tindakan > b,
+.akh-pelajaran .akh-pelajaran-label,
+.akh-pelajaran-tombol .akh-gelembung > small {
+  position: absolute; top: -11px; left: 12px; z-index: 1; margin: 0; padding: 4px 8px; background: #212121 !important; color: #ffffff !important;
+  font-size: 11px; line-height: 14px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; white-space: nowrap;
+}
+/* the phone end card: the lesson bubble had no top padding; 12 px = the height of the label that left the flow (no change in height) */
+.akh-pelajaran-tombol .akh-gelembung { padding-top: 12px; }
+/* grounds: CSS gradients only, attachment default (no parallax), behind the cards; text sits on cards */
+.lp-halaman,
+.cer-hub-layar { background: linear-gradient(#fff9f5, #fff9f5) 14px 22px / 44px 8px no-repeat,
+    linear-gradient(#fff9f5, #fff9f5) 24px 16px / 22px 6px no-repeat,
+    linear-gradient(#fff9f5, #fff9f5) 66px 26px / 14px 4px no-repeat,
+    linear-gradient(#fff9f5, #fff9f5) 236px 40px / 44px 8px no-repeat,
+    linear-gradient(#fff9f5, #fff9f5) 246px 34px / 22px 6px no-repeat,
+    linear-gradient(#fff9f5, #fff9f5) 288px 44px / 14px 4px no-repeat,
+    radial-gradient(#fff9f5 1.5px, transparent 1.7px) 0 0 / 10px 10px,
+    linear-gradient(180deg, #ffe4c2 0 168px, #fff1e2 168px 272px, #fff9f5 272px) 0 0 / 100% 100% no-repeat, #fff9f5 !important; }
+.hp-layar,
+.stf { background: linear-gradient(#f3ded3 1px, transparent 1px) 0 0 / 12px 12px,
+    linear-gradient(90deg, #f3ded3 1px, transparent 1px) 0 0 / 12px 12px,
+    radial-gradient(#ffd9a8 1px, transparent 1.3px) 6px 6px / 12px 12px, #fff9f5 !important; }
+.hp-obrolan { background: transparent !important; }
+
+/* K4, catatan pemilik 18 Nov 00:2x (tangkapan kartu TUGAS di kotak dialog):
+   (1) bagian dalam 14 px di semua sisi (bingkai 3 px digambar di latar, jadi padding sudah termasuk bingkai);
+   (2) tab label duduk DI garis atas: separuh di atas, separuh di bawah, 12 px dari kiri;
+   (3) siku: kartu TUGAS kecil tanpa siku; HASIL dan PELAJARAN memakai siku bentuk L 2 px (10 x 10, bagian dalam berlubang);
+   (4) tombol Mulai ikut terinset 14 px (hasil dari padding);
+   (5) jarak 10 px dari teks dialog di atasnya: tab menonjol 11 px di atas bingkai, jadi margin atas 21 px. */
+section.hp-aksi,
+.hp-vn-dialog:has(.hp-tindakan),
+.akh-pelajaran { padding: 14px !important; }
+.hp-vn-aksi section.hp-aksi, .hp-vn-aksi > .hp-aksi { margin-top: 21px !important; border-top: 0 !important; }
+section.hp-aksi .hp-aksi-label,
+.hp-vn-dialog:has(.hp-tindakan) .hp-tindakan > b,
+.akh-pelajaran .akh-pelajaran-label,
+.akh-pelajaran-tombol .akh-gelembung > small { position: absolute !important; top: 1.5px !important; left: 12px !important; margin: 0 !important; transform: translateY(-50%); }
+/* Tab Pelajaran kartu akhir lebar: hanya kata (potret mentor membuat tab 42 px dan menutupi isi). */
+.akh-pelajaran .akh-pelajaran-label .tokoh-potret { display: none !important; }
+section.hp-aksi {
+  background: linear-gradient(var(--c-muka), var(--c-muka)) left 3px top 3px / calc(100% - 6px) calc(100% - 6px) no-repeat,
+    linear-gradient(var(--c-tepi), var(--c-tepi)) 0 0 / 100% 100% no-repeat !important;
+}
+.hp-vn-dialog:has(.hp-tindakan),
+.akh-pelajaran {
+  background:
+    linear-gradient(var(--c-siku), var(--c-siku)) left 0 top 0 / 10px 2px no-repeat, linear-gradient(var(--c-siku), var(--c-siku)) left 0 top 0 / 2px 10px no-repeat,
+    linear-gradient(var(--c-siku), var(--c-siku)) right 0 top 0 / 10px 2px no-repeat, linear-gradient(var(--c-siku), var(--c-siku)) right 0 top 0 / 2px 10px no-repeat,
+    linear-gradient(var(--c-siku), var(--c-siku)) left 0 bottom 0 / 10px 2px no-repeat, linear-gradient(var(--c-siku), var(--c-siku)) left 0 bottom 0 / 2px 10px no-repeat,
+    linear-gradient(var(--c-siku), var(--c-siku)) right 0 bottom 0 / 10px 2px no-repeat, linear-gradient(var(--c-siku), var(--c-siku)) right 0 bottom 0 / 2px 10px no-repeat,
+    linear-gradient(var(--c-muka), var(--c-muka)) left 3px top 3px / calc(100% - 6px) calc(100% - 6px) no-repeat,
+    linear-gradient(var(--c-tepi), var(--c-tepi)) 0 0 / 100% 100% no-repeat !important;
+}
+/* Gelembung Pelajaran kartu akhir HP: teks mulai 6 px dari tepi (ukuran kartu satu layar tidak boleh berubah), jadi siku L 6 px. */
+.akh-pelajaran-tombol .akh-gelembung {
+  background:
+    linear-gradient(var(--c-siku), var(--c-siku)) left 0 top 0 / 6px 2px no-repeat, linear-gradient(var(--c-siku), var(--c-siku)) left 0 top 0 / 2px 6px no-repeat,
+    linear-gradient(var(--c-siku), var(--c-siku)) right 0 top 0 / 6px 2px no-repeat, linear-gradient(var(--c-siku), var(--c-siku)) right 0 top 0 / 2px 6px no-repeat,
+    linear-gradient(var(--c-siku), var(--c-siku)) left 0 bottom 0 / 6px 2px no-repeat, linear-gradient(var(--c-siku), var(--c-siku)) left 0 bottom 0 / 2px 6px no-repeat,
+    linear-gradient(var(--c-siku), var(--c-siku)) right 0 bottom 0 / 6px 2px no-repeat, linear-gradient(var(--c-siku), var(--c-siku)) right 0 bottom 0 / 2px 6px no-repeat,
+    linear-gradient(var(--c-muka), var(--c-muka)) left 3px top 3px / calc(100% - 6px) calc(100% - 6px) no-repeat,
+    linear-gradient(var(--c-tepi), var(--c-tepi)) 0 0 / 100% 100% no-repeat !important;
+  background-origin: border-box !important; background-clip: border-box !important;
+}
+/* Kartu K1: bagian dalam kiri/kanan paling sedikit 14 px (isi tidak menempel di garis). Tinggi tidak berubah. */
+.lp-halaman .lp-pintu, .stf-kartu, .stf-masuk-kartu, .lp-join { padding-left: 14px !important; padding-right: 14px !important; }
+/* Catatan pemilik 2 (18 Nov 00:10): tidak ada sudut membulat di cangkang cerita, aktivitas, kartu akhir, beranda dan pemilih,
+   kecuali lingkaran ikon dan avatar / potret. Kotak bergambar (panggung) dan pil memakai sudut piksel. */
+:is(.hp-layar, .hp-tema, .lp-halaman, .cer-hub-layar, .akh-kartu) :not(img, svg, svg *, .pilih-bahasa, .sound-button, .hp-kembali, [class*="potret"], [class*="avatar"], [class*="ikon"], [class*="titik"], [class*="tokoh"], [class*="tanda"], [class*="nada"], [class*="arah"], [class*="bulat"], [class*="wajah"], [role="radio"] > span:first-child) { border-radius: 0 !important; }
+/* Bingkai panggung + kotak dialog: tangga 3 px (clip-path), garis 2 px digambar di dalam (lapisan ::after di atas seni). */
+.hp-vn-bingkai {
+  position: relative; box-shadow: none !important;
+  clip-path: polygon(3px 0, calc(100% - 3px) 0, calc(100% - 3px) 1px, calc(100% - 2px) 1px, calc(100% - 2px) 2px, calc(100% - 1px) 2px, calc(100% - 1px) 3px, 100% 3px,
+    100% calc(100% - 3px), calc(100% - 1px) calc(100% - 3px), calc(100% - 1px) calc(100% - 2px), calc(100% - 2px) calc(100% - 2px), calc(100% - 2px) calc(100% - 1px), calc(100% - 3px) calc(100% - 1px), calc(100% - 3px) 100%,
+    3px 100%, 3px calc(100% - 1px), 2px calc(100% - 1px), 2px calc(100% - 2px), 1px calc(100% - 2px), 1px calc(100% - 3px), 0 calc(100% - 3px),
+    0 3px, 1px 3px, 1px 2px, 2px 2px, 2px 1px, 3px 1px);
+}
+.hp-vn-bingkai::after { content: ''; position: absolute; inset: 0; z-index: 3; pointer-events: none; box-shadow: inset 0 0 0 2px #ff9000; }
+.hp-vn-dialog { box-shadow: none !important; }
+/* Pil istilah -> chip bertangga (K1 ringan) */
+.cer-istilah-tombol, .cer-istilah-tombol-bentuk {
+  --c-muka: #f9eeea; --c-tepi: #e0e0e0; border-color: transparent !important;
+  background: linear-gradient(var(--c-muka), var(--c-muka)) left 3px top 1px / calc(100% - 6px) calc(100% - 2px) no-repeat,
+    linear-gradient(var(--c-muka), var(--c-muka)) left 2px top 2px / calc(100% - 4px) calc(100% - 4px) no-repeat,
+    linear-gradient(var(--c-muka), var(--c-muka)) left 1px top 3px / calc(100% - 2px) calc(100% - 6px) no-repeat,
+    linear-gradient(var(--c-tepi), var(--c-tepi)) left 2px top 0px / calc(100% - 4px) 100% no-repeat,
+    linear-gradient(var(--c-tepi), var(--c-tepi)) left 1px top 1px / calc(100% - 2px) calc(100% - 2px) no-repeat,
+    linear-gradient(var(--c-tepi), var(--c-tepi)) left 0px top 2px / 100% calc(100% - 4px) no-repeat !important;
+  background-origin: border-box !important;
+}
+/* Lembar balasan (K1): tombol pilihan dan "Kirim balasan" terinset 14 px dari bingkai kiri, kanan dan bawah. */
+.hp-lembar { padding-left: 14px !important; padding-right: 14px !important; padding-bottom: max(14px, env(safe-area-inset-bottom)) !important; }
+/* Lembar balasan: inset 14 px di atas mengambil 8 px lebar baris; pilihan EN K13 / K14 di 390x645 lalu butuh gulir. Bagian dalam
+   baris dikurangi sama banyak (padding 6 px kiri-kanan, celah nomor 6 px), jadi lebar teks pilihan sama dengan sebelum T-030. */
+.hp-lembar .hp-opsi { padding-left: 6px !important; padding-right: 6px !important; column-gap: 6px !important; }
+/* Baris kode HP: inset 14 px membuat pesan kode salah dua baris (33,8 px > 30); dua baris 15 px = 30 px, baris tetap 110 px (D-263). */
+@media (max-width: 700px) { .lp-halaman .lp-join-galat { line-height: 15px !important; } }
+
+/* T-030 Fix 1 (Designer D-317 blocker, D-318): ruang cerita (join, lobi, babak, akibat, peringkat), konsol host, pemilih skenario,
+   proyektor, staf, dan kuis lama memakai bahasa piksel yang sama: tidak ada sudut membulat kecuali lingkaran ikon / avatar / potret /
+   penanda; kartu netral memakai K1 bertangga; latar ubin (ground 6) di belakang ruang cerita dan proyektor. */
+:is(.player-ui, .stf, .sr-layar, .proyektor) :not(img, svg, svg *, .pilih-bahasa, .sound-button, .hp-kembali, [class*="potret"], [class*="avatar"], [class*="ikon"], [class*="titik"], [class*="tokoh"], [class*="tanda"], [class*="nada"], [class*="arah"], [class*="bulat"], [class*="wajah"], [class*="penanda"], [class*="skala"], [class*="mood"], [role="radio"] > span:first-child, input[type="checkbox"], input[type="radio"]) { border-radius: 0 !important; }
+.panel, .sr-kartu, .sr-pembuka, .sr-chat, .sr-meja {
+  border-color: transparent !important; border-radius: 0 !important; box-shadow: none !important;
+  background: linear-gradient(var(--c-muka), var(--c-muka)) left 3px top 1px / calc(100% - 6px) calc(100% - 2px) no-repeat,
+    linear-gradient(var(--c-muka), var(--c-muka)) left 2px top 2px / calc(100% - 4px) calc(100% - 4px) no-repeat,
+    linear-gradient(var(--c-muka), var(--c-muka)) left 1px top 3px / calc(100% - 2px) calc(100% - 6px) no-repeat,
+    linear-gradient(var(--c-tepi), var(--c-tepi)) left 2px top 0px / calc(100% - 4px) 100% no-repeat,
+    linear-gradient(var(--c-tepi), var(--c-tepi)) left 1px top 1px / calc(100% - 2px) calc(100% - 2px) no-repeat,
+    linear-gradient(var(--c-tepi), var(--c-tepi)) left 0px top 2px / 100% calc(100% - 4px) no-repeat !important;
+  background-origin: border-box !important;
+}
+.panel, .sr-kartu { --c-muka: #ffffff; --c-tepi: #ff9000; }
+.sr-pembuka, .sr-chat, .sr-meja { --c-muka: #f9eeea; --c-tepi: #ecd5cb; }
+.proyektor .panel { --c-muka: #424242; --c-tepi: #5f5f5f; }
+.sr-halaman, .sr-layar { background: linear-gradient(#f3ded3 1px, transparent 1px) 0 0 / 12px 12px,
+    linear-gradient(90deg, #f3ded3 1px, transparent 1px) 0 0 / 12px 12px,
+    radial-gradient(#ffd9a8 1px, transparent 1.3px) 6px 6px / 12px 12px, #fff9f5 !important; }
+.sr-pembuka, .sr-meja { padding: 14px !important; } /* B: isi >= 14 px dari bingkai K1 (dulu 10 / 12 px) */
+/* T-033 Fix 1 / D-329: kotak kuis lama yang masih membulat (balon pemandu, paket soal host, pesan info, pil status koneksi). Ubin ikon
+   (.solo-ikon, .opsi-ikon) dan pil DEMO boleh tetap membulat. */
+.tokoh-balon, .bank-paket-tombol, .pesan, .status-koneksi { border-radius: 0 !important; }
+
+/* D-289 di latar gelap proyektor kuis lama: abu gelap, label abu terang. */
+.proyektor .btn:disabled, .proyektor .primary-action:disabled { --k-muka: #424242; --k-tepi: #424242; --k-tekan: #424242; --k-tepi-tekan: #424242; --k-label: #a4a4a4; }

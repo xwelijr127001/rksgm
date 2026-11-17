@@ -18,6 +18,7 @@
  * mengisi kode dan memindahkan fokus ke Masuk). Papan ketik (390x745, id, profil): urutan Tab = urutan layar.
  * HP mendatar (844x390, 740x360): kedua pintu utuh di layar pertama; dengan spanduk acara, pil spanduk di header tidak menutupinya.
  * Lebar: 1280x800 kedua pintu di layar pertama, Mode Cerita di atas baris kode, teks panjang; 768x1024 urutan yang sama.
+ * Lebar dan mendatar (D-290, T-029 Fix 1): Mulai tidak lebih pendek daripada Masuk.
  * WebKit: dua ukuran sasaran (id, tanpa / dengan profil) dan 390x664.
  * Tangkapan layar + hasil.json -> team/evidence/T-027/fullstack/. Kode keluar 0 lulus, 1 ada yang gagal, 2 penjaga / env.
  */
@@ -269,7 +270,8 @@ for (const mesin of MESIN) {
         // Sasaran ketuk kartu = seluruh kartu (label Mulai hanya tanda di dalamnya).
         for (const [nama, k] of [['kartu Mode Cerita', d.kartu], ['kolom kode', d.kode], ['Masuk', d.masuk]]) if (k.h < 43.4) s.push(`sasaran ${nama} ${k.h} px (< 44)`);
         if (d.terpotong.length) s.push('teks terpotong: ' + d.terpotong.join(', '));
-        return { gulir: d.sh - d.vh, kartu: [d.kartu.x, d.kartu.y, d.kartu.b], kode: [d.join.x, d.join.y, d.join.b], h1: d.h1.tampil, hero: d.hero?.h ?? null };
+        if (d.mulai.h < d.masuk.h - 0.6) s.push(`Mulai (${d.mulai.w} x ${d.mulai.h}) lebih pendek daripada Masuk (${d.masuk.w} x ${d.masuk.h})`); // D-290
+        return { gulir: d.sh - d.vh, kartu: [d.kartu.x, d.kartu.y, d.kartu.b], kode: [d.join.x, d.join.y, d.join.b], mulai: [d.mulai.w, d.mulai.h], masuk: [d.masuk.w, d.masuk.h], h1: d.h1.tampil, hero: d.hero?.h ?? null };
       });
     }
     // --- HP mendatar + spanduk acara: spanduk = pil di pita header (T-006), tidak menutupi kedua pintu yang kini berdampingan
@@ -298,7 +300,9 @@ for (const mesin of MESIN) {
         if (JSON.stringify(d.judulJoin) !== JSON.stringify([kamus('id', 'joinJudul')]) || !d.isiJoin) s.push(`judul Join ${JSON.stringify(d.judulJoin)}, kalimat tampil ${d.isiJoin}`);
         if (!d.potretKartu) s.push('potret kartu tidak tampil');
         if (d.sw - d.vw > 0.5) s.push(`gulir mendatar ${d.sw - d.vw} px`);
-        return { gulir: d.sh - d.vh, kartu: [d.kartu.y, d.kartu.b], kode: [d.join.y, d.join.b] };
+        // D-290 (T-029 Fix 1): di layar lebar Mulai (pintu utama) tidak boleh lebih kecil daripada Masuk.
+        if (d.mulai.h < d.masuk.h - 0.6) s.push(`Mulai (${d.mulai.w} x ${d.mulai.h}) lebih pendek daripada Masuk (${d.masuk.w} x ${d.masuk.h})`);
+        return { gulir: d.sh - d.vh, kartu: [d.kartu.y, d.kartu.b], kode: [d.join.y, d.join.b], mulai: [d.mulai.w, d.mulai.h], masuk: [d.masuk.w, d.masuk.h] };
       });
     }
   }

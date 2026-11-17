@@ -21,3 +21,5 @@ createRoot(el).render(
   </StrictMode>,
 );
 import './player.css';
+// T-030 + T-031: tombol pixel key, kartu dan latar piksel (terakhir, menang atas lembar gaya bagian).
+import './gaya-game.css';

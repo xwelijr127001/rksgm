@@ -10,7 +10,7 @@
 .cms-editor-aksi { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
 .cms-tab-isi { display: flex; flex-direction: column; gap: 14px; padding-top: 14px; }
 .cms-isian-kaki { display: flex; justify-content: space-between; gap: 8px; }
-.cms-hitung { color: #828282; font-variant-numeric: tabular-nums; margin-left: auto; }
+.cms-hitung { color: #5f5f5f; font-variant-numeric: tabular-nums; margin-left: auto; }
 .cms-isu-galat { color: var(--merah-tua); font-weight: 600; }
 .cms-isu-peringatan { color: #2c5a6b; }
 .cms-isu-ok { color: #1f5c3f; font-weight: 600; }

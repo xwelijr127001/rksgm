@@ -10,18 +10,20 @@ export const BRAND = {
   company: 'PT Asuransi Raksa Pratikara',
   companion: 'Raki',
   /**
-   * Palet usulan desain game (BUKAN klaim kode warna resmi perusahaan).
-   * Ganti bila brand guideline resmi sudah tersedia.
+   * Palet Raksa v1 (T-029, 17 Nov 2026): warna raksaonline.com. Sumber kebenarannya character/palet-raksa-v1/PALET.md dan
+   * token di client/src/theme.css; daftar ini hanya ringkasannya (tidak dibaca kode mana pun). Nama kunci lama dipertahankan:
+   * `kuning` dan `hijau` kini jingga merek, `hijauMuda` = hijau "tepat". Warna tokoh di bawah (UNIFORM_COLORS, SKIN_TONES,
+   * HAIR_COLORS) BUKAN bagian palet antarmuka dan tidak ikut berubah (D-276).
    */
   colors: {
-    kuning: '#F6C445',
-    hijau: '#176B45',
-    krem: '#FFF9E9',
-    tinta: '#17362A',
+    kuning: '#FF9000',
+    hijau: '#FF9000',
+    krem: '#FFF9F5',
+    tinta: '#212121',
     cokelat: '#5B4636',
-    hijauMuda: '#2E9A66',
-    merah: '#C4452F',
-    biru: '#2F6FB0',
+    hijauMuda: '#2F7D57',
+    merah: '#D32F2F',
+    biru: '#3E7285',
   },
   /**
    * Logo resmi belum diverifikasi. Taruh file di client/public/logo/logo-raksa.svg
