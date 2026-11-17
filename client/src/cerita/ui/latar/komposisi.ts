@@ -10,7 +10,7 @@
  */
 import { barisTerlihat, nodeKini } from '../../mesin';
 import { adalahNarasi, ekspresiNasabah } from '../adegan';
-import type { Baris, CueLatar, Ekspresi, Episode, IdNode, IdPembicara, NodeCerita, StateCerita } from '../../tipe';
+import type { Baris, CueLatar, Ekspresi, Episode, IdNode, IdPembicara, KeadaanKomite, NodeCerita, StateCerita } from '../../tipe';
 
 export interface TokohLatar {
   id: IdPembicara;
@@ -24,14 +24,17 @@ export interface KomposisiLatar {
   hadir: TokohLatar[];
   telepon: TokohLatar | null;
   objek: string[];
+  /** (T-025) Keadaan sprite milik ruang (cue `komite`); hanya ada bila naskah pernah menyebutnya. */
+  komite?: KeadaanKomite;
 }
 
-/** Lipatan cue tata: lokasi, yang hadir, lawan bicara di ponsel, benda akibat. */
+/** Lipatan cue tata: lokasi, yang hadir, lawan bicara di ponsel, benda akibat, keadaan sprite milik ruang. */
 export interface Lipatan {
   lokasi: string;
   hadir: IdPembicara[];
   telepon: IdPembicara | null;
   objek: string[];
+  komite?: KeadaanKomite;
 }
 
 const ada = (rec: object | null | undefined, kunci: string): boolean => !!rec && Object.prototype.hasOwnProperty.call(rec, kunci);
@@ -39,11 +42,13 @@ const ada = (rec: object | null | undefined, kunci: string): boolean => !!rec &&
 /** Terapkan satu cue ke lipatan (nilai yang tidak disebut cue bertahan). */
 export function terapkanCue(k: Lipatan, c: CueLatar | undefined): Lipatan {
   if (!c) return k;
+  const komite = c.komite ?? k.komite;
   return {
     lokasi: c.lokasi ?? k.lokasi,
     hadir: c.hadir ?? k.hadir,
     telepon: c.telepon === undefined ? k.telepon : c.telepon,
     objek: c.objek ?? k.objek,
+    ...(komite !== undefined ? { komite } : {}),
   };
 }
 
@@ -62,6 +67,7 @@ export function lipatanAwal(ep: Episode): Lipatan {
     hadir: awal.hadir ?? [],
     telepon: awal.telepon ?? null,
     objek: awal.objek ?? [],
+    ...(awal.komite !== undefined ? { komite: awal.komite } : {}),
   };
 }
 
@@ -125,6 +131,7 @@ export function komposisiLatar(ep: Episode, s: StateCerita): KomposisiLatar {
     hadir: k.hadir.filter((id) => id !== k.telepon).map(wajah),
     telepon: k.telepon ? wajah(k.telepon) : null,
     objek: k.objek,
+    ...(k.komite !== undefined ? { komite: k.komite } : {}),
   };
 }
 

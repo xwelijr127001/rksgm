@@ -108,14 +108,30 @@ export type PesanObrolan =
  * Utas obrolan dari riwayat: hanya baris yang tampil sebagai obrolan, pilihan yang dijawab di obrolan, pesan aktivitas
  * (DefAktivitas.pesanObrolan), dan catatan status sesudah akibatnya. `pesanAktivitas` dipanggil dengan jawaban tersimpan.
  * `sesiMulai` = indeks pesan pertama sesudah tampilan terakhir kali berpindah ke obrolan (yang lebih lama boleh dilipat).
+ *
+ * ADEGAN SELA (T-025, K11): keputusan yang mengirim pesan obrolan, lalu node akibatnya dibuka dengan adegan (ruang Komite) dan
+ * BARU kemudian kembali ke obrolan. Adegan itu tidak memutus rangkaiannya: sesi obrolan berikutnya dimulai dari pesan keluar
+ * keputusan tadi (pemain melihat pesannya sendiri di atas reaksi nasabah), dan catatan status tetap menutup akibat DI OBROLAN,
+ * bukan di kartu adegan sela. `statusDiObrolan` = node akibat yang catatan statusnya ditahan untuk obrolan dengan cara ini.
+ * `sesiTengahNode` = sesi obrolan terakhir dimulai oleh baris yang BUKAN baris pertama node-nya yang tampil (pembuka node itu
+ * adegan yang sudah dilewati pemain, mis. ruang Komite di K13): sesi semacam itu langsung tampil, tanpa gerbang "Mulai".
  */
 export function utasObrolan(
   ep: Episode,
   s: StateCerita,
   pesanAktivitas: (node: IdNode, idAktivitas: string) => string | null,
-): { pesan: PesanObrolan[]; sesiMulai: number } {
+): { pesan: PesanObrolan[]; sesiMulai: number; statusDiObrolan: IdNode | null; sesiTengahNode: boolean } {
   const pesan: PesanObrolan[] = [];
   let sesiMulai = 0;
+  // Adegan sela: indeks pesan keluar keputusan terakhir selama belum ada baris obrolan sesudahnya, node akibat yang sedang
+  // di sela, dan node akibat yang catatan statusnya ditahan untuk obrolan.
+  let keluarKeputusan: number | null = null;
+  let nodeSela: IdNode | null = null;
+  let statusDiObrolan: IdNode | null = null;
+  // Urutan baris di node-nya (0 = baris pertama node itu yang tampil) + apakah sesi terakhir dimulai di tengah node.
+  let nodeBaris: IdNode | null = null;
+  let urutanBaris = 0;
+  let sesiTengahNode = false;
   let pandangLalu: Pandang | null = null;
   let kepercayaan = ep.kepercayaanAwal;
   // Catatan status sesudah keputusan menunggu sampai baris akibatnya (node akibat) selesai tampil.
@@ -127,18 +143,28 @@ export function utasObrolan(
     statusTunda = null;
     nodeAkibat = null;
   };
-  const masukObrolan = () => {
-    if (pandangLalu !== 'obrolan') sesiMulai = pesan.length;
+  const masukObrolan = (tengahNode = false) => {
+    if (pandangLalu !== 'obrolan') { sesiMulai = keluarKeputusan ?? pesan.length; sesiTengahNode = tengahNode && keluarKeputusan === null; }
     pandangLalu = 'obrolan';
   };
   telusuriRiwayat(ep, s.riwayat, (e, k, b) => {
     if (e.jenis === 'bab') return;
     if (e.jenis === 'baris') {
       const p = pandangBaris(ep, k, b ?? { siapa: e.siapa });
+      urutanBaris = e.node === nodeBaris ? urutanBaris + 1 : 0;
+      nodeBaris = e.node;
+      // Adegan sela: baris adegan tepat sesudah keputusan berpesan, di node yang barisnya kemudian kembali ke obrolan.
+      if (keluarKeputusan !== null && p !== 'obrolan') {
+        if (nodeSela === null && obrolanMenyusul(ep, k, e.node, e.teks)) nodeSela = e.node;
+        else if (e.node !== nodeSela) { keluarKeputusan = null; nodeSela = null; }
+      }
+      const sela = keluarKeputusan !== null && nodeSela === e.node;
       if (statusTunda) {
-        // Baris akibat pertama menentukan tempat catatan status: obrolan, atau adegan (catatan di kartu dialog).
+        // Baris akibat pertama menentukan tempat catatan status: obrolan (juga bila ia adegan SELA), atau adegan (catatan di
+        // kartu dialog).
         if (nodeAkibat === null) {
           if (p === 'obrolan') nodeAkibat = e.node;
+          else if (sela) { nodeAkibat = e.node; statusDiObrolan = e.node; }
           else statusTunda = null;
         } else if (e.node !== nodeAkibat) lepas();
       }
@@ -146,30 +172,40 @@ export function utasObrolan(
       // Baris node akibat keputusan (catatan statusnya masih menunggu): akibat ditampilkan utuh, tidak dilipat.
       const diAkibat = statusTunda !== null && nodeAkibat === e.node;
       if (p === 'obrolan') {
-        masukObrolan();
+        masukObrolan(urutanBaris > 0);
         const id = `b${pesan.length}`;
         const lampiran = { ...(b?.lampiran ? { lampiran: b.lampiran } : {}), ...(b?.topik ? { topik: b.topik } : {}), ...(diAkibat ? { akibat: true } : {}) };
         if (e.siapa === ep.nasabah) pesan.push({ jenis: 'masuk', id, teks: e.teks, ekspresi: e.ekspresi, node: e.node, ...lampiran });
         else if (e.siapa === 'pemain') pesan.push({ jenis: 'keluar', id, teks: e.teks, node: e.node });
         else pesan.push({ jenis: 'catatan', id, teks: e.teks, node: e.node, ...lampiran });
+        keluarKeputusan = null;
+        nodeSela = null;
       } else pandangLalu = p;
       return;
     }
     if (e.jenis === 'pilihan') {
       lepas();
+      keluarKeputusan = null;
+      nodeSela = null;
+      statusDiObrolan = null;
       if (pandangPada(ep, k, e.node) === 'obrolan') {
         masukObrolan();
         pesan.push({ jenis: 'keluar', id: `p${pesan.length}`, teks: e.teks, node: e.node });
+        keluarKeputusan = pesan.length - 1;
       }
       setelahKeputusan = true;
       return;
     }
     if (e.jenis === 'aktivitas') {
       lepas();
+      keluarKeputusan = null;
+      nodeSela = null;
+      statusDiObrolan = null;
       const isi = pesanAktivitas(e.node, e.aktivitas);
       if (isi !== null) {
         masukObrolan();
         pesan.push({ jenis: 'keluar', id: `a${pesan.length}`, teks: null, isi, node: e.node });
+        keluarKeputusan = pesan.length - 1;
       }
       setelahKeputusan = true;
       return;
@@ -194,7 +230,24 @@ export function utasObrolan(
     setelahKeputusan = false;
   }, s.node);
   lepas();
-  return { pesan, sesiMulai };
+  return { pesan, sesiMulai, statusDiObrolan, sesiTengahNode };
+}
+
+/**
+ * Sesudah baris `teks` node `id` (lipatan `k` = sesudah cue baris itu) masih ada baris TANPA syarat yang tampil sebagai obrolan.
+ * Baris bersyarat tidak dihitung: belum tentu tampil, dan catatan status tidak boleh menunggu obrolan yang tidak datang.
+ */
+function obrolanMenyusul(ep: Episode, k: Lipatan, id: IdNode, teks: KunciTeks): boolean {
+  const n: NodeCerita | undefined = ep.node[id];
+  if (!n || n.jenis === 'cabang') return false;
+  const i = n.baris.findIndex((x) => x.teks === teks);
+  if (i < 0) return false;
+  let kk = k;
+  for (const b of n.baris.slice(i + 1)) {
+    kk = terapkanCue(kk, b.tata);
+    if (!b.jika && pandangBaris(ep, kk, b) === 'obrolan') return true;
+  }
+  return false;
 }
 
 /**

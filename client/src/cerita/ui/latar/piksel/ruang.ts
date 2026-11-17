@@ -2,13 +2,16 @@
  * Manifest RUANG PIKSEL Episode 2 (seni/piksel/ruang-ep2.json (PNG ep2-ruang-*.png: awalan berbeda supaya glob ruang-*.png Episode 1 tidak menyentuhnya), tools/piksel/bangun-ruang-ep2.mjs) + URL PNG-nya. Terpisah dari
  * ruang.json Episode 1 (panggung Episode 1 tidak pernah memuat berkas ini). Dibaca toleran: lapisan/prop cacat dilewati
  * dengan catatan; ruang tanpa latar sah = tidak tersedia (adegan tetap ilustrasi, lihat PanggungLatarPiksel).
+ * T-025: ruang boleh punya blok `komite` = sprite hiasan MILIK RUANG (anggota Komite Klaim; ./komite.ts). Atlas + tandanya
+ * (komite.png, ep2-komite-tanda.png) ikut diglob di sini.
  */
 import json from '../../../seni/piksel/ruang-ep2.json';
 import type { Kotak } from '../../panggung/dunia';
+import { bacaKomite, type KomiteRuang } from './komite';
 
 let pngVite: Record<string, string> = {};
 try {
-  pngVite = import.meta.glob('../../../seni/piksel/ep2-ruang-*.png', { eager: true, query: '?url', import: 'default' });
+  pngVite = import.meta.glob(['../../../seni/piksel/ep2-ruang-*.png', '../../../seni/piksel/ep2-komite-*.png', '../../../seni/piksel/komite.png'], { eager: true, query: '?url', import: 'default' });
 } catch {
   /* bukan Vite (tes node) */
 }
@@ -42,6 +45,8 @@ export interface RuangPiksel {
   fokus: Kotak | null;
   papan: { kotak: Kotak; teksKunci: string; warna: string } | null;
   bingkai: { hp: Kotak; lebar: Kotak };
+  /** (T-025) Sprite hiasan milik ruang + peta keadaannya; null = ruang biasa. */
+  komite: KomiteRuang | null;
 }
 
 type Obj = Record<string, unknown>;
@@ -88,6 +93,7 @@ export function bacaRuangPiksel(m: unknown, catatan: string[] = []): Record<stri
       tempat,
       papan: papanK && typeof papanO?.teksKunci === 'string' ? { kotak: papanK, teksKunci: papanO.teksKunci, warna: typeof papanO.warna === 'string' ? papanO.warna : '#ffffff' } : null,
       bingkai: { hp: kotak(b?.hp) ?? { x: 300, y: 0, w: 1000, h: 900 }, lebar: kotak(b?.lebar) ?? { x: 0, y: 0, w: 1600, h: 900 } },
+      komite: bacaKomite(o.komite, urlBerkas, id, catatan),
     };
   }
   return hasil;

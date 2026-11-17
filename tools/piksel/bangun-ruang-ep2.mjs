@@ -17,12 +17,15 @@
  *  - prop `map` (map klaim kuning, dari referensi) dan `surat` (lembar surat putih, digambar kode: tidak ada di referensi).
  * Tempat tokoh (satuan dunia): Miss Raksa kaki (560, 756) di balik meja hadap kanan; Hendra kaki (1040, 860) di depan meja
  * hadap kiri; jarak kepala 480 = 120 piksel seni (D-80). Papan nama: teks runtime (`papan.teksKunci`).
+ * T-025: ruang `komite-ep2` (Ruang Rapat Komite Klaim) tidak digambar di sini; seni + angkanya dari Designer dan digabung ke manifest
+ * yang sama lewat ./ruang-komite-ep2.mjs (dipanggil di akhir skrip ini).
  */
 import fs from 'node:fs';
 import path from 'node:path';
 import * as L from './lib.mjs';
 import { tulisPngIndeks } from './miss-lib.mjs';
 import { sampel } from './hendra-native.mjs';
+import { ruangKomiteEp2, salinPngKomite } from './ruang-komite-ep2.mjs';
 
 const SUMBER = path.join(L.ROOT, 'character', 'kantor-ep2-pixel-v1', 'kantor-ep2-referensi-v1.png');
 const KELUAR = path.join(L.ROOT, 'client', 'src', 'cerita', 'seni', 'piksel');
@@ -205,6 +208,10 @@ const slotDari = (slot, kaki) => Object.fromEntries(Object.entries(slot).map(([n
     lokasi[`${id}-ep2`] = L1;
     L.tulis(path.join(L.ROOT, 'character', 'piksel', 'kantor-ep2', `tinjau-${id}.png`), L.perbesar(b.latar, 2));
   }
+  // T-025: Ruang Rapat Komite Klaim = seni + manifest Designer (character/komite-ep2-pixel-v1), dipasang apa adanya (PNG disalin,
+  // entri ruang + sprite milik ruang digabung): tools/piksel/ruang-komite-ep2.mjs.
+  Object.assign(lokasi, ruangKomiteEp2());
+  for (const [nama, byte] of salinPngKomite(KELUAR)) hasil.push({ nama, byte });
   const manifest = { versi: 2, dibuat: 'tools/piksel/bangun-ruang-ep2.mjs', piksel: K, dunia: { w: PW * K, h: PH * K, pw: PW, ph: PH }, warnaTepi: lokasi['kantor-ep2'].warnaTepi, lokasi };
   fs.writeFileSync(path.join(KELUAR, 'ruang-ep2.json'), JSON.stringify(manifest, null, 1) + '\n');
   console.log(JSON.stringify(hasil.map((x) => [x.nama, x.byte, x.warna])));

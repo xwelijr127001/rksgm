@@ -14,10 +14,11 @@ import { teksCerita } from '../../teks';
 import type { CabangHasil, Episode, NodeAktivitas, StateCerita } from '../../tipe';
 import { komposisiLatar } from '../../ui/latar/komposisi';
 import { idCutIn, utasObrolan } from '../../hp/alur';
-import { deretStatus, pilihanTitik } from '../../ui/titik';
+import { deretStatus, hitungNilai, infoTitik, pilihanTitik } from '../../ui/titik';
+import { TINGGI_LEGA, URUTAN_LEGA, URUTAN_PAS, pilihLega, pilihPas, type LegaAkhir, type PasAkhir } from '../../ui/pasAkhir';
 import { majuSampaiKeputusan, salinJson } from '../../uji/jalurEpisode';
 import { validasiEpisode } from '../../validasi';
-import { EPISODE_AUTO_2 as EP } from './episode';
+import { ANGGOTA_KOMITE, EPISODE_AUTO_2 as EP, KOMITE_BERKAS } from './episode';
 
 // ------------------------------------------------------------------ naskah (Skenario Auto 01): klasifikasi & status per alternatif
 
@@ -202,11 +203,57 @@ test('bundel (K11): sembilan kombinasi tetap memetakan ke alternatif lama; akiba
       // Satu baris berkas (sesuai tindakan) + satu baris kabar, berlabel topik.
       assert.deepEqual(baris.filter((x) => x.topik).map((x) => x.topik), ['topik.berkas', 'topik.kabar'], r.lanjut);
       assert.equal(baris.find((x) => x.topik === 'topik.berkas')!.teks, `k11.akibat.berkas.${bundel}`, r.lanjut);
-      // Kabar terkirim = akibat di obrolan dengan Pak Hendra; tidak mengabari = tetap di kantor.
-      assert.equal(n.tata?.telepon === 'hendra', kabar !== 'nanti', `${r.lanjut}: tempat akibat`);
+      // T-025: sisi berkas = ketukan PERTAMA, di ruang Komite; keadaan ruangnya dari tindakan atas berkas (KOMITE_BERKAS).
+      const bk = baris[0]!;
+      assert.equal(bk.topik, 'topik.berkas', `${r.lanjut}: berkas dulu`);
+      assert.deepEqual(bk.tata, { lokasi: 'komite', hadir: [], telepon: null, objek: [], komite: KOMITE_BERKAS[bundel] }, r.lanjut);
+      // Kabar terkirim = baris sesudah berkas kembali ke obrolan dengan Pak Hendra; tidak mengabari = tetap di ruang Komite.
+      assert.equal(n.tata, undefined, `${r.lanjut}: tata ada di barisnya, bukan di node`);
+      assert.equal(baris[1]!.tata?.telepon === 'hendra', kabar !== 'nanti', `${r.lanjut}: tempat akibat kabar`);
+      assert.equal(baris.slice(2).some((x) => x.tata), false, `${r.lanjut}: tidak ada pergantian tata lain`);
     }
   }
   assert.equal(akibat.size, 9, 'tiap kombinasi punya akibat sendiri');
+  // Fix 1: berkas lengkap = Komite masih menunggu / menimbang; tidak ada akibat K11 yang memperlihatkan SETUJU.
+  assert.deepEqual(KOMITE_BERKAS, { lengkapi: 'tunggu', sekarang: 'catatan', hendra: 'kosong' });
+});
+
+test('T-025: ruang Komite di naskah: K11 pengantar menunggu, K13 dibuka dengan setuju lalu obrolan + surat, K12 tetap obrolan; anggota bukan pemeran', () => {
+  const tata = (id: string) => (EP.node[id] as { tata?: unknown }).tata;
+  const baris = (id: string) => (EP.node[id] as { baris: { teks: string; tata?: unknown; istilah?: string[] }[] }).baris;
+  assert.deepEqual(EP.latar!.lokasi.komite, { nama: 'lokasi.komite', piksel: 'komite-ep2', komite: { tunggu: 'lokasi.komite.tunggu', setuju: 'lokasi.komite.setuju', catatan: 'lokasi.komite.catatan', kosong: 'lokasi.komite.kosong' } });
+  // K11: pindah ruang terjadi di isyarat pengantar (tata node = baris narasi satu-satunya); kartu tugas bundel tampil di ketukan itu.
+  assert.deepEqual(tata('k11'), { lokasi: 'komite', hadir: [], telepon: null, objek: [], komite: 'tunggu' });
+  assert.deepEqual(baris('k11').map((x) => [x.teks, x.tata, x.istilah]), [['k11.1', undefined, ['komite']]]);
+  // K12: tidak berubah (obrolan dari kantor).
+  assert.deepEqual(tata('k12'), { lokasi: 'kantor', hadir: [], telepon: 'hendra', objek: [] });
+  assert.ok(baris('k12').every((x) => !x.tata));
+  // K13: ketukan pembuka di ruang Komite (setuju), lalu pesan Pak Hendra di obrolan dengan surat penawaran seperti semula.
+  assert.deepEqual(tata('k13'), { lokasi: 'komite', hadir: [], telepon: null, objek: [], komite: 'setuju' });
+  assert.deepEqual(baris('k13').map((x) => [x.teks, x.tata]), [['k13.1', undefined], ['k13.2', { lokasi: 'kantor', hadir: [], telepon: 'hendra', objek: ['surat'] }]]);
+  // Fix 1: SETUJU hanya di K13 (keputusan Komite keluar di minggu ke-7; K11-D dan K12 berkata keputusan belum keluar).
+  const bersetuju = Object.values(EP.node).filter((n) => JSON.stringify(n).includes('"komite":"setuju"')).map((n) => n.id);
+  assert.deepEqual(bersetuju, ['k13']);
+  for (const [id, harap] of [['k11-a', 'tunggu'], ['k11-c', 'tunggu'], ['k11-d', 'tunggu'], ['k11-b', 'catatan'], ['k11-d2', 'catatan'], ['k11-e', 'kosong'], ['k11-d3', 'kosong']] as const) {
+    assert.equal((baris(id)[0]!.tata as { komite?: string }).komite, harap, id);
+  }
+  // Hanya K11 (dan akibatnya) serta K13 yang memberi isyarat komite.
+  const berisyarat = Object.values(EP.node).filter((n) => JSON.stringify(n).includes('"komite":"')).map((n) => n.id).sort();
+  assert.deepEqual(berisyarat, ['k11', 'k11-a', 'k11-b', 'k11-b2', 'k11-c', 'k11-d', 'k11-d2', 'k11-d3', 'k11-e', 'k11-e2', 'k13']);
+  // Anggota komite = sprite milik ruang: bukan pemeran, tidak pernah menjadi penutur atau hadir di tata mana pun.
+  for (const id of ANGGOTA_KOMITE) {
+    assert.ok(!Object.prototype.hasOwnProperty.call(EP.pemeran, id), id);
+    assert.ok(!JSON.stringify(EP.node).includes(`"siapa":"${id}"`), `${id} tidak pernah berbicara`);
+  }
+  // Istilah: empat peran + ikon, urut kursi.
+  assert.deepEqual(EP.istilah!.komite, { label: 'istilah.komite.label', arti: 'istilah.komite.arti', anggota: ANGGOTA_KOMITE.map((id, i) => ({ teks: `istilah.komite.anggota.${i + 1}`, ikon: `komite-${id}` })) });
+  assert.deepEqual(validasiEpisode(EP), []);
+  // Validator menolak keadaan yang tidak dikenal, isyarat komite di lokasi tanpa kalimat keadaan, dan kalimat keadaan yang hilang.
+  const ubah = (f: (e: typeof EP) => void) => { const e = structuredClone({ ...EP, aktivitas: {} }) as typeof EP; e.aktivitas = EP.aktivitas; f(e); return validasiEpisode(e).join(' | '); };
+  assert.match(ubah((e) => { (e.node.k13 as { tata: { komite: string } }).tata.komite = 'tidur'; }), /node "k13"\.tata: keadaan komite "tidur" tidak dikenal/);
+  assert.match(ubah((e) => { (e.node.k13 as { tata: { lokasi: string } }).tata.lokasi = 'kantor'; }), /isyarat komite di lokasi "kantor"/);
+  assert.match(ubah((e) => { delete (e.latar!.lokasi.komite!.komite as Record<string, string>).kosong; }), /latar\.lokasi "komite"\.komite\.kosong/);
+  assert.match(ubah((e) => { e.istilah!.komite!.anggota![0]!.teks = 'tidak.ada'; }), /istilah "komite"\.anggota\[0\]\.teks/);
 });
 
 test('aturan saksi (K09) & penutupan (K15): varian akibat tetap benar untuk susunannya', () => {
@@ -441,4 +488,55 @@ test('balasan yang disarankan bukan satu-satunya terpanjang/terpendek, dan posis
     posisi.push(n.pilihan.findIndex((p) => p.id === saran));
   }
   assert.ok(new Set(posisi).size >= 4, `posisi saran terlalu seragam: ${posisi.join(',')}`);
+});
+
+// ------------------------------------------------------------------ T-024: layar akhir satu layar (strip token + lembar rincian)
+
+test('T-024: token keputusan = pilihan, klasifikasi, dan saran naskah hanya bila berbeda; legenda menghitung per klasifikasi', () => {
+  const tepat = mainkan(TEPAT);
+  const buruk = mainkan(TERBURUK);
+  assert.equal(EP.titik!.length, 15);
+  for (const k of EP.titik!) {
+    const a = infoTitik(tepat, k);
+    assert.deepEqual([a.alt, a.nilai, a.saran, a.label], [TEPAT[k.id], 'tepat', null, k.alternatif[TEPAT[k.id]!]!.label], k.id);
+    const b = infoTitik(buruk, k);
+    assert.equal(b.alt, TERBURUK[k.id], k.id);
+    assert.equal(b.nilai, NASKAH[k.id]![TERBURUK[k.id]!]![0], k.id);
+    // Yang disarankan = satu-satunya alternatif "tepat" titik itu, dan hanya disebut bila pemain memilih yang lain.
+    assert.equal(b.saran, b.alt === k.saran ? null : k.alternatif[k.saran]!.label, k.id);
+  }
+  assert.deepEqual(hitungNilai(EP, tepat), { tepat: 15, kurang: 0, keliru: 0 });
+  const h = hitungNilai(EP, buruk);
+  assert.equal(h.tepat + h.kurang + h.keliru, 15);
+  assert.equal(h.keliru, TITIK.filter((k) => NASKAH[k]![TERBURUK[k]!]![0] === 'keliru').length);
+  // Simpanan rusak: titik tanpa tanda / dengan alternatif tak dikenal = tidak tercatat (token abu), tidak dihitung, saran tetap ada.
+  const rusak = { tanda: ['kep:k01:zz', 'kep:k02:b'] };
+  const k1 = infoTitik(rusak, EP.titik![0]!);
+  assert.deepEqual([k1.alt, k1.label, k1.nilai], [null, null, null]);
+  assert.equal(k1.saran, EP.titik![0]!.alternatif[EP.titik![0]!.saran]!.label);
+  assert.deepEqual(infoTitik(rusak, EP.titik![2]!), { alt: null, label: null, nilai: null, saran: EP.titik![2]!.alternatif[EP.titik![2]!.saran]!.label });
+  assert.deepEqual(hitungNilai(EP, rusak), { tepat: 1, kurang: 0, keliru: 0 });
+});
+
+test('T-024: aturan pas layar akhir: utuh, lalu tanpa kalimat sebab, lalu tanpa legenda, lalu jaring pengaman gulir', () => {
+  assert.deepEqual([...URUTAN_PAS], ['utuh', 'tanpa-sebab', 'tanpa-legenda', 'gulir']);
+  const coba = (muatMulai: PasAkhir | null) => { const ditanya: PasAkhir[] = []; const hasil = pilihPas((p) => { ditanya.push(p); return muatMulai !== null && URUTAN_PAS.indexOf(p) >= URUTAN_PAS.indexOf(muatMulai); }); return [hasil, ditanya.join(' ')]; };
+  // Susunan pertama yang muat dipakai dan yang sesudahnya tidak dicoba; "gulir" tidak pernah ditanyakan (selalu muat).
+  assert.deepEqual(coba('utuh'), ['utuh', 'utuh']);
+  assert.deepEqual(coba('tanpa-sebab'), ['tanpa-sebab', 'utuh tanpa-sebab']);
+  assert.deepEqual(coba('tanpa-legenda'), ['tanpa-legenda', 'utuh tanpa-sebab tanpa-legenda']);
+  assert.deepEqual(coba(null), ['gulir', 'utuh tanpa-sebab tanpa-legenda']);
+});
+
+test('T-024 polish (D-245): layar tinggi melonggar berurutan selama muat: Pelajaran utuh, kalimat sebab utuh, grafik; berhenti di yang pertama tidak muat', () => {
+  assert.deepEqual([...URUTAN_LEGA], ['pelajaran', 'sebab', 'grafik']);
+  // Batas tinggi di antara ukuran mock (640 / 645: potongan dua baris tetap) dan layar tinggi yang diukur Designer (740 / 844).
+  assert.ok(TINGGI_LEGA > 645 && TINGGI_LEGA <= 740, String(TINGGI_LEGA));
+  const coba = (muat: LegaAkhir[]) => { const ditanya: string[] = []; const hasil = pilihLega((l) => { ditanya.push(l.join('+')); return muat.includes(l[l.length - 1]!); }); return [hasil.join(' '), ditanya.join(' ')]; };
+  assert.deepEqual(coba(['pelajaran', 'sebab', 'grafik']), ['pelajaran sebab grafik', 'pelajaran pelajaran+sebab pelajaran+sebab+grafik']);
+  assert.deepEqual(coba(['pelajaran', 'sebab']), ['pelajaran sebab', 'pelajaran pelajaran+sebab pelajaran+sebab+grafik']);
+  // Kalimat sebab tidak muat: berhenti di sana; grafik TIDAK dicoba (urutan, bukan pilihan bebas).
+  assert.deepEqual(coba(['pelajaran', 'grafik']), ['pelajaran', 'pelajaran pelajaran+sebab']);
+  assert.deepEqual(coba(['sebab', 'grafik']), ['', 'pelajaran']);
+  assert.deepEqual(coba([]), ['', 'pelajaran']);
 });

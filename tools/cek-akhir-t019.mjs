@@ -9,13 +9,18 @@
  *              tertutup kepala; potongan kaki dicatat (kantor = bidikan meja, kamera tidak diubah);
  *  3. gerak dikurangi + ?gerak=ikut (puas, 360): tidak pernah berjalan; 4. Lanjut di tengah jalan (puas, 360): langsung berdiri;
  *  5. tangkapan layar: tiap akhir 390 pada 0,3 d / 0,9 d / akhir, 360 + 1280 akhir -> team/evidence/T-019/.
- *   UI_BASE=http://127.0.0.1:4001 node tools/cek-akhir-t019.mjs     (exit 1 bila ada yang gagal)
+ *  6. (T-024) KARTU AKHIR SATU LAYAR sesudah adegan itu: tools/cek-kartu-t024.mjs (3 akhir x id / en / zh x 390x645 + 360x640, Chromium
+ *     lalu WebKit: halaman & kartu tidak menggulir, bilah aksi terlihat, blok setinggi mock, lembar rincian buka / tutup dengan
+ *     fokus kembali, teks zh melipat di lembar, baris Menu, aturan pas, desktop tidak berubah) -> team/evidence/T-024/fullstack/.
+ *   UI_BASE=http://127.0.0.1:4001 node tools/cek-akhir-t019.mjs [--hanya-kartu | --tanpa-kartu] [--tanpa-webkit]     (exit 1 bila ada yang gagal)
  */
 import puppeteer from 'puppeteer-core';
 import fs from 'node:fs';
 import path from 'node:path';
 import { mulaiPrioritasRendah } from './prioritas-rendah.mjs';
 import { bukaPool } from './cek-jalan-t017.mjs';
+import { OUT_KARTU, jalankanKartu } from './cek-kartu-t024.mjs';
+import { luncur } from './t018-umum.mjs';
 mulaiPrioritasRendah(); // pemilik bekerja di PC yang sama
 
 const BASE = process.env.UI_BASE || 'http://127.0.0.1:4001';
@@ -34,6 +39,9 @@ const TUJUAN = RUANG.slot['1'][0].xTokoh?.hendra ?? RUANG.slot['1'][0].x; // D-1
 const VP = [{ w: 360, h: 740, dpr: 2 }, { w: 390, h: 844, dpr: 3 }, { w: 1280, h: 800, dpr: 1 }];
 const tunggu = (ms) => new Promise((r) => setTimeout(r, ms));
 const UKUR = process.argv.includes('--ukur');
+// T-024: --hanya-kartu = hanya bagian 6 (kartu satu layar); --tanpa-kartu = hanya bagian 1-5 (T-019); --tanpa-webkit = kartu di Chromium saja.
+const HANYA_KARTU = process.argv.includes('--hanya-kartu');
+const TANPA_KARTU = process.argv.includes('--tanpa-kartu');
 
 const baca = (p) => p.evaluate(() => {
   const el = document.querySelector('.hp-vn .cer-latar'); const c = el?.querySelector('.cer-piksel-kanvas');
@@ -92,6 +100,7 @@ const sepatu = (p) => p.evaluate(() => {
 const b = await puppeteer.launch({ executablePath: process.env.RAKSA_CHROME || 'C:/Program Files/Google/Chrome/Application/chrome.exe', headless: 'new' });
 const hasil = []; let gagal = 0;
 const lapor = (nama, lulus, data) => { hasil.push({ nama, lulus, ...data }); if (!lulus && !UKUR) gagal++; console.log(lulus ? 'PASS' : UKUR ? 'UKUR' : 'FAIL', nama, JSON.stringify(data)); };
+if (!HANYA_KARTU) {
 for (const akhir of ['puas', 'catatan', 'kurang']) {
   const st = STATES[`akhir-${akhir}`];
   if (!st) { lapor(`akhir-${akhir}`, false, { sebab: 'state tidak ada di states.json' }); continue; }
@@ -170,7 +179,15 @@ if (STATES['akhir-puas']) {
   lapor('lanjut-tengah-jalan-360', !!sebelum?.jalan && !!sesudah && !sesudah.jalan && !nanti?.jalan && Number(sesudah.kaki.hendra?.[0]) === TUJUAN, { sebelum: sebelum?.jalan?.join(':'), sesudah: sesudah ? { jalan: sesudah.jalan, kaki: sesudah.kaki.hendra, pose: sesudah.pose.hendra?.join(':') } : null, nanti: nanti?.jalan ?? null });
   await ctx.close();
 }
-fs.writeFileSync(path.join(OUT, 'hasil.json'), JSON.stringify(hasil, null, 1));
+} // !HANYA_KARTU
+// 6. T-024: kartu akhir satu layar. Chromium memakai browser yang sama; WebKit diluncurkan sesudah Chromium ditutup (SATU browser).
+if (!TANPA_KARTU) await jalankanKartu('chromium', b, BASE, lapor, { ukur: UKUR });
 await b.close();
+if (!TANPA_KARTU && !process.argv.includes('--tanpa-webkit')) {
+  const wk = await luncur('webkit');
+  try { await jalankanKartu('webkit', wk, BASE, lapor, { ukur: UKUR }); } finally { await wk.close().catch(() => {}); }
+}
+if (!HANYA_KARTU) fs.writeFileSync(path.join(OUT, 'hasil.json'), JSON.stringify(hasil, null, 1));
+if (!TANPA_KARTU) { fs.mkdirSync(OUT_KARTU, { recursive: true }); fs.writeFileSync(path.join(OUT_KARTU, 'hasil.json'), JSON.stringify(hasil.filter((x) => /^(kartu|pas)-/.test(x.nama)), null, 1)); }
 console.log(UKUR ? 'UKUR selesai' : gagal ? `FAILED ${gagal} / ${hasil.length}` : `ALL PASS (${hasil.length})`);
 process.exit(!UKUR && gagal ? 1 : 0);

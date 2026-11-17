@@ -14,9 +14,11 @@
  *    telepon pemeran tanpa atlas -> ilustrasi.
  *  - objek: berkas -> prop `map` (map klaim di meja), surat -> prop `surat`; objek lain -> ilustrasi.
  *  - `dekat` (potongan dekat ilustrasi) tidak punya padanan: kamera tetap; ekspresi dibaca dari wajah + potret dialog.
+ *  - komite (T-025): di ruang yang punya sprite milik ruang (ruang-ep2.json blok `komite`), isyarat `komite` diteruskan
+ *    apa adanya (bawaan `tunggu`); anggota komite BUKAN tokoh adegan: tidak masuk `tokoh`, slot, maupun kamera.
  * Wajah: ekspresi cerita apa adanya; atlas memetakan sendiri (manifest.ekspresiDari, Hendra: lega -> senang).
  */
-import type { Ekspresi, Episode, IdPembicara } from '../../../tipe';
+import type { Ekspresi, Episode, IdPembicara, KeadaanKomite } from '../../../tipe';
 import type { IdTokohPiksel } from '../../../seni/piksel/susun';
 import type { KomposisiLatar } from '../komposisi';
 import { RUANG_PIKSEL } from './ruang';
@@ -64,6 +66,8 @@ export interface AdeganPiksel {
   tokoh: TokohDiPiksel[];
   telepon: { id: IdPembicara; tokoh: IdTokohPiksel; ekspresi: Ekspresi; bicara: boolean } | null;
   prop: string[];
+  /** (T-025) Keadaan sprite milik ruang; hanya ada bila ruangnya punya blok `komite`. */
+  komite?: KeadaanKomite;
 }
 
 export type HasilAdapter = { piksel: AdeganPiksel; alasan: null } | { piksel: null; alasan: string };
@@ -104,7 +108,8 @@ export function adeganPiksel(ep: Pick<Episode, 'latar'>, k: KomposisiLatar): Has
     if (!p) return tolak(`objek ${o} tanpa prop piksel`);
     prop.push(p);
   }
-  return { piksel: { ruang, tokoh, telepon, prop }, alasan: null };
+  const komite: KeadaanKomite | undefined = RUANG_PIKSEL[ruang]?.komite ? k.komite ?? 'tunggu' : undefined;
+  return { piksel: { ruang, tokoh, telepon, prop, ...(komite ? { komite } : {}) }, alasan: null };
 }
 
 /**

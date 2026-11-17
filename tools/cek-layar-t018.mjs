@@ -11,8 +11,13 @@
  *  aktivitas (K02, K08): kepala cerita, kepala aktivitas dan pertanyaan/baris rambu tersemat; hanya .hp-arena-gulir yang meluap;
  *            K02: gambar + instruksi + baki terlihat sekaligus, tombol kirim (ringkasan) di bilah bawah; K08: kotak jalan >= 300 px.
  *            K04 peta lokasi (T-020): kelima tempat utuh tanpa menggulir + tombol kirim terlihat; detail terlihat sesudah ketuk.
- *  akhir   : bilah aksi satu baris di dalam visualViewport; judul + pelajaran terlihat tanpa menggulir; hanya .hp-main yang menggulir
- *            sampai ujung (ringkasan keputusan).
+ *  akhir   : (T-024) kartu SATU LAYAR: tidak ada yang menggulir (halaman, .hp-main, kartu), aturan pas tidak terpakai (grafik 72 px;
+ *            layar >= 700 px melonggar, D-245: Pelajaran utuh dan grafik sampai 96 px), bilah aksi
+ *            satu baris di dalam visualViewport; judul, grafik, 15 token keputusan dan Pelajaran utuh terlihat. Rincian per bahasa,
+ *            lembar dan aturan pas: tools/cek-kartu-t024.mjs (dipanggil cek-akhir-t019).
+ *  + (T-025) adegan-k11-istilah: lembar istilah "Apa itu Komite Klaim?" di ketukan pengantar K11 (ruang Komite), dibuka dengan
+ *            ketukan sungguhan: halaman tetap tidak menggulir, arti + deret empat anggota (ikon 32 px sebaris + peran) terlihat utuh di
+ *            kotak dialog, tombol tugas tetap di dalam layar, panggung tetap >= minimum; ditutup lagi = layar kembali sah.
  *  + desktop 1280 (bukan cangkang) dan Episode 1 (pemain standar, bukan layar ini): dicatat.
  */
 import fs from 'node:fs';
@@ -71,9 +76,16 @@ export const ukurLayar = (p) => p.evaluate(() => {
   if (tampilan === 'akhir') {
     const m = document.querySelector('.hp-main'); const mr = k(m); const aksi = document.querySelector('.akh-aksi'); const ar = k(aksi);
     const diM = (sel) => { const r = k(document.querySelector(sel)); return r ? r.top >= mr.top - 0.5 && r.bottom <= mr.bottom + 0.5 : null; };
+    // T-024: kartu satu layar. `luang` = sisa px di bawah blok terakhir kartu (negatif = isi meluap; kartu memotong luapannya).
+    const kartu = document.querySelector('.akh-kartu'); const kr = k(kartu);
+    const bawahKartu = kr ? kr.bottom - parseFloat(getComputedStyle(kartu).paddingBottom) : 0;
+    const isiKartu = kartu ? [...kartu.children].filter((c) => !c.classList.contains('sr-only')).map((c) => k(c)).filter((r) => r.height > 0) : [];
+    const tokenUtuh = [...document.querySelectorAll('.hp-main .akh-token-tombol')].filter((el) => { const r = k(el); return r.height >= 44 && r.width >= 44 && r.top >= mr.top - 0.5 && r.bottom <= bawahKartu + 0.5; }).length;
     Object.assign(d, {
       aksiTersemat: !!document.querySelector('.hp-akhir-aksi .akh-aksi'), aksiDalam: dalam(ar), aksiTinggi: ar ? Math.round(ar.height) : null, aksi: [...(aksi?.children ?? [])].map((x) => x.textContent.trim()),
-      judulTerlihat: diM('.akh-judul'), pelajaranTerlihat: diM('.akh-pelajaran'), penggulir: [m.clientHeight, m.scrollHeight], ringkasan: !!document.querySelector('.hp-main .akh-kartu ~ *'),
+      judulTerlihat: diM('.akh-judul'), pelajaranTerlihat: diM('[data-ukur="akhir-pelajaran"]'), grafikTerlihat: diM('.akh-grafik-ringkas'), penggulir: [m.clientHeight, m.scrollHeight],
+      satuLayar: !!kartu?.hasAttribute('data-satu-layar') && layar.hasAttribute('data-akhir-satu'), pas: kartu?.getAttribute('data-pas') ?? null, kartu: kartu ? [kartu.clientHeight, kartu.scrollHeight] : null,
+      luang: isiKartu.length ? Math.round((bawahKartu - Math.max(...isiKartu.map((r) => r.bottom))) * 10) / 10 : null, token: tokenUtuh, grafik: Math.round(k(document.querySelector('.akh-grafik-ringkas'))?.height ?? 0), lega: document.querySelector('.akh-kartu')?.getAttribute('data-lega') ?? null,
     });
   }
   return d;
@@ -89,7 +101,8 @@ export function nilaiLayar(d) {
   if (d.kepala !== 0) s.push('kepala cerita bergerak');
   if (d.sisaUjung.some((x) => x > 1)) s.push('penggulir tidak sampai ujung');
   if (d.tombol !== null && !d.tombolDalam) s.push('tombol utama di luar visualViewport: ' + d.tombol);
-  const boleh = d.tampilan === 'adegan' ? ['div.hp-vn-isi'] : d.tampilan === 'arena' ? ['div.hp-arena-gulir', 'div.hp-opsi-daftar', 'div.hp-lembar-badan'] : ['main.hp-main'];
+  // (T-024) layar akhir satu layar: TIDAK ADA wilayah yang boleh meluap.
+  const boleh = d.tampilan === 'adegan' ? ['div.hp-vn-isi'] : d.tampilan === 'arena' ? ['div.hp-arena-gulir', 'div.hp-opsi-daftar', 'div.hp-lembar-badan'] : [];
   const lain = d.meluap.filter((x) => !boleh.includes(x));
   if (lain.length) s.push('wilayah meluap lain: ' + lain.join(' '));
   if (d.tampilan === 'adegan') {
@@ -105,8 +118,16 @@ export function nilaiLayar(d) {
   }
   if (d.tampilan === 'akhir') {
     if (!d.aksiTersemat || !d.aksiDalam || d.aksiTinggi > 60) s.push(`bilah aksi (${d.aksiTinggi} px) tidak satu baris / di luar layar`);
-    if (!d.judulTerlihat || d.pelajaranTerlihat === false) s.push('judul / pelajaran tidak terlihat tanpa menggulir');
-    if (!d.ringkasan) s.push('ringkasan keputusan tidak ada di penggulir');
+    if (!d.satuLayar) s.push('layar akhir bukan bentuk satu layar (T-024)');
+    if (d.penggulir[1] > d.penggulir[0]) s.push(`isi layar akhir menggulir ${d.penggulir[1] - d.penggulir[0]} px (T-024: seharusnya muat)`);
+    if (d.kartu && (d.kartu[1] > d.kartu[0] || d.luang < -0.5)) s.push(`kartu akhir meluap: ${d.kartu[1]} > ${d.kartu[0]}, luang ${d.luang}`);
+    // D-245 (polish T-024): layar tinggi (>= 700 px) melonggar: grafik 72..96 px; di bawahnya angka mock (72 px, tidak melonggar).
+    const tinggi = d.layar >= 700;
+    if (d.pas !== 'utuh' || (tinggi ? d.grafik < 72 || d.grafik > 96 : d.grafik !== 72)) s.push(`aturan pas terpakai di layar akhir: ${d.pas}, grafik ${d.grafik} px`);
+    if (!tinggi && d.lega) s.push(`kartu akhir melonggar (${d.lega}) di layar ${d.layar} px (< 700)`);
+    if (tinggi && !(d.lega ?? '').includes('pelajaran')) s.push(`kartu akhir tidak melonggar di layar tinggi ${d.layar} px (data-lega ${d.lega})`);
+    if (!d.judulTerlihat || !d.pelajaranTerlihat || !d.grafikTerlihat) s.push('judul / grafik / pelajaran tidak utuh terlihat');
+    if (d.token !== 15) s.push(`token keputusan utuh ${d.token}, seharusnya 15`);
   }
   return s;
 }
@@ -139,7 +160,57 @@ async function adegan(p, sampai = 'node') {
     sebab.push(...nilaiLayar(akhir).map((x) => 'layar akhir: ' + x));
   } else if (sampai === 'akhir') sebab.push('layar akhir tidak tercapai');
   if (!ketukan.length) sebab.push('bukan adegan');
-  return { lulus: sebab.length === 0, data: { sebab, node, ketukan, ...(akhir ? { akhir: { aksi: akhir.aksi, aksiTinggi: akhir.aksiTinggi, penggulir: akhir.penggulir, judulTerlihat: akhir.judulTerlihat, pelajaranTerlihat: akhir.pelajaranTerlihat } } : {}) } };
+  return { lulus: sebab.length === 0, data: { sebab, node, ketukan, ...(akhir ? { akhir: { aksi: akhir.aksi, aksiTinggi: akhir.aksiTinggi, penggulir: akhir.penggulir, satuLayar: akhir.satuLayar, pas: akhir.pas, grafik: akhir.grafik, token: akhir.token, luang: akhir.luang, judulTerlihat: akhir.judulTerlihat, pelajaranTerlihat: akhir.pelajaranTerlihat } } : {}) } };
+}
+/**
+ * T-025: lembar istilah Komite Klaim di ketukan pengantar K11. Peran yang diharapkan = teks tabel (states-komite.json `harap`).
+ * Membuka istilah TIDAK menggeser atau mengubah panggung: isinya memanjang di dalam kotak dialog, yang menggulir sendiri dan
+ * menggulirkan arti ke dalam pandangan. Yang dijaga selama terbuka: halaman tidak menggulir, hanya kotak dialog yang meluap dan
+ * bisa digulir sampai ujung, arti + deret anggota terlihat utuh, tombol utama di dalam layar. Sebelum dibuka dan sesudah
+ * ditutup: aturan adegan biasa (nilaiLayar).
+ */
+async function istilahKomite(p) {
+  await siap(p);
+  await p.evaluate(() => new Promise((r) => { const t0 = Date.now(); const f = () => (document.querySelector('.hp-vn .cer-piksel[data-siap]') || Date.now() - t0 > 6000 ? r(1) : setTimeout(f, 100)); f(); }));
+  const sebab = [];
+  const harap = JSON.parse(fs.readFileSync(path.join(ROOT, 'team/evidence/T-025/states-komite.json'), 'utf8')).harap.id.istilah;
+  const d0 = await ukurLayar(p);
+  sebab.push(...nilaiLayar(d0).map((x) => 'sebelum dibuka: ' + x));
+  if (d0?.lokasi !== 'komite' || !d0?.mulaiTugas) sebab.push('ketukan pengantar K11 bukan ruang Komite berkartu tugas: ' + JSON.stringify([d0?.lokasi, d0?.mulaiTugas]));
+  const ukur = () => p.evaluate(() => {
+    const kotak = document.querySelector('.hp-vn-isi[data-gulir-dialog]'); const kr = kotak?.getBoundingClientRect();
+    const arti = document.querySelector('[data-istilah-arti="komite"]'); const ar = arti?.getBoundingClientRect(); const tombol = document.querySelector('[data-istilah="komite"]');
+    const butir = [...(arti?.querySelectorAll('.cer-istilah-anggota li') ?? [])].map((li) => { const ik = li.querySelector('.cer-istilah-ikon')?.getBoundingClientRect(); const tk = li.querySelector('span:not(.cer-istilah-ikon)'); const tr = tk?.getBoundingClientRect();
+      return { teks: tk?.textContent.trim() ?? '', ikon: ik ? [Math.round(ik.width), Math.round(ik.height), Math.round(ik.top)] : null, baris: tk ? Math.round(tr.height / parseFloat(getComputedStyle(tk).lineHeight)) : 0, luap: tk ? tk.scrollWidth > tk.clientWidth + 1 : true, dalam: !!ar && !!tr && tr.left >= ar.left - 0.5 && tr.right <= ar.right + 0.5 }; });
+    return { terbuka: tombol?.getAttribute('aria-expanded') ?? null, tinggiTombol: tombol ? Math.round(tombol.getBoundingClientRect().height) : 0, arti: arti && !arti.hidden ? arti.querySelector(':scope > p')?.textContent.trim() ?? null : null, butir,
+      artiDiKotak: !!ar && !!kr && ar.height > 0 && ar.top >= kr.top - 0.5 && ar.bottom <= kr.bottom + 0.5, kotak: kotak ? [kotak.clientHeight, kotak.scrollHeight, Math.round(kotak.scrollTop)] : null };
+  });
+  const tutup = await ukur();
+  if (tutup.terbuka !== 'false' || tutup.tinggiTombol < 44) sebab.push('tombol istilah Komite: ' + JSON.stringify([tutup.terbuka, tutup.tinggiTombol]));
+  const titik = await p.evaluate(() => { const el = document.querySelector('[data-istilah="komite"]'); if (!el) return null; el.scrollIntoView({ block: 'nearest' }); const r = el.getBoundingClientRect(); return [r.left + r.width / 2, r.top + r.height / 2]; });
+  if (!titik) return { lulus: false, data: { sebab: [...sebab, 'tombol istilah Komite tidak ada'] } };
+  await p.mouse.click(titik[0], titik[1]); await tunggu(900);
+  const d1 = await ukurLayar(p); const buka = await ukur();
+  if (!d1) sebab.push('istilah terbuka: tanpa layar');
+  else {
+    if (!d1.kunci || !d1.cangkang || d1.halaman > d1.layar + 0.5 || d1.gulirHalaman !== 0 || d1.lebarHalaman > d1.lebar + 0.5) sebab.push(`istilah terbuka: halaman menggulir / layar tidak terkunci (${d1.halaman} > ${d1.layar})`);
+    if (d1.meluap.some((x) => x !== 'div.hp-vn-isi') || d1.sisaUjung.some((x) => x > 1)) sebab.push('istilah terbuka: wilayah meluap lain / kotak dialog tidak sampai ujung: ' + JSON.stringify([d1.meluap, d1.sisaUjung]));
+    if (d1.tombol === null || !d1.tombolDalam || d1.kepala !== 0) sebab.push('istilah terbuka: tombol utama di luar layar / kepala cerita bergerak');
+    if (JSON.stringify([d1.panggung, d1.panggungAtas, d1.bentuk]) !== JSON.stringify([d0?.panggung, d0?.panggungAtas, d0?.bentuk])) sebab.push(`istilah terbuka: panggung berubah ${JSON.stringify([d0?.panggung, d0?.panggungAtas, d0?.bentuk])} -> ${JSON.stringify([d1.panggung, d1.panggungAtas, d1.bentuk])}`);
+  }
+  if (buka.terbuka !== 'true' || buka.arti !== harap.arti) sebab.push('arti tidak terbuka / bukan teks tabel: ' + JSON.stringify([buka.terbuka, buka.arti]));
+  if (JSON.stringify(buka.butir.map((x) => x.teks)) !== JSON.stringify(harap.anggota.map((x) => x.teks))) sebab.push('peran anggota: ' + JSON.stringify(buka.butir.map((x) => x.teks)));
+  if (buka.butir.some((x) => !x.ikon || x.ikon[0] !== 32 || x.ikon[1] !== 32) || new Set(buka.butir.map((x) => x.ikon?.[2])).size !== 1) sebab.push('ikon bukan 32 x 32 sebaris: ' + JSON.stringify(buka.butir.map((x) => x.ikon)));
+  if (buka.butir.some((x) => x.luap || !x.dalam || x.baris < 1 || x.baris > 2)) sebab.push('peran terpotong / keluar kotak: ' + JSON.stringify(buka.butir.map((x) => [x.teks, x.baris, x.luap, x.dalam])));
+  if (!buka.artiDiKotak) sebab.push('arti + deret anggota tidak terlihat utuh di kotak dialog: ' + JSON.stringify(buka.kotak));
+  // Tutup lagi: layar kembali sah (bentuk panggung boleh tetap yang lebih rendah, aturan ruang yang sama).
+  const titik2 = await p.evaluate(() => { const el = document.querySelector('[data-istilah="komite"]'); el.scrollIntoView({ block: 'nearest' }); const r = el.getBoundingClientRect(); return [r.left + r.width / 2, r.top + r.height / 2]; });
+  { const info = await p.evaluate(() => ({ w: window.innerWidth, h: window.innerHeight, wk: !/Chrome\//.test(navigator.userAgent) })); const dirT025 = path.join(ROOT, 'team/evidence/T-025/fullstack'); fs.mkdirSync(dirT025, { recursive: true }); await p.screenshot({ path: path.join(dirT025, `layar-istilah-${info.w}x${info.h}-${info.wk ? 'webkit' : 'chromium'}.png`) }); }
+  await p.mouse.click(titik2[0], titik2[1]); await tunggu(500);
+  const d2 = await ukurLayar(p); const akhir = await ukur();
+  sebab.push(...nilaiLayar(d2).map((x) => 'sesudah ditutup: ' + x));
+  if (akhir.terbuka !== 'false' || akhir.arti !== null) sebab.push('istilah tidak tertutup lagi');
+  return { lulus: sebab.length === 0, data: { sebab, node: d0?.node, panggung: [d0?.panggung, d1?.panggung, d2?.panggung], bentuk: [d0?.bentuk, d1?.bentuk, d2?.bentuk], tujuan: [d0?.tujuanTampil, d1?.tujuanTampil], kotak: buka.kotak, baris: buka.butir.map((x) => x.baris), teksGulir: d1?.teksGulir } };
 }
 /** Tangkapan layar per tahap aktivitas (T-020 batch 1): diisi jalankanTahap2; bawaan = tidak memotret. */
 const KINI = { foto: async () => {} };
@@ -778,7 +849,7 @@ export async function jalankanTahap2(mesin, peramban, BASE, lapor, OUT, { vp: ha
   const daftarVp = VP_LAYAR.filter((v) => (pilihVp ? pilihVp.includes(v.n) : !wk || v.n === '360x640' || v.n === '390x645'));
   const KASUS = [
     ['adegan-k08-hasil', 'akt-rambu', (p) => adegan(p)], ['adegan-k09e', 'wawancara-3', (p) => adegan(p)], ['adegan-k05-hasil', 'foto', (p) => adegan(p)],
-    ['adegan-k11-tugas', 'berkas', (p) => adegan(p)], ['adegan-pembuka', 'mentor', (p) => adegan(p)], ['adegan-k04-pool', 'pool', (p) => adegan(p)],
+    ['adegan-k11-tugas', 'berkas', (p) => adegan(p)], ['adegan-k11-istilah', 'berkas', (p) => istilahKomite(p)], ['adegan-pembuka', 'mentor', (p) => adegan(p)], ['adegan-k04-pool', 'pool', (p) => adegan(p)],
     ['adegan-k07-bima', 'bima', (p) => adegan(p)], ['adegan-k10', 'wawancara-2', (p) => adegan(p)],
     ['adegan-k08-tol', 'tol', (p) => adegan(p)], ['adegan-k09', 'wawancara-1', (p) => adegan(p)], ['adegan-awal-baru', null, (p) => adegan(p)],
     ['akhir-puas', 'akhir-puas', (p) => adegan(p, 'akhir')], ['akhir-catatan', 'akhir-catatan', (p) => adegan(p, 'akhir')], ['akhir-kurang', 'akhir-kurang', (p) => adegan(p, 'akhir')],

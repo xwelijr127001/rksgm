@@ -63,6 +63,13 @@ export const TEKS_AUTO_2_EN: Record<string, string> = {
   'lokasi.bengkel': 'Mitra Workshop',
   'lokasi.tol': 'Toll road',
   'lokasi.wawancara': 'Interview room',
+  // T-025: Ruang Rapat Komite Klaim. Nama ruang + SATU kalimat per keadaan ruang untuk pembaca layar (anggota komite dan tanda
+  // SETUJU / CATATAN adalah gambar; tandanya tetap berbahasa Indonesia di semua bahasa, jadi kalimat ini yang membawa artinya).
+  'lokasi.komite': 'Claims Committee meeting room',
+  'lokasi.komite.tunggu': 'Claims Committee meeting room. Four committee members sit waiting behind a long table.',
+  'lokasi.komite.setuju': 'Claims Committee meeting room. All four members nod, and an approval tag appears above each of them.',
+  'lokasi.komite.catatan': 'Claims Committee meeting room. Two members raise a hand, and a tag for a note appears above each of the two.',
+  'lokasi.komite.kosong': 'Claims Committee meeting room. The four chairs behind the long table are empty.',
   'latar.bengkel.antrean': 'This week’s queue',
   'latar.bengkel.penuh': 'FULL',
   'latar.tol.rambu1a': 'No trucks or trailers',
@@ -93,6 +100,11 @@ export const TEKS_AUTO_2_EN: Record<string, string> = {
   'istilah.pemeriksaan.arti': 'The team that checks the scene and interviews witnesses to confirm what happened and whether the policy covers it.',
   'istilah.komite.label': 'Claims Committee',
   'istilah.komite.arti': 'The team at Raksa that decides high-value claims.',
+  // T-025: peran empat anggota (urut kursi kiri -> kanan), di bawah arti bersama ikon kepala 32 px.
+  'istilah.komite.anggota.1': 'Chair',
+  'istilah.komite.anggota.2': 'Underwriter',
+  'istilah.komite.anggota.3': 'Surveyor',
+  'istilah.komite.anggota.4': 'Head of Claims',
   'istilah.penawaran.label': 'settlement offer letter',
   'istilah.penawaran.arti': 'A letter stating the settlement amount and how it was calculated.',
   'istilah.leasing.label': 'Leasing Sentosa',
@@ -510,7 +522,7 @@ export const TEKS_AUTO_2_EN: Record<string, string> = {
   'k11.akibat.kabar.d': 'But the decision is not out yet. If the Committee asks for corrections, you will have to take your words back.',
   'k11.akibat.kabar.d2': 'But the decision is not out yet, and the Committee has just sent the file back. You have to take your words back.',
   'k11.akibat.kabar.d3': 'But the file has not gone to the Committee and the decision is not out yet. You have to take your words back.',
-  'k11.akibat.kabar.e': 'You added no news about the process. Mr Hendra only received a long technical report and is confused by it. That report is for the Committee, not for the customer to approve.',
+  'k11.akibat.kabar.e': 'You added no news about the process. The long report confuses Mr Hendra.',
   'k11.akibat.kabar.e2': 'Your message says the claim has entered the approval stage, but the file has not gone to the Committee. Mr Hendra is also confused by the long technical report; that report is for the Committee, not for the customer to approve.',
   // Baris akibat K11 lama: tidak dipakai naskah lagi, DIPERTAHANKAN agar riwayat simpanan lama tetap terbaca.
   'k11-a.1': 'The file reaches the Committee with nothing marked as missing.',

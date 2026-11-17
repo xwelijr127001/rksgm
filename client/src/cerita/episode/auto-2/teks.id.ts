@@ -54,6 +54,13 @@ export const TEKS_AUTO_2_ID: Record<string, string> = {
   'lokasi.bengkel': 'Bengkel Mitra',
   'lokasi.tol': 'Ruas tol',
   'lokasi.wawancara': 'Ruang wawancara',
+  // T-025: Ruang Rapat Komite Klaim. Nama ruang + SATU kalimat per keadaan ruang untuk pembaca layar (anggota komite dan tanda
+  // SETUJU / CATATAN adalah gambar; tandanya tetap berbahasa Indonesia di semua bahasa, jadi kalimat ini yang membawa artinya).
+  'lokasi.komite': 'Ruang Rapat Komite Klaim',
+  'lokasi.komite.tunggu': 'Ruang Rapat Komite Klaim. Empat anggota komite duduk menunggu di balik meja panjang.',
+  'lokasi.komite.setuju': 'Ruang Rapat Komite Klaim. Keempat anggota mengangguk; di atas tiap anggota muncul tanda setuju.',
+  'lokasi.komite.catatan': 'Ruang Rapat Komite Klaim. Dua anggota mengangkat tangan; di atas keduanya muncul tanda catatan.',
+  'lokasi.komite.kosong': 'Ruang Rapat Komite Klaim. Keempat kursi di balik meja panjang kosong.',
   'latar.bengkel.antrean': 'Antrean minggu ini',
   'latar.bengkel.penuh': 'PENUH',
   'latar.tol.rambu1a': 'Truk & trailer dilarang',
@@ -84,6 +91,11 @@ export const TEKS_AUTO_2_ID: Record<string, string> = {
   'istilah.pemeriksaan.arti': 'Tim yang mengecek lokasi dan mewawancarai saksi untuk memastikan kejadiannya dan apakah dijamin polis.',
   'istilah.komite.label': 'Komite Klaim',
   'istilah.komite.arti': 'Tim di Raksa yang memutuskan klaim bernilai besar.',
+  // T-025: peran empat anggota (urut kursi kiri -> kanan), di bawah arti bersama ikon kepala 32 px.
+  'istilah.komite.anggota.1': 'Ketua',
+  'istilah.komite.anggota.2': 'Underwriter',
+  'istilah.komite.anggota.3': 'Surveyor',
+  'istilah.komite.anggota.4': 'Kepala Klaim',
   'istilah.penawaran.label': 'surat penawaran ganti rugi',
   'istilah.penawaran.arti': 'Surat yang berisi nilai ganti rugi dan dasar hitungannya.',
   'istilah.leasing.label': 'Leasing Sentosa',
@@ -502,7 +514,7 @@ export const TEKS_AUTO_2_ID: Record<string, string> = {
   'k11.akibat.kabar.d': 'Padahal keputusannya belum keluar. Kalau Komite meminta perbaikan, kamu harus menarik ucapanmu.',
   'k11.akibat.kabar.d2': 'Padahal keputusannya belum keluar, dan berkasnya baru saja dikembalikan Komite. Ucapanmu harus kamu tarik kembali.',
   'k11.akibat.kabar.d3': 'Padahal berkasnya belum diajukan ke Komite dan keputusannya belum keluar. Ucapanmu harus kamu tarik kembali.',
-  'k11.akibat.kabar.e': 'Kamu tidak menambahkan kabar soal proses. Pak Hendra hanya menerima laporan teknis yang panjang dan bingung membacanya. Laporan itu untuk Komite, bukan untuk disetujui nasabah.',
+  'k11.akibat.kabar.e': 'Kamu tidak menambahkan kabar soal proses. Pak Hendra bingung membaca laporan teknis yang panjang.',
   'k11.akibat.kabar.e2': 'Kabarmu menyebut klaimnya sudah masuk tahap persetujuan, padahal berkasnya belum diajukan ke Komite. Pak Hendra juga bingung membaca laporan teknis yang panjang; laporan itu untuk Komite, bukan untuk disetujui nasabah.',
   // Baris akibat K11 lama: tidak dipakai naskah lagi, DIPERTAHANKAN agar riwayat simpanan lama tetap terbaca.
   'k11-a.1': 'Berkas masuk Komite tanpa catatan kurang.',

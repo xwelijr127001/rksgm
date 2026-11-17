@@ -9,9 +9,18 @@
  * awal lewat konfirmasi yang ada (arsip). Epilog TIDAK diulang (sudah dibaca di dialog; tetap ada di Riwayat).
  * Tinjauan lengkap & pemilih bagian ada di dialog terpisah (PerjalananKu, PemilihBagian); membuka/menutupnya dan
  * ganti bahasa tidak mengubah state cerita. Tanpa skor, poin, waktu, atau "Episode berikutnya".
+ *
+ * T-024 (`satuLayar`, cangkang HP dengan ringkasan keputusan bernomor; angka = mock Designer D-226..D-235): SEMUA isi muat di
+ * satu layar HP, tidak ada yang menggulir. Urutan: kepala (potret 56 px, perasaan, nama akhir) -> judul (maks. 2 baris) +
+ * kalimat sebab (2 baris) -> grafik status ringkas -> legenda + strip 15 token keputusan -> Pelajaran (2 baris, gelembung Miss
+ * Raksa); aksi tetap di bilah tersemat. Yang dipotong tetap utuh di SATU lembar bawah milik layar ini (LembarAkhir): ketuk token
+ * = rincian keputusan itu (Sebelumnya / Berikutnya di dalamnya), ketuk kalimat sebab = kalimat utuh + "Lihat perjalananku",
+ * ketuk Pelajaran = teks utuhnya. Bila layar terlalu pendek, pasAkhir.ts memilih yang mengalah. Legenda suasana, catatan
+ * simulasi, status naskah: pindah ke Menu (PemainHP). Keterangan tombol ulang: hanya untuk pembaca layar (D-233).
+ * Desktop / layar yang halamannya menggulir memakai bentuk lama di bawah, tidak berubah.
  */
 import './akhir.css';
-import { useId, useState } from 'react';
+import { useEffect, useId, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { Link } from 'react-router-dom';
 import type { Bahasa } from '@shared/bahasa';
@@ -25,12 +34,18 @@ import type { Ekspresi, Episode, IdAkhir, IdBab, KunciTeks, StateCerita } from '
 import { labelPerasaan, selaPembicara } from './bagian';
 import { PotretPikselHp } from './latar/piksel/PotretPikselHp';
 import { tokohPotret } from './latar/piksel/potret';
-import { RingkasanKeputusan } from './RingkasanKeputusan';
+import { LembarAkhir } from './LembarAkhir';
+import { usePasAkhir } from './pasAkhir';
+import { GambarToken, IsiLembarTitik, PetaTitik, RingkasanKeputusan, RingkasanSatuLayar } from './RingkasanKeputusan';
 import { PemilihBagian } from './PemilihBagian';
 import { PerjalananKu, TandaNada } from './PerjalananKu';
 import { kartuAkhir } from './tinjauan';
+import { infoTitik } from './titik';
 
-export function LayarAkhir({ ep, state, bahasa, tx, ditemukan, onUlangBab, onUlangEpisode, slotAksi = null }: {
+/** Isi lembar bawah layar akhir satu layar: rincian satu keputusan, kalimat sebab utuh, atau teks Pelajaran utuh. */
+type IsiLembar = { jenis: 'titik'; indeks: number } | { jenis: 'sebab' } | { jenis: 'pelajaran'; denganSebab: boolean };
+
+export function LayarAkhir({ ep, state, bahasa, tx, ditemukan, onUlangBab, onUlangEpisode, slotAksi = null, satuLayar = false }: {
   ep: Episode;
   state: StateCerita;
   bahasa: Bahasa;
@@ -43,12 +58,23 @@ export function LayarAkhir({ ep, state, bahasa, tx, ditemukan, onUlangBab, onUla
   onUlangEpisode: () => void;
   /** (cangkang HP, T-018 Tahap 2 D-134) bilah aksi dipindah ke elemen ini (tersemat di bawah) dan label ulang dipendekkan. */
   slotAksi?: HTMLElement | null;
+  /** (cangkang HP, T-024) layar terkunci: kartu satu layar tanpa gulir (hanya episode dengan ringkasan keputusan bernomor). */
+  satuLayar?: boolean;
 }) {
   const [dialog, setDialog] = useState<'pemilih' | 'perjalanan' | null>(null);
   const [tanyaUlang, setTanyaUlang] = useState(false);
   const idKet = useId();
   const k = kartuAkhir(ep, state);
   const info = k ? ep.akhir[k.akhir] : undefined;
+  // T-024: bentuk satu layar + SATU lembar (state di sini; token, kalimat sebab, gelembung Pelajaran hanya memintanya dibuka).
+  const satu = satuLayar && !!ep.titik?.length && !!k && !!info;
+  const [lembar, setLembar] = useState<IsiLembar | null>(null);
+  const kartuRef = useRef<HTMLElement>(null);
+  /** Kontrol yang membuka lembar teks utuh (fokus kembali ke sana; tombol tidak selalu menerima fokus saat diketuk di iOS). */
+  const pemicuRef = useRef<HTMLElement | null>(null);
+  usePasAkhir(kartuRef, satu, `${bahasa}|${k?.akhir ?? ''}|${k?.aturan ?? ''}|${slotAksi ? 1 : 0}`);
+  // Keluar dari cangkang (layar diputar / dilebarkan) = lembar ditutup bersama bentuk satu layarnya.
+  useEffect(() => { if (!satu) setLembar(null); }, [satu]);
   if (!k || !info) return null;
 
   const nasabah = ep.pemeran[ep.nasabah];
@@ -70,41 +96,8 @@ export function LayarAkhir({ ep, state, bahasa, tx, ditemukan, onUlangBab, onUla
   const pilihBab = (bab: IdBab) => { setDialog(null); onUlangBab(bab); };
   const ulangDariAwal = () => { setTanyaUlang(false); setDialog(null); onUlangEpisode(); };
 
-  return (
-    <>
-    <section className="akh-kartu" aria-labelledby="akh-judul" data-nada={k.nada} data-akhir={k.akhir} data-aturan={k.aturan || undefined}>
-      <div className="akh-kepala">
-        {/* Potret piksel: ukuran tampil diukur dari kotaknya (akhir.css menimpa 64 -> 56/80/88 px), jadi jendela & skala
-            bulatnya selalu untuk ukuran yang benar-benar tampil. */}
-        {avatarNasabah ? <PotretPikselHp tokoh={avatarNasabah} ekspresi={k.ekspresi} ukuran={64} label={namaNasabah} className="akh-potret" />
-          : <PotretNasabah ekspresi={k.ekspresi} ukuran={64} label={namaNasabah} className="akh-potret" />}
-        <div className="akh-kepala-teks">
-          <p className="akh-perasaan">
-            {k.sesudahnya ? t('ceritaAkhir.perasaanSesudah', { suasana }) : t('ceritaAkhir.perasaanAkhir', { nama: namaNasabah, suasana })}
-          </p>
-          {/* "Akhir campuran: Lega Sesaat" mengalir sebagai satu teks (pindah baris tanpa pemisah menggantung). */}
-          <p className="akh-nama-akhir">
-            <TandaNada nada={k.nada} />
-            <span>{t(`cerita.nada.${k.nada}`)}{selaPembicara()}<b>{tx(info.judul)}</b></span>
-          </p>
-        </div>
-      </div>
-
-      <h2 id="akh-judul" className="akh-judul" tabIndex={-1} data-cer-fokus="" data-ukur="akhir-judul">{tx(k.judul)}</h2>
-      <p className="akh-sebab">{tx(k.sebab)}</p>
-
-      {k.pelajaran ? (
-        <div className="akh-pelajaran" data-ukur="akhir-pelajaran">
-          <p className="akh-pelajaran-label">
-            {/* 32 = slot ikon kepala mini (seni/piksel/ikon.ts: sanggul & kerah utuh di lingkaran isi 28 px). */}
-            {adaMentor ? (avatarMentor ? <PotretPikselHp tokoh={avatarMentor} ekspresi={wajahMentor} ukuran={32} label={namaMentor} /> : <PotretMissRaksa ekspresi={wajahMentor} ukuran={32} />) : null}
-            <b>{t('ceritaAkhir.pelajaranLabel')}</b>
-          </p>
-          <p className="akh-pelajaran-teks">{tx(k.pelajaran)}</p>
-        </div>
-      ) : null}
-
-      {(() => { const aksi = (
+  // Bilah aksi (dipindah ke slot cangkang HP bila ada) + dialog bersama: dipakai kedua bentuk kartu.
+  const blokAksi = (
       <div className="akh-aksi" data-tersemat={slotAksi ? '' : undefined}>
         {baik ? (
           <>
@@ -133,19 +126,11 @@ export function LayarAkhir({ ep, state, bahasa, tx, ditemukan, onUlangBab, onUla
           </>
         )}
       </div>
-      ); return slotAksi ? createPortal(aksi, slotAksi) : aksi; })()}
-      {baik ? null : <p id={idKet} className="akh-ket">{ulang ? t('ceritaAkhir.ulangKet') : t('cerita.ulangIsi')}</p>}
-
-      <div className="akh-kaki">
-        {/* Episode dengan ringkasan keputusan bernomor: ringkasan di bawah kartu menggantikan tinjauan perjalanan. */}
-        {adaRingkasan ? null : (
-          <button type="button" className="text-button akh-lihat" aria-haspopup="dialog" onClick={() => setDialog('perjalanan')}>
-            {t('ceritaAkhir.lihatPerjalanan')}
-          </button>
-        )}
-        <p className="practice-note akh-simulasi">{t('misi.catatanSimulasiPeriksa')}</p>
-      </div>
-
+  );
+  // Bentuk satu layar: aksi HANYA di slot tersemat (sebelum slot terpasang tidak digambar, supaya tidak ikut diukur).
+  const aksi = slotAksi ? createPortal(blokAksi, slotAksi) : satu ? null : blokAksi;
+  const dialogBersama = (
+    <>
       {dialog === 'pemilih' ? (
         <PemilihBagian
           ep={ep}
@@ -181,6 +166,172 @@ export function LayarAkhir({ ep, state, bahasa, tx, ditemukan, onUlangBab, onUla
           <p>{t('cerita.ulangIsi')}</p>
         </Modal>
       ) : null}
+    </>
+  );
+
+  if (satu) {
+    const titik = ep.titik ?? [];
+    const dibuka = lembar?.jenis === 'titik' ? titik[lembar.indeks] ?? null : null;
+    const tutupLembar = () => setLembar(null);
+    const bukaTeks = (jenis: 'sebab' | 'pelajaran', el: HTMLElement) => {
+      pemicuRef.current = el;
+      // Kalimat sebab disembunyikan aturan pas (layar sangat pendek): lembar Pelajaran membawanya, supaya tidak ada teks yang hilang.
+      const tanpaSebab = (kartuRef.current?.getAttribute('data-pas') ?? 'utuh') !== 'utuh';
+      setLembar(jenis === 'sebab' ? { jenis } : { jenis, denganSebab: tanpaSebab });
+    };
+    const pindah = (ke: number) => { if (ke >= 0 && ke < titik.length) setLembar({ jenis: 'titik', indeks: ke }); };
+    const wajahMentorKecil = adaMentor ? (avatarMentor ? <PotretPikselHp tokoh={avatarMentor} ekspresi={wajahMentor} ukuran={32} label="" /> : <PotretMissRaksa ekspresi={wajahMentor} ukuran={32} />) : null;
+    const namaAkhir = <>{t(`cerita.nada.${k.nada}`)}{selaPembicara()}<b>{tx(info.judul)}</b></>;
+    // Isi lembar "kalimat sebab utuh" (D-228): kalimatnya + pintu ke tinjauan perjalanan (dialog yang sudah ada).
+    const isiSebab = (
+      <>
+        <p className="akh-lembar-teks" data-baris="sebab">{tx(k.sebab)}</p>
+        <button type="button" className="akh-lembar-tautan" data-lihat-perjalanan="" aria-haspopup="dialog" onClick={() => { setLembar(null); setDialog('perjalanan'); }}>
+          {t('ceritaAkhir.lihatPerjalanan')}
+        </button>
+      </>
+    );
+    return (
+      <section ref={kartuRef} className="akh-kartu akh-satu" data-satu-layar="" aria-labelledby="akh-judul" data-nada={k.nada} data-akhir={k.akhir} data-aturan={k.aturan || undefined}>
+        <div className="akh-kepala" data-pas-pantau="">
+          {avatarNasabah ? <PotretPikselHp tokoh={avatarNasabah} ekspresi={k.ekspresi} ukuran={56} label={namaNasabah} className="akh-potret" />
+            : <PotretNasabah ekspresi={k.ekspresi} ukuran={56} label={namaNasabah} className="akh-potret" />}
+          <div className="akh-kepala-teks">
+            <p className="akh-perasaan">
+              {k.sesudahnya ? t('ceritaAkhir.perasaanSesudah', { suasana }) : t('ceritaAkhir.perasaanAkhir', { nama: namaNasabah, suasana })}
+            </p>
+            <p className="akh-nama-akhir">
+              <TandaNada nada={k.nada} />
+              <span>{namaAkhir}</span>
+            </p>
+          </div>
+        </div>
+
+        <div className="akh-hasil">
+          <h2 id="akh-judul" className="akh-judul" tabIndex={-1} data-cer-fokus="" data-ukur="akhir-judul" data-pas-pantau="">{tx(k.judul)}</h2>
+          {/* D-228: kalimat sebab selalu terpotong 2 baris, jadi kalimat itu sendiri tombol yang membuka lembar berisi kalimat utuhnya. */}
+          <button type="button" className="akh-sebab-tombol" data-ukur="akhir-sebab" aria-haspopup="dialog" onClick={(e) => bukaTeks('sebab', e.currentTarget)}>
+            <span className="akh-sebab">{tx(k.sebab)}</span>
+            <span className="akh-lagi" aria-hidden="true">›</span>
+          </button>
+        </div>
+
+        <RingkasanSatuLayar ep={ep} state={state} tx={tx} namaNasabah={namaNasabah} aktif={lembar?.jenis === 'titik' ? lembar.indeks : null}
+          onBuka={(indeks) => setLembar({ jenis: 'titik', indeks })} />
+
+        {k.pelajaran ? (
+          <button type="button" className="akh-pelajaran-tombol" data-ukur="akhir-pelajaran" data-tanpa-wajah={wajahMentorKecil ? undefined : ''} aria-haspopup="dialog" onClick={(e) => bukaTeks('pelajaran', e.currentTarget)}>
+            {wajahMentorKecil ? <span className="akh-wajah">{wajahMentorKecil}</span> : null}
+            <span className="akh-gelembung">
+              <small>{t('ceritaAkhir.pelajaranLabel')}</small>
+              <span className="akh-gelembung-teks">{tx(k.pelajaran)}</span>
+              <span className="akh-lagi" aria-hidden="true">›</span>
+            </span>
+          </button>
+        ) : null}
+
+        {aksi}
+        {/* D-233: keterangan tombol ulang tetap terbaca pembaca layar (aria-describedby), tidak memakan baris di satu layar. */}
+        {baik ? null : <p id={idKet} className="sr-only">{ulang ? t('ceritaAkhir.ulangKet') : t('cerita.ulangIsi')}</p>}
+        {dialogBersama}
+
+        {dibuka && lembar?.jenis === 'titik' ? (
+          <LembarAkhir
+            jenis="titik"
+            nama={tx(dibuka.judul)}
+            kecil={t('ceritaAkhir.lembar.nomor', { n: dibuka.nomor, total: titik.length })}
+            judul={tx(dibuka.judul)}
+            tanda={<GambarToken nomor={dibuka.nomor} nilai={infoTitik(state, dibuka).nilai} />}
+            atasBadan={<PetaTitik ep={ep} state={state} kini={lembar.indeks} />}
+            kunciIsi={dibuka.id}
+            kembaliKe={() => kartuRef.current?.querySelector<HTMLElement>(`[data-token="${dibuka.id}"]`) ?? null}
+            onTutup={tutupLembar}
+            onPanah={(arah) => pindah(lembar.indeks + arah)}
+            kaki={<>
+              <button type="button" data-lembar-nav="sebelum" aria-disabled={lembar.indeks <= 0 || undefined} onClick={() => pindah(lembar.indeks - 1)}>
+                <span aria-hidden="true">←</span> {t('ceritaAkhir.lembar.sebelum')}
+              </button>
+              <button type="button" data-lembar-nav="berikut" aria-disabled={lembar.indeks >= titik.length - 1 || undefined} onClick={() => pindah(lembar.indeks + 1)}>
+                {t('ceritaAkhir.lembar.berikut')} <span aria-hidden="true">→</span>
+              </button>
+            </>}
+          >
+            <IsiLembarTitik state={state} titik={dibuka} tx={tx} namaMentor={namaMentor} wajah={wajahMentorKecil} />
+          </LembarAkhir>
+        ) : null}
+        {lembar?.jenis === 'sebab' ? (
+          <LembarAkhir jenis="sebab" nama={tx(k.judul)} kecil={namaAkhir} judul={tx(k.judul)} kembaliKe={() => pemicuRef.current} onTutup={tutupLembar}>
+            {isiSebab}
+          </LembarAkhir>
+        ) : null}
+        {lembar?.jenis === 'pelajaran' && k.pelajaran ? (
+          <LembarAkhir
+            jenis="pelajaran"
+            nama={t('ceritaAkhir.pelajaranLabel')}
+            judul={t('ceritaAkhir.pelajaranLabel')}
+            tanda={wajahMentorKecil ? <span className="akh-wajah">{wajahMentorKecil}</span> : undefined}
+            kembaliKe={() => pemicuRef.current}
+            onTutup={tutupLembar}
+          >
+            <p className="akh-lembar-teks" data-baris="pelajaran">{tx(k.pelajaran)}</p>
+            {lembar.denganSebab ? <>
+              <h3 className="akh-lembar-sub">{t('ceritaAkhir.kenapa')}</h3>
+              {isiSebab}
+            </> : null}
+          </LembarAkhir>
+        ) : null}
+      </section>
+    );
+  }
+
+  return (
+    <>
+    <section className="akh-kartu" aria-labelledby="akh-judul" data-nada={k.nada} data-akhir={k.akhir} data-aturan={k.aturan || undefined}>
+      <div className="akh-kepala">
+        {/* Potret piksel: ukuran tampil diukur dari kotaknya (akhir.css menimpa 64 -> 56/80/88 px), jadi jendela & skala
+            bulatnya selalu untuk ukuran yang benar-benar tampil. */}
+        {avatarNasabah ? <PotretPikselHp tokoh={avatarNasabah} ekspresi={k.ekspresi} ukuran={64} label={namaNasabah} className="akh-potret" />
+          : <PotretNasabah ekspresi={k.ekspresi} ukuran={64} label={namaNasabah} className="akh-potret" />}
+        <div className="akh-kepala-teks">
+          <p className="akh-perasaan">
+            {k.sesudahnya ? t('ceritaAkhir.perasaanSesudah', { suasana }) : t('ceritaAkhir.perasaanAkhir', { nama: namaNasabah, suasana })}
+          </p>
+          {/* "Akhir campuran: Lega Sesaat" mengalir sebagai satu teks (pindah baris tanpa pemisah menggantung). */}
+          <p className="akh-nama-akhir">
+            <TandaNada nada={k.nada} />
+            <span>{t(`cerita.nada.${k.nada}`)}{selaPembicara()}<b>{tx(info.judul)}</b></span>
+          </p>
+        </div>
+      </div>
+
+      <h2 id="akh-judul" className="akh-judul" tabIndex={-1} data-cer-fokus="" data-ukur="akhir-judul">{tx(k.judul)}</h2>
+      <p className="akh-sebab">{tx(k.sebab)}</p>
+
+      {k.pelajaran ? (
+        <div className="akh-pelajaran" data-ukur="akhir-pelajaran">
+          <p className="akh-pelajaran-label">
+            {/* 32 = slot ikon kepala mini (seni/piksel/ikon.ts: sanggul & kerah utuh di lingkaran isi 28 px). */}
+            {adaMentor ? (avatarMentor ? <PotretPikselHp tokoh={avatarMentor} ekspresi={wajahMentor} ukuran={32} label={namaMentor} /> : <PotretMissRaksa ekspresi={wajahMentor} ukuran={32} />) : null}
+            <b>{t('ceritaAkhir.pelajaranLabel')}</b>
+          </p>
+          <p className="akh-pelajaran-teks">{tx(k.pelajaran)}</p>
+        </div>
+      ) : null}
+
+      {aksi}
+      {baik ? null : <p id={idKet} className="akh-ket">{ulang ? t('ceritaAkhir.ulangKet') : t('cerita.ulangIsi')}</p>}
+
+      <div className="akh-kaki">
+        {/* Episode dengan ringkasan keputusan bernomor: ringkasan di bawah kartu menggantikan tinjauan perjalanan. */}
+        {adaRingkasan ? null : (
+          <button type="button" className="text-button akh-lihat" aria-haspopup="dialog" onClick={() => setDialog('perjalanan')}>
+            {t('ceritaAkhir.lihatPerjalanan')}
+          </button>
+        )}
+        <p className="practice-note akh-simulasi">{t('misi.catatanSimulasiPeriksa')}</p>
+      </div>
+
+      {dialogBersama}
     </section>
     {adaRingkasan ? <RingkasanKeputusan ep={ep} state={state} tx={tx} namaNasabah={namaNasabah} namaMentor={namaMentor} /> : null}
     </>

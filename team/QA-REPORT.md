@@ -520,3 +520,42 @@ I am reading and writing in C:\Users\User\Desktop\rksgm-episode2 (QA, no source 
 **4. Playthrough id (driver seed 3, patched for the K09 board):** reached "AKHIR CERITA / Akhir kurang baik" in 252 steps, 0 console errors, 0 HTTP errors. **Bytes:** 14 PNG requests = **172,390 B** (the 134 activity PNGs, incl. the 37 ksim sprites, are inlined in CSS/JS), 0 webp. **Chunk sizes now:** `CeritaMain-*.css` 218,214 / 218,563 B and `CeritaMain-*.js` 188,789 / 188,943 B (two builds are present in `dist/assets`; Fullstack's quoted 217,204 B CSS / 187,742 B JS: +0.5-1 % since).
 
 **Notes:** N-1 `cek-layar` 142 cases vs 184 quoted (all pass). N-2 the one-sentence Catatan note (`catatan.simBersih` / `simRagu`) and the line under the result scene: the result line is visible after ksim; the Catatan sentence I could not find in the menu or end screen from my flow (it appears in the reply-sheet Catatan tab of later decisions, which my states do not reach) so it is **unverified**. N-3 real finger drag on iOS/Android not tested. N-4 desktop 1280 of the activity not opened. N-5 en/zh: all 3 paths pass the fit rules; wording of the English/Chinese drafts was not reviewed by me.
+
+## T-024 (2026-11-17) — PASS (0 bugs, 3 notes)
+
+Testing under `C:\Users\User\Desktop\rksgm-episode2` (QA, no source edits, no commit, no e2e). My server :4001 (`RAKSA_LEGACY=on`, `CLIENT_DIST=client/dist`), stopped afterwards. One headless browser at a time, below-normal priority. Evidence: `team/evidence/T-024/qa/`.
+
+**Tools (once each):** `test:client` 750/750; `cek-akhir-t019` ALL PASS (84); `cek-layar` ALL PASS (142); `cek-bahasa` ALL PASS (138); `cek-gulir` ALL PASS (150, chat family, `--tanpa-tahap2`). The bare `cek-gulir` run hit my 15-minute kill limit, and its end-card part duplicates `cek-layar`, so I ran the chat family only.
+
+**My own matrix** (`k24.py`, Playwright Python): the three endings (puas, catatan, kurang) reached from the saved game states by pressing Lanjut through to the card, at 390x645 and 360x640, in id/en/zh, in Chromium and WebKit. That is 2515 checks per engine, run again with reduced motion on. All pass, with 0 console errors.
+- **Fit:** one-screen form; 0 px page, `.hp-main` and card scroll; no inner scrollers; the fit rule is unused; 15 tokens.
+- **Action bar:** inside the viewport. Selesai, Coba jalur lain (opens the dialog) and Coba lagi dari bagian N (leaves the card) work.
+- **Tokens:** all 15 open the sheet with the right decision title and number. The sheet sits at least 65 px under the top, has no inner scroll, `#root` is inert and the page does not scroll. Sebelumnya/Berikutnya and the arrow keys work, and both ends are disabled at 1 and 15. Escape, the close button and a backdrop tap each return focus to the token.
+- **Other sheets and Menu:** the reason and lesson sheets open and close with focus returned. Both Menu rows ("Rentang suasana", "Catatan simulasi") are present.
+- **Keyboard only:** Tab reaches the reason line, tokens 1-15, the lesson and the action bar. Enter and Space open a sheet, focus is trapped inside it and Escape returns focus.
+- **Desktop 1280x800:** unchanged (old list form, 15 rows, no tokens, no one-screen marker).
+
+**Notes (not bugs):**
+1. In WebKit, Tab skips the links (Selesai, back arrow). That is the engine's default link-focus setting; Chromium reaches them. Buttons are fine.
+2. The reason and lesson text are cut to two lines with an arrow. This is by design; the full text is in the sheet.
+3. Not tested: a real finger on a phone, and a real iPhone.
+
+## T-025 (2026-11-17) — PASS (0 bugs, 4 notes)
+
+Testing under `C:\Users\User\Desktop\rksgm-episode2` (QA; no source edits, no commit, no e2e). My server :4001 (`RAKSA_LEGACY=on`, `CLIENT_DIST=client/dist`), stopped afterwards; `dist-rilis` untouched. One headless browser at a time, below-normal priority. Evidence: `team/evidence/T-025/qa/`.
+
+**Tools (once each):** `test:client` 759/759; `cek-piksel` ALL PASS (156, includes the 57 `cek-komite` cases); `cek-layar` 148/148; `cek-bahasa` 138/138; `cek-gulir` 150/150 (chat family, `--tanpa-tahap2`; the other families are inside `cek-layar`); `cek-akhir-t019` 105/105.
+
+**My own matrix** (`k25.py`, Playwright Python), 390x645 and 360x640, id/en/zh, Chromium, WebKit and Chromium with reduced motion: 686 checks per run, 0 bad, 0 console errors.
+- **K11, nine combinations** (berkas lengkapi/sekarang/hendra x kabar persetujuan/disetujui/nanti), played through the real activity. The room beat after the task shows the right state: lengkapi = tunggu (no tags, ever), sekarang = catatan with two CATATAN tags, hendra = kosong (no tags). For the two kabar options that send news the chat then follows with the player's sent message first and the status note last, with no gate and no page scroll.
+- **K13:** the committee room with `setuju` and four SETUJU tags; the next beat is the chat at once (no "Mulai percakapan" gate), message visible.
+- **K12 and a full playthrough** (id, seed 3): the ending is reached in 253 steps. It passes through bengkel, komite, kantor, pool, tol and wawancara, with 0 console errors and 0 HTTP errors.
+- **Glossary "Apa itu Komite Klaim?":** the meaning is whole, with four 32 px icons in a row and role names (Ketua Komite, Underwriter, Surveyor, Kepala Klaim; en/zh equivalents); the page does not scroll.
+- **Regression on T-013 saved states** `berkas` and `surat`: both open and do not scroll.
+- **T-024 polish:** `cek-akhir` 105 (it covers the clamps relaxed at 390x844, the Menu rows in view and the pressed state) and `cek-layar` pass.
+
+**Notes (not bugs):**
+1. Phone framing is wider than the mock (1 CSS px per art pixel, heads 36 px). This is Fullstack's point 1, accepted by the Lead.
+2. The room pixel checks inside `cek-komite` are Chromium only. My own matrix covers the room state, tags and chat flow in WebKit.
+3. English Menu: the last line of the script-status sentence is just below the fold at 360x640 (Fullstack's own note).
+4. Not tested: a real phone, a screen reader (live region checked in the DOM only), and a real finger on the glossary.

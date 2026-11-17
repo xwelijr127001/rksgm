@@ -236,3 +236,194 @@
   .akh-tk-chip { grid-column: 2; grid-row: 2; justify-self: start; }
   .akh-tk-buka { grid-column: 3; grid-row: 1; }
 }
+
+/* ------------------------------------------------------------------ T-024: layar akhir SATU LAYAR (cangkang HP) */
+/* LayarAkhir `satuLayar` (.akh-kartu.akh-satu): kartu mengisi ruang antara kepala cerita dan bilah aksi tersemat dan TIDAK
+   menggulir. Semua angka = mock terukur Designer (team/DESIGN-REVIEW.md "T-024 - mock", D-226..D-235; aturan aslinya di
+   team/evidence/T-024/designer/mock-akhir-satu-layar.css): kepala 56 (57 bila nama akhir dua baris), judul 21 / 25 maks. 2 baris,
+   sebab 14,5 / 20 dua baris, grafik 72 berbingkai, legenda 18, token 3 x 44, Pelajaran 63; jarak 8 antarblok, 4 judul-sebab,
+   2 legenda-token. Bantalan kolom 10 atas / 8 bawah (2 px di .hp-main + 6 px di sini). Kartu selebar kolom + 12 px (6 px bantalan
+   samping) hanya supaya cincin fokus tombol selebar kolom tidak terpotong: letak isi sama dengan mock.
+   Yang mengalah bila tidak muat (ui/pasAkhir.ts): grafik menyusut sendiri ke 56, lalu data-pas menyembunyikan kalimat sebab,
+   lalu legenda; `gulir` = jaring pengaman. */
+.akh-kartu.akh-satu {
+  position: relative; flex: 1 1 auto; min-height: 0; align-self: center; width: min(652px, calc(100% + 12px)); margin: 0;
+  padding: 0 6px 6px; gap: 8px; border: 0; border-radius: 0; background: none; color: #243d30; overflow: hidden;
+}
+.akh-satu > * { flex: none; margin: 0; }
+.akh-satu:is([data-pas="tanpa-sebab"], [data-pas="tanpa-legenda"], [data-pas="gulir"]) .akh-sebab-tombol { display: none; }
+.akh-satu:is([data-pas="tanpa-legenda"], [data-pas="gulir"]) .akh-token-legenda { display: none; }
+.akh-kartu.akh-satu[data-pas="gulir"] { overflow-y: auto; overscroll-behavior-y: contain; touch-action: pan-y pinch-zoom; -webkit-overflow-scrolling: touch; }
+/* D-245 (polish, review Designer): layar tinggi (>= 700 px; ui/pasAkhir.ts menulis data-lega selama MUAT, berurutan): teks
+   Pelajaran utuh, kalimat sebab utuh, lalu grafik mengambil sisa ruang sampai 96 px. Di 390 x 645 / 360 x 640 tidak pernah. */
+.akh-satu[data-lega~="pelajaran"] .akh-gelembung-teks, .akh-satu[data-lega~="sebab"] .akh-sebab { display: block; -webkit-line-clamp: none; overflow: visible; }
+.akh-satu[data-lega~="grafik"] > .akh-grafik-ringkas { flex: 1 1 72px; max-height: 96px; }
+/* D-247 (polish): tekanan terasa. Gambar token dan chip panah (kalimat sebab, Pelajaran) turun 2 px selama ditekan, seperti
+   baris pilihan lembar balasan (hp/desain.css); hanya bila gerak tidak dikurangi. `translate`, bukan transform. */
+@media (prefers-reduced-motion: no-preference) {
+  .akh-satu .akh-token-tombol:active .akh-token-gambar { translate: 0 2px; }
+  .akh-satu :is(.akh-sebab-tombol, .akh-pelajaran-tombol):active .akh-lagi { translate: 0 2px; box-shadow: none; }
+}
+
+/* 1 kepala: 56 (D-227: min-height, bukan tinggi tetap) */
+.akh-satu .akh-kepala { gap: 10px; min-height: 56px; }
+.akh-satu .akh-potret { width: 56px !important; height: 56px !important; }
+.akh-satu .akh-potret > svg { width: 100%; height: 100%; }
+.akh-satu .akh-kepala-teks { gap: 3px; }
+.akh-satu .akh-perasaan { padding: 1px 10px; font-size: 14px; line-height: 18px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.akh-satu .akh-nama-akhir { font-size: 13px; line-height: 16px; min-height: 20px; gap: 6px; }
+.akh-satu .akh-nada { flex-basis: 20px; width: 20px; height: 20px; }
+
+/* 2 judul (maks. 2 baris) + kalimat sebab (2 baris; tombol yang membuka lembar, D-228) */
+.akh-hasil { display: grid; gap: 4px; }
+.akh-satu .akh-judul {
+  margin: 0; font-size: 21px; line-height: 25px; font-weight: 800; letter-spacing: -.015em; display: -webkit-box; -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2; overflow: hidden;
+}
+.akh-sebab-tombol {
+  position: relative; display: grid; grid-template-columns: minmax(0, 1fr) 20px; gap: 6px; align-items: end; margin: 0; padding: 0; border: 0;
+  background: none; color: inherit; font: inherit; text-align: left; cursor: pointer;
+}
+.akh-sebab-tombol::after { content: ''; position: absolute; inset: -2px 0; } /* sasaran sentuh 44 px */
+.akh-satu .akh-sebab {
+  margin: 0; font-size: 14.5px; line-height: 20px; color: #2f4637; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden;
+}
+/* Panah piksel 20 x 20 "ada lanjutannya" (kalimat sebab, Pelajaran). */
+.akh-lagi {
+  width: 20px; height: 20px; box-sizing: border-box; display: grid; place-items: center; border: 2px solid #215c40; background: #fffdf6;
+  color: #215c40; font-size: 15px; font-weight: 800; line-height: 1; box-shadow: 0 2px 0 #215c40; margin-bottom: 2px;
+}
+
+/* 3 grafik status: 72 (menyusut sampai 56 lebih dulu bila layar pendek). Bingkai 2 px; pita selebar kotak; garis 2 px + titik
+   persegi 6 px hanya di kiri talang; titik terakhir persegi emas 10 px; nama grafik di sudut kiri atas (D-229). */
+.akh-satu > .akh-grafik-ringkas {
+  position: relative; display: block; flex: 0 1 72px; min-height: 56px; box-sizing: border-box; border: 2px solid #1c2b24; background: #f3f6ee; overflow: hidden;
+}
+.akh-grafik-kotak { position: absolute; inset: 0; display: flex; }
+.akh-grafik-ringkas .akh-grafik-latar, .akh-grafik-ringkas .akh-grafik-jalur { display: block; height: 100%; border-radius: 0; shape-rendering: crispEdges; }
+.akh-grafik-ringkas .akh-grafik-latar { position: absolute; left: 0; top: 0; width: 100%; }
+.akh-grafik-ringkas .akh-grafik-jalur { position: relative; flex: 1 1 0; min-width: 0; width: auto; overflow: visible; }
+.akh-grafik-ringkas .akh-grafik-pita-0 { fill: #f3f6ee; }
+.akh-grafik-ringkas .akh-grafik-pita-1 { fill: #e4ecd9; }
+.akh-grafik-ringkas .akh-grafik-garis { stroke-width: 2px; stroke-linejoin: miter; }
+.akh-grafik-ringkas .akh-grafik-titik path { stroke-linecap: square; }
+.akh-grafik-ringkas .akh-grafik-titik-luar { stroke: #1f5c40; stroke-width: 6px; }
+.akh-grafik-ringkas .akh-grafik-titik-dalam { stroke: #fffdf6; stroke-width: 2px; }
+.akh-grafik-ringkas .akh-grafik-titik-akhir .akh-grafik-titik-luar { stroke: #1c2b24; stroke-width: 10px; }
+.akh-grafik-ringkas .akh-grafik-titik-akhir .akh-grafik-titik-dalam { stroke: #e0b84f; stroke-width: 6px; }
+.akh-grafik-nama, .akh-grafik-talang { font-size: 10.5px; line-height: 12px; font-weight: 800; white-space: nowrap; pointer-events: none; }
+.akh-grafik-nama { position: absolute; left: 5px; top: 1px; color: #2f5439; }
+/* Talang = lebar label terpanjang + 12 px (33 px zh, 48 px id, 61 px en di mock); garis berhenti di tepi kirinya. */
+.akh-grafik-talang {
+  position: relative; flex: none; display: flex; flex-direction: column; justify-content: space-between; align-items: flex-end; padding: 1px 5px 1px 7px; color: #4b5f4c;
+}
+
+/* 4 strip keputusan: legenda 18 + 3 baris x 44. Satu atlas (seni/akhir/token-keputusan.png, 128 x 44): sel token 32 x 32 di
+   baris atas, lencana tanda 12 x 12 di y 32. */
+.akh-token { display: grid; gap: 2px; }
+.akh-token-legenda {
+  display: flex; justify-content: space-between; align-items: center; height: 18px; margin: 0; padding: 0 3px; list-style: none;
+  font-size: 12.5px; line-height: 18px; font-weight: 600; color: #2f4637;
+}
+.akh-token-legenda li { display: inline-flex; align-items: center; gap: 4px; white-space: nowrap; }
+.akh-token-legenda b { font-weight: 800; color: #17362a; }
+.akh-tanda, .akh-token-gambar { background: url('../seni/akhir/token-keputusan.png') 0 0 no-repeat; image-rendering: pixelated; }
+.akh-tanda { flex: none; display: block; width: 12px; height: 12px; background-position: 0 -32px; }
+.akh-tanda[data-nilai="kurang"] { background-position: -12px -32px; }
+.akh-tanda[data-nilai="keliru"] { background-position: -24px -32px; }
+.akh-tanda[data-nilai="kosong"] { background-position: -36px -32px; }
+.akh-token-daftar { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); margin: 0; padding: 0; list-style: none; }
+.akh-token-tombol {
+  position: relative; width: 100%; height: 44px; margin: 0; padding: 0; border: 0; background: none; display: grid; place-items: center;
+  font: inherit; cursor: pointer; -webkit-tap-highlight-color: transparent;
+}
+.akh-token-gambar { position: relative; flex: none; display: block; width: 32px; height: 32px; font-style: normal; }
+.akh-token-tombol .akh-token-gambar { margin-top: -4px; }
+.akh-token-gambar[data-nilai="kurang"] { background-position: -32px 0; }
+.akh-token-gambar[data-nilai="keliru"] { background-position: -64px 0; }
+.akh-token-gambar[data-nilai="kosong"] { background-position: -96px 0; }
+/* Nomor di atas badan 28 x 28 (sel: 0, 4): putih di hijau 4,9 : 1 dan merah 4,7 : 1; gelap di kuning 7,8 : 1 dan abu. */
+.akh-token-gambar b {
+  position: absolute; left: 0; top: 4px; width: 28px; height: 27px; display: grid; place-items: center; font-style: normal; font-size: 14px;
+  line-height: 1; font-weight: 800; color: #fff;
+}
+.akh-token-gambar[data-nilai="kurang"] b, .akh-token-gambar[data-nilai="kosong"] b { color: #1e2b24; }
+/* Token yang lembarnya terbuka: bingkai emas 3 px + garis luar 1 px di sekeliling badan. */
+.akh-token-tombol[aria-expanded="true"] .akh-token-gambar::after {
+  content: ''; position: absolute; left: -3px; top: 1px; width: 34px; height: 34px; box-sizing: border-box; border: 3px solid #e0b84f; box-shadow: 0 0 0 1px #1c2b24;
+}
+.akh-satu .akh-token-tombol:focus-visible { outline: 3px solid #1d6fd1; outline-offset: -3px; }
+
+/* 5 Pelajaran: Miss Raksa 32 di bingkai 36 + gelembung ucapan (seni gelembung T-022), teks 2 baris, membuka lembar. */
+.akh-pelajaran-tombol {
+  position: relative; display: grid; grid-template-columns: 36px minmax(0, 1fr); gap: 8px; align-items: start; margin: 0; padding: 0; border: 0;
+  background: none; color: inherit; font: inherit; text-align: left; cursor: pointer;
+}
+.akh-wajah { flex: none; display: block; width: 36px; height: 36px; box-sizing: border-box; border: 2px solid #1c2b24; background: #f3ead2; overflow: hidden; }
+.akh-wajah .cer-potret { display: block; width: 32px !important; height: 32px !important; border: 0 !important; border-radius: 0 !important; box-shadow: none !important; }
+.akh-wajah .cer-potret svg { width: 100%; height: 100%; }
+.akh-gelembung {
+  position: relative; display: grid; grid-template-columns: minmax(0, 1fr) 20px; gap: 0 6px; align-items: end; border: 6px solid transparent;
+  border-image: url('../seni/aktivitas/sim/gelembung-9i.png') 6 fill / 6px repeat; image-rendering: pixelated;
+}
+.akh-gelembung::before {
+  content: ''; position: absolute; left: -12px; top: 6px; width: 8px; height: 10px; background: url('../seni/aktivitas/sim/gelembung-ekor.png') 0 0 no-repeat;
+  image-rendering: pixelated;
+}
+.akh-gelembung small {
+  display: block; grid-column: 1 / -1; margin: -2px 0 0; font-size: 11.5px; line-height: 14px; font-weight: 800; letter-spacing: .06em;
+  text-transform: uppercase; color: #215c40;
+}
+.akh-gelembung-teks, .akh-gelembung p { margin: 0 0 -1px; font-size: 14.5px; line-height: 20px; color: #1c2b24; }
+.akh-gelembung-teks { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden; overflow-wrap: anywhere; }
+.akh-gelembung .akh-lagi { margin-bottom: 1px; }
+/* Episode tanpa mentor berpotret: gelembung saja, tanpa ekor. */
+[data-tanpa-wajah].akh-pelajaran-tombol, [data-tanpa-wajah].akh-alasan { grid-template-columns: minmax(0, 1fr); }
+[data-tanpa-wajah] > .akh-gelembung::before { display: none; }
+
+/* ---- isi lembar bawah (cangkang + letak: hp/desain.css ".akh-lembar"; komponen ui/LembarAkhir.tsx) ---- */
+.akh-lembar-kepala .akh-token-gambar { margin: 0 0 4px; }
+.akh-lembar-judul { flex: 1; min-width: 0; display: grid; gap: 1px; }
+.akh-lembar-judul small { font-size: 12px; line-height: 15px; font-weight: 700; color: #5c6f58; }
+.akh-lembar-judul small b { font-weight: 700; }
+.akh-lembar .akh-lembar-judul h2 { margin: 0; font-size: 16px; line-height: 20px; font-weight: 800; letter-spacing: -.01em; color: #17362a; overflow-wrap: anywhere; }
+.akh-lembar .akh-lembar-judul h2:focus, .akh-lembar .akh-lembar-judul h2:focus-visible { outline: none; } /* penerima fokus, bukan kontrol */
+.akh-lembar-tutup {
+  position: absolute; right: 4px; top: 6px; width: 44px; height: 44px; margin: 0; padding: 0; display: grid; place-items: center; border: 0; border-radius: 8px;
+  background: none; color: #215c40; cursor: pointer;
+}
+/* Peta: satu balok per keputusan (warna = klasifikasinya); balok keputusan ini lebih tinggi dan berbingkai emas. */
+.akh-peta { display: grid; gap: 3px; margin: 6px 0 8px; }
+.akh-peta i { height: 6px; background: #277f5e; box-shadow: 0 0 0 1px #1c2b24; }
+.akh-peta i[data-nilai="kurang"] { background: #e0b84f; }
+.akh-peta i[data-nilai="keliru"] { background: #c0512b; }
+.akh-peta i[data-nilai="kosong"] { background: #aeb6bd; }
+.akh-peta i[data-kini] { height: 10px; margin-top: -2px; box-shadow: 0 0 0 1px #1c2b24, 0 0 0 3px #e0b84f; }
+.akh-baris { margin: 0; overflow-wrap: anywhere; }
+.akh-baris b, .akh-lembar-sub { display: block; margin: 0; font-size: 12px; line-height: 15px; font-weight: 800; letter-spacing: .04em; text-transform: uppercase; color: #5c6f58; }
+.akh-baris-hasil { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+/* Cap hasil: tanda + kata, tiga warna yang sama dengan token. */
+.akh-cap {
+  flex: none; display: inline-flex; align-items: center; gap: 5px; height: 24px; padding: 0 8px 0 6px; box-sizing: border-box; border: 2px solid #1b5c43;
+  background: #e5f2e8; color: #1b5c43; font-size: 13px; font-weight: 800; white-space: nowrap;
+}
+.akh-cap[data-nilai="kurang"] { border-color: #7a5a12; background: #fbf1d8; color: #7a5a12; }
+.akh-cap[data-nilai="keliru"] { border-color: #8f2419; background: #f8e3df; color: #8f2419; }
+.akh-cap[data-nilai="kosong"] { border-color: #5d646b; background: #eef0eb; color: #4d5a52; }
+.akh-alasan { display: grid; grid-template-columns: 36px minmax(0, 1fr); gap: 8px; align-items: start; margin: 0; }
+.akh-alasan .akh-gelembung { display: block; }
+/* Label di lembar = satu baris 20 px tanpa margin negatif (angka mock: lembar keputusan 320..443 px). */
+.akh-alasan .akh-gelembung small { margin: 0; line-height: 20px; }
+.akh-alasan .akh-gelembung p { overflow-wrap: anywhere; }
+.akh-navigasi { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 10px; }
+.akh-navigasi button {
+  height: 48px; margin: 0; padding: 0 12px; display: flex; align-items: center; justify-content: center; gap: 6px; border: 0; border-radius: 12px; background: #fff;
+  color: #215c40; font: inherit; font-size: 15.5px; font-weight: 800; box-shadow: inset 0 0 0 2px #215c40, inset 0 -4px 0 #d9dfce; white-space: nowrap; cursor: pointer;
+}
+/* Ujung daftar: tombolnya tetap bisa difokus (aria-disabled), supaya fokus tidak hilang saat sampai di keputusan 1 / 15. */
+.akh-navigasi button[aria-disabled="true"] { color: #8a968c; box-shadow: inset 0 0 0 2px #c9d3c5, inset 0 -4px 0 #e6e9e0; cursor: default; }
+.akh-lembar-teks { margin: 0; font-size: 16px; line-height: 24px; color: #1e2b24; overflow-wrap: anywhere; }
+.akh-lembar-tautan {
+  justify-self: start; min-height: 44px; margin: 0; padding: 0; border: 0; background: none; color: #215c40; font: inherit; font-size: 15px; font-weight: 700;
+  text-decoration: underline; text-underline-offset: 4px; cursor: pointer;
+}

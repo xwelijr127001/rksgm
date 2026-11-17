@@ -62,6 +62,13 @@ export const TEKS_AUTO_2_ZH: Record<string, string> = {
   'lokasi.bengkel': 'Mitra 修理厂',
   'lokasi.tol': '高速公路路段',
   'lokasi.wawancara': '访谈室',
+  // T-025: Ruang Rapat Komite Klaim. Nama ruang + SATU kalimat per keadaan ruang untuk pembaca layar (anggota komite dan tanda
+  // SETUJU / CATATAN adalah gambar; tandanya tetap berbahasa Indonesia di semua bahasa, jadi kalimat ini yang membawa artinya).
+  'lokasi.komite': '理赔委员会会议室',
+  'lokasi.komite.tunggu': '理赔委员会会议室。四位委员坐在长桌后面等候。',
+  'lokasi.komite.setuju': '理赔委员会会议室。四位委员都点了头，每人头顶出现“同意”标记。',
+  'lokasi.komite.catatan': '理赔委员会会议室。两位委员举起了手，两人头顶出现“备注”标记。',
+  'lokasi.komite.kosong': '理赔委员会会议室。长桌后面的四把椅子都空着。',
   'latar.bengkel.antrean': '本周排期',
   'latar.bengkel.penuh': '已满',
   'latar.tol.rambu1a': '卡车和挂车禁行',
@@ -92,6 +99,11 @@ export const TEKS_AUTO_2_ZH: Record<string, string> = {
   'istilah.pemeriksaan.arti': '负责查看现场、访谈证人的团队，用来确认事故经过以及是否属于保单保障范围。',
   'istilah.komite.label': '理赔委员会',
   'istilah.komite.arti': 'Raksa 内部负责决定大额理赔的团队。',
+  // T-025: peran empat anggota (urut kursi kiri -> kanan), di bawah arti bersama ikon kepala 32 px.
+  'istilah.komite.anggota.1': '主席',
+  'istilah.komite.anggota.2': '核保员',
+  'istilah.komite.anggota.3': '查勘员',
+  'istilah.komite.anggota.4': '理赔主管',
   'istilah.penawaran.label': '赔偿方案通知书',
   'istilah.penawaran.arti': '写明赔偿金额及其计算依据的函件。',
   'istilah.leasing.label': 'Leasing Sentosa',
@@ -509,7 +521,7 @@ export const TEKS_AUTO_2_ZH: Record<string, string> = {
   'k11.akibat.kabar.d': '可是决定还没有出来。如果委员会要求修改，你就得收回自己的话。',
   'k11.akibat.kabar.d2': '可是决定还没有出来，案卷又刚被委员会退回。你得收回自己的话。',
   'k11.akibat.kabar.d3': '可是案卷还没有提交委员会，决定也没有出来。你得收回自己的话。',
-  'k11.akibat.kabar.e': '你没有补充任何关于流程的消息。Hendra 先生只收到一份很长的技术报告，看得一头雾水。那份报告是给委员会看的，不是让客户批准的。',
+  'k11.akibat.kabar.e': '你没有补充任何关于流程的消息。Hendra 先生只收到一份很长的技术报告，看得一头雾水。',
   'k11.akibat.kabar.e2': '你的消息说理赔已进入审批阶段，可案卷还没有提交委员会。Hendra 先生看那份很长的技术报告也一头雾水；那份报告是给委员会看的，不是让客户批准的。',
   // Baris akibat K11 lama: tidak dipakai naskah lagi, DIPERTAHANKAN agar riwayat simpanan lama tetap terbaca.
   'k11-a.1': '案卷进入委员会，没有缺件记录。',

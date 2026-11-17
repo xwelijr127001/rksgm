@@ -150,7 +150,19 @@ export interface CueLatar {
   telepon?: IdPembicara | null;
   /** Benda akibat keputusan yang terlihat (id objek LokasiIlustrasi.objek). */
   objek?: string[];
+  /**
+   * (T-025) Keadaan SPRITE MILIK RUANG di ruang yang punya blok `komite` (Ruang Rapat Komite Klaim): empat anggota hiasan
+   * yang bukan pemeran dan tidak pernah berbicara. Bertahan sampai cue berikutnya; di ruang lain tidak digambar apa pun.
+   */
+  komite?: KeadaanKomite;
 }
+
+/**
+ * Keadaan anggota Komite Klaim di ruangnya: `tunggu` duduk menunggu, `setuju` mengangguk + tanda SETUJU, `catatan` dua anggota
+ * mengangkat tangan + tanda CATATAN, `kosong` kursi kosong.
+ */
+export type KeadaanKomite = 'tunggu' | 'setuju' | 'catatan' | 'kosong';
+export const KEADAAN_KOMITE: readonly KeadaanKomite[] = ['tunggu', 'setuju', 'catatan', 'kosong'];
 
 /**
  * Konfigurasi panggung latar sebuah episode (alternatif dari `panggung` dunia Episode 1). T-013 Stage 3: lokasi = ruang
@@ -158,8 +170,11 @@ export interface CueLatar {
  * atlas piksel (adegan.ts PERAN_PIKSEL). Panggung ilustrasi (WebP) dan asetnya sudah dihapus.
  */
 export interface KonfigLatar {
-  /** Lokasi -> nama tempat (kunci teks) + id ruang piksel. */
-  lokasi: Record<string, { nama: KunciTeks; piksel: string }>;
+  /**
+   * Lokasi -> nama tempat (kunci teks) + id ruang piksel. `komite` (T-025, ruang bersprite milik ruang): SATU kalimat per
+   * keadaan untuk pembaca layar (gambarnya hiasan; tanda SETUJU / CATATAN adalah piksel, bukan teks).
+   */
+  lokasi: Record<string, { nama: KunciTeks; piksel: string; komite?: Record<KeadaanKomite, KunciTeks> }>;
   /** Komposisi sebelum cue mana pun. */
   awal: CueLatar;
   /**
@@ -512,6 +527,12 @@ export interface Istilah {
   label: KunciTeks;
   /** Arti dengan kata sehari-hari, satu-dua kalimat. Materi klaim: dicatat di TINJAUAN-PIC-CLAIM.md. */
   arti: KunciTeks;
+  /**
+   * (T-025) Rincian di bawah arti: satu baris per anggota (mis. empat anggota Komite Klaim), masing-masing satu kalimat peran
+   * dan, bila ada, ikon piksel 32 px (`ikon` = id sel ikon, mis. 'komite-ketua'; CSS .cer-istilah-ikon[data-ikon]; hiasan,
+   * kalimatnya yang membawa arti).
+   */
+  anggota?: { teks: KunciTeks; ikon?: string }[];
 }
 
 export interface Suasana {

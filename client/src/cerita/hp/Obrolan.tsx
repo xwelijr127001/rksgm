@@ -81,7 +81,7 @@ export function Obrolan({ ep, state, tx, status, pesanAktivitas, komposer, sisip
   lembar?: boolean;
 }) {
   const reduced = useReducedMotion();
-  const { pesan, sesiMulai } = useMemo(() => utasObrolan(ep, state, pesanAktivitas), [ep, state, pesanAktivitas]);
+  const { pesan, sesiMulai, sesiTengahNode } = useMemo(() => utasObrolan(ep, state, pesanAktivitas), [ep, state, pesanAktivitas]);
   const [bukaLama, setBukaLama] = useState(false);
   const nama = tx(ep.pemeran[ep.nasabah]?.nama ?? ep.nasabah);
   const cutIn = idCutIn(ep, pesan);
@@ -96,7 +96,8 @@ export function Obrolan({ ep, state, tx, status, pesanAktivitas, komposer, sisip
   // Gerbang hanya untuk sesi yang DIMULAI oleh titik keputusan percakapan (mis. K01, K06, K12); sesi yang dibuka oleh akibat
   // keputusan (mis. jawaban Pak Hendra sesudah K08-D) langsung tampil, agar akibat tidak tertahan di balik tombol.
   const nodeAwalSesi = sesi[0] ? ep.node[sesi[0].node] : undefined;
-  const gerbang = !!tujuan && !adaKeluar && !mulai && sesi.length > 0 && nodeAwalSesi?.jenis === 'pilihan';
+  // T-025: sesi yang mulai di TENGAH node (pembukanya adegan yang sudah dilewati pemain: ruang Komite di K13) juga langsung tampil.
+  const gerbang = !!tujuan && !adaKeluar && !mulai && sesi.length > 0 && nodeAwalSesi?.jenis === 'pilihan' && !sesiTengahNode;
 
   // ---- sedang mengetik
   const [ketik, setKetik] = useState<string | null>(null);

@@ -2,15 +2,17 @@
    dengan bingkai + kata (bukan warna saja). Desktop = kolom yang sama, lebih lebar. Gerak dikurangi: tanpa animasi. */
 
 /* Dasar visual (satu bahasa dengan adegan /lokasi): hijau hutan, krem hangat, sage, kuning hemat; Plus Jakarta Sans (deklarasi font di
-   cerita/lokasi/seni/font.css, diimpor lewat seni/Aset.tsx; lisensi OFL di folder yang sama). Hanya berlaku di .hp-layar (Episode 2); Episode 1 dan mode lain tidak berubah. */
-.hp-layar {
+   cerita/lokasi/seni/font.css, diimpor lewat seni/Aset.tsx; lisensi OFL di folder yang sama). Hanya berlaku di .hp-layar (Episode 2); Episode 1 dan mode lain tidak berubah.
+   .hp-tema (T-024) = dasar yang sama untuk lapisan milik layar HP yang dipasang di <body> (lembar layar akhir, ui/LembarAkhir.tsx). */
+.hp-layar, .hp-tema {
   --hp-tinta: #1e2b24; --hp-redup: #4d5a52; --hp-hijau: #215c40; --hp-hijau-muda: #eaf0e1; --hp-garis: #d9dfce;
   --hp-kertas: #fcfbf6; --hp-latar: #f8f7f2; --hp-sage: #b9c9a4; --hp-kuning: #e0b84f;
-  min-height: 100dvh; background: var(--hp-latar); color: var(--hp-tinta);
+  color: var(--hp-tinta);
   font-family: 'Plus Jakarta Sans', system-ui, -apple-system, 'Segoe UI', sans-serif; -webkit-font-smoothing: antialiased;
 }
-.hp-layar :is(h1, h2, h3, h4, button, input, select, textarea, summary, .primary-action) { font-family: inherit; }
-.hp-layar :focus-visible { outline: 3px solid #215c40; outline-offset: 2px; }
+.hp-layar { min-height: 100dvh; background: var(--hp-latar); }
+:is(.hp-layar, .hp-tema) :is(h1, h2, h3, h4, button, input, select, textarea, summary, .primary-action) { font-family: inherit; }
+:is(.hp-layar, .hp-tema) :focus-visible { outline: 3px solid #215c40; outline-offset: 2px; }
 /* Kepala lengket (56 px + inset): gulir ke fokus/elemen berhenti DI BAWAH kepala, tidak tertutup olehnya. */
 :root:has(.hp-layar) { scroll-padding-top: calc(68px + env(safe-area-inset-top)); scroll-padding-bottom: 12px; }
 
@@ -45,6 +47,12 @@
   border-radius: 12px; background: #fff; font: inherit; font-size: 16px; text-align: left; color: var(--hp-tinta); cursor: pointer;
 }
 .hp-menu-baris { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 48px; padding: 4px 4px 4px 12px; font-size: 16px; }
+/* T-024: baris keterangan (bukan tombol) di Menu layar akhir satu layar: legenda rentang suasana + catatan simulasi & status naskah.
+   Warna ditulis langsung: Menu = Modal di <body>, di luar .hp-layar (variabel --hp-* tidak sampai ke sana). */
+.hp-menu-info { display: grid; gap: 4px; padding: 10px 4px 2px 12px; border-top: 1px solid #e6e3d6; font-size: 14.5px; line-height: 1.45; color: #4d5a52; }
+.hp-menu-info > b { font-size: 16px; font-weight: 800; color: #1e2b24; }
+/* D-246: baris keterangan kini di tengah daftar (di atas bahasa & suara): garis penutup di baris sesudahnya. */
+.hp-menu-info + li:not(.hp-menu-info) { border-top: 1px solid #e6e3d6; }
 
 /* ---------------------------------------------------------------- tombol bersama */
 .hp-layar .primary-action { min-height: 52px; font-size: 17px; }
@@ -461,6 +469,7 @@
 
 @media (prefers-reduced-motion: reduce) {
   :root:not([data-gerak="penuh"]) .hp-layar *,
+  :root:not([data-gerak="penuh"]) .hp-tema *,
   :root:not([data-gerak="penuh"]) .hp-terbang { animation: none !important; transition: none !important; }
 }
 

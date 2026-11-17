@@ -3502,3 +3502,244 @@ Whole walk on this build: 261 picture checks and 64 frame checks per Indonesian 
 
 ### Not verified by me
 A real phone and WebKit (the finger drag most of all). The clean path to `ksim-a`, the motion-on timings, Chinese, and 390 × 844 on this build (all passed on the build of 00:27:30). English at sizes other than 360 × 640. The same files as in the review were not compared pixel by pixel (desk tile, terminal "typing" frame, bubble tail, Pak Darto's figure, frame edges). The test suites. The four cheap additions from the review (drag arrow, step numbers, speaker name, two-step arrival) were not part of this fix and are still only ideas.
+
+---
+
+## T-024 — mock (2026-11-17)
+
+Designer · Folder: C:\Users\User\Desktop\rksgm-episode2 · No client source edits, no commit, BOARD.md not touched.
+Build: production build of 04:04:46, unchanged during the runs. My own server on :4002 (other ports not touched).
+Method (run light: one headless Chrome at a time, below-normal priority, no test suite): read the spec `team/specs/2026-11-17-T-024-T-025.md` sections 1 to 6. I measured the ending as it is today, then built the one-screen layout **inside the real ending page** (real header, real pinned action bar, real fonts, the real texts and decisions of the three saved endings) by injecting the mock's CSS and markup, and measured every block. Sizes 390 × 645 and 360 × 640; Indonesian and Chinese as asked, and English as well because it is the longest. I opened the Indonesian and Chinese sheet at 360 × 640, the sheet of five sheets at 390 × 645 and two single screens; the other screens I judge from the numbers. Evidence: `team/evidence/T-024/designer/` (`mock-*.png`, `sebelum-sesudah-390x645-id.png`, `ukur-*.txt`, `mock-akhir-satu-layar.css` = the exact rules the mock used).
+
+### Result: the spec's layout fits one screen at both sizes in all three languages and all three endings, with nothing cut and the fit rule never needed. Smallest space left: 17 px (360 × 640, English).
+
+### Today (for comparison)
+The scroll area between header and action bar is 519 px at 390 × 645 and 514 px at 360 × 640 (English: 510 and 505, because the English header is 66 px, not 57). The ending is 2,014 to 2,408 px long: **3.9 to 4.8 screens** at these two sizes. The decision list alone is 1,208 to 1,357 px.
+
+### Fit numbers per block (px)
+| Block (spec no.) | Height | Notes |
+| --- | --- | --- |
+| 1 Head row | 56 (57) | portrait 56; mood chip 14 / 18, padding 1 × 10; ending-name line 13 / 16. 57 when the ending name wraps to two lines (the mixed ending at 360 px, Indonesian and English) |
+| 2 Title | 25 or 50 | 21 / 25, weight 800, at most two lines; never cut in the nine texts |
+| 2 Reason | 40 | 14.5 / 20, two lines, always clamped (all nine texts are longer); 4 px under the title |
+| 3 Status chart | 72 | 2 px frame included; five bands; "Puas" and "Kecewa" in a gutter at the right (33 to 61 px wide) |
+| 4 Legend row | 18 | three marks with counts: "6 Tepat · 5 Kurang tepat · 4 Keliru"; widest 242 px of 330 |
+| 4 Token grid | 132 | 3 rows × 44; 5 columns; touch target = the grid cell, 67 × 44 at 360 and 73 × 44 at 390; token picture 28 × 28 plus mark |
+| 5 Lesson | 63 | Miss Raksa 32 in a 36 px frame, speech bubble, label 11.5 / 14, text 14.5 / 20 two lines (clamped) |
+| Gaps | 38 | 8 between blocks (four), 4 title to reason, 2 legend to tokens |
+| **Content** | **444 to 470** | room: 501 / 492 (390 × 645, id and zh / en), 496 / 487 (360 × 640); padding 10 top, 8 bottom |
+
+| Space left under the content (px) | Puas | Selesai dengan catatan | Kurang puas |
+| --- | --- | --- | --- |
+| 390 × 645 Indonesian | 57 | 57 | 57 |
+| 390 × 645 Chinese | 57 | 57 | 57 |
+| 390 × 645 English | 48 | 23 | 48 |
+| 360 × 640 Indonesian | 52 | 26 | 27 |
+| 360 × 640 Chinese | 52 | 52 | 52 |
+| 360 × 640 English | 18 | 17 | 43 |
+- In all 18 screens: page height = viewport, page width = viewport, no inner scroll, action bar 69 px unchanged.
+- **If a later text does not fit:** the chart goes first, 72 → 56 (16 px; in the mock it shrinks by itself, `flex: 0 1 72px; min-height: 56px`), then the reason line (44 px with its gap), as the spec says. A third step, if ever needed: the legend row (20 px). Tokens and the lesson are never cut.
+
+### Look
+- **Tokens** (`character/akhir-ep2-pixel-v1/token-keputusan.png`, 128 × 44, 16 colours, **496 B**, all colours from the Ep2 palette): a bevelled pixel tile 28 × 28 with a 2 px dark outline and stepped corners, in three colours (green `#277f5e` Tepat, amber `#e0b84f` Kurang tepat, brick red `#c0512b` Keliru) plus grey for a decision with no record. Each tile carries a 12 × 12 mark at its top right corner (tick, exclamation mark, cross), so the value never depends on colour alone. The number is HTML, 14 px / 800: white on green (4.9 : 1) and red (4.7 : 1), dark on amber (7.8 : 1). The open token gets a 3 px gold ring.
+- **Chart:** 2 px dark frame, square 6 px points, 2 px line drawn with crisp edges, the last point a 10 px gold square. No legend row.
+- **Lesson:** Miss Raksa says it in a speech bubble; the bubble and its tail are the T-022 files, so no new art.
+- **Decision sheet:** the reply-sheet shell (`.hp-lembar`: gold top edge, handle), over a 45 % dark scrim, covering the action bar. Head: the token, "Keputusan 3 dari 15", the title, a close button 44 × 44. A strip of 15 small blocks shows where you are. Body: "Pilihanmu" with the result tag (mark + word, same three colours), "Disarankan" only when it differs, and the reason in Miss Raksa's bubble. "Sebelumnya" and "Berikutnya" are 48 px buttons fixed at the bottom of the sheet, so they stay under the thumb while the sheet height changes. Heights for the 15 decisions of the mixed ending: 260 to 443 px; the tallest (443, at 360 × 640) starts 131 px below the header; the body never scrolls in the 90 cases measured (15 × three languages × two sizes).
+- The lesson and the reason open in the same shell (114 to 226 px high).
+
+### Items
+- [D-226] Fit · as above: fits with 17 to 57 px left, the fit rule is not triggered by today's texts · build to the block sizes in the table · info.
+- [D-227] Head row · at 360 px "Akhir campuran: Selesai dengan catatan" (and the English) needs two lines; with a fixed 56 px row the mood chip was cut at the top · `min-height: 56px`, not a fixed height, and the sizes above (row becomes 57) · med.
+- [D-228] Reason line · it is always clamped, and the spec sends the reader to "Perjalananku" for the rest, but in Episode 2 that button is not rendered today (it is hidden when the episode has numbered decisions) · make the reason line itself a button (a 20 × 20 pixel chevron at its right end, 44 px touch height) that opens the sheet shell with the whole sentence and the link "Lihat perjalananku" · **Lead decision**; mocked this way (`mock-lembar-390x645-id.png`, last tile).
+- [D-229] Chart caption and labels · the caption "Status Pak Hendra dari awal sampai akhir" inside the chart could be crossed by the line of a very good run, and the band labels were hit by the last point of a bad run · short caption "Status {nama}" at top left (new key, e.g. `ceritaAkhir.statusSingkat`: "Status {nama}" / "Status of {nama}" / "{nama} 的状态"; the long sentence stays as the chart's accessible name) and the two band labels in their own gutter at the right, where the line never goes · med.
+- [D-230] Chart points are status changes, not decisions: 16 points in two endings, 17 in the third. So a point cannot be linked to a token; I dropped that idea · info.
+- [D-231] Legend row above the tokens · not in the spec. Without it nothing on the screen says what the three colours mean until a token is tapped · keep the 18 px row (marks + counts + the existing words); it also replaces the visible heading "Ringkasan 15 keputusanmu", which becomes a screen-reader heading · low, recommended.
+- [D-232] Sheet head · "Keputusan {n} dari {total}" needs a key (e.g. `ceritaAkhir.lembar.nomor`: "Keputusan {n} dari {total}" / "Decision {n} of {total}" / "第 {n} 个决定，共 {total} 个"), and the close button a label (`ceritaAkhir.lembar.tutup` or an existing "Tutup") · low.
+- [D-233] Three texts of today's ending have no place in the spec's layout · (a) the retry sentence "Pilihanmu sejak bagian itu diganti; akhir yang sudah ditemukan tetap tercatat." (38 px): keep it as the retry button's `aria-describedby` text only, not visible on phones; (b) the script-status note under the decision list (78 to 136 px): into the Menu row "Catatan simulasi" together with the disclaimer; (c) the chart caption sentence and the summary heading: screen-reader only · **Lead decision**; the mock assumes exactly this.
+- [D-234] English header is 66 px (the episode title wraps), so English has 9 px less room than the other languages at both sizes. It still fits. For the new `cek-akhir` assertion: measure the scroll area, do not assume 57 · info.
+- [D-235] Menu rows · not mocked as pictures. Text for "Rentang suasana": the existing legend in one line, "80+ Puas · 60+ Percaya · 40+ Tenang · 20+ Cemas · 0+ Kecewa"; for "Catatan simulasi": the existing disclaimer sentence, then the script-status note (D-233 b) · info.
+- [D-236] Cut order, added after reading spec rev 1.1 · rev 1.0 says "the chart shrinks first (min 56 px), then the sebab line hides"; rev 1.1 says "cut order unchanged (sebab first, chart to 56 px next)". The two disagree. The mock follows rev 1.0 (chart first). No text of today triggers either step, so nothing in the numbers above changes · **Lead to say which order is meant**; my preference is chart first, because the reason line is information and 16 px of chart is not · low.
+
+### Not verified by me
+A real phone and WebKit. Sizes other than the two asked. The decision sheet only with the choices of the saved mixed ending (the reasons are the same in every playthrough; the "Pilihanmu" lines differ). Keyboard and focus order (a mock has none). The Menu rows. The fit rule in action: no text triggers it, so I only checked that the chart is the block that gives way.
+
+---
+
+## T-025 — concept + art (2026-11-17)
+
+Designer · Folder: C:\Users\User\Desktop\rksgm-episode2 · No client source edits, no commit, BOARD.md not touched. No browser and no server used for this part.
+Read: spec `team/specs/2026-11-17-T-024-T-025.md` rev 1.0 and rev 1.1 (members are room-owned sprites with anchors, z-order, a pose-state map and tag references). Delivered in `character/komite-ep2-pixel-v1/` by one script (`alat/bangun.mjs`); README with every offset and frame list; `BYTE.md`. Mocks and check pictures in `team/evidence/T-025/designer/`. I opened the three 390-wide mocks side by side, the full room at 2x, the frame sheet of the four members, the icon strip and a test picture with all four hands up and all eyes closed.
+
+### Concept
+A meeting room seen from the front. Four members sit behind one long table and look towards the middle; the LAYANAN KLAIM RAKSA plate hangs above them; a jug, two glasses and a paper per seat are on the table; on wide screens a whiteboard with a small "KLAIM" sheet and a picture are also in view. The verdict lands above each head as a stamp card, in the T-022 stamp style: SETUJU in green, one by one, while the heads nod; or CATATAN in amber above the two members who raise a hand; or four empty chairs.
+The members are at the game's own character scale (heads 36 art pixels wide, 1 art pixel = 4 world units), cut from game atlas frames and recoloured, so they match the hendra and bima atlases by construction: Ketua Komite (steel blue hijab, glasses), Underwriter (grey hair, white shirt, lanyard), Surveyor (olive cap, khaki field vest), Kepala Klaim (dark green blazer).
+
+### Files and bytes
+| File | Size | Colours | Bytes |
+| --- | --- | --- | --- |
+| `ep2-ruang-komite-latar.png` (background, z 10) | 400 × 225 | 22 | 938 |
+| `ep2-ruang-komite-meja.png` (table layer, z 30, at art y 112) | 400 × 64 | 14 | 395 |
+| `komite.png` (four members: head, body, blink patch, raised arm) | 253 × 129 | 125 | 6,713 |
+| `ep2-komite-tanda.png` (SETUJU, CATATAN, 62 × 26 each) | 124 × 26 | 4 | 267 |
+| `komite-ikon.png` (four 32 × 32 head icons for the istilah sheet) | 128 × 32 | 68 | 1,576 |
+| **Total, 5 runtime PNGs** | | | **9,889 of 12,288** |
+- Manifests (not PNG): `ruang-komite.json` 3,620 B = the room entry `komite-ep2` for `ruang-ep2.json` (layers, frames, focus box, and the block `komite`: atlas reference, z 20, tag z 40, the four ids with anchor and frame box, the pose list, the state map `tunggu` / `setuju` / `catatan` / `kosong`, the tag cells and positions, the reduced-motion rule); `komite.json` 4,599 B = cells, offsets, poses, portraits.
+- Every colour is from the game's palette: 0 pixels outside it; largest colour move 0.043 (OKLab).
+- **Check:** `alat/periksa-manifes.mjs` draws the room from the two JSON files and the PNGs alone; for `tunggu` and `setuju` 0 of 360,000 pixels differ from the builder's pictures. So the numbers in the manifest are enough to draw every state.
+
+### Frames (all are stacks of cells; no frame has its own picture)
+| Pose | Stack | Timing |
+| --- | --- | --- |
+| idle `diam` | body, head | still |
+| blink `kedip` | body, head, eye patch | 120 ms, every 3 to 6 s per member |
+| nod `angguk`, 2 frames | head 3 px down; head back | 160 ms each, twice |
+| raised hand `angkat` | body, head, arm | still |
+Seats at art x 101, 167, 233, 299; table edge y 116 (anchor = seat on the table edge); tags at (seat − 31, 20). The README has the 16 cell rectangles and offsets.
+
+### Mocks
+- `mock-komite-setuju-390.png`, `mock-komite-catatan-390.png`, `mock-komite-kursi-kosong-390.png` (and `mock-komite-menunggu-390.png`): the phone frame (275 of 400 art pixels wide) in a 366 px stage on a 390 px canvas, at 2x. `tiga-mock-390.png` shows the three side by side.
+- `empat-keadaan-ruang-penuh-2x.png`: the whole room in the four states (wide screens). `anggota-bingkai-3x.png`: the four poses of each member. `ikon-32-4x.png`: the four icons.
+
+### Items
+- [D-237] Likeness · three members keep the face shapes of the frames they come from (Rudi, the toll officer, the admin), and the Ketua keeps Bu Rina's under a different hijab with glasses; they differ by hair, cap, clothes and seat. At stage size they read as four new people to me, but the owner should look once · if it bothers, new faces need hand work that this budget and script did not cover · **owner / Lead to look**.
+- [D-238] Scale and frame · at character scale four seated members need 264 art pixels, so the phone frame is 1100 world units wide (as the office), seats 66 pixels apart, shoulders almost touching. A smaller scale would have broken the pixel grid · info.
+- [D-239] Phone view · the whiteboard with the "KLAIM" sheet and the picture are outside the phone frame; on phones the room shows the plate, the members, the tags and the jug. Bringing the sheet into the phone frame means giving up the wall space the tags use · accepted by me; Lead may disagree.
+- [D-240] Tags are art · SETUJU and CATATAN are pixels and stay Indonesian in English and Chinese, as the T-022 stamps do. The localized room sentence per state (rev 1.1) must carry the meaning · info for Fullstack and for the text keys.
+- [D-241] Which two raise a hand · the spec says "two members"; I chose the Underwriter and the Surveyor (seats 2 and 3, the middle of the picture). All four have an arm cell, so the map can change without new art · Lead may change the two ids in `ruang-komite.json`.
+- [D-242] Vertical cut · everything that matters lies in art y 0 to 155 (plate 2 to 17, tags 20 to 45, heads from 47, table top 114 to 127); the manifest's `fokus` box says so. On a flat stage box the table front may be cut; if heads or tags are cut, the crop rule is wrong, not the art · for Fullstack.
+- [D-243] 32 px portraits · delivered as mini head icons (whole head and collar, the game's own convention for 32 px slots), because a 1 : 1 window of 32 px shows only a face. The 1 : 1 windows are in the manifest too · info.
+- [D-244] The raised arm is drawn by the script with flat shading and is simpler than the atlas art; the hand reads as a hand at stage size, less so at 3x. A hand-drawn arm per member is possible later within the budget (2.4 KB left) · low.
+
+### Not verified by me
+Nothing is wired: I have not seen the room in the running game, on a real phone, or through the engine's camera and crop. Timing values (120, 160, 180 ms) are proposals on paper. The mocks scale the art 2.65 times with nearest neighbour, which is what a 366 px stage at DPR 2 does; other stage sizes were not drawn. The states `catatan` and `kosong` were not compared by the manifest check (only looked at).
+
+### Lead decisions on T-024 mock / T-025 art (2026-11-17)
+- D-236: cut order = chart 72 -> 56 first, then the reason line (rev 1.1 wording corrected; mock is right).
+- D-237: ACCEPTED, the four read as new people at stage size; owner may ask for new faces later.
+- D-239: ACCEPTED, whiteboard outside the phone frame; tags keep the wall space.
+- T-025 art ACCEPTED for integration (9,889 B).
+
+---
+
+## T-024 — review (2026-11-17)
+
+Reviewer: Designer · Folder: C:\Users\User\Desktop\rksgm-episode2 · No source edits, no commit, BOARD.md not touched.
+Build: production build of 12:32:31, unchanged before and after every run. My own server on :4002, started and stopped by me; ports 4001 and 4003 not touched.
+Method (run light: one headless Chrome at a time, below-normal priority, no test suite): read HANDOFF "T-024". The card at 390 × 645, 360 × 640 and 390 × 844, in id / en / zh, the three endings (27 screens, DPR 2), measured block by block; each screen at the two mock sizes compared with my mock's picture of the same screen, device pixel by device pixel, per block; the token pictures and legend marks compared with the atlas file at DPR 2 and DPR 3. On the mixed ending, in every size and language: a decision sheet opened by a real tap, all 15 decisions walked, arrow keys, the three ways to close, then the lesson sheet, the reason sheet, "Lihat perjalananku" and the Menu. One run with motion on, one run on shortened screens, and one test of whole texts on taller phones (test styles, not a source edit). I opened the built / mock / difference picture, the sheet strips for Indonesian at 360 × 640 and English at 390 × 645, the three 390 × 844 cards with the Menu, the shortened card and the tall-phone test. Evidence: `team/evidence/T-024/designer/review/`.
+
+### Verdict: PASS, no blocker. The card is my mock at both mock sizes, and every sheet works. One fix I ask for before the owner looks: D-245 (on taller phones texts are cut while a third of the screen is empty). Two small polish items.
+
+### What holds
+| Check | Result |
+| --- | --- |
+| Nothing scrolls | page, `.hp-main` and card: scroll 0 in all 27 screens; action bar 69 px, inside the screen; fit rule unused |
+| Space left under the content | equals the mock's table to the pixel: 390 × 645 id and zh 57 / 57 / 57, en 48 / 23 / 48; 360 × 640 id 52 / 26 / 27, zh 52 / 52 / 52, en 18 / 17 / 43. At 390 × 844: 256 (id, zh), 247 / 222 / 247 (en) |
+| Block heights | head 56 (57 when the ending name wraps), title 25 or 50 (21 / 25, weight 800, never cut), reason 40 (14.5 / 20, two lines), chart 72, legend 18 (12.5 / 18), tokens 132, lesson 63; portrait 56 × 56 |
+| Against the mock's pictures (18 screens, DPR 2) | **title, reason line, legend row and token grid: 0 device pixels differ in every screen.** Chart: about 3 % differ (points and line one device pixel off in places, two band edges; the same picture to the eye). Head: about 6 % (the real 56 px portrait window instead of my cropped one). Lesson, header and action bar: 0 to 0.13 % |
+| Token pictures against the atlas | 0 device pixels differ at DPR 2 (360 × 640) and at DPR 3 (360 × 640, 390 × 645, 390 × 844), number area left out; legend marks 0. The columns are 67.2 and 73.2 px wide, so some tokens sit one device pixel from the rounded place; the art stays whole-pixel |
+| Chart | 2 px frame; short caption at (7, 3) in the language ("Status Pak Hendra", "Status of Mr Hendra", "Hendra 先生 的状态"); label gutter 54 / 60 / 33 px with "Puas" / "Kecewa" in the language; 16 or 17 points; the long sentence is the accessible name; the plot ends 180 to 230 px right of the caption |
+| Tokens | 15 buttons, target 67.2 × 44 and 73.2 × 44, picture 32 × 32; names in the language ("Keputusan 1: Kabar pertama, Kurang tepat", "Decision 1: First contact, Not quite", "决定 1：第一次联系，不够恰当"); legend counts match the tokens |
+| Decision sheet | opens on a real tap; modal (page behind inert, focus inside, action bar covered); close button 44 × 44; "Keputusan 3 dari 15", title, map strip, "Pilihanmu" with the tag, "Disarankan" only when it differs, the reason in Miss Raksa's bubble. **Heights equal my mock's lists** in id, en and zh at both sizes (for example 360 × 640 id: 403 403 403 360 340 383 360 403 363 360 340 420 423 443 443). In the 135 decision sheets opened (15 × three languages × three sizes) no body scrolls; in the one I checked for it per run (decision 3) no text leaves the sheet; tallest 443 px against a limit of 575 |
+| Previous / Next | 48 px, always 10 px from the screen bottom, so they do not move while the sheet height changes; at 1 and at 15 the end button is off and stays in place; Left and Right arrow keys do the same |
+| Closing and focus | Escape, a tap on the backdrop and the close button each close the sheet and put focus back on the token of the decision last shown; the open token is marked while the sheet is up |
+| Lesson and reason sheets | the whole text in both; the lesson sheet returns focus to the lesson card; the reason sheet has "Lihat perjalananku", which opens the dialog with "Kenapa berakhir begini" and "Akhir yang ditemukan 1/3" (no empty groups) and returns focus to the reason line |
+| Sheet rise | 0.18 s with motion on; none with reduced motion |
+| Menu rows | both present in the three languages: "Rentang suasana" with the five ranges in one line, "Catatan simulasi" with the disclaimer and the script-status note |
+| Shorter screens (360 wide, mixed ending, id) | chart 72 → 66 at 608 → 58 at 600; at 592 the reason line hides and the chart is 72 again; 62 at 560; tokens and lesson never cut, nothing scrolls. With the reason hidden, the lesson sheet carries it ("Kenapa berakhir begini", the sentence, the link; 341 px, no scroll). Under 560 px of height the shell is not locked and the old scrolling card shows, as for every screen of the shell |
+
+### Items
+- [D-245] Taller phones · **fix before the owner looks.** At 390 × 844, the most common size, the reason line and the lesson are still cut at two lines with "…", while 256 px under the lesson are empty (222 to 247 in English); at 360 × 740 it is 117 to 152 px. I kept the mock's numbers for the two short sizes only; this is the gap I left, not a build fault. Measured with test styles: the whole lesson needs 40 px more (English at 360 wide 60, Chinese 20), the whole reason 20 to 40, a chart of 96 px 24. At 390 × 844 all three together still leave 138 to 192 px; at 360 × 740 both whole texts fit with 17 to 72 px left and the chart takes what remains (89 to 96) (`tall-phone-as-built-vs-whole-texts-test.png`) · when there is room, relax in this order while it fits: lesson whole, reason whole, chart up to 96 px; the fit helper already measures the card, so it is the same rule run the other way. The two sheets stay as they are · **med to high**, not a blocker.
+- [D-246] Menu rows are out of sight · they sit under the sound controls: at 640 and 645 px of height the Menu list must be scrolled 420 to 509 px to reach them, and at 844 only the first row's title shows (`sheets-menu-*.png`, last two tiles). Nothing on the card says the Menu holds the meaning of the bands · on the end card put the two rows first in the list, or directly under "Bantuan" · low to med.
+- [D-247] No press feedback · tokens, the reason line and the lesson card have no pressed state; the first thing that moves after a tap is the sheet. The reply sheet's options go 2 px down when pressed · the same here: the token picture and the two chevron chips 2 px down on `:active`, only with motion on · low, a few CSS lines; it is the one thing missing from the game feel.
+- Answers to the handoff's notes · 1 (chart first), 2 (lesson sheet carries the reason), 3 ("Perjalananku" without the empty groups), 4 (0.18 s rise, pointer-only handle, end buttons that keep focus): agreed, all seen working. 5: see D-246. 6: see D-245. 7 (blue ring on tokens, green on the two cards, card 12 px wider for the ring): accepted.
+
+### Game feel
+It reads as a result board, not a report: fifteen pieces in three colours with their marks, a framed status line, Miss Raksa speaking the lesson, and a sheet that steps through the decisions with a strip showing where you are. The tags in the sheet echo the T-022 stamps. One screen, no scrolling, the two buttons always in reach. What it lacks is the press (D-247); a soft sound on opening a decision would add to it, which is the owner's call.
+
+### Not verified by me
+A real phone and WebKit. Keyboard Tab order and a screen reader (I checked focus targets, arrow keys and Escape only). The fit rule in English and Chinese, and the screens under 560 px. The desktop card, which the handoff says is unchanged. Blocks other than the tokens at DPR 3. The chart's 3 % against the mock by eye on one screen only.
+
+---
+
+## T-025 — review (2026-11-17)
+
+Reviewer: Designer · Folder: C:\Users\User\Desktop\rksgm-episode2 · No source edits, no commit, BOARD.md not touched. My art folder `character/komite-ep2-pixel-v1/` is not changed either.
+Build: production build of 14:59:53 (T-025 with Fix 1 and the T-024 polish), unchanged before and after every run. My own server on :4002, started and stopped by me; ports 4000 and 4001 not touched.
+Method (run light: one headless Chrome at a time, below-normal priority, no test suite): read HANDOFF "T-025", "Fix 1" and "Polish". The five committee screens (K11 intro, K11 result with the completed file, with the file sent without the police letter, with the report sent to Mr Hendra, and the K13 opening) at 390 × 645 and 360 × 640 in id / en / zh at DPR 2 and DPR 3, and at 390 × 844; each stage compared with the picture I compose from my manifest and atlas, device pixel by device pixel. With motion on: the attribute record of the entry motion, screen frames matched against composed pictures, a 13 s blink watch. Then reduced motion, the glossary entry, the K11 task flow by real taps, K11 with news, K13, and the three T-024 polish items. Extra sizes after a finding: 393 × 852 and 430 × 932 (DPR 3), 320 × 568 (DPR 2), 412 × 915 (DPR 2.625). For the focus-box question I ran the client's own camera function (`pasKamera`) in a read-only script. Evidence: `team/evidence/T-025/designer/review/` (15 pictures; I opened each one or the screenshots it is made of; the measurement logs as `ukur-*.txt`, the camera numbers in `kamera-fokus-hitung.txt`).
+
+### Verdict: FIX NEEDED, one item (D-248), and it is in my own manifest. At the three review sizes nothing is broken: the room is my atlas to the pixel, the motion, the glossary row and the flows work. T-024 polish D-245, D-246, D-247: all three done.
+
+### Answer to the Lead's question (framing and focus box)
+- **1 CSS px per art pixel reads well** at 390 × 645, 360 × 640 and 390 × 844: heads 35 to 47 CSS px wide, the four faces are told apart at a glance (hijab and glasses, grey hair, cap, ponytail), the tag letters are 6 × 10 px with 2 px strokes, the sign is readable. The wider view (366 art pixels at 390, 336 at 360, where my mock had 275) shows the wall picture and the whiteboard cut by the stage edge; that reads as a room, not as a fault (`built-vs-mock-390.png`).
+- **Yes, the focus box should change: from 250, 0, 1100 × 620 to 252, 0, 1096 × 472** (art x 63..337, y 0..118: sign, tags, heads down to the table edge). See D-248 for why and what it does.
+
+### Items
+- [D-248] **The room's scale depends on the stage shape, and at 320 wide the room is half size** · seen in the build: at 393 × 852 DPR 3 (the size of current iPhones) the K11 intro, the completed-file result and K13 draw at 4 device px per art pixel (heads about 48 CSS px, 277 art pixels across: my mock's framing), but the CATATAN and empty-chair results draw at 3 (heads about 36, 369 across); the same at 430 × 932 (`scale-changes-393x852-dpr3.png`). At 320 × 568 DPR 2 all five screens draw at 1 device px per art pixel: the room is 200 × 112 CSS px inside a 296 × 148 box with bands around it, tags 31 × 13 CSS px (`half-size-320x568-dpr2.png`). At 390 wide DPR 3 everything is at 3, while every other Episode 2 room on that phone draws its cast at 4 to 7 (pool 4, toll 4, interview 4 to 5, workshop 5, office 5 to 7), so the committee is the smallest cast of the episode there. Cause: my focus box. Its height (620 = down to art row 155, most of the table) cannot be held by the 2 : 1 stage at the next whole scale, and its width is half an art pixel more than a 390-wide DPR 3 stage holds at 4. My D-242 already said the table may be cut; the number did not follow · **focus box 252, 0, 1096 × 472.** Computed with the client's camera function: (1) the two stage shapes then give the same scale on every phone box I tried, 320 to 480 wide at DPR 2, 2.625, 2.75, 3 and 3.5 (today they differ in ten width ranges, among them 391 to 437 wide at DPR 3 and 320 to 333 wide at DPR 2 and 3); (2) 390 to 437 wide at DPR 3: 4 device px in both shapes, 1.33 CSS px, heads 48, the same as the pool and toll rooms; (3) 320 to 333 wide: 2 device px at DPR 2 instead of 1; (4) 360 × 640 and 390 × 645 at DPR 2, 360 and 375 wide at DPR 3: unchanged; (5) wide layouts: 16 : 9, 8 : 5 and 2 : 1 boxes unchanged; some 4 : 3 boxes from 548 px of width go one step up. At the larger scale the 2 : 1 stage shows art rows 0 to 137 (sign, tags, members, table top and the first rows of its front) and the whiteboard leaves the view (`focus-change-predicted-390-dpr3.png`, composed from the as-built screenshot, not a screenshot of the app) · work: two numbers in my `ruang-komite.json` and `bangun.mjs` (I do it on a yes, it takes minutes); Fullstack reruns the install tool; the camera test that expects 1 CSS px at 366 wide DPR 3 must expect 4 device px there. I did not touch the manifest during this review, because the install check compares it with the installed copy and QA is running · **fix before the owner looks on an iPhone.**
+- [D-249] K11 result "report sent to Mr Hendra, no news" does not fit · in Indonesian and English at both short sizes the "Kenapa" line sits under the fade and the status note is below the fold: 40 px to scroll at 390 × 645 id, 30 at 360 × 640 id, 16 and 51 in English; Chinese fits. The stage is already at its shortest shape; the shell's rule (text scrolls, fade as the cue) works, but the status change is the part the player should not miss (`fit-k11e-result-scrolls.png`). The card says one thing twice: the news text ends "Laporan itu untuk Komite, bukan untuk disetujui nasabah." and the reason line is "Laporan teknis itu untuk Komite, bukan untuk disetujui nasabah." · drop that sentence from the news text, in the three languages (English has the same pair). That frees about two lines, 46 px: enough in Indonesian at both sizes and in English at 390 wide; English at 360 wide would still be about 5 px over, so look again after the cut · text is the Lead's and the PIC's · **med.** The other six cards fit in the three languages at both sizes.
+- [D-250] CATATAN letters are 2.97 : 1 on the tag paper (amber #b5871a on #fbf4e1); SETUJU is 4.47 : 1. At 1 CSS px per art pixel the letters are 10 px tall, so the weak pair shows (`states-390x645-dpr2-id.png`) · my art: a darker amber for letters and inner frame, 4.5 : 1 or more (about #8a6512, snapped to the palette), same file, same cells · low to med, I do it on a yes.
+- [D-251] Glossary row in English · "Committee" and "Underwriter" are 4 px apart at 360 wide and 7.5 at 390, so they read as one phrase; at 360 the four columns are not equal (65.5 / 73.4 / 65.5 / 65.5), also in Indonesian (`glossary-row.png`) · shorter labels fit the entry, which is already about the Committee: "Chair", "Ketua", "主席"; or 12 px text with equal columns and an 8 px gap · low.
+- [D-252] The word on the whiteboard sheet is cut to "KLA" at 360 wide (`states-360x640-dpr2-en-zh.png`) · my art: I move the sheet 12 px left on the board, or drop the word (it is 5 px tall); one pass together with D-250 · low.
+- [D-253] The approval has no "before" · with motion on, the first frame of K13 already shows heads down and the first SETUJU; the CATATAN result opens with hands up and the first tag. The player never sees the room waiting, so the nod reads as a pose · hold the still room for about 320 ms (one nod) before the first tag and the first nod; nothing under reduced motion · low, a start delay in the state.
+- Accepted as built · the completed file leaves the room unchanged (SETUJU only at K13); the room beat before the chat on K11 with news; no start gate at K13; no folder prop; role names only in the glossary; Indonesian tags in English and Chinese, where the card text carries the meaning; after opening the glossary entry its button is half above the box, which is right because the entry itself must be whole.
+
+### What holds (T-025)
+| Check | Result |
+| --- | --- |
+| Art installed | the five PNGs in `client/src/cerita/seni/piksel/` are byte-identical to my folder |
+| Room against manifest and atlas | **0 device pixels differ in the room area** on all five screens in the 19 runs (two sizes × three languages × DPR 2 and 3, plus 390 × 844 in id, en, zh), and at 393 × 852 and 430 × 932. What differs is only what lies over the stage: the card frame's two top corners and the dialog card's 13 px overlap. At K13 on DPR 3 the stage box sits on a fraction of a pixel (129.8 CSS px), the picture starts one device row lower and is whole |
+| Scale and view at the review sizes | 1 CSS px per art pixel at DPR 2 and 3. 390 wide: art x 17..383; 360 wide: x 32..368. 2 : 1 stage: rows 0..183 (168 at 360); 8 : 5 stage: the whole room height. Same scale and view for the four states of a box |
+| The four states | waiting: four seated; CATATAN: the two middle members with a hand up and two tags; empty: four chairs, no tag; SETUJU: four tags, at K13 only. The completed-file result is the same picture as the intro (0 px) |
+| Entry motion (motion on) | K13, six runs: tags at 0, 179 to 181, 361 to 366 and 539 to 550 ms; heads down from 0, up at 161 to 164, down at 319 to 332, up at 480 to 488, still from 639 to 649. The screen follows it (`entry-motion-k13-390x645-dpr3.png`): every captured frame equals the composed picture of its moment with 0 art pixels differing, except the very first frame in two runs at 360 wide, where the canvas box is still the taller shape under the dialog card and the visible part is the same picture. CATATAN: hands up from the first frame, tags at 0 and 180 to 195 ms |
+| Blink | each member on their own, 3.2 to 6.1 s apart, 120 to 132 ms long (five runs of 13 s); the five frames caught mid-blink equal the composition with the eye patch (0 art pixels differ; 31 to 56 differ from the picture with open eyes) |
+| Reduced motion | every tag in the first frame, no nod, no blink in a 12 s watch; the still picture equals the end of the motion |
+| No replay | opening and closing a glossary entry or the Menu at K13 does not restart the motion; going into the bundle activity and back gives the same screen (0 device px, also at 390 × 844 zh DPR 3), no room fade |
+| Screen readers | one sentence per state in the language, polite live region, canvas hidden; no location chip |
+| Glossary row | meaning, then four 32 × 32 heads in seat order with the role under each; the icons equal the cells of `komite-ikon.png` (0 device px at DPR 2 and 3, seven runs); two-word roles take two lines in id and en, Chinese one line; after opening, the whole entry is inside the dialog box, the stage does not move, the page does not scroll, "Mulai" stays in reach |
+| K11 task flow (id with motion, en, zh) | intro with the task card and a 58 px "Mulai" → three steps → result within 100 ms of sending. Completed file: waiting room, both consequences, reason and status note. Sent without the letter: hands up, CATATAN at 0 and 180 ms |
+| K11 with news | room card with the file consequence only → "Lanjut" → chat at once: the sent message in view, the reply (variant A), the news consequence, reason and status note; no start gate, page does not scroll |
+| K13 | room beat with its two glossary buttons → "Lanjut" → chat at once with Mr Hendra's message and "Balas Pak Hendra" |
+
+### T-024 polish re-check
+| Item | Result |
+| --- | --- |
+| D-245 taller phones | **done.** 390 × 844: lesson and reason whole, chart 96 px, space left 152 / 152 / 152 (id), 163 / 138 / 143 (en), 192 / 192 / 192 (zh), as in the handoff. 360 × 740: id 48 / 22 / 23; en 0 / 0 / 19 with the chart at 90 / 89 / 96. The switch is at 700 px of height (699 no, 700 yes; English at 360 wide relaxes the lesson first and the rest from 724). Nothing scrolls. At 390 × 645 and 360 × 640 nothing relaxes and the numbers are my table's. Whole screen against my pictures of the 12:32 build: 0 device px in the twelve screens of 390 × 645 id (with motion), 390 × 645 en, 360 × 640 en and zh; at 360 × 640 id about 1 % differ, on letter edges in every text line including the header, with no block moved (the text rendering of that earlier run, as far as I can tell) |
+| D-246 Menu rows | **done.** Both rows sit directly under "Bantuan" and are in view when the Menu opens: whole in id and zh at 640 and 645, and in all three languages at 740 and 844; in English the note's last line is 28 px below at 360 × 640 and 2 px at 390 × 645, as the handoff says |
+| D-247 press | **done.** With motion on, while pressed: the token picture 2 px down; the two chips 2 px down and their edge off; back on release; 0 px under reduced motion. Measured with a held mouse press, because a held touch does not set the pressed state in this headless Chrome |
+
+### Not verified by me
+A real phone and WebKit. The new focus box in the app (computed with the client's camera function and composed as a picture only). A screen reader (the sentence is checked in the DOM). The press with a finger. The entry motion on a device: my screen frames are 100 to 270 ms apart, the times come from the attribute record. English and Chinese flows at one size each. The room on tablet and desktop. At 320 × 568 only the scale, not the pixels. D-249 at sizes other than the two short ones.
+
+**D-248, D-250, D-252 delivered (2026-11-17, Designer, on the Lead's yes).** Only my art folder `character/komite-ep2-pixel-v1/` changed; same file names, picture sizes and cells; five runtime PNGs 9,867 B of 12,288 (was 9,889).
+- D-248 · `fokus` in `ruang-komite.json` is now 252, 0, 1096 × 472; nothing else in that file changed (3,620 B as before).
+- D-250 · CATATAN letters and inner frame `#b5871a` → `#8e6a24`, a colour of the game palette (pool room): 4.51 : 1 on the tag paper, was 2.97. `ep2-komite-tanda.png` 267 B as before. SETUJU is untouched at 4.47 : 1.
+- D-252 (the brief names it D-251) · the pinned sheet on the whiteboard carries no word any more: a green title bar and one grey line. `ep2-ruang-komite-latar.png` 938 → 916 B.
+- Byte-identical to the first delivery: `komite.png`, `ep2-ruang-komite-meja.png`, `komite-ikon.png`, `komite.json`. My D-251 (glossary labels) is text and CSS, not art: not touched. README and BYTE.md updated; the manifest check gives 0 of 360,000 pixels for both composed states.
+- For Fullstack after reinstalling · the camera test "T-025: kamera ruang Komite ..." expects 1 CSS px per art pixel at 366 wide DPR 3 (both heights); the camera now gives 4 device px there. Its check `(x * s * dpr) % 1 === 0` returns 0.99999999999997 in those two cases (x 251, s 1/3): the offset is a whole device pixel, the check needs a tolerance.
+- Not seen in the app. I ran the delivered manifest through the client's camera function only: `team/evidence/T-025/designer/d248-kamera-hitung.txt`; pictures `d250-tanda-lama-baru-4x.png`, `d252-papan-lama-baru-4x.png`, `d248-d250-d252-catatan-pandangan-hp.png` in the same folder.
+
+---
+
+## T-025 — re-check (2026-11-17)
+
+Reviewer: Designer · Folder: C:\Users\User\Desktop\rksgm-episode2 · No source edits, no commit, BOARD.md not touched.
+Build: production build of 16:35:18 (Fix 2), unchanged before and after the runs. My own server on :4002, started and stopped by me; port 4000 not touched.
+Method (run light: one headless Chrome at a time, below-normal priority, no test suite): read HANDOFF "Fix 2". The five committee screens (K11 intro, the three K11 results without news, K13 opening) at 390 × 645 DPR 3, 360 × 640 DPR 2 and 393 × 852 DPR 3 in Indonesian with motion on, and once in English at 390 × 645 DPR 3 with reduced motion; each stage compared device pixel by device pixel with the picture I compose from my delivered art. The fit of the cards in id and en at the two short sizes and in id at 393 × 852; the glossary entry at the three sizes. I opened the result cards at 390 wide (id and en), two of the 393 × 852 screens, the four 360 × 640 screens, the K13 hold strip and the English glossary at 360 wide. Evidence: `team/evidence/T-025/designer/recheck/` (six pictures, the logs as `ukur-*.txt`).
+
+### Verdict: PASS. Nothing new to fix.
+
+| Item | Result |
+| --- | --- |
+| D-248 one scale per phone | **fixed.** Device px per art pixel on the five screens: 390 × 645 DPR 3: 4, 4, 4, 4, 4 (was 3); 393 × 852 DPR 3: 4 on both stage shapes (was 4 and 3); 360 × 640 DPR 2: 2, the same camera as before (art x 32..368). The two news screens of K11 have the same scale. At DPR 3 that is 1.33 CSS px per art pixel, so a 36-pixel head is 48 CSS px; the view is art x 62.75..337.25 at 390 wide and 61.75..338.5 at 393, with the wall picture and the whiteboard outside it (`one-scale-393x852-dpr3.png`, `states-390x645-dpr3-id.png`) |
+| Room against my delivered art | 0 device pixels differ in the room area on all twenty screens, so the darker CATATAN and the sheet without the word are what the app draws. As before, at K13 on DPR 3 the first device row of the stage box is the card frame, because the box sits on a fraction of a pixel |
+| D-250 CATATAN, D-252 whiteboard | **in the app.** CATATAN reads clearly at both scales; at 360 wide the whiteboard is still cut by the stage edge and shows the sheet with its green bar, no cut word (`states-360x640-dpr2-id.png`) |
+| D-249 note in view | **fixed.** The three result cards without news (completed file, sent without the letter, report to Mr Hendra): the status note is in view and the dialog text does not scroll at 360 × 640 and 390 × 645 in id and en, and at 393 × 852 in id. The report-to-Mr-Hendra card says "for the Committee, not for the customer to approve" once, in the reason line. The new second sentence reads well in both languages ("Pak Hendra bingung membaca laporan teknis yang panjang." / "The long report confuses Mr Hendra.") |
+| D-253 hold, then stagger | **fixed.** With motion on, the first picture is the waiting room: seated, heads up, no tag, no raised hand. K13: first nod and first SETUJU at 320 to 335 ms, the next tags at 500, 680 to 695 and 866 to 872, still from 960 to 966. CATATAN result: hands and first tag at 321 to 328 ms, second tag at 500 to 509. The frames on screen follow the record (at 390 wide: waiting, heads down with 1 tag, up with 2, down with 3, up with 4), each equal to its composed picture with 0 art pixels differing (at 360 wide from the second frame on, as in the review). It now reads as a decision arriving, not as a pose (`hold-then-stagger-k13-390x645-dpr3.png`, `hold-catatan-390x645-dpr3.png`). Reduced motion: every tag in the first frame, no hold |
+| D-251 glossary labels | **fixed.** The first seat is "Ketua" / "Chair" on one line. Between neighbouring label boxes: English at 360 wide 20.7 / 9.4 / 9.4 px (the first was 4), at 390 wide 26.2 / 14.9 / 14.1; Indonesian 18.9 / 9.4 / 9.4 and 24.4 / 14.9 / 14.1; at 393 wide 25.2 / 15.6 / 14.5. The four icons still equal the icon file (0 device px, five runs). At 360 wide the second column stays 8 px wider than the others (icons 73.5, 73.5 and 69.5 px apart); I accept that as it is (`glossary-labels.png`) |
+| Blink | unchanged: each member on their own, 3.3 to 5.9 s apart, 120 to 135 ms long |
+
+### Notes, no action asked
+- The cards fit with little room: by the handoff's table the tightest is the sent-without-the-letter card in Indonesian at 360 × 640, 5 px before the note goes under the fold again. A longer wording on any of the three cards needs this check again.
+- The two shortened sentences are script texts; the wording is the Lead's and the PIC's to confirm.
+
+### Not verified by me
+A real phone and WebKit. The 320 ms hold by eye on a device: the times are the page's attribute record, and my screen frames are 100 to 200 ms apart. Chinese in this round. 390 × 844, 430 × 932 and 320 × 568, which the handoff measured. A screen reader.

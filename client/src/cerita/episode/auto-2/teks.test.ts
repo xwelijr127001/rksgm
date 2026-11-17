@@ -12,6 +12,7 @@ import assert from 'node:assert/strict';
 import type { Bahasa } from '@shared/bahasa';
 import { teksCerita } from '../../teks';
 import { validasiEpisode } from '../../validasi';
+import { istilahBaris } from '../../ui/istilah';
 import { ARENA_AUTO_2, LAMPIRAN_AUTO_2 } from './arena';
 import { EPISODE_AUTO_2 as EP } from './episode';
 import { TEKS_AUTO_2 } from './teks';
@@ -32,7 +33,7 @@ const punya = (o: object, k: string) => Object.prototype.hasOwnProperty.call(o, 
 
 /** Sengaja SAMA dengan teks Indonesia: nama orang/perusahaan, merek papan nama, kata serapan; T-020: isi sel kertas K10 (jam, nama fiktif, "?"). */
 const SAMA_DENGAN_ID: Record<string, string[]> = {
-  en: ['pemeran.missRaksa.nama', 'lokasi.kantor', 'istilah.surveyor.label', 'istilah.leasing.label', 'arena.surveyor.rudi.ket', 'daftar.pemisah', 'daftar.titik', 'daftar.titikDua', 'daftar.antarKalimat', 'arena.rambu.lajurPemisah', 'arena.selisih.sel.jam.kiri', 'arena.selisih.sel.jam.kanan', 'arena.selisih.sel.nama.kiri', 'arena.selisih.sel.nama.kanan', 'arena.selisih.sel.antisipasi.kiri', 'arena.sim.tempat.satpas'],
+  en: ['pemeran.missRaksa.nama', 'lokasi.kantor', 'istilah.surveyor.label', 'istilah.leasing.label', 'istilah.komite.anggota.2', 'istilah.komite.anggota.3', 'arena.surveyor.rudi.ket', 'daftar.pemisah', 'daftar.titik', 'daftar.titikDua', 'daftar.antarKalimat', 'arena.rambu.lajurPemisah', 'arena.selisih.sel.jam.kiri', 'arena.selisih.sel.jam.kanan', 'arena.selisih.sel.nama.kiri', 'arena.selisih.sel.nama.kanan', 'arena.selisih.sel.antisipasi.kiri', 'arena.sim.tempat.satpas'],
   zh: ['pemeran.missRaksa.nama', 'lokasi.kantor', 'istilah.leasing.label', 'arena.selisih.sel.jam.kiri', 'arena.selisih.sel.jam.kanan', 'arena.selisih.sel.nama.kiri', 'arena.selisih.sel.nama.kanan', 'arena.selisih.sel.antisipasi.kiri', 'arena.sim.tempat.satpas'],
 };
 /** Kata yang hanya ada di kalimat Indonesia (bukan nama): penanda teks yang lupa diterjemahkan. */
@@ -45,7 +46,7 @@ test('T-014: Episode.bahasa memuat id, en, zh dan episode tetap sah', () => {
 
 test('T-014: kunci id/en/zh sama persis, tanpa nilai kosong, parameter identik', () => {
   const kunciId = Object.keys(ID).sort();
-  assert.equal(kunciId.length, 1019);
+  assert.equal(kunciId.length, 1028);
   for (const b of LAIN) {
     const t = TEKS_AUTO_2[b];
     assert.deepEqual(Object.keys(t).sort(), kunciId, `kunci ${b}`);
@@ -223,4 +224,68 @@ test('Kalimat hitungan ringkasan susun: jamak Inggris, kata bantu bilangan Manda
   assert.deepEqual(SEMUA.map((b) => baris(b, 'berkas', 1)), ['1 dari 1 dokumen sudah ditempatkan.', '1 of 1 document placed.', '已放置 1/1 份文件。']);
   // Arena tanpa satuanHitung: perilaku lama (label satuan berhuruf kecil).
   assert.equal(satuanSesudahAngka({ satuan: 'arena.berkas.satuan' }, (kunci) => teksCerita(EP, kunci, 'en'), 8), 'document');
+});
+
+test('T-024: nama token, baris lembar, nama grafik, label pita dan baris Menu layar akhir dalam id / en / zh', () => {
+  const k1 = EP.titik![0]!;
+  const ui = <T>(b: Bahasa, fn: () => T): T => { aturBahasa(b, false); try { return fn(); } finally { aturBahasa('id', false); } };
+  const tx = (b: Bahasa, kunci: KunciTeks) => teksCerita(EP, kunci, b);
+  // Nama token untuk pembaca layar: "Keputusan n: judul, klasifikasi" seluruhnya dalam bahasa aktif.
+  const aria = (b: Bahasa, nilai: 'tepat' | 'kurang' | 'keliru' | 'kosong') => ui(b, () => teksUi('ceritaAkhir.token.aria', { n: k1.nomor, judul: tx(b, k1.judul), nilai: teksUi('ceritaAkhir.nilai.' + nilai) }));
+  assert.deepEqual(SEMUA.map((b) => aria(b, 'tepat')), ['Keputusan 1: Kabar pertama, Tepat', 'Decision 1: First contact, Right call', '决定 1：第一次联系，恰当']);
+  assert.deepEqual(SEMUA.map((b) => aria(b, 'kosong')), ['Keputusan 1: Kabar pertama, Tidak tercatat', 'Decision 1: First contact, Not recorded', '决定 1：第一次联系，未记录']);
+  assert.deepEqual(SEMUA.map((b) => ui(b, () => teksUi('ceritaAkhir.lembar.nomor', { n: 3, total: EP.titik!.length }))), ['Keputusan 3 dari 15', 'Decision 3 of 15', '第 3 个决定，共 15 个']);
+  assert.deepEqual(SEMUA.map((b) => ui(b, () => [teksUi('ceritaAkhir.lembar.sebelum'), teksUi('ceritaAkhir.lembar.berikut')].join('|'))), ['Sebelumnya|Berikutnya', 'Previous|Next', '上一个|下一个']);
+  // Nama grafik pendek + dua label pita (teratas, terbawah) = label suasana episode dalam bahasanya.
+  const nasabah = EP.pemeran[EP.nasabah]!.nama;
+  assert.deepEqual(SEMUA.map((b) => ui(b, () => teksUi('ceritaAkhir.statusSingkat', { nama: tx(b, nasabah) }))), ['Status Pak Hendra', 'Status of Mr Hendra', 'Hendra 先生 的状态']);
+  const pita = [...EP.suasana].sort((x, y) => x.min - y.min);
+  assert.deepEqual(SEMUA.map((b) => [tx(b, pita[pita.length - 1]!.label), tx(b, pita[0]!.label)].join('|')), ['Puas|Kecewa', 'Satisfied|Let down', '满意|失望']);
+  // Baris Menu: judul dari kamus, rentang suasana dirakit dari angka + label episode (tanpa kata sambung), catatan = dua kalimat.
+  assert.deepEqual(SEMUA.map((b) => ui(b, () => [teksUi('ceritaAkhir.menu.suasana'), teksUi('ceritaAkhir.menu.catatan')].join('|'))), ['Rentang suasana|Catatan simulasi', 'Mood ranges|Simulation note', '心情区间|模拟说明']);
+  const rentang = (b: Bahasa) => [...EP.suasana].sort((x, y) => y.min - x.min).map((p) => p.min + '+ ' + tx(b, p.label)).join(' · ');
+  assert.deepEqual(SEMUA.map(rentang), ['80+ Puas · 60+ Percaya · 40+ Tenang · 20+ Cemas · 0+ Kecewa', '80+ Satisfied · 60+ Trusting · 40+ Calm · 20+ Worried · 0+ Let down', '80+ 满意 · 60+ 信任 · 40+ 平静 · 20+ 担心 · 0+ 失望']);
+  // Tidak ada kata Indonesia di teks en / zh yang baru (kunci kamus T-024 + semua judul / alasan / alternatif titik).
+  for (const b of LAIN) {
+    const kamus = ['nilai.kosong', 'statusSingkat', 'token.aria', 'lembar.nomor', 'lembar.sebelum', 'lembar.berikut', 'menu.suasana', 'menu.catatan'].map((k) => ui(b, () => teksUi('ceritaAkhir.' + k)));
+    for (const s of kamus) assert.doesNotMatch(s.replace(PARAM, ''), KATA_FUNGSI_ID, b + ': ' + s);
+    for (const k of EP.titik!) for (const kunci of [k.judul, k.alasan, ...Object.values(k.alternatif).map((x) => x.label)]) assert.notEqual(tx(b, kunci), tx('id', kunci), b + ' ' + kunci);
+    assert.notEqual(tx(b, EP.statusNaskah!), tx('id', EP.statusNaskah!), b + ' statusNaskah');
+  }
+});
+
+test('T-025: ruang Komite: nama ruang, satu kalimat per keadaan, dan peran empat anggota dalam id / en / zh', () => {
+  const KUNCI = ['lokasi.komite', ...['tunggu', 'setuju', 'catatan', 'kosong'].map((k) => `lokasi.komite.${k}`), ...[1, 2, 3, 4].map((n) => `istilah.komite.anggota.${n}`)];
+  for (const b of SEMUA) for (const k of KUNCI) assert.ok(punya(TEKS_AUTO_2[b], k) && TEKS_AUTO_2[b][k]!.trim(), `${b} ${k}`);
+  // Kalimat keadaan diawali nama ruangnya (pembaca layar tahu ia di mana) dan berbeda satu sama lain.
+  for (const b of SEMUA) {
+    const kalimat = ['tunggu', 'setuju', 'catatan', 'kosong'].map((k) => TEKS_AUTO_2[b][`lokasi.komite.${k}`]!);
+    assert.equal(new Set(kalimat).size, 4, b);
+    for (const v of kalimat) assert.ok(v.startsWith(TEKS_AUTO_2[b]['lokasi.komite']!), `${b}: ${v}`);
+  }
+  // Tanda di gambar berbahasa Indonesia (SETUJU / CATATAN, D-240): kalimat en / zh membawa artinya tanpa kata itu.
+  for (const b of LAIN) for (const k of ['setuju', 'catatan']) assert.doesNotMatch(TEKS_AUTO_2[b][`lokasi.komite.${k}`]!, /setuju|catatan/i, `${b} ${k}`);
+  assert.match(TEKS_AUTO_2.en['lokasi.komite.setuju']!, /approval/);
+  assert.match(TEKS_AUTO_2.zh['lokasi.komite.setuju']!, /同意/);
+  // Peran: "underwriter" dan "surveyor" kata serapan yang sama di id / en; zh memakai istilah yang sama dengan istilah.surveyor.
+  // Fix 2 (D-251): kursi pertama = "Ketua" / "Chair" / "主席" saja; lembarnya sudah tentang Komite, dan label dua kata
+  // menempel ke "Underwriter" di layar 360 px.
+  assert.deepEqual([1, 2, 3, 4].map((n) => ID[`istilah.komite.anggota.${n}`]), ['Ketua', 'Underwriter', 'Surveyor', 'Kepala Klaim']);
+  assert.deepEqual([1, 2, 3, 4].map((n) => TEKS_AUTO_2.en[`istilah.komite.anggota.${n}`]), ['Chair', 'Underwriter', 'Surveyor', 'Head of Claims']);
+  assert.equal(TEKS_AUTO_2.zh['istilah.komite.anggota.1'], '主席');
+  // Fix 2 (D-249): akibat kabar K11-E (laporan ke Pak Hendra, tanpa kabar) tidak mengulang kalimat alasannya; kalimat itu
+  // tetap ada SEKALI di kartu, di baris "Kenapa" (k11.e.alasan), supaya catatan status muat di layar 645 / 640 px.
+  for (const [b, pola] of [['id', /bukan untuk disetujui nasabah/], ['en', /not for the customer to approve/], ['zh', /不是让客户批准的/]] as const) {
+    assert.doesNotMatch(TEKS_AUTO_2[b]['k11.akibat.kabar.e']!, pola, `${b}: kabar.e`);
+    assert.match(TEKS_AUTO_2[b]['k11.e.alasan']!, pola, `${b}: alasan`);
+  }
+  assert.equal(TEKS_AUTO_2.zh['istilah.komite.anggota.3'], TEKS_AUTO_2.zh['istilah.surveyor.label']);
+  // Tampilan istilah: arti + empat anggota (peran dalam bahasa aktif, ikon per kursi).
+  for (const b of SEMUA) {
+    const i = istilahBaris(EP, { istilah: ['komite'] }, (k) => teksCerita(EP, k, b))[0]!;
+    assert.deepEqual(i.anggota, [1, 2, 3, 4].map((n, x) => ({ teks: TEKS_AUTO_2[b][`istilah.komite.anggota.${n}`], ikon: `komite-${['ketua', 'penjamin', 'surveyor', 'klaim'][x]}` })), b);
+    assert.equal(i.arti, TEKS_AUTO_2[b]['istilah.komite.arti']);
+  }
+  // Istilah lain tidak punya rincian (markah lamanya tidak berubah).
+  assert.equal(istilahBaris(EP, { istilah: ['surveyor'] }, (k) => teksCerita(EP, k, 'id'))[0]!.anggota, undefined);
 });

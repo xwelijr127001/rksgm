@@ -18,6 +18,7 @@ import {
   type ArenaPesan, type ArenaSusun,
 } from './arena/logika';
 import { ringkasTindakan } from './arena/ringkas';
+import { komposisiLatar } from '../ui/latar/komposisi';
 
 const tx = (k: KunciTeks, p?: Record<string, string | number>) => teksCerita(EP, k, 'id', { nama: 'Rina', ...p });
 
@@ -111,7 +112,7 @@ test('aktivitas dokumen: susunan arena menjadi SATU pesan keluar yang menyebut d
   assert.equal(pesan[pesan.length - 1]!.jenis, 'status');
 });
 
-test('akibat bundel (K11): kabar terkirim dulu, lalu akibat berkas & kabar berlabel (utuh), lalu alasan + status', () => {
+test('akibat bundel (K11): berkas = ketukan di ruang Komite; kabar terkirim = pesan keluar, akibat kabar berlabel (utuh), lalu alasan + status di obrolan', () => {
   // Pintas sah: susunan arena per titik (jalur apa saja) hanya untuk sampai ke K11; yang diuji utas sesudahnya.
   const lewat = (s: StateCerita): StateCerita => {
     let x = s;
@@ -130,24 +131,57 @@ test('akibat bundel (K11): kabar terkirim dulu, lalu akibat berkas & kabar berla
   };
   const awal = lewat(stateAwal(EP));
   // Ajukan sekarang + kabar tahap persetujuan (B): pesan terkirim, berkas dikembalikan, kabar tidak disangkal.
+  assert.deepEqual([pandangKini(EP, awal), komposisiLatar(EP, awal).lokasi, komposisiLatar(EP, awal).komite], ['adegan', 'komite', 'tunggu'], 'pengantar K11 di ruang Komite, anggota menunggu');
   let s = kirim(awal, { jenis: 'aktivitas', node: 'k11', jawaban: { bundel: 'sekarang', kabar: 'persetujuan' } });
+  // T-025: ketukan pertama akibat = sisi BERKAS di ruang Komite (adegan sela, dua anggota memberi catatan). Catatan status tidak
+  // ikut di kartu adegan itu: ia ditahan untuk obrolan, sesudah akibat kabar.
+  assert.equal(s.node, 'k11-b2');
+  assert.deepEqual([pandangKini(EP, s), ketukanKini(EP, s)!.awal, ketukanKini(EP, s)!.akhir], ['adegan', 0, 0]);
+  assert.deepEqual([komposisiLatar(EP, s).lokasi, komposisiLatar(EP, s).komite, komposisiLatar(EP, s).telepon], ['komite', 'catatan', null]);
+  assert.equal(utasObrolan(EP, s, pesanAktivitas(s)).statusDiObrolan, 'k11-b2', 'status menutup akibat di obrolan, bukan di kartu sela');
   while (!semuaBarisTampil(EP, s)) s = kirim(s, LANJUT);
   assert.equal(s.node, 'k11-b2');
-  const { pesan } = utasObrolan(EP, s, pesanAktivitas(s));
+  assert.equal(pandangKini(EP, s), 'obrolan');
+  const { pesan, sesiMulai } = utasObrolan(EP, s, pesanAktivitas(s));
   const i = pesan.findIndex((p) => p.jenis === 'keluar' && p.node === 'k11');
   assert.ok(i >= 0, 'kabar yang dipilih tampil sebagai pesan terkirim');
+  assert.equal(sesiMulai, i, 'sesi obrolan sesudah sela dimulai dari pesan terkirim (tidak terlipat di "pesan sebelumnya")');
   const sesudah = pesan.slice(i + 1);
   const catatan = sesudah.filter((p): p is Extract<PesanObrolan, { jenis: 'catatan' }> => p.jenis === 'catatan');
-  assert.deepEqual(catatan.map((p) => p.topik), ['topik.berkas', 'topik.kabar']);
+  assert.deepEqual(catatan.map((p) => p.topik), ['topik.kabar'], 'sisi berkas sudah tampil di ruang Komite');
   assert.ok(catatan.every((p) => p.akibat), 'akibat tidak dilipat di balik "Detail"');
   assert.doesNotMatch(catatan.map((p) => tx(p.teks)).join(' '), /belum mengabari|tidak tahu apa-apa/, 'pemain mengabari: akibat tidak boleh menyatakan sebaliknya');
   assert.equal(sesudah[sesudah.length - 1]!.jenis, 'status', 'perubahan status sesudah akibat');
-  // Tanpa kabar (C): akibat tetap di kantor (tanpa pesan terkirim) dan menyebut kedua sisi.
+  // Kabar terkirim + balasan Pak Hendra (A): pesan terkirim, balasan, akibat kabar, status; sisi berkas di ruang Komite, anggota
+  // masih menunggu (Fix 1: berkas lengkap bukan berarti disetujui; SETUJU baru di K13).
+  let a = kirim(awal, { jenis: 'aktivitas', node: 'k11', jawaban: { bundel: 'lengkapi', kabar: 'persetujuan' } });
+  assert.deepEqual([a.node, pandangKini(EP, a), komposisiLatar(EP, a).komite], ['k11-a', 'adegan', 'tunggu']);
+  while (!semuaBarisTampil(EP, a)) a = kirim(a, LANJUT);
+  const ua = utasObrolan(EP, a, pesanAktivitas(a));
+  assert.deepEqual(ua.pesan.slice(ua.sesiMulai).map((p) => p.jenis), ['keluar', 'masuk', 'catatan', 'status']);
+  // Tanpa kabar (C): kedua akibat dalam SATU ketukan di ruang Komite (tanpa pesan terkirim), status di kartu adegan itu.
   let c = kirim(awal, { jenis: 'aktivitas', node: 'k11', jawaban: { bundel: 'lengkapi', kabar: 'nanti' } });
-  while (!semuaBarisTampil(EP, c)) c = kirim(c, LANJUT);
+  assert.deepEqual([c.node, komposisiLatar(EP, c).lokasi, komposisiLatar(EP, c).komite], ['k11-c', 'komite', 'tunggu']);
+  assert.ok(semuaBarisTampil(EP, c), 'akibat berkas + akibat kabar = satu ketukan');
+  assert.equal(utasObrolan(EP, c, pesanAktivitas(c)).statusDiObrolan, null);
   assert.equal(pandangKini(EP, c), 'adegan');
   assert.equal(utasObrolan(EP, c, pesanAktivitas(c)).pesan.filter((p) => p.jenis === 'keluar' && p.node === 'k11').length, 0);
   assert.equal(ringkasTindakan(EP, 'bundel', { bundel: 'lengkapi', kabar: 'nanti' }, tx), null, 'baris akibat sudah menyebut kedua tindakan');
+  // K12 sesudah akibat tanpa kabar: sesi obrolan baru dari baris PERTAMA node keputusan (gerbang "Mulai percakapan" seperti semula).
+  const k12 = majuKe(c, 'k12');
+  const u12 = utasObrolan(EP, k12, pesanAktivitas(k12));
+  assert.deepEqual([pandangKini(EP, k12), u12.pesan[u12.sesiMulai]!.node, u12.sesiTengahNode], ['obrolan', 'k12', false]);
+  // K13 (T-025): ketukan pembuka = ruang Komite (setuju); obrolan sesudahnya dimulai di TENGAH node (pesan Pak Hendra), jadi
+  // langsung tampil tanpa gerbang, dan keputusannya tetap dibalas di obrolan.
+  let s13 = kirim(k12, { jenis: 'pilih', node: 'k12', pilihan: pilihanTersedia(EP, k12)[0]!.id });
+  for (let i = 0; i < 20 && s13.node !== 'k13'; i++) s13 = kirim(s13, LANJUT);
+  assert.deepEqual([s13.node, s13.baris, pandangKini(EP, s13), komposisiLatar(EP, s13).lokasi, komposisiLatar(EP, s13).komite], ['k13', 1, 'adegan', 'komite', 'setuju']);
+  assert.ok(!siapMemutuskan(s13), 'balasan K13 belum tampil di ketukan ruang Komite');
+  s13 = kirim(s13, LANJUT);
+  const u13 = utasObrolan(EP, s13, pesanAktivitas(s13));
+  assert.deepEqual([pandangKini(EP, s13), siapMemutuskan(s13), u13.sesiTengahNode], ['obrolan', true, true]);
+  assert.deepEqual(u13.pesan.slice(u13.sesiMulai).map((p) => [p.jenis, p.jenis === 'masuk' ? p.teks : null]), [['masuk', 'k13.2']]);
+  assert.deepEqual(komposisiLatar(EP, s13).objek, ['surat'], 'surat penawaran tetap ikut di obrolan K13');
 });
 
 // ------------------------------------------------------------------ logika arena

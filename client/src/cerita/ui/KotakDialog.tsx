@@ -16,7 +16,8 @@ import type { PlayerLook } from '@shared/types';
 import { Arrow } from '../../components/PlayerShell';
 import { useReducedMotion } from '../../hooks';
 import { t } from '../../i18n';
-import type { Baris, Ekspresi, Episode, KunciTeks } from '../tipe';
+import type { Ekspresi } from '../tipe';
+import type { IstilahTampil } from './istilah';
 import { IkonInfo, PotretPembicara, tahanUlang, type Pembicara } from './bagian';
 
 /**
@@ -45,25 +46,8 @@ class BatasPotret extends Component<{ kunci: string; nama: string; ukuran: numbe
 /** Kecepatan mengetik (md per huruf). ±40 huruf per detik: cukup pelan untuk diikuti, tidak menahan pembaca cepat. */
 const MS_PER_HURUF = 24;
 
-/** Istilah yang sudah diterjemahkan pemanggil (label & arti dalam bahasa aktif). */
-export interface IstilahTampil {
-  id: string;
-  label: string;
-  arti: string;
-}
-
-/**
- * Istilah sebuah baris dalam bahasa aktif (`tx` = teks episode). Id yang tidak ada di `ep.istilah`, atau episode
- * tanpa istilah sama sekali, dilewati diam-diam (validasi episode yang menjaga rujukannya).
- */
-export function istilahBaris(ep: Episode, baris: Baris | null | undefined, tx: (k: KunciTeks) => string): IstilahTampil[] {
-  const daftar = ep.istilah;
-  if (!baris || !Array.isArray(baris.istilah) || !daftar) return [];
-  return baris.istilah.flatMap((id) => {
-    const i = Object.prototype.hasOwnProperty.call(daftar, id) ? daftar[id] : undefined;
-    return i ? [{ id, label: tx(i.label), arti: tx(i.arti) }] : [];
-  });
-}
+// Bagian murni (IstilahTampil, istilahBaris) ada di ./istilah (bisa diuji di node); diekspor ulang untuk pemakai lama.
+export { istilahBaris, type IstilahTampil } from './istilah';
 
 export function KotakDialog({
   kunci, pembicara, ekspresi, look, teks, selesai, mati, onSelesai, onMaju, labelTombol, umumkan, sisipan, petunjuk, istilah = [], slotLewati,
@@ -235,6 +219,17 @@ export function DaftarIstilah({ istilah }: { istilah: IstilahTampil[] }) {
     const arti = akar.current?.querySelector<HTMLElement>(`[data-istilah-arti="${CSS.escape(id)}"]`);
     const tombol = akar.current?.querySelector<HTMLElement>(`[data-istilah="${CSS.escape(id)}"]`);
     if (!arti || !tombol) return;
+    // T-025: di cangkang HP halaman tidak menggulir; yang menggulir = kotak teks dialog adegan (hp/AdeganTatap .hp-vn-isi).
+    // Arti yang baru dibuka digulir UTUH ke dalam kotak itu; puncaknya tidak pernah keluar dari atas (arti lebih tinggi daripada
+    // kotak = puncaknya yang terlihat). Tombolnya boleh tergulir ke atas: yang baru diminta pemain adalah artinya.
+    const kotak = akar.current?.closest<HTMLElement>('[data-gulir-dialog]');
+    if (kotak && kotak.scrollHeight > kotak.clientHeight + 1) {
+      const k = kotak.getBoundingClientRect();
+      const ra = arti.getBoundingClientRect();
+      const turun = Math.min(ra.bottom + 8 - k.bottom, ra.top - 8 - k.top);
+      if (turun > 0) kotak.scrollBy({ top: turun, behavior: reduced ? 'auto' : 'smooth' });
+      return;
+    }
     const lanjut = akar.current?.closest('.cer-dialog')?.querySelector<HTMLElement>('.cer-lanjut');
     const bawah = Math.max(arti.getBoundingClientRect().bottom, lanjut ? lanjut.getBoundingClientRect().bottom + 12 : 0);
     const geser = Math.min(bawah - window.innerHeight, tombol.getBoundingClientRect().top - 8);
@@ -272,7 +267,17 @@ export function DaftarIstilah({ istilah }: { istilah: IstilahTampil[] }) {
                 <path d="m6 9 6 6 6-6" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round" />
               </svg>
             </button>
-            <p id={idArti} className="cer-istilah-arti" data-istilah-arti={i.id} hidden={!terbuka}>{i.arti}</p>
+            {i.anggota?.length ? (
+              // T-025: arti + deretan anggota (ikon hiasan di atas, peran di bawahnya; urutannya = urutan kursi di gambar ruang).
+              <div id={idArti} className="cer-istilah-arti" data-istilah-arti={i.id} hidden={!terbuka}>
+                <p>{i.arti}</p>
+                <ul className="cer-istilah-anggota">
+                  {i.anggota.map((a, m) => (
+                    <li key={m}>{a.ikon ? <span className="cer-istilah-ikon" data-ikon={a.ikon} aria-hidden="true" /> : null}<span>{a.teks}</span></li>
+                  ))}
+                </ul>
+              </div>
+            ) : <p id={idArti} className="cer-istilah-arti" data-istilah-arti={i.id} hidden={!terbuka}>{i.arti}</p>}
           </div>
         );
       })}

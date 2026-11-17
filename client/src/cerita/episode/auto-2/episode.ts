@@ -18,7 +18,7 @@
  * ketiganya menyatakan klaim DIBAYAR. Mode solo tanpa timer: "waktu habis" naskah tidak dipakai di sini.
  */
 import type {
-  Baris, CueLatar, Efek, Ekspresi, Episode, IdNode, Kondisi, KonfigLatar, NilaiAlternatif, NodeCerita, TitikKeputusan,
+  Baris, CueLatar, Efek, Ekspresi, Episode, IdNode, KeadaanKomite, Kondisi, KonfigLatar, NilaiAlternatif, NodeCerita, TitikKeputusan,
 } from '../../tipe';
 import { AKTIVITAS_AUTO_2 } from './aktivitas';
 import { LAMPIRAN_AUTO_2, SENI_ARENA_AUTO_2 } from './arena';
@@ -40,9 +40,30 @@ function b(kunci: string, siapa: Siapa, ekspresi?: Ekspresi, opsi: { jika?: Kond
   return baris;
 }
 
-/** Baris akibat K11: sisi BERKAS (tindakan atas bundel) dan sisi KABAR (komunikasi), masing-masing berlabel topik. */
-const berkas11 = (tindakan: string): Baris => b(`k11.akibat.berkas.${tindakan}`, 'narasi', undefined, { topik: 'topik.berkas' });
-const kabar11 = (akhiran: string): Baris => b(`k11.akibat.kabar.${akhiran}`, 'narasi', undefined, { topik: 'topik.kabar' });
+/** Tata panggung latar yang sering dipakai. */
+const TELEPON_HENDRA: CueLatar = { lokasi: 'kantor', hadir: [], telepon: 'hendra' };
+/**
+ * T-025: Ruang Rapat Komite Klaim. Keempat anggotanya sprite MILIK RUANG (bukan pemeran, tidak pernah berbicara); naskah hanya
+ * memberi KEADAAN ruang lewat isyarat `komite`. Ruangnya kosong pemeran dan tanpa panggilan.
+ */
+const RUANG_KOMITE = (komite: KeadaanKomite): CueLatar => ({ lokasi: 'komite', hadir: [], telepon: null, objek: [], komite });
+/**
+ * K11: tindakan atas berkas -> keadaan ruang Komite (SATU tabel; ubah di sini bila pemetaannya berganti).
+ * Fix 1 (keputusan Lead): berkas lengkap = Komite MENERIMA berkasnya dan masih menunggu / menimbang (`tunggu`), BUKAN setuju:
+ * keputusan baru keluar di K13 (K11-D "Padahal keputusannya belum keluar", K12 "Berkas sedang menunggu keputusan Komite",
+ * K13 "Minggu ke-7. Komite menyetujui klaim"). Tanda SETUJU hanya tampil di ketukan pembuka K13.
+ */
+export const KOMITE_BERKAS: Readonly<Record<string, KeadaanKomite>> = { lengkapi: 'tunggu', sekarang: 'catatan', hendra: 'kosong' };
+
+/**
+ * Baris akibat K11: sisi BERKAS (tindakan atas bundel) dan sisi KABAR (komunikasi), masing-masing berlabel topik.
+ * T-025: sisi berkas tampil di ruang Komite (keadaan = KOMITE_BERKAS). Bila kabarnya terkirim, baris sesudahnya kembali ke
+ * obrolan lewat `tata` barisnya sendiri (balasan Pak Hendra, atau baris kabar bila ia tidak membalas).
+ */
+const berkas11 = (tindakan: string): Baris => b(`k11.akibat.berkas.${tindakan}`, 'narasi', undefined, { topik: 'topik.berkas', tata: RUANG_KOMITE(KOMITE_BERKAS[tindakan]!) });
+const kabar11 = (akhiran: string, tata?: CueLatar): Baris => b(`k11.akibat.kabar.${akhiran}`, 'narasi', undefined, { topik: 'topik.kabar', ...(tata ? { tata } : {}) });
+/** Balasan Pak Hendra atas kabar yang terkirim (kembali ke obrolan). */
+const balas11 = (kunci: string, ekspresi: Ekspresi): Baris => b(kunci, 'hendra', ekspresi, { tata: TELEPON_HENDRA });
 
 const tanda = (t: string): Kondisi => ({ tanda: t });
 const tidak = (k: Kondisi): Kondisi => ({ tidak: k });
@@ -52,9 +73,6 @@ const salahSatu = (...k: Kondisi[]): Kondisi => ({ salahSatu: k });
 const taruh = (akt: string, item: string, wadah: string): Kondisi => tanda(`akt:${akt}:taruh:${item}:${wadah}`);
 /** Opsi `opsi` dipilih di langkah pilih-satu aktivitas `akt`. */
 const pilih = (akt: string, opsi: string): Kondisi => tanda(`akt:${akt}:pilih:${opsi}`);
-
-/** Tata panggung latar yang sering dipakai. */
-const TELEPON_HENDRA: CueLatar = { lokasi: 'kantor', hadir: [], telepon: 'hendra' };
 
 interface Alternatif {
   nilai: NilaiAlternatif;
@@ -449,23 +467,27 @@ const NODE: NodeCerita[] = [
   }),
   ...titikAktivitas({
     id: 'k11', bab: 'b3', aktivitas: 'bundel',
-    tata: { lokasi: 'kantor', hadir: [], telepon: null, objek: ['berkas'] },
+    // T-025: pengantar di Ruang Rapat Komite Klaim, anggota duduk menunggu; kartu tugas bundel tampil di atas kotak panggung itu
+    // (ruang dan kamera tidak berganti lagi sampai akibatnya).
+    tata: RUANG_KOMITE('tunggu'),
     baris: [b('k11.1', 'narasi', undefined, { istilah: ['komite'] })],
     aturan: ATURAN_BUNDEL,
-    // Akibat: BERKAS dulu, lalu KABAR. Kabar terkirim = obrolan (pesanmu tampil sebagai pesan terkirim, lalu reaksi
-    // Pak Hendra); tanpa pesan = tetap di kantor. Status nasabah = alternatifnya (naskah), tampil sesudah akibat.
+    // Akibat: BERKAS dulu, lalu KABAR. Berkas = ketukan di ruang Komite (berkas11: lengkapi -> tetap menunggu, sekarang ->
+    // catatan, hendra -> kursi kosong; setuju baru di K13). Kabar terkirim = obrolan (pesanmu tampil sebagai pesan terkirim, lalu reaksi Pak Hendra, lalu
+    // catatan status; hp/alur.ts: adegan sela tidak memutus rangkaian itu); tanpa pesan = kedua akibat di ruang Komite.
+    // Status nasabah = alternatifnya (naskah), tampil sesudah akibat.
     alt: {
-      a: { nilai: 'tepat', delta: 6, tata: TELEPON_HENDRA, akibat: [berkas11('lengkapi'), b('k11-a.3', 'hendra', 'lega'), kabar11('a')] },
+      a: { nilai: 'tepat', delta: 6, akibat: [berkas11('lengkapi'), balas11('k11-a.3', 'lega'), kabar11('a')] },
       b: { nilai: 'keliru', delta: -6, akibat: [berkas11('sekarang'), kabar11('b')] },
       c: { nilai: 'kurang', delta: 0, akibat: [berkas11('lengkapi'), kabar11('c')] },
-      d: { nilai: 'keliru', delta: -6, tata: TELEPON_HENDRA, akibat: [berkas11('lengkapi'), b('k11-d.1', 'hendra', 'senang'), kabar11('d')] },
+      d: { nilai: 'keliru', delta: -6, akibat: [berkas11('lengkapi'), balas11('k11-d.1', 'senang'), kabar11('d')] },
       e: { nilai: 'kurang', delta: 0, akibat: [berkas11('hendra'), kabar11('e')] },
     },
     akibatLain: {
-      b2: { alt: 'b', tata: TELEPON_HENDRA, baris: [berkas11('sekarang'), kabar11('b2')] },
-      d2: { alt: 'd', baris: [berkas11('sekarang'), b('k11-d.1', 'hendra', 'senang'), kabar11('d2')] },
-      d3: { alt: 'd', baris: [berkas11('hendra'), b('k11-d.1', 'hendra', 'senang'), kabar11('d3')] },
-      e2: { alt: 'e', tata: TELEPON_HENDRA, baris: [berkas11('hendra'), kabar11('e2')] },
+      b2: { alt: 'b', baris: [berkas11('sekarang'), kabar11('b2', TELEPON_HENDRA)] },
+      d2: { alt: 'd', baris: [berkas11('sekarang'), balas11('k11-d.1', 'senang'), kabar11('d2')] },
+      d3: { alt: 'd', baris: [berkas11('hendra'), balas11('k11-d.1', 'senang'), kabar11('d3')] },
+      e2: { alt: 'e', baris: [berkas11('hendra'), kabar11('e2', TELEPON_HENDRA)] },
     },
     lanjut: 'k12',
   }),
@@ -486,8 +508,9 @@ const NODE: NodeCerita[] = [
     lanjut: 'k13',
   }),
   ...titikPilihan({
-    id: 'k13', bab: 'b4', tata: { ...TELEPON_HENDRA, objek: ['surat'] },
-    baris: [b('k13.1', 'narasi', undefined, { istilah: ['penawaran', 'leasing'] }), b('k13.2', 'hendra', 'cemas')],
+    // T-025: ketukan pembuka di ruang Komite (keempat anggota mengangguk, tanda SETUJU), lalu obrolan dan surat seperti semula.
+    id: 'k13', bab: 'b4', tata: RUANG_KOMITE('setuju'),
+    baris: [b('k13.1', 'narasi', undefined, { istilah: ['penawaran', 'leasing'] }), b('k13.2', 'hendra', 'cemas', { tata: { ...TELEPON_HENDRA, objek: ['surat'] } })],
     urutan: ['d', 'a', 'c', 'e', 'b'],
     dokumen: 'surat',
     catat: ['leasing'],
@@ -587,6 +610,9 @@ const LATAR: KonfigLatar = {
     bengkel: { nama: 'lokasi.bengkel', piksel: 'bengkel-ep2' },
     tol: { nama: 'lokasi.tol', piksel: 'tol-ep2' },
     wawancara: { nama: 'lokasi.wawancara', piksel: 'wawancara-ep2' },
+    // T-025: Ruang Rapat Komite Klaim; empat anggota = sprite milik ruang (ruang-ep2.json blok `komite`), digerakkan isyarat
+    // `komite`. Satu kalimat per keadaan untuk pembaca layar (tanda SETUJU / CATATAN adalah gambar).
+    komite: { nama: 'lokasi.komite', piksel: 'komite-ep2', komite: { tunggu: 'lokasi.komite.tunggu', setuju: 'lokasi.komite.setuju', catatan: 'lokasi.komite.catatan', kosong: 'lokasi.komite.kosong' } },
   },
   awal: { lokasi: 'kantor', hadir: ['missRaksa'], telepon: null, objek: [] },
   // Sampul: truk trailer yang ringsek + Pak Hendra di depannya (identitas kendaraan kasus terbaca, review staf #7).
@@ -600,7 +626,11 @@ const dokumen = (id: string, n: number) => ({
   catatan: `dok.${id}.catatan`,
 });
 
-const istilah = (...id: string[]) => Object.fromEntries(id.map((x) => [x, { label: `istilah.${x}.label`, arti: `istilah.${x}.arti` }]));
+const istilah = (...id: string[]): NonNullable<Episode['istilah']> => Object.fromEntries(id.map((x) => [x, { label: `istilah.${x}.label`, arti: `istilah.${x}.arti` }]));
+/** T-025: anggota Komite Klaim, urut kursi kiri -> kanan (= id sprite ruang `komite-ep2`); ikon 32 px = `komite-<id>`. */
+export const ANGGOTA_KOMITE = ['ketua', 'penjamin', 'surveyor', 'klaim'] as const;
+const ISTILAH: NonNullable<Episode['istilah']> = istilah('surveyor', 'estimasi', 'pemeriksaan', 'komite', 'penawaran', 'leasing', 'penilaian');
+ISTILAH.komite = { ...ISTILAH.komite!, anggota: ANGGOTA_KOMITE.map((id, i) => ({ teks: `istilah.komite.anggota.${i + 1}`, ikon: `komite-${id}` })) };
 
 export const EPISODE_AUTO_2: Episode = {
   id: 'auto-2',
@@ -667,7 +697,7 @@ export const EPISODE_AUTO_2: Episode = {
     sebab: `kartu.${akhir}.sebab`,
     pelajaran: 'kartu.pelajaran',
   })),
-  istilah: istilah('surveyor', 'estimasi', 'pemeriksaan', 'komite', 'penawaran', 'leasing', 'penilaian'),
+  istilah: ISTILAH,
   latar: LATAR,
   dokumen: {
     // K07 naskah: pemeriksaan kejadian bisa berjalan bersamaan dengan hitungan bengkel -> 'paralel'.

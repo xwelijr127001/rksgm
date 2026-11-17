@@ -40,7 +40,7 @@ import { ringkasTindakan } from './arena/ringkas';
 import { RingkasRambu } from './arena/RingkasRambu';
 import { tanggapan as tanggapanRambu } from './arena/rambu';
 import { TombolLanjut } from './bagianHp';
-import { ketukanBelumUtuh, ketukanKini, labelStatus, pandangKini } from './alur';
+import { ketukanBelumUtuh, ketukanKini, labelStatus, pandangKini, utasObrolan } from './alur';
 import { useTransisiTelepon } from './transisiTelepon';
 import { MEJA_KASUS, mejaAktif } from './meja/bendera';
 import { akibatMeja } from './meja/logika';
@@ -237,7 +237,10 @@ function PemainHPInti({ ep, state, kendali, profil, bahasa, tx: txAsli }: {
   const aktTerakhir = [...state.riwayat].reverse().find((e) => e.jenis === 'aktivitas');
   const tindakan = terakhir && awalNode && aktTerakhir && aktTerakhir.jenis === 'aktivitas'
     ? ringkasTindakan(ep, aktTerakhir.aktivitas, state.aktivitas[aktTerakhir.aktivitas]?.jawaban, tx) : null;
-  const statusSesudah: StatusSesudah | null = terakhir?.alasan && awalNode ? statusDariRiwayat(ep, state, tx) : null;
+  // T-025: akibat yang dibuka dengan adegan sela lalu kembali ke obrolan (ruang Komite K11 sesudah kabar terkirim): catatan
+  // statusnya menutup akibat DI OBROLAN (hp/alur.ts utasObrolan), jadi tidak ikut di kartu adegan sela.
+  const statusDiObrolan = useMemo(() => utasObrolan(ep, state, pesanAktivitas).statusDiObrolan, [ep, state, pesanAktivitas]);
+  const statusSesudah: StatusSesudah | null = terakhir?.alasan && awalNode && statusDiObrolan !== state.node ? statusDariRiwayat(ep, state, tx) : null;
   // K08: jalan bertanda + tanggapan tokoh atas tanda pemain (dibaca dari jawaban tersimpan; benar setelah muat ulang).
   const arenaTerakhir = aktTerakhir && aktTerakhir.jenis === 'aktivitas' ? ep.aktivitas[aktTerakhir.aktivitas]?.arena : undefined;
   const jawabanTerakhir = aktTerakhir && aktTerakhir.jenis === 'aktivitas' ? state.aktivitas[aktTerakhir.aktivitas]?.jawaban : undefined;
@@ -258,9 +261,12 @@ function PemainHPInti({ ep, state, kendali, profil, bahasa, tx: txAsli }: {
   const cangkangLayar = useKueri(KUERI_CANGKANG_LAYAR);
   const [slotAkhir, setSlotAkhir] = useState<HTMLDivElement | null>(null);
   const kunciLayar = tampilan === 'akhir' || (tampilan === 'arena' && !pakaiMeja) || (tampilan === 'adegan' && !akibatDiMeja && !(node.jenis === 'pilihan' && lengkap));
+  // T-024: layar akhir SATU LAYAR (tanpa gulir) di cangkang, untuk episode dengan ringkasan keputusan bernomor. Legenda suasana,
+  // catatan simulasi dan status naskah yang dulu di bawah kartu pindah ke Menu selama bentuk ini tampil.
+  const akhirSatu = tampilan === 'akhir' && cangkangLayar && !!ep.titik?.length;
 
   return (
-    <div className="player-ui cer-layar hp-layar" data-kunci={kunciLayar ? '' : undefined} data-tampilan={tampilan} data-balas-terbuka={balasTerbuka ? '' : undefined}>
+    <div className="player-ui cer-layar hp-layar" data-kunci={kunciLayar ? '' : undefined} data-tampilan={tampilan} data-akhir-satu={akhirSatu ? '' : undefined} data-balas-terbuka={balasTerbuka ? '' : undefined}>
       <header className="hp-kepala">
         <Link className="hp-kembali" to="/cerita" aria-label={t('cerita.kembaliDaftar')}><Arrow back /></Link>
         <div className="hp-judul">
@@ -302,7 +308,7 @@ function PemainHPInti({ ep, state, kendali, profil, bahasa, tx: txAsli }: {
             onKembali={() => setArenaUntuk(null)}
           />
         ) : tampilan === 'akhir' ? (
-          <LayarAkhir ep={ep} state={state} bahasa={bahasa} namaPemain={namaPemain} tx={tx} ditemukan={akhirDitemukan(ep.id)} onUlangBab={ulangBab} onUlangEpisode={ulangEpisode} slotAksi={cangkangLayar ? slotAkhir : null} />
+          <LayarAkhir ep={ep} state={state} bahasa={bahasa} namaPemain={namaPemain} tx={tx} ditemukan={akhirDitemukan(ep.id)} onUlangBab={ulangBab} onUlangEpisode={ulangEpisode} slotAksi={cangkangLayar ? slotAkhir : null} satuLayar={cangkangLayar} />
         ) : tampilan === 'obrolan' ? (
           <Obrolan ep={ep} state={state} tx={tx} status={status} pesanAktivitas={pesanAktivitas} komposer={komposer} sisipan={<>{sisipanIstilah}{buktiTindakan}</>} tujuan={bab ? tx(bab.bab.tujuan) : undefined} lembar={balasTerbuka} />
         ) : (
@@ -321,6 +327,21 @@ function PemainHPInti({ ep, state, kendali, profil, bahasa, tx: txAsli }: {
             <li><button type="button" onClick={() => setDialog('riwayat')}><IkonAlat jenis="riwayat" /><span>{t('cerita.riwayat')}</span></button></li>
             <li><button type="button" onClick={() => setDialog('catatan')}><IkonAlat jenis="catatan" /><span>{t('cerita.catatanKasus')}</span></button></li>
             <li><button type="button" onClick={() => setDialog('bantuan')}><IkonAlat jenis="bantuan" /><span>{t('cerita.bantuan')}</span></button></li>
+            {/* T-024: keterangan yang dulu di bawah kartu akhir (legenda pita grafik, catatan simulasi, status naskah).
+                D-246 (polish): tepat di bawah Bantuan, di ATAS bahasa & suara, supaya terlihat tanpa menggulir Menu. */}
+            {akhirSatu && ep.suasana.length ? (
+              <li className="hp-menu-info" data-menu-info="suasana">
+                <b>{t('ceritaAkhir.menu.suasana')}</b>
+                <span>{[...ep.suasana].sort((a, b) => b.min - a.min).map((p) => `${p.min}+ ${tx(p.label)}`).join(' · ')}</span>
+              </li>
+            ) : null}
+            {akhirSatu ? (
+              <li className="hp-menu-info" data-menu-info="catatan">
+                <b>{t('ceritaAkhir.menu.catatan')}</b>
+                <span>{t('misi.catatanSimulasiPeriksa')}</span>
+                {ep.statusNaskah ? <span>{tx(ep.statusNaskah)}</span> : null}
+              </li>
+            ) : null}
             <li className="hp-menu-baris"><span>{t('ceritaHp.menuBahasa')}</span><PilihBahasa /></li>
             <li className="hp-menu-suara"><span className="hp-menu-suara-judul">{t('ceritaHp.menuSuara')}</span><KontrolSuara temaUji={temaUji} onTemaUji={setTemaUji} /></li>
           </ul>

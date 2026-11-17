@@ -16,8 +16,8 @@ import type { MissionAnswer, MissionPublic, StepAnswer, StepDef } from '@shared/
 import { JUMLAH_LAJUR as JUMLAH_LAJUR_ASET, LAJUR_TRUK as LAJUR_TRUK_ASET } from './lokasi/seni/geometri';
 import { jalankan, pilihanTersedia, semuaBarisTampil, stateAwal } from './mesin';
 import {
-  DAFTAR_EKSPRESI, DAFTAR_LATAR, DAFTAR_LOKASI_ADEGAN, type AksiCerita, type Baris, type CueAdegan, type CueLatar, type DefAktivitas, type Efek, type Ekspresi, type Episode,
-  type IdAkhir, type IdLokasiAdegan, type IdNode, type Kondisi, type NilaiProses, type NodeCerita, type StateCerita,
+  DAFTAR_EKSPRESI, DAFTAR_LATAR, DAFTAR_LOKASI_ADEGAN, KEADAAN_KOMITE, type AksiCerita, type Baris, type CueAdegan, type CueLatar, type DefAktivitas, type Efek, type Ekspresi, type Episode,
+  type IdAkhir, type IdLokasiAdegan, type IdNode, type KeadaanKomite, type Kondisi, type KunciTeks, type NilaiProses, type NodeCerita, type StateCerita,
 } from './tipe';
 import { DAFTAR_AKSI_ADEGAN, DAFTAR_PANDANG, DAFTAR_PROP_ADEGAN, DAFTAR_TEMPAT_PROP, JENIS_POSE_MENTOR, JENIS_POSE_NASABAH } from './ui/adegan';
 
@@ -836,6 +836,13 @@ export function validasiEpisode(ep: Episode): string[] {
   for (const [id, x] of Object.entries(ep.istilah ?? {})) {
     teks(x?.label, `istilah "${id}".label`);
     teks(x?.arti, `istilah "${id}".arti`);
+    // T-025: rincian anggota di bawah arti (peran satu baris + id ikon piksel).
+    const anggota: unknown = x?.anggota;
+    if (anggota !== undefined && !Array.isArray(anggota)) salah(`istilah "${id}".anggota harus berupa daftar`);
+    (Array.isArray(anggota) ? (anggota as { teks?: unknown; ikon?: unknown }[]) : []).forEach((a, i) => {
+      teks(a?.teks as KunciTeks, `istilah "${id}".anggota[${i}].teks`);
+      if (a?.ikon !== undefined && !teksSah(a.ikon)) salah(`istilah "${id}".anggota[${i}].ikon harus berupa id ikon`);
+    });
   }
 
   // ---- panggung & cue adegan v3 (docs/cerita/ADEGAN-AUTO1.md bagian 1-4)
@@ -912,6 +919,15 @@ export function validasiEpisode(ep: Episode): string[] {
     for (const [idL, l] of Object.entries(latar.lokasi ?? {})) {
       teks(l?.nama, `latar.lokasi "${idL}".nama`);
       if (!teksSah(l?.piksel)) salah(`latar.lokasi "${idL}".piksel: id ruang piksel wajib ada`);
+      // T-025: ruang bersprite milik ruang = satu kalimat pembaca layar untuk SETIAP keadaan (tanda di gambarnya bukan teks).
+      const km: unknown = l?.komite;
+      if (km !== undefined) {
+        if (!km || typeof km !== 'object' || Array.isArray(km)) salah(`latar.lokasi "${idL}".komite harus berupa peta keadaan -> kalimat`);
+        else {
+          for (const k of KEADAAN_KOMITE) teks((km as Record<string, KunciTeks>)[k], `latar.lokasi "${idL}".komite.${k}`);
+          for (const k of Object.keys(km)) if (!KEADAAN_KOMITE.includes(k as KeadaanKomite)) salah(`latar.lokasi "${idL}".komite: keadaan "${k}" tidak dikenal`);
+        }
+      }
     }
     const punyaAset = (idT: string) => ada(pemeran, idT);
     const cekTata = (c: CueLatar | undefined, tempat: string) => {
@@ -922,6 +938,12 @@ export function validasiEpisode(ep: Episode): string[] {
       }
       // Panggung punya paling banyak tiga slot tokoh per lokasi; lebih dari itu akan hilang diam-diam.
       if ((c.hadir?.length ?? 0) > 3) salah(`${tempat}: paling banyak 3 tokoh hadir (${c.hadir!.length})`);
+      // T-025: keadaan sprite milik ruang. Anggota komite bukan pemeran: mereka tidak boleh muncul di hadir / telepon (itu
+      // sudah ditolak di atas karena bukan pemeran), hanya lewat isyarat ini.
+      if (c.komite !== undefined) {
+        if (!KEADAAN_KOMITE.includes(c.komite)) salah(`${tempat}: keadaan komite "${String(c.komite)}" tidak dikenal`);
+        else if (c.lokasi !== undefined && ada(latar.lokasi ?? {}, c.lokasi) && !latar.lokasi[c.lokasi]!.komite) salah(`${tempat}: isyarat komite di lokasi "${c.lokasi}" yang tidak punya kalimat keadaan (latar.lokasi.komite)`);
+      }
     };
     cekTata(latar.awal, 'latar.awal');
     cekTata({ lokasi: latar.sampul?.lokasi, hadir: latar.sampul?.hadir }, 'latar.sampul');

@@ -12,13 +12,19 @@
  *   sekali; event ADEGAN_SIAP dikirim (pemanas lokasi berikutnya). PNG gagal = `onGagal` (pemakai kembali ke ilustrasi).
  * - Hidup: kedip tiap 3-5 s, mulut bergantian 1,4 s pertama saat tokoh berbicara (hanya bila atlas punya varian bicara).
  *   Gerak dikurangi = tanpa kedip/mulut. Hiasan: aria-hidden; informasi ada di teks dialog.
+ * - T-025 SPRITE MILIK RUANG (ruang dengan blok `komite`, ./komite.ts): anggota komite digambar di z 20 (sesudah latar,
+ *   sebelum lapisan meja, jadi meja menutupi potongan bawahnya) dan tandanya di z 40 (paling atas). Mereka bukan tokoh adegan:
+ *   KAMERA tidak pernah membaca mereka, jadi ganti keadaan (isyarat tata `komite`) tidak menggeser bingkai. Gerak masuk keadaan
+ *   (ruang yang menunggu ditahan 320 md, lalu angguk + tanda satu per satu; D-253) berjalan sekali sejak PNG siap; gerak
+ *   dikurangi = bingkai diam + semua tanda sekaligus, tanpa jeda. Kalimat
+ *   ruang per keadaan (latar.lokasi[x].komite) ditulis untuk pembaca layar, karena tanda SETUJU / CATATAN adalah piksel.
  */
 import { useEffect, useLayoutEffect, useMemo, useRef, useState, type RefObject } from 'react';
 import { useReducedMotion } from '../../../../hooks';
 import { t } from '../../../../i18n';
 import { useDpr } from '../../../../game/tokoh';
 import { susunTokoh, teleponSisipan } from '../../../seni/piksel';
-import type { Episode, IdPembicara, KunciTeks } from '../../../tipe';
+import type { Episode, IdPembicara, KeadaanKomite, KunciTeks } from '../../../tipe';
 import { qPiksel } from '../../panggung/kamera';
 import { DUNIA_H, DUNIA_W, type Kotak } from '../../panggung/dunia';
 import { ADEGAN_SIAP } from '../hangatkan';
@@ -30,6 +36,7 @@ import { nasabahDiPanggung, type KomposisiLatar } from '../komposisi';
 import type { AdeganPiksel } from './adegan';
 import { kameraPiksel, kotakLuarSisipan, langkahJalan, LANGKAH_JALAN_MS, POSE_JALAN_MAKS, posisiJalan, punyaJalan, rencanaJalan, sisipanAdegan, susunAdeganPiksel } from './tata';
 import { RUANG_PIKSEL, SATUAN_RUANG } from './ruang';
+import { susunKomite, titikUbahKomite, type KomiteRuang } from './komite';
 import '../../panggung/panggung.css';
 import '../latar.css';
 
@@ -162,6 +169,46 @@ function useJalan(mati: boolean, siapGambar: boolean, ruang: string, pejalan: st
   return jalan;
 }
 
+const TANPA_KEDIP: ReadonlySet<string> = new Set();
+
+/**
+ * T-025: gerak sprite milik ruang. `t` = md sejak keadaan mulai (jam mulai saat PNG siap; hanya berganti di titik ubah: akhir
+ * jeda awal, bingkai angguk + munculnya tiap tanda), Infinity sesudah selesai atau saat gerak dikurangi. `kedip` = anggota yang sedang berkedip
+ * (hanya keadaan ber-kedip; tiap anggota berjadwal sendiri tiap 3-6 d).
+ */
+function useKomite(mati: boolean, siapGambar: boolean, km: KomiteRuang | null, keadaan: KeadaanKomite | undefined): { t: number; kedip: ReadonlySet<string> } {
+  const [t, setT] = useState(Infinity);
+  const [kedip, setKedip] = useState<ReadonlySet<string>>(TANPA_KEDIP);
+  useLayoutEffect(() => {
+    if (!km || !keadaan || !siapGambar) return;
+    const titik = mati ? [] : titikUbahKomite(km, keadaan);
+    if (titik.length < 2) { setT(Infinity); return; }
+    const t0 = performance.now();
+    let tm = 0, i = 0;
+    const langkah = () => {
+      i += 1;
+      if (i >= titik.length - 1) { setT(Infinity); return; }
+      setT(titik[i]!);
+      tm = window.setTimeout(langkah, Math.max(0, titik[i + 1]! - (performance.now() - t0)));
+    };
+    setT(0);
+    tm = window.setTimeout(langkah, titik[1]!);
+    return () => { window.clearTimeout(tm); setT(Infinity); };
+  }, [mati, siapGambar, km, keadaan]);
+  const berkedip = !mati && !!km && !!keadaan && km.keadaan[keadaan].kedip;
+  useEffect(() => {
+    if (!berkedip || !km || !keadaan) return;
+    const tm = new Map<string, number>();
+    const jadwal = (id: string) => tm.set(id, window.setTimeout(() => {
+      setKedip((x) => new Set(x).add(id));
+      tm.set(id, window.setTimeout(() => { setKedip((x) => { const b = new Set(x); b.delete(id); return b; }); jadwal(id); }, km.pose.kedip?.ms ?? 120));
+    }, 3000 + Math.random() * 3000));
+    for (const a of km.anggota) if (km.keadaan[keadaan].pose[a.id]) jadwal(a.id);
+    return () => { for (const x of tm.values()) window.clearTimeout(x); setKedip(TANPA_KEDIP); };
+  }, [berkedip, km, keadaan]);
+  return { t, kedip };
+}
+
 export interface PropsPanggungPiksel {
   ep: Episode;
   komposisi: KomposisiLatar;
@@ -201,6 +248,7 @@ export function PanggungPiksel({ ep, komposisi, adegan, tx, nama, suasana, statu
   const url = useMemo(() => {
     const u = new Set<string>([...r.lapisan.map((l) => l.url), ...prop.map((p) => p.url), ...tokoh.map((x) => x.s.url)]);
     if (sisipan) u.add(sisipan.url);
+    if (r.komite) { u.add(r.komite.url); u.add(r.komite.tanda.url); }
     return [...u].filter(Boolean);
   }, [r, prop.map((p) => p.url).join(), tokoh.map((x) => x.s.url).join(), sisipan?.url]); // eslint-disable-line react-hooks/exhaustive-deps
   const [siapUrl, setSiapUrl] = useState(() => url.every((u) => siap.has(u)));
@@ -216,6 +264,9 @@ export function PanggungPiksel({ ep, komposisi, adegan, tx, nama, suasana, statu
   // T-017: jalan masuk (hanya tokoh slot yang atlasnya punya bingkai jalan; kartu episode 'penuh' tidak pernah).
   const pejalan = isi === 'penuh' ? '' : adegan.tokoh.filter((x) => x.tempat === 'slot' && punyaJalan(x.tokoh)).map((x) => x.id).join(' ');
   const jalan = useJalan(kurang, siapUrl, adegan.ruang, pejalan, kunciLangkah);
+  // T-025: sprite milik ruang untuk keadaan isyarat `komite` (kamera di bawah TIDAK membacanya).
+  const gerakKomite = useKomite(kurang, siapUrl, r.komite, adegan.komite);
+  const komite = r.komite && adegan.komite ? susunKomite(r.komite, adegan.komite, gerakKomite.t, { diam: kurang, kedip: gerakKomite.kedip }, K) : null;
   const papanTeks = r.papan ? tx(r.papan.teksKunci) : '';
   const kamera = ukuran ? kameraPiksel(r, tokoh, ukuran.w, ukuran.h, dpr, ruangBawah, isi === 'penuh') : null;
   // T-015: sisipan telepon tidak pernah menutupi kepala tokoh (letak dipilih dari kotak kepala di layar).
@@ -337,9 +388,12 @@ export function PanggungPiksel({ ep, komposisi, adegan, tx, nama, suasana, statu
     if (meja) { g.beginPath(); g.rect(0, 0, W, dy(meja.y + meja.h)); g.clip(); }
     tokohDi('balikMeja');
     g.restore();
+    // T-025: anggota komite (z 20) di belakang meja; tanda (z 40) di atas semuanya.
+    if (komite && r.komite) for (const a of komite.anggota) for (const l of a.lapis) gambar(r.komite.url, l.sumber[0], l.sumber[1], l.sumber[2], l.sumber[3], l.x, l.y, l.w, l.h);
     for (const l of r.lapisan) if (l.z >= 30) gambar(l.url, 0, 0, l.w / K, l.h / K, l.x, l.y, l.w, l.h);
     for (const p of prop) gambar(p.url, 0, 0, p.w / K, p.h / K, p.x, p.y, p.w, p.h);
     tokohDi('slot');
+    if (komite && r.komite) for (const x of komite.tanda) gambar(r.komite.tanda.url, x.sumber[0], x.sumber[1], x.sumber[2], x.sumber[3], x.x, x.y, x.w, x.h);
     if (sisipan) {
       // Sisipan telepon: jendela kepala 56 piksel seni, skala bulat ± 34 % tinggi panggung, bingkai gelap. Letak = tataSisipan
       // (T-015: kanan atas bila bebas; tidak pernah di atas kepala tokoh).
@@ -371,6 +425,11 @@ export function PanggungPiksel({ ep, komposisi, adegan, tx, nama, suasana, statu
 
   const lok = ep.latar?.lokasi[komposisi.lokasi];
   const wajahNasabah = nasabahDiPanggung(ep, komposisi);
+  const kalimatKomite = adegan.komite && lok?.komite?.[adegan.komite] ? tx(lok.komite[adegan.komite]) : '';
+  // Wilayah hidup kalimat ruang ada di SETIAP ruang episode yang punya kalimat semacam itu (kosong di ruang lain), supaya saat
+  // panggung pindah ke ruang Komite atau keadaannya berganti, isinya yang berubah (itulah yang dibacakan), bukan elemennya yang
+  // baru dipasang. Kartu episode (`penuh`) tidak memakainya.
+  const adaKalimatRuang = isi !== 'penuh' && !!ep.latar && Object.values(ep.latar.lokasi).some((l) => !!l.komite);
   return (
     <div
       ref={akar}
@@ -382,6 +441,7 @@ export function PanggungPiksel({ ep, komposisi, adegan, tx, nama, suasana, statu
       data-hadir={komposisi.hadir.map((x) => x.id).join(' ') || undefined}
       data-telepon={komposisi.telepon?.id}
       data-objek={komposisi.objek.join(' ') || undefined}
+      data-komite={adegan.komite}
       data-k={kamera ? Math.round(kamera.s * qPiksel(dpr)) : undefined}
       data-sisipan={letakSisipan ? css(kotakLuarSisipan(letakSisipan.tata)) : undefined}
       data-sisipan-letak={letakSisipan?.tata.letak}
@@ -390,12 +450,17 @@ export function PanggungPiksel({ ep, komposisi, adegan, tx, nama, suasana, statu
       data-kamera={kamera ? `${Math.round(kamera.x)},${Math.round(kamera.y)},${Math.round(ukuran!.w / kamera.s)}x${Math.round(ukuran!.h / kamera.s)}` : undefined}
     >
       <div className="cer-piksel" data-siap={siapUrl ? '' : undefined} aria-hidden="true">
-        <canvas ref={kanvas} className="cer-piksel-kanvas" data-pose={tokoh.map((x) => `${x.t.id}:${x.s.pose}:${x.t.hadap}:${x.s.ekspresi}`).join(' ') || undefined} data-mata={gerak.kedip ? 'tutup' : 'buka'} data-napas={hidup.napas ? '1' : '0'} data-jalan={[...jalanKini].map(([id, j]) => `${id}:${j.pose}:${Math.round(j.x)}`).join(' ') || undefined} data-kaki={tokoh.map((x) => `${x.t.id}:${Math.round(jalanKini.get(x.t.id)?.x ?? x.kakiX)}`).join(' ') || undefined} />
+        <canvas ref={kanvas} className="cer-piksel-kanvas" data-pose={tokoh.map((x) => `${x.t.id}:${x.s.pose}:${x.t.hadap}:${x.s.ekspresi}`).join(' ') || undefined} data-mata={gerak.kedip ? 'tutup' : 'buka'} data-napas={hidup.napas ? '1' : '0'} data-jalan={[...jalanKini].map(([id, j]) => `${id}:${j.pose}:${Math.round(j.x)}`).join(' ') || undefined} data-kaki={tokoh.map((x) => `${x.t.id}:${Math.round(jalanKini.get(x.t.id)?.x ?? x.kakiX)}`).join(' ') || undefined}
+          data-komite-anggota={komite ? komite.anggota.map((a) => `${a.id}:${a.pose}:${a.bingkai}${a.kedip ? ':kedip' : ''}`).join(' ') : undefined}
+          data-komite-tanda={komite ? komite.tanda.map((x) => `${x.id}:${x.jenis}`).join(' ') : undefined} data-komite-gerak={komite ? (komite.selesai ? 'diam' : 'jalan') : undefined} />
         <canvas ref={lapisLama} className="cer-piksel-kanvas cer-piksel-lama" />
       </div>
       {/* Label lokasi hanya untuk ruang KOSONG tanpa papan: dengan tokoh, chip menutupi kepala (wawancara tiga saksi); di kantor
           nama lokasi sudah tertulis di papan. Nama lokasi tetap di narasi/judul bagian. */}
-      {lok?.nama && !r.papan && !adegan.tokoh.length ? <p className="cer-latar-lokasi">{tx(lok.nama)}</p> : null}
+      {/* T-025: ruang bersprite milik ruang juga tanpa chip (ia akan menutupi tanda di atas kepala anggota); nama ruangnya ada di
+          kalimat pembaca layar di bawah. */}
+      {lok?.nama && !r.papan && !r.komite && !adegan.tokoh.length ? <p className="cer-latar-lokasi">{tx(lok.nama)}</p> : null}
+      {adaKalimatRuang ? <p className="sr-only" aria-live="polite" data-komite-aria="">{kalimatKomite}</p> : null}
       {wajahNasabah && suasana !== null ? (
         <p className="cer-suasana" data-ekspresi={wajahNasabah.ekspresi} data-jenis={status ? 'status' : 'wajah'}>
           <span className="sr-only">{t(status ? 'cerita.statusAria' : 'cerita.suasanaAria', { nama: nama(ep.nasabah), suasana })}</span>

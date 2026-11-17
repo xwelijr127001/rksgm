@@ -18,6 +18,8 @@ export function urlKomposisi(ep: Episode, k: KomposisiLatar): string[] {
   if (!a || !r) return [];
   const u = new Set<string>(r.lapisan.map((l) => l.url));
   for (const p of a.prop) if (r.prop[p]) u.add(r.prop[p]!.url);
+  // T-025: sprite milik ruang (atlas anggota + tanda) ikut dipanaskan bersama ruangnya.
+  if (r.komite) { u.add(r.komite.url); u.add(r.komite.tanda.url); }
   for (const t of a.tokoh) { const s = susunTokoh(t.tokoh, { pose: t.pose as never, ekspresi: t.ekspresi }); if (s?.url) u.add(s.url); }
   return [...u].filter((x) => x && !x.startsWith('file:'));
 }

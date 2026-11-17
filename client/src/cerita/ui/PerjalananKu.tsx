@@ -6,6 +6,8 @@
  * pemahaman nasabah. Lalu akhir yang ditemukan (yang belum: tersamar), paling banyak SATU saran latihan, dan
  * tombol ke pemilih bagian (akhir yang belum baik juga bisa mencoba bab lain).
  * Isi dari tinjauanPerjalanan (murni, tinjauan.ts); dialog ini tidak mengubah state cerita.
+ * Episode tanpa data tinjauan (T-024: Episode 2, dibuka dari lembar sebab layar akhir satu layar): hanya "Kenapa berakhir
+ * begini", akhir yang ditemukan, dan tombol ke pemilih bagian.
  */
 import type { ReactNode } from 'react';
 import { Link } from 'react-router-dom';
@@ -43,6 +45,9 @@ export function PerjalananKu({ ep, state, bahasa, tx, ditemukan, onCobaBagian, o
   const p = tj.perhatian;
   const adaMembantu = m.komunikasi.length + m.proses.length + m.paham.length > 0;
   const adaPerhatian = p.komunikasi.length + p.proses.length + p.paham.length > 0;
+  // Episode tanpa data tinjauan (tanpa makna alasan, langkah klaim, pemahaman: Episode 2 merangkum keputusannya di layar akhir):
+  // dua kelompok pertama tidak digambar, supaya tidak tertulis "belum ada yang tercatat membantu" padahal memang tidak dicatat.
+  const adaTinjauan = ep.makna !== undefined || Object.keys(ep.proses).length > 0 || Object.keys(ep.paham).length > 0;
 
   return (
     <Modal
@@ -55,6 +60,7 @@ export function PerjalananKu({ ep, state, bahasa, tx, ditemukan, onCobaBagian, o
       </>}
     >
       <div className="akh-tinjauan">
+        {adaTinjauan ? <>
         <section className="akh-kelompok" data-kelompok="membantu" aria-labelledby="akh-tj-membantu">
           <h4 id="akh-tj-membantu">{t('ceritaAkhir.membantu')}</h4>
           {adaMembantu ? null : <p className="akh-kosong">{t('ceritaAkhir.kosongMembantu')}</p>}
@@ -121,6 +127,7 @@ export function PerjalananKu({ ep, state, bahasa, tx, ditemukan, onCobaBagian, o
             </Sub>
           ) : null}
         </section>
+        </> : null}
 
         <section className="akh-kelompok" data-kelompok="kenapa" aria-labelledby="akh-tj-kenapa">
           <h4 id="akh-tj-kenapa">{t('ceritaAkhir.kenapa')}</h4>

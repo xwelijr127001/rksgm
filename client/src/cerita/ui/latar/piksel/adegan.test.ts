@@ -6,10 +6,11 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { EPISODE_AUTO_2 } from '../../../episode/auto-2/episode';
 import { penyusunPiksel, susunTokoh } from '../../../seni/piksel';
-import type { Ekspresi } from '../../../tipe';
+import { KEADAAN_KOMITE, type Ekspresi, type KeadaanKomite } from '../../../tipe';
 import { barisNode, lipatanAwal, terapkanCue, type KomposisiLatar, type Lipatan } from '../komposisi';
 import { adeganPiksel, OBJEK_PIKSEL, PERAN_PIKSEL, poseHilang } from './adegan';
 import { RUANG_PIKSEL, CATATAN_RUANG } from './ruang';
+import { bacaKomite, lamaKomite, susunKomite, tahanKomite, TAHAN_AWAL_KOMITE, titikUbahKomite } from './komite';
 
 const ep = EPISODE_AUTO_2;
 /** T-019: jumlah pose jalan Hendra di kantor pada 360 / 390 / 1280 (sama dengan POSE_HARAPAN_HENDRA di tools/cek-jalan-t017.mjs). */
@@ -97,11 +98,18 @@ test('naskah AUTO-2 (SELURUH episode): setiap komposisi = piksel tanpa cadangan;
   let piksel = 0;
   const diminta = new Set<string>();
   const lokasi = new Set<string>();
+  const keadaanKomite = new Set<string>();
   for (const l of semuaKomposisi()) {
-    const k: KomposisiLatar = { lokasi: l.lokasi, hadir: l.hadir.filter((x) => x !== l.telepon).map((id) => tl(id)), telepon: l.telepon ? tl(l.telepon) : null, objek: l.objek };
+    const k: KomposisiLatar = { lokasi: l.lokasi, hadir: l.hadir.filter((x) => x !== l.telepon).map((id) => tl(id)), telepon: l.telepon ? tl(l.telepon) : null, objek: l.objek, ...(l.komite ? { komite: l.komite } : {}) };
     const h = adeganPiksel(ep, k);
     if (!h.piksel) { alasan.add(h.alasan); continue; }
     piksel++;
+    // T-025: ruang Komite = sprite milik ruang saja: tanpa pemeran, tanpa panggilan, tanpa prop; keadaannya dari isyarat naskah.
+    if (l.lokasi === 'komite') {
+      assert.deepEqual([h.piksel.ruang, h.piksel.tokoh.length, h.piksel.telepon, h.piksel.prop.length], ['komite-ep2', 0, null, 0], JSON.stringify(l));
+      assert.equal(h.piksel.komite, l.komite, 'keadaan ruang = isyarat naskah (bukan bawaan)');
+      keadaanKomite.add(h.piksel.komite!);
+    } else assert.equal(h.piksel.komite, undefined, `${l.lokasi}: ruang tanpa sprite milik ruang`);
     const r = RUANG_PIKSEL[h.piksel.ruang]!;
     assert.ok(r, h.piksel.ruang);
     for (const p of h.piksel.prop) assert.ok(r.prop[p], `${h.piksel.ruang}: prop ${p}`);
@@ -124,7 +132,8 @@ test('naskah AUTO-2 (SELURUH episode): setiap komposisi = piksel tanpa cadangan;
   assert.ok(piksel > 0);
   // Stage 2: TIDAK ADA komposisi naskah yang jatuh ke ilustrasi.
   assert.deepEqual([...alasan], []);
-  assert.deepEqual([...lokasi].sort(), ['bengkel', 'kantor', 'pool', 'tol', 'wawancara']);
+  assert.deepEqual([...lokasi].sort(), ['bengkel', 'kantor', 'komite', 'pool', 'tol', 'wawancara']);
+  assert.deepEqual([...keadaanKomite].sort(), [...KEADAAN_KOMITE].sort(), 'naskah memakai keempat keadaan ruang Komite');
   // Arah per adegan (D-93): kantor pengunjung kiri; pool/tol kanan; bengkel admin kiri; wawancara 1 kanan, 2 saling berhadapan,
   // 3 = kiri & tengah kanan, kanan kiri.
   assert.deepEqual([...diminta].sort(), [
@@ -353,4 +362,171 @@ test('T-017 fix D-126: ruang lapangan, kamera turun sampai telapak utuh bila kep
   const tk = susunAdeganPiksel(a, rk, { kedip: false, mulut: false });
   const kk = { s: 0.5, x: 0, y: 0 };
   assert.equal(turunkanKeKaki(kk, rk, tk, 780, 400, 1), kk);
+});
+
+// ------------------------------------------------------------------ T-025: Ruang Rapat Komite Klaim (sprite milik ruang)
+
+const RK = RUANG_PIKSEL['komite-ep2']!;
+const KM = RK.komite!;
+const ANGGOTA = ['ketua', 'penjamin', 'surveyor', 'klaim'];
+
+test('T-025: ruang komite-ep2 = latar + meja + empat anggota milik ruang (bukan pemeran, bukan slot), z 20 di antara latar dan meja, tanda z 40', () => {
+  assert.deepEqual(RK.lapisan.map((l) => [l.id, l.z]), [['latar', 10], ['meja', 30]]);
+  assert.equal(RK.tempat.balikMeja, undefined, 'tanpa tempat tokoh di balik meja: kursinya milik anggota');
+  assert.equal(RK.papan, null, 'papan nama sudah bagian dari gambar');
+  assert.deepEqual([KM.z, KM.zTanda], [20, 40]);
+  assert.deepEqual(KM.anggota.map((a) => a.id), ANGGOTA);
+  // Tidak satu pun anggota adalah pemeran naskah atau punya peran piksel: mereka tidak bisa masuk hadir / dialog.
+  for (const id of ANGGOTA) assert.ok(!Object.prototype.hasOwnProperty.call(ep.pemeran, id) && !(id in PERAN_PIKSEL), id);
+  // Kursi urut kiri -> kanan, 66 piksel seni; setiap sel di dalam kotak bingkai anggotanya; kotak di dalam bingkai HP ruang.
+  const hp = RK.bingkai.hp;
+  KM.anggota.forEach((a, i) => {
+    if (i) assert.ok(a.bingkai.x > KM.anggota[i - 1]!.bingkai.x, 'urut kiri -> kanan');
+    assert.ok(a.bingkai.x >= hp.x && a.bingkai.x + a.bingkai.w <= hp.x + hp.w, `${a.id} di dalam bingkai HP`);
+    for (const [nama, sel] of Object.entries(a.sel)) {
+      const [lx, ly] = a.letak[nama]!;
+      assert.ok(lx >= 0 && ly >= 0 && (lx + sel[2]) * 4 <= a.bingkai.w && (ly + sel[3]) * 4 <= a.bingkai.h + 12, `${a.id}.${nama} di dalam bingkai (+ 3 piksel angguk)`);
+    }
+  });
+  // Kotak fokus ruang (yang wajib tampil) memuat papan, tanda, dan kepala; meja boleh terpotong di kotak pipih (D-242).
+  const fk = RK.fokus!;
+  for (const id of ANGGOTA) { const l = KM.tanda.letak[id]!; assert.ok(l.x >= fk.x && l.x + KM.tanda.w <= fk.x + fk.w && l.y >= fk.y && l.y + KM.tanda.h <= fk.y + fk.h, `tanda ${id} di dalam fokus`); }
+  assert.deepEqual(Object.keys(KM.ikon), ANGGOTA);
+});
+
+test('T-025: susunKomite per keadaan: tunggu diam, setuju angguk 2 x (160 + 160) + tanda tiap 180 md, catatan dua tangan + dua tanda, kosong tanpa siapa pun; Fix 2: gerak masuk sesudah jeda awal 320 md', () => {
+  const pose = (g: ReturnType<typeof susunKomite>) => g.anggota.map((a) => `${a.id}:${a.pose}:${a.bingkai}`);
+  const tanda = (g: ReturnType<typeof susunKomite>) => g.tanda.map((x) => `${x.id}:${x.jenis}`);
+  // tunggu: empat anggota, badan + kepala, tanpa tanda, tidak ada yang berubah karena waktu.
+  const tunggu = susunKomite(KM, 'tunggu', 0);
+  assert.deepEqual(pose(tunggu), ANGGOTA.map((id) => `${id}:diam:-1`));
+  assert.deepEqual(tunggu.anggota.map((a) => a.lapis.map((l) => l.nama).join('+')), Array(4).fill('badan+kepala'));
+  assert.deepEqual([tunggu.tanda.length, tunggu.selesai, lamaKomite(KM, 'tunggu')], [0, true, 0]);
+  assert.deepEqual(titikUbahKomite(KM, 'tunggu'), [0]);
+  // Fix 2 (D-253): keadaan bergerak lebih dulu menahan ruang yang MENUNGGU selama satu anggukan (320 md): gambar yang sama
+  // dengan keadaan tunggu (duduk, kepala tegak, tanpa tanda, tanpa lengan terangkat). Keadaan diam tidak punya jeda.
+  const T0 = TAHAN_AWAL_KOMITE;
+  assert.deepEqual([T0, tahanKomite(KM, 'tunggu'), tahanKomite(KM, 'kosong'), tahanKomite(KM, 'setuju'), tahanKomite(KM, 'catatan')], [320, 0, 0, 320, 320]);
+  for (const k of ['setuju', 'catatan'] as const) for (const t of [0, 1, T0 - 1]) {
+    const g = susunKomite(KM, k, t);
+    assert.deepEqual([pose(g), g.tanda.length, g.selesai], [ANGGOTA.map((id) => `${id}:diam:-1`), 0, false], `${k} t ${t}: ruang menunggu`);
+    assert.deepEqual(g.anggota.map((a) => a.lapis), tunggu.anggota.map((a) => a.lapis), `${k} t ${t}: gambar = keadaan tunggu`);
+  }
+  // setuju (sesudah jeda): kepala turun 3 piksel seni 160 md, kembali 160 md, dua kali; tanda ketua -> penjamin -> surveyor ->
+  // klaim tiap 180 md.
+  assert.deepEqual(titikUbahKomite(KM, 'setuju'), [0, 320, 480, 500, 640, 680, 800, 860, 960]);
+  assert.equal(lamaKomite(KM, 'setuju'), 960);
+  const kepalaY = (t: number) => susunKomite(KM, 'setuju', t).anggota[0]!.lapis.find((l) => l.nama === 'kepala')!.y;
+  const y0 = susunKomite(KM, 'tunggu', 0).anggota[0]!.lapis.find((l) => l.nama === 'kepala')!.y;
+  assert.deepEqual([0, 319, 320, 479, 480, 639, 640, 799, 800, 959, 960, 5000].map((t) => (kepalaY(t) - y0) / 4), [0, 0, 3, 3, 0, 0, 3, 3, 0, 0, 0, 0]);
+  assert.deepEqual([0, 319, 320, 499, 500, 680, 860].map((t) => susunKomite(KM, 'setuju', t).tanda.length), [0, 0, 1, 1, 2, 3, 4]);
+  assert.deepEqual(tanda(susunKomite(KM, 'setuju', 960)), ANGGOTA.map((id) => `${id}:setuju`));
+  assert.deepEqual([susunKomite(KM, 'setuju', 959).selesai, susunKomite(KM, 'setuju', 960).selesai], [false, true]);
+  assert.deepEqual(pose(susunKomite(KM, 'setuju', T0 + 200)), ANGGOTA.map((id) => `${id}:angguk:1`));
+  // Badan tidak ikut mengangguk; semua anggota mengangguk bersama.
+  for (const a of susunKomite(KM, 'setuju', T0).anggota) assert.equal(a.lapis.find((l) => l.nama === 'badan')!.y, tunggu.anggota.find((x) => x.id === a.id)!.lapis.find((l) => l.nama === 'badan')!.y);
+  // catatan (sesudah jeda): penjamin + surveyor mengangkat tangan (lapis lengan), dua tanda berjarak 180 md; ketua & kepala
+  // klaim diam.
+  const cat = susunKomite(KM, 'catatan', T0);
+  assert.deepEqual(pose(cat), ['ketua:diam:-1', 'penjamin:angkat:-1', 'surveyor:angkat:-1', 'klaim:diam:-1']);
+  assert.deepEqual(cat.anggota.map((a) => a.lapis.map((l) => l.nama).join('+')), ['badan+kepala', 'badan+kepala+tangan', 'badan+kepala+tangan', 'badan+kepala']);
+  assert.deepEqual([tanda(cat), tanda(susunKomite(KM, 'catatan', T0 + 179)), tanda(susunKomite(KM, 'catatan', T0 + 180))], [['penjamin:catatan'], ['penjamin:catatan'], ['penjamin:catatan', 'surveyor:catatan']]);
+  assert.deepEqual([titikUbahKomite(KM, 'catatan'), lamaKomite(KM, 'catatan')], [[0, 320, 500], 500]);
+  // kosong: kursi kosong (tidak ada anggota, tidak ada tanda).
+  const kosong = susunKomite(KM, 'kosong', 0);
+  assert.deepEqual([kosong.anggota.length, kosong.tanda.length, kosong.selesai], [0, 0, true]);
+  // Tanda digambar di letak manifest, seukuran sel x 4.
+  for (const x of susunKomite(KM, 'setuju', 9999).tanda) assert.deepEqual([x.x, x.y, x.w, x.h], [KM.tanda.letak[x.id]!.x, KM.tanda.letak[x.id]!.y, 248, 104]);
+});
+
+test('T-025: gerak dikurangi = bingkai diam + semua tanda sekaligus; kedip hanya di keadaan tunggu, per anggota', () => {
+  for (const k of KEADAAN_KOMITE) {
+    const g = susunKomite(KM, k, 0, { diam: true, kedip: new Set(ANGGOTA) });
+    assert.ok(g.selesai, `${k}: gerak dikurangi tidak punya jeda awal`);
+    assert.deepEqual(g.anggota.map((a) => [a.bingkai, a.kedip]), g.anggota.map(() => [-1, false]), `${k}: tanpa angguk, tanpa kedip`);
+    assert.equal(g.tanda.length, Object.keys(KM.keadaan[k].tanda).length, `${k}: semua tanda tanpa jeda`);
+    // Bingkai diam = bingkai akhir gerak (kepala di letak aslinya).
+    assert.deepEqual(g, susunKomite(KM, k, 1e9, { diam: true }));
+    assert.deepEqual(g.anggota.map((a) => a.lapis), susunKomite(KM, k, 1e9).anggota.map((a) => a.lapis));
+  }
+  // Kedip: tambalan mata hanya untuk anggota yang sedang berkedip, hanya di keadaan ber-`kedip` (tunggu).
+  const kedip = susunKomite(KM, 'tunggu', 0, { kedip: new Set(['penjamin']) });
+  assert.deepEqual(kedip.anggota.map((a) => a.lapis.map((l) => l.nama).join('+')), ['badan+kepala', 'badan+kepala+kedip', 'badan+kepala', 'badan+kepala']);
+  assert.deepEqual(susunKomite(KM, 'setuju', 0, { kedip: new Set(ANGGOTA) }).anggota.map((a) => a.kedip), [false, false, false, false]);
+  assert.deepEqual(Object.entries(KM.keadaan).filter(([, v]) => v.kedip).map(([k]) => k), ['tunggu']);
+});
+
+test('T-025: lipatan isyarat `komite` bertahan sampai isyarat berikutnya; adapter meneruskannya hanya di ruang yang punya sprite', () => {
+  let k = lipatanAwal(ep);
+  assert.equal(k.komite, undefined);
+  k = terapkanCue(k, { lokasi: 'komite', hadir: [], telepon: null, objek: [], komite: 'tunggu' });
+  k = terapkanCue(k, { objek: [] });
+  assert.equal(k.komite, 'tunggu', 'cue tanpa `komite` tidak menghapus keadaan');
+  k = terapkanCue(k, { komite: 'catatan' });
+  assert.deepEqual([k.lokasi, k.komite], ['komite', 'catatan']);
+  for (const keadaan of KEADAAN_KOMITE) assert.deepEqual(adeganPiksel(ep, komp({ lokasi: 'komite', komite: keadaan })).piksel, { ruang: 'komite-ep2', tokoh: [], telepon: null, prop: [], komite: keadaan });
+  assert.equal(adeganPiksel(ep, komp({ lokasi: 'komite' })).piksel!.komite, 'tunggu', 'tanpa isyarat = menunggu');
+  assert.equal(adeganPiksel(ep, komp({ lokasi: 'kantor', komite: 'setuju' })).piksel!.komite, undefined, 'kantor tidak punya sprite milik ruang');
+  // Kalimat pembaca layar: satu per keadaan, di konfigurasi lokasi.
+  assert.deepEqual(Object.keys(ep.latar!.lokasi.komite!.komite!).sort(), [...KEADAAN_KOMITE].sort());
+});
+
+test('T-025: kamera ruang Komite hanya bergantung pada kotak panggung (bukan keadaan): SATU skala piksel bulat per HP (Fix 2, D-248), fokus (papan, tanda, kepala) utuh', async () => {
+  const { kameraPiksel } = await import('./tata');
+  // Fix 2 (D-248): kotak fokus = piksel seni x 63..337, y 0..118 (papan, tanda, kepala sampai tepi meja; meja boleh terpotong,
+  // D-242). Kotak lama (250, 0, 1100 x 620) memuat hampir seluruh meja: bentuk 2 : 1 tidak bisa memuatnya pada skala bulat
+  // berikutnya, jadi ketukan pengantar dan ketukan akibat berbeda skala di banyak HP, dan di 320 px ruangnya setengah ukuran.
+  const fk = RK.fokus!;
+  assert.deepEqual(fk, { x: 252, y: 0, w: 1096, h: 472 });
+  // Kotak panggung HP = lebar layar - 24 px. Ruang tanpa pemeran hanya memakai dua bentuk: sedang 16 : 10 dan pendek 2 : 1
+  // (AdeganTatap: panggung kosong tidak pernah 4 : 3).
+  const bentuk = (layar: number) => { const W = layar - 24; return [[W, (W * 10) / 16], [W, W / 2]] as const; };
+  const ukur = (W: number, H: number, dpr: number) => { const k = kameraPiksel(RK, [], W, H, dpr, 0); return { k, px: k.s * 4 * dpr }; };
+  // [lebar layar, DPR, piksel perangkat per piksel seni]. 390 DPR 3 = 4 (1,33 px CSS: kepala 36 piksel seni = 48 px CSS, sama
+  // dengan pool dan tol; dulu 3), 393 / 402 / 430 DPR 3 = 4 di KEDUA bentuk (dulu 4 dan 3), 360 dan 375 tidak berubah (1 px
+  // CSS), 320 = 1 px CSS di kedua bentuk (dulu setengah ukuran di bentuk 2 : 1).
+  for (const [layar, dpr, harap] of [[390, 3, 4], [393, 3, 4], [402, 3, 4], [430, 3, 4], [390, 2, 2], [390, 1, 1], [360, 1, 1], [360, 2, 2], [360, 3, 3], [375, 2, 2], [375, 3, 3], [320, 2, 2], [320, 3, 3], [412, 2.625, 3]] as const) for (const [W, H] of bentuk(layar)) {
+    const { k, px } = ukur(W, H, dpr);
+    const nama = `${layar}@${dpr} ${W}x${H}`;
+    assert.ok(Math.abs(px - harap) < 1e-9, `${nama}: ${px} piksel perangkat per piksel seni, seharusnya ${harap}`);
+    assert.ok(k.x <= fk.x + 1e-6 && k.x + W / k.s >= fk.x + fk.w - 1e-6, `${nama}: fokus mendatar utuh`);
+    assert.ok(k.y <= fk.y + 1e-6 && k.y + H / k.s >= fk.y + fk.h - 1e-6, `${nama}: papan, tanda, kepala utuh`);
+    // Geseran jatuh di piksel perangkat bulat (toleransi pecahan biner: 251 x 1/3 x 3 = 250,99999999999997).
+    for (const g of [k.x * k.s * dpr, k.y * k.s * dpr]) assert.ok(Math.abs(g - Math.round(g)) < 1e-6, `${nama}: geseran ${g} piksel perangkat`);
+  }
+  assert.ok(Math.abs(36 * ukur(366, 183, 3).k.s * 4 - 48) < 1e-9, '390 DPR 3: kepala 36 piksel seni = 48 px CSS');
+  // Sapuan 320..480 px x DPR yang beredar: kedua bentuk SELALU berskala sama (satu skala per HP), dan tidak pernah di bawah
+  // floor(DPR) piksel perangkat per piksel seni (DPR bulat: paling kecil 1 px CSS, bukan setengah ukuran).
+  for (const dpr of [1, 1.5, 2, 2.5, 2.625, 2.75, 3, 3.5, 4]) for (let layar = 320; layar <= 480; layar++) {
+    const [a, b] = bentuk(layar).map(([W, H]) => Math.round(ukur(W, H, dpr).px));
+    assert.equal(a, b, `${layar}@${dpr}: bentuk sedang ${a}, bentuk pendek ${b} piksel perangkat per piksel seni`);
+    assert.ok(a! >= Math.floor(dpr), `${layar}@${dpr}: ${a} piksel perangkat per piksel seni`);
+  }
+  // Fungsi kamera tidak menerima keadaan ruang: empat keadaan = adegan tanpa tokoh yang sama.
+  const adegan = KEADAAN_KOMITE.map((keadaan: KeadaanKomite) => adeganPiksel(ep, komp({ lokasi: 'komite', komite: keadaan })).piksel!);
+  assert.ok(adegan.every((a) => a.ruang === 'komite-ep2' && a.tokoh.length === 0));
+});
+
+test('T-025: pembaca blok komite toleran (blok cacat = ruang tanpa anggota + catatan); ikon istilah di CSS = sel manifest', async () => {
+  const url = (b: string) => 'u:' + b;
+  const catatan: string[] = [];
+  assert.equal(bacaKomite(undefined, url, 'x', catatan), null);
+  assert.deepEqual(catatan, [], 'ruang tanpa blok komite bukan kesalahan');
+  assert.equal(bacaKomite({ atlas: 'a.png', anggota: [] }, url, 'x', catatan), null);
+  assert.equal(bacaKomite({ atlas: 'a.png', anggota: [{ id: 'a', bingkai: { x: 0, y: 0, w: 4, h: 4 }, sel: { badan: [0, 0, 1, 1] }, letak: { badan: [0, 0] } }], pose: { diam: { lapis: ['kepala'] } } }, url, 'x', catatan), null);
+  assert.equal(catatan.length, 2);
+  assert.match(catatan.join(' | '), /ruang x: komite tanpa anggota \| ruang x: komite pose diam tidak sah/);
+  // Ikon 32 px lembar istilah: letak latar di cerita.css harus sama dengan sel manifest (ruang-ep2.json komite.ikon).
+  const fs = await import('node:fs');
+  const path = await import('node:path');
+  const css = fs.readFileSync(path.resolve(import.meta.dirname, '../../cerita.css'), 'utf8');
+  assert.match(css, /\.cer-istilah-ikon \{[^}]*width: 32px; height: 32px;[^}]*komite-ikon\.png'\) 0 0 \/ 128px 32px no-repeat/);
+  for (const id of ANGGOTA) {
+    const [x, y, w, h] = KM.ikon[id]!;
+    assert.deepEqual([y, w, h], [0, 32, 32], id);
+    if (x === 0) continue;
+    assert.ok(css.includes(`.cer-istilah-ikon[data-ikon="komite-${id}"] { background-position: -${x}px 0; }`), `ikon ${id} di x ${x}`);
+  }
+  // Episode: ikon istilah = id anggota ruang, urut kursi.
+  assert.deepEqual(ep.istilah!.komite!.anggota!.map((a) => a.ikon), ANGGOTA.map((id) => `komite-${id}`));
 });

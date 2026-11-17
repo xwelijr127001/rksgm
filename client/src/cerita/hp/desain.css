@@ -456,6 +456,20 @@
 @keyframes hp-lembar-goyang { 0%, 100% { transform: rotate(-2deg); } 50% { transform: rotate(-6deg); } }
 @keyframes hp-lembar-lompat { 0% { translate: 0 -3px; } 50%, 100% { translate: 0 0; } }
 @keyframes hp-lembar-letup { 0% { transform: scale(1); } 50% { transform: scale(1.15); } 100% { transform: scale(1); } }
+/* T-024 (rev 1.1; angka = mock Designer D-226..D-235): LEMBAR LAYAR AKHIR (ui/LembarAkhir.tsx) = cangkang .hp-lembar di atas sebagai
+   DIALOG MODAL (tumpukan ui/modal.ts): tirai 45 % selebar layar (anak <body>, jadi bilah aksi ikut tertutup), lembar menempel di tepi
+   bawah dan tidak pernah lebih tinggi dari layar - 65 px (kepala cerita tetap terlihat); hanya .hp-lembar-badan yang menggulir. Isi
+   lembar (judul, peta, baris, cap, navigasi): ui/akhir.css. `body >` = lebih kuat daripada .player-ui (kelas tema yang ikut dibawa ke
+   portal), seperti .mdl-latar. */
+body > .akh-lembar-latar {
+  position: fixed; inset: 0; z-index: 60; min-height: 0; display: flex; flex-direction: column; align-items: center; justify-content: flex-end;
+  padding: max(65px, env(safe-area-inset-top)) 0 0; background: rgba(20, 31, 24, .45); overflow: hidden; overscroll-behavior: contain;
+}
+.hp-lembar.akh-lembar { box-sizing: border-box; width: 100%; max-width: 640px; padding-bottom: calc(10px + env(safe-area-inset-bottom)); }
+.akh-lembar:focus { outline: none; }
+.akh-lembar .hp-lembar-kepala { gap: 10px; min-height: 44px; align-items: center; padding-right: 40px; }
+.akh-lembar > .hp-lembar-badan { display: grid; gap: 8px; align-content: start; font-size: 15px; line-height: 20px; color: #1e2b24; }
+.akh-lembar > .hp-lembar-badan:focus-visible { outline-offset: -3px; }
 /* D-131 (Tahap 1b): layar pendek (< 700 px): kartu tugas di komposer obrolan lebih ringkas (padding 10, judul 17, instruksi satu baris). */
 @media (max-width: 1023.98px) and (min-height: 480px) and (max-height: 699.98px) {
   .hp-layar[data-tampilan="obrolan"] .hp-komposer .hp-aksi { gap: 6px; padding: 10px; }
@@ -528,6 +542,16 @@
   .hp-layar[data-kunci] > .hp-akhir-aksi .akh-aksi { display: flex; flex-wrap: nowrap; align-items: stretch; gap: 8px; margin: 0; }
   .hp-layar[data-kunci] > .hp-akhir-aksi .akh-utama { flex: 1 1 auto; min-width: 0; min-height: 52px; padding: 8px 14px; gap: 8px; font-size: 16px; }
   .hp-layar[data-kunci] > .hp-akhir-aksi .akh-kedua { flex: 0 1 auto; min-width: 0; min-height: 52px; display: inline-flex; align-items: center; justify-content: center; text-align: center; }
+
+  /* ---------- T-024 layar akhir SATU LAYAR (episode dengan ringkasan keputusan bernomor): TIDAK ADA yang menggulir. .hp-main = kolom
+     setinggi layar - kepala cerita - bilah aksi; kartu (.akh-kartu[data-satu-layar], ui/akhir.css) mengisinya dan memilih susunan
+     yang muat (ui/pasAkhir.ts). Bantalan bawah 2 px + 6 px milik kartu = 8 px di atas bilah aksi (inset aman ada di bilah). ---------- */
+  .hp-layar[data-kunci][data-akhir-satu] > .hp-main {
+    display: flex; flex-direction: column; gap: 0; padding-top: 10px; padding-bottom: 2px; overflow: hidden; -webkit-mask-image: none; mask-image: none;
+  }
+  /* Kartu = satu-satunya anak yang lentur (aturan umum di atas: anak .hp-main tidak lentur): tingginya = ruang yang ada, jadi grafik
+     di dalamnya bisa menyusut dan luapan bisa diukur. */
+  .hp-layar[data-kunci][data-akhir-satu] > .hp-main > .akh-kartu { flex: 1 1 auto; min-height: 0; }
 }
 
 /* ---------- T-020 [D-143 / D-144] (Designer 16 Nov) dalam pola D-133: PAPAN LOKASI (K04 "Tugaskan pemeriksaan", 5 tempat) ----------

@@ -454,6 +454,445 @@
      "h": 900
     }
    }
+  },
+  "komite-ep2": {
+   "warnaTepi": "#c4915d",
+   "lapisan": [
+    {
+     "id": "latar",
+     "berkas": "ep2-ruang-komite-latar.png",
+     "x": 0,
+     "y": 0,
+     "w": 1600,
+     "h": 900,
+     "pw": 400,
+     "ph": 225,
+     "z": 10,
+     "alpha": false
+    },
+    {
+     "id": "meja",
+     "berkas": "ep2-ruang-komite-meja.png",
+     "x": 0,
+     "y": 448,
+     "w": 1600,
+     "h": 256,
+     "pw": 400,
+     "ph": 64,
+     "z": 30,
+     "alpha": true
+    }
+   ],
+   "tempat": {},
+   "slot": {
+    "1": [
+     {
+      "x": 120,
+      "y": 880,
+      "hadap": "kanan"
+     }
+    ]
+   },
+   "prop": {},
+   "bingkai": {
+    "hp": {
+     "x": 250,
+     "y": 0,
+     "w": 1100,
+     "h": 900
+    },
+    "lebar": {
+     "x": 0,
+     "y": 0,
+     "w": 1600,
+     "h": 900
+    }
+   },
+   "fokus": {
+    "x": 252,
+    "y": 0,
+    "w": 1096,
+    "h": 472
+   },
+   "komite": {
+    "atlas": "komite.png",
+    "z": 20,
+    "zTanda": 40,
+    "anggota": [
+     {
+      "id": "ketua",
+      "bingkai": {
+       "x": 252,
+       "y": 184,
+       "w": 316,
+       "h": 280
+      },
+      "sel": {
+       "kepala": [
+        0,
+        0,
+        47,
+        49
+       ],
+       "badan": [
+        0,
+        50,
+        59,
+        20
+       ],
+       "kedip": [
+        0,
+        71,
+        27,
+        13
+       ],
+       "tangan": [
+        28,
+        71,
+        15,
+        58
+       ]
+      },
+      "letak": {
+       "kepala": [
+        8,
+        1
+       ],
+       "badan": [
+        1,
+        50
+       ],
+       "kedip": [
+        28,
+        21
+       ],
+       "tangan": [
+        6,
+        13
+       ]
+      }
+     },
+     {
+      "id": "penjamin",
+      "bingkai": {
+       "x": 524,
+       "y": 200,
+       "w": 284,
+       "h": 264
+      },
+      "sel": {
+       "kepala": [
+        60,
+        0,
+        35,
+        44
+       ],
+       "badan": [
+        60,
+        45,
+        64,
+        22
+       ],
+       "kedip": [
+        60,
+        68,
+        27,
+        6
+       ],
+       "tangan": [
+        88,
+        68,
+        15,
+        54
+       ]
+      },
+      "letak": {
+       "kepala": [
+        19,
+        0
+       ],
+       "badan": [
+        3,
+        44
+       ],
+       "kedip": [
+        27,
+        20
+       ],
+       "tangan": [
+        5,
+        13
+       ]
+      }
+     },
+     {
+      "id": "surveyor",
+      "bingkai": {
+       "x": 808,
+       "y": 196,
+       "w": 284,
+       "h": 268
+      },
+      "sel": {
+       "kepala": [
+        125,
+        0,
+        38,
+        44
+       ],
+       "badan": [
+        125,
+        45,
+        64,
+        23
+       ],
+       "kedip": [
+        125,
+        69,
+        30,
+        6
+       ],
+       "tangan": [
+        156,
+        69,
+        15,
+        55
+       ]
+      },
+      "letak": {
+       "kepala": [
+        13,
+        0
+       ],
+       "badan": [
+        5,
+        44
+       ],
+       "kedip": [
+        13,
+        21
+       ],
+       "tangan": [
+        49,
+        13
+       ]
+      }
+     },
+     {
+      "id": "klaim",
+      "bingkai": {
+       "x": 1064,
+       "y": 200,
+       "w": 280,
+       "h": 264
+      },
+      "sel": {
+       "kepala": [
+        190,
+        0,
+        40,
+        44
+       ],
+       "badan": [
+        190,
+        45,
+        63,
+        22
+       ],
+       "kedip": [
+        190,
+        68,
+        27,
+        6
+       ],
+       "tangan": [
+        218,
+        68,
+        15,
+        54
+       ]
+      },
+      "letak": {
+       "kepala": [
+        17,
+        0
+       ],
+       "badan": [
+        5,
+        44
+       ],
+       "kedip": [
+        17,
+        20
+       ],
+       "tangan": [
+        52,
+        13
+       ]
+      }
+     }
+    ],
+    "pose": {
+     "diam": {
+      "lapis": [
+       "badan",
+       "kepala"
+      ]
+     },
+     "kedip": {
+      "lapis": [
+       "badan",
+       "kepala",
+       "kedip"
+      ],
+      "ms": 120
+     },
+     "angguk": {
+      "lapis": [
+       "badan",
+       "kepala"
+      ],
+      "bingkai": [
+       {
+        "kepalaDy": 3,
+        "ms": 160
+       },
+       {
+        "kepalaDy": 0,
+        "ms": 160
+       }
+      ],
+      "ulang": 2
+     },
+     "angkat": {
+      "lapis": [
+       "badan",
+       "kepala",
+       "tangan"
+      ]
+     }
+    },
+    "keadaan": {
+     "tunggu": {
+      "pose": {
+       "ketua": "diam",
+       "penjamin": "diam",
+       "surveyor": "diam",
+       "klaim": "diam"
+      },
+      "tanda": {},
+      "kedip": true
+     },
+     "setuju": {
+      "pose": {
+       "ketua": "angguk",
+       "penjamin": "angguk",
+       "surveyor": "angguk",
+       "klaim": "angguk"
+      },
+      "tanda": {
+       "ketua": "setuju",
+       "penjamin": "setuju",
+       "surveyor": "setuju",
+       "klaim": "setuju"
+      },
+      "urutan": [
+       "ketua",
+       "penjamin",
+       "surveyor",
+       "klaim"
+      ],
+      "jedaMs": 180
+     },
+     "catatan": {
+      "pose": {
+       "ketua": "diam",
+       "penjamin": "angkat",
+       "surveyor": "angkat",
+       "klaim": "diam"
+      },
+      "tanda": {
+       "penjamin": "catatan",
+       "surveyor": "catatan"
+      },
+      "urutan": [
+       "penjamin",
+       "surveyor"
+      ],
+      "jedaMs": 180
+     },
+     "kosong": {
+      "pose": {},
+      "tanda": {}
+     }
+    },
+    "tanda": {
+     "gambar": "ep2-komite-tanda.png",
+     "sel": {
+      "setuju": [
+       0,
+       0,
+       62,
+       26
+      ],
+      "catatan": [
+       62,
+       0,
+       62,
+       26
+      ]
+     },
+     "w": 248,
+     "h": 104,
+     "letak": {
+      "ketua": {
+       "x": 280,
+       "y": 80
+      },
+      "penjamin": {
+       "x": 544,
+       "y": 80
+      },
+      "surveyor": {
+       "x": 808,
+       "y": 80
+      },
+      "klaim": {
+       "x": 1072,
+       "y": 80
+      }
+     }
+    },
+    "ikon": {
+     "gambar": "komite-ikon.png",
+     "sel": {
+      "ketua": [
+       0,
+       0,
+       32,
+       32
+      ],
+      "penjamin": [
+       32,
+       0,
+       32,
+       32
+      ],
+      "surveyor": [
+       64,
+       0,
+       32,
+       32
+      ],
+      "klaim": [
+       96,
+       0,
+       32,
+       32
+      ]
+     }
+    }
+   }
   }
  }
 }

@@ -103,6 +103,21 @@
   font-size: 15px; line-height: 1.5; color: #243d30; animation: cer-muncul .16s ease-out;
 }
 .cer-istilah-arti[hidden] { display: none; }
+/* T-025: rincian anggota di bawah arti ("Apa itu Komite Klaim?"): empat ikon kepala piksel 32 px berderet seperti kursi di
+   gambar ruang, peran satu baris di bawah tiap ikon. Kolom sama lebar, tetapi tidak pernah lebih sempit daripada kata
+   terpanjangnya (kata tidak dipenggal); peran dua kata boleh turun ke baris kedua di layar sempit. Ikon = sel 32 x 32 dari
+   seni/piksel/komite-ikon.png (128 x 32; letak sel = ruang-ep2.json komite.ikon, diuji di adegan.test.ts). */
+.cer-istilah-arti > p { margin: 0; }
+.cer-istilah-anggota {
+  display: grid; grid-template-columns: repeat(4, minmax(min-content, 1fr)); gap: 4px; max-width: 344px; margin: 8px 0 0; padding: 0; list-style: none;
+}
+.cer-istilah-anggota li { display: grid; justify-items: center; align-content: start; gap: 3px; min-width: 0; font-size: 12.5px; line-height: 16px; font-weight: 700; text-align: center; color: #243d30; }
+.cer-istilah-ikon {
+  display: block; width: 32px; height: 32px; background: url('../seni/piksel/komite-ikon.png') 0 0 / 128px 32px no-repeat; image-rendering: pixelated;
+}
+.cer-istilah-ikon[data-ikon="komite-penjamin"] { background-position: -32px 0; }
+.cer-istilah-ikon[data-ikon="komite-surveyor"] { background-position: -64px 0; }
+.cer-istilah-ikon[data-ikon="komite-klaim"] { background-position: -96px 0; }
 
 @keyframes cer-muncul { from { opacity: 0; } to { opacity: 1; } }
 .cer-lanjut.primary-action { flex: 0 0 auto; min-height: 48px; padding: 10px 16px 10px 20px; gap: 14px; font-size: 16px; }

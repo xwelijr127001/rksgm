@@ -7,6 +7,13 @@
  * (id/en/zh): open /cerita/auto-2, wait for the pixel stage (.cer-piksel[data-siap]) or the illustrated stage, screenshot, and
  * record every image request. Checks: kantor cases = pixel stage, ZERO illustration (.webp under ilustrasi) requests, the
  * requested poses from the canvas data-pose; bima + pool = illustrated stage (explicit fallback / Stage 2).
+ *
+ * T-025: + the Ruang Rapat Komite Klaim (room-owned sprites), tools/cek-komite-t025.mjs: 4 room states x id/en/zh x 390x645 and
+ * 360x640 (poses, tags and pixels against the atlas, entry motion, screen-reader sentence, same camera for all states), reduced
+ * motion, blink, the glossary sheet with the four members, and the K11 / K13 flow into the chat. Fix 2: one pixel scale per
+ * phone (also at 390x844, 393x852, 430x932 and 320x568), the status note of the result cards in view. States for it:
+ *   npx tsx --tsconfig client/tsconfig.json tools/cerita/state-komite-t025.mts > team/evidence/T-025/states-komite.json
+ * (the T-013 states `berkas` = K11 and `surat` = K13 now open on the committee room too: still a pixel stage, so they pass as before).
  */
 import puppeteer from 'puppeteer-core';
 import fs from 'node:fs';
@@ -16,6 +23,7 @@ mulaiPrioritasRendah(); // pemilik bekerja di PC yang sama: Node + semua Chrome 
 import { cekSisipan, majuKeSisipan } from './cek-sisipan-t015.mjs';
 import { sampelGerak, lulusGerak } from './cek-gerak-t016.mjs';
 import { cekGulirRingkas } from './cek-gulir-t018.mjs';
+import { cekKomite } from './cek-komite-t025.mjs';
 
 const BASE = process.env.UI_BASE || 'http://127.0.0.1:4000';
 const OUT = path.resolve(import.meta.dirname, '..', 'team/evidence/T-013');
@@ -168,6 +176,8 @@ for (const ruang of ['pool', 'bengkel']) for (const [nama, kurang] of [['normal'
   const r = await sampelGerak(b, BASE, STATES[ruang].nilai, kurang, 10);
   lapor(`gerak-${ruang}-${nama}`, lulusGerak(r, kurang), r);
 }
+// T-025: Ruang Rapat Komite Klaim (sprite milik ruang). --cepat = 360x640 + id saja. Tangkapan -> team/evidence/T-025/fullstack/.
+for (const r of await cekKomite(b, BASE, { cepat })) lapor(r.nama, r.lulus, r.data);
 // T-018 Tahap 1: layar obrolan terpanjang tidak menggulir halaman (360x740, 390x844, 360x640) + mengikuti pesan terbaru.
 for (const r of await cekGulirRingkas(b, BASE, cepat)) lapor(r.nama, r.lulus, r.data);
 fs.writeFileSync(path.join(OUT, cepat ? 'hasil-cepat.json' : 'hasil-final.json'), JSON.stringify(hasil, null, 1));
