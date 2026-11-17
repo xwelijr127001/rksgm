@@ -14,7 +14,8 @@
  *  - letak: 10 px dari tepi kanan dan atas KOTAK GAMBAR (juga di tata letak dua kolom, tempat gambar = kolom kiri), seluruhnya
  *    di dalam kotak gambar, sama di kedua kartu, tidak menyentuh teks kartu, tidak terpotong, dan benar-benar paling atas di
  *    titik tengahnya (di atas lapisan panggung). Wajah tokoh sampul tidak diperiksa alat ini (dilihat di tangkapan layar);
- *  - warna: DEMO abu netral, KASUS NYATA hijau merek #215c40 berhuruf putih; kontras huruf >= 4,5 : 1;
+ *  - warna (T-029, palet Raksa v1): DEMO panel blush #F9EEEA berhuruf abu #5F5F5F, KASUS NYATA jingga merek #FF9000 berhuruf
+ *    tinta #212121 (dulu abu netral / hijau merek berhuruf putih); kontras huruf >= 4,5 : 1;
  *  - TIDAK ADA yang bergeser: tinggi tiap kartu, kotak baris meta (lima butir seperti dulu), kotak gambar, dan tinggi / lebar gulir
  *    halaman sama dengan ukuran dasar tanpa tag (team/evidence/T-026/dasar-tanpa-tag.json, diukur alat ini dengan --ukur-dasar
  *    pada build sebelum perubahan), toleransi 0,5 px; halaman tidak menggulir mendatar;
@@ -143,7 +144,7 @@ for (const mesin of MESIN) {
           const [mx, my, mw, mh] = k.meta;
           if (!(my >= ty + th || my + mh <= ty || mx >= tx + tw || mx + mw <= tx)) s.push(`${no}: lencana menumpang baris meta`);
           // Warna + kontras.
-          const harapLatar = j === 'nyata' ? 'rgb(33, 92, 64)' : 'rgb(233, 235, 228)'; const harapWarna = j === 'nyata' ? 'rgb(255, 255, 255)' : 'rgb(77, 90, 79)';
+          const harapLatar = j === 'nyata' ? 'rgb(255, 144, 0)' : 'rgb(249, 238, 234)'; const harapWarna = j === 'nyata' ? 'rgb(33, 33, 33)' : 'rgb(95, 95, 95)'; // T-029: palet Raksa v1
           if (t.latar !== harapLatar || t.warna !== harapWarna) s.push(`${no}: warna ${t.latar} / ${t.warna}, seharusnya ${harapLatar} / ${harapWarna}`);
           if (kontras(t.latar, t.warna) < 4.5) s.push(`${no}: kontras ${kontras(t.latar, t.warna)} < 4,5`);
           // Baris meta seperti dulu: lima butir, tanpa chip.

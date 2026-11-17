@@ -88,8 +88,8 @@ export function SatuBintang({ isi = true, ukuran = 18 }: { isi?: boolean; ukuran
     <svg className={isi ? 'solo-bintang-isi' : 'solo-bintang-kosong'} width={ukuran} height={ukuran} viewBox="0 0 24 24" aria-hidden="true" focusable="false">
       <path
         d="M12 3.2l2.7 5.6 6.1.9-4.4 4.3 1.1 6.1L12 17.2l-5.5 2.9 1.1-6.1L3.2 9.7l6.1-.9Z"
-        fill={isi ? '#f6c445' : 'none'}
-        stroke={isi ? '#17362a' : '#7a8c76'}
+        fill={isi ? '#ff9000' : 'none'}
+        stroke={isi ? '#212121' : '#818181'}
         strokeWidth={isi ? 1.8 : 1.5}
         strokeLinejoin="round"
       />

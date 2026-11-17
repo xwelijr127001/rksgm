@@ -4,30 +4,52 @@
    resmi perusahaan. Ubah nilai di :root untuk menyesuaikan brand.
    ========================================================================== */
 
-/* Satu bahasa visual untuk pemain, host, dan proyektor (review 26 Sep, temuan F): krem tenang,
-   hijau utama, tombol datar. Nilai di sini sama dengan yang dipakai halaman pemain (player.css),
-   jadi host & komponen bersama (ui/kit.tsx) tidak lagi memakai krem kekuningan & bayangan 3D.
-   Kuning tetap aksen (chip, podium, kode room), bukan warna tombol. */
+/* Satu bahasa visual untuk pemain, host, dan proyektor (review 26 Sep, temuan F). Nilai di sini sama dengan yang dipakai
+   halaman pemain (player.css).
+   T-029 (17 Nov 2026): PALET RAKSA v1, warna raksaonline.com (character/palet-raksa-v1/PALET.md; DESIGN-REVIEW D-268..D-288).
+   Nama token lama DIPERTAHANKAN supaya ratusan pemakaiannya tidak berpindah, tetapi artinya berubah:
+     --hijau / --kuning  = JINGGA merek #FF9000, hanya untuk ISI dan GARIS. Bukan warna teks di latar terang (2,18 : 1).
+     --hijau-tua / --kuning-tua = jingga ditekan #E07E00.   --hijau-muda = hijau "tepat / ok" (bukan warna merek).
+     --hijau-pucat = rona terpilih #FFF5EC.   --krem = halaman #FFF9F5.   --fokus = tinta #212121.
+   Aturan sapuan yang harus dijaga (PALET 2): label di atas jingga = var(--di-utama); jingga sebagai teks = var(--utama-teks);
+   satu warna keras per layar; warna status bukan warna merek; seni piksel tidak diwarnai ulang. */
 :root {
-  --kuning: #f6c445;
-  --kuning-tua: #d8a41f;
-  --hijau: #215c40;
-  --hijau-tua: #163e2b;
-  --hijau-muda: #2e9a66;
-  --hijau-pucat: #eef5e9;
-  --krem: #faf9f5;
-  --krem-tua: #e6e8df;
-  --tinta: #243d30;
-  --tinta-lembut: #5f6f64;
-  --garis: #dfe4d8;
+  --kuning: #ff9000;
+  --kuning-tua: #e07e00;
+  --hijau: #ff9000;
+  --hijau-tua: #e07e00;
+  --hijau-muda: #2f7d57;
+  --hijau-pucat: #fff5ec;
+  --krem: #fff9f5;
+  --krem-tua: #e0e0e0;
+  --tinta: #212121;
+  --tinta-lembut: #5f5f5f;
+  --garis: #e0e0e0;
   --cokelat: #5b4636;
-  --merah: #c4452f;
-  --merah-tua: #a43826;
-  --merah-pucat: #fbe4df;
-  --biru: #2f6fb0;
-  --biru-pucat: #e2edf8;
-  --fokus: #397bca;
+  --merah: #d32f2f;
+  --merah-tua: #b71c1c;
+  --merah-pucat: #fdecea;
+  --biru: #3e7285;
+  --biru-pucat: #e4eef2;
+  --fokus: #212121;
   --putih: #ffffff;
+
+  /* Peran yang dulu dipikul token hijau sendirian (T-029). */
+  --utama: #ff9000; /* isi & garis merek: tombol utama, terpilih, kini, progres */
+  --utama-tekan: #e07e00; /* hover / ditekan */
+  --utama-tepi: #b25c00; /* tepi & ekstrusi tombol utama; garis emas tua (4,55 : 1 pada halaman) */
+  --di-utama: #212121; /* label & ikon DI ATAS jingga: 7,09 : 1 (putih hanya 2,27 : 1) */
+  --utama-teks: #9a4f00; /* jingga sebagai TEKS: tautan, judul kecil (6,01 : 1 pada putih, 5,28 pada blush) */
+  --utama-teks-tua: #7a3e00; /* hover teks jingga */
+  --panel: #f9eeea; /* panel blush: baris kode, latar obrolan, hover */
+  --pilih: #fff5ec; /* baris / kartu terpilih, catatan terang */
+  --catatan: #f8e3c8; /* catatan tempel, gelembung terkirim */
+  --persik: #e8a87c; /* garis aksen terang, latar potret cut-in */
+  --garis-kuat: #a4a4a4; /* tepi kolom isian. BUKAN untuk teks (2,49 : 1) */
+  /* Warna status (D-274): isi (membawa label putih) | teks (juga tepi chip) | pucat | garis (tanpa teks) */
+  --tepat: #2f7d57; --tepat-teks: #1f5c3f; --tepat-pucat: #e6f1ea; --tepat-garis: #7ba88c;
+  --kurang: #3e7285; --kurang-teks: #2c5a6b; --kurang-pucat: #e4eef2; --kurang-garis: #5b8c9e;
+  --keliru: #d32f2f; --keliru-teks: #b3261e; --keliru-pucat: #fdecea; --keliru-garis: #ef9a9a;
 
   --radius-s: 10px;
   --radius: 14px;
@@ -36,8 +58,8 @@
   --radius-pill: 999px;
 
   --shadow-s: none;
-  --shadow: 0 1px 2px rgba(23, 54, 42, 0.06);
-  --shadow-l: 0 14px 34px rgba(23, 54, 42, 0.18);
+  --shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
+  --shadow-l: 0 14px 34px rgba(0, 0, 0, 0.18);
 
   --tap: 44px;
   --gutter: 16px;
@@ -96,7 +118,7 @@ h1 { font-size: clamp(24px, 6.4vw, 38px); }
 h2 { font-size: clamp(20px, 5vw, 28px); }
 h3 { font-size: clamp(17px, 4.2vw, 21px); }
 p { margin: 0 0 10px; }
-a { color: var(--hijau); }
+a { color: var(--utama-teks); }
 
 button {
   font-family: inherit;
@@ -207,7 +229,7 @@ h1[data-fokus-halaman]:focus-visible {
   border: 1px solid var(--hijau);
   border-radius: var(--radius-tombol);
   background: var(--hijau);
-  color: var(--putih);
+  color: var(--di-utama);
   font-family: inherit;
   font-weight: 600;
   font-size: 16px;
@@ -238,16 +260,16 @@ h1[data-fokus-halaman]:focus-visible {
 }
 .btn-garis {
   background: transparent;
-  color: var(--hijau);
+  color: var(--utama-teks);
   border-color: var(--hijau);
 }
-.btn-garis:hover:not(:disabled) { background: var(--hijau-pucat); color: var(--hijau-tua); border-color: var(--hijau-tua); }
+.btn-garis:hover:not(:disabled) { background: var(--hijau-pucat); color: var(--utama-teks-tua); border-color: var(--hijau-tua); }
 .btn-netral {
-  background: #eef1e9;
+  background: #f9eeea;
   color: var(--tinta);
-  border-color: #d9dfd2;
+  border-color: #e0e0e0;
 }
-.btn-netral:hover:not(:disabled) { background: #e2e8db; border-color: #c3cdbb; }
+.btn-netral:hover:not(:disabled) { background: #f9eeea; border-color: #a4a4a4; }
 .btn-bahaya {
   background: var(--merah);
   border-color: var(--merah);
@@ -275,7 +297,7 @@ h1[data-fokus-halaman]:focus-visible {
   box-shadow: var(--shadow);
 }
 .panel-krem {
-  background: #f4f5ed;
+  background: #f9eeea;
   border: 1px solid var(--garis);
   border-radius: 12px;
   padding: 14px;
@@ -289,8 +311,8 @@ h1[data-fokus-halaman]:focus-visible {
   min-height: var(--tap);
   padding: 12px 14px;
   text-align: left;
-  background: #fffefa;
-  border: 1px solid #d9dfd2;
+  background: #ffffff;
+  border: 1px solid #e0e0e0;
   border-radius: 12px;
   color: var(--tinta);
   font-weight: 600;
@@ -299,7 +321,7 @@ h1[data-fokus-halaman]:focus-visible {
   transition: transform var(--dur-cepat) ease, border-color var(--dur-cepat) ease,
     background var(--dur-cepat) ease;
 }
-.kartu:hover:not(:disabled) { border-color: #839879; }
+.kartu:hover:not(:disabled) { border-color: #a4a4a4; }
 .kartu:active { transform: scale(0.985); }
 .kartu:focus-visible {
   outline: 3px solid var(--fokus);
@@ -313,8 +335,8 @@ h1[data-fokus-halaman]:focus-visible {
   font-weight: 800;
 }
 .kartu.benar {
-  border-color: var(--hijau);
-  background: var(--hijau-pucat);
+  border-color: var(--tepat);
+  background: var(--tepat-pucat);
 }
 .kartu.salah {
   border-color: var(--merah);
@@ -341,7 +363,7 @@ h1[data-fokus-halaman]:focus-visible {
   display: grid;
   place-items: center;
   border-radius: 50%;
-  border: 1px solid #c3cdbb;
+  border: 1px solid #e0e0e0;
   font-size: 14px;
   font-weight: 900;
   background: var(--putih);
@@ -349,7 +371,7 @@ h1[data-fokus-halaman]:focus-visible {
 .kartu.terpilih .kartu-tanda {
   border-color: var(--hijau);
   background: var(--hijau);
-  color: var(--putih);
+  color: var(--di-utama);
 }
 
 /* ------------------------------------------------------------------ chip & badge */
@@ -362,13 +384,13 @@ h1[data-fokus-halaman]:focus-visible {
   padding: 6px 12px;
   border-radius: var(--radius-pill);
   background: var(--krem);
-  border: 1px solid #d9dfd2;
+  border: 1px solid #e0e0e0;
   font-size: 13px;
   font-weight: 700;
   color: var(--tinta);
 }
-.chip-hijau { background: var(--hijau-pucat); border-color: var(--hijau-muda); }
-.chip-kuning { background: #fdf1cf; border-color: var(--kuning); }
+.chip-hijau { background: var(--tepat-pucat); border-color: var(--tepat); }
+.chip-kuning { background: var(--kurang-pucat); border-color: var(--kurang-garis); }
 .chip-merah { background: var(--merah-pucat); border-color: var(--merah); }
 .chip-biru { background: var(--biru-pucat); border-color: var(--biru); }
 .chip-tap {
@@ -380,7 +402,7 @@ h1[data-fokus-halaman]:focus-visible {
 .chip-tap.terpilih {
   background: var(--hijau);
   border-color: var(--hijau);
-  color: var(--putih);
+  color: var(--di-utama);
 }
 
 .label-produk {
@@ -419,7 +441,8 @@ h1[data-fokus-halaman]:focus-visible {
   font-size: 11px;
   font-weight: 700;
   letter-spacing: 0.12em;
-  border-left: 1px solid #a8b8a7;
+  color: var(--tinta); /* T-029: RAKSA jingga merek, GAME tinta (PALET 6); dulu mewarisi hijau .mrk */
+  border-left: 1px solid #a4a4a4;
   padding: 3px 0 3px 10px;
 }
 a.mrk:hover { color: var(--hijau-tua); }
@@ -429,7 +452,7 @@ a.mrk:focus-visible { outline: 3px solid var(--fokus); outline-offset: 4px; bord
 .mrk-besar .mrk-game { font-size: 0.36em; padding: 0.3em 0 0.3em 16px; }
 /* Latar gelap (proyektor). */
 .mrk-gelap { color: var(--krem); }
-.mrk-gelap .mrk-game { color: #cfe3d5; border-left-color: rgba(255, 249, 233, 0.45); }
+.mrk-gelap .mrk-game { color: #ffffff; border-left-color: rgba(255, 249, 245, 0.45); }
 
 /* Header ringkas layar panitia (host): wordmark + label konteks | bahasa + status koneksi.
    Krem bergaris tipis (bukan bilah hijau tebal); tetap lengket supaya status koneksi terlihat. */
@@ -453,8 +476,8 @@ a.mrk:focus-visible { outline: 3px solid var(--fokus); outline-offset: 4px; bord
 .mrk-konteks {
   min-width: 0;
   padding-left: 14px;
-  border-left: 1px solid #d5dccf;
-  color: #5f6f64;
+  border-left: 1px solid #e0e0e0;
+  color: #5f5f5f;
   font-size: 14px;
   font-weight: 600;
   line-height: 1.2;
@@ -485,7 +508,7 @@ a.mrk:focus-visible { outline: 3px solid var(--fokus); outline-offset: 4px; bord
   z-index: 20;
   padding: 10px var(--gutter);
   background: var(--hijau);
-  color: var(--putih);
+  color: var(--di-utama);
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -520,6 +543,9 @@ a.mrk:focus-visible { outline: 3px solid var(--fokus); outline-offset: 4px; bord
   transition: width 240ms linear;
 }
 .timer-bar.mendesak > i { background: var(--merah); }
+/* T-029: angka timer saat mendesak. Dulu kuning inline di ui/kit.tsx (1,6 : 1 pada krem); jingga bukan warna teks di latar terang. */
+.timer-mendesak { color: var(--keliru-teks); }
+.proyektor .timer-mendesak { color: var(--kuning); }
 
 /* ------------------------------------------------------------------ status */
 
@@ -533,8 +559,8 @@ a.mrk:focus-visible { outline: 3px solid var(--fokus); outline-offset: 4px; bord
   font-weight: 600;
   padding: 4px 12px;
   border-radius: var(--radius-pill);
-  background: #fffefa;
-  border: 1px solid #dce2d7;
+  background: #ffffff;
+  border: 1px solid #e0e0e0;
   color: var(--tinta);
   white-space: nowrap;
 }
@@ -542,10 +568,10 @@ a.mrk:focus-visible { outline: 3px solid var(--fokus); outline-offset: 4px; bord
   width: 9px;
   height: 9px;
   border-radius: 50%;
-  background: var(--kuning-tua);
+  background: var(--kurang-garis); /* menyambung: keluarga kurang (dulu kuning tua; token itu kini jingga merek) */
   flex: 0 0 auto;
 }
-.titik.ok { background: var(--hijau-muda); }
+.titik.ok { background: var(--tepat); }
 .titik.putus { background: var(--merah); }
 
 .pesan {
@@ -556,10 +582,10 @@ a.mrk:focus-visible { outline: 3px solid var(--fokus); outline-offset: 4px; bord
   gap: 10px;
   align-items: flex-start;
 }
-.pesan-error { background: var(--merah-pucat); color: #7d2718; border: 1px solid #e3a597; }
-.pesan-info { background: var(--biru-pucat); color: #1d4a78; border: 1px solid #a9c3e0; }
-.pesan-sukses { background: var(--hijau-pucat); color: #12563a; border: 1px solid #b9cdb7; }
-.pesan-kuning { background: #fdf6df; color: #6d520a; border: 1px solid #ecd48d; }
+.pesan-error { background: var(--merah-pucat); color: #b3261e; border: 1px solid #ef9a9a; }
+.pesan-info { background: var(--biru-pucat); color: #2c5a6b; border: 1px solid #5b8c9e; }
+.pesan-sukses { background: var(--tepat-pucat); color: #1f5c3f; border: 1px solid #7ba88c; }
+.pesan-kuning { background: #e4eef2; color: #2c5a6b; border: 1px solid #5b8c9e; }
 
 .kosong {
   padding: 28px 16px;
@@ -591,8 +617,8 @@ a.mrk:focus-visible { outline: 3px solid var(--fokus); outline-offset: 4px; bord
   font-size: 17px;
   font-family: inherit;
   color: var(--tinta);
-  background: #fffefa;
-  border: 1px solid #c9d2c2;
+  background: #ffffff;
+  border: 1px solid #e0e0e0;
   border-radius: 12px;
 }
 .kolom:focus-visible {
@@ -654,7 +680,7 @@ a.mrk:focus-visible { outline: 3px solid var(--fokus); outline-offset: 4px; bord
   border: 2px solid var(--krem-tua);
   transition: transform var(--dur) ease;
 }
-.papan-baris.saya { border-color: var(--kuning); background: #fffdf4; }
+.papan-baris.saya { border-color: var(--kuning); background: var(--pilih); }
 .papan-peringkat {
   flex: 0 0 auto;
   width: 34px;
@@ -671,8 +697,8 @@ a.mrk:focus-visible { outline: 3px solid var(--fokus); outline-offset: 4px; bord
 .papan-baris.r3 .papan-peringkat { background: #dfae7c; color: var(--tinta); }
 .papan-nama { flex: 1; min-width: 0; font-weight: 700; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .papan-poin { font-weight: 900; font-variant-numeric: tabular-nums; }
-.delta-naik { color: var(--hijau); font-weight: 800; font-size: 12px; }
-.delta-turun { color: var(--merah); font-weight: 800; font-size: 12px; }
+.delta-naik { color: var(--tepat-teks); font-weight: 800; font-size: 12px; }
+.delta-turun { color: var(--keliru-teks); font-weight: 800; font-size: 12px; }
 
 /* ------------------------------------------------------------------ animasi */
 
@@ -725,7 +751,7 @@ a.mrk:focus-visible { outline: 3px solid var(--fokus); outline-offset: 4px; bord
 
 .proyektor {
   min-height: 100vh;
-  background: linear-gradient(160deg, #0f3b28 0%, #17362a 55%, #0c2a1d 100%);
+  background: #212121; /* T-029: usul Designer (PALET 6), tinta polos; dulu gradasi hijau gelap */
   color: var(--krem);
   padding: 24px clamp(16px, 3vw, 48px);
   display: flex;
@@ -735,24 +761,26 @@ a.mrk:focus-visible { outline: 3px solid var(--fokus); outline-offset: 4px; bord
 .proyektor h1,
 .proyektor h2 { color: var(--krem); }
 .proyektor .panel {
-  background: rgba(255, 249, 233, 0.07);
-  border: 1px solid rgba(255, 249, 233, 0.18);
+  background: rgba(255, 249, 245, 0.07);
+  border: 1px solid rgba(255, 249, 245, 0.18);
   color: var(--krem);
   box-shadow: none;
   backdrop-filter: blur(2px);
 }
 .proyektor .papan-baris {
-  background: rgba(255, 249, 233, 0.1);
-  border-color: rgba(255, 249, 233, 0.2);
+  background: rgba(255, 249, 245, 0.1);
+  border-color: rgba(255, 249, 245, 0.2);
   color: var(--krem);
 }
-.proyektor .papan-baris.r1 { background: rgba(246, 196, 69, 0.22); border-color: var(--kuning); }
+.proyektor .papan-baris.r1 { background: rgba(255, 144, 0, 0.22); border-color: var(--kuning); }
 .proyektor .kecil,
-.proyektor .lembut { color: #cfe3d5; }
-/* Tombol hijau di latar hijau gelap: garis krem tipis supaya bentuknya tetap terlihat (tetap datar). */
-.proyektor .btn:not(.btn-netral):not(.btn-garis) { border-color: rgba(255, 249, 233, 0.55); }
-.proyektor .btn-garis { color: var(--krem); border-color: rgba(255, 249, 233, 0.7); }
-.proyektor .btn-garis:hover:not(:disabled) { background: rgba(255, 249, 233, 0.1); color: var(--krem); }
+.proyektor .lembut { color: #ffffff; }
+/* Tombol utama di latar gelap: garis krem tipis supaya bentuknya tetap terlihat (tetap datar). */
+.proyektor .btn:not(.btn-netral):not(.btn-garis) { border-color: rgba(255, 249, 245, 0.55); }
+.proyektor .btn-garis { color: var(--krem); border-color: rgba(255, 249, 245, 0.7); }
+.proyektor .btn-garis:hover:not(:disabled) { background: rgba(255, 249, 245, 0.1); color: var(--krem); }
+/* T-029: cincin fokus antarmuka kini tinta; di atas latar gelap proyektor ia harus terang (putih 16,1 : 1). */
+.proyektor :focus-visible { outline-color: var(--putih); }
 
 /* ------------------------------------------------------------------ utilitas */
 
@@ -774,5 +802,5 @@ a.mrk:focus-visible { outline: 3px solid var(--fokus); outline-offset: 4px; bord
   bottom: 0;
   z-index: 15;
   padding: 12px var(--gutter) max(12px, env(safe-area-inset-bottom));
-  background: linear-gradient(to top, var(--krem) 70%, rgba(255, 249, 233, 0));
+  background: linear-gradient(to top, var(--krem) 70%, rgba(255, 249, 245, 0));
 }

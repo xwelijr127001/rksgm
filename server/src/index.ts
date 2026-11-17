@@ -45,6 +45,7 @@ import { STORY_SCORE_POLICY } from '../../shared/story/scorePolicy';
 import { mountStoryHttp } from './story/http';
 import { createStoryService } from './story/socket';
 import { recoverInterruptedRooms } from './story/runtime/sqliteStore';
+import { ensureSeedScenarios, seedLogLine } from './story/seed/publish';
 import {
   RoomManager,
   sanitizeAnswer,
@@ -100,6 +101,8 @@ const story = createStoryService(io);
 mountStoryHttp(app, story);
 const interrupted = recoverInterruptedRooms();
 if (interrupted.length) console.log('[story] room terputus karena server dimulai ulang:', interrupted.join(', '));
+// T-028: scenarios that ship with the code (Episode 2 as a hosted room). Idempotent; a failure is logged, never fatal.
+if (CONFIG.storySeed) for (const result of ensureSeedScenarios()) console.log(seedLogLine(result));
 
 // ------------------------------------------------------------------ broadcast
 

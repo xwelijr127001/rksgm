@@ -11,7 +11,8 @@ import { bahasaKini, t, useBahasa } from '../i18n';
 type Mood = 'senang' | 'netral' | 'fokus';
 
 const TINTA = 'var(--tinta)';
-const KUNING = 'var(--kuning)';
+// T-029: warna aksesori avatar dipaku (D-276: tokoh mempertahankan warnanya; token --kuning / --hijau kini jingga merek).
+const KUNING = '#f6c445';
 
 /** Ambil warna dengan indeks apa pun (negatif / pecahan / NaN tetap aman). */
 function pilih(daftar: readonly string[], i: number): string {
@@ -170,7 +171,7 @@ function aksesoriKepala(jenis: PlayerLook['accessory']): ReactElement | null {
   if (jenis === 'topi') {
     return (
       <>
-        <path d="M21 19.2a11 11 0 0 1 22 0Z" fill="var(--hijau)" />
+        <path d="M21 19.2a11 11 0 0 1 22 0Z" fill="#215c40" />
         <path d="M20.2 19.2h23.6a1.9 1.9 0 0 1 0 3.8H20.2a1.9 1.9 0 0 1 0-3.8Z" fill={KUNING} />
         <circle cx="32" cy="14.4" r="2.1" fill={KUNING} />
       </>
@@ -227,7 +228,7 @@ export function Avatar({
         </clipPath>
       </defs>
 
-      <circle cx="32" cy="32" r="31" fill="var(--hijau-pucat)" />
+      <circle cx="32" cy="32" r="31" fill="#eef5e9" />
 
       <g clipPath={`url(#${clipBulat})`}>
         {/* leher lalu badan */}

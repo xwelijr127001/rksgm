@@ -176,8 +176,8 @@ function AdeganSusun({ spec }: { spec: SceneSpec }) {
       ))}
       {label.map((l) => (
         <g key={l.kunci} transform={`translate(${l.x} ${l.y})`}>
-          <rect x={-l.w / 2} y={-h / 2} width={l.w} height={h} rx={14} fill="#ffffff" fillOpacity={0.96} stroke="#17362a" strokeOpacity={0.85} strokeWidth={2} />
-          <text y={1} textAnchor="middle" dominantBaseline="middle" fontSize={LABEL_STATIS.huruf} fontWeight={700} fill="#17362a">{l.teks}</text>
+          <rect x={-l.w / 2} y={-h / 2} width={l.w} height={h} rx={14} fill="#ffffff" fillOpacity={0.96} stroke="#212121" strokeOpacity={0.85} strokeWidth={2} />
+          <text y={1} textAnchor="middle" dominantBaseline="middle" fontSize={LABEL_STATIS.huruf} fontWeight={700} fill="#212121">{l.teks}</text>
         </g>
       ))}
     </svg>

@@ -22,8 +22,8 @@
  *             kasus nyata, karena teks kasus nyata tidak boleh masuk repo), RAKSA_CHROME, RAKSA_PORT_TERLARANG.
  *
  * Fase (bawaan: semua, berurutan):
- *   landing  review staf #1–#6 + arahan pemilik 2 Nov 2026 (Join Game di layar pertama HP dan DI ATAS pintu Mode Cerita
- *            "Mulai", Miss Raksa + slogan, tanpa "Cara main lain"/Latihan misi), Mode Cerita terbuka, rute mode lama
+ *   landing  review staf #1–#6 + T-027 (pemilik 17 Nov 2026: pintu Mode Cerita "Mulai" DI ATAS baris kode Join Game, keduanya
+ *            di layar pertama HP; Miss Raksa + slogan, tanpa "Cara main lain"/Latihan misi), Mode Cerita terbuka, rute mode lama
  *            (latihan, kuis acara) tertutup di MVP, empat viewport tanpa luapan horizontal.
  *   main     DUA skenario demo di DUA room terpisah yang berjalan BERSAMAAN, 15 babak penuh: room A (Baret, 4 peserta,
  *            waktu asli & lanjut otomatis) dan room B (Banjir, 3 peserta, host mengendalikan & sempat terputus).
@@ -340,7 +340,9 @@ async function phaseLanding() {
       const join = document.querySelector('.lp-join');
       const r = join?.getBoundingClientRect();
       return {
-        joinTitle: document.querySelector('.lp-join-judul')?.textContent,
+        // T-027: judul baris kode punya dua varian (lebar: "Join Game"; HP <= 700 px: pertanyaan pendek); yang dibaca = yang tampil.
+        joinTitle: [...document.querySelectorAll('.lp-join-judul > span')].filter((e) => getComputedStyle(e).display !== 'none').map((e) => e.textContent).join(''),
+        sempit: window.innerWidth <= 700,
         mulai: document.querySelector('.lp-join-mulai')?.textContent.trim(),
         joinBottom: r ? r.bottom : null,
         vh: window.innerHeight,
@@ -349,13 +351,18 @@ async function phaseLanding() {
         latihan: /Latihan misi|Mini Games/i.test(document.body.innerText) || !!document.querySelector('a[href^="/solo"], a[href^="/latihan"]'),
         cerita: document.querySelector('[data-pintu-cerita]')?.textContent ?? null,
         ceritaTop: document.querySelector('[data-pintu-cerita]')?.getBoundingClientRect().top ?? null,
+        ceritaLeft: document.querySelector('[data-pintu-cerita]')?.getBoundingClientRect().left ?? null,
         joinTop: r ? r.top : null,
+        joinLeft: r ? r.left : null,
         surveyor: !!document.querySelector('.lp-join .potret-surveyor'),
         isti: !!document.querySelector('.lp-join .tokoh-isti'),
       };
     });
-    check(`landing ${name}: Join Game + tombol Masuk (review #4)`, info.joinTitle === 'Join Game' && /^Masuk/.test(info.mulai ?? ''), JSON.stringify(info));
-    check(`landing ${name}: pintu Mode Cerita "Mulai" di BAWAH Join Game (review #2, #4; arahan pemilik)`, /Mulai/.test(info.cerita ?? '') && info.ceritaTop !== null && info.joinTop !== null && info.ceritaTop > info.joinTop, `${info.joinTop} -> ${info.ceritaTop}`);
+    check(`landing ${name}: Join Game + tombol Masuk (review #4; T-027: di HP judulnya "Punya kode room?")`, info.joinTitle === (info.sempit ? 'Punya kode room?' : 'Join Game') && /^Masuk/.test(info.mulai ?? ''), JSON.stringify(info));
+    // T-027 (varian A, disetujui pemilik 17 Nov 2026): Mode Cerita = pintu utama, LEBIH DULU daripada baris kode di semua lebar
+    // (dulu di bawah Join Game): di atasnya, atau, di HP mendatar tempat keduanya berdampingan, sebaris dan di kirinya.
+    const ceritaDulu = info.ceritaTop !== null && info.joinTop !== null && (info.ceritaTop < info.joinTop - 1 || (Math.abs(info.ceritaTop - info.joinTop) <= 1 && info.ceritaLeft < info.joinLeft));
+    check(`landing ${name}: pintu Mode Cerita "Mulai" lebih dulu daripada baris kode Join Game: di atas, atau sebaris di kirinya (T-027; review #2, #4)`, /Mulai/.test(info.cerita ?? '') && ceritaDulu, `kode ${info.joinLeft},${info.joinTop} | Mode Cerita ${info.ceritaLeft},${info.ceritaTop}`);
     if (name !== 'desktop') check(`landing ${name}: Join Game utuh di layar pertama HP (review #4)`, info.joinBottom !== null && info.joinBottom <= info.vh, `bawah=${info.joinBottom} tinggi=${info.vh}`);
     check(`landing ${name}: ikon surveyor, bukan Bu Isti (review #6)`, info.surveyor && !info.isti);
     check(`landing ${name}: sapaan Miss Raksa "anytime anywhere with our smile" (review #1)`, /Miss Raksa/.test(info.slogan ?? '') && /anytime anywhere with our smile/.test(info.slogan ?? ''), info.slogan);

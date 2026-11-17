@@ -10,6 +10,7 @@ approved; no reviewer names, signatures or dates were invented.
 | --- | --- | --- | --- |
 | `[DEMO] Baret di Parkiran Pasar` | `server/src/story/seed/demoBaret.ts` (reuses the fictional Bu Rina / Miss Raksa characters and the v5.1 office/parking stage) | draft; published only by `story:dev-setup --publish-demo` = **simulated approval** by test identities | engine, UI and report verification |
 | `[DEMO] Mobil Terendam Banjir` | `server/src/story/seed/demoBanjir.ts` | same | same |
+| `Truk Trailer di Jalan Tol` (T-028) | `server/src/story/seed/ep2Trailer.ts`, generated from the solo Episode 2 (`client/src/cerita/episode/auto-2`) by `tools/cerita/ep2-ke-skenario.mts`; what was approximated: `docs/prd-v02/EP2-ROOM-CONVERSION.md` | published by the server itself at start (`server/src/story/seed/publish.ts`, idempotent by scenario id + content hash; `STORY_SEED=off` skips it) = **automatic publication, not committee approval**; the source script is still a draft | event trial of Episode 2 as a hosted room; `contentSource = demo`, so it is marked DEMO and left out of competition reports by default |
 
 Both are 15 rounds × 5 choices with tepat / kurang tepat / keliru classifications, accuracy weights, mood deltas,
 consequences, reasons, timeout consequences and three endings (happy / with notes / fallback). They are marked

@@ -28,14 +28,14 @@ export function IkonTandai({ ukuran = 15 }: { ukuran?: number }) {
 }
 export function IkonCentang({ ukuran = 28 }: { ukuran?: number }) {
   return (
-    <svg width={ukuran} height={ukuran} viewBox="0 0 24 24" fill="none" stroke="#215C40" strokeWidth={2.2} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" style={{ flex: 'none' }}>
+    <svg width={ukuran} height={ukuran} viewBox="0 0 24 24" fill="none" stroke="#2F7D57" strokeWidth={2.2} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" style={{ flex: 'none' }}>
       <circle cx="12" cy="12" r="9.5" /><path d="M7.5 12.5l3 3 6-6.5" />
     </svg>
   );
 }
 export function IkonUlang({ ukuran = 28 }: { ukuran?: number }) {
   return (
-    <svg width={ukuran} height={ukuran} viewBox="0 0 24 24" fill="none" stroke="#3D4A42" strokeWidth={2.2} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" style={{ flex: 'none' }}>
+    <svg width={ukuran} height={ukuran} viewBox="0 0 24 24" fill="none" stroke="#212121" strokeWidth={2.2} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" style={{ flex: 'none' }}>
       <path d="M3.5 12a8.5 8.5 0 1 0 2.6-6.1" /><path d="M3.5 4v5h5" />
     </svg>
   );
@@ -45,10 +45,10 @@ export function ContohArsir() {
   const id = useId().replace(/[^a-zA-Z0-9]/g, '');
   return (
     <svg width="22" height="22" viewBox="0 0 22 22" aria-hidden="true" style={{ flex: 'none' }}>
-      <defs><pattern id={`rk-hatch-mini-${id}`} width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="2.4" height="6" fill="#D4553B" /></pattern></defs>
+      <defs><pattern id={`rk-hatch-mini-${id}`} width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="2.4" height="6" fill="#D32F2F" /></pattern></defs>
       <rect x="1.5" y="1.5" width="19" height="19" rx="4" fill="#5A6066" />
       <rect x="1.5" y="1.5" width="19" height="19" rx="4" fill={`url(#rk-hatch-mini-${id})`} />
-      <rect x="1.5" y="1.5" width="19" height="19" rx="4" fill="none" stroke="#D4553B" strokeWidth="2" />
+      <rect x="1.5" y="1.5" width="19" height="19" rx="4" fill="none" stroke="#D32F2F" strokeWidth="2" />
     </svg>
   );
 }

@@ -70,7 +70,7 @@ const CSS = `
 .pj-judul2{font-family:var(--font-judul);font-weight:800;line-height:1.1;margin:0;
   font-size:clamp(22px,2.4vw,38px)}
 .pj-teks{font-size:clamp(18px,1.55vw,26px);line-height:1.4;margin:0}
-.pj-teks2{font-size:clamp(16px,1.15vw,21px);line-height:1.45;margin:0;color:#cfe3d5}
+.pj-teks2{font-size:clamp(16px,1.15vw,21px);line-height:1.45;margin:0;color:#ffffff}
 .pj-timer .timer{font-size:clamp(20px,2.1vw,34px)}
 .pj-acara{font-family:var(--font-judul);font-weight:800;font-size:clamp(17px,1.8vw,30px)}
 .pj-kode > span{font-size:clamp(44px,6vw,92px) !important;padding:10px 26px !important}
@@ -83,16 +83,16 @@ const CSS = `
 
 .pj-titik{display:grid;grid-template-columns:repeat(auto-fill,minmax(152px,1fr));gap:8px}
 .pj-kirim{display:flex;align-items:center;gap:8px;padding:6px 10px;min-height:44px;
-  border-radius:var(--radius-pill);border:2px solid rgba(255,249,233,.22);
-  background:rgba(255,249,233,.06)}
-.pj-kirim.ok{border-color:var(--kuning);background:rgba(246,196,69,.2)}
+  border-radius:var(--radius-pill);border:2px solid rgba(255,249,245,.22);
+  background:rgba(255,249,245,.06)}
+.pj-kirim.ok{border-color:var(--kuning);background:rgba(255,144,0,.2)}
 .pj-kirim b{display:block;font-size:15px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.pj-kirim i{display:flex;align-items:center;gap:4px;font-size:12px;font-style:normal;color:#cfe3d5}
+.pj-kirim i{display:flex;align-items:center;gap:4px;font-size:12px;font-style:normal;color:#ffffff}
 .pj-kirim.ok i{color:var(--kuning);font-weight:800}
 .pj-kirim > span{min-width:0;flex:1}
 
 .pj-bar{height:clamp(22px,2.2vw,34px);border-radius:var(--radius-pill);
-  background:rgba(255,249,233,.16);overflow:hidden}
+  background:rgba(255,249,245,.16);overflow:hidden}
 .pj-bar > i{display:block;height:100%;background:var(--kuning);
   border-radius:var(--radius-pill);transition:width 420ms ease}
 
@@ -105,10 +105,10 @@ const CSS = `
 .pj-podium{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));
   gap:clamp(6px,1.4vw,20px);align-items:end}
 .pj-tiang{display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:6px;
-  padding:14px 8px;text-align:center;background:rgba(255,249,233,.12);
-  border:2px solid rgba(255,249,233,.3);border-bottom:0;
+  padding:14px 8px;text-align:center;background:rgba(255,249,245,.12);
+  border:2px solid rgba(255,249,245,.3);border-bottom:0;
   border-radius:var(--radius-l) var(--radius-l) 0 0}
-.pj-tiang.emas{background:rgba(246,196,69,.22);border-color:var(--kuning)}
+.pj-tiang.emas{background:rgba(255,144,0,.22);border-color:var(--kuning)}
 .pj-tiang svg{max-width:100%;height:auto}
 .pj-tiang .pj-nama{font-family:var(--font-judul);font-weight:900;line-height:1.1;
   font-size:clamp(17px,1.9vw,32px);overflow-wrap:anywhere}
@@ -120,7 +120,7 @@ const CSS = `
 
 .pj-pojok{position:fixed;right:12px;bottom:12px;z-index:40;display:flex;gap:8px;align-items:center}
 .pj-jeda{position:fixed;inset:0;z-index:45;display:grid;place-items:center;text-align:center;
-  padding:24px;background:rgba(12,42,29,.92)}
+  padding:24px;background:rgba(0,0,0,.92)}
 .pj-jeda-kata{font-family:var(--font-judul);font-weight:900;letter-spacing:.06em;line-height:1;
   font-size:clamp(46px,12vw,150px)}
 

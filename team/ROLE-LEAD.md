@@ -34,3 +34,8 @@
   1. find the handle: `orca terminal list --json` (filter by workspace name Fullstack/Designer/QA)
   2. `orca orchestration task-create ...` then `orca orchestration dispatch --task <id> --to <handle> --inject` (ALWAYS --inject, otherwise the card stays idle)
 - QA stays on claude-sonnet-5-5 low. If that card's terminal isn't running yet, ask the user to open it first.
+
+## Check split (owner, 2026-11-17)
+Fullstack = build gate only: typecheck, test:client (and test:server when the server changed), and the check tools for the screens it
+touched. QA = the full tool suites plus its own matrix and exploratory play. The Lead runs e2e before commit. Reason: full suites on
+the builder's side duplicate QA and tie up the shared PC.

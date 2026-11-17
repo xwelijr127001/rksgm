@@ -1,6 +1,7 @@
 /**
- * Join Game (review staf #4, #6): SATU-SATUNYA ajakan bergabung ke room acara, dipakai di halaman awal (paling atas) dan
- * di Mode Cerita (di atas daftar episode). Ikon surveyor; kode diisi di sini lalu "Masuk" membuka halaman gabung (nama +
+ * Join Game (review staf #4, #6): SATU-SATUNYA ajakan bergabung ke room acara, dipakai di halaman awal (T-027: baris kode
+ * di bawah pintu Mode Cerita; di HP judulnya pertanyaan pendek `joinTanya` dan kalimat penjelasnya hanya untuk pembaca
+ * layar, lewat aria-describedby kolom kode) dan di Mode Cerita (di atas daftar episode). Ikon surveyor; kode diisi di sini lalu "Masuk" membuka halaman gabung (nama +
  * pemberitahuan data, tanpa akun). Kode 6 karakter = room cerita; 4 karakter = room kuis lama (diteruskan halaman gabung
  * bila mode lama aktif). `kodeSaran` (mis. spanduk acara yang sedang dibuka) hanya MENGISI kotak ini, bukan tombol gabung
  * kedua.
@@ -36,10 +37,10 @@ export function JoinGame({ kodeSaran = null, className = '' }: { kodeSaran?: str
     nav('/join?room=' + c);
   };
   return (
-    <section className={'lp-join ' + className} aria-labelledby={id + 'j'} data-join-game="">
+    <section className={'lp-join ' + className + (galat ? ' lp-join-ada-galat' : '')} aria-labelledby={id + 'j'} data-join-game="">
       <div className="lp-join-kepala">
         <PotretSurveyor ukuran={POTRET_AWAL} />
-        <div className="lp-join-teks"><h2 className="lp-join-judul" id={id + 'j'}>{t('pemain.joinJudul')}</h2><p className="lp-join-isi" id={id + 'i'}>{t('pemain.joinIsi')}</p></div>
+        <div className="lp-join-teks"><h2 className="lp-join-judul" id={id + 'j'}><span className="lp-join-judul-lebar">{t('pemain.joinJudul')}</span><span className="lp-join-judul-hp">{t('pemain.joinTanya')}</span></h2><p className="lp-join-isi" id={id + 'i'}>{t('pemain.joinIsi')}</p></div>
       </div>
       <form className="lp-join-form" onSubmit={kirim} noValidate>
         <label className="sr-only" htmlFor={id + 'k'}>{t('pemain.joinKodeLabel')}</label>

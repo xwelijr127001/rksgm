@@ -21,7 +21,7 @@ body > .mdl-latar {
     max(16px, env(safe-area-inset-right))
     max(16px, env(safe-area-inset-bottom))
     max(16px, env(safe-area-inset-left));
-  background: rgba(23, 54, 42, 0.55);
+  background: rgba(0, 0, 0, 0.55);
   overflow: hidden;
   overscroll-behavior: contain;
 }
@@ -58,7 +58,7 @@ body > .mdl-latar {
   padding: 4px 8px;
 }
 .mdl-panel .mdl-isi:focus-visible {
-  outline: 3px solid #397bca;
+  outline: 3px solid #212121;
   outline-offset: -3px;
   border-radius: 10px;
 }

@@ -115,7 +115,8 @@ try {
   const login = await (await fetch(GAME + '/api/staff/login', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ username: 'uji.host', password: HOST_PASSWORD }) })).json();
   if (!login.ok) throw new Error(`login uji.host: ${login.error}`);
   const scenarios = (await (await fetch(GAME + '/api/host/scenarios', { headers: { authorization: `Bearer ${login.token}` } })).json()).scenarios ?? [];
-  const demo = scenarios.find((s) => s.contentKind === 'demo');
+  // The seeded Episode 2 scenario (T-028) is demo-kind too and sorts first by title: keep using a synthetic [DEMO] one.
+  const demo = scenarios.find((s) => s.contentKind === 'demo' && s.title.startsWith('[DEMO]')) ?? scenarios.find((s) => s.contentKind === 'demo');
   if (!demo) throw new Error('tidak ada skenario DEMO yang terbit (story:dev-setup --publish-demo)');
   const link = await connectHost(login.token);
   host = link.socket;

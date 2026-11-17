@@ -257,7 +257,26 @@ export function blankContent(categoryId: string, title: string, contentSource: C
 
 const titleOf = (c: ScenarioContent) => contentText(c, 'id', textKey.title()).slice(0, 120) || 'Tanpa judul';
 
-export function createScenario(input: { categoryId: unknown; title: unknown; contentSource: unknown; content?: unknown }, actor: AuditActor): ScenarioDetail {
+/** Ids a server-side caller may fix for a seeded scenario (createScenario `opts.id`); generated ids are `sc_` + 12 uuid characters. */
+const FIXED_SCENARIO_ID = /^sc_[a-z0-9][a-z0-9_-]{2,39}$/;
+
+export function scenarioExists(id: string): boolean {
+  return !!getDb().prepare('SELECT 1 FROM story_scenarios WHERE id = ?').get(id);
+}
+
+/**
+ * `opts.id` fixes the scenario id (seeded scenarios: a stable id makes publication idempotent). It is a separate
+ * argument on purpose: `input` comes from request bodies, and a request must never choose an id.
+ */
+export function createScenario(
+  input: { categoryId: unknown; title: unknown; contentSource: unknown; content?: unknown },
+  actor: AuditActor,
+  opts: { id?: string } = {},
+): ScenarioDetail {
+  if (opts.id !== undefined) {
+    if (!FIXED_SCENARIO_ID.test(opts.id)) throw new ScenarioError('ID skenario tidak valid.');
+    if (scenarioExists(opts.id)) throw new ScenarioError('Skenario dengan ID itu sudah ada.', 409);
+  }
   const cats = listCategories();
   const categoryId = typeof input.categoryId === 'string' ? input.categoryId : '';
   if (!cats.some((c) => c.id === categoryId)) throw new ScenarioError('Kategori tidak dikenal.');
@@ -267,7 +286,7 @@ export function createScenario(input: { categoryId: unknown; title: unknown; con
   const fromRaw = input.content === undefined ? null : sanitizeScenarioContent(input.content);
   if (input.content !== undefined && !fromRaw) throw new ScenarioError('Isi skenario tidak dapat dibaca.');
   const content = fromRaw ? { ...fromRaw, categoryId, contentSource } : blankContent(categoryId, title, contentSource);
-  const id = `sc_${randomUUID().slice(0, 12)}`;
+  const id = opts.id ?? `sc_${randomUUID().slice(0, 12)}`;
   const now = Date.now();
   const db = getDb();
   db.transaction(() => {

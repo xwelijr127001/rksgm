@@ -9,8 +9,10 @@ type RakiMood = 'sapa' | 'bicara' | 'senang' | 'berpikir';
 
 const COKELAT = 'var(--cokelat)';
 const KREM = 'var(--krem)';
-const KUNING = 'var(--kuning)';
-const HIJAU = 'var(--hijau)';
+// T-029: warna TOKOH dipaku (D-276: tokoh mempertahankan warnanya). Token --kuning / --hijau kini jingga merek; paruh
+// kuning dan syal hijau Raki bukan warna antarmuka. index.html (templat pra-JS) memuat salinan markup ini (pemuatPra.test).
+const KUNING = '#f6c445';
+const HIJAU = '#215c40';
 const TINTA = 'var(--tinta)';
 const PUTIH = 'var(--putih)';
 
@@ -51,7 +53,7 @@ function paruh(mood: RakiMood): ReactElement {
     return (
       <>
         <path d="M32 31.4l3.6 3.4h-7.2Z" fill={KUNING} />
-        <path d="M28.8 36.2h6.4l-3.2 3.4Z" fill="var(--kuning-tua)" />
+        <path d="M28.8 36.2h6.4l-3.2 3.4Z" fill="#d8a41f" />
       </>
     );
   }
@@ -132,7 +134,7 @@ const CSS_BALON = `
 .rb-balon{position:relative;flex:1 1 240px;min-width:0;background:var(--putih);color:var(--tinta);
   border:2px solid var(--krem-tua);border-radius:var(--radius-l);padding:12px 14px;
   box-shadow:var(--shadow-s);overflow-wrap:anywhere;line-height:1.45}
-.rb-judul{font-family:var(--font-judul);font-weight:800;font-size:15px;color:var(--hijau);
+.rb-judul{font-family:var(--font-judul);font-weight:800;font-size:15px;color:var(--utama-teks);
   margin-bottom:2px}
 .rb-ekor{position:absolute;left:-9px;top:22px;width:14px;height:14px;background:var(--putih);
   border-left:2px solid var(--krem-tua);border-bottom:2px solid var(--krem-tua);

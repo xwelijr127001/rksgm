@@ -28,7 +28,7 @@ const GAYA_ADEGAN = `.mission-scene{margin-bottom:22px}
 .mission-scene>div{border-radius:18px!important}
 .scene-views{display:flex;flex-wrap:wrap;gap:8px;margin:-8px 0 20px}
 .scene-views>button{flex:1 1 90px;min-height:44px}
-.scene-views>button[aria-pressed="true"]{border-color:#427348;background:#eef5e9;box-shadow:0 0 0 1px #427348}`;
+.scene-views>button[aria-pressed="true"]{border-color:#ff9000;background:#fff5ec;box-shadow:0 0 0 1px #ff9000}`;
 
 function useUnityStatus(): UnityStatus {
   const [status, setStatus] = useState<UnityStatus>(() => unityRuntime.getStatus());

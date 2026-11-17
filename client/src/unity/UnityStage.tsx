@@ -109,7 +109,7 @@ export function UnityStage({ enabled, fallback, aspect = '4 / 3', label }: Unity
         maxHeight: '46vh',
         borderRadius: 14,
         overflow: 'hidden',
-        background: 'var(--hijau-pucat, #eef5e9)',
+        background: 'var(--hijau-pucat, #fff5ec)',
       }}
     >
       <canvas
@@ -152,7 +152,7 @@ export function UnityStage({ enabled, fallback, aspect = '4 / 3', label }: Unity
               width: 'min(220px, 80%)',
               height: 6,
               borderRadius: 4,
-              background: '#dfe4d8',
+              background: '#e0e0e0',
               overflow: 'hidden',
             }}
           >
@@ -161,7 +161,7 @@ export function UnityStage({ enabled, fallback, aspect = '4 / 3', label }: Unity
                 display: 'block',
                 height: '100%',
                 width: `${persen}%`,
-                background: '#427348',
+                background: '#ff9000',
               }}
             />
           </div>

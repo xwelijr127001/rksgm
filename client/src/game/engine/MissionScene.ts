@@ -37,19 +37,20 @@ export interface KataAdegan { difoto: string; masukFolder: string; dicatat: stri
 
 const FONT = '"Segoe UI Variable", "Segoe UI", system-ui, -apple-system, Roboto, Arial, sans-serif';
 const HEX = {
-  tinta: 0x17362a,
-  kuning: 0xf6c445,
-  kuningTua: 0xd8a41f,
+  // T-029: palet Raksa v1 untuk ANTARMUKA di kanvas (pil, vonis, panel). Seni adegan (game/art, game/scenes) tidak berubah.
+  tinta: 0x212121,
+  kuning: 0xff9000, // isi pil terpilih (jingga merek, teks tinta)
+  kuningTua: 0xe07e00,
   putih: 0xffffff,
-  krem: 0xfff9e9,
-  hijau: 0x2e9a66,
-  hijauTua: 0x176b45,
-  merah: 0xc4452f,
-  biru: 0x2f6fb0,
+  krem: 0xfff9f5,
+  hijau: 0x2f7d57, // vonis tepat (isi, label putih 5,01 : 1)
+  hijauTua: 0x1f5c3f, // vonis terlewat (garis + teks tepat di atas putih)
+  merah: 0xd32f2f,
+  biru: 0x3e7285,
   kayuTua: 0x9c6b3f,
 };
 /** Warna stiker kategori sebelum pembahasan: sengaja netral (bukan hijau/merah). */
-const WARNA_TAG = [0x2f6fb0, 0x7a5aa6, 0xb26b1f, 0x2e7d7a];
+const WARNA_TAG = [0x3e7285, 0x7a5aa6, 0xb26b1f, 0x2e7d7a];
 /** Skala gambar petugas di adegan. */
 const HERO_S = 0.8;
 
@@ -147,7 +148,7 @@ export function defineMissionScene(P: Ph) {
       img.setOrigin(0, 0).setDisplaySize(q.w * s, q.h * s).setPosition(bulat(p.x - j.x * s), bulat(p.y + p.art.h / 2 - j.y * s));
     }
 
-    teks(x: number, y: number, s: string, size: number, color = '#17362a', bold = true): Phaser.GameObjects.Text {
+    teks(x: number, y: number, s: string, size: number, color = '#212121', bold = true): Phaser.GameObjects.Text {
       const t = this.add.text(x, y, s, {
         fontFamily: FONT,
         fontSize: `${size}px`,
@@ -178,7 +179,7 @@ export function defineMissionScene(P: Ph) {
       this.zoom = this.scale.width / WORLD_W;
       cam.setZoom(this.zoom);
       cam.centerOn(WORLD_W / 2, WORLD_H / 2);
-      cam.setBackgroundColor('#fff9e9');
+      cam.setBackgroundColor('#fff9f5');
 
       const { spec } = this.cfg;
       this.add.image(0, 0, this.tex(spec.background)).setOrigin(0, 0).setDisplaySize(WORLD_W, WORLD_H).setDepth(0);
@@ -233,7 +234,7 @@ export function defineMissionScene(P: Ph) {
       const ui = this.add.container(o.x, o.y).setDepth(200 + depth);
 
       const focusRing = this.add.graphics();
-      focusRing.lineStyle(6, HEX.kuningTua, 1);
+      focusRing.lineStyle(6, HEX.tinta, 1); // T-029: cincin fokus antarmuka = tinta (jingga 2,9 : 1 pada halaman)
       focusRing.strokeRoundedRect(-o.art.w / 2 - 12, -o.art.h / 2 - 12, o.art.w + 24, o.art.h + 24, 18);
       focusRing.setVisible(false);
 
@@ -337,14 +338,14 @@ export function defineMissionScene(P: Ph) {
       const h = 48 + b.lines.length * 46;
       const g = this.add.graphics().setDepth(18);
       g.fillStyle(HEX.tinta, 0.18).fillRoundedRect(b.x - b.w / 2 + 4, b.y + 6, b.w, h, 14);
-      g.fillStyle(0x24483a, 1).fillRoundedRect(b.x - b.w / 2, b.y, b.w, h, 14);
+      g.fillStyle(0x212121, 1).fillRoundedRect(b.x - b.w / 2, b.y, b.w, h, 14);
       g.lineStyle(4, HEX.kayuTua, 1).strokeRoundedRect(b.x - b.w / 2, b.y, b.w, h, 14);
-      const judul = this.teks(b.x, b.y + 24, b.title, 21, '#fbe7a6').setDepth(19);
+      const judul = this.teks(b.x, b.y + 24, b.title, 21, '#ff9000').setDepth(19);
       void judul;
       const baris: Phaser.GameObjects.Text[] = [];
       b.lines.forEach((l, i) => {
         const y = b.y + 66 + i * 46;
-        this.teks(b.x - b.w / 2 + 16, y, l.label, 20, '#e8f1ea', false).setOrigin(0, 0.5).setDepth(19);
+        this.teks(b.x - b.w / 2 + 16, y, l.label, 20, '#ffffff', false).setOrigin(0, 0.5).setDepth(19);
         const nilai = this.teks(b.x + b.w / 2 - 16, y, '…', 23, '#ffffff').setOrigin(1, 0.5).setDepth(19);
         nilai.setData('stepId', l.stepId);
         baris.push(nilai);
@@ -491,7 +492,7 @@ export function defineMissionScene(P: Ph) {
 
     buatVerdict(v: ObjView, verdict: NonNullable<ObjectState['verdict']>, instan: boolean): Phaser.GameObjects.Container {
       const warna = verdict === 'tepat' ? HEX.hijau : verdict === 'kurang' ? HEX.merah : HEX.putih;
-      const teksWarna = verdict === 'terlewat' ? '#176b45' : '#ffffff';
+      const teksWarna = verdict === 'terlewat' ? '#1f5c3f' : '#ffffff';
       const kata = v.spec.label;
       const t = this.teks(12, 0, kata, 19, teksWarna);
       const w = t.width + 50;

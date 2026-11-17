@@ -577,3 +577,26 @@ Testing under `C:\Users\User\Desktop\rksgm-episode2` (QA; no source edits, no co
 1. The tooltip is hover only; on a touch screen the explanation is not visible (also noted by Fullstack).
 2. The en and zh tooltip lines are Fullstack's wording, for the Lead or PIC to confirm.
 3. Not tested: a real phone, a screen reader, and covers other than the current two.
+
+## T-028 (2026-11-17) — PASS (0 high, 0 medium, 0 low bugs; 5 notes)
+
+Testing under `C:\Users\User\Desktop\rksgm-episode2` (QA; no source edits, no commit, no e2e). Server: a fresh `tsc` build into `server/qa-t028/dist` (git-ignored, removed afterwards; I did not touch `server/dist`, `server/dist-uji` or `client/dist-rilis`), a scratch database outside the repo (`dev-setup --publish-demo` for the two DEMO scenarios and the test identities), `CLIENT_DIST=client/dist`, `RAKSA_LEGACY=on`, port 4001, stopped afterwards. Evidence: `team/evidence/T-028/qa/` (logs and screenshots; `sesi/` is the final run, `sesi-run2-citra-janji/` the one before it).
+
+**`tools/cek-room-t028.mjs`:** ALL PASS (6). The tool refuses ports 4000-4002, so I ran an unchanged copy from my scratch folder with only that port rule, the import paths and the evidence folder changed (the file in `tools/` is untouched).
+
+**My own session:** staff sign-in on `/host` as `qa.host`, created with `staff.ts create` (host role) and deactivated afterwards (a scratch database, discarded). A room from "Truk Trailer di Jalan Tol" (picker: first in the list, "versi 1 · tingkat 2 · DEMO", synopsis "untuk uji acara."), the projector open at `/projector?room=`, and four players: Ani (Chromium, always tepat, answers at 2.5 s), Budi (Chromium, tepat but at 22 s), Citra (WebKit, always keliru), Dodi (Chromium, times out on rounds 1, 6 and 12, reloads his page once at 4 s of round 9, otherwise kurang tepat). All 15 rounds were played; the final run had 127 checks and 0 findings. Two earlier runs gave only findings caused by my own script (the ranking card shows the top 3 plus your own row, so I had expected four rows).
+- **30 s window:** a round with a missing answer closes 29-33.5 s after it opens (rounds 1, 6, 12); a round where everybody answers closes early.
+- **Scoring (700 a + 300 s):** the cumulative points on each player's own screen match my replay of the policy within 40 points in every round (for example round 1: Ani 973 at 2.5 s, Budi 778 at 22 s, Citra 0, Dodi 0). Keliru and timeout give 0; kurang tepat gives 350 plus speed. Final totals: Ani 13,622, Budi 11,670, Dodi 6,536, Citra 0; each equals its own row in the final ranking.
+- **Leaderboard order and ties:** descending in all rounds. In round 1 Citra and Dodi are tied at 0 and both show rank "3". Dodi's own screen shows both rows; the others show the top 3.
+- **Reconnect:** Dodi reloaded his page mid-round 9 and came back to "Babak 9/15" with the five options, then answered normally.
+- **K12 promise:** Ani made it (K12 option A). At K14 only Ani sees Pak Hendra's protest and her status chip shows "dampak tertunda −12"; the others do not. Her final summary lists the effect ("Babak 14 terkena dampak keputusanmu di babak 12 … status −12"), and nobody else's does. In the earlier run Citra made it and got the protest and the trace (her status was already at the floor).
+- **Endings and summaries:** each player's ending matches my replay of the moods (Ani and Budi "Puas", Citra and Dodi "Kurang puas"); the 15 decision cards of each summary agree with what they chose (3 timeouts for Dodi); nothing scrolls sideways on a phone; host shows "Selesai"; no page errors.
+- **DEMO room:** "[DEMO] Baret di Parkiran Pasar" still opens a room, a player joins and round 1 plays.
+- **Second server start does not duplicate:** before and after the restart: 3 scenarios, 3 versions, 3 drafts, 9 events; Episode 2 is version 1 with the same hash (`a3f79ee8beda`); audit rows `scenario.create/submit/publish` stay 3 each. The only new row is the runtime's `room.interrupted_on_boot`. The log says "sudah terbit (versi 1), tidak ada yang ditulis".
+
+**Notes (not bugs):**
+1. The ranking card shows the top 3 plus your own row, so a tied player below third place is only visible on their own screen.
+2. The line "Dicatat walaupun statusnya pulih dan akhir ceritanya baik." (existing room text) also appears under the trace for a player whose ending is poor and whose status did not recover (Citra, run 2).
+3. Rooms show Indonesian only (Fullstack's point 1), and Pak Hendra has no portrait (point 3); both are known and accepted.
+4. Not tested: a real phone, the CMS pages, more than four players, WebKit as host or projector, and Linode. Rooms left unfinished by the tool were reported as interrupted at restart, as designed.
+5. The seed is published at every server start including production (Fullstack's point 2); the owner's :4000 only gets it after `server/dist` is rebuilt, which I did not do.

@@ -2116,3 +2116,257 @@ The optional tag in the story header is skipped (the Lead agreed): the phone hea
 - Not verified: a real phone; `npm run test:e2e` (not run, as instructed).
 
 **Files.** New: `tools/cek-tag-t026.mjs`. Changed: `client/src/cerita/tipe.ts`, `validasi.ts`, `episode/auto-1/episode.ts`, `episode/auto-2/episode.ts`, `ui/cerita.css`, `client/src/pages/Cerita.tsx`, `client/src/i18n/kamus/cerita.ts`, tests (`validasi.test.ts`, `episode/auto-2/episode.test.ts`, `i18n/terjemahan.test.ts`), `docs/cerita/PANDUAN-EPISODE.md`.
+
+## T-028 (2026-11-17): Episode 2 as a hosted story room
+
+Fullstack · edited under `C:\Users\User\Desktop\rksgm-episode2` · NOT committed. Board: T-028 note "built (uncommitted)".
+Spec `team/specs/2026-11-17-T-028-ep2-room.md` rev 1.0 + rev 1.1; Codex plan review in `team/REVIEW.md` (7 points).
+
+**Result.** A host can open a room from "Truk Trailer di Jalan Tol" next to the two DEMO scenarios. The existing room runtime and the client play it unchanged: 15 rounds (K01 to K15), five options each with the script's classification and status change, the delayed promise of the 20th, endings by final status, the final summary. Nothing of the script is typed again: `tools/cerita/ep2-ke-skenario.mts` reads the solo Episode 2 and writes `server/src/story/seed/ep2Trailer.ts` (id and en, 480 texts each, validator 0 errors), and the server publishes that scenario itself, once.
+
+**Read first: what differs from what the spec assumed**
+
+1. **A room shows Indonesian only.** The runtime reads one fixed content language (`server/src/story/runtime/room.ts`, `const LOCALE = 'id'`, used for the scene, the options, the consequence and the summary). The spec asked for the runtime to stay unchanged, so it is. The English texts are converted, stored and validated, but no room shows them: with the interface in English a player gets English buttons and an Indonesian story (`babak1-*-en.png`). If English rooms are wanted, that is a follow-up of its own: one content language per room (chosen by the host, stored with the room): the eight uses of that constant in `room.ts`, the `host:create` payload, the host picker, and the labels of a stored summary.
+2. **"Published at server start like the demo" is not how the demo works.** The two DEMO scenarios are created and published only by `npm run story:dev-setup -- --publish-demo`, which refuses `NODE_ENV=production`. The Episode 2 scenario IS published at server start, in every environment including production, because the owner's event needs it on the deployed server (`STORY_SEED=off` skips it). The owner's server on :4000 runs the old `server/dist`; it gets the scenario when `server/dist` is rebuilt and that server restarted. I did not touch `server/dist`.
+3. **Pak Hendra has no portrait.** It is not a data + URL addition: built-in characters are drawn by client code, for Bu Rina only; built-in assets have no file URL; and the chat and dossier layouts (all 15 rounds) show no customer portrait anyway. The fallback the spec names, the default customer portrait, is Bu Rina's face, which must not stand for Pak Hendra. So `customerCharacterId` is null: his name, initials in the chat header and the status word. Miss Raksa keeps her portrait.
+4. **Every screen marks it as demo content.** Rev 1.1 keeps `contentSource: 'demo'`, so the host picker reads "DEMO (tidak masuk rekap kompetisi)", the host console "DEMO", and the player's lobby "Konten demonstrasi (bukan kasus resmi)" (`lobi-hp390-id.png`); the projector page uses the same text key (read in the code, not opened). The solo card of the same episode says KASUS NYATA (T-026), so the owner will see both labels for one story. Competition recaps leave its rooms out unless "sertakan DEMO" is chosen. It sorts first in the picker (by title).
+5. **The answer key is not secret.** The solo Episode 2 on the same site has the same five alternatives per decision and shows the recommended ones at its end, and its script is in the client bundle. The project already has the switch for an event on the same case: a build with `VITE_CERITA_TANPA=auto-2` leaves the solo episode out of the bundle (`client/src/cerita/episode/index.ts`), at the price of the Episode 2 card. For the same reason I did not add the new seed to `tools/uji-bundel-kunci.mjs`: it would fail on every default build. Owner's call.
+6. **Two sentences are mine, not the script's**: the synopsis ending that rev 1.1 asks for, and the timeout sentence (the solo game has no timer, so the script has no text for it). For the Lead / PIC to confirm:
+
+| Key | Used for | id | en |
+| --- | --- | --- | --- |
+| `scenario.synopsis` | appended to the Episode 2 blurb (`ringkas`) | Kasus dari modul klaim; untuk uji acara. | A case from the claims module; for an event trial. |
+| `round.<id>.timeout.consequence` | timeout consequence of all 15 rounds; {nasabah} = the customer’s name from the script | Kamu belum memutuskan apa pun. {nasabah} menunggu tanpa kabar. | You have not decided anything. {nasabah} is left waiting with no news. |
+
+7. **Option length gives one answer away.** Validator warning `choice_length_hint` (not blocking): in round 15 the recommended option is by far the longest (69 characters, the others 23 to 56), because it is the script's summary of the complete closing message. In English the same holds for rounds 3, 13 and 15, and 11 English options are over 20 words. The solo script has the same texts.
+
+**What was built**
+
+- **Converter** `tools/cerita/ep2-ke-skenario.mts` (run with the client tsconfig; `--cek` compares the checked-in seed with a fresh conversion and exits 1 when they differ). It reads the episode graph, the id and en text tables and the activity definitions, and throws with the node's name when the script has something its rules do not cover (a conditional opening line, a new flag, a text over its limit with no split rule). Every text is measured against `TEXT_LIMITS`; a validator error stops it before anything is written. It writes the seed and the report `docs/prd-v02/EP2-ROOM-CONVERSION.md`.
+- **Seed** `server/src/story/seed/ep2Trailer.ts`: generated data, typed `ScenarioContent`, with the canonical content hash in its header.
+- **Publication** `server/src/story/seed/publish.ts`, called at server start (`server/src/index.ts`, after the interrupted-room recovery) and by `story:dev-setup`. It uses the normal lifecycle (`createScenario`, `submitForReview`, `publish`), so the scenario has a draft, an immutable version with its SHA-256 hash, three events and three audit rows, attributed to the actor `seed` (no staff id). The review note reads "Terbit otomatis oleh seed server untuk uji acara. BUKAN persetujuan komite; naskah sumbernya masih draf." Rules:
+  - no scenario `sc_ep2_trailer`: create, submit, publish version 1 in one transaction;
+  - current version has the seed's hash: nothing is written at all;
+  - current version is the seed's and the seed content changed in a new build: the next version, in one transaction;
+  - anything a person did (a draft being edited, their own published version, a withdrawn version, an archived scenario): left as it is, logged as "DILEWATI";
+  - a failure (for example the category deactivated) is logged as "GAGAL" and never stops the server.
+- `createScenario` takes a third argument `{ id }` for the stable id. It is separate from the request body on purpose: a request can never choose an id (tested).
+- `CONFIG.storySeed` (`STORY_SEED`, default on), documented in `docs/prd-v02/HOSTING.md`; one row in `docs/prd-v02/CONTENT-HANDOFF.md`.
+- Three scripts that took "the first demo scenario" now prefer a `[DEMO]` title, because the new scenario is demo-kind too and sorts first: `tools/uji-hosting-harness.mjs`, `tools/uji-keyboard-room.mjs`, `server/src/story/loadtest.ts` (one line each, the old expression as fallback; not run).
+- **Tool** `tools/cek-room-t028.mjs` (below).
+
+**Rounds** (from the report; each cell is the script's classification and status change, kept as authored)
+
+| # | Round | Solo form | Layout | Key | Respondent | A | B | C | D | E | Timeout | Evidence |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| 1 | `k01` Kabar pertama | chat reply | chat |  | Pak Hendra | **tepat** +6 | keliru -3 | keliru -6 | kurang 0 | kurang 0 | -6 | none |
+| 2 | `k02` Dokumen yang dibutuhkan | activity `berkas` | dossier |  | Pak Hendra | kurang 0 | **tepat** +6 | keliru -6 | keliru -3 | keliru -3 | -6 | checklist: the 8 items of the activity, in the activity’s own order, no status marks |
+| 3 | `k03` Menjelaskan sejak awal | chat reply | chat |  | Pak Hendra | keliru -6 | kurang 0 | **tepat** +6 | keliru -3 | kurang 0 | -6 | timeline `dok.proses` (4 rows) |
+| 4 | `k04` Di mana truk diperiksa? | activity `surveyor` | dossier |  | Pak Hendra | keliru -6 | kurang 0 | keliru -3 | **tepat** +6 | keliru -6 | -6 | document: the activity card (title + story) |
+| 5 | `k05` Bengkel sedang penuh | activity `foto` | dossier |  | Pak Hendra | kurang 0 | keliru -6 | kurang 0 | keliru -3 | **tepat** +6 | -6 | document: the activity card (title + story) |
+| 6 | `k06` Kapan keputusannya? | chat reply | chat | yes | Pak Hendra | keliru -12 | **tepat** +12 | kurang 0 | keliru -6 | keliru -6 | -12 | timeline `dok.linimasa` (3 rows) |
+| 7 | `k07` Perlu diperiksa di lapangan? | activity `jalur` | dossier |  | Pak Bima | keliru -3 | kurang 0 | keliru -6 | **tepat** +6 | kurang 0 | -6 | compare: activity table `rencana` (3 rows) |
+| 8 | `k08` Rambu di lokasi | activity `rambu` | dossier |  | Pak Hendra | keliru -6 | keliru -3 | **tepat** +6 | kurang 0 | kurang 0 | -6 | compare `dok.rambu` (4 rows) |
+| 9 | `k09` Siapa yang ditanya? | activity `saksi` | dossier |  | none (narration) | kurang 0 | keliru -6 | kurang 0 | keliru -3 | **tepat** +6 | -6 | checklist: the 5 items of the activity, in the activity’s own order, no status marks |
+| 10 | `k10` Keterangan yang berbeda | activity `selisih` | dossier |  | none (narration) | keliru -6 | keliru -6 | kurang 0 | **tepat** +6 | keliru -3 | -6 | compare: activity table `fakta` (4 rows); checklist: the 3 items of the activity, in the activity’s own order, no status marks |
+| 11 | `k11` Sebelum diajukan ke Komite | activity `bundel` | dossier |  | none (narration) | **tepat** +6 | keliru -6 | kurang 0 | keliru -6 | kurang 0 | -6 | checklist: activity table `isi-bundel` (7 rows) |
+| 12 | `k12` Cicilan tetap jalan | chat reply | chat | yes | Pak Hendra | keliru +4 ⚑ `janji-20` | **tepat** +12 | keliru -12 | kurang 0 | keliru -6 | -12 | none |
+| 13 | `k13` Surat penawaran ganti rugi | chat reply | chat |  | Pak Hendra | kurang 0 | keliru -6 | keliru -6 | kurang 0 | **tepat** +6 | -6 | compare `dok.surat` (4 rows) |
+| 14 | `k14` Nasabah tidak setuju nilainya | chat reply | chat | yes | Pak Hendra | keliru -12 | keliru -6 | **tepat** +12 | kurang 0 | keliru -6 | -12; start: -12 if `janji-20` | compare `dok.banding` (3 rows) |
+| 15 | `k15` Pembayaran dan penutupan | activity `tutup` | chat |  | Pak Hendra | keliru -6 | kurang +2 | **tepat** +6 | keliru -6 | kurang 0 | -6 | document: the activity card (title + story) |
+
+Accuracy: tepat 1, kurang 0.5, keliru 0. Option ids `alt-a` to `alt-e`; a room shuffles the order per participant. Key rounds are the script's double-weight decisions 6, 12 and 14. A session with automatic advance takes at most 14.7 minutes (every 30 s window used up) and about 9.7 minutes when everybody answers within 10 s: shared reading 8.4 to 16.5 s per round (25.2 s in round 1 with the opening), 10 s consequence, 7 s ranking. Evidence is not part of the shared reading time (a runtime rule), so in the eight dossier rounds the list or table is read inside the 30 s.
+
+**Approximation list** (complete; the same list is in the report)
+
+- Room text is Indonesian for every participant: the room runtime reads one fixed content language (`server/src/story/runtime/room.ts`, `LOCALE = 'id'`). The English text map is stored (480 texts) and validated, but no room shows it until the runtime gets a language choice.
+- Chinese (zh) is not converted (content locales are id and en).
+- Pak Hendra has no portrait: `customerCharacterId` is null (name and status word only). A built-in character is not a data + URL addition: built-in characters are drawn by client code for Bu Rina only, built-in assets have no file URL, and the chat and dossier layouts show no customer portrait at all. The default customer portrait is Bu Rina’s face, which must not stand for Pak Hendra.
+- No `stage` rounds: every solo decision is either a chat reply or an activity, so rounds are `chat` (7) or `dossier` (8). Backgrounds are the built-in `telepon` (chat and phone-cue rounds) and `meja`; neither layout draws them. The Episode 2 pixel rooms, walking, the phone hand-over cutscene and the Claims Committee room are not in a room.
+- Activities become one decision with five options (the script’s five alternatives). The player does not arrange documents, cards or message parts; what an arrangement would show (which tray, which lane) is reduced to the option text `titik.<id>.<alt>`, the script’s own summary of that alternative.
+- In English the summary labels used as option texts of activity rounds are in the past tense ("Sent Rudi to inspect at the depot"): right for a summary, odd for an option. No room shows English today (first item); to be reworded if rooms get an English content language.
+- Not a round: `ksim` (the SIM check after K09: a learning activity with no status change and no numbered decision).
+- Solo bookkeeping is not mapped: the summary flags `kep:<titik>:<alt>` and the case notes (`catat`). Only a flag that a later round reads becomes a room flag: `janji-20` (left in K12, read at the start of K14: -12 and a line only its holder sees). The follow-up flag set by the protest itself is not needed (a room applies a delayed effect once by construction).
+- The delayed flag has no label text: the script has only full sentences for it, and the room inserts a label into its own sentence ("<label> (babak 12) berdampak di babak ini"). Without a label the reminder reads "keputusanmu di babak 12 …"; the protest line itself names the promise.
+- The opening is carried whole (3 lines), including Miss Raksa’s sentence that her advice and reasons come at the end (`buka.3`). In a room that is only half true: the recommended option is shown right after a round that was not answered correctly, and her reasons come in the final summary. Kept as written; leaving the sentence out is a script decision.
+- Timeout: the solo game has no timer and no timeout text. Each round’s timeout applies the worst status change among its five alternatives, with one converter-written sentence (below).
+- No lesson text per round: after a decision the room shows the option’s neutral cause sentence (as the solo game does); Miss Raksa’s reason for the round (`titik.<id>.alasan`) is the round reason of the final summary. Nothing is cut to the 220-character lesson limit.
+- Endings: chosen by final status only, as in the script (`puas` happy from 70, `catatan` with_notes from 45, `kurang` unhappy fallback). Ending text = the one-line summary `akhir.<id>.ringkas`, then Pak Hendra’s and Miss Raksa’s closing words. The shared narration `akhir.bayar` is not carried (its fact is in the summary line), nor are the solo end screen’s result cards and lessons (`kartu.*`, `akhir.pelajaran.*`).
+- Not carried from the solo presentation: glossary buttons ("Apa itu …?"), chat attachments such as the truck photos, expressions, the buttons’ send labels (`akt.<id>.kirim`: they name the solo gesture, e.g. "Tugaskan Mas Rudi", and would contradict options such as assessing from photos only), the per-step questions and hints of activities, chapter goals, and the location names.
+- Scenario kind: `contentSource` is `demo` (the schema has only demo and settled_case, and this script is a draft, not a committee-settled case). The host picker therefore marks it DEMO and competition recaps leave its rooms out unless "sertakan DEMO" is chosen.
+- **K03** Document `proses` is shown as numbered steps; the solo screen’s remark that its order is the order of explanation, not a schedule, is interface text of the solo game and is not in the room.
+- **K08** The lane diagram and sign pictures of document `rambu` are not drawn: its 4 facts are the rows of a comparison.
+- **K08** The activity story `akt.rambu.cerita` is not carried: its fact is already a row of the evidence document.
+- **K09** Option A: the solo result variant `k09-a2` (other arrangements of the activity that map to the same alternative, same classification and status change) is flattened to the base outcome `k09-a`.
+- **K11** Option B: the solo result variant `k11-b2` (other arrangements of the activity that map to the same alternative, same classification and status change) is flattened to the base outcome `k11-b`.
+- **K11** Option D: the solo result variants `k11-d2`, `k11-d3` (other arrangements of the activity that map to the same alternative, same classification and status change) are flattened to the base outcome `k11-d`.
+- **K11** Option E: the solo result variant `k11-e2` (other arrangements of the activity that map to the same alternative, same classification and status change) is flattened to the base outcome `k11-e`.
+- **K11** The solo activity combines 2 choices; a room option is one of the script’s five alternatives, and its outcome is that of the alternative’s base combination: A = `lengkapi` + `persetujuan`; B = `sekarang` + `nanti`; C = `lengkapi` + `nanti`; D = `lengkapi` + `disetujui`; E = `hendra` + `nanti` (option texts `akt.bundel.opsi.<id>`). An outcome therefore also states the side its option text does not name, for example that no news was sent.
+- **K15** Option B: 3 outcome lines shown only for certain arrangements of the solo activity (`k15-b.bukti`, `k15-b.langkah`, `k15-b.nilai`) are not carried: a room option has no arrangement.
+
+**Text compositions** (28, each listed per option in the report; no sentence was rewritten)
+
+- 11 outcomes hold a character's words inside the consequence text as `Name: "…"`, in script order: the words come after narration (a reply is always shown before the consequence), or the speaker is not the round's respondent (K02 A, C; K04 B, C, D, E; K05 A, E; K11 A, D; K15 A).
+- 7 outcomes are only the respondent's words, so the script's neutral cause sentence is the consequence text and the option has no separate reason (K01 C; K06 C, E; K07 C, E; K14 A; K15 B).
+- K11: the topic labels "Berkas" and "Kabar untuk Pak Hendra" are written as a prefix inside the one consequence text (5 options); the table values "Ada" / "Belum ada di berkas" are shown as the room's status marks.
+- K13 B: the neutral cause sentence is word for word the outcome narration, so it is not shown twice.
+- K12 E is a stage direction in brackets: form "action", brackets removed. K08: the prompt is the activity's last question ("Apa kesimpulanmu?"), because the instruction tells the player to mark lanes. K06: an evidence title of 41 characters (limit 40) gives its bracketed ending to the kind label.
+
+**Checks** (my server on :4003 only, one headless browser at a time, below-normal priority, no e2e)
+
+| Check | Result |
+| --- | --- |
+| `npm run test:server` | 202 / 202 (10 new: 9 in `seed.test.ts`, 1 in `room.test.ts`) |
+| `npm run test:client` | 771 / 771 (762 before; 9 new: the converter tests) |
+| `tools/cek-room-t028.mjs` | ALL PASS (6): the full run in Chromium in Indonesian (15 rounds to the final summary), round 1 to the ranking with the interface in English, round 1 to the ranking in WebKit; each run opens its own room from the host picker |
+| Type check | server `tsc --noEmit` clean; the converter, its test and the seed checked with the client tsconfig through a temporary config (the only errors are the Node type names, unknown to that config as for every `tools/*.mts`) |
+
+- **Server tests, new.** `server/src/story/seed.test.ts` (9, on a temp database): the seed as the server sees it (15 x 5, the script key `abcdebdcedabecc` pinned, accuracy, ids, id + en with the same keys, no error with the real categories and asset library), engine paths to the three endings and the promise costing 12 once, the checked-in seed equals a fresh conversion (the converter runs as its own process with the client tsconfig), first seed = version 1 with the seed hash and three audit rows, **reseed three times = same version, same hash, no row written in any table**, **the DEMO set (two scenarios, their versions and hashes) unchanged**, a room opens from the seeded scenario and from a DEMO scenario, a changed seed publishes version 2 on an untouched scenario and is skipped on an edited draft, a reviewer's own version, a withdrawn version and an archived scenario, a failing seed leaves nothing behind, a request cannot choose an id. `room.test.ts` (+1): the Episode 2 content through all 15 rounds in a live room with two participants and production timing: the faster correct player leads (970 against 880 points for the same right answer at 3 s and 12 s), a timeout, the promise of the 20th (the protest and the reminder reach only its maker, status 12 lower once, at round 14), totals, endings "Puas" and "Selesai dengan catatan", the summaries, and the live room equal to the shared engine.
+- **Converter tests, new.** `tools/cerita/ep2-ke-skenario.test.mts` (9, in `test:client` because the converter imports client code): against the solo episode itself, per round and option, in id and en; **no text other than script text, the two converter sentences and glue (name, colon, quote marks)**; the report names every flattened variant and every dropped conditional line; the checked-in seed is the current conversion.
+- The existing story integration tests start the real server, so they now run with the seed published in their temp database: all pass unchanged.
+
+**Tool run**
+
+Test server: the server built into `server/dist-uji`, a new test database in my scratch folder (`story:dev-setup -- --publish-demo`: the test identities, the two demos and the seed), a copy of `client/dist`, port 4003, production timing (30 s answers). The seed line of that database, start by start: dev-setup `seed sc_ep2_trailer: terbit sebagai versi 1`; first server start `sudah terbit (versi 1), tidak ada yang ditulis`; after I changed the seed's internal note and rebuilt, `isi seed berubah, terbit versi 2`; the start after that `sudah terbit (versi 2), tidak ada yang ditulis`. The last tool run played version 2.
+
+- **Full run, Chromium, Indonesian** (host 1280 x 800, Ani 390 x 645 DPR 3, Budi 360 x 640 DPR 2, the host sets the pace). The picker lists the scenario first, with "Auto · versi 2 · tingkat 2 · DEMO (tidak masuk rekap kompetisi)" and the synopsis ending "untuk uji acara."; the room gets its code; both join and see the title in the lobby. Round 1 with real timing: "Babak 1/15", "Kabar pertama", the opening with the player's own name ("Halo, Ani!"), the five script replies on both phones (in a different order per phone, all five on screen above the send bar once the tray has settled), Ani takes the recommended one and Budi a keliru one, each sees their own consequence (Pak Hendra's reply as a chat bubble, the script narration, the cause sentence), and the ranking is the same on both phones: Ani 1 with 967 points (700 + speed), Budi 2 with 0. Rounds 2 to 15 at the host's pace: round 2 is a dossier, its evidence opens ("Permintaan dokumen", 8 rows) and Budi does not answer ("Tidak menjawab", the converter sentence, 0 points); round 11 shows the composed consequence whole on both phones; in round 14 only Budi sees the protest, with the chip "Status Pak Hendra: Cemas → Kecewa · −12" and the reminder "keputusanmu di babak 12 berdampak di babak ini: status −12"; final summaries: Ani "Puas", 15 decisions tepat, total 14.932 of 15.000; Budi "Kurang puas", total 8.439, with the note that round 14 was hit by the decision of round 12; each total equals its row in the final ranking; the host console reads "Selesai". No page error on any page; no sideways scroll on the phones in round 1 (the only place the tool measures it).
+- **English run, Chromium** (a new room, round 1 to the ranking): the interface is English ("Round 1/15", "Send reply", "Current ranking") and the story is Indonesian ("Kabar pertama", the options, the status word "Cemas"): point 1 above; `hasil.json` records it as `isiCerita: "id"`.
+- **WebKit run** (host and both phones in WebKit, Indonesian, round 1 to the ranking): the same checks, pass.
+
+The tool ran five times in all. The first run (the full part only) failed on one check of mine (the timeout card of a dossier round reads "Tidak menjawab", not the chat sentence the tool looked for); the product was right and the check was corrected. I stopped one run on purpose, to move the report to a tracked folder. A WebKit screenshot of an earlier run showed "5 pilihan lagi di bawah" with two options on screen: it was taken while the tray was still scrolling itself into view; the tool now waits 1.2 s and records what is on screen (five options, no cue, in all three runs).
+
+**Evidence:** `docs/prd-v02/EP2-ROOM-CONVERSION.md` (the conversion report) and `team/evidence/T-028/fullstack/` (28 files: 27 screenshots and `hasil.json`). The ones the brief names: `host-pemilih-skenario.png` (host picker), `babak1-pilihan-hp390-id.png` (round 1 on a phone), `babak1-konsekuensi-hp390-id.png` (consequence), `babak1-peringkat-hp390-id.png` (leaderboard), `hasil-akhir-hp390-id.png` and `hasil-akhir-hp360-id.png` (final summary, "Puas" and "Kurang puas"). Also: a dossier round with its evidence open (`babak2-*`), the timeout (`babak2-waktu-habis-hp360-id.png`), the protest of round 14 for the player who promised (`babak14-protes-hp360-id.png`), the host console, and round 1 in English and in WebKit. From the last run I opened the host picker and the round 1 options in Chromium and WebKit. In the earlier runs of the same tool on the same client build I opened: the round 1 scene, consequence and ranking at 390 wide, the lobby, the host console at the ranking, the dossier of round 2 with its evidence sheet and Budi's timeout card, both round 11 consequences, the protest of round 14, both final summaries, and the English consequence and ranking. For the Designer: the densest text is the round 11 consequence, one paragraph with two labels and a quoted reply (`babak11-konsekuensi-*.png`).
+
+**Not verified**
+
+- A real phone, the projector screen, more than two participants, a reconnect, the CMS pages with this scenario, `npm run test:e2e` (not run, as instructed).
+- The seed on the owner's data or on Linode: it was published only into temp and scratch databases. `data/raksa-game.db` was not opened.
+- The three scripts with the `[DEMO]` preference were not run.
+- English content in a room cannot be seen (point 1), so the English compositions were read in the seed file only.
+
+**State left behind.** My server on :4003 is stopped. `server/dist-uji` holds my test build of the server (ignored by git; it replaced a build from 2 Nov). `client/dist`, `client/dist-rilis`, `server/dist` and `data/` not touched; the tool served a copy of `client/dist` from my scratch folder (T-028 changes no client code).
+
+**Files.** New: `tools/cerita/ep2-ke-skenario.mts`, `tools/cerita/ep2-ke-skenario.test.mts`, `tools/cek-room-t028.mjs`, `server/src/story/seed/ep2Trailer.ts` (generated), `server/src/story/seed/publish.ts`, `server/src/story/seed.test.ts`, `server/src/story/testing/seedEnv.ts`, `docs/prd-v02/EP2-ROOM-CONVERSION.md` (generated), `team/evidence/T-028/`. Changed: `server/src/index.ts`, `server/src/config.ts`, `server/src/story/content/scenarios.ts`, `server/src/story/cli/devSetup.ts`, `server/src/story/room.test.ts`, `server/src/story/loadtest.ts`, `server/package.json` and `package.json` (test lists), `tools/uji-hosting-harness.mjs`, `tools/uji-keyboard-room.mjs`, `docs/prd-v02/HOSTING.md`, `docs/prd-v02/CONTENT-HANDOFF.md`.
+
+## T-027 (2026-11-17): home page on one phone screen (variant A)
+
+Fullstack · edited under `C:\Users\User\Desktop\rksgm-episode2` · NOT committed. Board: T-027 note "built (uncommitted)".
+Design: `team/DESIGN-REVIEW.md` "## T-027 — mock", D-254 to D-267 (variant A, approved by the owner 2026-11-17); Lead decision D-265 (a): Mode Cerita first at every width. Colours are T-029, next section.
+
+**Result.** On a phone the whole home page is one screen: header, street scene, Miss Raksa's bubble, the Mode Cerita card with a Mulai as wide as the card, the code row, one note line, one footer row. The page scrolls 0 px at 390x745 and 360x640 in id / en / zh, with and without a saved profile (12 screens), and at 390x664, 390x844, 430x932, 360x700, 375x553 and 320x568. Every size I measured equals the Designer's table:
+
+| | 390x745 | 360x640 |
+| --- | --- | --- |
+| street scene | 190 px | 143 px |
+| Mode Cerita card | 147 px | 137 px |
+| Mulai | 318 x 54 | 288 x 50 |
+| code field, id / en / zh | 207.5 / 224.8 / 224 x 48 | 177.5 / 194.8 / 194 x 48 |
+| Masuk, id / en / zh | 110.5 / 93.2 / 94 x 48 | the same |
+| code row | 110 px | 110 px |
+| footer row | 44 px | 44 px |
+
+**What changed**
+
+- **One order everywhere (D-265 a).** `Landing.tsx` renders the greeting, Mode Cerita, the code row (Join Game) and the note in that order, so source order, screen order and Tab order are the same at every width. No CSS `order` (the mock used it to move blocks). Tab order at 390x745: wordmark, language, sound, Mode Cerita card, "ubah", code field, Masuk, "Untuk panitia".
+- **Phones (700 px wide and narrower).** The headline, "Main sendiri", the long card sentence and the Join sentence leave the screen but stay in the page for screen readers (the page keeps its `h1`; the Join sentence stays the description of the code field). The card shows the short line and the code row asks the question.
+- **Two new texts** (D-258, wording accepted by the Lead as D-288), in `client/src/i18n/kamus/pemain.ts`: `pintuCeritaIsiHp` "Main sendiri. Tanpa timer." / "Play on your own. No timer." / "自己玩，没有计时。" and `joinTanya` "Punya kode room?" / "Got a room code?" / "有房间代码吗？".
+- **States come from the components, not from `:has()`.** `lp-ada-profil` on the page (the line "Main sebagai … · ubah" replaces the note "Tanpa akun"), `lp-join-ada-galat` on the code row (the wrong-code message takes the place of the question, so the row stays 110 px; measured before and after: 110 / 110).
+- **Street scene**: `clamp(140px, 100svh - 525px, 190px)`, 497 instead of 525 on screens lower than 700 px; the line `min(40vw, 190px)` in front of it is the fallback for a browser without `svh` (D-267). Hidden below 640 px high (portrait) and below 360 px wide, as designed.
+- **Reduced motion** (D-262): at 480 px and narrower the "Animasi dimatikan" switch shares the footer row and the company name gives way. This one rule uses `:has()`; without it the switch keeps a row of its own, as before.
+- The rules are one block at the end of `client/src/player.css`, all under `.lp-halaman`, so the Join Game panel on `/cerita` is not touched (the title there still reads "Join Game").
+
+**Decided by me, not in the mock (for the Designer to look at)**
+
+1. **Phones held sideways** (844x390, 740x360). With Mode Cerita first, the code row fell below the first screen (card ended at 308 px, code row at 495 of 390), and since D-08 a landscape phone must show Join Game without scrolling. Now the two doors stand side by side, the card on the left and the code row on the right (left to right is the source order), and the headline is off-screen as on portrait phones. Both doors end at 190 and 256 px of 390; at 740x360 at 217 and 265 of 360 (the page still scrolls 32 px there, for the footer). Screens `mendatar-*.png`. The event banner in landscape is the pill in the header (T-006), so it does not cover them.
+2. **Desktop and tablets** keep today's look; only the order changed. At 1280x800 both doors are on the first screen: card 383 to 476 px, Join Game 498 to 675 px (550 to 727 with a saved profile). The 2 px orange frame and the wide Mulai are phone rules only, as in the mock.
+
+**Checks** (my server on :4003, test database, one headless browser at a time, below-normal priority)
+
+- `tools/cek-beranda-t027.mjs` (new): ALL PASS (37), last run on the final build with the Raksa colours. Chromium: the 12 screens above; the six other sizes; wrong code, six wide letters "WWWWWW" (field 177.5 px, not clipped) and reduced motion at 360x640; the event banner at both sizes and on a landscape phone; keyboard order; three landscape cases; 1280x800 with and without profile; 768x1024. WebKit: both target sizes with and without profile and 390x664 with profile, same numbers.
+- The event banner (`RAKSA_IKLAN_ROOM`, `/api/acara-terbuka`): shown, the code field and Masuk are not covered at 390x745 and 360x640, its button fills the code and moves focus to Masuk. With the banner the page scrolls 78 px (the existing bottom margin for the banner) and at 360x640 the street scene steps aside (existing rule D-04). At 844x390 the banner is the pill in the header (10 to 64 px) and the two doors start at 78 px. The tool supplies the endpoint's answer for one open room; no real quiz room was opened.
+- `tools/uji-room-cerita.mjs`, landing phase only: 40 / 40 on a start of my server without legacy mode (four screen sizes; Join Game whole on the first screen of both phones and of the landscape phone; old routes closed). Its two expectations that said "Join Game above Mode Cerita" and "title Join Game" now say the approved order; on a landscape phone "first" means left of the code row on the same line. The other phases of that tool were not run.
+- `test:client` 771 / 771 (the dictionary parity test covers the two new keys); client typecheck 0 errors.
+
+**Not verified**
+
+- A real phone, and the on-screen keyboard over the code field (D-267): headless browsers only. The 390x664 case stands in for the iPhone with its toolbars.
+- A browser without `svh`: the fallback line is there, no such browser was run.
+- English and Chinese were measured (no clipped text, same heights), not read by a native speaker.
+
+**Files.** Changed: `client/src/pages/Landing.tsx`, `client/src/components/JoinGame.tsx`, `client/src/i18n/kamus/pemain.ts`, `client/src/player.css`, `tools/uji-room-cerita.mjs`. New: `tools/cek-beranda-t027.mjs`. Evidence: `team/evidence/T-027/fullstack/` (screens + `hasil.json`).
+
+## T-029 (2026-11-17): the Raksa palette across the game
+
+Fullstack · edited under `C:\Users\User\Desktop\rksgm-episode2` · NOT committed. Board: T-029 note "built (uncommitted)".
+Design: `character/palet-raksa-v1/PALET.md` and `team/DESIGN-REVIEW.md` D-268 to D-288 (the Lead accepted D-280 to D-288 as written).
+
+**Result.** The game is in the colours of raksaonline.com: orange `#FF9000` for the one main button, the selected and the current thing; dark labels on it; page `#FFF9F5`, white cards, blush panels; ink `#212121` text; status colours of their own (tepat green, kurang blue-grey, keliru red). Pixel art, the street scene, characters and uniforms keep their colours. No old colour is left in any style sheet, in the source or in the build, and outside the art files none is left in the code.
+
+**How the sweep was done**
+
+- **Tokens** as in PALET section 3: `theme.css` `:root`, `cerita/hp/hp.css`, the token copies in `meja.css`, `lokasi.css` (`.lk`) and `projector.css`. The old names stay and mean something new (`--hijau` and `--kuning` are the orange fill), so the head of `theme.css` now says so. New tokens for the roles green carried alone: `--utama`, `--utama-tekan`, `--utama-tepi`, `--di-utama`, `--utama-teks`, `--utama-teks-tua`, `--panel`, `--pilih`, `--catatan`, `--persik`, `--garis-kuat`, and twelve status values (`--tepat`, `--tepat-teks`, `--tepat-pucat`, `--tepat-garis`, the same for `kurang` and `keliru`).
+- **Mechanical, from the Designer's table.** A script reads every rule the way `alat/peta.mjs` does, asks that tool's own rule for each colour, and writes the new value at the exact place. Before writing it reproduced the Designer's three files byte for byte and checked that it sees the 1,826 colour uses in the same order. Applied: 1,599 hex uses in 25 style sheets (the table's own count), 76 `rgb()` / `rgba()` values by the same rules (not in the table), the 39 labels of list A to `var(--di-utama)`, and 35 of the 37 green-token-as-text declarations to `var(--utama-teks)` (the two left are the wordmark, which is the brand orange on purpose). Every change is a row in `team/evidence/T-029/fullstack/alat/sapuan-css.csv` (file, line, selector, property, old, new, rule).
+- **By hand**: 101 edits, each with its reason in `alat/tangan.csv`. The groups are below.
+- **Art from the Designer**: `token-keputusan.png` (500 B) is installed in `client/src/cerita/seni/akhir/`; the number on a kurang token is white, on an empty token dark (the shared rule in `akhir.css` is split, D-280).
+
+**Read first: what I decided by hand**
+
+1. **Where green or yellow meant a status, the status colour, not the brand.** A token swap would have turned "right" orange. Now tepat: `.kartu.benar`, `.chip-hijau`, `.pesan-sukses`, `.delta-naik`, the connection dot `.titik.ok`, `.bank-status-tersimpan`, `.bank-opsi-benar`, the "sama" tick of the sign summary. Kurang family: `.chip-kuning`, the "connecting" dot, `.bank-status-menyimpan`. `.delta-turun` is keliru text.
+2. **Characters drawn with brand tokens are pinned to their old colours.** Raki (`art/Raki.tsx`: yellow beak, green scarf) and the old avatars (`art/Avatar.tsx`: cap, badge, disc) took their colours from `--kuning` and `--hijau`; with the swap the two-colour cap would have become one orange shape. D-276 says characters keep their colours, so the values are written into the art. The pre-JS loader in `client/index.html` holds a copy of Raki and got the same values (the guard test `pemuatPra.test.tsx` passes). If the mascot's scarf should be brand orange, that is two constants.
+3. **Things the table cannot know.**
+   - Chart bands of the end card are shapes, not text: white and blush (the table read `fill` as text and made both white).
+   - A grey fill that carries a white mark is `#5F5F5F` (6.1 : 1), not `#A4A4A4` (2.5 : 1): `.akh-nada`, `.cer-arah`, `.cer-proses-ikon`.
+   - Seven hover or open states had become the same as their normal state (two pale greens, one blush). They now change the border to `#A4A4A4`; `.slot-hapus`, which has no border, fills with `#E0E0E0`; `.kj-status.ditanyakan` uses the note tint.
+   - Children that stayed white on a fill that turned orange (list B and beyond): the link in `.hp-tutorial`, the title and the tabs of the question bank editor, the number on the field markers `.sr-penanda`, the selected hotspot in `Interaction.tsx`. In the editor's orange bar the selected tab is ink with a white label, and the level bars inside a selected button are ink.
+   - Two text colours written as `var(--hp-hijau, …)` with a fallback were not in the Designer's list (it looks for the plain form): now `--utama-teks`.
+4. **Focus rings.** The interface ring is ink (`--fokus`). Six green rings would have become orange (2.1 : 1 on the page), four by the table and two through the tokens: the Episode 2 screens (`hp.css` line 15, as PALET says), `.hp-tempat`, `.lk` buttons, the end card's `summary`, the skip button on the stage, the table prototype. All ink now. The ring on the question bank's orange bar is ink too, and on the dark old projector it is white. Blue rings inside pixel-art activities stay (D-286).
+5. **The home page follows the mock, with one addition.** Mulai: face `#FF9000`, label `#212121`, border and extrusion `#B25C00`; Masuk: `#212121`, white label, border and extrusion `#000000`; "GAME" in the wordmark is ink. Addition: the code row has a 1 px edge `#ECD5CB`. It is in the approved mock picture (I sampled it) and not in PALET.md; blush on the page is only 1.07 : 1, so the edge is what makes the panel read. It is drawn inside the panel, so no size changed. Designer: confirm or name the colour.
+6. **Colours in `.ts` and `.tsx`** (not in the table). Interface, swept by the same rules: the old projector's inline styles, QR code, confetti, the "misi selesai" stamp, rating stars, stage labels, the loading bar, the old mission engine's pills, verdict tags and panel, and the constants of the K11 table prototype (not in a normal build, not rendered). Art, left alone: everything under `art/`, `cerita/seni/`, `game/art/`, `game/scenes/`, the stage props, the road diagram `BuktiLajur.tsx`, the incident diagram of `ProtoKejadian.tsx`. The list with a reason per entry is the allowlist in the tool.
+7. **Small ones.** The urgent timer number was yellow written inline (1.6 : 1 on the old cream); it is a class now, keliru red on light pages and orange on the dark projector. `theme-color` in `index.html` is `#FF9000`. The empty rating star's outline is `#818181`, the grey the table's rule gives, because it must stay 3 : 1.
+
+**For the Lead and the Designer to decide or look at**
+
+- **Staff pages** (host, CMS, admin) have blush as the page ground with white cards: that is the table's row for the `.stf` ground. And every `.btn` is orange, so a staff page can show more than one orange thing (host console: the active tab and the main button are orange, "Tutup room" red, the rest blush; the host's room list has "Buka room" and one "Kendalikan" per running room in orange; see `08-host-*.png`, `15-host-babak1-*.png`).
+- **The old quiz projector** (`.proyektor` in `theme.css`, `pages/Projector.tsx`) has the plain ink ground the Designer proposed. It was not rendered: it needs a room of the old quiz. The story projector (`/projector?room=`) is a light page and is in the screens.
+- **A disabled main button** keeps the orange-brown edge around its grey fill (it kept the green edge before). `05-ksim-390x745.png`, bottom bar.
+- **Input fields** (`.kolom`) have the `#E0E0E0` line: that is the table's row for their old border. PALET section 1 names `#A4A4A4` for field borders, and only the home code field has it (decided by hand in the mock). One line per sheet if the stronger edge is wanted everywhere (`10-join-*.png`, `12-cms-masuk-*.png`).
+- **Two pairs of states share a colour now**, as D-285 says they would: "dikoreksi" and "sebagian" icons (both `#3E7285`), and the pending and check marks on the projector's dossier (both `#2C5A6B`). They differ by icon and word only.
+- **Not touched**: `client/public/favicon.svg` (old green and yellow, an icon to redraw) and `shared/brand.ts` (`BRAND.colors` holds the old values; nothing reads them).
+
+**The tool** `tools/cek-palet-t029.mjs` (+ `cek-palet-t029.data.json`)
+
+- **A. Old colours.** The list is the seven brand colours of the task, the old colours PALET.md names (75), and the other old colours of the Designer's table whose every use changed (307): 389 in all. It looks for `#rrggbb(aa)`, `#rgb`, `0xrrggbb` and `rgb()` / `rgba()`. Source: none allowed in a style sheet; in `.ts` / `.tsx` only in art files (allowlist with reasons); in `index.html` only inside the pre-JS copy of Raki. Build: none in CSS outside a `url(data:…)`; in JS every hit must be a colour that an art source file really contains.
+- **B. Tokens.** 30 token values read from the built CSS, and 21 contrast pairs, among them the focus ring on the page, on blush, on white and on the selected tint.
+- **C. Screens.** 35 pictures: the 12 key screens at 390x745 and 1280 (home, picker, K01 chat, K02 dossier activity, K-SIM, committee room, end card, host, projector, join, lobby, CMS sign-in), plus the K01 reply sheet (numbered options, D-284), the host picker, round 1 of a room on phone, projector and host, and `/solo`. On each it reads the computed styles: no light text on an orange fill, no orange text on a light ground (the wordmark excepted), and on the home page the focus ring at each Tab stop against its ground. Text under 4.5 : 1 is listed, not failed.
+- It checks itself first: a page with three planted faults must be reported, or a clean result would mean nothing. And run against the older build in `client/dist` the scan fails as it should (1,577 hits in the CSS, the green tokens, the theme colour).
+- The screen part opens a room, so it needs a test server and refuses ports 4000 to 4002.
+
+**Checks** (my server on :4003 with a test database, one headless browser at a time, below-normal priority, no e2e)
+
+All on the final build; no source file changed after it.
+
+| Check | Result |
+| --- | --- |
+| `test:client` | 771 / 771. Client typecheck (`tsc --noEmit`): 0 errors |
+| `tools/cek-palet-t029.mjs` (cek-palet) | ALL PASS (45). Source: 0 old colours in the style sheets, 0 in code outside art (art: 20 files, 85 uses, 33 colours), 0 in `index.html` outside Raki. Build: 13 CSS files 0 hits, 64 JS files 0 unexplained and 80 that are art, `index.html` 0. 30 token values right. 21 contrast pairs at or above their floor (focus ring 15.4 on the page, 14.1 on blush, 16.1 on white; label on orange 7.09; orange text 5.28 to 6.01; white on the status fills 4.98 to 5.32). 35 screens: no light text on orange, no orange text on a light ground, and no text it could measure under 4.5 : 1 (text that lies on a picture is not measured); focus ring 14.1 to 16.1 at the eight Tab stops of the home page |
+| `tools/cek-beranda-t027.mjs` | ALL PASS (37), Chromium and WebKit |
+| `tools/cek-layar-t018.mjs` (cek-layar) | ALL PASS (148), Chromium and WebKit |
+| `tools/cek-akhir-t019.mjs` (cek-akhir) | ALL PASS (105) |
+| `tools/cek-gulir-t018.mjs --tanpa-tahap2` (cek-gulir) | ALL PASS (150): the chat family. Its scene, activity and end-card families are the cek-layar run above, so I did not run those twice |
+| `tools/cek-bahasa-t014.mjs` (cek-bahasa) | ALL PASS (138) |
+| `tools/cek-tag-t026.mjs` | ALL PASS (18) after I changed the two tag colours it expects: KASUS NYATA is orange with ink letters (7.09 : 1), DEMO blush with grey letters (5.61 : 1) |
+| `tools/uji-room-cerita.mjs landing` | 40 / 40 (see T-027) |
+
+Bundle against the build of 17:44 in `client/dist`: CSS 1.07 KB smaller gzipped, JS 78 B larger.
+
+**Evidence:** `team/evidence/T-029/fullstack/`: 35 screens, `hasil.json`, and `alat/` (the two logs and the scripts that made the changes). `hasil.json` is the full run of 45 checks; a later scan-only run of mine overwrote it, so I rebuilt it from that full run's own output, and the tool now writes partial runs to `hasil-sebagian.json`.
+
+**Not verified**
+
+- Not rendered: the activities other than K02 and K-SIM, phone calls, the location scene, the old quiz beyond its `/solo` map (a mission itself, its projector, the question bank editor), the pages of CMS and admin behind the sign-in, the K11 table prototype, the incident prototype. For those the evidence is the table, the scan, and a comparison of every rule that sets both a ground and a text colour: 278 such rules, none under 4.5 : 1 after the sweep.
+- Hover and pressed states were read in the CSS, not seen.
+- No real phone; Chromium for the palette screens (the home page also in WebKit).
+
+**State left behind.** My server on :4003 is stopped and no browser of mine is running. It used the test database in my scratch folder (the palette tool opened two rooms there). Client builds went to my scratch folder; `client/dist`, `client/dist-rilis` and `server/dist` are untouched, so the owner's server on :4000 still shows the old colours until the client is built there. The check tools write into their own evidence folders, as always: the pictures in `team/evidence/T-014`, `T-018/stage1b` and `stage2`, `T-019/fix`, `T-020/fullstack`, `T-022/fix`, `T-024/fullstack`, `T-025/fullstack` and `T-026` were replaced by today's runs and now show the new colours. `character/` was only read (the Designer's `peta.mjs` was run as a copy in my scratch folder, so their three lists are as they delivered them).
+
+**Files.** Changed: 25 style sheets under `client/src` (all except `seni.css` and `font.css`), `client/index.html`, `client/src/cerita/seni/akhir/token-keputusan.png`, `client/src/art/Raki.tsx`, `art/Avatar.tsx`, `ui/kit.tsx`, `pages/Projector.tsx`, `pages/soloBagian.tsx`, `unity/UnityStage.tsx`, `game/GameStage.tsx`, `game/engine/MissionScene.ts`, `game/engine/stage.ts`, `components/MissionStage.tsx`, `interactions/Interaction.tsx`, `cerita/lokasi/seni/Aset.tsx`, `cerita/hp/meja/MejaScene.ts`, `tools/cek-tag-t026.mjs` (the tag colours it expects). New: `tools/cek-palet-t029.mjs`, `tools/cek-palet-t029.data.json`.

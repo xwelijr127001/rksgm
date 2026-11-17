@@ -5,7 +5,7 @@
 .hp-sim { display: grid; gap: 8px; width: 100%; max-width: 366px; margin: 0; }
 .hp-sim > .hp-instruksi-arena { order: -1; }
 .sim-instruksi { margin: 0; min-height: 20px; font-size: 16px; line-height: 20px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.sim-adegan { box-sizing: border-box; height: 236px; border: 2px solid #1c2b24; background: #b98a57; overflow: hidden; }
+.sim-adegan { box-sizing: border-box; height: 236px; border: 2px solid #212121; background: #b98a57; overflow: hidden; }
 /* D-222: overflow clip (bukan hidden): kotak hidden masih bisa menggulir sendiri saat kartu langkah 4 difokus dengan Tab. */
 .sim-isi { position: relative; width: 100%; height: 232px; overflow: hidden; overflow: clip; }
 .sim-isi > .px, .sim-isi > span { position: absolute; }
@@ -43,7 +43,7 @@
 
 /* ---- latar */
 .sim-meja { inset: 0; background: url('./sim/meja.png') 0 0 repeat; image-rendering: pixelated; }
-.sim-meja-bawah { inset: 88px 0 0 0; border-top: 3px solid #1c2b24; }
+.sim-meja-bawah { inset: 88px 0 0 0; border-top: 3px solid #212121; }
 .sim-dinding { left: 0; right: 0; top: 0; height: 88px; background: url('../piksel/ep2-ruang-wawancara-latar.png') calc(50% + 0px) -10px / 400px 225px no-repeat; image-rendering: pixelated; }
 .sim-darto { left: calc(50% - 36px); top: 4px; height: 84px; overflow: hidden; }
 .sim-darto > span { position: absolute; background-repeat: no-repeat; image-rendering: pixelated; }
@@ -55,34 +55,34 @@
 /* ---- sasaran ketuk: polos; ragu = putus-putus kuning; benar = garis hijau */
 .sim-ketuk { position: absolute; z-index: 4; margin: 0; padding: 0; border: 0; border-radius: 0; background: transparent; cursor: pointer; }
 .sim-ketuk:disabled { cursor: default; }
-.sim-ketuk[data-keadaan="ragu"], .sim-ubin[data-keadaan="ragu"] .sim-ubin-gambar, .sim-label-truk[data-keadaan="ragu"] { outline: 2px dashed #e0a52f; outline-offset: -2px; }
-.sim-ketuk[data-keadaan="benar"] { outline: 2px solid #2e8a57; outline-offset: -2px; }
+.sim-ketuk[data-keadaan="ragu"], .sim-ubin[data-keadaan="ragu"] .sim-ubin-gambar, .sim-label-truk[data-keadaan="ragu"] { outline: 2px dashed #3e7285; outline-offset: -2px; }
+.sim-ketuk[data-keadaan="benar"] { outline: 2px solid #2f7d57; outline-offset: -2px; }
 .sim-ketuk:focus-visible, .sim-ubin:focus-visible, .sim-label-truk:focus-visible, .sim-balik:focus-visible, .sim-cetakan:focus-visible, .sim-kartu-seret:focus-visible, .sim-kenapa:focus-visible { outline: 3px solid #1d6fd1; outline-offset: -3px; }
-.sim-pelat { z-index: 3; padding: 1px 5px; border: 1px solid #1c2b1c; background: #fffdf6; color: #1e2b24; font-size: 13px; line-height: 15px; font-weight: 800; white-space: nowrap; pointer-events: none; }
+.sim-pelat { z-index: 3; padding: 1px 5px; border: 1px solid #212121; background: #fffdf6; color: #212121; font-size: 13px; line-height: 15px; font-weight: 800; white-space: nowrap; pointer-events: none; }
 
 /* ---- langkah 2 */
 .sim-label-truk {
   position: absolute; z-index: 4; left: 136px; right: 6px; top: 176px; height: 44px; box-sizing: border-box; display: grid; align-content: center; margin: 0; padding: 0 2px 0 14px; text-align: left;
   border-style: solid; border-color: transparent; border-width: 6px 6px 8px; border-image: url('./sim/label-truk-9i.png') 6 6 8 6 fill / 6px 6px 8px repeat; image-rendering: pixelated; border-radius: 0;
-  background: none; color: #1c2b24; font: inherit; font-size: 13px; line-height: 16px; cursor: pointer; white-space: nowrap; overflow: hidden;
+  background: none; color: #212121; font: inherit; font-size: 13px; line-height: 16px; cursor: pointer; white-space: nowrap; overflow: hidden;
 }
 .sim-label-truk[data-keadaan="ketuk"] { border-image-source: url('./sim/label-truk-ketuk-9i.png'); }
 .sim-label-truk[data-keadaan="cocok"] { border-image-source: url('./sim/label-truk-cocok-9i.png'); cursor: default; }
 .sim-label-truk > span, .sim-label-truk > b { margin: -2px 0; overflow: hidden; text-overflow: ellipsis; }
 .sim-label-truk > .sm-lubang { position: absolute; left: 0; top: 12px; margin: 0; }
 .sim-balik {
-  position: absolute; z-index: 5; right: 6px; top: 27px; width: 62px; height: 44px; margin: 0; padding: 7px 0; box-sizing: border-box; border: 0; background: none; font: inherit; font-size: 13px; font-weight: 800; color: #1c2b24; cursor: pointer;
+  position: absolute; z-index: 5; right: 6px; top: 27px; width: 62px; height: 44px; margin: 0; padding: 7px 0; box-sizing: border-box; border: 0; background: none; font: inherit; font-size: 13px; font-weight: 800; color: #212121; cursor: pointer;
 }
-.sim-balik::before { content: ''; position: absolute; left: 0; top: 7px; width: 62px; height: 30px; box-sizing: border-box; border: 2px solid #1c2b24; background: #fffdf6; box-shadow: 0 2px 0 #1c2b24; z-index: -1; }
+.sim-balik::before { content: ''; position: absolute; left: 0; top: 7px; width: 62px; height: 30px; box-sizing: border-box; border: 2px solid #212121; background: #fffdf6; box-shadow: 0 2px 0 #212121; z-index: -1; }
 
 /* ---- langkah 3a: ubin tempat (kotak 96, gambar 80 x 60 di bingkai 84 x 64, pelat label seperti K04) */
-.sim-ubin { position: absolute; z-index: 4; width: 96px; margin: 0; padding: 0; display: grid; justify-items: center; border: 0; background: none; color: #1e2b24; font: inherit; cursor: pointer; }
+.sim-ubin { position: absolute; z-index: 4; width: 96px; margin: 0; padding: 0; display: grid; justify-items: center; border: 0; background: none; color: #212121; font: inherit; cursor: pointer; }
 .sim-ubin:disabled { cursor: default; }
 .sim-ubin-gambar { position: relative; box-sizing: border-box; width: 84px; height: 64px; padding: 2px; background: url('./peta/bingkai.png') 0 0 no-repeat; image-rendering: pixelated; }
 .sim-ubin.terpilih .sim-ubin-gambar::before { content: ''; position: absolute; left: -2px; top: -2px; width: 88px; height: 68px; background: url('./peta/bingkai-pilih.png') 0 0 no-repeat; image-rendering: pixelated; }
 .sim-ubin-gambar > .px { position: relative; width: 80px; height: 60px; }
-.sim-ubin-nama { position: relative; z-index: 1; max-width: 96px; box-sizing: border-box; margin-top: -8px; padding: 1px 5px; border: 1px solid #1c2b1c; background: #fffdf6; font-size: 13px; line-height: 15px; font-weight: 800; }
-.sim-ubin.terpilih .sim-ubin-nama { background: #e0b84f; }
+.sim-ubin-nama { position: relative; z-index: 1; max-width: 96px; box-sizing: border-box; margin-top: -8px; padding: 1px 5px; border: 1px solid #212121; background: #fffdf6; font-size: 13px; line-height: 15px; font-weight: 800; }
+.sim-ubin.terpilih .sim-ubin-nama { background: #ff9000; }
 .sim-ubin > .sm-sim-pin { position: absolute; left: 70px; top: -6px; z-index: 2; }
 
 /* ---- langkah 4 */
@@ -91,17 +91,17 @@
 .sim-cetakan > .sm-cetakan { position: absolute; left: 0; top: 0; }
 .sim-kartu-seret { position: absolute; z-index: 2; left: calc(50% - 120px); width: 240px; height: 152px; margin: 0; padding: 0; border: 0; background: none; cursor: grab; touch-action: none; }
 .sim-kartu-seret > .px { position: absolute; left: 0; top: 0; }
-.sim-garis { position: absolute; box-sizing: border-box; border: 2px solid #2e8a57; pointer-events: none; }
+.sim-garis { position: absolute; box-sizing: border-box; border: 2px solid #2f7d57; pointer-events: none; }
 .sm-sim-hantu { z-index: 1; pointer-events: none; }
 
 /* ---- "Kenapa?" */
 .sim-kenapa {
   position: absolute; z-index: 6; right: 0; top: 0; width: 64px; height: 24px; box-sizing: border-box; margin: 0; padding: 0; border: 8px solid transparent; border-image: url('./sim/catatan-9i.png') 8 fill / 8px repeat; image-rendering: pixelated;
-  background: none; color: #3a3212; font: inherit; font-size: 12px; line-height: 8px; font-weight: 800; cursor: pointer;
+  background: none; color: #212121; font: inherit; font-size: 12px; line-height: 8px; font-weight: 800; cursor: pointer;
 }
 .sim-kenapa::after { content: ''; position: absolute; inset: -8px -8px -18px -14px; }
 .sim-catatan {
-  position: absolute; z-index: 7; right: 0; top: 0; width: 204px; box-sizing: border-box; border: 8px solid transparent; border-image: url('./sim/catatan-9i.png') 8 fill / 8px repeat; image-rendering: pixelated; color: #3a3212;
+  position: absolute; z-index: 7; right: 0; top: 0; width: 204px; box-sizing: border-box; border: 8px solid transparent; border-image: url('./sim/catatan-9i.png') 8 fill / 8px repeat; image-rendering: pixelated; color: #212121;
 }
 .sim-catatan p { margin: -2px 0 2px; font-size: 13px; line-height: 17px; font-weight: 600; }
 .sim-catatan .hp-tautan { min-height: 28px; margin: 0 0 -4px; font-size: 13px; }
@@ -114,16 +114,16 @@
 .sim-papan[data-akhir] { height: 62px; }
 .sim-papan > .sm-klip { position: absolute; left: calc(50% - 24px); top: -15px; z-index: 1; }
 .sim-papan > li { display: grid; justify-items: center; gap: 0; margin: -4px 0; padding: 1px 0; background: #fbf3dd; }
-.sim-cap-nama { font-size: 10.5px; line-height: 12px; font-weight: 800; color: #3d4a42; white-space: nowrap; }
+.sim-cap-nama { font-size: 10.5px; line-height: 12px; font-weight: 800; color: #212121; white-space: nowrap; }
 .sim-papan > li > .px { width: 60px; height: 26px; background-repeat: no-repeat; image-rendering: pixelated; }
 .sim-papan > li[data-keadaan="kini"] > .sm-cap-kosong { background-position: -60px 0; }
 
 /* ---- kalimat Pak Bima */
 .sim-ucap { display: grid; grid-template-columns: 36px minmax(0, 1fr); gap: 8px; align-items: start; min-height: 36px; }
-.sim-ucap-potret { width: 36px; height: 36px; box-sizing: border-box; border: 2px solid #1c2b24; background: #f3ead2; overflow: hidden; }
+.sim-ucap-potret { width: 36px; height: 36px; box-sizing: border-box; border: 2px solid #212121; background: #f3ead2; overflow: hidden; }
 .sim-ucap-potret .hp-potret .cer-potret { width: 32px !important; height: 32px !important; border: 0 !important; border-radius: 0 !important; box-shadow: none !important; }
 .sim-ucap-potret .cer-potret svg { width: 100%; height: 100%; }
-.sim-ucap > p { position: relative; margin: 0; border: 6px solid transparent; border-image: url('./sim/gelembung-9i.png') 6 fill / 6px repeat; image-rendering: pixelated; font-size: 14px; line-height: 18px; color: #1c2b24; }
+.sim-ucap > p { position: relative; margin: 0; border: 6px solid transparent; border-image: url('./sim/gelembung-9i.png') 6 fill / 6px repeat; image-rendering: pixelated; font-size: 14px; line-height: 18px; color: #212121; }
 .sim-ucap > p::before { content: ''; position: absolute; left: -12px; top: 6px; width: 8px; height: 10px; background: url('./sim/gelembung-ekor.png') 0 0 no-repeat; image-rendering: pixelated; }
 .sim-ucap[data-ragu] > p { border-image-source: url('./sim/gelembung-ragu-9i.png'); }
 .sim-ucap[data-ragu] > p::before { background-position: -8px 0; }
@@ -131,7 +131,7 @@
 /* ---- akhir: kartu kasus lain */
 .sim-kasus {
   position: relative; box-sizing: border-box; min-height: 150px; margin-top: 8px; overflow: hidden; border-style: solid; border-color: transparent; border-width: 6px 6px 8px;
-  border-image: url('./sim/kartu-kasus-9i.png') 6 6 8 6 fill / 6px 6px 8px repeat; image-rendering: pixelated; color: #1c2b24;
+  border-image: url('./sim/kartu-kasus-9i.png') 6 6 8 6 fill / 6px 6px 8px repeat; image-rendering: pixelated; color: #212121;
 }
 .sim-kasus-judul { display: flex; align-items: center; gap: 6px; margin: -4px -4px 0; padding: 3px 8px; background: #1f3a5f; color: #fff8e7; font-size: 13.5px; line-height: 18px; }
 .sim-kasus > .sm-lensa-palsu { position: absolute; left: 0; top: 16px; }

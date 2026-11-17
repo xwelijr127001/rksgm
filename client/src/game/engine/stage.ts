@@ -128,7 +128,7 @@ export async function createStage(opts: StageOptions): Promise<StageHandle> {
       parent: opts.parent,
       width: awal.w,
       height: awal.h,
-      backgroundColor: '#fff9e9',
+      backgroundColor: '#fff9f5',
       banner: false,
       audio: { noAudio: true },
       scale: { mode: P.Scale.NONE, width: awal.w, height: awal.h, zoom: 1 / dpr },

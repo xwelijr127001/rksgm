@@ -41,8 +41,10 @@ function PotretRaki() {
 }
 
 /**
- * Mode Cerita (review staf #2): satu pintu dengan tindakan "Mulai", di bawah Join Game. Latihan misi tidak ditawarkan
- * lagi di halaman awal (arahan pemilik; rute lama tetap ada bila mode lama aktif). Tanpa profil -> kenalan dulu.
+ * Mode Cerita (review staf #2; T-027: PINTU UTAMA, di atas baris kode room di semua lebar): satu pintu dengan tindakan
+ * "Mulai". Latihan misi tidak ditawarkan lagi di halaman awal (arahan pemilik; rute lama tetap ada bila mode lama aktif).
+ * Tanpa profil -> kenalan dulu. T-027 D-258: di HP kalimat kartu diganti satu baris pendek (`pintuCeritaIsiHp`, hiasan:
+ * aria-hidden); kalimat panjangnya tetap di halaman sebagai keterangan tautan (disembunyikan secara visual saja).
  * Seluruh kartu = tautan (target sentuh besar); nama tautan = judul + label aksi "Mulai" yang terlihat (perintah suara
  * "klik Mulai" berfungsi), keterangannya = kalimat (aria-labelledby/-describedby).
  */
@@ -71,7 +73,7 @@ function ModeCerita() {
       <span className="lp-pintu-potret" aria-hidden="true">
         {TOKOH.missRaksa.aktif ? <PotretTokoh tokoh="missRaksa" ukuran={POTRET_AWAL} hias /> : <PotretRaki />}
       </span>
-      <span className="lp-pintu-teks"><b className="lp-pintu-judul" id={id + 'j'}>{t('pemain.pintuCeritaJudul')}</b><span className="lp-pintu-isi" id={id + 'i'}>{t('pemain.pintuCeritaIsi')}</span></span>
+      <span className="lp-pintu-teks"><b className="lp-pintu-judul" id={id + 'j'}>{t('pemain.pintuCeritaJudul')}</b><span className="lp-pintu-isi lp-pintu-isi-lebar" id={id + 'i'}>{t('pemain.pintuCeritaIsi')}</span><span className="lp-pintu-isi lp-pintu-isi-hp" aria-hidden="true">{t('pemain.pintuCeritaIsiHp')}</span></span>
       <span className="lp-pintu-aksi" id={id + 'm'}>{t('pemain.pintuCeritaMulai')} <Arrow /></span>
     </Link>
     {profil ? <div className="alur-sebagai lp-sebagai"><span className="alur-sebagai-avatar" aria-hidden="true"><Avatar look={profil.look} size={30} mood="senang" /></span><span className="alur-sebagai-nama">{t('alur.mainSebagai', { nama: profil.nickname })}</span><span aria-hidden="true">·</span><Link className="alur-sebagai-ubah" to="/kenalan?ubah=1" aria-label={t('alur.ubahProfilAria')}>{t('alur.ubahKecil')}</Link></div> : null}
@@ -79,26 +81,29 @@ function ModeCerita() {
 }
 
 /**
- * Halaman awal: Join Game paling atas (room acara bersama, review staf #4/#6), lalu Mode Cerita (main sendiri) dan sapaan
- * Miss Raksa di ilustrasi (review staf #1). Spanduk acara kuis lama (hanya bila mode lama aktif) tidak menjadi ajakan
- * gabung kedua: tombolnya mengisi kode ke Join Game.
+ * Halaman awal (T-027, varian A, disetujui pemilik 17 Nov 2026): ilustrasi + sapaan Miss Raksa (review staf #1), lalu Mode
+ * Cerita sebagai pintu utama, lalu baris kode room (Join Game, room acara bersama; review staf #4/#6). Urutan di sumber =
+ * urutan di layar = urutan Tab, di semua lebar (D-265 a). Di HP (<= 700 px) seluruh halaman muat satu layar: judul besar
+ * hanya untuk pembaca layar, baris profil menggantikan catatan "Tanpa akun". Spanduk acara kuis lama (hanya bila mode
+ * lama aktif) tidak menjadi ajakan gabung kedua: tombolnya mengisi kode ke Join Game.
  */
 export default function Landing() {
   useBahasa();
   const legacy = useLegacyEnabled();
   const acara = useAcaraTerbuka(legacy);
+  const { profil } = useProfil();
   const [kodeSaran, setKodeSaran] = useState<string | null>(null);
   // Spanduk melayang (fixed), jadi kemunculannya tidak menggeser kartu yang hendak diketuk.
   // T-003 D-01: ilustrasi + sapaan (.lp-seni) DULUAN di DOM supaya di HP tampil paling atas & urutan baca = urutan lihat;
   // di desktop (>900px) grid menaruhnya kembali di kolom kanan (player.css, D-09).
-  return <><PemuatAwal /><PlayerShell className={'lp-halaman alur-landing' + (acara ? ' alur-ada-spanduk' : '')} footer judul={null}><main className="lp-utama"><div className="lp-seni"><WelcomeArt /></div><div className="lp-kiri">
+  return <><PemuatAwal /><PlayerShell className={'lp-halaman alur-landing' + (acara ? ' alur-ada-spanduk' : '') + (profil ? ' lp-ada-profil' : '')} footer judul={null}><main className="lp-utama"><div className="lp-seni"><WelcomeArt /></div><div className="lp-kiri">
     <div className="lp-sapa">
       <span className="eyebrow">{t('pemain.landingEyebrow')}</span>
       <h1 className="lp-judul">{t('pemain.landingJudul1')}<br />{' '}<span>{t('pemain.landingJudul2')}</span></h1>
       <p className="lp-isi">{t('pemain.landingPilih')}</p>
     </div>
-    <JoinGame kodeSaran={kodeSaran} />
     <ModeCerita />
+    <JoinGame kodeSaran={kodeSaran} />
     <span className="lp-catatan">{t('pemain.landingCatatan')}</span>
   </div></main>
     {/* Wadah status selalu ada (kosong) supaya pembaca layar mengumumkan spanduk saat muncul. */}

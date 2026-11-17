@@ -61,6 +61,7 @@ server behind the harness uses `PUBLIC_BASE_URL=<harness>/game`, and it plays th
 | `FRAME_ANCESTORS` | `'self'` | who may frame the game (§2) |
 | `STORY_MAX_PARTICIPANTS` | 100 | participants per room (local default, not an approved capacity — D-18) |
 | `STORY_MAX_ACTIVE_ROOMS` | 20 | rooms open at the same time (same caveat) |
+| `STORY_SEED` | on | at start the server publishes the scenarios that ship with the code (T-028: Episode 2 "Truk Trailer di Jalan Tol", `server/src/story/seed/publish.ts`) when they are not there yet; a start that finds the same content writes nothing; `off` skips it |
 | `VITE_BASE_PATH`, `VITE_OUT_DIR` | `/`, `dist` | client build prefix and output folder (§1) |
 | `STAFF_PASSWORD` | — | password for the staff provisioning CLI (`create`, `password`); only read from the environment, never from arguments (ROLES-AND-PROVISIONING.md) |
 

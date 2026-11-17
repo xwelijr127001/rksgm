@@ -137,7 +137,8 @@ async function main(): Promise<void> {
   const login = (await (await fetch(`${BASE}/api/staff/login`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ username: USER, password: PASSWORD }) })).json()) as { ok: boolean; token: string; error?: string };
   if (!login.ok) throw new Error(`login: ${login.error}`);
   const list = (await (await fetch(`${BASE}/api/host/scenarios`, { headers: { authorization: `Bearer ${login.token}` } })).json()) as { scenarios: { scenarioId: string; title: string }[] };
-  const scenario = list.scenarios[0];
+  // The seeded Episode 2 scenario (T-028) sorts first by title: keep load-testing a synthetic [DEMO] scenario when there is one.
+  const scenario = list.scenarios.find((s) => s.title.startsWith('[DEMO]')) ?? list.scenarios[0];
   if (!scenario) throw new Error('no published scenario');
   const t0 = Date.now();
   const rooms = await Promise.all(Array.from({ length: ROOMS }, (_, i) => runRoom(i, login.token, scenario.scenarioId).catch((e: Error) => (errors.push(e.message), null))));

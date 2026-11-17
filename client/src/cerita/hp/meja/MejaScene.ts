@@ -65,8 +65,10 @@ export interface InitMeja {
 }
 
 const FONT = '"Segoe UI Variable", "Segoe UI", system-ui, -apple-system, Roboto, Arial, sans-serif';
-const W = { tinta: 0x17362a, tintaLembut: 0x47604f, krem: 0xfff9e9, putih: 0xffffff, kuning: 0xf6c445, kuningTua: 0xd8a41f, hijau: 0x176b45, abu: 0x6f7d73, kertas: 0xf7f3e8, cap: 0x9a3b24 };
-const T = { tinta: '#17362a', lembut: '#47604f', putih: '#ffffff', cap: '#9a3b24' };
+// T-029: palet Raksa v1 untuk antarmuka di kanvas. Satu warna keras (D-284): pil AKSI jingga berteks tinta; pil terpilih /
+// "hijau" = tinta berteks putih; bingkai aktif jingga. Kertas, cap dan meja kayu = warna benda, tetap.
+const W = { tinta: 0x212121, tintaLembut: 0x5f5f5f, krem: 0xfff9f5, putih: 0xffffff, kuning: 0xff9000, kuningTua: 0xe07e00, hijau: 0x212121, abu: 0xa4a4a4, kertas: 0xf7f3e8, cap: 0x9a3b24 };
+const T = { tinta: '#212121', lembut: '#5f5f5f', putih: '#ffffff', cap: '#9a3b24' };
 type GayaPil = 'biasa' | 'aksi' | 'pilih' | 'putus' | 'hijau' | 'redup' | 'cap';
 
 export function defineMejaScene(P: Ph) {
@@ -344,7 +346,7 @@ export function defineMejaScene(P: Ph) {
         g.clear();
         g.setAlpha(1);
         if (sorot || aktif) {
-          g.lineStyle(aktif ? 5 : 4, aktif ? W.hijau : W.kuningTua, 1).strokeRoundedRect(ko.x - ko.w / 2 + 3, ko.y - ko.h / 2 + 3, ko.w - 6, ko.h - 6, 16);
+          g.lineStyle(aktif ? 5 : 4, aktif ? W.kuning : W.abu, 1).strokeRoundedRect(ko.x - ko.w / 2 + 3, ko.y - ko.h / 2 + 3, ko.w - 6, ko.h - 6, 16);
         }
         g.setVisible(sorot || aktif);
         const lama = this.denyut.get(id);
@@ -417,7 +419,7 @@ export function defineMejaScene(P: Ph) {
         } else {
           v.bg.fillStyle(W.tinta, 0.14).fillRoundedRect(-ko.w / 2 + 2, -ko.h / 2 + 3, ko.w, ko.h, 10);
           v.bg.fillStyle(W.putih, 1).fillRoundedRect(-ko.w / 2, -ko.h / 2, ko.w, ko.h, 10);
-          v.bg.lineStyle(this.p.aktif === `berkas:${b.id}` ? 4 : 2, this.p.aktif === `berkas:${b.id}` ? W.hijau : W.tinta, 1).strokeRoundedRect(-ko.w / 2, -ko.h / 2, ko.w, ko.h, 10);
+          v.bg.lineStyle(this.p.aktif === `berkas:${b.id}` ? 4 : 2, this.p.aktif === `berkas:${b.id}` ? W.kuning : W.tinta, 1).strokeRoundedRect(-ko.w / 2, -ko.h / 2, ko.w, ko.h, 10);
         }
         v.seni?.setVisible(!kosong);
         v.status.setText(k.statusBerkas[b.status]);

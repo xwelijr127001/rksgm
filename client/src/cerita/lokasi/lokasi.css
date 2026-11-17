@@ -6,17 +6,17 @@
  * (kecuali <html data-gerak="penuh">, pola aplikasi ini).
  */
 .lk {
-  --lk-hijau: #215C40; --lk-hijau-tua: #163F2B; --lk-krem: #F8F7F2; --lk-sage: #B9C9A4; --lk-kuning: #E0B84F; --lk-merah: #D4553B; --lk-biru: #2F6FB0;
-  --lk-tinta: #1E2B24; --lk-tinta-2: #3D4A42; --lk-tinta-3: #4D5A52;
+  --lk-hijau: #ff9000; --lk-hijau-tua: #e07e00; --lk-krem: #fff9f5; --lk-sage: #e8a87c; --lk-kuning: #ff9000; --lk-merah: #d32f2f; --lk-biru: #3e7285;
+  --lk-tinta: #212121; --lk-tinta-2: #212121; --lk-tinta-3: #555555;
   display: grid; gap: 12px; max-width: 440px; margin: 0 auto; padding: 4px 16px 24px; color: var(--lk-tinta);
   font-family: 'Plus Jakarta Sans', system-ui, -apple-system, 'Segoe UI', sans-serif; -webkit-font-smoothing: antialiased; overflow-x: hidden;
 }
 .lk *, .lk *::before, .lk *::after { box-sizing: border-box; }
 @media (min-width: 600px) {
-  .lk { margin: 12px auto 32px; padding: 20px 20px 28px; background: var(--lk-krem); border-radius: 28px; box-shadow: 0 0 0 1px #D6D8CB, 0 12px 32px rgba(30, 43, 36, .08); }
+  .lk { margin: 12px auto 32px; padding: 20px 20px 28px; background: var(--lk-krem); border-radius: 28px; box-shadow: 0 0 0 1px #e0e0e0, 0 12px 32px rgba(0, 0, 0, .08); }
 }
 .lk button { font: inherit; -webkit-tap-highlight-color: transparent; }
-.lk button:focus-visible, .lk summary:focus-visible, .lk a:focus-visible { outline: 3px solid var(--lk-hijau); outline-offset: 3px; }
+.lk button:focus-visible, .lk summary:focus-visible, .lk a:focus-visible { outline: 3px solid var(--fokus); outline-offset: 3px; }
 .lk [tabindex="-1"]:focus { outline: none; }
 .lk-bagian { display: grid; gap: 12px; }
 .lk-judul { margin: 0; font-size: 24px; line-height: 1.2; font-weight: 800; letter-spacing: -.01em; }
@@ -25,25 +25,25 @@
 .lk-tugas { margin: 0; font-size: 16px; }
 .lk-alasan { margin: -4px 0 0; font-size: 14px; color: var(--lk-tinta-3); }
 .lk-narasi { margin: 0; font-size: 17px; line-height: 1.45; }
-.lk-dikatakan { margin: 0; padding: 10px 12px; border-radius: 14px; background: #EAF0E1; font-size: 15px; line-height: 1.4; }
+.lk-dikatakan { margin: 0; padding: 10px 12px; border-radius: 14px; background: #f9eeea; font-size: 15px; line-height: 1.4; }
 .lk-alasan-teks { margin: 0; font-size: 15px; line-height: 1.45; color: var(--lk-tinta-3); }
 
 /* ---------------------------------------------------------------- tombol */
 .lk-btn { width: 100%; min-height: 52px; padding: 12px 18px; border-radius: 14px; font-size: 17px; font-weight: 800; cursor: pointer; transition: transform .08s ease, background-color .12s ease; }
-.lk-btn-utama { background: var(--lk-hijau); color: var(--lk-krem); border: 2px solid var(--lk-hijau); }
-.lk-btn-utama:hover:not(:disabled) { background: #1B4D35; }
+.lk-btn-utama { background: var(--lk-hijau); color: var(--di-utama); border: 2px solid var(--lk-hijau); }
+.lk-btn-utama:hover:not(:disabled) { background: #e07e00; }
 .lk-btn-utama:active:not(:disabled) { background: var(--lk-hijau-tua); transform: scale(.98); }
 .lk-btn-utama:disabled { opacity: .45; cursor: not-allowed; }
-.lk-btn-tenang { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 44px; padding: 8px 14px; border: 0; border-radius: 10px; background: transparent; color: var(--lk-hijau); font-size: 16px; font-weight: 700; text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
+.lk-btn-tenang { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 44px; padding: 8px 14px; border: 0; border-radius: 10px; background: transparent; color: var(--utama-teks); font-size: 16px; font-weight: 700; text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
 .lk-chip-baris { display: flex; flex-wrap: wrap; gap: 8px; }
-.lk-chip { min-height: 44px; padding: 8px 16px; border: 2px solid var(--lk-sage); border-radius: 22px; background: #fff; color: var(--lk-hijau); font-size: 15px; font-weight: 700; cursor: pointer; }
-.lk-chip:active { background: #EAF0E1; }
+.lk-chip { min-height: 44px; padding: 8px 16px; border: 2px solid var(--lk-sage); border-radius: 22px; background: #fff; color: var(--utama-teks); font-size: 15px; font-weight: 700; cursor: pointer; }
+.lk-chip:active { background: #f9eeea; }
 
 /* ---------------------------------------------------------------- titik ketuk rambu (sorotan kuning berdenyut) */
 .lk-tag-baris { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 14px; }
-.lk-tag { position: relative; display: inline-flex; align-items: center; gap: 10px; min-height: 52px; padding: 6px 18px 6px 6px; border-radius: 16px; background: #fff; border: 2px solid var(--lk-hijau); color: var(--lk-hijau); font-size: 17px; font-weight: 800; cursor: pointer; transition: transform .08s ease; }
-.lk-tag:hover { background: #FBFAF5; }
-.lk-tag:active { transform: scale(.97); background: #F1F3EA; }
+.lk-tag { position: relative; display: inline-flex; align-items: center; gap: 10px; min-height: 52px; padding: 6px 18px 6px 6px; border-radius: 16px; background: #fff; border: 2px solid var(--lk-hijau); color: var(--utama-teks); font-size: 17px; font-weight: 800; cursor: pointer; transition: transform .08s ease; }
+.lk-tag:hover { background: #fff9f5; }
+.lk-tag:active { transform: scale(.97); background: #f9eeea; }
 .lk-tag::after { content: ''; position: absolute; inset: -6px; border-radius: 21px; border: 3px solid var(--lk-kuning); pointer-events: none; animation: lk-denyut 1.9s ease-out infinite; }
 .lk-tag-ikon { width: 38px; height: 38px; border-radius: 12px; background: var(--lk-kuning); color: var(--lk-tinta); display: flex; align-items: center; justify-content: center; }
 .lk-tag-baris .lk-instruksi { flex: 1 1 150px; }
@@ -51,8 +51,8 @@
 /* ---------------------------------------------------------------- tulisan rambu (kartu bukti) */
 .lk-bukti-kartu { display: grid; gap: 6px; padding: 10px 12px 12px; background: #fff; border: 2px solid var(--lk-sage); border-radius: 18px; }
 .lk-bukti-kepala { display: flex; align-items: center; gap: 10px; }
-.lk-bukti-ikon { flex: none; width: 32px; height: 32px; border-radius: 10px; background: var(--lk-hijau); color: var(--lk-krem); display: flex; align-items: center; justify-content: center; }
-.lk-bukti-label { margin: 0; font-size: 17px; font-weight: 800; color: var(--lk-hijau); }
+.lk-bukti-ikon { flex: none; width: 32px; height: 32px; border-radius: 10px; background: var(--lk-hijau); color: var(--di-utama); display: flex; align-items: center; justify-content: center; }
+.lk-bukti-label { margin: 0; font-size: 17px; font-weight: 800; color: var(--utama-teks); }
 .lk-bukti-kicker { margin-left: auto; font-size: 13px; font-weight: 600; color: var(--lk-tinta-3); }
 .lk-bukti-isi { margin: 0; font-size: 18px; line-height: 1.35; font-weight: 700; }
 
@@ -72,16 +72,16 @@
 .lk-lajur:disabled { cursor: default; }
 .lk-lajur-statis { pointer-events: none; }
 .lk-lajur:focus-visible { outline: 3px solid var(--lk-krem) !important; outline-offset: -5px !important; box-shadow: inset 0 0 0 5px var(--lk-tinta); }
-.lk-hidup .lk-lajur:not(:disabled):hover { background: rgba(248, 247, 242, .07); }
-.lk-hidup .lk-lajur:not(:disabled):active { background: rgba(248, 247, 242, .16); }
-.lk-hidup .lk-lajur:not(:disabled):not(.is-on)::before { content: ''; position: absolute; inset: 8px 7px; border: 2px dashed rgba(248, 247, 242, .38); border-radius: 10px; pointer-events: none; }
+.lk-hidup .lk-lajur:not(:disabled):hover { background: rgba(255, 249, 245, .07); }
+.lk-hidup .lk-lajur:not(:disabled):active { background: rgba(255, 249, 245, .16); }
+.lk-hidup .lk-lajur:not(:disabled):not(.is-on)::before { content: ''; position: absolute; inset: 8px 7px; border: 2px dashed rgba(255, 249, 245, .38); border-radius: 10px; pointer-events: none; }
 
 .lk-tanda { position: absolute; inset: 0; display: block; pointer-events: none; }
-.lk-tanda-tepi { position: absolute; inset: 0; border: 3px solid var(--lk-merah); border-radius: 4px; box-shadow: inset 0 0 0 2px rgba(248, 247, 242, .55); }
+.lk-tanda-tepi { position: absolute; inset: 0; border: 3px solid var(--lk-merah); border-radius: 4px; box-shadow: inset 0 0 0 2px rgba(255, 249, 245, .55); }
 .lk-lencana { position: absolute; top: 10px; left: 50%; transform: translateX(-50%); width: 30px; height: 30px; border-radius: 50%; background: var(--lk-merah); border: 2px solid var(--lk-krem); display: flex; align-items: center; justify-content: center; color: var(--lk-krem); }
 /* rambu 2: di dalam lajur (lebih kecil) dengan garis putus biru, agar terlihat bersama tanda rambu 1 */
 .lk-tanda-biru { inset: 18px 11px 52px; border-radius: 10px; overflow: hidden; }
-.lk-tanda-biru .lk-tanda-tepi { border: 3px dashed var(--lk-biru); border-radius: 10px; box-shadow: inset 0 0 0 2px rgba(248, 247, 242, .55); }
+.lk-tanda-biru .lk-tanda-tepi { border: 3px dashed var(--lk-biru); border-radius: 10px; box-shadow: inset 0 0 0 2px rgba(255, 249, 245, .55); }
 .lk-tanda-biru .lk-lencana { top: 6px; background: var(--lk-biru); }
 
 .lk-num { position: absolute; bottom: 12px; transform: translateX(-50%); width: 36px; height: 36px; border-radius: 50%; background: var(--lk-krem); color: var(--lk-tinta); font-size: 18px; font-weight: 800; display: flex; align-items: center; justify-content: center; pointer-events: none; box-shadow: 0 1px 0 rgba(0, 0, 0, .28); transition: box-shadow .12s ease; }
@@ -90,7 +90,7 @@
 .lk-num.on-merah.on-biru { box-shadow: 0 0 0 3px var(--lk-merah), 0 0 0 6px var(--lk-biru), 0 1px 0 rgba(0, 0, 0, .28); }
 
 .lk-truk { position: absolute; pointer-events: none; }
-.lk-cincin { position: absolute; border: 3px dashed var(--lk-kuning); border-radius: 14px; background: rgba(224, 184, 79, .14); pointer-events: none; }
+.lk-cincin { position: absolute; border: 3px dashed var(--lk-kuning); border-radius: 14px; background: rgba(255, 144, 0, .14); pointer-events: none; }
 .lk-cincin-label { position: absolute; bottom: calc(100% + 6px); left: 50%; transform: translateX(-50%); white-space: nowrap; background: var(--lk-tinta); color: var(--lk-krem); font-size: 14px; font-weight: 700; padding: 4px 10px; border-radius: 10px; }
 .lk-keterangan { margin: 0; font-size: 14px; line-height: 1.4; font-weight: 600; color: var(--lk-tinta-3); }
 
@@ -103,33 +103,33 @@
 
 /* ---------------------------------------------------------------- Pak Bima / Hendra */
 .lk-orang { display: grid; grid-template-columns: 72px 1fr; gap: 12px; align-items: start; }
-.lk-orang img { width: 72px; height: 72px; border-radius: 36px; object-fit: cover; background: #E6EBE0; }
-.lk-gelembung { margin: 0; padding: 12px 14px; border-radius: 4px 18px 18px 18px; background: #EAF0E1; font-size: 17px; line-height: 1.45; }
+.lk-orang img { width: 72px; height: 72px; border-radius: 36px; object-fit: cover; background: #f9eeea; }
+.lk-gelembung { margin: 0; padding: 12px 14px; border-radius: 4px 18px 18px 18px; background: #f9eeea; font-size: 17px; line-height: 1.45; }
 .lk-pilihan { display: grid; gap: 8px; margin: 0; padding: 0; list-style: none; }
-.lk-opsi { display: block; width: 100%; min-height: 60px; padding: 10px 14px; border: 2px solid var(--lk-hijau); border-radius: 14px; background: #fff; color: var(--lk-hijau); font-size: 17px; font-weight: 700; line-height: 1.35; text-align: left; cursor: pointer; transition: transform .08s ease, background-color .12s ease; }
-.lk-opsi:hover { background: #F4F6EE; }
-.lk-opsi:active { background: #E1E9D6; transform: scale(.99); }
-.lk-opsi.dipilih { background: #EAF0E1; box-shadow: inset 0 0 0 2px var(--lk-hijau); }
+.lk-opsi { display: block; width: 100%; min-height: 60px; padding: 10px 14px; border: 2px solid var(--lk-hijau); border-radius: 14px; background: #fff; color: var(--utama-teks); font-size: 17px; font-weight: 700; line-height: 1.35; text-align: left; cursor: pointer; transition: transform .08s ease, background-color .12s ease; }
+.lk-opsi:hover { background: #f9eeea; }
+.lk-opsi:active { background: #f9eeea; transform: scale(.99); }
+.lk-opsi.dipilih { background: #f9eeea; box-shadow: inset 0 0 0 2px var(--lk-hijau); }
 
 /* tanggapan Pak Bima atas tanda pemain (kartu seperti umpan balik di desain) */
 .lk-tanggapan { display: grid; gap: 10px; }
 .lk-umpan { display: flex; gap: 12px; align-items: flex-start; padding: 14px; border-radius: 16px; }
 .lk-umpan p { margin: 0; font-size: 17px; line-height: 1.45; }
-.lk-umpan-sama { background: #EAF0E1; border: 2px solid var(--lk-sage); }
-.lk-umpan-beda { background: #fff; border: 2px solid #C9CBC0; }
+.lk-umpan-sama { background: #f9eeea; border: 2px solid var(--lk-sage); }
+.lk-umpan-beda { background: #fff; border: 2px solid #e0e0e0; }
 .lk-umpan-isi { display: grid; gap: 6px; }
 
 /* ---------------------------------------------------------------- catatan dan tentang */
 .lk-lihat-catatan, .lk-tentang { border: 2px solid var(--lk-sage); border-radius: 16px; background: #fff; }
 .lk-lihat-catatan summary, .lk-tentang summary { min-height: 48px; padding: 10px 14px; font-weight: 700; font-size: 15px; cursor: pointer; display: flex; align-items: center; gap: 8px; list-style: none; color: var(--lk-tinta-3); }
 .lk-lihat-catatan summary::-webkit-details-marker, .lk-tentang summary::-webkit-details-marker { display: none; }
-.lk-lihat-catatan summary { color: var(--lk-hijau); }
-.lk-tentang { border: 0; border-top: 1px solid #E1E0D6; border-radius: 0; background: transparent; }
+.lk-lihat-catatan summary { color: var(--utama-teks); }
+.lk-tentang { border: 0; border-top: 1px solid #e0e0e0; border-radius: 0; background: transparent; }
 .lk-tentang p { margin: 0 0 8px; padding: 0 2px; font-size: 14px; line-height: 1.5; color: var(--lk-tinta-3); }
 .lk-kaki { margin: 4px 2px 0; font-size: 13px; color: var(--lk-tinta-3); }
 .lk-catatan { display: grid; gap: 6px; padding: 2px 14px 14px; font-size: 15px; line-height: 1.4; }
 .lk-catatan-judul { margin: 0 0 2px; font-size: 16px; }
-.lk-catatan-sub { margin: 8px 0 2px; font-size: 13px; font-weight: 800; color: var(--lk-hijau); }
+.lk-catatan-sub { margin: 8px 0 2px; font-size: 13px; font-weight: 800; color: var(--utama-teks); }
 .lk-catatan-daftar { margin: 0; padding-left: 18px; display: grid; gap: 4px; }
 
 /* ---------------------------------------------------------------- gerak (restrained) */

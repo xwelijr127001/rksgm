@@ -132,6 +132,12 @@ export const CONFIG = {
    */
   legacy: (process.env.RAKSA_LEGACY || 'off').toLowerCase().trim() === 'on',
   /**
+   * Seeded scenarios (T-028, story/seed/publish.ts): at start the server publishes the scenarios that ship with the code
+   * (Episode 2 "Truk Trailer di Jalan Tol" as a hosted room) if they are not there yet. Idempotent: a start that finds
+   * the same content writes nothing. STORY_SEED=off skips it.
+   */
+  storySeed: (process.env.STORY_SEED || 'on').toLowerCase().trim() !== 'off',
+  /**
    * Number of trusted reverse-proxy hops in front of Node (e.g. 1 behind Apache/nginx). 0 = X-Forwarded-For is ignored.
    * Needed so per-IP rate limits see the real client instead of the proxy (docs/prd-v02/HOSTING.md).
    */

@@ -5,7 +5,8 @@
  * applied once), opening lines, cast names, status-only endings and score policy v2 inside a live room; the gameplay
  * payloads (shared evidence, action and respondent, lesson only after close, replies and labelled delayed effects,
  * summary labels and flag notes, scene clock, reached assets, the form of the own choice, the round's thread kept
- * through its consequence) and the transport events of phase changes. All content is SYNTHETIC (testing/fixtures.ts).
+ * through its consequence) and the transport events of phase changes. All content is SYNTHETIC (testing/fixtures.ts),
+ * except the last test (T-028), which plays the seeded Episode 2 scenario (seed/ep2Trailer.ts) through all 15 rounds.
  */
 import assert from 'node:assert/strict';
 import test from 'node:test';
@@ -16,6 +17,7 @@ import type { StoryPrivateState } from '../../../shared/story/protocol';
 import { mergeSceneLines } from '../../../shared/story/scene';
 import { validateScenario } from '../../../shared/story/validate';
 import { DEFAULT_TIMING, defaultReadingMs, INTRO_READING_MAX_MS, StoryRoom, type RoomTiming, type StoryRoomEvents } from './runtime/room';
+import { ep2TrailerContent } from './seed/ep2Trailer';
 import {
   addTestDelayedConsequence,
   addTestEvidence,
@@ -34,7 +36,7 @@ import {
 
 const TIMING: RoomTiming = { ...DEFAULT_TIMING, readingMs: () => 10_000 };
 
-function makeRoom(opts: { max?: number; auto?: boolean; content?: ScenarioContent; events?: StoryRoomEvents } = {}) {
+function makeRoom(opts: { max?: number; auto?: boolean; content?: ScenarioContent; events?: StoryRoomEvents; timing?: RoomTiming } = {}) {
   const clock = new ManualClock();
   const store = new MemoryStore();
   const content = opts.content ?? buildTestScenario();
@@ -48,7 +50,7 @@ function makeRoom(opts: { max?: number; auto?: boolean; content?: ScenarioConten
       hostName: 'Host Uji',
       maxParticipants: opts.max ?? 50,
       autoAdvance: opts.auto ?? true,
-      timing: TIMING,
+      timing: opts.timing ?? TIMING,
     },
     clock,
     store,
@@ -954,4 +956,151 @@ test('every phase change reaches the transport as ONE phaseChanged event (it del
   assert.ok(paced.room.close().ok);
   assert.deepEqual(phases(), ['scene#1', 'answering#1', 'consequence#1', 'leaderboard#1', 'scene#2', 'interrupted#2']);
   checkSequence('host-paced session');
+});
+
+// ------------------------------------------------------------------ T-028: the seeded Episode 2 scenario in a live room
+
+test('Episode 2 seed (T-028): 15 rounds, two participants, production timing: server scores under story-70-30-v2, the faster correct player leads, a timeout, the promise of the 20th reaches only its maker at round 14, endings and summaries', () => {
+  const content = ep2TrailerContent();
+  assert.deepEqual(validateScenario(content, testValidationContext()).filter((i) => i.severity === 'error'), []);
+  const { room, clock, store } = makeRoom({ content, timing: DEFAULT_TIMING });
+  join(room, 'ani', 'Ani');
+  join(room, 'budi', 'Budi');
+  const text = (key: string) => content.text.id![key]!;
+  const first = (r: number, kind: string) => content.rounds[r]!.choices.find((x) => x.classification === kind)!.id;
+  /**
+   * Ani: the recommended option, 3 s into every window. Budi, 12 s in: recommended in rounds 1-4, no answer in round 5, the
+   * unfounded date in round 6 (-12), a kurang option in rounds 7-11, the promise of the 20th in round 12 (+4, leaves the
+   * flag), recommended in rounds 13-14, a kurang option in round 15.
+   */
+  const budi = (r: number): string | null => (r < 4 ? first(r, 'tepat') : r === 4 ? null : r === 5 || r === 11 ? 'alt-a' : r < 11 || r === 14 ? first(r, 'kurang_tepat') : first(r, 'tepat'));
+  const ANI_MS = 3_000;
+  const BUDI_MS = 12_000;
+  const PROTEST = text(textKey.line('k14', 'janji-20-1'));
+  const leaked = (payload: unknown) => [PROTEST, 'janji-20'].filter((s) => JSON.stringify(payload).includes(s));
+  const toPhaseEnd = (extra = 0) => clock.advance(room.phaseEndsAt! - clock.now() + extra);
+
+  assert.ok(room.start().ok);
+  for (let r = 0; r < 15; r++) {
+    const round = content.rounds[r]!;
+    assert.equal(room.phase, 'scene', `round ${r + 1}`);
+    const scene = room.publicState().scene!;
+    assert.deepEqual([scene.roundId, scene.roundNumber, scene.title, scene.layout, scene.keyRound], [round.id, r + 1, text(textKey.roundTitle(round.id)), round.layout, round.keyRound]);
+    assert.deepEqual(
+      [scene.intro.length, scene.lines.length, scene.evidence.length],
+      [r === 0 ? 3 : 0, round.lines.filter((l) => !l.ifFlag).length, round.evidence.length],
+      `round ${r + 1}: opening lines on round 1 only, shared lines, shared evidence`,
+    );
+    assert.equal(scene.lesson, '', 'no lesson text in this scenario');
+    // Shared reading time from the real text: 8-25 s, plus the opening lines on round 1 (at most 12 s more).
+    const reading = room.phaseEndsAt! - clock.now();
+    assert.equal(reading, defaultReadingMs(content, r));
+    assert.ok(reading >= 8_000 && reading <= 25_000 + (r === 0 ? INTRO_READING_MAX_MS : 0), `round ${r + 1}: reading time ${reading}`);
+
+    // The promise: only its maker sees the protest and the reminder, and only in round 14.
+    assert.deepEqual(leaked(room.publicState()), [], `public state, round ${r + 1}`);
+    assert.deepEqual(leaked(me(room, 'ani')), [], `the other participant, round ${r + 1}`);
+    assert.deepEqual([me(room, 'ani').flagLines, me(room, 'ani').flagReminders], [[], []]);
+    const mine = me(room, 'budi');
+    assert.ok(!JSON.stringify(mine).includes('janji-20'), 'the flag id never leaves the server');
+    if (r === 13) {
+      assert.deepEqual(mine.flagLines, [{ id: 'f0', speaker: 'customer', name: 'Pak Hendra', pos: -0.5, text: PROTEST }]);
+      assert.deepEqual(mergeSceneLines(scene.lines, mine.flagLines).map((l) => l.id), ['f0', 'p0', 'p1'], 'the protest comes first, as in the script');
+      assert.deepEqual(mine.flagReminders, [{ label: '', fromRound: 12, delta: -12 }], 'no label authored: the client words it as "your decision in round 12"');
+      assert.deepEqual([mine.mood, mine.moodBand], [34, 'kecewa'], 'round 14 begins 12 lower for Budi');
+    } else {
+      assert.deepEqual([mine.flagLines, mine.flagReminders], [[], []], `round ${r + 1}`);
+    }
+
+    for (const p of room.participants.values()) room.markReady(p.id, round.id);
+    toPhaseEnd();
+    assert.equal(room.phase, 'answering', `round ${r + 1}`);
+    for (const pid of ['ani', 'budi']) {
+      const options = me(room, pid).options!;
+      assert.deepEqual(options.map((o) => Object.keys(o).sort().join()), Array(5).fill('form,handle,text'), 'an option is a handle, a text and a form: never a key');
+      assert.deepEqual(options.map((o) => o.text).sort(), round.choices.map((x) => text(textKey.choiceText(round.id, x.id))).sort());
+    }
+    clock.advance(ANI_MS);
+    assert.ok(room.answer('ani', round.id, handleFor(room, 'ani', first(r, 'tepat'))).ok);
+    assert.equal(room.phase, 'answering', 'the window stays open for Budi');
+    clock.advance(BUDI_MS - ANI_MS);
+    const choice = budi(r);
+    if (choice) assert.ok(room.answer('budi', round.id, handleFor(room, 'budi', choice)).ok);
+    else toPhaseEnd(1);
+    assert.equal(room.phase, 'consequence', `round ${r + 1}`);
+    assert.equal(store.settled[r]!.closeReason, choice ? 'all_answered' : 'deadline');
+
+    if (r === 0) {
+      const c = me(room, 'ani').consequence!;
+      assert.deepEqual([c.outcome, c.chosenForm, c.respondentName, c.lesson, c.score.roundScore], ['tepat', 'message', 'Pak Hendra', '', 970]);
+      assert.deepEqual([c.reply, c.consequence], ['Terima kasih sudah cepat dihubungi. Saya kirim cerita singkat dan beberapa foto, ya.', 'Pak Hendra sedikit lebih tenang. Foto-foto truk masuk ke chat.']);
+      assert.deepEqual([c.reason, c.mentorReason], [text(textKey.choiceReason('k01', 'alt-a')), text(textKey.roundReason('k01'))]);
+      assert.ok(c.reason && c.mentorReason && c.reason !== c.mentorReason, 'the neutral cause now, the mentor reason for the final summary');
+    }
+    if (r === 4) {
+      const c = me(room, 'budi').consequence!;
+      assert.deepEqual([c.outcome, c.chosenText, c.consequence, c.score.roundScore, c.moodBefore, c.moodAfter], ['timeout', null, 'Kamu belum memutuskan apa pun. Pak Hendra menunggu tanpa kabar.', 0, 54, 48]);
+    }
+    if (r === 13) {
+      const c = me(room, 'budi').consequence!;
+      assert.deepEqual([c.outcome, c.delayedDelta, c.delayed, c.moodBefore, c.moodAfter], ['tepat', -12, [{ label: '', fromRound: 12, delta: -12 }], 34, 46]);
+      assert.deepEqual([me(room, 'ani').consequence!.delayedDelta, me(room, 'ani').consequence!.delayed], [0, []]);
+      assert.deepEqual(me(room, 'budi').flagLines.map((l) => l.text), [PROTEST], 'the round keeps its thread through the consequence');
+    }
+    toPhaseEnd();
+    if (r < 14) {
+      assert.equal(room.phase, 'leaderboard', `round ${r + 1}`);
+      const rows = room.publicState().rankings!;
+      assert.deepEqual(rows.map((x) => [x.name, x.rank]), [['Ani', 1], ['Budi', 2]], `round ${r + 1}: the faster correct player leads`);
+      if (r === 0) assert.deepEqual(rows.map((x) => x.totalScore), [970, 880], 'both right: 3 s beats 12 s by 90 points');
+      toPhaseEnd();
+    }
+  }
+  assert.equal(room.phase, 'finished');
+  assert.equal(store.settled.length, 15);
+
+  // Server scores (story-70-30-v2): tepat 970 at 3 s and 880 at 12 s, kurang 530 at 12 s, keliru and timeout 0.
+  assert.deepEqual([scoreDecision(1, ANI_MS).roundScore, scoreDecision(1, BUDI_MS).roundScore, scoreDecision(0.5, BUDI_MS).roundScore, scoreDecision(0, BUDI_MS).roundScore], [970, 880, 530, 0]);
+  assert.deepEqual(me(room, 'ani').totals, { totalScore: 15 * 970, accuracyPoints: 15 * 700, speedPoints: 15 * 270, answeredCount: 15, timeoutCount: 0 });
+  assert.deepEqual(me(room, 'budi').totals, { totalScore: 6 * 880 + 6 * 530, accuracyPoints: 6 * 700 + 6 * 350, speedPoints: 12 * 180, answeredCount: 14, timeoutCount: 1 });
+  const decisions = room.participants.get('budi')!.decisions;
+  assert.deepEqual(decisions.map((d) => d.score.roundScore), [880, 880, 880, 880, 0, 0, 530, 530, 530, 530, 530, 0, 880, 880, 530]);
+  assert.deepEqual(decisions.map((d) => d.moodAfter), [36, 42, 48, 54, 48, 36, 36, 36, 36, 36, 36, 40, 46, 46, 48]);
+  assert.deepEqual(decisions.map((d) => d.delayedDelta), [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -12, 0], 'the delayed effect applies exactly once');
+
+  // The live room equals the shared engine for the same picks and server-measured answer times.
+  for (const [pid, pick] of [['ani', (r: number) => first(r, 'tepat')], ['budi', budi]] as const) {
+    const live = room.participants.get(pid)!.decisions;
+    assert.deepEqual(live, playThrough(content, (_round, i) => ({ choiceId: pick(i), elapsedMs: live[i]!.elapsedMs ?? 0 })).decisions, pid);
+  }
+
+  // Endings by final status, and the summaries.
+  const finals = new Map(store.finished[0]!.map((f) => [f.participantId, f]));
+  assert.deepEqual(
+    ['ani', 'budi'].map((id) => [finals.get(id)!.rank, finals.get(id)!.finalMood, finals.get(id)!.endingId, finals.get(id)!.endingKind]),
+    [
+      [1, 100, 'puas', 'happy'],
+      [2, 48, 'catatan', 'with_notes'],
+    ],
+  );
+  const ani = me(room, 'ani').summary!;
+  const mixed = me(room, 'budi').summary!;
+  assert.deepEqual([ani.complete, ani.decisions.length, ani.scorePolicyId], [true, 15, 'story-70-30-v2']);
+  assert.deepEqual(ani.ending, { id: 'puas', kind: 'happy', title: 'Puas', text: text(textKey.endingText('puas')), customer: text(textKey.endingCustomer('puas')), mentor: text(textKey.endingMentor('puas')) });
+  assert.ok(ani.ending!.customer.includes('{nama}') && ani.ending!.mentor.includes('{nama}'), 'clients substitute {nama}, the server never does');
+  assert.deepEqual(ani.labels, {
+    customerName: 'Pak Hendra',
+    officerName: 'Miss Raksa',
+    officerCharacterId: 'builtin:char:miss-raksa',
+    moodLabels: { sangat_kecewa: 'Kecewa', kecewa: 'Cemas', ragu: 'Tenang', tenang: 'Percaya', senang: 'Puas' },
+  });
+  assert.deepEqual([mixed.ending!.id, mixed.ending!.title, mixed.finalMood, mixed.finalBand], ['catatan', 'Selesai dengan catatan', 48, 'ragu']);
+  assert.deepEqual(
+    mixed.decisions.map((d) => d.outcome),
+    ['tepat', 'tepat', 'tepat', 'tepat', 'timeout', 'keliru', 'kurang_tepat', 'kurang_tepat', 'kurang_tepat', 'kurang_tepat', 'kurang_tepat', 'keliru', 'tepat', 'tepat', 'kurang_tepat'],
+  );
+  assert.deepEqual(mixed.decisions[11]!.flagSet, { label: '', effectRound: 14, delta: -12 }, 'the summary ties the promise to the round it hit');
+  assert.deepEqual([mixed.decisions[13]!.delayedDelta, mixed.decisions[13]!.delayed], [-12, [{ label: '', fromRound: 12, delta: -12 }]]);
+  assert.ok(mixed.decisions.every((d) => d.mentorReason && d.title && d.prompt), 'every decision carries its round reason for the final summary');
+  assert.deepEqual(ani.decisions.map((d) => d.flagSet).filter(Boolean), []);
 });

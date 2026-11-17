@@ -6,6 +6,9 @@
  *                                               approval with clearly labeled test identities, NOT committee approval
  *   npm run story:dev-setup -- --period         also create a clearly labeled local test competition period
  *
+ * Every run also publishes the seeded scenarios (seed/publish.ts: Episode 2 "Truk Trailer di Jalan Tol"), exactly as a
+ * server start does, so a test database has them before its server runs. Idempotent.
+ *
  * Test identity passwords are random and written to `<data dir>/dev-staff-credentials.json` (data/ is git-ignored).
  */
 import { randomBytes } from 'node:crypto';
@@ -20,6 +23,7 @@ import { createScenario, getScenario, listScenarios, publish, submitForReview } 
 import { createPeriod, listPeriods } from '../reports';
 import { demoBanjirContent } from '../seed/demoBanjir';
 import { demoBaretContent } from '../seed/demoBaret';
+import { ensureSeedScenarios, seedLogLine } from '../seed/publish';
 
 if (process.env.NODE_ENV === 'production') {
   console.error('story:dev-setup tidak boleh dijalankan di production.');
@@ -71,6 +75,7 @@ function main(): void {
     ids.push(createScenario({ categoryId: 'auto', title, contentSource: 'demo', content }, author).id);
   }
   console.log(`Identitas uji siap (kata sandi: ${credentialFile()}). Draf demo baru: ${ids.length}.`);
+  for (const result of ensureSeedScenarios()) console.log(seedLogLine(result));
   if (process.argv.includes('--publish-demo')) {
     const reviewer = actor('uji.reviewer');
     for (const s of listScenarios()) {

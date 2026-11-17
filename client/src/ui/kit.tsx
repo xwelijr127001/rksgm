@@ -104,7 +104,7 @@ export function Timer({
   return (
     <span className="timer" role="timer" aria-live="off">
       <Icon name="jam" size={18} />
-      <span style={{ color: mendesak ? 'var(--kuning)' : undefined }}>{t('layar.timerDetik', { n: seconds })}</span>
+      <span className={mendesak ? 'timer-mendesak' : undefined}>{t('layar.timerDetik', { n: seconds })}</span>
       {label ? <span className="mini lembut">{label}</span> : null}
       {ratio !== null ? (
         <span className={'timer-bar' + (mendesak ? ' mendesak' : '')} style={{ width: 84 }} aria-hidden>
@@ -401,7 +401,7 @@ export function QrCode({ value, size = 220, label }: { value: string; size?: num
       width: size * 2,
       margin: 1,
       errorCorrectionLevel: 'M',
-      color: { dark: '#17362a', light: '#ffffff' },
+      color: { dark: '#212121', light: '#ffffff' },
     })
       .then((url) => {
         if (alive) setSrc(url);
@@ -628,7 +628,7 @@ export function Stempel({ teks }: { teks?: string }) {
         display: 'inline-block',
         padding: '8px 18px',
         border: '4px solid var(--hijau)',
-        color: 'var(--hijau)',
+        color: 'var(--utama-teks)',
         borderRadius: 12,
         fontFamily: 'var(--font-judul)',
         fontWeight: 800,
@@ -651,7 +651,7 @@ export function Confetti({ jumlah = 60 }: { jumlah?: number }) {
         left: Math.random() * 100,
         delay: Math.random() * 0.9,
         dur: 2.2 + Math.random() * 1.6,
-        warna: ['#F6C445', '#176B45', '#2F6FB0', '#C4452F', '#FFF9E9'][i % 5],
+        warna: ['#FF9000', '#2F7D57', '#3E7285', '#D32F2F', '#FFF5EC'][i % 5], // T-029: jingga merek + tiga warna status + rona terang
         ukuran: 6 + Math.random() * 8,
         putar: Math.random() * 360,
       })),
