@@ -37,9 +37,11 @@
     "node": ">=20.11"
   },
   "devDependencies": {
-    "@esbuild/win32-x64": "^0.28.2",
     "concurrently": "^10.0.5",
     "lamejs": "^1.2.1",
     "typescript": "^7.0.2"
+  },
+  "optionalDependencies": {
+    "@esbuild/win32-x64": "^0.28.2"
   }
 }
