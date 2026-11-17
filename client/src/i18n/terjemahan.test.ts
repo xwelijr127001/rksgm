@@ -11,6 +11,7 @@ import { MISSION_KEYS, TIEBREAK_KEY, TUTORIAL_KEY, buildReveal, keyForMissionId 
 import { PEMBAHASAN_I18N as PEMBAHASAN_LATIHAN } from '../../../server/src/answerKeys.i18n';
 import { KUNCI_ACARA, PEMBAHASAN_ACARA_I18N } from '../../../server/src/acara';
 import { KAMUS, KAMUS_MVP } from './kamus';
+import { JENIS_EPISODE } from '../cerita/tipe';
 import { sceneFor } from '../game/scenes';
 import { LABEL } from '../game/scenes/label';
 
@@ -56,6 +57,18 @@ test('kamus UI: kunci & parameter en/zh sama persis dengan id, tanpa teks kosong
         assert.deepEqual(p(k[b][kunci]!), p(k.id[kunci]!), `${ruang}.${kunci} (${b}): parameter {..} berbeda`);
       }
     }
+  }
+});
+
+test('T-026: tag jenis episode (demo / nyata): label + keterangan satu baris ada di id / en / zh', () => {
+  const c = KAMUS.cerita!;
+  assert.deepEqual(['id', 'en', 'zh'].map((b) => [c[b as 'id']['jenis.demo'], c[b as 'id']['jenis.nyata']]), [['DEMO', 'KASUS NYATA'], ['DEMO', 'REAL CASE'], ['演示', '真实案例']]);
+  assert.deepEqual([c.id['jenisKet.demo'], c.id['jenisKet.nyata']], ['Cerita contoh untuk mencoba alur', 'Berdasarkan modul klaim Raksa']);
+  for (const b of ['id', 'en', 'zh'] as const) for (const j of JENIS_EPISODE) {
+    assert.ok(c[b][`jenis.${j}`]?.trim() && c[b][`jenisKet.${j}`]?.trim(), `${b} ${j}`);
+    // Satu baris pendek (tooltip), tanpa titik akhir; keterangan en / zh bukan salinan teks Indonesia.
+    assert.ok(c[b][`jenisKet.${j}`]!.length <= 48 && !/[.。]$/.test(c[b][`jenisKet.${j}`]!), `${b} jenisKet.${j}`);
+    if (b !== 'id') assert.notEqual(c[b][`jenisKet.${j}`], c.id[`jenisKet.${j}`], `${b} jenisKet.${j}`);
   }
 });
 

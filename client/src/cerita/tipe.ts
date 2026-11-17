@@ -542,6 +542,13 @@ export interface Suasana {
   label: KunciTeks;
 }
 
+/**
+ * T-026 (permintaan owner 17 Nov 2026): jenis episode, ditampilkan sebagai tag di kartu daftar /cerita supaya pemain bisa
+ * memilih. 'demo' = cerita contoh untuk mencoba alur (Episode 1); 'nyata' = berdasarkan modul klaim Raksa (Episode 2).
+ */
+export type JenisEpisode = 'demo' | 'nyata';
+export const JENIS_EPISODE: readonly JenisEpisode[] = ['demo', 'nyata'];
+
 export interface Episode {
   /**
    * T-021: titik serah panggung kantor <-> obrolan yang memakai adegan telepon. `tokoh` = pemeran yang memegang telepon (harus
@@ -554,6 +561,8 @@ export interface Episode {
   /** Versi konten. Naikkan bila perubahan membuat progres lama tidak cocok; sediakan `migrasi` bila bisa. */
   versi: number;
   produk: Product;
+  /** T-026: tag jenis di kartu daftar episode (label + keterangan: kamus cerita `jenis.*` / `jenisKet.*`). Tanpa nilai = kartu tanpa tag. */
+  jenis?: JenisEpisode;
   judul: KunciTeks;
   /** Satu-dua kalimat untuk kartu episode. */
   ringkas: KunciTeks;

@@ -4,7 +4,8 @@
  * Judul + SATU kalimat pengantar, lalu Join Game (satu-satunya ajakan gabung acara, di ATAS daftar episode; review staf
  * #4), lalu satu kartu per episode di DAFTAR_EPISODE (nomor = urutan daftar, produk, durasi, ringkas, status sendiri
  * dari simpan.ts: Baru / Sedang berjalan · Bagian n / Selesai · akhir ditemukan n/m). Tidak ada blok "Cara main lain"
- * dan tidak ada Latihan misi (arahan pemilik); episode yang belum siap tidak tampil. Tanpa profil -> /kenalan. Kartu
+ * dan tidak ada Latihan misi (arahan pemilik); episode yang belum siap tidak tampil. Tanpa profil -> /kenalan. Tiap kartu
+ * membawa tag jenis episode (T-026, `Episode.jenis`: DEMO / KASUS NYATA) sebagai lencana di pojok kanan-atas gambarnya. Kartu
  * selesai: "Main lagi dari awal" (arsip episode itu saja) dan "Lihat hasil". Seni kartu dari panggung episodenya:
  * ruang piksel Episode 1, atau sampul panggung latar (`Episode.latar.sampul`).
  */
@@ -228,8 +229,15 @@ function KartuEpisode({ ep, nomor, bahasa, nama, onMainLagi }: { ep: Episode; no
   const idJudul = 'cer-ep-' + ep.id;
   const latar = ep.node[ep.mulai]?.latar ?? 'kantor';
   const ekspresi: Ekspresi = status.jenis === 'selesai' ? 'lega' : 'cemas';
+  // T-026: tag jenis (owner: "Episode 1 is only DEMO, Episode 2 is Real Case, so users can choose"). Lencana di pojok
+  // kanan-atas gambar kartu di semua ukuran (keputusan Lead: di baris meta chip tidak muat pada HP dalam id / en, dan turun
+  // baris menambah tinggi kartu; letaknya diatur cerita.css). Anak PERTAMA kartu, di luar kotak gambar yang aria-hidden:
+  // dibaca sebelum meta dan judul. Keterangan = tooltip (title) + deskripsi aksesibel yang sama; episode tanpa `jenis` =
+  // tanpa tag.
+  const ketJenis = ep.jenis ? t(`cerita.jenisKet.${ep.jenis}`) : '';
   return (
     <li className="cer-ep" data-status={status.jenis}>
+      {ep.jenis ? <p className="cer-ep-jenis" data-jenis={ep.jenis} title={ketJenis} aria-description={ketJenis}>{t(`cerita.jenis.${ep.jenis}`)}</p> : null}
       {ep.panggung ? (
         <SeniRuangKartu nama={ep.panggung.lokasi.nama} ekspresi={ekspresi} />
       ) : ep.latar ? (

@@ -25,6 +25,13 @@ test('fixture sah: validasiEpisode = []', () => {
   assert.deepEqual(validasiEpisode(buatEpisodeUji()), []);
 });
 
+test('T-026: jenis episode: demo / nyata / kosong sah; nilai lain ditolak', () => {
+  assert.equal(buatEpisodeUji().jenis, undefined, 'fixture tanpa jenis = sah (kartu tanpa tag)');
+  for (const j of ['demo', 'nyata'] as const) assert.deepEqual(pesanSetelah((ep) => { ep.jenis = j; }), [], j);
+  adaPesan(pesanSetelah((ep) => { (ep as { jenis?: string }).jenis = 'latihan'; }), /jenis "latihan" tidak dikenal/);
+  adaPesan(pesanSetelah((ep) => { (ep as { jenis?: unknown }).jenis = ''; }), /jenis "" tidak dikenal/);
+});
+
 test('rujukan node hilang', () => {
   const p = pesanSetelah((ep) => {
     node(ep, 'n1-pilih', 'pilihan').pilihan[0]!.lanjut = 'tidak-ada';

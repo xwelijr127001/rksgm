@@ -639,6 +639,8 @@ export const EPISODE_AUTO_2: Episode = {
   serahTelepon: { tokoh: 'missRaksa', maju: [['buka', 'k01']], balik: { dari: ['k15', 'k15-a', 'k15-b', 'k15-c', 'k15-d', 'k15-e'], ke: ['akhir-puas', 'akhir-catatan', 'akhir-kurang'] } },
   versi: 1,
   produk: 'AUTO',
+  // T-026 (owner): Episode 2 = kasus nyata, berdasarkan modul klaim Raksa.
+  jenis: 'nyata',
   judul: 'judul',
   ringkas: 'ringkas',
   // Diukur dari alur: ±1.900 kata wajib dibaca (pembuka, 15 titik, satu jalur akibat, akhir) pada ±180 kata/menit

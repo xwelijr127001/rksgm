@@ -559,3 +559,21 @@ Testing under `C:\Users\User\Desktop\rksgm-episode2` (QA; no source edits, no co
 2. The room pixel checks inside `cek-komite` are Chromium only. My own matrix covers the room state, tags and chat flow in WebKit.
 3. English Menu: the last line of the script-status sentence is just below the fold at 360x640 (Fullstack's own note).
 4. Not tested: a real phone, a screen reader (live region checked in the DOM only), and a real finger on the glossary.
+
+## T-026 (2026-11-17) — PASS (0 bugs, 3 notes)
+
+Testing under `C:\Users\User\Desktop\rksgm-episode2` (QA; no source edits, no commit, no e2e). My server :4001 (`RAKSA_LEGACY=on`, `CLIENT_DIST=client/dist`), stopped afterwards; `dist-rilis` untouched. One headless browser at a time, below-normal priority. Evidence: `team/evidence/T-026/qa/`.
+
+**Tools (once each):** `test:client` 762/762; `cek-tag-t026` ALL PASS (18); `cek-bahasa` ALL PASS (138).
+
+**My own check** (`k26.py`, Playwright Python) of `/cerita` at 390x645, 360x640 and 1280x800 in id/en/zh, Chromium (236 checks) and WebKit (227), 0 bad, 0 console errors:
+- Episode 1 badge reads DEMO (grey #e9ebe4 with #4d5a4f letters); Episode 2 reads KASUS NYATA / REAL CASE / 真实案例 (green #215c40 with white letters).
+- The badge sits inside the picture's top-right corner, is the same distance from the corner on both cards, is the topmost element at its centre and does not touch the meta line. I looked at the screenshots: no face is covered at 360x640 and 390x645 (the Episode 1 badge is over wall, the Episode 2 one over sky and roof).
+- Tooltip (`title`) and `aria-description` equal the expected line in every language.
+- Card heights and page scroll height equal Fullstack's baseline (`dasar-tanpa-tag.json`) within 0.6 px at every size that has a baseline (three WebKit sizes have none); no horizontal page scroll.
+- Mulai works on both cards; Episode 2 opens at its first node (`buka`, "Laporan awal"), and the story text is unchanged.
+
+**Notes (not bugs):**
+1. The tooltip is hover only; on a touch screen the explanation is not visible (also noted by Fullstack).
+2. The en and zh tooltip lines are Fullstack's wording, for the Lead or PIC to confirm.
+3. Not tested: a real phone, a screen reader, and covers other than the current two.

@@ -16,7 +16,7 @@ import type { MissionAnswer, MissionPublic, StepAnswer, StepDef } from '@shared/
 import { JUMLAH_LAJUR as JUMLAH_LAJUR_ASET, LAJUR_TRUK as LAJUR_TRUK_ASET } from './lokasi/seni/geometri';
 import { jalankan, pilihanTersedia, semuaBarisTampil, stateAwal } from './mesin';
 import {
-  DAFTAR_EKSPRESI, DAFTAR_LATAR, DAFTAR_LOKASI_ADEGAN, KEADAAN_KOMITE, type AksiCerita, type Baris, type CueAdegan, type CueLatar, type DefAktivitas, type Efek, type Ekspresi, type Episode,
+  DAFTAR_EKSPRESI, DAFTAR_LATAR, DAFTAR_LOKASI_ADEGAN, JENIS_EPISODE, KEADAAN_KOMITE, type AksiCerita, type Baris, type CueAdegan, type CueLatar, type DefAktivitas, type Efek, type Ekspresi, type Episode,
   type IdAkhir, type IdLokasiAdegan, type IdNode, type KeadaanKomite, type Kondisi, type KunciTeks, type NilaiProses, type NodeCerita, type StateCerita,
 } from './tipe';
 import { DAFTAR_AKSI_ADEGAN, DAFTAR_PANDANG, DAFTAR_PROP_ADEGAN, DAFTAR_TEMPAT_PROP, JENIS_POSE_MENTOR, JENIS_POSE_NASABAH } from './ui/adegan';
@@ -443,6 +443,8 @@ export function validasiEpisode(ep: Episode): string[] {
   if (!teksSah(ep.id) || !/^[a-z0-9-]+$/.test(ep.id)) salah(`id episode "${String(ep.id)}" tidak sah (huruf kecil, angka, tanda minus)`);
   if (!Number.isInteger(ep.versi) || ep.versi < 1) salah(`versi episode harus bilangan bulat >= 1 (sekarang ${String(ep.versi)})`);
   if (!PRODUK.includes(ep.produk)) salah(`produk "${String(ep.produk)}" tidak dikenal`);
+  // T-026: jenis boleh kosong (kartu tanpa tag); bila diisi harus salah satu JENIS_EPISODE.
+  if (ep.jenis !== undefined && !JENIS_EPISODE.includes(ep.jenis)) salah(`jenis "${String(ep.jenis)}" tidak dikenal (${JENIS_EPISODE.join(' / ')}, atau dikosongkan)`);
   if (!(typeof ep.durasiMenit === 'number' && ep.durasiMenit > 0)) salah('durasiMenit harus angka > 0');
   if (!Number.isFinite(ep.kepercayaanAwal)) salah('kepercayaanAwal harus angka');
   teks(ep.judul, 'judul episode');

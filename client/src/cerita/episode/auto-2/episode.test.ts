@@ -127,6 +127,10 @@ test('Episode 2 sah menurut validator yang sama dengan Episode 1', () => {
   assert.deepEqual(validasiEpisode(EPISODE_AUTO_1), []);
 });
 
+test('T-026: jenis episode di kartu daftar: Episode 1 = demo, Episode 2 = nyata (permintaan owner)', () => {
+  assert.deepEqual([EPISODE_AUTO_1!.jenis, EP.jenis], ['demo', 'nyata']);
+});
+
 test('terdaftar sebagai episode nomor 2 dengan id & namespace simpanan sendiri', () => {
   assert.deepEqual(DAFTAR_EPISODE.map((e) => e.id), ['auto-1', 'auto-2']);
   assert.equal(cariEpisode('auto-2'), EP);

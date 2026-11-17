@@ -269,6 +269,21 @@
 .cer-ep-ruang > svg { position: absolute; inset: 0; display: block; width: 100%; height: 100%; }
 .cer-ep-isi { display: flex; flex-direction: column; gap: 8px; padding: 14px 16px 16px; min-width: 0; }
 .cer-ep-meta { margin: 0; display: flex; flex-wrap: wrap; gap: 2px 8px; font-size: 12.5px; font-weight: 700; letter-spacing: .03em; color: #5c6f58; }
+/* T-026: tag jenis episode (Episode.jenis) = lencana di pojok KANAN-atas gambar kartu, di SEMUA ukuran (keputusan Lead: lencana
+   di pojok gambar, letak sama di kedua kartu). Di baris meta chip tidak muat di samping teks pada HP dalam id / en (KASUS
+   NYATA 101 px, sisa baris 61-91 px), dan turun baris menambah tinggi kartu 19 px. Lencana di luar alur (absolute terhadap
+   kartu): tinggi kartu, baris meta, dan tinggi halaman tidak berubah. Pojok KANAN, bukan kiri: di sampul Episode 2 kepala Pak
+   Hendra berada di pojok kiri-atas (tertutup lencana di semua ukuran HP); pojok kanan-atas kedua sampul hanya dinding, kusen
+   pintu, langit, atau atap (dilihat di 320-430 px dan 768-1280 px). Sampul baru harus menjaga pojok itu bebas wajah. DEMO =
+   abu netral, KASUS NYATA = hijau merek; cincin warna kartu supaya tepinya terbaca di atas gambar apa pun. z-index di atas
+   lapisan panggung kartu (paling tinggi 3). Tata letak dua kolom (>= 600 px): lihat media query di bawah. */
+.cer-ep { position: relative; }
+.cer-ep-jenis {
+  position: absolute; top: 10px; right: 10px; z-index: 5; max-width: calc(100% - 20px); margin: 0; padding: 0 9px; overflow: hidden; border-radius: 999px;
+  background: #e9ebe4; color: #4d5a4f; box-shadow: 0 0 0 2px #fffefa;
+  font-size: 11px; font-weight: 800; letter-spacing: .05em; line-height: 22px; white-space: nowrap; text-overflow: ellipsis;
+}
+.cer-ep-jenis[data-jenis="nyata"] { background: #215c40; color: #fff; }
 .cer-ep-isi h2 { margin: 0; font-size: 24px; }
 .cer-ep-ringkas { margin: 0; font-size: 15.5px; line-height: 1.5; color: #3f5245; }
 .cer-ep-status { margin: 0; display: flex; flex-wrap: wrap; align-items: center; gap: 4px 8px; font-size: 14px; font-weight: 600; color: #2f4637; }
@@ -313,8 +328,10 @@
   .cer-main .cer-panggung { aspect-ratio: 2 / 1; max-height: 40dvh; }
 }
 @media (min-width: 600px) {
-  .cer-ep { grid-template-columns: 280px minmax(0, 1fr); }
+  .cer-ep { --cer-ep-kolom-seni: 280px; grid-template-columns: var(--cer-ep-kolom-seni) minmax(0, 1fr); }
   .cer-ep-seni { height: auto; min-height: 220px; }
+  /* T-026: gambar = kolom kiri; lencana tetap di pojok kanan-atas GAMBAR (10 px dari tepi kanan kolom itu), bukan pojok kartu. */
+  .cer-ep-jenis { right: calc(100% - var(--cer-ep-kolom-seni) + 10px); max-width: calc(var(--cer-ep-kolom-seni) - 20px); }
 }
 
 /* HP mendatar (layar pendek): panggung kiri setinggi layar (lengket), percakapan kanan. */

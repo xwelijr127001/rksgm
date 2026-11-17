@@ -895,6 +895,8 @@ export const EPISODE_AUTO_1: Episode = {
   id: 'auto-1',
   versi: 1,
   produk: 'AUTO',
+  // T-026 (owner): Episode 1 = cerita contoh untuk mencoba alur.
+  jenis: 'demo',
   judul: 'ep.judul',
   ringkas: 'ep.ringkas',
   durasiMenit: 8,

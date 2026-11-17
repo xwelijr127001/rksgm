@@ -2064,3 +2064,55 @@ Numbers are the review's own: D-251 = glossary labels, D-252 = word on the white
 - **Build.** Made in a side folder at 16:14; every browser run above was on that build. Copied into `client/dist` at 16:35, after QA's T-025 report was written (16:24, on the Fix 1 build) and its server on :4001 was stopped, so no review ran across the change; older chunks removed, `client/dist` is exactly the checked build (146 files). `client/dist-rilis` not touched. My server on :4003 is stopped.
 - **For the re-check.** QA's report lists the old first-seat label (Ketua Komite). A check that pins that label or the old K11-E news text needs the new text, and a check that reads the tags in the first frame now finds the waiting room for the first 320 ms.
 - **Not verified.** A real phone. The 320 ms hold by eye on a device (times come from the page's attribute record). WebKit for the room pixels (Chromium only); WebKit ran the three result cards and the cek-layar K11 cases. A screen reader.
+
+## T-026 (2026-11-17): episode cards get a type tag, DEMO and KASUS NYATA
+
+Fullstack · edited under `C:\Users\User\Desktop\rksgm-episode2` · NOT committed. Board: T-026 note "built (uncommitted)".
+Owner request 2026-11-17: "add tags: Episode 1 is only DEMO, Episode 2 is Real Case, so users can choose."
+
+**Result.** Each card in the picker (`/cerita`) carries a small badge on the top-right corner of its picture. Episode 1: DEMO, neutral grey. Episode 2: KASUS NYATA, brand green with white letters. English DEMO / REAL CASE, Chinese 演示 / 真实案例. Hovering shows one line, and the same line is the badge's accessible description:
+
+| | DEMO | KASUS NYATA |
+| --- | --- | --- |
+| id | Cerita contoh untuk mencoba alur | Berdasarkan modul klaim Raksa |
+| en | A sample story for trying out the flow | Based on the Raksa claims module |
+| zh | 用来体验流程的示例故事 | 根据 Raksa 理赔模块编写 |
+
+The id lines and the six labels are the brief's. **The en and zh lines are mine: for the Lead or PIC to confirm.**
+
+**Where the badge sits, and why not in the meta line.** The brief asked for a chip in the meta line and for unchanged card heights at 390 and 360 wide. In Indonesian and English both cannot hold: beside the meta text there are 61 to 91 px free for Episode 2 in id and 26 to 56 px in en, and the chip needs 101 px (KASUS NYATA) or 79 px (REAL CASE) plus the gap. Wrapped under the meta text it adds 19 px to the card. I asked, with pictures of both; the Lead chose the badge on the picture corner at every size, the same place on both cards.
+One change after that answer: my preview pictures had the badge on the top-left corner, and there it covers Pak Hendra's head on the Episode 2 cover at every phone size and the top of his hair on desktop (`sudut-kiri-ditolak-semua-ukuran.png`). The badge is therefore on the **top-right** corner, where both covers show only wall, door frame, sky or roof: 28 close-ups of both covers at 320, 360, 390, 412 and 430 wide (DPR 2, 2.625 and 3) and at 768, 1024 and 1280 wide are in one sheet, `sudut-kanan-semua-ukuran.png`. From 600 px, where the picture is the left column, the badge stays on the picture's top-right corner, not the card's.
+The optional tag in the story header is skipped (the Lead agreed): the phone header has no room for it.
+
+**How it is built**
+- `Episode.jenis?: 'demo' | 'nyata'` and `JENIS_EPISODE` in `tipe.ts`; auto-1 is `demo`, auto-2 is `nyata`. The validator accepts an episode without the field (its card then has no badge) and rejects any other value.
+- Dictionary `cerita`: `jenis.demo`, `jenis.nyata`, `jenisKet.demo`, `jenisKet.nyata` in id / en / zh.
+- `pages/Cerita.tsx`: the badge is a `<p>` and the first child of the card, outside the picture box (which is `aria-hidden`), so it is read before the meta line and the title. It has `title` and `aria-description`. The meta line is untouched.
+- `cerita.css`: the badge is positioned against the card and takes no room in the layout. 22 px high, 11 px text at weight 800, a 2 px ring in the card colour so its edge reads on any picture. Grey #e9ebe4 with #4d5a4f letters is 6.04 : 1; green #215c40 with white is 7.87 : 1. In the two-column layout one custom property holds the picture column width (280 px) for both the grid and the badge offset.
+- `docs/cerita/PANDUAN-EPISODE.md`: one row for the new field.
+
+**Checks** (my server on :4003, one headless browser at a time, below-normal priority, no e2e)
+
+| Check | Result |
+| --- | --- |
+| `npm run test:client` | 762 / 762 (3 new: the validator, the two episodes, the dictionary keys) |
+| `tools/cek-tag-t026.mjs` (new) | ALL PASS (18): Chromium at 390 × 645, 360 × 640, 320 × 568 and 1280 × 800, WebKit at 390 × 645 and 360 × 640, each in id / en / zh |
+| `tools/cek-piksel-t013.mjs` | ALL PASS (180); its five picker-card cases (`kartu-cerita-360`, `-390`, `-768`, `-1024`, `-1280`) pass as before |
+| `tools/cek-bahasa-t014.mjs` | ALL PASS (138) |
+
+- **cek-layar has no picker or home family** (its families are scene, activity and end screen), so I could not run what the brief names. The picker is covered by the new tool and by the five picker-card cases of cek-piksel (360, 390, 768, 1024, 1280 wide). The home page is not touched by this change.
+- The new tool, per case: one badge per card with the right type, label, tooltip and description (expected texts are read from the dictionary file, not typed into the tool); 10 px from the top and right edges of the picture box, wholly inside it, the same on both cards, not over the meta line, not clipped, and the topmost element at its centre; the two colours and their contrast; no horizontal page scroll; no page error.
+- **Nothing moved.** Before the change I ran the same tool with `--ukur-dasar` on the build that was in `client/dist` (`dasar-tanpa-tag.json`). In all 18 cases the height of each card, the box of the meta line (still five items), the picture box and the page's scroll height and width equal those measurements within 0.5 px.
+
+**Evidence:** `team/evidence/T-026/` (35 files): `picker-<size>-<language>.png`, full page (12 Chromium, 6 with `-webkit`); `hasil.json`; `dasar-tanpa-tag.json`; the two sheets and seven single close-ups `sudut-kanan-*.png` (final corner) and `sudut-kiri-ditolak-*.png` (rejected corner); `pilihan-A-*.png` and `pilihan-B-*.png` are the two options of my question, and B there still shows the top-left corner. I opened the final pictures of the picker at 390 × 645 (id), 360 × 640 (en, and zh in WebKit) and 1280 × 800 (id), and both sheets.
+
+**Budget.** JS + CSS against the Fix 2 build: +1,241 B raw, about +450 B gzip. No new picture.
+
+**Build.** Made in a side folder; every browser run above was on that build. Rebuilt once after a comment-only CSS edit: the output is byte-identical to the checked build (146 files). Copied into `client/dist` at 17:44 with no review server running (only the owner's :4000, which still serves its own build); older chunks removed; `client/dist` is exactly the checked build. `client/dist-rilis` not touched. My server on :4003 is stopped.
+
+**Notes**
+- The tooltip is hover only: on a touch screen the badge has no visible explanation. The description is in the DOM; no screen reader was run.
+- A new or changed cover must keep its top-right corner free of faces. The tool checks where the badge is, not what the picture shows under it.
+- Not verified: a real phone; `npm run test:e2e` (not run, as instructed).
+
+**Files.** New: `tools/cek-tag-t026.mjs`. Changed: `client/src/cerita/tipe.ts`, `validasi.ts`, `episode/auto-1/episode.ts`, `episode/auto-2/episode.ts`, `ui/cerita.css`, `client/src/pages/Cerita.tsx`, `client/src/i18n/kamus/cerita.ts`, tests (`validasi.test.ts`, `episode/auto-2/episode.test.ts`, `i18n/terjemahan.test.ts`), `docs/cerita/PANDUAN-EPISODE.md`.

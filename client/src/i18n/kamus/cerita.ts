@@ -7,6 +7,8 @@ import type { KamusRuang } from './index';
  *
  * Catatan:
  * - `produk.<Product>` = label produk singkat di kartu episode.
+ * - `jenis.<demo|nyata>` = tag jenis episode di kartu (T-026, Episode.jenis); `jenisKet.<...>` = keterangan satu baris tag
+ *   itu (tooltip + deskripsi untuk pembaca layar).
  * - `arah.<naik|turun|tetap>` = kata perubahan suasana nasabah. Dialog & Riwayat TIDAK memakainya lagi (kalimat
  *   ajar netral, docs/rancangan-mode-cerita.md 11.3); dipertahankan untuk pemakai lain yang mungkin masih ada.
  * - `apaItu` = tombol istilah di kotak dialog ({istilah} = label istilah episode, bagian 11.4).
@@ -38,6 +40,10 @@ const kamus: KamusRuang = {
     'produk.FIRE': 'Kebakaran & harta benda',
     'produk.CARGO': 'Pengangkutan barang',
     'produk.MIX': 'Gabungan',
+    'jenis.demo': 'DEMO',
+    'jenis.nyata': 'KASUS NYATA',
+    'jenisKet.demo': 'Cerita contoh untuk mencoba alur',
+    'jenisKet.nyata': 'Berdasarkan modul klaim Raksa',
     statusBaru: 'Baru',
     statusLanjut: 'Sedang berjalan · Bagian {n}/{total}',
     statusSelesai: 'Selesai',
@@ -202,6 +208,10 @@ const kamus: KamusRuang = {
     'produk.FIRE': 'Fire & property',
     'produk.CARGO': 'Cargo',
     'produk.MIX': 'Mixed',
+    'jenis.demo': 'DEMO',
+    'jenis.nyata': 'REAL CASE',
+    'jenisKet.demo': 'A sample story for trying out the flow',
+    'jenisKet.nyata': 'Based on the Raksa claims module',
     statusBaru: 'New',
     statusLanjut: 'In progress · Part {n}/{total}',
     statusSelesai: 'Finished',
@@ -359,6 +369,10 @@ const kamus: KamusRuang = {
     'produk.FIRE': '火灾与财产',
     'produk.CARGO': '货物运输',
     'produk.MIX': '综合',
+    'jenis.demo': '演示',
+    'jenis.nyata': '真实案例',
+    'jenisKet.demo': '用来体验流程的示例故事',
+    'jenisKet.nyata': '根据 Raksa 理赔模块编写',
     statusBaru: '未开始',
     statusLanjut: '进行中 · 第 {n}/{total} 部分',
     statusSelesai: '已完成',

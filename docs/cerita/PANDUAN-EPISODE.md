@@ -74,6 +74,7 @@ Bidang `Episode` yang sering terlupa:
 | `versi` | Mulai 1. Naikkan bila perubahan membuat progres tersimpan tidak cocok (bagian 6) |
 | `produk` | `AUTO` / `HVC` / `FIRE` / `CARGO` / `MIX` (label kartu dari kamus `cerita.produk.*`) |
 | `durasiMenit` | Perkiraan jujur (AUTO-1: 8). Tampil "± n menit" di kartu |
+| `jenis` | Opsional: `demo` (cerita contoh untuk mencoba alur) / `nyata` (berdasarkan modul klaim Raksa). Tag di pojok kanan-atas gambar kartu; label & keterangan dari kamus `cerita.jenis.*` / `cerita.jenisKet.*`. Dikosongkan = kartu tanpa tag |
 | `pemeran` | Selain `pemain` & `narasi` (id itu dicadangkan). Nasabah `potret: 'nasabah'`, `diPanggung: true` |
 | `nasabah` | Id pemeran yang suasananya dilacak |
 | `suasana` | Urut menurun berdasarkan `min`; baris terakhir `min: -100` = "lainnya" |
