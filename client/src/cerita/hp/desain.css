@@ -790,3 +790,10 @@ body > .akh-lembar-latar {
   .hp-layar[data-kunci] .hp-arena[data-tampilan="daftar"] .hp-susun:has(> .hp-ringkasan-ringkas) { gap: 6px; }
   .hp-layar[data-kunci] .hp-arena[data-tampilan="daftar"] > .hp-arena-gulir:has(.hp-susun[data-gaya="baki"] .hp-ringkasan-ringkas) .hp-konteks-catatan { display: none; }
 }
+
+/* T-033 Fix 3 (QA B-02): lembar kesimpulan K08 di HP pendek (360x640 id: daftar 8 px menggulir). Pilihan dirapatkan 4 px atas-bawah
+   dan baris teks 18 px supaya kelima pilihan muat tanpa gulir dalam. */
+@media (max-width: 1023.98px) and (max-height: 700px) {
+  .hp-layar[data-kunci] .hp-lembar-simpul .hp-opsi { padding-top: 6px; padding-bottom: 6px; }
+  .hp-layar[data-kunci] .hp-lembar-simpul .hp-opsi-teks { line-height: 18px; }
+}

@@ -130,7 +130,8 @@ export function ArenaPolaSusun({ ep, misi, konfig, jawaban, ubah, daftar, tx, la
               {benda ? <span className="sr-only">: {namaBenda(benda)}</span> : null}
             </p>
             {mejaBaki ? null : umpanEl}
-            <div className="hp-panggung-benda" ref={kartuRef}>
+            {/* T-036 Fix 2 (QA): ketuk dokumen di meja = bunyi "berkas dibuka" (kertas), lewat playSfx (ikut bisu). */}
+            <div className="hp-panggung-benda" ref={kartuRef} onClick={() => { if (benda) playSfx('kertas'); }}>
               {benda ? <KartuBenda key={benda.id} ep={ep} benda={benda} tx={tx} daftar={daftar} sekarangDi={peta[benda.id] ? namaWadah(peta[benda.id]!) : null} /> : <div className="hp-benda-kosong" aria-hidden="true" />}
             </div>
           </div>

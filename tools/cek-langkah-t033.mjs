@@ -98,6 +98,20 @@ for (const [kode, st] of AKT) for (const vp of VP) for (const lang of BAHASA) {
         if (await h.p.evaluate(() => !!document.querySelector('.lgk-pelatih'))) s.push('kartu cara main muncul lagi sesudah muat ulang');
         if ((await ukur(h.p)).gulir > 0.5) s.push('menggulir sesudah muat ulang');
       }
+      // T-033 Fix 3 (QA B-01): K09 diselesaikan MENURUT LANGKAH (buka tiap kartu, tandai rencana / tidak perlu): bilah kirim aktif
+      // dan pita di langkah 3, apa pun keadaan pita sebelumnya.
+      if (kode === 'k09') {
+        const ids = await h.p.evaluate(() => [...document.querySelectorAll('.hp-saksi-kartu')].map((k) => k.dataset.orang));
+        for (const id of ids) {
+          await h.p.click(`.hp-saksi-kartu[data-orang="${id}"]`); await tunggu(350);
+          await h.p.click(`.sk-tombol[data-wadah="${id === 'mobilkecil' ? 'tidak' : 'ya'}"]`); await tunggu(450);
+        }
+        const u = await h.p.evaluate(() => { const k = [...document.querySelectorAll('[data-kirim], .hp-kirim-tombol')].filter((x) => x.offsetParent).at(-1); return { kirimAktif: !!k && !k.disabled, langkah: document.querySelector('.lgk-langkah [aria-current]')?.getAttribute('data-langkah') ?? [...document.querySelectorAll('.lgk-langkah [aria-current]')].length }; });
+        const kini = (await ukur(h.p)).kini;
+        data.k09Selesai = { ...u, kini };
+        if (!u.kirimAktif) s.push('K09: bilah kirim tidak aktif sesudah semua saksi ditandai menurut langkah (QA B-01)');
+        if (kini !== 2) s.push(`K09: pita di langkah ${kini + 1}, harus 3 sesudah semua saksi ditandai`);
+      }
       // ketukan pada sasaran (sekali, 390x745 id): langkah / petunjuk berubah
       if (vp.n === '390x745' && lang === 'id' && kode !== 'k08') await h.p.screenshot({ path: path.join(ROOT, 'team/evidence/T-035', `${kode}-tanpa-penunjuk-${vp.n}-${lang}.png`) });
       if (vp.n === '390x745' && lang === 'id' && d.sasaran) {
@@ -121,6 +135,10 @@ for (const [kode, st] of AKT) for (const vp of VP) for (const lang of BAHASA) {
           await h.p.evaluate(() => document.querySelector('.lgk-sasaran')?.click()); await tunggu(700);
           await h.p.evaluate(() => document.querySelector('.lgk-sasaran')?.click()); await tunggu(1200); u = await ukur(h.p);
           urut.push(['kesimpulan: penunjuk di kesimpulan pertama + petunjuk 3 (D-332)', u.sasaranCocok['[data-simpul]'] && u.petunjuk === kamus(lang, 'k08.p3')]);
+          // T-033 Fix 3 (QA B-02): daftar kesimpulan tanpa gulir dalam; panah di ujung kanan pilihan, tidak menutupi teks mana pun.
+          const lembar = await h.p.evaluate(() => { const g = document.querySelector('[data-gulir-lembar]'); const p = document.querySelector('.lgk-penunjuk')?.getBoundingClientRect(); const tabrak = p ? [...document.querySelectorAll('.hp-lembar-simpul .hp-opsi-teks, .hp-lembar-simpul h2, .hp-lembar-simpul p')].some((e) => { const rg = document.createRange(); rg.selectNodeContents(e); return [...rg.getClientRects()].some((q) => q.left < p.right - 1 && p.left < q.right - 1 && q.top < p.bottom - 1 && p.top < q.bottom - 1); }) : null; return { gulir: g ? g.scrollHeight - g.clientHeight : null, tabrak }; });
+          urut.push([`kesimpulan: gulir dalam ${lembar.gulir} px (harus 0)`, lembar.gulir === 0]);
+          urut.push(['kesimpulan: panah tidak menutupi teks', lembar.tabrak === false]);
           await h.p.screenshot({ path: path.join(OUT, `k08-kesimpulan-${vp.n}-${lang}.png`) });
           await h.p.screenshot({ path: path.join(OUT, `k08-dua-rambu-${vp.n}-${lang}.png`) });
           data.duaRambu = urut; for (const [n, ok] of urut) if (!ok) s.push('K08 dua rambu: ' + n);

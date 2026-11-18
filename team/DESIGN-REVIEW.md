@@ -4072,3 +4072,17 @@ Designer · Folder: C:\Users\User\Desktop\rksgm-episode2 · No source edits, no 
 - **Pointer only in K08:** K08 shows pointer + ring on sign 1; K02, K04, K05, K10 and K-SIM show the strip and no pointer or ring, at both sizes.
 - **Language menu:** ID / EN / 中文 on the home page in both id and zh (server flag not touched by me; Fullstack's test covers it).
 - **Not verified:** only one result card was reachable from my saved states (K09); K03, K06, K11 and K-SIM results share the same component and rule, but I did not see them.
+
+---
+
+## T-037 — review (2026-11-18)
+
+Designer · Folder: C:\Users\User\Desktop\rksgm-episode2 · No source edits, no commit. `client/dist` built 08:18, served on my :4002 with my test database, `RAKSA_DEMO_CERITA` unset (stopped). 390 × 745, 360 × 640, 390 × 844 (DPR 3) and 1280, id / en / zh, new and returning player. Evidence `team/evidence/T-037/designer/review/` (`ukur-picker.txt`, `ukur-t33c.txt`, `screens/`).
+
+### Verdict: FIX NEEDED (one item). Everything else PASS.
+**PASS:** **0 px scroll** in all 16 cases; free space under the last line 210 / 107 / 309 / 195 px (390 × 745 / 360 × 640 / 390 × 844 / 1280). Header one line on phones (back, Miss Raksa head + "Mode cerita", ID, sound); hub title only at 1280. No Join card; the room-code link is there in all three languages. Demo hidden. Ground 8. Episode 1 card: K1, Pak Hendra's face 88 × 88, **pixel-exact at DPR 3** (`thumb-dpr3.png`, hard pixel edges, no smoothing), nothing over the face; status on one line ("Baru" / "Sedang berjalan · Bagian 2/4"), key 48 px "Mulai" / "Lanjutkan". Locked row: grey with a lock, square, 52 px, under the card; a tap shows its note, gone after 2 s. Keyboard order: back → language → sound → Mulai → Episode 2 row → room-code link, every stop with the 3 px ring. 1280: wide K1 card with the scene cover, chip and meta on one line.
+- **D-341 · FIX · The meta line on phones is unreadable.** With the KASUS NYATA chip at its start, "Episode 1 · Kendaraan · ± 17 menit" is cut at every part: "Ep… · Ke… · ± 1…" (`picker-390x745-id.png`), in en and zh too. On phones keep the chip, then only "Episode 1 · ± 17 menit" (drop the category below 600 px), or put the chip on its own line above the title only if the free space allows (it does: 107 px at 360 × 640). Never ellipsis each part separately.
+- **D-342 · minor · Locked row note repeats the title.** Tapped, the subtitle becomes "Segera hadir", same words as the title "Episode 2 · Segera hadir". At 1280 the subtitle is "Kasus berikutnya sedang disiapkan"; use that sentence on phones as well (as the subtitle and as the tap note), and give the row the blush panel (#F9EEEA) instead of grey, so it reads "locked but coming" rather than disabled.
+
+### T-033 Fix 3 re-check
+**K08 PASS:** hint now follows the pointer (sign → "Sekarang ketuk lajur yang dilarang" while on a lane → back to the sign hint for sign 2); conclusion step: pointer at the right end of option 1, the sheet shows all five options and the send bar at 360 × 640 (the inner-scroll number I logged is the arena behind the sheet, not visible). **K09:** opens with strip and hint and no pointer (correct after T-035); I did not play its steps through, so "steps unlock the send bar" is not verified by me.

@@ -649,3 +649,90 @@ Testing under `C:\Users\User\Desktop\rksgm-episode2` (QA; no source edits, no co
 1. WebKit skips links when tabbing (home Mulai, picker Mulai and the end-card second button are links), so my keyboard-focus check could not reach them in WebKit; this is the engine's default, as in T-024.
 2. My pressed-state check only reads the transform; the reply-row pressed state is a colour change, so I confirmed that one in the screenshot (`chromium-btn-sheet-opsi-tekan.png`).
 3. Not tested: a real phone or touch pressed state held on a real finger, hover, and the pages behind the CMS and admin sign-in.
+
+## T-033 (2026-11-18) — FAIL (0 high, 1 medium, 2 low bugs; 5 notes)
+
+Testing under `C:\Users\User\Desktop\rksgm-episode2` (QA; no source edits, no commit, no e2e). I built the working tree (client and server) into my own folder `server/qa-t033` (git-ignored, removed afterwards), ran :4001 on it (legacy mode on; off for `uji-room-cerita`, with `STORY_MAX_PARTICIPANTS=4`) with a scratch database, and stopped it afterwards. `client/dist` and `client/dist-rilis` were not touched. The tools that refuse ports 4000-4002 (`cek-palet`, `cek-tugas`, `cek-langkah`, `cek-room`) ran as copies from my scratch folder with only the port rule, import paths and evidence folder changed. Evidence: `team/evidence/T-033/qa/`.
+
+**The tree moved while I tested.** My first build (sources of 03:34) failed `typecheck` (`bacaTampilan` not found in `PemainHP.tsx`), and `cek-layar` and `cek-gulir` failed on `arena-k15` (6 of 154); Fullstack's edits of 04:34 fixed both. I rebuilt from the tree as it stood at 04:39 (identical to the `client/dist` Fullstack copied later) and re-ran everything; that second run is the one reported (the first is kept in `run1-tree-0334/`). A first re-run of `cek-langkah` failed 10 of 54 only because my copy of the tool was older than Fullstack's tool update; with a fresh copy it passes.
+
+**Suites on the 04:39 build, all pass:** `test:client` 771/771; typecheck 0 errors; `cek-langkah` 54/54; `cek-layar` 154/154 (all families); `cek-palet` 56/56; `cek-tugas` 9/9; `cek-akhir` 105/105; `cek-gulir` ALL PASS (full run, all families); `cek-bahasa` 138/138; `cek-piksel` ALL PASS; `cek-room` 6/6. `uji-room-cerita`: 178/179. The one failure is "periode baru dibuat; periode bentrok ditolak: 409 409": my scratch database already held that period from an earlier run of mine, so it is an environment artifact (179/179 on a fresh database in T-029).
+
+**My matrix: all 9 activities step by step** (a script that reads the pointer, hint, step and send bar after every real tap on the pointer's target; id/en/zh at 390x745 and 360x640 in Chromium, id in WebKit and with reduced motion):
+- **K04, K05, K07, K10:** the pointer sits on a tappable target near it at every step, the hint changes, the send bar unlocks at the last step, no page scroll, no console errors. The coach card "Cara main" shows once for K05, K10 and ksim (never for the others), closes with "Mengerti", and does not return after a reload. The pointer is static under reduced motion.
+- **K02:** the pointer alternates document (on the desk) and tray as designed (D-333) and the send bar unlocks after the last tray. But the document is a non-focusable `div.hp-panggung-benda` (see B-03).
+- **K08:** the tool-based walk (`cek-langkah`) passes; my generic loop could not walk K08 end to end because the "next sign" and "send" buttons look alike to it.
+- **K11, K-SIM:** my loop stops at the first enabled stage button, so it only checks the first step; `cek-langkah` covers the rest.
+- **Keyboard path:** Tab reaches the pointer's target on K09 in both engines.
+- **Scoring unchanged:** I re-ran the T-020 answer scripts on this build: K02, K04, K07, K09 and K10 give identical result texts and status lines to the T-020 logs; K11 differs only in the result of option "hendra + disetujui" (it now shows the committee-room beat before the chat, as T-025 changed it). K05 matches in id and en; in Chinese the "just wait" result text is two characters longer than in the T-020 log (the status line is the same), which I could not trace.
+- **Story room:** `cek-room` and `cek-palet` (screens 18 and 19: lobby, round 1, consequence, leaderboard) pass; the host, projector, join and CMS pages show no corner above 2 px in either engine (my T-030 low about the join card is fixed). **Legacy quiz** (legacy mode on): room created, a player joined, tutorial started and an option tapped, with no page errors.
+- **Episode 2 playthrough** (id, seed 11) to an ending in 259 steps: 0 console errors, 0 HTTP errors.
+
+**Bugs:**
+1. **B-01 medium: the K09 pointer leads away from completion.** After the five testimonies are read, the pointer goes to the first untouched button of the board in DOM order: a statement chip, the "Tidak perlu" button and then `sk-lepas`, the remove control of a pinned item. Following it literally (tapping what it points at, 9 taps) undoes the pinned card and the activity returns to step 1 with no pointer and the send bar still locked ("Tandai 5 kartu lagi"). Happens in id/en/zh, both sizes, Chromium (6 of 6), WebKit and reduced motion. Cause: `Pandu.tsx` `cariSasaran` has no K09 rule and falls through to "first untouched button". Evidence: `dbg-k09.png`, `k33-chromium.log`.
+2. **B-02 low: K08 conclusion step at 360x640 in Indonesian.** The list of five conclusions scrolls by a few pixels (the fifth option is clipped at the bottom) and the pointer arrow sits on the question text ("rambu" is partly covered). English and Chinese at 360x640 and Indonesian at the other sizes do not scroll. The T-020 run of the same script had no scroll here. `cek-layar` does not catch it. Evidence: `pontaj/chromium-k08-id-360x640-benar-simpul.png`.
+3. **B-03 low: K02's pointer target is not keyboard-focusable.** Step 1 and every "document" step point at the document on the desk, a `div`; a keyboard user cannot reach it in the picture view (the list-view link "Gunakan tampilan daftar" is the keyboard route). The handoff says the pointer target is an existing focusable control.
+
+**Notes (not bugs):**
+1. The "hint never changed" and "no pointer" lines for K09, K11 and ksim in my generic loop are partly artifacts of the loop; B-01 was confirmed by hand (`dbg-k09.png`).
+2. The coach card is a non-modal dialog but it blocks taps on the activity until "Mengerti" is pressed, so the older T-020 answer scripts stall on K05, K10 and ksim unless the card is dismissed first.
+3. `cek-sisipan` was not in this brief's list; `cek-piksel` was re-run as asked.
+4. WebKit skips links when tabbing (engine default, as before).
+5. Not tested: a real phone, a screen reader, hover, and all three languages in WebKit and reduced motion (Indonesian only there).
+
+## T-034/T-035 (2026-11-18) — PASS (0 high, 0 medium, 4 low findings; 4 notes)
+
+Testing under `C:\Users\User\Desktop\rksgm-episode2` (QA; no source edits, no commit, no e2e). I used the shared `client/dist` as it was (built 07:30) and a fresh `tsc` server build in `server/qa-t035` (git-ignored, removed afterwards), :4001 with a scratch database, `RAKSA_LEGACY=on`, and `RAKSA_LEGACY=off` for the language-menu check; stopped afterwards. `client/dist-rilis` not touched. The tools that refuse ports 4000-4002 (`cek-k15`, `cek-tugas`, `cek-langkah`) ran as copies from my scratch folder with only the port rule, import paths and evidence folder changed. Evidence: `team/evidence/T-035/qa/`.
+
+**Suites:** `test:client` 771/771; typecheck 0 errors; `cek-k15-t034` 12/12; `cek-tugas` 141/141; `cek-langkah` 54/54; `cek-layar` 154/154 (all families); `cek-bahasa` **FAILED 18 of 138** (see L-01).
+
+**K15 composer matrix** (390x745 and 360x640, id/en/zh in Chromium; id in WebKit and with reduced motion; 227 checks, all pass): 6 chips in two columns, each at least 44 px high, preview on top; chips chosen in a shuffled order (5, 2, 6, 1) give a preview in part order; the preview opens and closes on tap (`aria-expanded`); a chosen part leaves the message on a touch tap; Enter and Space toggle a chip and Tab reaches all six chips and the send button; the send button is locked with nothing chosen and unlocked with parts chosen; 0 px page scroll and 0 px inner scroll in every state; no console errors. **Scoring identical for the same chosen set:** parts {1, 2, 4} chosen in three different orders give the identical result card text ("... Status Pak Hendra masih Tenang, tapi membaik").
+
+**Re-test of my T-033 findings:**
+- **B-01 medium (K09 pointer):** resolved. The pointer and the target marker no longer exist outside K08 (checked on all nine activities in both engines: present only in K08). The K09 answer script (the T-020 one, with the coach card dismissed) completes the activity, the send bar unlocks only when the board is complete, and its result texts equal the T-020 logs. K02, K04, K07 and K10 also match the T-020 logs; K05 and K11 differ as noted in my T-033 report (T-025 flow, and two characters in a Chinese text).
+- **B-02 low (K08 conclusion sheet at 360x640 id):** resolved. All five conclusions fit without scrolling, and the arrow now stands beside conclusion 1 and covers no text (`pontaj/chromium-k08-id-360x640-benar-simpul.png`).
+- **B-03 low (K02 keyboard focus):** no longer applies, because there is no pointer target in K02.
+- **Result cards (T-035):** `cek-tugas` passes all 141 cases (every saved state, 390x745 and 360x640, id/en/zh: the tab sits on the frame line, no text touches it, inner-panel text is 14 px or more from the left line); I also looked at a Chinese result card, which shows the tab on the line and the Kenapa panel padded.
+- **Language menu with the server flag off:** the picker offers ID / EN / 中文 on the home page, the picker page, the join page and the story Menu, in both engines, and choosing 中文 switches the page to Chinese.
+
+**Findings:**
+1. **L-01 low (tool, not the game): `cek-bahasa` fails 18 of 138** (the states `akt-rambu`, `akt-saksi`, `wawancara-3` at three sizes in en and zh). The failing check is "text clipped": `b.: Your action` / `b.: 你的行动`, the screen-reader-only original label of the result card that T-035 now hides and replaces by the tab. The cards themselves look right (the tab "Your action" / 你的行动 sits on the frame line, nothing is cut off). The tool needs to skip that hidden label; T-035's gate did not list `cek-bahasa`.
+2. **L-02 low: K15 chip "Kabar pembayaran" breaks the word "pembayaran" across two lines** ("pembayara" / "n") at 360x640 in Indonesian (no other size or language breaks a word). `cek-k15` does not catch it (no overflow).
+3. **L-03 low: K15 preview at 360x640** shows one full line and a half-cut second line with the "…" (spec: 2 lines on short screens). Evidence: `chromium-id-360x640-k15.png`.
+
+**Notes (not bugs):**
+1. While the preview is open at 360x640 the chips below the first row are pushed under the send bar and cannot be scrolled to (the page and the inner area do not scroll); tapping the preview closes it again.
+2. (L-04) Hints of K05, K10 and K-SIM still say "the arrow points at ..." ("Ketuk tempat tujuan yang ditunjuk panah", "Bandingkan baris yang ditunjuk panah", "Ketuk benda yang ditunjuk panah"), but since T-035 there is no arrow outside K08. This is a misleading instruction for the player; I count it as L-04 low (same text in en and zh).
+3. WebKit skips links when tabbing (engine default, as before).
+4. The two things in the brief about the hosted room and legacy quiz were not re-tested here (nothing changed there since my T-033 run).
+5. Not tested: a real phone, a screen reader, hover.
+
+## T-037/T-036 (2026-11-18) — PASS (0 high, 0 medium, 1 low finding; 5 notes)
+
+Testing under `C:\Users\User\Desktop\rksgm-episode2` (QA; no source edits, no commit, no e2e). I used the shared `client/dist` (built 08:42, unchanged during my run) and a fresh `tsc` server build in `server/qa-t037` (git-ignored, removed afterwards), :4001 with a scratch database and `RAKSA_LEGACY=on` (restarted once with `RAKSA_DEMO_CERITA=on`); stopped afterwards. `client/dist-rilis` not touched. `cek-beranda` (refuses port 4001) and `cek-pemilih`, `cek-audio` ran as copies from my scratch folder with only the port rule, import paths and evidence folder changed. Evidence: `team/evidence/T-037/qa/`.
+
+**Suites, all pass:** `test:client` 771/771; typecheck 0 errors; `cek-pemilih` 13/13; `cek-tag` 18/18; `cek-beranda` 37/37; `cek-bahasa` 138/138; `check:audio` (with `AUDIO_BASE=:4001`) all three tracks pass; `cek-audio-t036` ALL PASS.
+
+**Picker matrix** (`/cerita` at 390x745, 360x640, 390x844 and 1280x800 in id/en/zh, new player and returning player with saved progress; Chromium and WebKit; 358 checks each; Chromium 0 bad, WebKit 3 bad that are only the keyboard-order note below):
+- Exactly one playable card, linking to `/cerita/auto-2` (the truck case); no demo card; no Join Game card; the card shows Pak Hendra's portrait.
+- The KASUS NYATA chip sits on its own line directly above the meta line, and the meta line is not truncated (no ellipsis, no clipped item). 0 px page scroll on the phones and no horizontal overflow at any size.
+- The locked "Episode 2 · Segera hadir" row is a disabled control (`aria-disabled`, no link), 52 px high; a tap shows the note for about 2 s with the row height unchanged and no navigation, and it is empty again after 2.7 s.
+- The key reads Mulai for a new player and Lanjutkan for a returning one, in all three languages. Mulai and Lanjutkan open the story at `/cerita/auto-2` and the browser Back returns to the one-card picker.
+- The room-code link "Masuk di beranda" goes to `/` and the home page code row is there.
+- Chromium keyboard order: back, language, sound, the card key, the locked row, "Masuk di beranda".
+- `/cerita/auto-1` still loads by URL at 390 and 1280 in both engines.
+- With `RAKSA_DEMO_CERITA=on` (`/api/config` reports `features.demoCerita: true`): two cards appear, the demo one linking to `/cerita/auto-1` (336 checks, Chromium); the only misses are the page scroll with two cards at 360x640 in English (61 px) and the 360x640 Chinese is fine; this is a developer flag and was not expected to fit one screen.
+
+**Audio:**
+- The three story tracks are requested as `cerita-kantor.mp3`, `cerita-periksa.mp3` and `cerita-penutup.mp3` with `?v=t036b` (in the built JS). Decoded: kantor 110.8 s, peak -7.1 dB, RMS -21.4 dB; periksa 120 s, peak -7.2 dB, RMS -21.4 dB; penutup 115.2 s, peak -8.3 dB, RMS -22.4 dB: the HANDOFF numbers. No silence, loop start and end within 1.4 dB.
+- Which SFX fires on which event (I counted the Web Audio nodes created after each action and matched them to each SFX as played from the Menu's "Coba suara" buttons): K02 tray tap = `taruh`; K11 file tab opened = `kertas`; chat: sending a reply plays `pesanKirim` immediately and the reply that follows plays `pesanTerima`. No console errors in any of these.
+
+**Finding:**
+1. **L-01 low:** tapping the document on the desk in K02 (picture view) plays no sound at all. The brief names "K02 document open" for `kertas`; in the code `kertas` is wired to the K11 file tabs and the K-SIM objects only. If a document sound is wanted in K02, it is not there.
+
+**Notes (not bugs):**
+1. In WebKit, Tab skips the links and buttons that are links (the card key, "Masuk di beranda"), so my keyboard-order check fails there; it is the engine default, as before.
+2. The returning-player key text only shows "Lanjutkan" for a state past the first chapter (my first choice of saved state still read "Mulai", so I used a later one).
+3. Playwright treats the `aria-disabled` locked row as not clickable, so my script forced the click; a real finger or mouse works (tested).
+4. Not verified: listening to the music or the effects, a real phone, a screen reader.
+5. `check:audio` reads :4000 by default, which still serves the old files until the Lead refreshes `dist-rilis`; I ran it against my own server.

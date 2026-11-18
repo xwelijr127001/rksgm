@@ -97,18 +97,22 @@ Dibuat oleh `tools/make-music-ep2.mjs` (100% disintesis di script ini: piano ele
 petikan Karplus-Strong redup, reverb ringan). Tanpa sampel, loop, atau rekaman pihak ketiga. Lisensi sama dengan lagu di
 atas: milik proyek RAKSA GAME / PT Asuransi Raksa Pratikara. Lagu lama (`lobby`, `gameplay`, `podium`) tidak diubah.
 
-| Berkas               | Judul                                | Durasi | BPM | Pemakaian                                              | Status |
-| -------------------- | ------------------------------------ | -----: | --: | ------------------------------------------------------ | ------ |
-| `cerita-kantor.mp3`  | Meja Layanan                         | 96,0 s |  80 | Bagian 1 & 4: kantor dan percakapan dengan nasabah, loop | DRAF   |
-| `cerita-periksa.mp3` | Catatan Lapangan                     | 91,4 s |  84 | Bagian 2 & 3: survey dan pemeriksaan kejadian, loop      | DRAF   |
-| `cerita-penutup.mp3` | Berkas Ditutup                       | 109,7 s |  70 | K15 dan layar akhir, loop tenang                        | DRAF   |
+**T-036 Fix 1 (18 Nov 2026): diganti lagi, gaya chiptune 8-bit ceria** (arahan pemilik sesudah mendengar; versi pastoral T-036
+dibuang). Saluran ala konsol lama, semua disintesis di script: dua pulsa (duty 12,5 / 25 / 50 %, PolyBLEP), segitiga 4-bit bertangga
+untuk bass, noise LFSR untuk hat, kick dan snare. Motif 4 bar ASLI yang diulang (dibangkitkan dari nada akor oleh PRNG ber-seed),
+bagian A / B; bukan kutipan lagu mana pun, tanpa sampel atau rekaman.
 
-Format MP3 mono 96 kbps, sekitar 1,1 sampai 1,3 MB per trek; hanya trek yang sedang dipakai yang diunduh. Pemeriksaan otomatis
-script: durasi, peak (sekitar -4 dBFS), panjang kelipatan bar, sambungan loop, dan lonjakan level antar-bagian (maks 3 dB).
-Status **DRAF**: belum didengar dan disetujui manusia (lihat laporan). Di game diputar 55% dari volume musik pemain, dengan
-crossfade 1,6 s saat berganti tema.
+| Berkas               | Judul              | Durasi  | BPM | Bar | Pemakaian                                               | Status |
+| -------------------- | ------------------ | ------: | --: | --: | ------------------------------------------------------- | ------ |
+| `cerita-kantor.mp3`  | Loket Pagi         | 110,8 s | 104 |  48 | Bagian 1 & 4: kantor dan percakapan (ringan, C mayor)   | DRAF   |
+| `cerita-periksa.mp3` | Lapangan Berangkat | 120,0 s | 112 |  56 | Bagian 2 & 3: pemeriksaan (lebih bertenaga, D mayor)    | DRAF   |
+| `cerita-penutup.mp3` | Berkas Beres       | 115,2 s | 100 |  48 | K15 dan layar akhir (hangat + lick kemenangan, F mayor) | DRAF   |
 
-Efek suara mode cerita (`taruh`, `kertas`, `pesanKirim`, `pesanTerima`, `ketuk`, `konfirmasi`, `batal`) dan suasana tempat
+Metode loop: panjang = kelipatan bar, ekor di-"wrap" ke kepala, semua nada mulai dari titik nol, bass legato (sambungan maks 0,013; level awal/akhir loop beda maks 1,4 dB). Level: dinormalisasi
+RMS -21/-22 dBFS, MP3 mono 80 kbps (sekitar 1,1 MB). Di game diputar 28% dari volume musik pemain (total sekitar 9 dB di bawah SFX,
+volume disetujui pemilik). Kunci cache URL `?v=t036b`. Suasana (`bengkel`, `jalan`) 8 dB lebih pelan. Status **DRAF** sampai pemilik mendengar.
+
+Efek suara mode cerita (`taruh` = dokumen ke baki: kibasan kertas + ketuk kayu + denting kecil, 0,4 s; `kertas` = berkas dibuka: kertas bergeser + pop + ekor terang, 0,3 s; `pesanTerima` = tiga nada bel naik, 0,57 s; `pesanKirim` = satu tik bel; T-036, `ketuk`, `konfirmasi`, `batal`) dan suasana tempat
 (`bengkel`, `jalan`: noise ter-filter yang naik-turun pelan) disintesis di `client/src/audio/audio.ts`, tanpa berkas.
 
 ### Pemeriksaan MP3 hasil encode (15 Nov 2026, `node tools/cek-mp3-ep2.mjs`, ffmpeg)

@@ -26,7 +26,7 @@ g.Audio = FakeAudio;
 
 const A = await import('./audio');
 const tidur = (ms: number) => new Promise((r) => setTimeout(r, ms));
-const nama = (e: FakeAudio) => e.src.split('/').pop()!.replace('.mp3', '');
+const nama = (e: FakeAudio) => e.src.split('/').pop()!.replace(/\.mp3(\?.*)?$/, ''); // T-036: abaikan kunci cache ?v=
 const terdengar = () => semua.filter((e) => !e.paused && e.volume > 0.005).map(nama).sort();
 async function bersih() {
   A.setTrack(null); A.forceMusic(false); A.setModeCerita(false);

@@ -70,3 +70,18 @@
 .hp-arena[data-pola="pesan"] .hp-draf-kalimat + .hp-draf-kalimat::before { content: ' '; }
 .hp-arena[data-pola="pesan"] .hp-pesan-bagian-daftar { margin: 0; padding: 0; list-style: none; }
 .hp-arena[data-pola="pesan"] .hp-pesan-bagian-daftar li { display: grid; }
+
+/* T-035 Fix 2 (QA L-02, L-03). L-02: judul chip pindah baris hanya di batas kata (tanpa memecah "pembayaran"); chip boleh tumbuh
+   satu baris. L-03: pratinjau tertutup = TEPAT N baris utuh (3, atau 2 di layar <= 700 px) dengan elipsis bawaan di baris terakhir,
+   tinggi dari line-height, bukan max-height yang memotong baris kedua. */
+.hp-arena[data-pola="pesan"] .hp-pesan-bagian-teks b { overflow-wrap: normal; word-break: normal; hyphens: none; }
+.hp-arena[data-pola="pesan"] .hp-draf:not([data-buka]) { max-height: none; }
+.hp-arena[data-pola="pesan"] .hp-draf:not([data-buka])::after { content: none; }
+.hp-arena[data-pola="pesan"] .hp-draf-teks { font-size: 14px; line-height: 19px; }
+.hp-arena[data-pola="pesan"] .hp-draf:not([data-buka]) .hp-draf-teks { display: -webkit-box !important; -webkit-box-orient: vertical; -webkit-line-clamp: 3; overflow: hidden; }
+@media (max-height: 700px) {
+  .hp-arena[data-pola="pesan"] .hp-draf:not([data-buka]) { max-height: none; }
+  .hp-arena[data-pola="pesan"] .hp-draf:not([data-buka]) .hp-draf-teks { -webkit-line-clamp: 2; }
+}
+/* Pesan kosong ikut clamp pratinjau yang sama (sebaris dengan wadahnya). */
+.hp-arena[data-pola="pesan"] .hp-draf:not([data-buka]) .hp-draf-teks .hp-draf-kosong { display: inline !important; -webkit-line-clamp: unset; }

@@ -131,6 +131,8 @@ export const CONFIG = {
    * (docs/prd-v02/DECISIONS.md D-03). Off = their API routes and the default Socket.IO namespace are refused.
    */
   legacy: (process.env.RAKSA_LEGACY || 'off').toLowerCase().trim() === 'on',
+  /** T-037 (pemilik 18 Nov): kartu demo (auto-1) di pemilih /cerita hanya untuk uji internal. Bawaan off. */
+  demoCerita: (process.env.RAKSA_DEMO_CERITA || 'off').toLowerCase().trim() === 'on',
   /**
    * Seeded scenarios (T-028, story/seed/publish.ts): at start the server publishes the scenarios that ship with the code
    * (Episode 2 "Truk Trailer di Jalan Tol" as a hosted room) if they are not there yet. Idempotent: a start that finds

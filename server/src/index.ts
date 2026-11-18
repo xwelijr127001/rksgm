@@ -179,7 +179,7 @@ app.get('/api/config', (_req, res) => {
     paketBawaan: CONFIG.paketBawaan,
     /** true = membuat room & menulis bank soal butuh PIN panitia. */
     butuhPin: Boolean(CONFIG.panitiaPin),
-    features: { legacy: CONFIG.legacy },
+    features: { legacy: CONFIG.legacy, demoCerita: CONFIG.demoCerita },
     story: { maxParticipants: story.manager.limits.maxParticipantsPerRoom, answerWindowMs: STORY_SCORE_POLICY.answerWindowMs, scorePolicyId: STORY_SCORE_POLICY.id },
   });
 });

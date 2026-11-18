@@ -109,7 +109,9 @@ export function PanduLangkah({ kode, arena, adaIsian, slotKepala }: { kode: stri
         const a = arena.getBoundingClientRect(); const r = s.getBoundingClientRect();
         // D-328: sasaran di tepi atas gambar -> panah dari kanan, di dalam gambar (tidak menutupi teks di atasnya).
         const gambar = s.closest('.lk-kotak, .lk-adegan, .sim-adegan, .hp-papan-lok, figure'); const atasGambar = gambar ? gambar.getBoundingClientRect().top : -Infinity;
-        if (r.top - 24 < atasGambar) setPos({ x: Math.round(r.right - a.left + 4), y: Math.round(r.top - a.top + r.height / 2 - 10), arah: 'kiri' });
+        // T-033 Fix 3 (QA B-02): kesimpulan K08 = panah di ujung KANAN pilihan (ruang dicadangkan di pandu.css), bukan di atas teks pertanyaan.
+        if (s.matches('[data-simpul]')) setPos({ x: Math.round(r.right - a.left - 26), y: Math.round(r.top - a.top + r.height / 2 - 10), arah: 'kiri' });
+        else if (r.top - 24 < atasGambar) setPos({ x: Math.round(r.right - a.left + 4), y: Math.round(r.top - a.top + r.height / 2 - 10), arah: 'kiri' });
         else setPos({ x: Math.round(r.left - a.left + r.width / 2 - 10), y: Math.round(r.top - a.top - 24) });
       } else setPos(null);
     };

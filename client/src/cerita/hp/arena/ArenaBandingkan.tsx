@@ -12,6 +12,7 @@
 import { useEffect, useId, useRef, useState } from 'react';
 import '../../seni/aktivitas/piksel.css';
 import { t } from '../../../i18n';
+import { playSfx } from '../../../audio/audio';
 import { KeSlot, SlotKepalaArena } from '../cangkang';
 import { TombolKirim } from '../bagianHp';
 import { petaLangkah, sisaArena, tetapkan, type ArenaBandingkan } from './logika';
@@ -106,7 +107,8 @@ export function ArenaPolaBandingkan({ ep, misi, konfig, jawaban, ubah, daftar, t
 
   const kelasCap = (seni?: string) => (seni ? ep.seniArena?.[seni]?.piksel ?? '' : '');
   const capDari = (sid: string) => konfig.perlakuan.find((x) => x.id === peta[sid]) ?? null;
-  const pilihBaris = (sid: string) => { batalPindah(); setCapBaru(null); setAktif(sid); };
+  // T-036 Fix 2: membuka baris kertas pembanding = bunyi "berkas dibuka" (hanya bila berganti baris).
+  const pilihBaris = (sid: string) => { if (sid !== aktif) playSfx('kertas'); batalPindah(); setCapBaru(null); setAktif(sid); };
   const pilihCap = (pid: string) => {
     batalPindah();
     ubah(tetapkan(jawaban, konfig.langkah, s.id, pid));

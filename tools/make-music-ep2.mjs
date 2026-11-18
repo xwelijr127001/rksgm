@@ -5,7 +5,7 @@
  * Jalankan:  node tools/make-music-ep2.mjs
  * Keluaran:  client/public/audio/cerita-{kantor,periksa,penutup}.mp3  (lagu lama lobby/gameplay/podium TIDAK disentuh)
  *
- * T-036 (18 Nov 2026): diganti tema kota pedesaan yang hangat (lihat SONGS); teks di bawah = arah lama, tetap berlaku untuk suasana.
+ * T-036 Fix 1 (18 Nov 2026): diganti gaya chiptune 8-bit ceria (lihat SONGS); teks di bawah = arah lama, tetap berlaku untuk suasana.
  * Arah: hangat, tenang, penasaran secara halus, profesional tetapi tidak kaku; tanpa vokal, tanpa perkusi tajam, tanpa
  * melodi pendek yang menonjol, nyaman diulang saat membaca. Instrumen: piano elektrik FM lembut, pad sinus berlapis
  * (serangan lambat), bass sinus, petikan Karplus-Strong redup (hanya tema pemeriksaan). Reverb ringan, lowpass hangat.
@@ -20,7 +20,7 @@ import { fileURLToPath } from 'node:url';
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const OUT_DIR = path.resolve(HERE, '..', 'client', 'public', 'audio');
 const SR = 44100;
-const KBPS = 96;
+const KBPS = 80; // T-036: trek 130-146 s; 80 kbps mono menjaga < 1,6 MB per trek untuk HP
 
 let seed = 20261115;
 function rnd() { seed = (seed * 1664525 + 1013904223) >>> 0; return seed / 4294967296; }
@@ -165,130 +165,128 @@ function motif(list, t0, beat, ch, layer, lalu) {
   return m;
 }
 
-// T-036 (pemilik 18 Nov 06:40): tema kota pedesaan yang hangat & pelan. GAYA saja (mayor, 84-92 BPM, lead kotak/segitiga lembut,
-// petikan mirip marimba, bass lembut, hat tipis); melodi ASLI, dibangkitkan di sini dari nada akor (bukan lagu mana pun).
+// T-036 Fix 1 (pemilik 18 Nov, sesudah mendengar di :4000): GAYA chiptune 8-bit ceria (bukan pastoral). Saluran ala konsol lama:
+// dua pulsa (duty 12,5 / 25 / 50 %), segitiga untuk bass, noise untuk hat & kick. Motif 4 bar ASLI (dibangkitkan dari nada akor
+// oleh PRNG ber-seed), bagian A / B; bukan kutipan lagu mana pun, tanpa sampel.
 
-/** Lead kotak lembut: harmonik ganjil terbatas (1,3,5,7) dengan vibrato tunda; serangan halus. */
-function leadKotak(buf, t, midi, dur, amp, segitiga = false) {
+/** Pulsa band-limited (PolyBLEP) dengan duty; amplop ADSR sederhana bergaya chip (serangan instan, luruh ke sustain). */
+function pulsa(buf, t, midi, dur, amp, duty = 0.5, vib = 0) {
   const f = mtof(midi);
   const i0 = Math.round(t * SR);
-  const n = Math.min(Math.round((dur + 0.18) * SR), buf.length - i0);
+  const n = Math.min(Math.round((dur + 0.03) * SR), buf.length - i0);
   if (i0 < 0 || n <= 0) return;
-  const atk = Math.round(0.018 * SR);
-  const relMulai = Math.round(dur * SR);
-  const H = segitiga ? [[1, 1], [3, -1 / 9], [5, 1 / 25], [7, -1 / 49]] : [[1, 1], [3, 0.26], [5, 0.11], [7, 0.05]];
+  const blep = (p, dt) => { if (p < dt) { p /= dt; return p + p - p * p - 1; } if (p > 1 - dt) { p = (p - 1) / dt; return p * p + p + p + 1; } return 0; };
   let ph = 0;
+  const lepas = Math.round(dur * SR);
   for (let i = 0; i < n; i++) {
     const s = i / SR;
-    const vib = 1 + 0.0035 * Math.sin(2 * Math.PI * 5.2 * s) * Math.min(1, Math.max(0, (s - 0.25) / 0.3));
-    ph += (2 * Math.PI * f * vib) / SR;
-    let v = 0;
-    for (const [k, a] of H) v += a * Math.sin(k * ph);
-    let env = i < atk ? i / atk : 1;
-    env *= 0.7 + 0.3 * Math.exp(-2.5 * s);
-    if (i > relMulai) env *= Math.max(0, 1 - (i - relMulai) / (0.18 * SR));
+    const ff = f * (1 + (vib ? 0.006 * Math.sin(2 * Math.PI * 6 * s) * Math.min(1, s / 0.15) : 0));
+    const dt = ff / SR;
+    ph += dt; if (ph >= 1) ph -= 1;
+    let v = (ph < duty ? 1 : -1) + blep(ph, dt) - blep((ph - duty + 1) % 1, dt);
+    v -= 2 * duty - 1; // tanpa DC
+    let env = 0.62 + 0.38 * Math.exp(-9 * s);
+    if (i < 30) env *= i / 30;
+    if (i > lepas) env *= Math.max(0, 1 - (i - lepas) / (0.03 * SR));
     buf[i0 + i] += v * amp * env;
   }
 }
 
-/** Petikan mirip marimba: sinus dasar + parsial 4x dan 10x yang cepat hilang. */
-function marimba(buf, t, midi, dur, amp) {
+/** Segitiga 4-bit bertangga (seperti saluran segitiga konsol), untuk bass. */
+function segitiga(buf, t, midi, dur, amp) {
   const f = mtof(midi);
   const i0 = Math.round(t * SR);
-  const n = Math.min(Math.round(Math.min(dur + 0.4, 1.4) * SR), buf.length - i0);
+  const n = Math.min(Math.round((dur + 0.02) * SR), buf.length - i0);
   if (i0 < 0 || n <= 0) return;
+  let ph = 0.25;
+  const lepas = Math.round(dur * SR);
   for (let i = 0; i < n; i++) {
-    const s = i / SR;
-    const v = Math.sin(2 * Math.PI * f * s) * Math.exp(-4.2 * s) + 0.35 * Math.sin(2 * Math.PI * f * 4 * s) * Math.exp(-14 * s) + 0.08 * Math.sin(2 * Math.PI * f * 9.8 * s) * Math.exp(-30 * s);
-    const env = i < 40 ? i / 40 : 1;
+    ph += f / SR; if (ph >= 1) ph -= 1;
+    const tri = ph < 0.5 ? 4 * ph - 1 : 3 - 4 * ph;
+    const v = Math.round(tri * 7.5) / 7.5;
+    let env = i < 40 ? i / 40 : 1;
+    if (i > lepas) env *= Math.max(0, 1 - (i - lepas) / (0.02 * SR));
     buf[i0 + i] += v * amp * env;
   }
 }
 
-/** Hat sangat tipis: noise berpita tinggi, 35 ms. */
-function hat(buf, t, amp) {
+/** Noise LFSR ala chip: 'hat' pendek bernada tinggi, 'kick' = sapuan segitiga turun + sedikit noise, 'snare' noise menengah. */
+let lfsr = 1;
+function noiseBit() { const b = (lfsr ^ (lfsr >> 1)) & 1; lfsr = (lfsr >> 1) | (b << 14); return (lfsr & 1) ? 1 : -1; }
+function perkusi(buf, t, jenis, amp) {
   const i0 = Math.round(t * SR);
-  const n = Math.min(Math.round(0.035 * SR), buf.length - i0);
+  const dur = jenis === 'hat' ? 0.04 : jenis === 'kick' ? 0.13 : 0.11;
+  const n = Math.min(Math.round(dur * SR), buf.length - i0);
   if (i0 < 0 || n <= 0) return;
-  let lp = 0;
-  for (let i = 0; i < n; i++) { const x = rnd() * 2 - 1; lp += 0.6 * (x - lp); buf[i0 + i] += (x - lp) * amp * Math.exp(-i / (0.009 * SR)); }
+  const tahan = jenis === 'hat' ? 3 : jenis === 'snare' ? 6 : 12; // sampel per langkah noise (nada noise)
+  let nv = noiseBit(); let ph = 0.25; // fase 0,25 = nilai segitiga 0: tanpa klik di awal (sambungan loop)
+  for (let i = 0; i < n; i++) {
+    const s = i / SR;
+    if (i % tahan === 0) nv = noiseBit();
+    let v;
+    if (jenis === 'kick') {
+      const f = 150 * Math.exp(-s * 22) + 45; ph += f / SR; if (ph >= 1) ph -= 1;
+      v = (ph < 0.5 ? 4 * ph - 1 : 3 - 4 * ph) * Math.exp(-s * 18) + 0.15 * nv * Math.exp(-s * 60);
+    } else v = nv * Math.exp(-s * (jenis === 'hat' ? 90 : 28));
+    buf[i0 + i] += v * amp * (i < 24 ? i / 24 : 1);
+  }
 }
 
 const K = {
   C: { v: [60, 64, 67], b: 36 }, F: { v: [60, 65, 69], b: 41 }, G: { v: [59, 62, 67], b: 43 }, Am: { v: [60, 64, 69], b: 45 },
-  Dm: { v: [62, 65, 69], b: 38 }, Em: { v: [59, 64, 67], b: 40 }, G7: { v: [59, 62, 65], b: 43 }, Fm6: { v: [60, 65, 69], b: 41 },
-  Bb: { v: [62, 65, 70], b: 46 }, Csus: { v: [60, 65, 67], b: 36 },
+  Dm: { v: [62, 65, 69], b: 38 }, Em: { v: [59, 64, 67], b: 40 }, E: { v: [59, 64, 68], b: 40 }, Bb: { v: [62, 65, 70], b: 46 },
 };
-// Skala mayor (C) untuk langkah melodi; transposisi per lagu.
 const SKALA = [0, 2, 4, 5, 7, 9, 11];
 function dekatSkala(m) { const pc = ((m % 12) + 12) % 12; let best = m; let d = 99; for (const s of SKALA) for (const o of [-12, 0, 12]) { const c = m - pc + s + o; if (Math.abs(c - m) < d) { d = Math.abs(c - m); best = c; } } return best; }
 
-/**
- * Melodi frase 4 bar: ritme dari pola (nilai ketukan), nada mengikuti akor pada ketukan kuat, langkah skala di antaranya;
- * akhir frase turun ke nada akor (rasa "pulang"). Pola dan arah dibangkitkan oleh PRNG ber-seed: asli, bukan kutipan.
- */
-const RITME = [
-  [1, 0.5, 0.5, 1, 1], [1.5, 0.5, 1, 1], [0.5, 0.5, 1, 0.5, 0.5, 1], [2, 1, 1], [1, 1, 2], [0.5, 0.5, 0.5, 0.5, 2],
-];
-function frase(list, x, chords, t0, beat, padat, oktaf, suara) {
-  let m = x.lalu;
-  for (let b = 0; b < chords.length; b++) {
+/** Motif 4 bar sekali dibangkitkan per bagian, lalu DIULANG (catchy) dengan akhir yang berbeda pada pengulangan kedua. */
+const POLA = [[1, 0.5, 0.5, 1, 1], [0.5, 0.5, 0.5, 0.5, 1, 1], [1.5, 0.5, 1, 1], [0.5, 0.5, 1, 0.5, 0.5, 1], [1, 1, 0.5, 0.5, 1]];
+function buatMotif(chords, padat) {
+  const bars = [];
+  let m = 72;
+  for (let b = 0; b < 4; b++) {
     const ch = chords[b];
-    const akhir = b === chords.length - 1;
-    const pola = akhir ? [2, 2] : RITME[Math.floor(rnd() * (padat ? RITME.length : 3))];
-    let t = t0 + b * 4 * beat;
+    const pola = b === 3 ? [1, 1, 2] : POLA[Math.floor(rnd() * (padat ? POLA.length : 3))];
+    const notes = [];
+    let pos = 0;
     pola.forEach((d, k) => {
-      if (akhir && k === 1) return; // istirahat di akhir frase
-      const nadaAkor = ch.v.map((v) => v + oktaf);
-      if (k === 0) m = nadaAkor.reduce((a, v) => (Math.abs(v - m) < Math.abs(a - m) ? v : a), nadaAkor[0]);
-      else m = dekatSkala(m + (rnd() < 0.55 ? 2 : -2) * (rnd() < 0.2 ? 2 : 1));
-      m = Math.max(67 + oktaf - 12, Math.min(84 + oktaf - 12, m));
-      list.push([suara, t + hum(), m, d * beat * 0.92, jit(k === 0 ? 0.13 : 0.11)]);
-      t += d * beat;
+      const nada = ch.v.map((v) => v + 12);
+      if (k === 0 || (b === 3 && k === pola.length - 1)) m = nada.reduce((a, v) => (Math.abs(v - m) < Math.abs(a - m) ? v : a), nada[0]);
+      else m = dekatSkala(m + (rnd() < 0.6 ? 2 : -2) * (rnd() < 0.25 ? 2 : 1));
+      m = Math.max(67, Math.min(86, m));
+      notes.push([pos, m, d]);
+      pos += d;
     });
+    bars.push(notes);
   }
-  x.lalu = m;
-}
-
-function iringan(list, x, opsi) {
-  const { t0, beat, ch, layer } = x;
-  // Bass lembut: akar di ketuk 1, kelima di ketuk 3 (bagian ramai).
-  list.push(['bs', t0, ch.b, beat * 1.7, 0.2]);
-  list.push(['bs', t0 + beat * 2, layer >= 1 ? ch.b + 7 : ch.b, beat * 1.7, 0.16]);
-  // Marimba: arpeggio 1/8 (atau 1/4 di bagian tenang).
-  const pola = opsi.arp;
-  for (let i = 0; i < 8; i++) {
-    if (pola[i] < 0 || (layer === 0 && i % 2 === 1)) continue;
-    list.push(['mr', t0 + (i * beat) / 2 + hum(), ch.v[pola[i]] + (opsi.naik ?? 0), beat * 0.6, jit(i % 2 === 0 ? 0.11 : 0.08)]);
-  }
-  if (opsi.hat && layer >= 1) for (let i = 0; i < 4; i++) list.push(['ht', t0 + beat * (i + 0.5) + hum(), 0, 0, jit(opsi.hat)]);
+  return bars;
 }
 
 const TRANSPOS = (prog, n) => prog.map((c) => ({ v: K[c].v.map((v) => v + n), b: K[c].b + n }));
 
 const SONGS = [
   {
-    file: 'cerita-kantor.mp3', judul: 'Pagi di Loket (kantor & percakapan)', bpm: 88, rms: -21, tail: 3.5, durasi: [120, 190], transpos: 5, // F mayor: paling terang
-    arp: [0, 2, 1, 2, 0, 2, 1, 2], hat: 0.035, lead: 'sq',
-    order: [['A', 0], ['A', 1], ['B', 1], ['A', 2], ['C', 1], ['A', 2]],
-    prog: { A: ['C', 'Am', 'F', 'G', 'C', 'Am', 'Dm', 'G'], B: ['F', 'G', 'Em', 'Am', 'F', 'G', 'C', 'C'], C: ['Am', 'Em', 'F', 'C', 'Dm', 'G', 'C', 'G7'] },
+    file: 'cerita-kantor.mp3', judul: 'Loket Pagi (kantor & percakapan)', bpm: 104, rms: -21, tail: 0.6, durasi: [100, 190], transpos: 0, // C mayor, ringan & ceria
+    duty: [0.25, 0.125], drum: 'ringan',
+    order: [['A', 0], ['A', 1], ['B', 1], ['A', 1], ['B', 2], ['A', 2]],
+    prog: { A: ['C', 'Am', 'F', 'G', 'C', 'Am', 'Dm', 'G'], B: ['F', 'G', 'Em', 'Am', 'F', 'G', 'C', 'C'] },
   },
   {
-    file: 'cerita-periksa.mp3', judul: 'Jalan Desa (pemeriksaan lapangan)', bpm: 92, rms: -21, tail: 3.5, durasi: [120, 190], transpos: 0, // C mayor, gerak lebih banyak
-    arp: [0, 1, 2, 1, 2, 1, 0, 2], hat: 0.045, lead: 'tr', padat: true,
-    order: [['A', 0], ['A', 1], ['B', 2], ['A', 2], ['B', 1], ['C', 1], ['A', 2]],
-    prog: { A: ['C', 'G', 'Am', 'F', 'C', 'F', 'G', 'C'], B: ['F', 'C', 'Dm', 'G', 'Em', 'Am', 'Dm', 'G'], C: ['F', 'Em', 'Dm', 'C', 'F', 'G', 'Csus', 'G'] },
+    file: 'cerita-periksa.mp3', judul: 'Lapangan Berangkat (pemeriksaan)', bpm: 112, rms: -21, tail: 0.6, durasi: [100, 190], transpos: 2, // D mayor, lebih bertenaga
+    duty: [0.5, 0.25], drum: 'dorong', padat: true,
+    order: [['A', 0], ['A', 1], ['B', 1], ['A', 2], ['B', 2], ['A', 2], ['C', 1]],
+    prog: { A: ['C', 'G', 'Am', 'F', 'C', 'G', 'F', 'G'], B: ['Am', 'F', 'C', 'G', 'Am', 'F', 'Dm', 'G'], C: ['F', 'G', 'Em', 'Am', 'Dm', 'E', 'F', 'G'] },
   },
   {
-    file: 'cerita-penutup.mp3', judul: 'Senja di Kantor (penutup)', bpm: 84, rms: -22, tail: 4.5, durasi: [120, 190], transpos: 7, // G mayor, hangat & pulang
-    arp: [0, -1, 2, -1, 1, -1, 2, -1], hat: 0, lead: 'tr',
+    file: 'cerita-penutup.mp3', judul: 'Berkas Beres (penutup)', bpm: 100, rms: -22, tail: 0.6, durasi: [100, 190], transpos: 5, // F mayor, hangat
+    duty: [0.5, 0.125], drum: 'ringan', kemenangan: true,
     order: [['A', 0], ['A', 1], ['B', 1], ['A', 2], ['B', 2], ['A', 1]],
-    prog: { A: ['C', 'F', 'C', 'G', 'Am', 'F', 'G', 'C'], B: ['F', 'Em', 'Am', 'F', 'Dm', 'G', 'C', 'C'] },
+    prog: { A: ['C', 'F', 'C', 'G', 'Am', 'F', 'G', 'C'], B: ['F', 'Em', 'Am', 'Bb', 'F', 'G', 'C', 'C'] },
   },
 ];
 
 function render(song) {
-  seed = 20261118;
+  seed = 20261118 + song.transpos; lfsr = 1;
   const barSamples = Math.round((4 * 60 * SR) / song.bpm);
   const barDur = barSamples / SR;
   const beat = barDur / 4;
@@ -296,33 +294,52 @@ function render(song) {
   const bodyLen = total * barSamples;
   const tailLen = Math.round(song.tail * SR);
   const buf = new Float32Array(bodyLen + tailLen);
-  const list = [];
-  const x = { lalu: 72 + song.transpos };
+  const motif = {};
+  for (const p of Object.keys(song.prog)) {
+    const ch = TRANSPOS(song.prog[p], song.transpos);
+    motif[p] = [buatMotif(ch.slice(0, 4), song.padat), buatMotif(ch.slice(4, 8), song.padat)];
+    // Frase kedua mengulang irama frase pertama (catchy), nadanya mengikuti akornya sendiri.
+    motif[p][1] = motif[p][0].map((notes, b) => notes.map(([pos, m, d], k) => {
+      const akor = ch[4 + b].v.map((v) => v + 12);
+      return [pos, k === 0 ? akor.reduce((a, v) => (Math.abs(v - m) < Math.abs(a - m) ? v : a), akor[0]) : dekatSkala(m), d];
+    }));
+  }
   let bar = 0;
   for (const [p, layer] of song.order) {
     const chords = TRANSPOS(song.prog[p], song.transpos);
-    // Melodi: layer 0 = tanpa lead (marimba & bass saja), layer >= 1 = lead per frase 4 bar.
-    if (layer >= 1) for (let f = 0; f < chords.length; f += 4) frase(list, x, chords.slice(f, f + 4), (bar + f) * barDur, beat, song.padat || layer >= 2, 12, song.lead);
-    for (const ch of chords) {
-      Object.assign(x, { t0: bar * barDur, beat, ch, layer, bar });
-      iringan(list, x, song);
+    chords.forEach((ch, i) => {
+      const t0 = bar * barDur;
+      // Bass segitiga: akar - kelima - oktaf - kelima per seperdelapan (layer 0: per seperempat).
+      const pola = layer === 0 ? [0, 7, 0, 7] : [0, 0, 7, 12, 0, 0, 7, 12];
+      const lang = 4 / pola.length;
+      pola.forEach((d, k) => segitiga(buf, t0 + k * lang * beat, ch.b + d, lang * beat * 0.97, layer === 0 ? 0.17 : 0.24)); // legato: tanpa celah di titik loop
+      // Arpeggio pulsa 12,5 % lembut (pengisi harmoni).
+      if (layer >= 1) for (let k = 0; k < 8; k++) pulsa(buf, t0 + k * beat / 2, ch.v[[0, 1, 2, 1, 0, 1, 2, 1][k]] + 12, beat * 0.4, 0.05, song.duty[1]);
+      // Melodi pulsa (layer >= 1), motif bagian ini.
+      if (layer >= 1) for (const [pos, m, d] of motif[p][Math.floor(i / 4)][i % 4]) {
+        pulsa(buf, t0 + pos * beat, m, d * beat * 0.85, 0.13, song.duty[0], d >= 1 ? 1 : 0);
+        // Lapis 2 (puncak): melodi digandakan satu oktaf di bawah, pulsa 12,5 %: bagian ramai terdengar lebih penuh (variasi dinamika).
+        if (layer >= 2) pulsa(buf, t0 + pos * beat, m - 12, d * beat * 0.85, 0.07, 0.125);
+      }
+      // Perkusi saluran noise.
+      for (let k = 0; k < 8; k++) {
+        const tt = t0 + k * beat / 2;
+        if (layer === 0 ? k === 3 || k === 7 : k % 2 === 1 || song.drum === 'dorong') perkusi(buf, tt, 'hat', layer === 0 ? 0.015 : 0.04);
+        if (k === 0 || (song.drum === 'dorong' && k === 5) || (layer >= 2 && k === 4 && song.drum !== 'dorong')) perkusi(buf, tt, 'kick', 0.32);
+        if (layer >= 1 && (k === 2 || k === 6)) perkusi(buf, tt, 'snare', 0.07);
+      }
+      // Penutup: lick kemenangan singkat di bar terakhir tiap bagian B.
+      if (song.kemenangan && p === 'B' && i === chords.length - 1) {
+        const c = chords[i].v.map((v) => v + 12);
+        [[0, c[0]], [0.5, c[1]], [1, c[2]], [1.5, c[0] + 12], [2, c[2]], [3, c[0] + 12]].forEach(([pos, m]) => pulsa(buf, t0 + pos * beat, m, beat * 0.42, 0.1, 0.25));
+      }
       bar++;
-    }
+    });
   }
-  for (const [v, t, m, d, a] of list) {
-    if (t < -0.001 || t >= bodyLen / SR) continue;
-    const tt = Math.max(0, t);
-    if (v === 'sq') leadKotak(buf, tt, m, d, a * 0.55);
-    else if (v === 'tr') leadKotak(buf, tt, m, d, a * 0.7, true);
-    else if (v === 'mr') marimba(buf, tt, m, d, a);
-    else if (v === 'bs') bass(buf, tt, m, d, a);
-    else if (v === 'ht') hat(buf, tt, a);
-  }
-  warm(buf, 0.55);
-  reverb(buf, 0.2, 0.84, 0.4);
   for (let i = 0; i < tailLen; i++) buf[i] += buf[bodyLen + i];
   const out = buf.slice(0, bodyLen);
-  // Normalisasi RMS (bukan peak): semua trek sama "keras"-nya, jauh di bawah SFX (T-036).
+  // Sedikit hangat (lowpass ~7 kHz) supaya pulsa tidak menusuk di speaker HP; tanpa reverb (khas chip), sambungan mulus.
+  warm(out, 0.62);
   const g = Math.pow(10, song.rms / 20) / rmsOf(out);
   for (let i = 0; i < out.length; i++) out[i] *= g;
   if (peakOf(out) > 0.89) normalize(out, 0.89);

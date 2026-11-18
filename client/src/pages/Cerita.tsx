@@ -1,6 +1,10 @@
 /**
  * DAFTAR EPISODE MODE CERITA (/cerita). Kontrak: docs/rancangan-mode-cerita.md bagian 4.
  *
+ * T-037 (pemilik 18 Nov): satu layar HP tanpa gulir; kasus nyata (auto-2) = Episode 1, satu-satunya kartu yang bisa dimainkan;
+ * lalu baris TERKUNCI Episode 2 (segera hadir, tanpa rute); kartu demo (auto-1) hanya bila RAKSA_DEMO_CERITA=on. Tanpa kartu Join
+ * Game (cukup tautan "Punya kode room?"). Thumbnail = WAJAH tokoh (atlas potret piksel). Tiap kartu
+ *
  * Judul + SATU kalimat pengantar, lalu Join Game (satu-satunya ajakan gabung acara, di ATAS daftar episode; review staf
  * #4), lalu satu kartu per episode di DAFTAR_EPISODE (nomor = urutan daftar, produk, durasi, ringkas, status sendiri
  * dari simpan.ts: Baru / Sedang berjalan · Bagian n / Selesai · akhir ditemukan n/m). Tidak ada blok "Cara main lain"
@@ -17,13 +21,14 @@ import { Icon } from '../art/Icon';
 import { Arrow, PlayerShell } from '../components/PlayerShell';
 import { t, useBahasa } from '../i18n';
 import { useProfil } from '../state/profil';
-import { DAFTAR_EPISODE } from '../cerita/episode';
+import { cariEpisode } from '../cerita/episode';
 import { LatarPanggung, TokohNasabah } from '../cerita/seni';
 import { PotretMissRaksa } from '../cerita/seni/tokoh/PotretMissRaksa';
 import { akhirDitemukan, berlanggananCerita, muatProgres, mulaiBaru, versiPenyimpananCerita } from '../cerita/simpan';
 import { teksCerita } from '../cerita/teks';
 import type { Ekspresi, Episode } from '../cerita/tipe';
-import { JoinGame } from '../components/JoinGame';
+import { useAppConfig } from '../story/appConfig';
+import { PotretPikselHp } from '../cerita/ui/latar/piksel/PotretPikselHp';
 import { PanggungLatar } from '../cerita/ui/latar/PanggungLatar';
 import { idAman, kotakKepala, type Kotak } from '../cerita/ui/panggung/dunia';
 import { seniKartuRuang } from '../cerita/ui/panggung/kartuRuang';
@@ -44,14 +49,38 @@ export default function Cerita() {
   // Status kartu ikut perubahan progres (tab ini & tab lain).
   useSyncExternalStore(berlanggananCerita, versiPenyimpananCerita, () => 0);
   const nav = useNavigate();
+  const cfg = useAppConfig();
   // T-010 G3: latar adegan pertama episode berpanggung latar dipanaskan selagi daftar dibaca (dibatalkan saat pindah halaman).
   // R-14: dipanaskan ulang dengan ukuran baru saat layar diputar / DPR berubah.
   useEffect(() => { if (profil) hangatkanEpisodeAwal(); }, [profil]);
 
   if (!profil) return <Navigate to="/kenalan?lanjut=/cerita" replace />;
 
+  // T-037: hanya kasus nyata yang bisa dimainkan; demo (auto-1) hanya untuk uji internal (RAKSA_DEMO_CERITA=on). Id episode,
+  // rute /cerita/auto-1 dan progres tersimpan tidak berubah.
+  const nyata = cariEpisode('auto-2');
+  const demo = cfg.status === 'ready' && cfg.config.demoCerita ? cariEpisode('auto-1') : null;
+  const kartu = (ep: Episode) => (
+    <KartuEpisode
+      key={ep.id}
+      ep={ep}
+      bahasa={bahasa}
+      nama={profil.nickname}
+      onMainLagi={() => {
+        // Perjalanan lama diarsipkan (bukan dihapus); akhir yang ditemukan tetap tercatat.
+        mulaiBaru(ep);
+        nav('/cerita/' + ep.id);
+      }}
+    />
+  );
+  const [kodeAwal, kodeAkhir = ''] = t('cerita.hubKode', { tautan: '\u0000' }).split('\u0000');
+
   return (
-    <PlayerShell back="/" label={t('cerita.labelHub')} className="cer-hub-layar">
+    <PlayerShell
+      back="/"
+      label={<>{TOKOH.missRaksa.aktif ? <span className="cer-hub-potret-kecil" aria-hidden="true"><PotretMissRaksa ekspresi="tersenyum" ukuran={28} /></span> : null}{t('cerita.labelHub')}</>}
+      className="cer-hub-layar"
+    >
       <main className="cer-hub">
         <header className="cer-hub-kepala">
           {/* Potret piksel Miss Raksa (seni panggung cerita); tokoh dinonaktifkan = tanpa potret seperti dulu. */}
@@ -63,24 +92,12 @@ export default function Cerita() {
           </div>
         </header>
 
-        <JoinGame className="cer-hub-join" />
-
         <ul className="cer-hub-daftar" aria-label={t('cerita.daftarEpisodeAria')}>
-          {DAFTAR_EPISODE.map((ep, i) => (
-            <KartuEpisode
-              key={ep.id}
-              ep={ep}
-              nomor={i + 1}
-              bahasa={bahasa}
-              nama={profil.nickname}
-              onMainLagi={() => {
-                // Perjalanan lama diarsipkan (bukan dihapus); akhir yang ditemukan tetap tercatat.
-                mulaiBaru(ep);
-                nav('/cerita/' + ep.id);
-              }}
-            />
-          ))}
+          {nyata ? kartu(nyata) : null}
+          <BarisSegera />
+          {demo ? kartu(demo) : null}
         </ul>
+        <p className="cer-hub-kode">{kodeAwal}<Link to="/">{t('cerita.hubKodeTautan')}</Link>{kodeAkhir}</p>
         <p className="cer-hub-catatan">{t('cerita.catatanPerangkat')}</p>
       </main>
     </PlayerShell>
@@ -220,7 +237,53 @@ function SampulLatar({ ep, ekspresi, tx }: { ep: Episode; ekspresi: Ekspresi; tx
   );
 }
 
-function KartuEpisode({ ep, nomor, bahasa, nama, onMainLagi }: { ep: Episode; nomor: number; bahasa: Bahasa; nama: string; onMainLagi: () => void }) {
+/** Ikon gembok piksel 16 px (persegi utuh, tanpa penghalusan). */
+function GembokPiksel() {
+  return (
+    <svg className="cer-segera-ikon" width="16" height="16" viewBox="0 0 16 16" shapeRendering="crispEdges" aria-hidden="true" focusable="false">
+      <path fill="#5F5F5F" d="M5 2h6v1H5zM4 3h1v4H4zM11 3h1v4h-1zM2 7h12v8H2z" />
+      <path fill="#F9EEEA" d="M7 9h2v2H7zM7.5 11h1v2h-1z" />
+    </svg>
+  );
+}
+
+/**
+ * T-037 (pemilik 07:10): baris TERKUNCI Episode 2 di antara kasus nyata dan demo. Bukan tombol main: kontrol nonaktif
+ * (aria-disabled, bisa difokus); ketuk / Enter / Spasi = catatan "Segera hadir" 2 detik di barisnya. Tanpa data cerita, tanpa rute.
+ */
+function BarisSegera() {
+  const [catat, setCatat] = useState(false);
+  const waktu = useRef<number | null>(null);
+  useEffect(() => () => { if (waktu.current) window.clearTimeout(waktu.current); }, []);
+  const tunjuk = () => {
+    setCatat(true);
+    if (waktu.current) window.clearTimeout(waktu.current);
+    waktu.current = window.setTimeout(() => setCatat(false), 2000);
+  };
+  return (
+    <li className="cer-segera">
+      <div
+        className="cer-segera-baris"
+        role="button"
+        tabIndex={0}
+        aria-disabled="true"
+        aria-label={t('cerita.pemilih.terkunciAria')}
+        data-terkunci=""
+        onClick={tunjuk}
+        onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); tunjuk(); } }}
+      >
+        <GembokPiksel />
+        <span className="cer-segera-teks">
+          <b>{t('cerita.episodeKe', { n: 2 })} · {t('cerita.pemilih.segera')}</b>
+          <small>{t('cerita.pemilih.segeraTeks')}</small>
+        </span>
+        <span className="cer-segera-catatan" role="status" aria-live="polite">{catat ? t('cerita.pemilih.segeraCatatan') : ''}</span>
+      </div>
+    </li>
+  );
+}
+
+function KartuEpisode({ ep, bahasa, nama, onMainLagi }: { ep: Episode; bahasa: Bahasa; nama: string; onMainLagi: () => void }) {
   const tx = (k: string) => teksCerita(ep, k, bahasa, { nama });
   const status = statusEpisode(ep, muatProgres(ep));
   const akhir = akhirDitemukan(ep.id).filter((a) => Object.prototype.hasOwnProperty.call(ep.akhir, a));
@@ -237,7 +300,10 @@ function KartuEpisode({ ep, nomor, bahasa, nama, onMainLagi }: { ep: Episode; no
   const ketJenis = ep.jenis ? t(`cerita.jenisKet.${ep.jenis}`) : '';
   return (
     <li className="cer-ep" data-status={status.jenis}>
-      {ep.jenis ? <p className="cer-ep-jenis" data-jenis={ep.jenis} title={ketJenis} aria-description={ketJenis}>{t(`cerita.jenis.${ep.jenis}`)}</p> : null}
+      {/* T-037: thumbnail = WAJAH tokoh (atlas potret piksel, aturan skala piksel bulat), di HP; sampul lama di >= 600 px. */}
+      <span className="cer-ep-wajah" aria-hidden="true">
+        <PotretPikselHp tokoh={ep.jenis === 'demo' ? 'buRina' : 'hendra'} ekspresi={ekspresi} ukuran={88} label="" />
+      </span>
       {ep.panggung ? (
         <SeniRuangKartu nama={ep.panggung.lokasi.nama} ekspresi={ekspresi} />
       ) : ep.latar ? (
@@ -249,8 +315,12 @@ function KartuEpisode({ ep, nomor, bahasa, nama, onMainLagi }: { ep: Episode; no
         </div>
       )}
       <div className="cer-ep-isi">
+        <div className="cer-ep-teks">
+          {/* T-037 Fix 1 (D-341): chip jenis di BARIS SENDIRI di atas baris meta (meta tidak lagi terpotong di HP). */}
+          {ep.jenis ? <span className="cer-ep-jenis" data-jenis={ep.jenis} title={ketJenis} aria-description={ketJenis}>{t(`cerita.jenis.${ep.jenis}`)}</span> : null}
         <p className="cer-ep-meta">
-          <span>{t('cerita.episodeKe', { n: nomor })}</span>
+          {/* Kasus nyata = Episode 1; demo tanpa nomor. */}
+          <span>{ep.jenis === 'demo' ? t('cerita.labelDemo') : t('cerita.episodeKe', { n: 1 })}</span>
           <span aria-hidden="true">·</span>
           <span>{t(`cerita.produk.${ep.produk}`)}</span>
           <span aria-hidden="true">·</span>
@@ -265,6 +335,7 @@ function KartuEpisode({ ep, nomor, bahasa, nama, onMainLagi }: { ep: Episode; no
           <span>{teksStatus(status)}</span>
           {akhir.length ? <span className="cer-ep-akhir">{t('cerita.akhirDitemukan', { n: akhir.length, total })}</span> : null}
         </p>
+        </div>
         <div className="cer-ep-aksi">
           {status.jenis === 'baru' ? (
             <Link className="primary-action" to={ke}>{t('cerita.tombolMulai')} <Arrow /></Link>

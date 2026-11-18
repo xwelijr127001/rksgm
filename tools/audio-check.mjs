@@ -7,7 +7,8 @@
  */
 import puppeteer from 'puppeteer-core';
 
-const BASE = 'http://127.0.0.1:4000';
+// AUDIO_BASE: server lain (mis. :4003 uji Fullstack); bawaan :4000.
+const BASE = process.env.AUDIO_BASE || 'http://127.0.0.1:4000';
 const br = await puppeteer.launch({
   executablePath: 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe',
   headless: true,
@@ -22,7 +23,7 @@ await p.goto(BASE + '/', { waitUntil: 'networkidle2' });
 const hasil = await p.evaluate(async () => {
   const out = [];
   const ctx = new (window.AudioContext || window.webkitAudioContext)();
-  for (const nama of ['lobby', 'gameplay', 'podium']) {
+  for (const nama of ['lobby', 'gameplay', 'podium', 'cerita-kantor', 'cerita-periksa', 'cerita-penutup']) {
     try {
       const res = await fetch(`/audio/${nama}.mp3`);
       if (!res.ok) {
@@ -101,7 +102,7 @@ for (const h of hasil) {
     continue;
   }
   console.log(
-    `  ${h.nama.padEnd(9)} ${String(h.detik).padStart(5)}s ${h.sampleRate}Hz ${h.kanal}ch | ` +
+    `  ${h.nama.padEnd(15)} ${String(h.detik).padStart(5)}s ${h.sampleRate}Hz ${h.kanal}ch | ` +
       `peak ${String(h.peakDb).padStart(6)}dB rms ${String(h.rmsDb).padStart(6)}dB | ` +
       `variasi(cv) ${h.variasiCv} | senyap ${h.detikSenyap}/${h.totalDetikDiukur}s | ` +
       `loop awal/akhir ${h.loopAwalDb}/${h.loopAkhirDb}dB | zcr ${h.zcrPerDetik}/s`,
@@ -112,7 +113,13 @@ for (const h of hasil) {
 const masalah = [];
 for (const h of hasil) {
   if (h.error) { masalah.push(`${h.nama}: ${h.error}`); continue; }
-  if (h.nama !== 'podium' && (h.detik < 45 || h.detik > 90)) masalah.push(`${h.nama}: durasi ${h.detik}s di luar 45-90s`);
+  const cerita = h.nama.startsWith('cerita-');
+  // T-036 Fix 1: trek cerita 48-64 bar pada 100-116 BPM (sekitar 100-155 s) dan jauh lebih pelan (di belakang teks & SFX).
+  if (cerita && (h.detik < 99 || h.detik > 190)) masalah.push(`${h.nama}: durasi ${h.detik}s di luar 99-190s`);
+  if (cerita && (h.rmsDb > -20 || h.rmsDb < -30)) masalah.push(`${h.nama}: rms ${h.rmsDb}dB di luar -30..-20 dB (T-036)`);
+  // 50 ms awal = serangan ketuk 1, 50 ms akhir = peluruhan sebelum ketuk 1 berikutnya: selisih alami sekitar 9 dB (gameplay lama juga 9 dB).
+  if (cerita && Math.abs(h.loopAwalDb - h.loopAkhirDb) > 12) masalah.push(`${h.nama}: lompatan level di titik loop ${h.loopAwalDb}/${h.loopAkhirDb} dB`);
+  if (!cerita && h.nama !== 'podium' && (h.detik < 45 || h.detik > 90)) masalah.push(`${h.nama}: durasi ${h.detik}s di luar 45-90s`);
   if (h.nama === 'podium' && (h.detik < 8 || h.detik > 16)) masalah.push(`podium: durasi ${h.detik}s di luar 8-16s`);
   if (h.peakDb > -0.5) masalah.push(`${h.nama}: peak ${h.peakDb}dB terlalu dekat clipping`);
   if (h.rmsDb > -10) masalah.push(`${h.nama}: rms ${h.rmsDb}dB terlalu keras (bisa menutupi MC)`);

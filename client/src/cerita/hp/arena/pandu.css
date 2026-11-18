@@ -76,3 +76,6 @@
   .lgk[data-kompak] .lgk-petunjuk::before { display: inline-block; margin-right: 6px; vertical-align: 1px; }
   .hp-arena:is([data-pandu="k05"], [data-pandu="k11"]) .hp-arena-sematan .hp-instruksi-arena { display: none; }
 }
+
+/* T-033 Fix 3 (QA B-02): ruang untuk panah di ujung kanan pilihan kesimpulan K08 (hanya saat langkah terpandu aktif). */
+.hp-arena[data-pandu] .hp-lembar-simpul .hp-opsi { padding-right: 30px; }

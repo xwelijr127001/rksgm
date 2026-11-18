@@ -202,7 +202,7 @@ export function AdeganTatap({ ep, state, tx, namaPemain, status, tindakan, bukti
         {tanpaPanggung ? null : <PanggungLatar ep={ep} komposisi={k} tx={tx} nama={nama} suasana={status} status ruangBawah={dekat ? TUMPANG_DIALOG : 0} kunciLangkah={`${state.node}:${state.baris}`} />}
         <article className="hp-vn-dialog" aria-live="polite" data-tab={tindakan ? t('ceritaHp.tindakanmu') : undefined}>
           <div className="hp-vn-isi" data-gulir-dialog="">
-          {tindakan ? <p className="hp-tindakan"><b>{t('ceritaHp.tindakanmu')}</b><span className="hp-tindakan-sela">{selaPembicara()}</span>{tindakan}</p> : null}
+          {tindakan ? <p className="hp-tindakan"><b className="sr-only">{t('ceritaHp.tindakanmu')}</b><span className="hp-tindakan-sela">{selaPembicara()}</span>{tindakan}</p> : null}
           {buktiTindakan}
           {isiBaris(baris)}
           {statusSesudah ? (

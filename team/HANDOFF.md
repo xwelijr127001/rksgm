@@ -2528,3 +2528,160 @@ Fullstack · edited under `C:\Users\User\Desktop\rksgm-episode2` · NOT committe
   - `cek-langkah-t033` asserts there is no pointer outside K08.
 - **Gate** (final build): typecheck 0, `test:client` 771, `cek-tugas` 141, `cek-langkah` 54, `cek-layar` adegan 76 and aktivitas 60, `cek-palet` 56. `client/dist` is an exact copy of that build.
 - **Screens** are in `team/evidence/T-035/`: result cards plus each activity without a pointer.
+
+## T-036 (2026-11-18): AUDIO: quieter, cozier story music; phone-style chat ping; satisfying document SFX
+
+Fullstack · edited under `C:\Users\User\Desktop\rksgm-episode2` · NOT committed. Everything is still synthesized in the project. There are no downloads or samples, and no melody is quoted from any song.
+
+**Music** (`tools/make-music-ep2.mjs`, which is where the story tracks have always been made; `make-music.mjs` makes lobby, gameplay and podium, untouched):
+- The tracks are a new pastoral town theme: major key, soft square or triangle lead with delayed vibrato, marimba-like plucks, gentle sine bass and a light hat. The original melody is generated from chord tones by the seeded PRNG.
+- Each track is a seamless loop whose length is a whole number of bars, with the reverb tail wrapped to the start.
+
+| File | Before | After |
+| --- | --- | --- |
+| `cerita-kantor` | 96 s, 80 BPM, peak -4.6, RMS -19.4 | "Pagi di Loket", 130.9 s, 88 BPM, 48 bars, F major, peak -8.6, RMS -21.4 |
+| `cerita-periksa` | 91.5 s, 84 BPM, peak -4.9, RMS -18.3 | "Jalan Desa", 146.1 s, 92 BPM, 56 bars, C major, peak -9.0, RMS -21.4 |
+| `cerita-penutup` | 109.7 s, 70 BPM, peak -5.2, RMS -16.9 | "Senja di Kantor", 137.1 s, 84 BPM, 48 bars, G major, peak -8.6, RMS -22.4 |
+
+All values are in dBFS as decoded by Chrome. The loop seam is under 0.002, and level changes between sections stay within 2.2 dB. The files are mono 80 kbps (1.3-1.4 MB), under the 1.6 MB limit that `test:client` enforces.
+
+**Mix** (`client/src/audio/audio.ts`):
+- `GAIN_CERITA` goes from 0.55 to 0.28, on top of the quieter files.
+- Story music at the default volume: about -23.5 dB effective RMS before, -32.5 after (about 9 dB quieter relative to SFX).
+- Ambience `GAIN_SUASANA` is multiplied by 0.4 (-8 dB).
+- Music on the phone stays off by default.
+- No cache key existed, so I added `?v=t036` to the three story URLs and updated the test helper.
+
+**SFX** (Web Audio synthesis in `audio.ts`). The names are unchanged, so the existing wiring plays the new sounds: K02 tray = `taruh`, berkas opened = `kertas`, chat = `pesanTerima` and `pesanKirim`. Measured offline at the default SFX volume:
+
+| SFX | Before | After |
+| --- | --- | --- |
+| `kertas` (berkas dibuka): paper slide (band sweep) + soft pop + small bright tail | 0.11 s, peak -28.0, RMS -40.4 | 0.31 s, peak -14.6, RMS -32.9 |
+| `taruh` (dokumen ke baki): paper flutter + wooden tick + tiny chime | 0.07 s, peak -22.8, RMS -35.3 | 0.40 s, peak -14.3, RMS -36.4 |
+| `pesanTerima`: three ascending bell/marimba notes | 0.20 s, peak -25.5, RMS -38.3 | 0.57 s, peak -18.1, RMS -32.1 |
+| `pesanKirim`: single short tick | 0.12 s, peak -24.1, RMS -37.6 | 0.06 s, peak -20.3, RMS -34.9 |
+
+**Tools:**
+- `tools/cek-audio-t036.mjs` (new): renders the four SFX offline through a test-only hook, which loads only when the URL has `?uji-audio`. It recomputes the old recipes to give the before numbers, and decodes the tracks. Result: ALL PASS.
+- `check:audio` (`tools/audio-check.mjs`) now covers the story tracks too, and accepts `AUDIO_BASE`. Story tracks must be 120-190 s with RMS between -30 and -20 dB.
+- The loop-edge rule is 12 dB: the 50 ms after the downbeat versus the 50 ms of decay before it differ by about 9 dB naturally; the old gameplay track also differs by 9 dB.
+
+**Gate:**
+- typecheck 0, `test:client` 771 / 771.
+- `check:audio` passes against my :4003 server. By default it reads :4000, which still serves dist-rilis with the old files.
+- `cek-audio-t036` ALL PASS.
+- `client/dist` was rebuilt as an exact copy of the checked build. dist-rilis is untouched, so :4000 plays the new audio only after the Lead refreshes dist-rilis.
+- Not verified: listening by a human.
+
+## T-037 (2026-11-18): episode picker on one phone screen, real case first
+
+Fullstack · edited under `C:\Users\User\Desktop\rksgm-episode2` · NOT committed. Follows the Designer mock D-335..D-340 and the owner addendum of 07:00-07:12.
+
+- **Picker** (`client/src/pages/Cerita.tsx`):
+  - The picker shows the Episode 1 card (auto-2, the truck case), then a LOCKED Episode 2 row.
+  - The demo card (auto-1) is hidden. It only shows with the new server flag `RAKSA_DEMO_CERITA=on` (default off), which `/api/config` reports as `features.demoCerita`.
+  - The auto-1 code, its route `/cerita/auto-1`, saved progress and the hosted-room demo are untouched. `DAFTAR_EPISODE` keeps its order; the picker sets its own.
+  - No Join Game card. Instead one line, "Punya kode room? **Masuk di beranda**", links to `/`.
+- **Header:** one line (back, small 28 px Miss Raksa head + "Mode cerita", language, sound). The hub eyebrow, title and lead sentence are not shown under 600 px.
+- **Card on phones:**
+  - Thumbnail = Pak Hendra's FACE from the pixel portrait atlas (`PotretPikselHp`, whole-pixel scale), 88 px inside a 96 px blush square with a 2 px frame. Bu Rina's face is used for the demo when the flag is on. At 600 px and wider the old cover stays.
+  - Meta line on one line: a small chip (20 px tall, 11 px caps; orange for KASUS NYATA, grey outline for DEMO) then "Episode 1 · Kendaraan · ± 17 menit". The demo reads "Demo · …" with no number.
+  - Below the meta: title 18/22, blurb clamped to 2 lines (1 on screens ≤ 700 px high), and the status on one line with its icon inline.
+  - Mulai / Lanjutkan key full width, 48 px.
+- **Locked row:** 52 px tall with a grey K1-light frame, a 16 px pixel lock, "Episode 2 · Segera hadir" and one muted line.
+  - It is a disabled control (`aria-disabled`, tabbable, no link or route). A tap, Enter or Space shows "Segera hadir" for 2 s in place of the second line, so the row height does not change.
+- **New keys** (id/en/zh): `cerita.labelDemo`, `hubKode`, `hubKodeTautan`, `pemilih.segera`, `pemilih.segeraTeks`, `pemilih.segeraCatatan`, `pemilih.terkunciAria`.
+- **"Episode 2" label check:** the story screens never printed an episode number; their header says "Mode cerita". The only number was on the picker, which now says Episode 1.
+- **Tools:**
+  - `tools/cek-pemilih-t037.mjs` (new), 13 cases: 390x745 and 360x640 x id/en/zh x new/returning, plus 1280x800.
+  - It asserts:
+    - 0 px page scroll;
+    - exactly one playable card (auto-2), and the order card → locked row;
+    - no Join card, and the room-code link goes to `/`;
+    - the chip is first in the meta line, sized and coloured as specified, and does not overlap the portrait;
+    - the portrait box is 96 px;
+    - blurb line limit, one-line status, key text and size;
+    - the locked row is ≤ 64 px, `aria-disabled`, has no link, shows the 2 s note, and a tap does not navigate.
+  - Free space below the last line: about 400 px at 390x745 and 316 px at 360x640.
+  - `cek-tag-t026` now checks the chip contract described above, in place of the old corner badge and the before/after baseline.
+- **Also:** the T-035 hidden "Tindakanmu" label is now `class="sr-only"`, because `cek-bahasa` flagged it as clipped text.
+- **Screens:** `team/evidence/T-037/fullstack/`.
+
+## T-033 Fix 3 (2026-11-18): QA B-01, B-02
+
+- **B-01 (K09):** with the pointer gone outside K08 (T-035), K09 completes by the steps. Opening each witness and marking "Di rencana" or "Tidak perlu" enables the send bar, and the strip reaches step 3. `cek-langkah` now walks this at every size and language and asserts both.
+- **B-02 (K08 conclusion):**
+  - The pointer now sits at the RIGHT end of the first option, pointing left, with 30 px reserved in the option. It no longer covers the question text.
+  - On screens ≤ 700 px high the options are 4 px tighter and use an 18 px line height. The list had 8 px of inner scroll at 360x640 id; it now has 0.
+  - `cek-langkah` asserts 0 px inner scroll and no overlap between the pointer and any text.
+- **K02 keyboard focus (B-03):** no longer relevant, since K02 has no pointer.
+
+## T-036 Fix 1 (2026-11-18): story loops in 8-bit chiptune style
+
+- **New loops:** recomposed in `tools/make-music-ep2.mjs`. All original, with no samples and no downloads.
+  - Sound: band-limited pulse leads (12.5 / 25 / 50 % duty), a 4-bit stepped triangle bass, and LFSR-noise hat, kick and snare.
+  - Melody: a catchy 4-bar motif that repeats with A/B sections, generated from chord tones.
+
+  | Track | Title | Character | BPM | Bars | Length | RMS |
+  | --- | --- | --- | --: | --: | --: | --: |
+  | `cerita-kantor` | "Loket Pagi" | light, C major | 104 | 48 | 110.8 s | -21.4 |
+  | `cerita-periksa` | "Lapangan Berangkat" | more drive, D major | 112 | 56 | 120.0 s | -21.4 |
+  | `cerita-penutup` | "Berkas Beres" | warm, F major, short victory lick at the end of each B section | 100 | 48 | 115.2 s | -22.4 |
+
+  Peaks are -7.1 to -8.3 dBFS. Loudness variation is 0.16-0.17, and the start and end of each loop differ by at most 1.4 dB.
+- **Mix:** unchanged (`GAIN_CERITA` 0.28). Cache key bumped to `?v=t036b`. `CREDITS.md` updated.
+- **`check:audio`:** the length rule for the story tracks is now 99-190 s (48-64 bars at 100-116 BPM).
+- **The pastoral version from T-036** is kept in my scratch folder only.
+
+**Gate:**
+- The picker and Fix 3 checks ran on the build before the new audio: typecheck 0, `test:client` 771, `cek-pemilih` 13, `cek-tag` 18, `cek-beranda` 37, `cek-bahasa` 138, `cek-langkah` 54, `cek-layar` aktivitas 60, server `bahasa.config` 1.
+- The final build (same code plus the new audio): `check:audio` passes against :4003, `cek-audio-t036` ALL PASS, `test:client` 771, `cek-pemilih` 13.
+- `client/dist` is an exact copy of the final build. My test server build (`server/dist-uji`) was rebuilt with the new flag.
+- **Not verified:** a real phone, a screen reader, and anyone listening to the chiptune loops.
+
+## T-037 Fix 1 (2026-11-18): Designer D-341, D-342
+
+Fullstack · edited under `C:\Users\User\Desktop\rksgm-episode2` · NOT committed.
+- **D-341:** the KASUS NYATA chip now has its own line above the meta line, with nothing else on that line. The meta line is never cut or ellipsised.
+  - On phones the meta uses 12 px type, no letter-spacing and narrower separators. At 360 px the gap between portrait and text is 10 px instead of 12.
+  - id and zh fit on ONE line at both 390x745 and 360x640.
+  - **en does not fit one line.** "Episode 1 · Motor vehicle · about 17 min" needs about 230 px, but the text column is 198 px at 360 and 216 px at 390. So in en the line wraps BETWEEN items, never inside one, and the separator moves with the next item so no dot is left hanging.
+  - To get en onto one line, the en wording would need to be shorter, for example "Vehicle" and "± 17 min" (those keys are shared). Lead or Designer decision.
+- **D-342:** the tap note on the locked row is now "Segera hadir. Kasus berikutnya sedang disiapkan." (en "Coming soon. The next case is in preparation.", zh "即将推出。下一案例正在筹备中。"). It replaces both text lines, so the title is not repeated, and the row height stays 52 px. The row tint is blush `#F9EEEA`.
+- **Tools:**
+  - `cek-pemilih-t037` asserts that the chip is its own line directly above the meta; that neither the meta nor any of its items is truncated (scrollWidth ≤ clientWidth, no `text-overflow`); that the meta has 5 items on at most 2 lines; and that the page is not wider than the screen. It reports the meta line count for each case.
+  - `cek-tag-t026` asserts that the chip sits directly above the meta. This caught a 5 px sideways overflow in WebKit en during the fix, which the wrapping resolves.
+- **Gate** (final build): typecheck 0, `test:client` 771, `cek-pemilih` 13, `cek-tag` 18 (Chromium + WebKit). Page scroll is 0 px everywhere; the lowest content ends at 406 px (390x745 en) and 381 px (360x640 en).
+- `client/dist` is an exact copy of the final build.
+
+## T-034/T-035 Fix 2 (2026-11-18): QA L-01..L-04
+
+Fullstack · edited under `C:\Users\User\Desktop\rksgm-episode2` · NOT committed.
+- **L-01** (`cek-bahasa` measured the hidden original label on the result card): this was already fixed in T-037. The label is now `class="sr-only"`, and `cek-bahasa` skips `.sr-only` elements. The check passes 138 / 138.
+- **L-02** (K15 chip "pembayaran" broken mid-word at 360x640 id): chip titles now wrap only at word boundaries (`overflow-wrap: normal`, no hyphens), and the chip may grow by a line.
+- **L-03** (K15 preview half-cut):
+  - The collapsed preview is now exactly 3 whole lines, or 2 on screens ≤ 700 px high. The height comes from the line-height clamp (19 px lines) with the built-in ellipsis on the last line. The old max-height and the "…" overlay are removed.
+  - The empty-message text obeys the same clamp. Without that it grew to 3 lines at 360x640 en and caused 16 px of inner scroll.
+- **L-04:** the K05, K10 and K-SIM hints and the coach card no longer mention an arrow. The arrow wording remained only in those three hints and the coach card; no other text had it.
+
+  | Hint | id | en | zh |
+  | --- | --- | --- | --- |
+  | K05 | "Ketuk kartu, lalu tempat tujuannya" | "Tap a card, then where it goes" | "先点卡片，再点它的去处" |
+  | K10 | "Bandingkan tiap baris kedua dokumen" | "Compare each row of both documents" | "逐行比较两份文件" |
+  | K-SIM | "Ketuk benda di adegan untuk memeriksanya" | "Tap an item in the scene to check it" | "点击场景中的物体进行检查" |
+  | Coach card | "Ketuk benda atau tempat yang disebut petunjuk. …" | "Tap the item or place the hint names. …" | "点击提示所说的物体或位置。…" |
+
+- **Tools:** `cek-k15-t034` now asserts that no Latin-script word in a chip title is split across lines (CJK may break between characters), and that the collapsed preview shows whole lines only.
+- **Gate** (final build): typecheck 0, `test:client` 771, `cek-k15` 12 (0 px page and inner scroll at 360x640 and 390x745 x id/en/zh), `cek-langkah` 54, `cek-bahasa` 138.
+- `client/dist` is an exact copy of the final build.
+
+## T-036 Fix 2 (2026-11-18): every document open plays "kertas"
+
+Fullstack · edited under `C:\Users\User\Desktop\rksgm-episode2` · NOT committed.
+- **K02:** tapping the document on the desk (`.hp-panggung-benda`, while a document is there) now plays `kertas`, the "berkas dibuka" sound. Fixes QA low.
+- **K10:** switching to another row of the papers plays `kertas`. Tapping the row that is already open stays silent.
+- **K11 and ksim:** already played it (opening a file in the bundle, flipping the card). Unchanged.
+- **Mute:** every case goes through `playSfx`, so mute and the SFX switch apply as before.
+- **Test hook:** with `?uji-audio`, `playSfx` logs each request to `window.__sfxLog`. Nothing is logged otherwise.
+- **`cek-audio-t036`:** opens K02 on the test state, taps the document and asserts the log contains `kertas`. Result: `["kertas"]`, ALL PASS.
+- **Gate:** typecheck 0, `test:client` 771, `cek-audio-t036` ALL PASS. `client/dist` is an exact copy of the final build.

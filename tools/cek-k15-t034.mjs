@@ -36,7 +36,22 @@ export const ukurK15 = (p) => p.evaluate(() => {
   const tampak = (s) => [...a.querySelectorAll(s)].some((e) => r(e).height > 0 && getComputedStyle(e).display !== 'none');
   const potong = [...a.querySelectorAll('.hp-pesan-bagian-teks b, .hp-arena-judul, .hp-tanya-arena')].filter((e) => e.scrollWidth > e.clientWidth + 1).map((e) => e.textContent.trim().slice(0, 20));
   const kirim = [...document.querySelectorAll('[data-kirim]')].at(-1);
+  // T-035 Fix 2 (QA L-02): kata judul chip tidak dipecah di tengah (tiap kata = satu kotak baris).
+  const kataPecah = [];
+  for (const b of document.querySelectorAll('.hp-pesan-bagian-teks b')) {
+    const n = b.firstChild; if (!n || n.nodeType !== 3) continue;
+    const teks = n.textContent; let i = 0;
+    for (const kata of teks.split(/(\s+)/)) {
+      // Teks CJK tanpa spasi boleh pindah baris di antara aksara: hanya kata beraksara Latin yang diperiksa.
+      if (kata.trim() && !/[　-鿿＀-￯]/.test(kata)) { const rg = document.createRange(); rg.setStart(n, i); rg.setEnd(n, i + kata.length); const baris = new Set([...rg.getClientRects()].map((q) => Math.round(q.top))); if (baris.size > 1) kataPecah.push(kata); }
+      i += kata.length;
+    }
+  }
+  // (QA L-03) pratinjau tertutup: tinggi teks = kelipatan utuh line-height (tidak ada baris terpotong setengah).
+  const tk = document.querySelector('.hp-draf:not([data-buka]) .hp-draf-teks');
+  const barisPratinjau = tk ? tk.getBoundingClientRect().height / parseFloat(getComputedStyle(tk).lineHeight) : null;
   return {
+    kataPecah, barisPratinjau: barisPratinjau === null ? null : Math.round(barisPratinjau * 100) / 100,
     gulirHalaman: document.scrollingElement.scrollHeight - innerHeight, gulirIsi: g ? g.scrollHeight - g.clientHeight : null,
     chip: chip.length, kolom: new Set(chip.map((c) => Math.round(r(c).left))).size, tinggiMin: Math.min(...chip.map((c) => Math.round(r(c).height))),
     ikon: chip.filter((c) => /url\(/.test(getComputedStyle(c).backgroundImage)).length, ditekan: chip.filter((c) => c.getAttribute('aria-pressed') === 'true').map((c) => c.dataset.bagian),
@@ -51,6 +66,8 @@ export function nilaiK15(d, n) {
   const s = [];
   if (d.gulirHalaman > 0.5) s.push(`halaman menggulir ${d.gulirHalaman} px`);
   if (d.gulirIsi > 0.5) s.push(`isi aktivitas menggulir ${d.gulirIsi} px`);
+  if (d.kataPecah?.length) s.push(`kata chip terpecah: ${d.kataPecah.join(', ')}`);
+  if (d.barisPratinjau !== null && Math.abs(d.barisPratinjau - Math.round(d.barisPratinjau)) > 0.05) s.push(`pratinjau tertutup ${d.barisPratinjau} baris (harus baris utuh)`);
   if (d.chip !== 6 || d.kolom !== 2) s.push(`chip ${d.chip} dalam ${d.kolom} kolom`);
   if (d.tinggiMin < 44) s.push(`chip ${d.tinggiMin} px < 44`);
   if (d.ikon !== 6) s.push(`ikon ${d.ikon}/6`);

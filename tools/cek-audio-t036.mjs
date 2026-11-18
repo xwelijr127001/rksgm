@@ -51,6 +51,30 @@ for (const t of hasil.trek) {
   console.log(`${t.nama.padEnd(15)} ${t.detik}s peak ${t.peakDb} rms ${t.rmsDb} loop ${t.loopAwalDb}/${t.loopAkhirDb}`);
   if (t.peakDb > -1) masalah.push(`${t.nama}: peak`);
 }
+// T-036 Fix 2 (QA): ketuk dokumen di meja K02 meminta efek 'kertas' (berkas dibuka). Log permintaan efek dari hook ?uji-audio.
+{
+  const fsx = await import('node:fs');
+  const ST = JSON.parse(fsx.readFileSync(new URL('../team/evidence/T-013/states.json', import.meta.url), 'utf8'));
+  const p2 = await br.newPage();
+  await p2.setViewport({ width: 390, height: 745, deviceScaleFactor: 2 });
+  await p2.evaluateOnNewDocument((st) => {
+    localStorage.setItem('raksa:bahasa', 'id');
+    localStorage.setItem('raksa:profil', JSON.stringify({ nickname: 'Uji', look: { body: 0, skin: 0, hair: 0, color: 0, accessory: 'none' } }));
+    sessionStorage.setItem('raksa:loader:v1', '1');
+    localStorage.setItem('raksa:cerita', st);
+  }, ST['tel-cemas'].nilai);
+  await p2.goto(BASE + '/cerita/auto-2?uji-audio', { waitUntil: 'networkidle2' });
+  for (let i = 0; i < 14 && !(await p2.evaluate(() => !!document.querySelector('[data-mulai-tugas]'))); i++) { await p2.evaluate(() => document.querySelector('[data-lanjut], [data-mulai-percakapan]')?.click()); await new Promise((r) => setTimeout(r, 900)); }
+  await p2.evaluate(() => document.querySelector('[data-mulai-tugas]')?.click());
+  await p2.waitForSelector('.hp-panggung-benda .hp-kartu-benda, .hp-panggung-benda > *:not(.hp-benda-kosong)', { timeout: 15000 }).catch(() => null);
+  await p2.evaluate(() => { window.__sfxLog = []; });
+  await p2.click('.hp-panggung-benda').catch(() => null);
+  await new Promise((r) => setTimeout(r, 400));
+  const log = await p2.evaluate(() => window.__sfxLog ?? null);
+  console.log(`K02 ketuk dokumen -> efek ${JSON.stringify(log)}`);
+  if (!Array.isArray(log) || !log.includes('kertas')) masalah.push('K02: ketuk dokumen tidak meminta efek kertas');
+  await p2.close();
+}
 await br.close();
 console.log(masalah.length ? 'MASALAH: ' + masalah.join('; ') : 'ALL PASS');
 process.exit(masalah.length ? 1 : 0);

@@ -53,9 +53,9 @@ const MUSIC_FILES: Record<Exclude<Track, null>, string> = {
   game: (import.meta.env?.BASE_URL ?? '/') + 'audio/gameplay.mp3',
   podium: (import.meta.env?.BASE_URL ?? '/') + 'audio/podium.mp3',
   // Mode cerita Episode 2 (tools/make-music-ep2.mjs): tenang, untuk dibaca berulang.
-  'cerita-kantor': (import.meta.env?.BASE_URL ?? '/') + 'audio/cerita-kantor.mp3',
-  'cerita-periksa': (import.meta.env?.BASE_URL ?? '/') + 'audio/cerita-periksa.mp3',
-  'cerita-penutup': (import.meta.env?.BASE_URL ?? '/') + 'audio/cerita-penutup.mp3',
+  'cerita-kantor': (import.meta.env?.BASE_URL ?? '/') + 'audio/cerita-kantor.mp3?v=t036b', // ?v: kunci cache, naikkan saat trek diganti
+  'cerita-periksa': (import.meta.env?.BASE_URL ?? '/') + 'audio/cerita-periksa.mp3?v=t036b', // ?v: kunci cache, naikkan saat trek diganti
+  'cerita-penutup': (import.meta.env?.BASE_URL ?? '/') + 'audio/cerita-penutup.mp3?v=t036b', // ?v: kunci cache, naikkan saat trek diganti
 };
 
 /** Lobby & gameplay berulang; jingle podium hanya sekali. */
@@ -70,7 +70,9 @@ const MUSIC_LOOP: Record<Exclude<Track, null>, boolean> = {
 
 /** Trek cerita: lebih pelan dari musik acara (di belakang teks & SFX) dan crossfade lebih panjang. */
 const TREK_CERITA = new Set<string>(['cerita-kantor', 'cerita-periksa', 'cerita-penutup']);
-const GAIN_CERITA = 0.55;
+// T-036 (pemilik 18 Nov: musik terlalu keras): 0.55 -> 0.28 (-5,9 dB) DAN berkasnya kini RMS -21/-22 dBFS (dulu -17..-19):
+// total sekitar 9 dB lebih pelan dibanding SFX. Bawaan HP tetap musik mati.
+const GAIN_CERITA = 0.28;
 const FADE_CERITA_MS = 1600;
 function volTrek(track: Exclude<Track, null>): number {
   return musicVolume() * (TREK_CERITA.has(track) ? GAIN_CERITA : 1);
@@ -421,7 +423,7 @@ function tone(
   wave: OscillatorType,
   detune = 0,
 ) {
-  if (!ctx) return;
+  const ctx = bus.context;
   const osc = ctx.createOscillator();
   const env = ctx.createGain();
   osc.type = wave;
@@ -435,8 +437,8 @@ function tone(
   osc.stop(start + dur + 0.05);
 }
 
-function noise(bus: GainNode, start: number, dur: number, gain: number, hp = 2400) {
-  if (!ctx) return;
+function noise(bus: GainNode, start: number, dur: number, gain: number, hp = 2400, bp?: [number, number]) {
+  const ctx = bus.context;
   const len = Math.max(1, Math.floor(ctx.sampleRate * dur));
   const buf = ctx.createBuffer(1, len, ctx.sampleRate);
   const ch = buf.getChannelData(0);
@@ -444,8 +446,10 @@ function noise(bus: GainNode, start: number, dur: number, gain: number, hp = 240
   const src = ctx.createBufferSource();
   src.buffer = buf;
   const filt = ctx.createBiquadFilter();
-  filt.type = 'highpass';
+  filt.type = bp ? 'bandpass' : 'highpass';
   filt.frequency.value = hp;
+  // bp = [frekuensi akhir, Q]: sapuan pita (kertas bergeser).
+  if (bp) { filt.Q.value = bp[1]; filt.frequency.setValueAtTime(hp, start); filt.frequency.exponentialRampToValueAtTime(bp[0], start + dur); }
   const env = ctx.createGain();
   env.gain.value = gain;
   src.connect(filt).connect(env).connect(bus);
@@ -455,6 +459,8 @@ function noise(bus: GainNode, start: number, dur: number, gain: number, hp = 240
 const sfxTerakhir = new Map<Sfx, number>();
 const SFX_REDAM = new Set<Sfx>(['taruh', 'kertas', 'pesanKirim', 'pesanTerima', 'ketuk', 'konfirmasi', 'batal']);
 export function playSfx(name: Sfx): void {
+  // T-036 Fix 2: log permintaan efek untuk alat uji (hanya bila ?uji-audio memasang __sfxLog), sebelum cek bisu.
+  (globalThis as { __sfxLog?: string[] }).__sfxLog?.push(name);
   if (!ctx || !sfxBus || prefs.muted || !prefs.sfxEnabled) return;
   const kini = typeof performance !== 'undefined' ? performance.now() : Date.now();
   // Peredam ketukan beruntun HANYA untuk efek mode cerita (mode lain tidak berubah).
@@ -463,7 +469,42 @@ export function playSfx(name: Sfx): void {
     sfxTerakhir.set(name, kini);
   }
   if (ctx.state === 'suspended') ctx.resume().catch(() => { /* ditolak browser: dicoba lagi pada interaksi berikutnya */ });
-  const t = ctx.currentTime;
+  bunyikan(name, sfxBus, ctx.currentTime);
+}
+
+/** Nada mirip marimba/bel: dasar + parsial 4x yang cepat hilang (notifikasi pesan, denting konfirmasi). */
+function bel(bus: GainNode, freq: number, start: number, dur: number, gain: number) {
+  tone(bus, freq, start, dur, gain, 'sine');
+  tone(bus, freq * 4, start, dur * 0.25, gain * 0.22, 'sine');
+}
+
+/** Pop lembut: sinus yang nadanya turun cepat. */
+function pop(bus: GainNode, start: number, f0: number, f1: number, dur: number, gain: number) {
+  const ctx = bus.context;
+  const osc = ctx.createOscillator();
+  const env = ctx.createGain();
+  osc.type = 'sine';
+  osc.frequency.setValueAtTime(f0, start);
+  osc.frequency.exponentialRampToValueAtTime(f1, start + dur);
+  env.gain.setValueAtTime(0.0001, start);
+  env.gain.exponentialRampToValueAtTime(gain, start + 0.004);
+  env.gain.exponentialRampToValueAtTime(0.0001, start + dur);
+  osc.connect(env).connect(bus);
+  osc.start(start);
+  osc.stop(start + dur + 0.02);
+}
+
+/** Rekam satu efek ke OfflineAudioContext (bus = volume SFX bawaan) untuk pengukuran peak/RMS tanpa mendengar (T-036). */
+export async function rekamSfx(name: Sfx, detik = 1.2): Promise<Float32Array> {
+  const off = new OfflineAudioContext(1, Math.round(44100 * detik), 44100);
+  const bus = off.createGain();
+  bus.gain.value = DEFAULT_PREFS.sfxVolume;
+  bus.connect(off.destination);
+  bunyikan(name, bus, 0.01);
+  return (await off.startRendering()).getChannelData(0);
+}
+
+function bunyikan(name: Sfx, sfxBus: GainNode, t: number): void {
   switch (name) {
     case 'pilih':
       tone(sfxBus, N(16), t, 0.09, 0.3, 'triangle');
@@ -498,24 +539,32 @@ export function playSfx(name: Sfx): void {
       }
       break;
     case 'taruh':
-      // Kertas masuk baki: desis kertas pendek teredam + ketuk kayu rendah. Netral: sama untuk semua baki.
-      noise(sfxBus, t, 0.06, 0.07, 1500);
-      tone(sfxBus, N(-5), t + 0.01, 0.07, 0.1, 'sine');
+      // T-036 dokumen ke baki (~0,45 s): kibasan kertas (tiga desis pendek) + ketuk kayu lembut + denting konfirmasi kecil.
+      // Netral: sama untuk semua baki (bukan penilaian).
+      noise(sfxBus, t, 0.05, 0.085, 2600, [1400, 1.2]);
+      noise(sfxBus, t + 0.045, 0.05, 0.077, 2200, [1200, 1.2]);
+      noise(sfxBus, t + 0.09, 0.06, 0.06, 1800, [900, 1.2]);
+      pop(sfxBus, t + 0.15, 620, 380, 0.06, 0.272);
+      noise(sfxBus, t + 0.15, 0.012, 0.1, 3000);
+      bel(sfxBus, N(24), t + 0.21, 0.2, 0.085);
+      bel(sfxBus, N(31), t + 0.27, 0.2, 0.068);
       break;
     case 'kertas':
-      // Berkas dibuka: desis kertas singkat dua lapis, tanpa nada.
-      noise(sfxBus, t, 0.08, 0.05, 2200);
-      noise(sfxBus, t + 0.05, 0.05, 0.03, 3200);
+      // T-036 berkas dibuka (~0,35 s): kertas bergeser (desis pita yang menyapu turun) + pop lembut + ekor terang kecil.
+      noise(sfxBus, t, 0.16, 0.207, 4200, [1600, 0.9]);
+      pop(sfxBus, t + 0.13, 900, 420, 0.07, 0.322);
+      bel(sfxBus, N(28), t + 0.16, 0.18, 0.081);
+      bel(sfxBus, N(35), t + 0.2, 0.15, 0.057);
       break;
     case 'pesanKirim':
-      // Balasan terkirim: dua nada naik pendek & lembut (beda dari pesan diterima).
-      tone(sfxBus, N(19), t, 0.07, 0.11, 'sine');
-      tone(sfxBus, N(26), t + 0.05, 0.1, 0.09, 'sine');
+      // T-036 pesan terkirim: satu tik bel pendek & tinggi.
+      bel(sfxBus, N(31), t, 0.08, 0.144);
       break;
     case 'pesanTerima':
-      // Pesan masuk: dua nada turun yang hangat.
-      tone(sfxBus, N(21), t, 0.13, 0.09, 'sine');
-      tone(sfxBus, N(14), t + 0.08, 0.18, 0.08, 'sine');
+      // T-036 pesan masuk (~0,6 s): tiga nada naik ala notifikasi ponsel, bunyi mirip marimba/bel (sintesis asli).
+      bel(sfxBus, N(24), t, 0.22, 0.168);
+      bel(sfxBus, N(28), t + 0.12, 0.22, 0.168);
+      bel(sfxBus, N(31), t + 0.24, 0.5, 0.18);
       break;
     case 'ketuk':
       // Tanda lajur / buka pilihan: tick lembut.
@@ -653,7 +702,8 @@ function lepasSuasana(s: NonNullable<typeof suasanaAktif>, segera: boolean): voi
     }
   } catch { lepas(); }
 }
-const GAIN_SUASANA: Record<Exclude<Suasana, null>, number> = { bengkel: 0.05, jalan: 0.07 };
+// T-036: suasana 8 dB lebih pelan (x0,4).
+const GAIN_SUASANA: Record<Exclude<Suasana, null>, number> = { bengkel: 0.02, jalan: 0.028 };
 
 export function setSuasana(jenis: Suasana): void {
   suasanaDiminta = jenis;

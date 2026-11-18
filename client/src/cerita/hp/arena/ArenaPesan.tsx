@@ -22,7 +22,7 @@ export function ArenaPolaPesan({ konfig, jawaban, ubah, tx, labelKirim, onKirim 
       <KeSlot ke={SlotKepalaArena}><h3 className="hp-tanya-arena">{tx(konfig.tanya)}</h3></KeSlot>
       <button type="button" id="hp-draf-pesan" className="hp-draf" data-buka={buka ? '' : undefined} aria-expanded={buka} onClick={() => setBuka((v) => !v)}>
         <span className="hp-draf-judul" style={{ display: 'block' }}>{t('ceritaHp.drafPesan')}</span>
-        <span aria-live="polite" style={{ display: 'block' }}>
+        <span className="hp-draf-teks" aria-live="polite" style={{ display: 'block' }}>
           {di.length
             ? di.map((id) => <span key={id} className="hp-draf-kalimat" data-bagian={id}>{tx(konfig.benda.find((x) => x.id === id)!.keterangan!)}</span>)
             : <span className="hp-draf-kosong" style={{ display: 'block' }}>{t('ceritaHp.pesanKosong')}</span>}

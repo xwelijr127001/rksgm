@@ -23,4 +23,5 @@ import './gaya-game.css';
 // T-036: pengukuran SFX tanpa mendengar (tools/cek-audio-t036.mjs). Hanya dengan ?uji-audio di URL.
 if (typeof location !== 'undefined' && location.search.includes('uji-audio')) {
   void import('./audio/audio').then((m) => { (window as unknown as { __rekamSfx?: typeof m.rekamSfx }).__rekamSfx = m.rekamSfx; });
+  (window as unknown as { __sfxLog?: string[] }).__sfxLog = [];
 }
