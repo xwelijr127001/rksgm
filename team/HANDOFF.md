@@ -2783,3 +2783,17 @@ Owner phone pass item 5. Built by the Designer; uncommitted. Owner rule: no e2e,
 **Risks**
 - e2e/cek tools that clicked the old master switch (`data-suara="master"`), the "Coba suara" details, or the `<select>` in the menu will need updating if they are run later. `data-suara="musik|efek"` and `data-volume="musik|efek"` are kept.
 - Gate: client typecheck 0 errors, client/dist rebuilt. Not committed; `client/dist-rilis` untouched.
+
+## T-042 (2026-11-19): SFX late on iPhone after T-040
+
+- **Reasoning:** the tap-to-sound path in `playSfx` was already synchronous (gap check, voice bookkeeping and `bunyikan` at `ctx.currentTime` in the same call; `resume()` fire-and-forget; the setTimeouts only disconnect finished voices), so the delay must come from the output buffer size. T-040 added two session-wide iOS changes that can raise it: `audioSession.type = 'playback'` and music routed into the same AudioContext via `createMediaElementSource`. The context also had no `latencyHint`.
+- **Certain fixes** (`client/src/audio/audio.ts`): `new Ctor({ latencyHint: 'interactive' })` with fallback to `new Ctor()`; `resume()` now runs whenever the state is not `running` (iOS reports `interrupted`, not only `suspended`), still fire-and-forget.
+- **T-042 temporary A/B, remove after owner picks:** read once at `initAudio` from `?suara=`, kept in sessionStorage key `raksa:suara-ab`.
+  - `?suara=a` = T-040 as shipped (audioSession playback + music through Web Audio)
+  - `?suara=b` = no audioSession playback, music still through Web Audio (**default** without parameter: keeps the in-app music volume working on iOS, which the owner confirmed, and drops the session-category change that is new and global)
+  - `?suara=c` = audioSession playback, music NOT routed (el.volume as before T-040)
+  - `?suara=d` = neither (pre-T-040 audio routing/session)
+  - Note: routing is per element and permanent once made, so switch mode with a fresh load of the URL (new tab or reload), not mid-page.
+- T-040 fixes untouched: 70/80 ms per-sound gap, max 6 voices, idempotent music/ambience, single play per track.
+
+**Gate (owner rule):** typecheck 0; `client/dist` rebuilt = exact copy of the scratch build. Not tested in a browser or on a phone. Not committed.
