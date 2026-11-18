@@ -177,12 +177,36 @@ function ready(): boolean {
   return ctx !== null && ctx.state === 'running';
 }
 
+// T-046: orange-button sound = the owner's pick, Kenney Interface Sounds "confirmation_003" (CC0, public/audio/CREDITS.md).
+// WAV on purpose (no MP3 encoder silence at the head). Loaded once at initAudio; until it is decoded (or if it fails) the
+// T-045 synth recipe plays instead, silently.
+const SFX_TOMBOL_URL = (import.meta.env?.BASE_URL ?? '/') + 'audio/sfx-tombol.wav';
+/** Level of the sample (file peak 0.89, RMS 0.17) so it sits about as loud as 'konfirmasi'. Tweak here. */
+const GAIN_TOMBOL = 0.16;
+let bufTombol: AudioBuffer | null = null;
+let muatTombolMulai = false;
+function muatSampelTombol(): void {
+  if (muatTombolMulai || !ctx || typeof fetch === 'undefined') return;
+  muatTombolMulai = true;
+  const c = ctx;
+  fetch(SFX_TOMBOL_URL)
+    .then((r) => { if (!r.ok) throw new Error(String(r.status)); return r.arrayBuffer(); })
+    // Callback form as well: older Safari decodeAudioData returns no promise.
+    .then((ab) => new Promise<AudioBuffer>((ok, gagal) => {
+      const p = c.decodeAudioData(ab, ok, gagal) as Promise<AudioBuffer> | undefined;
+      if (p && typeof p.then === 'function') p.then(ok, gagal);
+    }))
+    .then((b) => { bufTombol = b; })
+    .catch(() => { catatSekali('Suara tombol (sfx-tombol.wav) tidak bisa dimuat - memakai suara sintesis.'); });
+}
+
 /** Dipanggil pada interaksi pengguna pertama (AudioUnlocker). */
 export function initAudio(): void {
   userGesture = true;
   // T-044: behaviour "b" of the T-042 A/B is permanent: NO audioSession 'playback' (owner picked b on iPhone), music routed
   // through Web Audio (in-app music volume works on iOS), AudioContext with latencyHint 'interactive'.
   if (ctx) {
+    muatSampelTombol();
     if (ctx.state !== 'running') ctx.resume().catch(() => { /* ditolak browser: dicoba lagi pada interaksi berikutnya */ });
     applyMusic();
     return;
@@ -209,6 +233,7 @@ export function initAudio(): void {
   } else {
     catatSekali('Web Audio tidak tersedia - efek suara dimatikan.');
   }
+  muatSampelTombol();
   applyMusic();
   applyAmbience();
 }
@@ -696,6 +721,16 @@ function bunyikan(name: Sfx, sfxBus: GainNode, t: number): void {
       tone(sfxBus, N(23), t + 0.06, 0.14, 0.07, 'sine');
       break;
     case 'tombol': {
+      // T-046: the owner's sample when it is decoded (same voice gain, same 20 ms lead); otherwise the T-045 synth below.
+      if (bufTombol) {
+        const src = sfxBus.context.createBufferSource();
+        src.buffer = bufTombol;
+        const lvl = sfxBus.context.createGain();
+        lvl.gain.value = GAIN_TOMBOL;
+        src.connect(lvl).connect(sfxBus);
+        src.start(t);
+        break;
+      }
       // T-045 orange key press (~130 ms, original synth): soft low "thock" (sine 180 -> 110 Hz, 25 ms) + bright two-note rising
       // chime N(24) -> N(31), triangle, 10 ms apart, through a 5 kHz lowpass. 2.5 ms attack (no click), exponential release,
       // peak a little below 'konfirmasi' so it does not tire on repeat.

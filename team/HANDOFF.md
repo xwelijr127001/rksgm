@@ -2822,3 +2822,12 @@ QA added 3 expect (snapshot) tests with node:test `t.assert.snapshot` (record: `
 - **New SFX `tombol`** (~130 ms, original synth): sine "thock" 180 -> 110 Hz (25 ms drop + short tail, peak 0.085) + triangle chime N(24) then N(31) 10 ms apart through a 5 kHz lowpass (peaks 0.05 / 0.045), 2.5 ms attack, exponential release; 70 ms gap. Listed in the dev-only "Coba suara" samples (i18n `ceritaHp.sfxTombol` id/en/zh).
 
 **Gate (owner rule):** typecheck 0; `client/dist` rebuilt = exact copy of the scratch build. Not tested in a browser or on a phone. Not committed.
+
+## T-046 (2026-11-19): orange-button sound = owner's pick (Kenney confirmation_003, CC0)
+
+- `client/src/audio/audio.ts`: `initAudio` fetches `BASE_URL + audio/sfx-tombol.wav` once (`muatSampelTombol`) and decodes it with `decodeAudioData` (promise and callback form, for older Safari); the AudioBuffer stays in memory. SFX `tombol` = AudioBufferSourceNode -> level gain `GAIN_TOMBOL` -> the per-voice gain -> sfxBus, started at the same 20 ms lead. Until the buffer is ready, or if fetch/decode fails (logged once), the T-045 synth recipe plays.
+- **Gain:** `GAIN_TOMBOL = 0.16` (file peak 0.89, RMS 0.17, measured from the WAV; about the loudness of konfirmasi, which peaks near 0.12). One constant to tweak.
+- Unchanged from T-045: central capture listener, a button's own sound wins and the default voice is cut, 70 ms gap, voice cap, mute / effects-off.
+- The WAV is not re-encoded; Vite copies `client/public/audio/sfx-tombol.wav` to `client/dist/audio/sfx-tombol.wav` (byte-identical, 28 622 bytes).
+
+**Gate (owner rule):** typecheck 0; `client/dist` rebuilt = exact copy of the scratch build. Not tested in a browser or on a phone. Not committed.

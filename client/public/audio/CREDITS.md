@@ -121,3 +121,9 @@ Ketiga berkas didekode penuh tanpa galat dan tanpa clipping (peak -4,6 s/d -5,2 
 dengar manusia, komposisi tidak diubah berdasarkan dugaan):
 - Hening 16-26 ms di kepala tiap berkas (jeda encoder MP3): calon jeda kecil saat `<audio loop>` berulang.
 - `cerita-periksa.mp3`: detik terakhir sekitar 8 dB lebih pelan dari detik pertama, jadi di titik loop ada lompatan level.
+
+### sfx-tombol.wav (bunyi tombol oranye, 19 Nov 2026)
+
+`confirmation_003` dari **Interface Sounds** oleh Kenney (www.kenney.nl), lisensi **CC0 1.0** (domain publik; boleh komersial,
+tanpa wajib kredit). Dipilih owner dari halaman pilih bunyi (nomor 20). Diubah ke WAV mono 16-bit 44,1 kHz tanpa pengolahan lain
+(WAV dipakai, bukan MP3, supaya tidak ada jeda encoder di kepala bunyi).
