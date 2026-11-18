@@ -18,7 +18,8 @@
     linear-gradient(#f8e3c8, #f8e3c8) 1px 1px / calc(100% - 2px) calc(100% - 2px) no-repeat,
     linear-gradient(#e8a87c, #e8a87c) 2px 0 / calc(100% - 4px) 100% no-repeat, linear-gradient(#e8a87c, #e8a87c) 0 2px / 100% calc(100% - 4px) no-repeat; }
 .hp-arena[data-pola="pesan"] .hp-draf .hp-draf-judul { margin: 0 0 2px; font-size: 12px; line-height: 16px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; color: #7a3e00; }
-.hp-arena[data-pola="pesan"] .hp-draf .hp-draf-kosong { margin: 0; font-size: 14px; line-height: 19px; color: #5f5f5f; }
+/* T-040: no box behind the empty-state line (hp.css gives it a white fill + padding; inline it wrapped into patches) */
+.hp-arena[data-pola="pesan"] .hp-draf .hp-draf-kosong { margin: 0; padding: 0; border-radius: 0; background: none; font-size: 14px; line-height: 19px; color: #5f5f5f; }
 /* collapsed: 3 lines of the message then "...", the whole bubble is a button that opens it (JS: data-buka) */
 .hp-arena[data-pola="pesan"] .hp-draf:not([data-buka])::after { content: '\2026'; position: absolute; right: 10px; bottom: 4px; padding-left: 16px; font-weight: 800; color: #7a3e00; background: linear-gradient(90deg, transparent, #f8e3c8 14px); }
 .hp-arena[data-pola="pesan"] .hp-draf[data-buka] { max-height: none; }

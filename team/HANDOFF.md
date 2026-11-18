@@ -2735,3 +2735,12 @@ Fullstack · edited under `C:\Users\User\Desktop\rksgm-episode2` · NOT committe
 - **Coordinator add-on:** `tools/e2e-browser.mjs` takes `RAKSA_PIN` and sends it in `host:create` (the tool does not call the bank), and stops with a clear message when `host:create` fails.
 
 **Gate:** typecheck 0, `test:server` 209 / 209, `test:client` 772 / 772, `cek-rilis` 0 hits on the rebuilt `client/dist` (exact copy). e2e with a PIN not run by me (Lead gate). Not committed.
+
+## T-040 (2026-11-19): owner phone pass, items 1-4 (item 5 Story menu moved to Designer T-041, not touched)
+
+- **1 K15 draft empty line** (`client/src/cerita/hp/arena/pesan.css`): `.hp-draf-kosong` inherited a white fill + padding + radius from hp.css and is forced inline when collapsed, so it wrapped into patchy boxes. The composer rule now sets padding 0, radius 0, background none; the line sits on the panel colour (CSS only, same for id/en/zh). The sentence spans (`.hp-draf-kalimat`) already had no background.
+- **2 K08 pointer** (`client/src/cerita/hp/arena/Pandu.tsx` `cariSasaran`): no pointer and no `.lgk-sasaran` ring on lanes (`tandai`) or conclusions (`putus`); after a choice the pointer moves to the send button only. It still shows on the sign post at `ketuk` (signs are not graded). Ribbon and hints unchanged.
+- **3 Audio pile-up** (`client/src/audio/audio.ts`): every SFX has a 70 ms minimum gap (story SFX keep 80 ms); each play is its own voice GainNode, max 6 at once, the oldest fades out in about 10 ms. `setTrack` with the unchanged track is a no-op; `fade` skips when the same target is already running or reached; a pending `play()` is not called again or reset to 0 (this was the restart on quick screen updates); ambience with the same place + volume does no new ramp. One element per track (map by src), at most two during a crossfade.
+- **4 iPhone volume** (`audio.ts`): `initAudio` sets `navigator.audioSession.type = 'playback'` (try/catch). Music elements are routed element -> MediaElementSource -> per-track gain -> new `musicBus` -> master; volume and fades drive the gain (`el.volume` stays 1), with `el.volume` as fallback when there is no AudioContext. So `prefs.musicVolume` really changes loudness on iOS; SFX already went through the Web Audio sfx bus. Prefs keys and defaults unchanged.
+
+**Gate (owner rule: typecheck + build only):** typecheck 0; `client/dist` rebuilt = exact copy of the scratch build. No tests, e2e or browser runs; nothing verified on a phone yet. Not committed.

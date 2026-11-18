@@ -57,9 +57,10 @@ function cariSasaran(kode: string, arena: HTMLElement, kini: number, disentuh: W
   if (kode === 'k08') {
     const t = arena.querySelector('.hp-rambu')?.getAttribute('data-tahap');
     if (t === 'ketuk') return pertama('.lk-tiang[data-keadaan="aktif"]');
-    if (t === 'tandai') return arena.querySelector('button.lk-lajur.is-on') ? kirim() : semua('button.lk-lajur')[0] ?? null; // D-323: lajur pertama, bukan jawabannya
-    // D-332: kesimpulan = kesimpulan pertama di lembar, lalu tombol kirim sesudah satu dipilih.
-    if (t === 'putus') return arena.querySelector('[data-simpul][aria-checked="true"]') ? kirim() : semua('[data-simpul]')[0] ?? null;
+    // T-040 (pemilik 19 Nov): penunjuk TIDAK PERNAH di pilihan yang dinilai (lajur 1 = jawaban rambu 2; kesimpulan 1 = jawaban).
+    // Lajur dan kesimpulan: tanpa penunjuk/cincin; pita + petunjuk sudah menyebut aksinya. Sesudah memilih: tombol kirim saja.
+    if (t === 'tandai') return arena.querySelector('button.lk-lajur.is-on') ? kirim() : null;
+    if (t === 'putus') return arena.querySelector('[data-simpul][aria-checked="true"]') ? kirim() : null;
     return null;
   }
   if (kini === 2) return kirim();

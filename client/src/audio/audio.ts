@@ -163,6 +163,8 @@ let ctx: AudioContext | null = null;
 let master: GainNode | null = null;
 let sfxBus: GainNode | null = null;
 let ambBus: GainNode | null = null;
+/** T-040: music elements routed through Web Audio (iOS Safari ignores HTMLAudioElement.volume). */
+let musicBus: GainNode | null = null;
 
 /** Interaksi pengguna sudah terjadi (syarat autoplay). */
 let userGesture = false;
@@ -176,6 +178,12 @@ function ready(): boolean {
 /** Dipanggil pada interaksi pengguna pertama (AudioUnlocker). */
 export function initAudio(): void {
   userGesture = true;
+  // T-040 (owner on iPhone): declare media playback so the hardware volume buttons and the silent switch behave like normal
+  // media (iOS 16.4+ / Safari 17). Unsupported browsers: no-op.
+  try {
+    const sesi = (navigator as unknown as { audioSession?: { type: string } }).audioSession;
+    if (sesi && sesi.type !== 'playback') sesi.type = 'playback';
+  } catch { /* not supported */ }
   if (ctx) {
     if (ctx.state === 'suspended') ctx.resume().catch(() => { /* ditolak browser: dicoba lagi pada interaksi berikutnya */ });
     applyMusic();
@@ -195,6 +203,9 @@ export function initAudio(): void {
     ambBus = ctx.createGain();
     ambBus.gain.value = 1;
     ambBus.connect(master);
+    musicBus = ctx.createGain();
+    musicBus.gain.value = 1;
+    musicBus.connect(master);
     if (ctx.state === 'suspended') ctx.resume().catch(() => { /* ditolak browser: dicoba lagi pada interaksi berikutnya */ });
   } else {
     catatSekali('Web Audio tidak tersedia - efek suara dimatikan.');
@@ -217,6 +228,38 @@ function applyPrefs() {
 const els = new Map<string, HTMLAudioElement>();
 const rusak = new Set<string>();
 const fades = new Map<HTMLAudioElement, number>();
+/** Target of the fade in progress per element: the same target again = no new fade (T-040, idempotent). */
+const fadeTujuan = new Map<HTMLAudioElement, number>();
+/** play() still pending: do not call play() again or reset the volume (rapid screen updates used to restart the track). */
+const memulai = new Set<HTMLAudioElement>();
+/** T-040: per-element gain (element -> MediaElementSource -> gain -> musicBus -> master). Missing = fallback el.volume. */
+const gainEl = new Map<HTMLAudioElement, GainNode>();
+
+function sambungkan(el: HTMLAudioElement): void {
+  if (!ctx || !musicBus || gainEl.has(el)) return;
+  try {
+    const g = ctx.createGain();
+    g.gain.value = el.volume;
+    ctx.createMediaElementSource(el).connect(g).connect(musicBus);
+    el.volume = 1; // loudness is now the gain only
+    gainEl.set(el, g);
+  } catch {
+    catatSekali('Musik tidak bisa diarahkan lewat Web Audio - volume memakai elemen audio.');
+  }
+}
+
+function bacaVol(el: HTMLAudioElement): number {
+  const g = gainEl.get(el);
+  return g ? g.gain.value : el.volume;
+}
+
+function aturVol(el: HTMLAudioElement, v: number): void {
+  const g = gainEl.get(el);
+  if (g && ctx) {
+    g.gain.cancelScheduledValues(ctx.currentTime);
+    g.gain.value = v;
+  } else el.volume = v;
+}
 
 /** Trek yang diminta halaman, belum tentu yang berbunyi. */
 let desired: Track = null;
@@ -225,6 +268,7 @@ let playing: Exclude<Track, null> | null = null;
 
 function cancelFade(el: HTMLAudioElement) {
   const id = fades.get(el);
+  fadeTujuan.delete(el);
   if (id !== undefined) {
     window.clearInterval(id);
     fades.delete(el);
@@ -232,18 +276,22 @@ function cancelFade(el: HTMLAudioElement) {
 }
 
 function fade(el: HTMLAudioElement, to: number, ms: number, done?: () => void) {
-  cancelFade(el);
-  const from = el.volume;
   const target = Math.min(1, Math.max(0, to));
+  // T-040: the same fade already running (or already there) = no-op, so repeated applyMusic calls never re-fade.
+  if (!done && fades.has(el) && Math.abs((fadeTujuan.get(el) ?? -1) - target) < 0.001) return;
+  if (!done && !fades.has(el) && Math.abs(bacaVol(el) - target) < 0.001) return;
+  cancelFade(el);
+  const from = bacaVol(el);
   if (ms <= 0 || Math.abs(target - from) < 0.01) {
-    el.volume = target;
+    aturVol(el, target);
     if (done) done();
     return;
   }
   const mulai = Date.now();
+  fadeTujuan.set(el, target);
   const id = window.setInterval(() => {
     const k = Math.min(1, (Date.now() - mulai) / ms);
-    el.volume = from + (target - from) * k;
+    aturVol(el, from + (target - from) * k);
     if (k >= 1) {
       cancelFade(el);
       if (done) done();
@@ -256,7 +304,7 @@ function element(track: Exclude<Track, null>): HTMLAudioElement | null {
   const src = MUSIC_FILES[track];
   if (rusak.has(src) || typeof Audio === 'undefined') return null;
   const ada = els.get(src);
-  if (ada) return ada;
+  if (ada) { sambungkan(ada); return ada; }
   const el = new Audio(src);
   el.loop = MUSIC_LOOP[track];
   el.preload = 'auto';
@@ -271,6 +319,7 @@ function element(track: Exclude<Track, null>): HTMLAudioElement | null {
     if (playing === track) playing = null; // jingle selesai, boleh diputar lagi
   });
   els.set(src, el);
+  sambungkan(el);
   return el;
 }
 
@@ -316,7 +365,8 @@ let sebelumEl: HTMLAudioElement | null = null;
 
 function hentikan(el: HTMLAudioElement) {
   cancelFade(el);
-  el.volume = 0;
+  memulai.delete(el);
+  aturVol(el, 0);
   el.pause();
 }
 
@@ -349,6 +399,8 @@ function applyMusic() {
   playing = want && el ? want : null;
   if (!want || !el) return;
 
+  // T-040: play() still pending for this target = nothing to do (no second play(), no volume reset, no restart).
+  if (memulai.has(el)) return;
   if (!el.paused) {
     // Sudah berbunyi (termasuk yang sempat memudar keluar lalu dipilih lagi): cukup arahkan volumenya.
     fade(el, volTrek(want), TREK_CERITA.has(want) ? FADE_CERITA_MS : FADE_QUICK_MS);
@@ -362,19 +414,22 @@ function applyMusic() {
     }
   }
   cancelFade(el);
-  el.volume = 0;
+  aturVol(el, 0);
   let p: Promise<void> | undefined;
   try { p = el.play(); } catch { p = undefined; }
   const masihRelevan = () => targetEl === el && targetTrack() === want;
   if (p && typeof p.then === 'function') {
+    memulai.add(el);
     p.then(
       () => {
+        memulai.delete(el);
         blocked = false;
         // play() bisa selesai sesudah pemain keluar, membisukan, atau berganti tema: jangan hidupkan trek yang tidak relevan.
         if (!masihRelevan()) { if (targetEl !== el) hentikan(el); return; }
         fade(el, volTrek(want), TREK_CERITA.has(want) ? FADE_CERITA_MS : FADE_IN_MS);
       },
       () => {
+        memulai.delete(el);
         // Ditolak browser (autoplay) atau berkas bermasalah: jangan melempar.
         blocked = true;
         userGesture = false;
@@ -394,6 +449,7 @@ function applyMusic() {
  */
 export function setTrack(track: Track, owner?: string): void {
   if (owner !== undefined && owner !== activeOwner()) return;
+  if (desired === track) return; // T-040: unchanged track = no-op (screen updates call this on every render)
   desired = track;
   applyMusic();
 }
@@ -460,18 +516,42 @@ function noise(bus: GainNode, start: number, dur: number, gain: number, hp = 240
 
 const sfxTerakhir = new Map<Sfx, number>();
 const SFX_REDAM = new Set<Sfx>(['taruh', 'kertas', 'pesanKirim', 'pesanTerima', 'ketuk', 'konfirmasi', 'batal']);
+/** T-040: every sound has a minimum gap (fast answers cannot stack the same sound) and at most SFX_SUARA_MAKS voices sound at once. */
+const SFX_JEDA_MS = 70;
+const SFX_SUARA_MAKS = 6;
+const SFX_UMUR_S = 0.9; // longest effect (pesanTerima ~0.8 s) + tail
+const suaraSfx: { g: GainNode; akhir: number }[] = [];
+
+function lepasSuara(v: { g: GainNode }, cepat: boolean): void {
+  if (!ctx) return;
+  if (cepat) {
+    try { v.g.gain.cancelScheduledValues(ctx.currentTime); v.g.gain.setTargetAtTime(0, ctx.currentTime, 0.01); } catch { /* ignore */ }
+  }
+  window.setTimeout(() => { try { v.g.disconnect(); } catch { /* already */ } }, cepat ? 80 : 50);
+}
 export function playSfx(name: Sfx): void {
   // T-036 Fix 2 / T-038 Fix 1: log for the test tool, compiled in only for dev or a VITE_UJI_AUDIO=on build.
   if (UJI_AUDIO) (globalThis as { __sfxLog?: string[] }).__sfxLog?.push(name);
   if (!ctx || !sfxBus || prefs.muted || !prefs.sfxEnabled) return;
   const kini = typeof performance !== 'undefined' ? performance.now() : Date.now();
-  // Peredam ketukan beruntun HANYA untuk efek mode cerita (mode lain tidak berubah).
-  if (SFX_REDAM.has(name)) {
-    if (kini - (sfxTerakhir.get(name) ?? -1e9) < 80) return;
-    sfxTerakhir.set(name, kini);
-  }
+  // Peredam ketukan beruntun: efek mode cerita 80 ms (lama), semua efek lain paling sedikit 70 ms (T-040).
+  if (kini - (sfxTerakhir.get(name) ?? -1e9) < (SFX_REDAM.has(name) ? 80 : SFX_JEDA_MS)) return;
+  sfxTerakhir.set(name, kini);
   if (ctx.state === 'suspended') ctx.resume().catch(() => { /* ditolak browser: dicoba lagi pada interaksi berikutnya */ });
-  bunyikan(name, sfxBus, ctx.currentTime);
+  const t = ctx.currentTime;
+  // Voices that already ended leave the list; when the cap is reached the OLDEST is faded out in ~10 ms (no clipping pile-up).
+  for (let i = suaraSfx.length - 1; i >= 0; i--) if (suaraSfx[i].akhir <= t) suaraSfx.splice(i, 1);
+  while (suaraSfx.length >= SFX_SUARA_MAKS) lepasSuara(suaraSfx.shift()!, true);
+  const g = ctx.createGain();
+  g.gain.value = 1;
+  g.connect(sfxBus);
+  const v = { g, akhir: t + SFX_UMUR_S };
+  suaraSfx.push(v);
+  bunyikan(name, g, t);
+  window.setTimeout(() => {
+    const i = suaraSfx.indexOf(v);
+    if (i >= 0) { suaraSfx.splice(i, 1); lepasSuara(v, false); }
+  }, SFX_UMUR_S * 1000 + 100);
 }
 
 /** Nada mirip marimba/bel: dasar + parsial 4x yang cepat hilang (notifikasi pesan, denting konfirmasi). */
@@ -684,7 +764,7 @@ export function musikCeritaAktif(): boolean {
  */
 export type Suasana = 'bengkel' | 'jalan' | null;
 let suasanaDiminta: Suasana = null;
-let suasanaAktif: { jenis: Exclude<Suasana, null>; out: GainNode; src: AudioBufferSourceNode; lfo?: OscillatorNode; simpul: AudioNode[] } | null = null;
+let suasanaAktif: { jenis: Exclude<Suasana, null>; out: GainNode; src: AudioBufferSourceNode; lfo?: OscillatorNode; simpul: AudioNode[]; vol: number } | null = null;
 
 /** Hentikan satu lapis suasana: `segera` = bisu/tab tersembunyi/keluar halaman (tanpa sisa); selain itu memudar ~1 s. Simpul dilepas. */
 function lepasSuasana(s: NonNullable<typeof suasanaAktif>, segera: boolean): void {
@@ -731,7 +811,12 @@ function applyAmbience(): void {
   const want: Suasana = !modeCerita || prefs.muted || prefs.musikCerita === false || hidden || !userGesture ? null : suasanaDiminta;
   const vol = (j: Exclude<Suasana, null>) => GAIN_SUASANA[j] * Math.min(1, Math.max(0, prefs.musicVolume)) * 2;
   if (suasanaAktif && suasanaAktif.jenis === want) {
-    suasanaAktif.out.gain.setTargetAtTime(vol(want), ctx.currentTime, 0.3);
+    // T-040: same place + same volume = no-op (no new ramp on every answer).
+    const v = vol(want);
+    if (Math.abs(v - suasanaAktif.vol) > 0.0001) {
+      suasanaAktif.out.gain.setTargetAtTime(v, ctx.currentTime, 0.3);
+      suasanaAktif.vol = v;
+    }
     return;
   }
   if (suasanaAktif) {
@@ -778,7 +863,7 @@ function applyAmbience(): void {
   }
   src.start();
   out.gain.setTargetAtTime(vol(want), ctx.currentTime, 0.8);
-  suasanaAktif = { jenis: want, out, src, lfo, simpul };
+  suasanaAktif = { jenis: want, out, src, lfo, simpul, vol: vol(want) };
 }
 
 export function setSfxVolume(v: number): void {
