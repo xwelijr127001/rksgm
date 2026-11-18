@@ -160,3 +160,9 @@
 .sim-cetakan[aria-disabled="true"], .sim-kartu-seret[aria-disabled="true"] { cursor: default; }
 /* D-220: klip papan jalan disembunyikan di layar akhir (setengah tertutup tepi area gulir di HP). */
 .sim-papan[data-akhir] > .sm-klip { display: none; }
+
+/* T-049 langkah 4: baris data Satpas dan kotak kartu = tombol cocokkan (bidang ketuk transparan di atas seni, seni tidak berubah).
+   NAMA dan NO. SIM 44 px (ikut kepala / kaki cetakan), GOLONGAN 24 px + kotak golongan di kartu 48 px. */
+.sim-baris { position: absolute; z-index: 3; margin: 0; padding: 0; border: 0; background: none; cursor: pointer; }
+.sim-baris[aria-pressed="true"], .sim-baris:disabled { cursor: default; }
+.sim-baris:focus-visible { outline: 3px solid #1d6fd1; outline-offset: -3px; }

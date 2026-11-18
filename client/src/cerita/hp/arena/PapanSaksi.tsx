@@ -10,6 +10,7 @@
  */
 import { useId, useState } from 'react';
 import '../../seni/aktivitas/piksel.css';
+import { playSfx } from '../../../audio/audio';
 import { t } from '../../../i18n';
 import { KeSlot, SlotKepalaArena } from '../cangkang';
 import type { BendaArena } from '../../tipe';
@@ -32,13 +33,16 @@ export function PapanSaksi({ ep, konfig, jawaban, ubah, tx, labelKirim, onKirim,
   const b = lihat ? konfig.benda.find((x) => x.id === lihat) ?? null : null;
   const tandai = (id: string, wadah: string) => {
     const batal = peta[id] === wadah;
+    // T-049: pinning on the plan board = 'taruh'; another tray (e.g. "Tidak perlu") = 'ketuk'; untick = 'batal'.
+    // Card taps (select) get the central default 'ketuk' (ui/kit.tsx AudioUnlocker).
+    playSfx(batal ? 'batal' : wadah === rencana.id ? 'taruh' : 'ketuk');
     ubah(batal ? lepaskan(jawaban, konfig.langkah, id) : tetapkan(jawaban, konfig.langkah, id, wadah));
     if (batal) return;
     const i = konfig.benda.findIndex((x) => x.id === id);
     const berikut = [...konfig.benda.slice(i + 1), ...konfig.benda.slice(0, i)].find((x) => !peta[x.id]);
     if (berikut) setLihat(berikut.id);
   };
-  const lepas = (id: string) => { ubah(lepaskan(jawaban, konfig.langkah, id)); setLihat(id); };
+  const lepas = (id: string) => { playSfx('batal'); ubah(lepaskan(jawaban, konfig.langkah, id)); setLihat(id); };
 
   return (
     <div className="hp-saksi hp-saksi-px">

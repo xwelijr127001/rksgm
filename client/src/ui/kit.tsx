@@ -760,17 +760,30 @@ export function AudioControls({ ringkas = false }: { ringkas?: boolean }) {
 const TOMBOL_ORANYE = '.primary-action, .btn-utama, .kj-utama, .lk-btn-utama, .meja-utama, .akh-utama, .lp-pintu-aksi';
 /** Staff authoring pages keep silent buttons (not the game). */
 const TANPA_SUARA_TOMBOL = /^\/(cms|admin)(\/|$)/;
+/** T-049: the story player route (an episode open, not the picker); tolerant of a hosting base path. */
+const DI_PEMAIN_CERITA = /\/cerita\/[^/]+/;
 
 /** Panggil initAudio() pada interaksi pertama halaman. T-045: also the one default sound for orange buttons. */
 export function AudioUnlocker() {
   useEffect(() => {
     // Capture phase at window: runs before React's root listener, so the sound starts before any render of this click.
     const klikMulai = (e: MouseEvent) => {
-      const el = e.target instanceof Element ? e.target.closest<HTMLElement>(TOMBOL_ORANYE) : null;
-      if (!el || TANPA_SUARA_TOMBOL.test(window.location.pathname)) return;
-      const kendali = el.closest<HTMLElement>('button, a, [role="button"]') ?? el;
-      if ((kendali as HTMLButtonElement).disabled || kendali.getAttribute('aria-disabled') === 'true') return;
-      tombolUtamaDiklik();
+      if (!(e.target instanceof Element) || TANPA_SUARA_TOMBOL.test(window.location.pathname)) return;
+      const el = e.target.closest<HTMLElement>(TOMBOL_ORANYE);
+      if (el) {
+        const kendali = el.closest<HTMLElement>('button, a, [role="button"]') ?? el;
+        if ((kendali as HTMLButtonElement).disabled || kendali.getAttribute('aria-disabled') === 'true') return;
+        tombolUtamaDiklik('tombol');
+        return;
+      }
+      // T-049: in the story player (/cerita/<episode>, incl. its dialogs) every other enabled button / [role=button] without
+      // a sound of its own gets the soft 'ketuk' (same scheduled-start + cancel-before-start rule; a handler that plays its
+      // own sound wins). Not: links (a[href] may leave the game), text inputs, sliders, selects, summary toggles.
+      if (!DI_PEMAIN_CERITA.test(window.location.pathname)) return;
+      const k = e.target.closest<HTMLElement>('button, [role="button"], [role="switch"], [role="radio"], [role="checkbox"]');
+      if (!k || k.closest('a[href], input, textarea, select')) return;
+      if ((k as HTMLButtonElement).disabled || k.getAttribute('aria-disabled') === 'true') return;
+      tombolUtamaDiklik('ketuk');
     };
     const klikSelesai = () => akhiriKlikTombol();
     window.addEventListener('click', klikMulai, true);

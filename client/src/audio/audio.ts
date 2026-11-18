@@ -616,12 +616,13 @@ function lepasSuara(v: { g: GainNode }, cepat: boolean): void {
  * the window; nothing is deferred to the bubble phase or timers.
  */
 const LEAD_TOMBOL_S = 0.035;
-let suaraBawaan: { v: Suara; sebelum: number | undefined } | null = null;
-export function tombolUtamaDiklik(): void {
+let suaraBawaan: { v: Suara; nama: Sfx; sebelum: number | undefined } | null = null;
+/** T-049: nama = 'tombol' (orange keys) or 'ketuk' (any other story button / card without a sound of its own). */
+export function tombolUtamaDiklik(nama: 'tombol' | 'ketuk' = 'tombol'): void {
   suaraBawaan = null;
-  const sebelum = sfxTerakhir.get('tombol');
-  const v = mulaiSfx('tombol', LEAD_TOMBOL_S);
-  if (v) suaraBawaan = { v, sebelum };
+  const sebelum = sfxTerakhir.get(nama);
+  const v = mulaiSfx(nama, LEAD_TOMBOL_S);
+  if (v) suaraBawaan = { v, nama, sebelum };
 }
 export function akhiriKlikTombol(): void {
   suaraBawaan = null;
@@ -638,7 +639,7 @@ export function playSfx(name: Sfx): void {
   try { b.v.g.disconnect(); } catch { /* already */ }
   const k = suaraSfx.indexOf(b.v);
   if (k >= 0) suaraSfx.splice(k, 1);
-  if (b.sebelum === undefined) sfxTerakhir.delete('tombol'); else sfxTerakhir.set('tombol', b.sebelum);
+  if (b.sebelum === undefined) sfxTerakhir.delete(b.nama); else sfxTerakhir.set(b.nama, b.sebelum);
 }
 
 /** One sounding effect: its voice gain, start / end time on the audio clock, and (sample) a stop for its source. */

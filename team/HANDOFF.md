@@ -2871,3 +2871,14 @@ QA added 3 expect (snapshot) tests with node:test `t.assert.snapshot` (record: `
 - This removes the T-048 trade-off: Lanjut / next-scene and other orange buttons without their own sound now sound before the render.
 
 **Gate:** typecheck 0; `client/dist` rebuilt = exact copy. Not tested in a browser or on a phone. Not committed.
+
+## T-049 (2026-11-19): silent choice taps + manual compare in the SIM check
+
+- **Default rule** (`client/src/ui/kit.tsx` AudioUnlocker, `client/src/audio/audio.ts` `tombolUtamaDiklik(nama)`): orange keys keep `tombol`. In the story player (route `/cerita/<episode>`, incl. its dialogs) every other enabled `button` / `[role=button|switch|radio|checkbox]` gets the soft `ketuk` with the same rule as T-048 Fix 1: started in the capture phase at +35 ms, cancelled before its start time when the handler starts its own sound. A handler that plays `ketuk` itself is gap-dropped (80 ms), so it still sounds once. Skipped: links (`a[href]`), text inputs, sliders, selects, summary toggles, disabled / aria-disabled, staff pages.
+- **Specific sounds:** `client/src/cerita/hp/arena/PapanSaksi.tsx`: pin on the plan board ("Wawancarai") = `taruh`, another tray ("Tidak perlu") = `ketuk`, untick / remove = `batal`. Witness card select (PapanSaksi), RencanaPeriksa slots / chips: the default `ketuk`.
+- **SIM step 4 manual** (`client/src/cerita/hp/arena/ArenaSim.tsx`, `seni/aktivitas/sim.css`, `episode/auto-2/teks.{id,en,zh}.ts`): dropping the card (drag or tap, as before) no longer ticks anything. The player taps each Satpas row (NAMA, GOLONGAN, NO. SIM) or the matching box on the card, any order: the pair is outlined (row + card box, same green `.sim-garis`), the row is ticked, `ketuk` plays, Pak Bima says "Nama sama." / "Golongan sama." / "Nomor sama." (en/zh too). The third tick = the existing finish (cap SESUAI, "Tiga-tiganya sama dengan data Satpas.", `konfirmasi`). Unticked rows keep the empty tick box. Instruction after the drop: "Ketuk tiap baris untuk mencocokkan dengan SIM." / "Tap each row to match it with the licence." / zh; bar reason "Ketuk ketiga baris dulu.".
+  - Hit areas (transparent buttons over the art, art unchanged): NAMA 44 px (with the print-out header), NO. SIM 44 px (with the footer), GOLONGAN 24 px (rows are 24 px apart) plus its 48 px box on the card; card boxes are a second way to tick (tabIndex -1; the rows are the keyboard path).
+  - Keyboard: rows are buttons; a keyboard drop focuses the first unticked row; ticked rows stay focusable (aria-pressed) until the third tick, then focus goes to the bar button (header comment updated). The print-out is no longer a button after the drop (role img), so nothing nests.
+  - Layout unchanged (no height change), so it still fits 360x640.
+
+**Gate (owner rule):** typecheck 0; `client/dist` rebuilt = exact copy. Not tested in a browser or on a phone. Not committed.

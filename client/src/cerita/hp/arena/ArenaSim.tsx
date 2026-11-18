@@ -5,7 +5,10 @@
  *   2 kartu    : ketuk kotak golongan (kaca pembesar), lalu label di truk; "Balik" membalik kartu -> cap COCOK
  *   3a tempat  : papan tiga tempat; ketuk Satpas SIM
  *   3b loket   : ketuk baris NIK di KTP; terminal mengetik lalu "data ditemukan"  -> cap SATPAS
- *   4 cetakan  : seret kartu ke cetakan Satpas (atau ketuk kartu / cetakan): tiga baris dicentang -> cap SESUAI
+ *   4 cetakan  : seret kartu ke cetakan Satpas (atau ketuk kartu / cetakan); lalu (T-049, owner: "otomatis semua? bingung") pemain
+ *                MENGETUK tiap baris data Satpas (NAMA, GOLONGAN, NO. SIM) atau kotak yang sama di kartu, urutan bebas: tiap ketukan
+ *                menyorot pasangan baris + kotak kartu, mencentang baris itu, dan Pak Bima berkata satu kalimat; centang ketiga
+ *                -> cap SESUAI. Tidak ada jawaban keliru di langkah ini (ketiganya memang sama).
  *   akhir      : papan jalan dengan empat cap + kartu "Cerita Pak Bima dari kasus lain".
  * Ketukan keliru tidak pernah berkata "salah": bendanya berbingkai putus-putus kuning dan Pak Bima menjawab satu kalimat; tidak ada
  * yang hilang. Jawaban arena = satu item ke wadah `bersih` (tanpa ketukan keliru) atau `ragu`; SIM-nya asli, jadi cerita tidak
@@ -17,6 +20,8 @@
  *  - ketukan keliru, atau benar tetapi langkahnya belum beres (kotak golongan): fokus TETAP di sasaran itu. Syaratnya simpul DOM yang
  *    tetap, jadi <Ketuk> didefinisikan di tingkat modul (dulu di dalam render: tombolnya dibuat ulang tiap render dan fokusnya hilang);
  *  - langkah beres (sasarannya menjadi nonaktif): fokus pindah ke tombol bilah ("Lanjut: ..."), tindakan berikutnya;
+ *  - T-049 langkah 4: kartu dijatuhkan lewat keyboard -> fokus ke baris Satpas pertama yang belum dicentang; baris yang dicentang
+ *    tetap bisa difokus (aria-pressed) sampai centang ketiga, lalu fokus ke tombol bilah;
  *  - tombol bilah (langkah baru): fokus ke baris instruksi langkah itu (tabindex -1, tanpa cincin, seperti judul langkah K11); satu Tab
  *    dari sana = sasaran pertama adegan;
  *  - "Kenapa?" -> tombol "Tutup" di catatan; "Tutup" -> kembali ke tab "Kenapa?".
@@ -43,7 +48,17 @@ const CAP = ['asli', 'cocok', 'satpas', 'sesuai'] as const;
 const CAP_DARI: Record<(typeof CAP)[number], Langkah> = { asli: 'meja', cocok: 'kartu', satpas: 'loket', sesuai: 'cetakan' };
 interface Ucap { siapa: 'bima' | 'darto'; kunci: KunciTeks; ragu?: boolean }
 /** Tujuan fokus sesudah aktivasi keyboard: tombol bilah (langkah beres), baris instruksi (langkah baru), "Tutup" / tab "Kenapa?". */
-type TujuanFokus = 'bilah' | 'instruksi' | 'tutup' | 'kenapa';
+type TujuanFokus = 'bilah' | 'instruksi' | 'tutup' | 'kenapa' | 'baris';
+/** T-049 langkah 4: baris data Satpas (urutan di cetakan) dan kotak yang sama di kartu (px dari pojok kartu). */
+type Baris = 'nama' | 'golongan' | 'nomor';
+const BARIS: Baris[] = ['nama', 'golongan', 'nomor'];
+const KOTAK_KARTU: Record<Baris, { left: number; top: number; width: number; height: number }> = {
+  golongan: { left: 152, top: 8, width: 80, height: 48 },
+  nama: { left: 74, top: 60, width: 66, height: 26 },
+  nomor: { left: 74, top: 88, width: 130, height: 23 },
+};
+/** Bidang ketuk baris di cetakan (px dari atas cetakan, tinggi cetakan 112): NAMA ikut kepala, NO. SIM ikut kaki = 44 px. */
+const BIDANG_BARIS: Record<Baris, { top: number; height: number }> = { nama: { top: 0, height: 44 }, golongan: { top: 44, height: 24 }, nomor: { top: 68, height: 44 } };
 
 /**
  * Sasaran ketuk di adegan: tombol bernama tanpa isi (gambarnya terletak di bawahnya). HARUS di tingkat modul: komponen yang
@@ -72,7 +87,7 @@ export function ArenaPolaSim({ ep, konfig, jawaban, ubah, tx, labelKirim, onKiri
   const [tempat, setTempat] = useState<string | null>(null);
   const [monitor, setMonitor] = useState<'kosong' | 'ketik' | 'isi'>('kosong');
   const [jatuh, setJatuh] = useState(false);
-  const [centang, setCentang] = useState(0);
+  const [cocok, setCocok] = useState<Baris[]>([]);
   const [ucap, setUcap] = useState<Ucap>({ siapa: 'bima', kunci: 'arena.sim.bima.meja' });
   const [raguDi, setRaguDi] = useState<string | null>(null);
   const [salah, setSalah] = useState(0);
@@ -99,7 +114,8 @@ export function ArenaPolaSim({ ep, konfig, jawaban, ubah, tx, labelKirim, onKiri
     // Tombol bilah: di cangkang HP berada di bilah bawah (portal, di luar .hp-sim), di desktop di dalam .hp-sim; keduanya di dalam .hp-arena.
     const el = tujuan === 'instruksi' ? instruksiRef.current
       : tujuan === 'bilah' ? (root?.closest<HTMLElement>('.hp-arena') ?? root)?.querySelector<HTMLElement>('[data-kirim]:not(:disabled)') ?? null
-        : root?.querySelector<HTMLElement>(tujuan === 'tutup' ? '[data-kenapa-tutup]' : '[data-kenapa]') ?? null;
+        : tujuan === 'baris' ? root?.querySelector<HTMLElement>('[data-baris]:not([aria-pressed="true"])') ?? null
+          : root?.querySelector<HTMLElement>(tujuan === 'tutup' ? '[data-kenapa-tutup]' : '[data-kenapa]') ?? null;
     if (!el) { if (tujuan !== 'bilah') fokusNanti.current = null; return; }
     fokusNanti.current = null;
     el.focus({ preventScroll: true });
@@ -115,13 +131,20 @@ export function ArenaPolaSim({ ep, konfig, jawaban, ubah, tx, labelKirim, onKiri
     else ubah(tetapkan(jawaban, konfig.langkah, konfig.benda, salah ? konfig.ragu : konfig.bersih));
   };
 
-  // ---- langkah 4: seret (atau ketuk) kartu ke cetakan
+  // ---- langkah 4: seret (atau ketuk) kartu ke cetakan, lalu (T-049) cocokkan tiap baris dengan tangan
   const jatuhkan = () => {
     if (jatuh) return;
     setJatuh(true); setSeret(null); playSfx('kertas');
-    fokusKe('bilah');
-    if (kurang) { setCentang(3); benar({ siapa: 'bima', kunci: 'arena.sim.bima.sama' }); return; }
-    [1, 2, 3].forEach((n) => nanti(() => { setCentang(n); if (n === 3) benar({ siapa: 'bima', kunci: 'arena.sim.bima.sama' }); }, 250 * n));
+    fokusKe('baris');
+  };
+  const cocokkan = (b: Baris) => {
+    if (!jatuh || beres || cocok.includes(b)) return;
+    const baru = [...cocok, b];
+    setCocok(baru);
+    if (baru.length === BARIS.length) { benar({ siapa: 'bima', kunci: 'arena.sim.bima.sama' }); return; }
+    playSfx('ketuk');
+    setRaguDi(null);
+    setUcap({ siapa: 'bima', kunci: `arena.sim.bima.barisSama.${b}` });
   };
   const y0 = useRef<number | null>(null);
   const turun = (e: PE<HTMLButtonElement>) => { if (jatuh) return; lewatKeyboard.current = false; y0.current = e.clientY; try { e.currentTarget.setPointerCapture?.(e.pointerId); } catch { /* penunjuk tanpa sesi aktif (WebKit, peristiwa buatan): seret tetap jalan tanpa tangkapan */ } setSeret(0); };
@@ -134,7 +157,8 @@ export function ArenaPolaSim({ ep, konfig, jawaban, ubah, tx, labelKirim, onKiri
 
   const sudahCap = (c: (typeof CAP)[number]) => langkah === 'akhir' || URUT.indexOf(langkah) > URUT.indexOf(CAP_DARI[c]) || (langkah === CAP_DARI[c] && beres);
   const capKini = CAP.find((c) => !sudahCap(c));
-  const instruksi: KunciTeks = langkah === 'akhir' ? 'arena.sim.inst.akhir' : beres ? `arena.sim.beres.${langkah}` : langkah === 'kartu' ? (lensa ? 'arena.sim.inst.label' : 'arena.sim.inst.golongan') : `arena.sim.inst.${langkah}`;
+  const instruksi: KunciTeks = langkah === 'akhir' ? 'arena.sim.inst.akhir' : langkah === 'cetakan' && jatuh && !beres ? 'arena.sim.inst.cetakanBaris' : beres ? `arena.sim.beres.${langkah}` : langkah === 'kartu' ? (lensa ? 'arena.sim.inst.label' : 'arena.sim.inst.golongan') : `arena.sim.inst.${langkah}`;
+  const bilahKunci: KunciTeks = langkah === 'cetakan' && jatuh ? 'arena.sim.bilah.cetakanBaris' : `arena.sim.bilah.${langkah}`;
   const keadaan = (id: string, benarnya: boolean) => (raguDi === id ? 'ragu' : benarnya ? 'benar' : undefined);
   const darto = useMemo(() => { const tp = tokohPotret(ep, 'darto'); return tp ? susunTokoh(tp, { pose: 'berdiri', hadap: 'kanan', ekspresi: 'netral' }) : null; }, [ep]);
 
@@ -229,20 +253,38 @@ export function ArenaPolaSim({ ep, konfig, jawaban, ubah, tx, labelKirim, onKiri
     // sampai saat itu keduanya hanya aria-disabled (jatuhkan() mengabaikan aktivasi ulang), supaya tombol yang diaktifkan lewat
     // keyboard tidak kehilangan fokus selama centang muncul; begitu beres, fokusnya pindah ke tombol bilah.
     const menunggu = jatuh && !beres ? true : undefined;
+    // T-049: centang per baris (kotak kosong = belum), sorotan pasangan baris + kotak kartu yang sudah dicocokkan.
+    const isiCetakan = (
+      <>
+        <span className="px sm-cetakan" aria-hidden="true" />
+        {BARIS.map((b, r) => <span key={b} className="px sm-centang" data-centang={cocok.includes(b) ? '' : undefined} aria-hidden="true" style={{ left: 262, top: 23 + 24 * r }} />)}
+        {BARIS.map((b, r) => (cocok.includes(b) ? <i key={b} className="sim-garis" data-garis-baris={b} aria-hidden="true" style={{ left: 4, top: 20 + 24 * r, width: 254, height: 24 }} /> : null))}
+      </>
+    );
     adegan = (
       <>
         <span className="sim-meja" aria-hidden="true" />
-        <button type="button" className="sim-cetakan" data-ketuk="cetakan" aria-label={tx('arena.sim.benda.cetakan')} disabled={beres} aria-disabled={menunggu} onClick={jatuhkan}>
-          <span className="px sm-cetakan" aria-hidden="true" />
-          {[0, 1, 2].map((r) => <span key={r} className="px sm-centang" data-centang={centang > r ? '' : undefined} aria-hidden="true" style={{ left: 262, top: 23 + 24 * r }} />)}
-        </button>
+        {jatuh ? (
+          <span className="sim-cetakan" data-ketuk="cetakan" role="img" aria-label={tx('arena.sim.benda.cetakan')}>{isiCetakan}</span>
+        ) : (
+          <button type="button" className="sim-cetakan" data-ketuk="cetakan" aria-label={tx('arena.sim.benda.cetakan')} onClick={jatuhkan}>{isiCetakan}</button>
+        )}
+        {jatuh ? BARIS.map((b) => (
+          <button key={b} type="button" className="sim-baris" data-baris={b} aria-pressed={cocok.includes(b)} aria-label={tx(`arena.sim.baris.${b}`)} disabled={beres}
+            style={{ left: 'calc(50% - 150px)', top: 6 + BIDANG_BARIS[b].top, width: 300, height: BIDANG_BARIS[b].height }} onClick={() => cocokkan(b)} />
+        )) : null}
         {seret !== null && !jatuh ? <span className="px sm-sim-hantu" aria-hidden="true" style={{ left: 'calc(50% - 120px)', top: 136 }} /> : null}
         <button type="button" className="sim-kartu-seret" data-ketuk="kartu" data-jatuh={jatuh ? '' : undefined} aria-label={tx('arena.sim.benda.kartu')} disabled={beres} aria-disabled={menunggu} style={{ top: atas }}
           onPointerDown={turun} onPointerMove={gerak} onPointerUp={naik} onPointerCancel={() => { y0.current = null; setSeret(null); }}
           onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); lewatKeyboard.current = true; jatuhkan(); } }}>
           <span className="px sm-sim-depan" aria-hidden="true" />
-          {jatuh ? <><i className="sim-garis" style={{ left: 152, top: 8, width: 80, height: 48 }} /><i className="sim-garis" style={{ left: 74, top: 60, width: 66, height: 26 }} /><i className="sim-garis" style={{ left: 74, top: 88, width: 130, height: 23 }} /></> : null}
+          {BARIS.filter((b) => cocok.includes(b)).map((b) => <i key={b} className="sim-garis" data-garis-kartu={b} style={KOTAK_KARTU[b]} />)}
         </button>
+        {/* T-049: the same value on the card is a second way to tick the pair (sibling buttons over the dropped card). */}
+        {jatuh ? BARIS.map((b) => (
+          <button key={b} type="button" className="sim-baris sim-baris-kartu" data-baris-kartu={b} aria-pressed={cocok.includes(b)} aria-label={tx(`arena.sim.baris.${b}`)} disabled={beres} tabIndex={-1}
+            style={{ left: `calc(50% - 120px + ${KOTAK_KARTU[b].left}px)`, top: atas + KOTAK_KARTU[b].top, width: KOTAK_KARTU[b].width, height: KOTAK_KARTU[b].height }} onClick={() => cocokkan(b)} />
+        )) : null}
         <span className="px sm-jempol" aria-hidden="true" style={{ left: 'calc(50% - 130px)', top: atas + 54 }} />
       </>
     );
@@ -309,7 +351,7 @@ export function ArenaPolaSim({ ep, konfig, jawaban, ubah, tx, labelKirim, onKiri
       )}
       {langkah === 'akhir'
         ? <TombolKirim key="akhir" label={labelKirim} siap onKirim={onKirim} />
-        : <TombolKirim key={langkah} label={tx(`arena.sim.lanjut.${langkah}`)} siap={beres} onKirim={maju} alasanBelum={beres ? null : tx(`arena.sim.bilah.${langkah}`)} alasanRingkas={beres ? null : tx(`arena.sim.bilah.${langkah}`)} />}
+        : <TombolKirim key={langkah} label={tx(`arena.sim.lanjut.${langkah}`)} siap={beres} onKirim={maju} alasanBelum={beres ? null : tx(bilahKunci)} alasanRingkas={beres ? null : tx(bilahKunci)} />}
     </div>
   );
 }
