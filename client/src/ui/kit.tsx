@@ -244,6 +244,7 @@ export function Modal({
   kembaliKe,
   lebar,
   gaya,
+  kelas,
 }: {
   judul: string;
   children?: ReactNode;
@@ -254,6 +255,8 @@ export function Modal({
   lebar?: number | string;
   /** 'lembar' = panel menempel di tepi bawah layar sempit (lembar bawah HP); bawaan = panel di tengah. */
   gaya?: 'lembar';
+  /** Kelas tambahan pada lapisan (.mdl-latar), mis. 'hp-menu-piksel' untuk Menu cerita piksel (T-041). */
+  kelas?: string;
 }) {
   useBahasa();
   const idJudul = useId();
@@ -271,7 +274,7 @@ export function Modal({
   return createPortal(
     <div
       ref={latarRef}
-      className={'mdl-latar' + (konteks ? ` ${konteks}` : '')}
+      className={'mdl-latar' + (konteks ? ` ${konteks}` : '') + (kelas ? ` ${kelas}` : '')}
       data-gaya={gaya}
       onPointerDown={(e) => {
         tekanDiLatar.current = e.target === e.currentTarget;

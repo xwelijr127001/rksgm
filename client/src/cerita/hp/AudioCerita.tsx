@@ -7,11 +7,12 @@
  *  - PetunjukSuara: petunjuk kecil sekali tampil bahwa suara tersedia; tidak memblokir, bisa ditutup.
  * Audio baru berbunyi sesudah interaksi pengguna (initAudio dari AudioUnlocker); kegagalan berkas = senyap, permainan jalan terus.
  */
-import { useEffect, useState } from 'react';
+import { useEffect, useState, type CSSProperties } from 'react';
 import {
   initAudio, playSfx, setModeCerita, setMusicVolume, setMusikCerita, setMuted, setSfxEnabled, setSfxVolume, setSuasana, setTrack,
   type Sfx,
 } from '../../audio/audio';
+import { UJI_AUDIO } from '../../audio/bendera';
 import { useAudioPrefs } from '../../hooks';
 import { t } from '../../i18n';
 import type { Episode, StateCerita } from '../tipe';
@@ -45,30 +46,37 @@ const CONTOH_SFX: { id: Sfx; kunci: string }[] = [
 
 export function KontrolSuara({ temaUji, onTemaUji }: { temaUji: TemaCerita | null; onTemaUji: (t: TemaCerita | null) => void }) {
   const p = useAudioPrefs();
-  const musik = p.musikCerita !== false;
-  const sakelar = (nama: string, on: boolean, ubah: () => void, data: string) => (
-    <button type="button" className="hp-sakelar" role="switch" aria-checked={on} data-suara={data} onClick={() => { initAudio(); ubah(); }}>
-      <span className="hp-sakelar-nama">{nama}</span>
-      <span className="hp-sakelar-status">{on ? t('ceritaHp.aktif') : t('ceritaHp.mati')}</span>
-    </button>
-  );
+  // T-041 (owner 19 Nov): two rows only, Music and Effects = pixel on/off key + pixel volume slider. The old "All sound" (master
+  // mute) row is folded in: while muted both show Off; switching one on unmutes and keeps the other off, so what is shown stays true.
+  const musik = !p.muted && p.musikCerita !== false;
+  const efek = !p.muted && p.sfxEnabled !== false;
+  const alih = (jenis: 'musik' | 'efek') => {
+    initAudio();
+    const on = jenis === 'musik' ? musik : efek;
+    if (on) { if (jenis === 'musik') setMusikCerita(false); else setSfxEnabled(false); return; }
+    if (p.muted) { if (jenis === 'musik') setSfxEnabled(false); else setMusikCerita(false); setMuted(false); }
+    if (jenis === 'musik') setMusikCerita(true); else { setSfxEnabled(true); playSfx('ketuk'); }
+  };
+  const baris = (jenis: 'musik' | 'efek', nama: string, on: boolean, vol: number, labelVol: string, ubahVol: (v: number) => void) => {
+    const nilai = Math.round(vol * 100);
+    return (
+      <div className="hp-suara-baris" data-baris-suara={jenis}>
+        <button type="button" className="hp-sakelar" role="switch" aria-checked={on} data-suara={jenis} onClick={() => alih(jenis)}>
+          <span className="hp-sakelar-nama">{nama}</span>
+          <span className="hp-sakelar-status">{on ? t('ceritaHp.aktif') : t('ceritaHp.mati')}</span>
+        </button>
+        <input type="range" className="hp-geser" min={0} max={100} step={5} value={nilai} data-volume={jenis} aria-label={labelVol}
+          style={{ '--isi': nilai } as CSSProperties}
+          onChange={(e) => { initAudio(); ubahVol(Number(e.currentTarget.value) / 100); }} disabled={!on} />
+      </div>
+    );
+  };
   return (
     <div className="hp-suara" data-kontrol-suara="">
-      {sakelar(t('ceritaHp.suaraMaster'), !p.muted, () => setMuted(!p.muted), 'master')}
-      {sakelar(t('ceritaHp.suaraMusik'), musik, () => setMusikCerita(!musik), 'musik')}
-      {sakelar(t('ceritaHp.suaraEfek'), p.sfxEnabled !== false, () => setSfxEnabled(p.sfxEnabled === false), 'efek')}
-      <label className="hp-suara-volume">
-        <span>{t('ceritaHp.volumeMusik')}</span>
-        <input type="range" min={0} max={100} step={5} value={Math.round(p.musicVolume * 100)} data-volume="musik"
-          onChange={(e) => { initAudio(); setMusicVolume(Number(e.currentTarget.value) / 100); }} disabled={p.muted || !musik} />
-      </label>
-      <label className="hp-suara-volume">
-        <span>{t('ceritaHp.volumeEfek')}</span>
-        <input type="range" min={0} max={100} step={5} value={Math.round(p.sfxVolume * 100)} data-volume="efek"
-          onChange={(e) => { initAudio(); setSfxVolume(Number(e.currentTarget.value) / 100); playSfx('ketuk'); }} disabled={p.muted || p.sfxEnabled === false} />
-      </label>
-      {p.muted ? <p className="hp-suara-catatan">{t('ceritaHp.suaraDibisukan')}</p> : null}
-      <details className="hp-tahu hp-coba-suara" data-coba-suara="">
+      {baris('musik', t('ceritaHp.suaraMusikPendek'), musik, p.musicVolume, t('ceritaHp.volumeMusik'), setMusicVolume)}
+      {baris('efek', t('ceritaHp.suaraEfekPendek'), efek, p.sfxVolume, t('ceritaHp.volumeEfek'), (v) => { setSfxVolume(v); playSfx('ketuk'); })}
+      {/* Samples ("Coba suara") are a test aid: only in dev or a VITE_UJI_AUDIO=on build, so the phone menu never scrolls. */}
+      {UJI_AUDIO ? <details className="hp-tahu hp-coba-suara" data-coba-suara="">
         <summary>{t('ceritaHp.cobaSuara')}</summary>
         {p.muted ? <p className="hp-suara-catatan" data-coba-bisu="">{t('ceritaHp.cobaBisu')}</p> : null}
         <p className="hp-coba-judul">{t('ceritaHp.cobaMusik')}</p>
@@ -85,7 +93,7 @@ export function KontrolSuara({ temaUji, onTemaUji }: { temaUji: TemaCerita | nul
             <button key={x.id} type="button" className="hp-coba" data-sfx={x.id} onClick={() => { initAudio(); playSfx(x.id); }}>{t(x.kunci)}</button>
           ))}
         </div>
-      </details>
+      </details> : null}
     </div>
   );
 }

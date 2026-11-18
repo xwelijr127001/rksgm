@@ -2744,3 +2744,42 @@ Fullstack · edited under `C:\Users\User\Desktop\rksgm-episode2` · NOT committe
 - **4 iPhone volume** (`audio.ts`): `initAudio` sets `navigator.audioSession.type = 'playback'` (try/catch). Music elements are routed element -> MediaElementSource -> per-track gain -> new `musicBus` -> master; volume and fades drive the gain (`el.volume` stays 1), with `el.volume` as fallback when there is no AudioContext. So `prefs.musicVolume` really changes loudness on iOS; SFX already went through the Web Audio sfx bus. Prefs keys and defaults unchanged.
 
 **Gate (owner rule: typecheck + build only):** typecheck 0; `client/dist` rebuilt = exact copy of the scratch build. No tests, e2e or browser runs; nothing verified on a phone yet. Not committed.
+
+## T-041 (2026-11-19): pixel Story menu, compact (Designer)
+
+Owner phone pass item 5. Built by the Designer; uncommitted. Owner rule: no e2e, no tests, no browser runs. NOTHING here was opened in a browser; the sizes below are calculated from the CSS.
+
+**What changed**
+- `client/src/cerita/hp/PemainHP.tsx`: the menu Modal gets `kelas="hp-menu-piksel"`. Order: Goal (max 2 lines), then 2x2 pixel keys (History, Case notes, Help, and List view / Picture view in the arena), then a language row, then two sound rows, then Close. The List view key now has its own pixel list icon (picture icon when switching back), not the "?" icon. Its full label ("Use list view") stays as `aria-label`. `PilihBahasa` is no longer used in the menu.
+- `client/src/cerita/hp/MenuPiksel.tsx` (new):
+  - `IkonMenu`: 12x12-cell pixel icons drawn as rects (24 px, crispEdges, PALET colours) for riwayat, catatan, bantuan, daftar and gambar.
+  - `BahasaKunci`: ID / EN / 中文 as three segmented pixel keys (`role="group"` + `aria-label` "Pilih bahasa", `aria-pressed` on each). Each key calls `aturBahasa`, as PilihBahasa does.
+- `client/src/cerita/hp/AudioCerita.tsx` (`KontrolSuara`): two rows only, Music and Effects. Each row has a pixel On/Off key (`role="switch"`, `aria-checked`) and a pixel slider.
+  - Music slider: `setMusicVolume` (prefs.musicVolume). Effects slider: `setSfxVolume` (prefs.sfxVolume) plus a tap sound. Both have `aria-label`s and step 5.
+  - The "All sound" row is dropped and folded in: while muted, both rows show Off; switching one on unmutes and keeps the other off. `audio.ts` is not touched.
+  - "Coba suara" samples now show only when `UJI_AUDIO` is on (dev or VITE_UJI_AUDIO build), so the phone menu does not grow.
+- `client/src/ui/kit.tsx`: `Modal` gets an optional `kelas` prop (an extra class on `.mdl-latar`). Focus trap, Escape, backdrop close and the title focus are unchanged.
+- `client/src/i18n/kamus/ceritaHp.ts`: new keys in id, en and zh: `suaraMusikPendek`, `suaraEfekPendek`, `tampilanDaftarPendek`, `tampilanVisualPendek`.
+- `client/src/cerita/hp/desain.css`: block "T-041" (all rules scoped to `.hp-menu-piksel`).
+  - Panel: K1 frame (3 px stepped corners, 2 px orange line, 5 px base). Title is an orange strip across the panel (#FFD9A8 top, #E07E00 underside).
+  - Keys: T-030 pixel key shape. Ink by default; orange when On or selected; 2 px press.
+  - Slider: 12 px stepped track (ink outline with notched corners, #FFF9F5 face, #ECD5CB tick every 16 px, orange fill from `--isi`). The thumb is a square 28 px pixel thumb, and the input is 44 px high.
+  - Close is the shared `.btn` key, full width. Layer padding is `max(12px, safe-area)`, and the panel max-height uses 100dvh minus the insets.
+
+**Sizes (calculated, not measured)**
+- 360x640, insets 0: room 616 px. Menu = 2 + title 36 + 10 + list [4 + goal 40 + 8 + 2x2 keys 104 + 8 + language 44 + 8 + sound 102 + 4] + 10 + Close 44 + 12 + 5 = 447 px. That leaves 169 px; there is no inner scroll.
+- 390x700: 447 px, leaving 229.
+- End screen (no goal, plus the two info rows, about 2x60): about 520 px, which still fits.
+- Widths at 360: key 149 px. Label room 101 px at 14 px, and a 2-line label still fits the 48 px key. Language keys 3x52 + 8 = 164 px. Sound row: key 136 + 12 + slider 156 px.
+- Tap targets: keys 48, language 52x44, On/Off 136x44, slider input 44 high with a 28 px thumb, Close 44.
+
+**For the owner's phone check (iPhone Safari)**
+- The slider thumb drags by touch.
+- Music follows the slider.
+- Effects On/Off.
+- Language switches without closing.
+- Close is visible without scrolling on the smallest phone.
+
+**Risks**
+- e2e/cek tools that clicked the old master switch (`data-suara="master"`), the "Coba suara" details, or the `<select>` in the menu will need updating if they are run later. `data-suara="musik|efek"` and `data-volume="musik|efek"` are kept.
+- Gate: client typecheck 0 errors, client/dist rebuilt. Not committed; `client/dist-rilis` untouched.

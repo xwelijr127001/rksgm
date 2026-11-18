@@ -18,7 +18,6 @@ import { Link } from 'react-router-dom';
 import type { Bahasa } from '@shared/bahasa';
 import type { MissionAnswer } from '@shared/types';
 import { playSfx } from '../../audio/audio';
-import { PilihBahasa } from '../../components/PilihBahasa';
 import { Arrow } from '../../components/PlayerShell';
 import { t } from '../../i18n';
 import type { Profil } from '../../state/profil';
@@ -36,6 +35,7 @@ import { IsiRiwayat } from '../ui/Riwayat';
 import type { KendaliCerita } from '../ui/useCerita';
 import { AdeganTatap, type StatusSesudah } from './AdeganTatap';
 import { Arena, adaDrafArena, bacaTampilan } from './arena/Arena';
+import { BahasaKunci, IkonMenu } from './MenuPiksel';
 import { ringkasTindakan } from './arena/ringkas';
 import { RingkasRambu } from './arena/RingkasRambu';
 import { tanggapan as tanggapanRambu } from './arena/rambu';
@@ -320,13 +320,14 @@ function PemainHPInti({ ep, state, kendali, profil, bahasa, tx: txAsli }: {
       {tampilan === 'akhir' ? <div ref={setSlotAkhir} className="hp-akhir-aksi" /> : null}
 
       {dialog === 'menu' ? (
-        <Modal judul={t('ceritaHp.menuJudul')} onTutup={() => setDialog(null)} lebar={420}>
+        <Modal judul={t('ceritaHp.menuJudul')} onTutup={() => setDialog(null)} lebar={420} kelas="hp-menu-piksel">
           {/* D-132: baris tujuan bisa disembunyikan di layar pendek, jadi selalu terbaca di Menu. */}
           {bab && tampilan !== 'akhir' ? <p className="hp-menu-tujuan"><b>{t('ceritaHp.tujuan')}</b>{selaPembicara()}{tx(bab.bab.tujuan)}</p> : null}
-          <ul className="hp-menu-daftar">
-            <li><button type="button" onClick={() => setDialog('riwayat')}><IkonAlat jenis="riwayat" /><span>{t('cerita.riwayat')}</span></button></li>
-            <li><button type="button" onClick={() => setDialog('catatan')}><IkonAlat jenis="catatan" /><span>{t('cerita.catatanKasus')}</span></button></li>
-            <li><button type="button" onClick={() => setDialog('bantuan')}><IkonAlat jenis="bantuan" /><span>{t('cerita.bantuan')}</span></button></li>
+          {/* T-041 (owner 19 Nov): pixel Menu that fits 360x640 / 390x700 without scrolling: 2x2 pixel keys, language keys, Music + Effects. */}
+          <ul className="hp-menu-daftar hp-menu-ringkas">
+            <li><button type="button" className="hp-kunci-piksel" onClick={() => setDialog('riwayat')}><IkonMenu jenis="riwayat" /><span>{t('cerita.riwayat')}</span></button></li>
+            <li><button type="button" className="hp-kunci-piksel" onClick={() => setDialog('catatan')}><IkonMenu jenis="catatan" /><span>{t('cerita.catatanKasus')}</span></button></li>
+            <li><button type="button" className="hp-kunci-piksel" onClick={() => setDialog('bantuan')}><IkonMenu jenis="bantuan" /><span>{t('cerita.bantuan')}</span></button></li>
             {/* T-024: keterangan yang dulu di bawah kartu akhir (legenda pita grafik, catatan simulasi, status naskah).
                 D-246 (polish): tepat di bawah Bantuan, di ATAS bahasa & suara, supaya terlihat tanpa menggulir Menu. */}
             {akhirSatu && ep.suasana.length ? (
@@ -342,9 +343,9 @@ function PemainHPInti({ ep, state, kendali, profil, bahasa, tx: txAsli }: {
                 {ep.statusNaskah ? <span>{tx(ep.statusNaskah)}</span> : null}
               </li>
             ) : null}
-            {tampilan === 'arena' ? <li><button type="button" data-menu-tampilan="" onClick={() => { setDialog(null); window.dispatchEvent(new Event('raksa:alih-tampilan')); }}><IkonAlat jenis="bantuan" /><span>{bacaTampilan() === 'daftar' ? t('ceritaHp.tampilanVisual') : t('ceritaHp.tampilanDaftar')}</span></button></li> : null}
-            <li className="hp-menu-baris"><span>{t('ceritaHp.menuBahasa')}</span><PilihBahasa /></li>
-            <li className="hp-menu-suara"><span className="hp-menu-suara-judul">{t('ceritaHp.menuSuara')}</span><KontrolSuara temaUji={temaUji} onTemaUji={setTemaUji} /></li>
+            {tampilan === 'arena' ? <li><button type="button" className="hp-kunci-piksel" data-menu-tampilan="" aria-label={bacaTampilan() === 'daftar' ? t('ceritaHp.tampilanVisual') : t('ceritaHp.tampilanDaftar')} onClick={() => { setDialog(null); window.dispatchEvent(new Event('raksa:alih-tampilan')); }}><IkonMenu jenis={bacaTampilan() === 'daftar' ? 'gambar' : 'daftar'} /><span>{bacaTampilan() === 'daftar' ? t('ceritaHp.tampilanVisualPendek') : t('ceritaHp.tampilanDaftarPendek')}</span></button></li> : null}
+            <li className="hp-menu-baris"><span>{t('ceritaHp.menuBahasa')}</span><BahasaKunci /></li>
+            <li className="hp-menu-suara"><span className="sr-only">{t('ceritaHp.menuSuara')}</span><KontrolSuara temaUji={temaUji} onTemaUji={setTemaUji} /></li>
           </ul>
         </Modal>
       ) : null}

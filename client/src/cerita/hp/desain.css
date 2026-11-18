@@ -797,3 +797,142 @@ body > .akh-lembar-latar {
   .hp-layar[data-kunci] .hp-lembar-simpul .hp-opsi { padding-top: 6px; padding-bottom: 6px; }
   .hp-layar[data-kunci] .hp-lembar-simpul .hp-opsi-teks { line-height: 18px; }
 }
+
+/* T-041 (Designer, owner 19 Nov): Menu cerita PIKSEL ringkas, muat tanpa gulir di 360x640 dan 390x700.
+   Panel = K1 (sudut bertangga 3 px, garis oranye 2 px, dasar 5 px); judul = pita oranye selebar panel; aksi = kunci piksel (T-030)
+   dengan ikon piksel 12x12 (MenuPiksel.tsx); bahasa = 3 kunci bersegmen; suara = 2 baris (kunci On/Off + penggeser piksel).
+   Menu = Modal di <body> (.mdl-latar.hp-menu-piksel), jadi warna ditulis langsung dari PALET.md (+ #FFD9A8 #ECD5CB #FFF9F5).
+   !important hanya untuk sifat yang juga ditulis gaya-game.css dengan !important (latar & sudut .panel).
+   Hitungan tinggi (tanpa browser), 360x640, inset aman 0: ruang panel 640 - 2x12 = 616. Panel = 2 (garis atas) + judul 36 + 10
+   + isi [4 + tujuan 2 baris 40 + 8 + kunci 2x2 (2x48 + 8 = 104) + 8 + bahasa 44 + 8 + suara (8 + 2x44 + 6 = 102) + 4] + 10
+   + Tutup 44 + 12 + 5 (dasar) = 447 px: sisa 169 px. 390x700: 447, sisa 229. Layar akhir (tanpa tujuan, + 2 baris keterangan
+   ~2x60): ~520 px, masih muat. Kunci 2x2: lebar (304 - 6) / 2 = 149 px; ikon 24 + celah 8 + padding 16 = 48; sisa 101 px untuk
+   label 14 px (2 baris pun tetap 48 px). */
+body > .mdl-latar.hp-menu-piksel {
+  padding: max(12px, env(safe-area-inset-top)) max(12px, env(safe-area-inset-right)) max(12px, env(safe-area-inset-bottom)) max(12px, env(safe-area-inset-left));
+}
+body > .mdl-latar.hp-menu-piksel > .mdl-panel {
+  --c-muka: #ffffff; --c-tepi: #ff9000; --c-dasar: #e07e00;
+  max-height: min(100%, calc(100dvh - max(12px, env(safe-area-inset-top)) - max(12px, env(safe-area-inset-bottom))));
+  padding: 2px 12px 17px;
+  border: 0; border-radius: 0 !important; box-shadow: none !important;
+  background: linear-gradient(var(--c-muka), var(--c-muka)) left 5px top 2px / calc(100% - 10px) calc(100% - 9px) no-repeat,
+    linear-gradient(var(--c-muka), var(--c-muka)) left 4px top 3px / calc(100% - 8px) calc(100% - 11px) no-repeat,
+    linear-gradient(var(--c-muka), var(--c-muka)) left 3px top 4px / calc(100% - 6px) calc(100% - 13px) no-repeat,
+    linear-gradient(var(--c-muka), var(--c-muka)) left 2px top 5px / calc(100% - 4px) calc(100% - 15px) no-repeat,
+    linear-gradient(var(--c-tepi), var(--c-tepi)) left 3px top 0px / calc(100% - 6px) calc(100% - 5px) no-repeat,
+    linear-gradient(var(--c-tepi), var(--c-tepi)) left 2px top 1px / calc(100% - 4px) calc(100% - 7px) no-repeat,
+    linear-gradient(var(--c-tepi), var(--c-tepi)) left 1px top 2px / calc(100% - 2px) calc(100% - 9px) no-repeat,
+    linear-gradient(var(--c-tepi), var(--c-tepi)) left 0px top 3px / 100% calc(100% - 11px) no-repeat,
+    linear-gradient(var(--c-dasar), var(--c-dasar)) left 3px top 5px / calc(100% - 6px) calc(100% - 5px) no-repeat,
+    linear-gradient(var(--c-dasar), var(--c-dasar)) left 2px top 6px / calc(100% - 4px) calc(100% - 7px) no-repeat,
+    linear-gradient(var(--c-dasar), var(--c-dasar)) left 1px top 7px / calc(100% - 2px) calc(100% - 9px) no-repeat,
+    linear-gradient(var(--c-dasar), var(--c-dasar)) left 0px top 8px / 100% calc(100% - 11px) no-repeat !important;
+  background-origin: border-box !important;
+}
+/* title bar strip: same orange as the frame line, so the stepped silhouette of the panel stays; light 2 px top, dark 2 px underside */
+.hp-menu-piksel .mdl-judul {
+  margin: 0 -10px 10px; padding: 9px 12px; min-height: 36px; box-sizing: border-box;
+  font-size: 16px; line-height: 18px; font-weight: 800; letter-spacing: .02em; color: #212121;
+  background: #ff9000; box-shadow: inset 0 -2px 0 #e07e00, inset 0 2px 0 #ffd9a8;
+}
+.hp-menu-piksel .mdl-isi > .stack { gap: 8px; }
+.hp-menu-piksel .hp-menu-tujuan {
+  display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden;
+  margin: 0; font-size: 14px; line-height: 20px; color: #5f5f5f;
+}
+.hp-menu-piksel .hp-menu-tujuan b { color: #212121; }
+.hp-menu-piksel .hp-menu-daftar.hp-menu-ringkas { grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: 6px; row-gap: 8px; }
+.hp-menu-piksel .hp-menu-ringkas > li.hp-menu-baris,
+.hp-menu-piksel .hp-menu-ringkas > li.hp-menu-suara,
+.hp-menu-piksel .hp-menu-ringkas > li.hp-menu-info { grid-column: 1 / -1; }
+.hp-menu-piksel .hp-menu-ringkas > li.hp-menu-info { padding: 6px 4px 0; border-top: 2px solid #ecd5cb; font-size: 13px; line-height: 1.4; }
+.hp-menu-piksel .hp-menu-ringkas > li.hp-menu-info > b { font-size: 14px; }
+.hp-menu-piksel .hp-menu-info + li:not(.hp-menu-info) { border-top: 0; }
+
+/* pixel key (T-030 shape): ink kind by default; pressed / on = orange kind */
+.hp-menu-piksel .hp-kunci-piksel,
+.hp-menu-piksel .hp-sakelar {
+  --k-muka: #ffffff; --k-tepi: #212121; --k-terang: transparent; --k-kanan: transparent; --k-dasar: #212121; --k-label: #212121; --k-tekan: #f9eeea;
+  display: flex; align-items: center; gap: 8px; min-height: 48px; margin: 0; padding: 6px 8px 9px;
+  border: 0; border-radius: 0; box-shadow: none; color: var(--k-label);
+  font: inherit; font-size: 14px; font-weight: 700; line-height: 17px; text-align: left; cursor: pointer;
+  background: linear-gradient(var(--k-terang), var(--k-terang)) left 2px top 0 / calc(100% - 4px) 2px no-repeat,
+    linear-gradient(var(--k-terang), var(--k-terang)) left 0 top 2px / 2px calc(100% - 7px) no-repeat,
+    linear-gradient(var(--k-kanan), var(--k-kanan)) right 0 top 2px / 2px calc(100% - 7px) no-repeat,
+    linear-gradient(var(--k-muka), var(--k-muka)) left 4px top 2px / calc(100% - 8px) calc(100% - 7px) no-repeat,
+    linear-gradient(var(--k-muka), var(--k-muka)) left 2px top 4px / calc(100% - 4px) calc(100% - 11px) no-repeat,
+    linear-gradient(var(--k-tepi), var(--k-tepi)) left 2px top 0px / calc(100% - 4px) calc(100% - 3px) no-repeat,
+    linear-gradient(var(--k-tepi), var(--k-tepi)) left 0px top 2px / 100% calc(100% - 7px) no-repeat,
+    linear-gradient(var(--k-dasar), var(--k-dasar)) left 2px top 3px / calc(100% - 4px) calc(100% - 3px) no-repeat,
+    linear-gradient(var(--k-dasar), var(--k-dasar)) left 0px top 5px / 100% calc(100% - 7px) no-repeat;
+  transition: transform 80ms ease-out; -webkit-tap-highlight-color: transparent; touch-action: manipulation;
+}
+.hp-menu-piksel .hp-menu-ringkas > li > .hp-kunci-piksel { width: 100%; height: 100%; }
+.hp-menu-piksel .hp-kunci-piksel > span { min-width: 0; overflow-wrap: anywhere; }
+.hp-menu-piksel .hp-ikon-piksel { flex: 0 0 auto; width: 24px; height: 24px; }
+.hp-menu-piksel .hp-kunci-piksel[aria-pressed="true"],
+.hp-menu-piksel .hp-sakelar[aria-checked="true"] { --k-muka: #ff9000; --k-tepi: #ff9000; --k-terang: #ffd9a8; --k-kanan: #e07e00; --k-dasar: #9a4f00; --k-tekan: #e07e00; }
+@media (hover: hover) {
+  .hp-menu-piksel .hp-kunci-piksel:hover, .hp-menu-piksel .hp-sakelar:hover { --k-muka: var(--k-tekan); }
+}
+.hp-menu-piksel .hp-kunci-piksel:active,
+.hp-menu-piksel .hp-sakelar:active { --k-muka: var(--k-tekan); --k-terang: transparent; --k-kanan: transparent; --k-dasar: transparent; transform: translateY(2px); }
+@media (prefers-reduced-motion: reduce) { .hp-menu-piksel .hp-kunci-piksel, .hp-menu-piksel .hp-sakelar { transition: none; } }
+
+/* language: label left, three segmented keys right (each at least 52 x 44) */
+.hp-menu-piksel .hp-menu-ringkas > li.hp-menu-baris { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 44px; padding: 0 0 0 2px; font-size: 14px; font-weight: 700; color: #212121; }
+.hp-menu-piksel .hp-bahasa-kunci { display: flex; gap: 4px; flex: 0 0 auto; }
+.hp-menu-piksel .hp-bahasa-kunci .hp-kunci-piksel { justify-content: center; min-width: 52px; min-height: 44px; padding: 4px 8px 9px; font-size: 14px; font-weight: 800; text-align: center; }
+
+/* sound: two rows; each = [name + On/Off] key, then the slider */
+.hp-menu-piksel .hp-menu-ringkas > li.hp-menu-suara { display: block; padding: 8px 0 0; border-top: 2px solid #ecd5cb; }
+.hp-menu-piksel .hp-suara { display: grid; gap: 6px; }
+.hp-menu-piksel .hp-suara-baris { display: grid; grid-template-columns: minmax(0, 136px) minmax(0, 1fr); align-items: center; gap: 12px; }
+.hp-menu-piksel .hp-sakelar { justify-content: space-between; min-height: 44px; padding: 4px 6px 9px 10px; }
+.hp-menu-piksel .hp-sakelar-nama { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.hp-menu-piksel .hp-sakelar-status {
+  flex: 0 0 auto; min-width: 34px; padding: 1px 4px; border-radius: 0; text-align: center; font-size: 12px; line-height: 16px; font-weight: 800;
+  background: #ffffff; color: #5f5f5f; box-shadow: inset 0 0 0 2px #a4a4a4;
+}
+.hp-menu-piksel .hp-sakelar[aria-checked="true"] .hp-sakelar-status { background: #212121; color: #ffffff; box-shadow: none; }
+
+/* pixel slider: stepped 12 px track (ink outline with notched corners, cream face, ticks every 16 px, orange fill = --isi),
+   square 28 px thumb with the key's light top and dark base. The input is 44 px high, so the whole row height is the touch target. */
+.hp-menu-piksel .hp-geser {
+  --g-isi: #ff9000; --g-muka: #fff9f5; --g-garis: #212121; --g-tik: #ecd5cb;
+  -webkit-appearance: none; appearance: none; display: block; width: 100%; height: 44px; margin: 0; padding: 0;
+  background: transparent; border: 0; border-radius: 0; cursor: pointer; touch-action: manipulation; -webkit-tap-highlight-color: transparent;
+}
+.hp-menu-piksel .hp-geser:focus-visible { outline: 3px solid #212121; outline-offset: 2px; }
+.hp-menu-piksel .hp-geser::-webkit-slider-runnable-track {
+  height: 12px; border: 0; border-radius: 0;
+  background: linear-gradient(var(--g-isi), var(--g-isi)) left 2px top 2px / calc((100% - 4px) * var(--isi, 50) / 100) calc(100% - 4px) no-repeat,
+    repeating-linear-gradient(90deg, transparent 0 14px, var(--g-tik) 14px 16px) left 2px top 2px / calc(100% - 4px) calc(100% - 4px) no-repeat,
+    linear-gradient(var(--g-muka), var(--g-muka)) left 2px top 2px / calc(100% - 4px) calc(100% - 4px) no-repeat,
+    linear-gradient(var(--g-garis), var(--g-garis)) left 2px top 0 / calc(100% - 4px) 100% no-repeat,
+    linear-gradient(var(--g-garis), var(--g-garis)) left 0 top 2px / 100% calc(100% - 4px) no-repeat;
+}
+.hp-menu-piksel .hp-geser::-moz-range-track {
+  height: 12px; border: 0; border-radius: 0;
+  background: linear-gradient(var(--g-isi), var(--g-isi)) left 2px top 2px / calc((100% - 4px) * var(--isi, 50) / 100) calc(100% - 4px) no-repeat,
+    repeating-linear-gradient(90deg, transparent 0 14px, var(--g-tik) 14px 16px) left 2px top 2px / calc(100% - 4px) calc(100% - 4px) no-repeat,
+    linear-gradient(var(--g-muka), var(--g-muka)) left 2px top 2px / calc(100% - 4px) calc(100% - 4px) no-repeat,
+    linear-gradient(var(--g-garis), var(--g-garis)) left 2px top 0 / calc(100% - 4px) 100% no-repeat,
+    linear-gradient(var(--g-garis), var(--g-garis)) left 0 top 2px / 100% calc(100% - 4px) no-repeat;
+}
+.hp-menu-piksel .hp-geser::-webkit-slider-thumb {
+  -webkit-appearance: none; appearance: none; width: 28px; height: 28px; margin-top: -8px; border: 0; border-radius: 0;
+  background: #ff9000; box-shadow: inset 0 0 0 2px #212121, inset 0 -6px 0 #9a4f00, inset 0 4px 0 #ffd9a8;
+}
+.hp-menu-piksel .hp-geser::-moz-range-thumb {
+  box-sizing: border-box; width: 28px; height: 28px; border: 0; border-radius: 0;
+  background: #ff9000; box-shadow: inset 0 0 0 2px #212121, inset 0 -6px 0 #9a4f00, inset 0 4px 0 #ffd9a8;
+}
+.hp-menu-piksel .hp-geser:disabled { cursor: not-allowed; --g-isi: #a4a4a4; --g-garis: #a4a4a4; --g-muka: #f9eeea; }
+.hp-menu-piksel .hp-geser:disabled::-webkit-slider-thumb { background: #e0e0e0; box-shadow: inset 0 0 0 2px #a4a4a4; }
+.hp-menu-piksel .hp-geser:disabled::-moz-range-thumb { background: #e0e0e0; box-shadow: inset 0 0 0 2px #a4a4a4; }
+
+/* Close: full-width ink pixel key (the shared .btn key from gaya-game.css), always below the list */
+.hp-menu-piksel .mdl-aksi { margin-top: 10px; flex-wrap: nowrap; }
+.hp-menu-piksel .mdl-aksi > .btn { flex: 1 1 auto; min-height: 44px; }
