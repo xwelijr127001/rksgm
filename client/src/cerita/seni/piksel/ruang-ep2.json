@@ -26,6 +26,18 @@
      "alpha": false
     },
     {
+     "id": "tanda-sogok",
+     "berkas": "ep2-kantor-tanda-sogok.png",
+     "x": 896,
+     "y": 64,
+     "w": 468,
+     "h": 224,
+     "pw": 117,
+     "ph": 56,
+     "z": 12,
+     "alpha": true
+    },
+    {
      "id": "meja",
      "berkas": "ep2-ruang-kantor-meja.png",
      "x": 0,
@@ -35,6 +47,18 @@
      "pw": 400,
      "ph": 104,
      "z": 30,
+     "alpha": true
+    },
+    {
+     "id": "monitor",
+     "berkas": "ep2-kantor-monitor.png",
+     "x": 400,
+     "y": 280,
+     "w": 464,
+     "h": 136,
+     "pw": 116,
+     "ph": 34,
+     "z": 31,
      "alpha": true
     }
    ],
@@ -129,6 +153,16 @@
      "y": 0,
      "w": 1600,
      "h": 900
+    }
+   },
+   "aksesori": {
+    "missRaksa": {
+     "frame": "berdiri-kanan",
+     "berkas": "ep2-kantor-headset.png",
+     "x": 12,
+     "y": 12,
+     "pw": 34,
+     "ph": 36
     }
    }
   },
@@ -498,7 +532,7 @@
     "hp": {
      "x": 250,
      "y": 0,
-     "w": 1100,
+     "w": 1316,
      "h": 900
     },
     "lebar": {
@@ -511,7 +545,7 @@
    "fokus": {
     "x": 252,
     "y": 0,
-    "w": 1096,
+    "w": 1308,
     "h": 472
    },
    "komite": {
@@ -730,6 +764,59 @@
         13
        ]
       }
+     },
+     {
+      "id": "missRaksa",
+      "bingkai": {
+       "x": 1352,
+       "y": 124,
+       "w": 244,
+       "h": 736
+      },
+      "sel": {
+       "kepala": [
+        254,
+        0,
+        61,
+        56
+       ],
+       "badan": [
+        254,
+        56,
+        61,
+        128
+       ],
+       "kedip": [
+        254,
+        185,
+        23,
+        8
+       ],
+       "tangan": [
+        278,
+        185,
+        1,
+        1
+       ]
+      },
+      "letak": {
+       "kepala": [
+        0,
+        0
+       ],
+       "badan": [
+        0,
+        56
+       ],
+       "kedip": [
+        14,
+        32
+       ],
+       "tangan": [
+        0,
+        0
+       ]
+      }
      }
     ],
     "pose": {
@@ -778,7 +865,8 @@
        "ketua": "diam",
        "penjamin": "diam",
        "surveyor": "diam",
-       "klaim": "diam"
+       "klaim": "diam",
+       "missRaksa": "diam"
       },
       "tanda": {},
       "kedip": true
@@ -788,7 +876,8 @@
        "ketua": "angguk",
        "penjamin": "angguk",
        "surveyor": "angguk",
-       "klaim": "angguk"
+       "klaim": "angguk",
+       "missRaksa": "diam"
       },
       "tanda": {
        "ketua": "setuju",
@@ -809,7 +898,8 @@
        "ketua": "diam",
        "penjamin": "angkat",
        "surveyor": "angkat",
-       "klaim": "diam"
+       "klaim": "diam",
+       "missRaksa": "diam"
       },
       "tanda": {
        "penjamin": "catatan",

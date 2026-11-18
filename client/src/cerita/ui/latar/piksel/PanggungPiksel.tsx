@@ -249,8 +249,9 @@ export function PanggungPiksel({ ep, komposisi, adegan, tx, nama, suasana, statu
     const u = new Set<string>([...r.lapisan.map((l) => l.url), ...prop.map((p) => p.url), ...tokoh.map((x) => x.s.url)]);
     if (sisipan) u.add(sisipan.url);
     if (r.komite) { u.add(r.komite.url); u.add(r.komite.tanda.url); }
+    for (const x of tokoh) { const ak = r.aksesori[x.t.id]; if (ak && ak.frame === x.s.frame) u.add(ak.url); }
     return [...u].filter(Boolean);
-  }, [r, prop.map((p) => p.url).join(), tokoh.map((x) => x.s.url).join(), sisipan?.url]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [r, prop.map((p) => p.url).join(), tokoh.map((x) => `${x.s.url}#${x.s.frame}`).join(), sisipan?.url]); // eslint-disable-line react-hooks/exhaustive-deps
   const [siapUrl, setSiapUrl] = useState(() => url.every((u) => siap.has(u)));
   const kunciUrl = url.join('|');
   useEffect(() => {
@@ -340,6 +341,9 @@ export function PanggungPiksel({ ep, komposisi, adegan, tx, nama, suasana, statu
         for (const l of x.s.lapisan) {
           gambar(x.s.url, l.sumber.x, l.sumber.y, l.sumber.w, l.sumber.h, x.x + geser + (l.x - tubuh.x) * K, x.y - naik + (l.y - tubuh.y) * K, l.sumber.w * K, l.sumber.h * K);
         }
+        // T-050: aksesori milik ruang (headset Miss Raksa di meja layanan) hanya di frame yang ditulis ruangnya; ikut naik & cermin.
+        const ak = r.aksesori[x.t.id];
+        if (ak && ak.frame === x.s.frame) gambar(ak.url, 0, 0, ak.w, ak.h, x.x + geser + (ak.x - tubuh.x) * K, x.y - naik + (ak.y - tubuh.y) * K, ak.w * K, ak.h * K);
         if (tlp && tlp.tokoh === x.t.id) {
           // Titik (0, 0) bingkai tokoh di dunia; offset README telepon-v2 dalam koordinat bingkai. Ikut naik 1 piksel bila tokoh bernapas.
           const bx = x.x + geser - tubuh.x * K, by = x.y - naik - tubuh.y * K;

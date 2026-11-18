@@ -4,6 +4,8 @@
  * dengan catatan; ruang tanpa latar sah = tidak tersedia (adegan tetap ilustrasi, lihat PanggungLatarPiksel).
  * T-025: ruang boleh punya blok `komite` = sprite hiasan MILIK RUANG (anggota Komite Klaim; ./komite.ts). Atlas + tandanya
  * (komite.png, ep2-komite-tanda.png) ikut diglob di sini.
+ * T-050: kantor punya lapisan tambahan (ep2-kantor-tanda-sogok.png, ep2-kantor-monitor.png) dan blok `aksesori` (headset Miss
+ * Raksa, ep2-kantor-headset.png, hanya di frame berdiri-kanan); dipasang tools/piksel/kantor-t050.mjs.
  */
 import json from '../../../seni/piksel/ruang-ep2.json';
 import type { Kotak } from '../../panggung/dunia';
@@ -11,7 +13,7 @@ import { bacaKomite, type KomiteRuang } from './komite';
 
 let pngVite: Record<string, string> = {};
 try {
-  pngVite = import.meta.glob(['../../../seni/piksel/ep2-ruang-*.png', '../../../seni/piksel/ep2-komite-*.png', '../../../seni/piksel/komite.png'], { eager: true, query: '?url', import: 'default' });
+  pngVite = import.meta.glob(['../../../seni/piksel/ep2-ruang-*.png', '../../../seni/piksel/ep2-komite-*.png', '../../../seni/piksel/komite.png', '../../../seni/piksel/ep2-kantor-*.png'], { eager: true, query: '?url', import: 'default' });
 } catch {
   /* bukan Vite (tes node) */
 }
@@ -47,7 +49,14 @@ export interface RuangPiksel {
   bingkai: { hp: Kotak; lebar: Kotak };
   /** (T-025) Sprite hiasan milik ruang + peta keadaannya; null = ruang biasa. */
   komite: KomiteRuang | null;
+  /**
+   * (T-050) Aksesori per tokoh yang HANYA dipakai di ruang ini (headset Miss Raksa di meja layanan): gambar kecil yang digambar
+   * di atas frame atlas `frame` tokoh itu, di letak x, y (piksel seni, relatif pojok kiri-atas frame). Frame lain = tidak digambar.
+   */
+  aksesori: Record<string, AksesoriRuang>;
 }
+
+export interface AksesoriRuang { frame: string; url: string; x: number; y: number; w: number; h: number }
 
 type Obj = Record<string, unknown>;
 const obj = (v: unknown): Obj | null => (v && typeof v === 'object' && !Array.isArray(v) ? (v as Obj) : null);
@@ -63,6 +72,17 @@ function lapisan(id: string, v: unknown, catatan: string[]): LapisanRuangPiksel 
     return null;
   }
   return { id, url: urlBerkas(o.berkas), ...k, z: n(o.z) ? o.z : 10 };
+}
+
+/** T-050: aksesori tokoh milik ruang (toleran: entri cacat dilewati + catatan). */
+function bacaAksesori(v: unknown, ruang: string, catatan: string[]): Record<string, AksesoriRuang> {
+  const hasil: Record<string, AksesoriRuang> = {};
+  for (const [tokoh, av] of Object.entries(obj(v) ?? {})) {
+    const a = obj(av);
+    if (!a || typeof a.frame !== 'string' || typeof a.berkas !== 'string' || !n(a.x) || !n(a.y) || !n(a.pw) || !n(a.ph)) { catatan.push(`ruang ${ruang}: aksesori ${tokoh} tidak sah`); continue; }
+    hasil[tokoh] = { frame: a.frame, url: urlBerkas(a.berkas), x: a.x, y: a.y, w: a.pw, h: a.ph };
+  }
+  return hasil;
 }
 
 export function bacaRuangPiksel(m: unknown, catatan: string[] = []): Record<string, RuangPiksel> {
@@ -94,6 +114,7 @@ export function bacaRuangPiksel(m: unknown, catatan: string[] = []): Record<stri
       papan: papanK && typeof papanO?.teksKunci === 'string' ? { kotak: papanK, teksKunci: papanO.teksKunci, warna: typeof papanO.warna === 'string' ? papanO.warna : '#ffffff' } : null,
       bingkai: { hp: kotak(b?.hp) ?? { x: 300, y: 0, w: 1000, h: 900 }, lebar: kotak(b?.lebar) ?? { x: 0, y: 0, w: 1600, h: 900 } },
       komite: bacaKomite(o.komite, urlBerkas, id, catatan),
+      aksesori: bacaAksesori(o.aksesori, id, catatan),
     };
   }
   return hasil;

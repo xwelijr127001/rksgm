@@ -26,6 +26,7 @@ import * as L from './lib.mjs';
 import { tulisPngIndeks } from './miss-lib.mjs';
 import { sampel } from './hendra-native.mjs';
 import { ruangKomiteEp2, salinPngKomite } from './ruang-komite-ep2.mjs';
+import { tambahKantorT050, salinPngKantorT050 } from './kantor-t050.mjs';
 
 const SUMBER = path.join(L.ROOT, 'character', 'kantor-ep2-pixel-v1', 'kantor-ep2-referensi-v1.png');
 const KELUAR = path.join(L.ROOT, 'client', 'src', 'cerita', 'seni', 'piksel');
@@ -212,6 +213,9 @@ const slotDari = (slot, kaki) => Object.fromEntries(Object.entries(slot).map(([n
   // entri ruang + sprite milik ruang digabung): tools/piksel/ruang-komite-ep2.mjs.
   Object.assign(lokasi, ruangKomiteEp2());
   for (const [nama, byte] of salinPngKomite(KELUAR)) hasil.push({ nama, byte });
+  // T-050: meja layanan Bagian 1 = tanda "Sogok = NO", monitor + keyboard, headset Miss Raksa (character/kantor-ep2-pixel-v1/t050).
+  tambahKantorT050(lokasi['kantor-ep2']);
+  for (const [nama, byte] of salinPngKantorT050(KELUAR)) hasil.push({ nama, byte });
   const manifest = { versi: 2, dibuat: 'tools/piksel/bangun-ruang-ep2.mjs', piksel: K, dunia: { w: PW * K, h: PH * K, pw: PW, ph: PH }, warnaTepi: lokasi['kantor-ep2'].warnaTepi, lokasi };
   fs.writeFileSync(path.join(KELUAR, 'ruang-ep2.json'), JSON.stringify(manifest, null, 1) + '\n');
   console.log(JSON.stringify(hasil.map((x) => [x.nama, x.byte, x.warna])));

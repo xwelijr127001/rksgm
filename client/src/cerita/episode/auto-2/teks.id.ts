@@ -57,9 +57,9 @@ export const TEKS_AUTO_2_ID: Record<string, string> = {
   // T-025: Ruang Rapat Komite Klaim. Nama ruang + SATU kalimat per keadaan ruang untuk pembaca layar (anggota komite dan tanda
   // SETUJU / CATATAN adalah gambar; tandanya tetap berbahasa Indonesia di semua bahasa, jadi kalimat ini yang membawa artinya).
   'lokasi.komite': 'Ruang Rapat Komite Klaim',
-  'lokasi.komite.tunggu': 'Ruang Rapat Komite Klaim. Empat anggota komite duduk menunggu di balik meja panjang.',
-  'lokasi.komite.setuju': 'Ruang Rapat Komite Klaim. Keempat anggota mengangguk; di atas tiap anggota muncul tanda setuju.',
-  'lokasi.komite.catatan': 'Ruang Rapat Komite Klaim. Dua anggota mengangkat tangan; di atas keduanya muncul tanda catatan.',
+  'lokasi.komite.tunggu': 'Ruang Rapat Komite Klaim. Empat anggota komite duduk menunggu di balik meja panjang. Miss Raksa berdiri di ujung meja sebagai tuan rumah.',
+  'lokasi.komite.setuju': 'Ruang Rapat Komite Klaim. Keempat anggota mengangguk; di atas tiap anggota muncul tanda setuju. Miss Raksa berdiri di ujung meja sebagai tuan rumah.',
+  'lokasi.komite.catatan': 'Ruang Rapat Komite Klaim. Dua anggota mengangkat tangan; di atas keduanya muncul tanda catatan. Miss Raksa berdiri di ujung meja sebagai tuan rumah.',
   'lokasi.komite.kosong': 'Ruang Rapat Komite Klaim. Keempat kursi di balik meja panjang kosong.',
   'latar.bengkel.antrean': 'Antrean minggu ini',
   'latar.bengkel.penuh': 'PENUH',

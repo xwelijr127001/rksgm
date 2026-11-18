@@ -2882,3 +2882,61 @@ QA added 3 expect (snapshot) tests with node:test `t.assert.snapshot` (record: `
   - Layout unchanged (no height change), so it still fits 360x640.
 
 **Gate (owner rule):** typecheck 0; `client/dist` rebuilt = exact copy. Not tested in a browser or on a phone. Not committed.
+
+## T-050 (2026-11-19): Miss Raksa in the committee room, Raksa yellow surveyor uniform, service-desk monitor + sign + headset (Designer)
+
+Built by the Designer and uncommitted. Owner rule: NOTHING was opened in a browser. The previews are composed from the PNGs by script, not taken from the app. Gate: client typecheck 0 errors; client/dist rebuilt (the three `ep2-kantor-*` PNGs are in dist/assets).
+
+**1. Committee room (Part 4): Miss Raksa as host.**
+- **Where she stands:** at the right end of the table, in front of the whiteboard, facing the members, smiling.
+  - Feet at art (366, 214), frame box 338, 31, 61×184.
+  - She covers no face and no SETUJU / CATATAN tag; the table hides her near leg.
+- **How she is built:** she is a 5th room sprite `missRaksa` with `tamu: true`.
+  - She has no tag, no vote and no istilah icon.
+  - She appears in tunggu, setuju (standing still) and catatan; she is absent in `kosong`.
+  - Her pixels are copied 1:1 from her in-game `berdiri-kiri` frame with the senyum face, and she blinks like the members.
+- **Camera:** `fokus` widened to art x 63..390 and `bingkai.hp` to x 62.5..391.5.
+  - Cost (calculated, not measured): 390–402 px wide phones at DPR 3 now draw the room at 1 CSS px per art px instead of 1.33.
+  - 430 px wide keeps 1.33. A 320 px wide phone at DPR 2 halves.
+  - The Lead can revert it with one number if the owner prefers bigger faces.
+- **Text:** the screen-reader room sentences (lokasi.komite.tunggu / setuju / catatan, id/en/zh) now mention her. The visible "Hadir:" line lists cast members only; this room has none, so it is unchanged.
+- **Files:**
+  - `character/komite-ep2-pixel-v1/alat/miss-raksa-t050.mjs` (new)
+  - `komite.png` (315×193), `komite.json`, `ruang-komite.json`, README "T-050"
+  - `tools/piksel/ruang-komite-ep2.mjs` (accepts `tamu`: no tag place, no icon)
+  - `client/src/cerita/seni/piksel/komite.png`, `ruang-ep2.json`
+  - `client/src/cerita/episode/auto-2/teks.{id,en,zh}.ts`
+- **Previews:** `character/komite-ep2-pixel-v1/pratinjau-miss-raksa-t050-2x.png` and `pratinjau-miss-raksa-fokus-t050-2x.png`.
+
+**2. Pak Rudi (Surveyor): Raksa yellow polo, from the real uniform.**
+- **Yellow #F6D25C:** sampled from the owner's poster `character/surveyor-raksa-ref/seragam-surveyor-raksa.jpg`. It is the mean of the most common brightness band of the shirt pixels (861 px).
+  - Ramp: #F6D25C main, #E2B74D shadow, #C69E43 deep, #9E7F20 folds.
+  - The saved raksaonline.com CSS has no colours (fonts only), so the photo is the source.
+- **Black parts:** collar and shoulder yoke in #33363F / #2C2C31, plus a small owl patch on the chest and a mark on the sleeve.
+- **Unchanged:** face, hair, skin, lanyard and ID card, tablet, trousers, pose and grid.
+- **Scope:** the change is in the runtime atlas `client/src/cerita/seni/piksel/samping.png` (his 3 body frames + the collar rows of his 2 face cells), so every Rudi scene, portrait and the K04 pin follow it.
+- **Not changed:**
+  - the Committee's own Surveyor seat (a different person in a khaki vest). The Lead can ask for the same yellow there if wanted.
+  - the Underwriter, who was once drawn from Rudi.
+- **Files:**
+  - `character/tokoh-samping-ep2-pixel-v1/seragam-rudi-t050/`: `seragam.mjs` (idempotent; rerun it after `tools/piksel/bangun-samping.mjs`), `png.mjs`, README.
+- **Previews:** `rudi-sebelum-sesudah-3x.png` and `rudi-dada-sebelum-sesudah-6x.png`.
+
+**3. Part 1 service desk.**
+- **Wall sign:** "SOGOK = NO / SERVICE = YES" with the smiley badge (maroon ring, waving glove).
+  - It is a beige plaque that replaces the framed picture (layer z 12, art x 224, y 16), between Miss Raksa's head and the clock.
+  - The text is in a 5×7 pixel font and not translated. The ring words were dropped (unreadable at 31 px).
+- **Monitor and keyboard:** a black monitor seen from behind, left of the desk phone, plus a keyboard in front of her on the counter (layer z 31: above the counter, below Pak Hendra).
+- **Headset:** grey band over the crown, ear cup on her visible ear, boom ending 1 px left of the mouth; eyes and mouth are uncovered.
+  - It is drawn only in the office room and only on her desk frame `berdiri-kanan`, through a new room `aksesori` block (`ruang.ts` parses it; `PanggungPiksel.tsx` draws it after her frame and preloads it).
+  - It does not appear in the committee room or in the phone-in-hand frames.
+- **Files:**
+  - `character/kantor-ep2-pixel-v1/t050/` (bangun.mjs, 3 PNG, kantor-t050.json, README)
+  - `tools/piksel/kantor-t050.mjs` (new installer); `tools/piksel/bangun-ruang-ep2.mjs` calls it
+  - `client/src/cerita/seni/piksel/ep2-kantor-{tanda-sogok,monitor,headset}.png`, `ruang-ep2.json`
+  - `client/src/cerita/ui/latar/piksel/ruang.ts`, `PanggungPiksel.tsx`
+- **Previews:** `character/kantor-ep2-pixel-v1/t050/pratinjau-kantor-t050-3x.png` (before/after), `-1x.png`, `pratinjau-headset-8x.png`.
+
+**Risks:**
+- Tests that count 4 committee members (`data-komite-anggota`), that pin the office room's layer list, or that pin the samping.png hash will need updating. None were run (owner rule).
+- The camera scale numbers for the committee room are calculated from the README table, not measured.

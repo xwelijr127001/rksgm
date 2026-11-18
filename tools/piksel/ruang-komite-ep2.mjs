@@ -62,6 +62,9 @@ export function ruangKomiteEp2() {
   });
   harus(Object.keys(atlas.anggota).length === anggota.length, 'jumlah anggota berbeda di kedua manifest');
   const id = anggota.map((a) => a.id);
+  // T-050: a `tamu` sprite (Miss Raksa, host) is drawn like a member but has no tag place and no istilah icon.
+  const tamu = new Set(km.anggota.filter((a) => a.tamu === true).map((a) => a.id));
+  const idAnggota = id.filter((a) => !tamu.has(a));
   const pose = Object.fromEntries(km.pose.map((p) => {
     const d = atlas.pose[p];
     harus(d && d.lapis.every((s) => SEL.includes(s)), `pose ${p}`);
@@ -69,7 +72,7 @@ export function ruangKomiteEp2() {
   }));
   const selTanda = km.tanda.sel;
   for (const [n, [x, y, w, h]] of Object.entries(selTanda)) harus(x + w <= tw && y + h <= th && km.tanda.w === w * K && km.tanda.h === h * K, `sel tanda ${n}`);
-  for (const a of id) harus(km.tanda.letak[a] && km.tanda.letak[a].x === atlas.tanda.letak[a][0] * K && km.tanda.letak[a].y === atlas.tanda.letak[a][1] * K, `letak tanda ${a}`);
+  for (const a of idAnggota) harus(km.tanda.letak[a] && km.tanda.letak[a].x === atlas.tanda.letak[a][0] * K && km.tanda.letak[a].y === atlas.tanda.letak[a][1] * K, `letak tanda ${a}`);
   harus(JSON.stringify(Object.keys(km.keadaan).sort()) === JSON.stringify([...KEADAAN].sort()), 'keadaan bukan tunggu / setuju / catatan / kosong');
   const keadaan = Object.fromEntries(KEADAAN.map((k) => {
     const s = km.keadaan[k];
@@ -79,7 +82,7 @@ export function ruangKomiteEp2() {
     harus(JSON.stringify([...urutan].sort()) === JSON.stringify(Object.keys(s.tanda).sort()), `keadaan ${k}: urutan tanda`);
     return [k, { pose: s.pose, tanda: s.tanda, ...(urutan.length ? { urutan, jedaMs: s.jedaMs } : {}), ...(s.kedip ? { kedip: true } : {}) }];
   }));
-  const ikon = Object.fromEntries(id.map((a) => {
+  const ikon = Object.fromEntries(idAnggota.map((a) => {
     const [x, y, w, h] = atlas.potret[a].ikon;
     harus(x + w <= iw && y + h <= ih, `ikon ${a} di luar gambar`);
     return [a, [x, y, w, h]];
