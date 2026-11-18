@@ -11,12 +11,14 @@ import type { DocTable, LeaderRow, Phase, PolicyCard, Prizes } from '@shared/typ
 import { Avatar } from '../art/Avatar';
 import { Icon } from '../art/Icon';
 import {
+  akhiriKlikTombol,
   getAudioPrefs,
   initAudio,
   setMuted,
   setMusicEnabled,
   setMusicVolume,
   setSfxVolume,
+  tombolUtamaDiklik,
 } from '../audio/audio';
 import { useAudioPrefs, useCountdown, useReducedMotion } from '../hooks';
 import { t, useBahasa } from '../i18n';
@@ -751,14 +753,35 @@ export function AudioControls({ ringkas = false }: { ringkas?: boolean }) {
   );
 }
 
-/** Panggil initAudio() pada interaksi pertama halaman. */
+/**
+ * T-045: orange main-action keys (Raksa pixel style, gaya-game.css "Primary"). Ink, danger, reply rows and toggles are not
+ * orange keys and keep their own (or no) sound.
+ */
+const TOMBOL_ORANYE = '.primary-action, .btn-utama, .kj-utama, .lk-btn-utama, .meja-utama, .akh-utama, .lp-pintu-aksi';
+/** Staff authoring pages keep silent buttons (not the game). */
+const TANPA_SUARA_TOMBOL = /^\/(cms|admin)(\/|$)/;
+
+/** Panggil initAudio() pada interaksi pertama halaman. T-045: also the one default sound for orange buttons. */
 export function AudioUnlocker() {
   useEffect(() => {
+    // Capture phase at window: runs before React's root listener, so the sound starts before any render of this click.
+    const klikMulai = (e: MouseEvent) => {
+      const el = e.target instanceof Element ? e.target.closest<HTMLElement>(TOMBOL_ORANYE) : null;
+      if (!el || TANPA_SUARA_TOMBOL.test(window.location.pathname)) return;
+      const kendali = el.closest<HTMLElement>('button, a, [role="button"]') ?? el;
+      if ((kendali as HTMLButtonElement).disabled || kendali.getAttribute('aria-disabled') === 'true') return;
+      tombolUtamaDiklik();
+    };
+    const klikSelesai = () => akhiriKlikTombol();
+    window.addEventListener('click', klikMulai, true);
+    window.addEventListener('click', klikSelesai);
     const unlock = () => initAudio();
     const opts = { once: true, passive: true } as const;
     window.addEventListener('pointerdown', unlock, opts);
     window.addEventListener('keydown', unlock, { once: true });
     return () => {
+      window.removeEventListener('click', klikMulai, true);
+      window.removeEventListener('click', klikSelesai);
       window.removeEventListener('pointerdown', unlock);
       window.removeEventListener('keydown', unlock);
     };

@@ -42,6 +42,7 @@ const CONTOH_SFX: { id: Sfx; kunci: string }[] = [
   { id: 'ketuk', kunci: 'ceritaHp.sfxKetuk' },
   { id: 'konfirmasi', kunci: 'ceritaHp.sfxKonfirmasi' },
   { id: 'batal', kunci: 'ceritaHp.sfxBatal' },
+  { id: 'tombol', kunci: 'ceritaHp.sfxTombol' },
 ];
 
 export function KontrolSuara({ temaUji, onTemaUji }: { temaUji: TemaCerita | null; onTemaUji: (t: TemaCerita | null) => void }) {

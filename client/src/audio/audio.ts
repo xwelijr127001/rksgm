@@ -33,7 +33,9 @@ export type Sfx =
   | 'pesanTerima'
   | 'ketuk'
   | 'konfirmasi'
-  | 'batal';
+  | 'batal'
+  // T-045: default sound of every orange main-action key (one central listener, ui/kit.tsx AudioUnlocker).
+  | 'tombol';
 
 export interface AudioPrefs {
   muted: boolean;
@@ -526,13 +528,48 @@ function lepasSuara(v: { g: GainNode }, cepat: boolean): void {
   }
   window.setTimeout(() => { try { v.g.disconnect(); } catch { /* already */ } }, cepat ? 80 : 50);
 }
+/**
+ * T-045 (owner: "all orange buttons have a sfx"): ONE default button sound for every orange main-action key.
+ * tombolUtamaDiklik() runs in the CAPTURE phase of the click (before React handlers and before React renders, so a heavy
+ * screen mounting cannot delay it) and starts 'tombol'. If the button's own handler then starts its own sound in the same
+ * click (Mulai = kertas, Kirim = pesanKirim, ...), that default voice is cut before it is heard (it is scheduled 20 ms ahead),
+ * so a button never plays two sounds. akhiriKlikTombol() (bubble phase, end of the click) closes the window.
+ */
+let suaraBawaan: { v: { g: GainNode; akhir: number }; waktu: number; sebelum: number | undefined } | null = null;
+export function tombolUtamaDiklik(): void {
+  suaraBawaan = null;
+  const sebelum = sfxTerakhir.get('tombol');
+  const v = mulaiSfx('tombol');
+  if (v) suaraBawaan = { v, waktu: typeof performance !== 'undefined' ? performance.now() : Date.now(), sebelum };
+}
+export function akhiriKlikTombol(): void {
+  suaraBawaan = null;
+}
+
 export function playSfx(name: Sfx): void {
+  const v = mulaiSfx(name);
+  // T-045: the button's own sound replaces the default button sound of this same click.
+  const b = suaraBawaan;
+  if (v && b && b.v !== v) {
+    suaraBawaan = null;
+    const kini = typeof performance !== 'undefined' ? performance.now() : Date.now();
+    if (kini - b.waktu < 1000) {
+      const i = suaraSfx.indexOf(b.v);
+      if (i >= 0) suaraSfx.splice(i, 1);
+      try { b.v.g.disconnect(); } catch { /* already */ }
+      if (b.sebelum === undefined) sfxTerakhir.delete('tombol'); else sfxTerakhir.set('tombol', b.sebelum);
+    }
+  }
+}
+
+/** Starts one effect now (same call, no await). null = not started (no context, muted, effects off, or inside the gap). */
+function mulaiSfx(name: Sfx): { g: GainNode; akhir: number } | null {
   // T-036 Fix 2 / T-038 Fix 1: log for the test tool, compiled in only for dev or a VITE_UJI_AUDIO=on build.
   if (UJI_AUDIO) (globalThis as { __sfxLog?: string[] }).__sfxLog?.push(name);
-  if (!ctx || !sfxBus || prefs.muted || !prefs.sfxEnabled) return;
+  if (!ctx || !sfxBus || prefs.muted || !prefs.sfxEnabled) return null;
   const kini = typeof performance !== 'undefined' ? performance.now() : Date.now();
   // Peredam ketukan beruntun: efek mode cerita 80 ms (lama), semua efek lain paling sedikit 70 ms (T-040).
-  if (kini - (sfxTerakhir.get(name) ?? -1e9) < (SFX_REDAM.has(name) ? 80 : SFX_JEDA_MS)) return;
+  if (kini - (sfxTerakhir.get(name) ?? -1e9) < (SFX_REDAM.has(name) ? 80 : SFX_JEDA_MS)) return null;
   sfxTerakhir.set(name, kini);
   if (ctx.state !== 'running') ctx.resume().catch(() => { /* ditolak browser: dicoba lagi pada interaksi berikutnya */ });
   // T-044: 20 ms lead, so a short main-thread stall right after the tap (a heavy screen mounting) does not put the start of
@@ -551,6 +588,7 @@ export function playSfx(name: Sfx): void {
     const i = suaraSfx.indexOf(v);
     if (i >= 0) { suaraSfx.splice(i, 1); lepasSuara(v, false); }
   }, SFX_UMUR_S * 1000 + 100);
+  return v;
 }
 
 /** Nada mirip marimba/bel: dasar + parsial 4x yang cepat hilang (notifikasi pesan, denting konfirmasi). */
@@ -657,6 +695,34 @@ function bunyikan(name: Sfx, sfxBus: GainNode, t: number): void {
       tone(sfxBus, N(16), t, 0.1, 0.09, 'triangle');
       tone(sfxBus, N(23), t + 0.06, 0.14, 0.07, 'sine');
       break;
+    case 'tombol': {
+      // T-045 orange key press (~130 ms, original synth): soft low "thock" (sine 180 -> 110 Hz, 25 ms) + bright two-note rising
+      // chime N(24) -> N(31), triangle, 10 ms apart, through a 5 kHz lowpass. 2.5 ms attack (no click), exponential release,
+      // peak a little below 'konfirmasi' so it does not tire on repeat.
+      const c = sfxBus.context;
+      const lp = c.createBiquadFilter();
+      lp.type = 'lowpass';
+      lp.frequency.value = 5000;
+      lp.Q.value = 0.5;
+      lp.connect(sfxBus);
+      const nada = (f0: number, f1: number, mulai: number, dur: number, puncak: number, wave: OscillatorType, ke: AudioNode) => {
+        const osc = c.createOscillator();
+        const env = c.createGain();
+        osc.type = wave;
+        osc.frequency.setValueAtTime(f0, mulai);
+        if (f1 !== f0) osc.frequency.exponentialRampToValueAtTime(f1, mulai + dur);
+        env.gain.setValueAtTime(0.0001, mulai);
+        env.gain.exponentialRampToValueAtTime(puncak, mulai + 0.0025);
+        env.gain.exponentialRampToValueAtTime(0.0001, mulai + dur);
+        osc.connect(env).connect(ke);
+        osc.start(mulai);
+        osc.stop(mulai + dur + 0.02);
+      };
+      nada(180, 110, t, 0.025 + 0.035, 0.085, 'sine', sfxBus); // body: 25 ms pitch drop, short tail
+      nada(N(24), N(24), t + 0.004, 0.09, 0.05, 'triangle', lp);
+      nada(N(31), N(31), t + 0.014, 0.115, 0.045, 'triangle', lp);
+      break;
+    }
     case 'batal':
       // Pembatalan: dua nada turun pelan, netral.
       tone(sfxBus, N(14), t, 0.07, 0.07, 'sine');

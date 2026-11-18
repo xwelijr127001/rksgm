@@ -2812,3 +2812,13 @@ QA added 3 expect (snapshot) tests with node:test `t.assert.snapshot` (record: `
 - **T-042 A/B removed:** no `?suara=`, no sessionStorage key `raksa:suara-ab` (0 hits in the build). Behaviour b is permanent: no audioSession 'playback', music through Web Audio, latencyHint 'interactive'. T-040 gap / voice cap / idempotent music untouched.
 
 **Gate (owner rule):** typecheck 0; `client/dist` rebuilt = exact copy of the scratch build. Not tested in a browser or on a phone. Not committed.
+
+## T-045 (2026-11-19): every orange button plays a sound
+
+- **Mechanism (one place, no per-button edits):** `client/src/ui/kit.tsx` `AudioUnlocker` (mounted once in App.tsx) adds a window click listener in the CAPTURE phase. If the target is inside an enabled orange key (not `disabled`, not `aria-disabled="true"`) it calls `tombolUtamaDiklik()` (`client/src/audio/audio.ts`), which starts the new SFX `tombol` right away. Capture runs before React's root listener and before React renders this click, so a heavy screen cannot delay it (no flushSync anywhere in client/src).
+- **No double sound:** if the button's own handler starts its own sound in the same click (Mulai = kertas, Kirim = pesanKirim, Lanjut aktivitas = konfirmasi, ...), `playSfx` cuts the default voice before it is heard (it is scheduled 20 ms ahead) and restores its gap timer. A bubble-phase listener (`akhiriKlikTombol`) closes the window at the end of the click. Keyboard Enter/Space fire click, so they are covered. Mute and effects-off are respected (same path as playSfx).
+- **Orange classes:** `.primary-action` (includes akh-utama, hp-kirim-tombol, cer-lanjut, sr-kirim, solo-jeda-lanjut, lp-join-mulai, hp-gerbang-mulai, ...), `.btn-utama`, `.kj-utama`, `.lk-btn-utama`, `.meja-utama`, `.akh-utama`, `.lp-pintu-aksi` (the "Primary" group of gaya-game.css). Not counted: ink/secondary keys, danger, reply rows (`.hp-opsi`), toggles (`.hp-sakelar`, menu pixel keys), round keys.
+- **Left out on purpose:** staff authoring pages `/cms` and `/admin` (not the game). The host page is included.
+- **New SFX `tombol`** (~130 ms, original synth): sine "thock" 180 -> 110 Hz (25 ms drop + short tail, peak 0.085) + triangle chime N(24) then N(31) 10 ms apart through a 5 kHz lowpass (peaks 0.05 / 0.045), 2.5 ms attack, exponential release; 70 ms gap. Listed in the dev-only "Coba suara" samples (i18n `ceritaHp.sfxTombol` id/en/zh).
+
+**Gate (owner rule):** typecheck 0; `client/dist` rebuilt = exact copy of the scratch build. Not tested in a browser or on a phone. Not committed.
