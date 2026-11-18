@@ -111,6 +111,8 @@ const kamus: KamusRuang = {
     // PIN panitia
     pinLabel: 'PIN panitia',
     pinKet: 'Server ini dilindungi PIN panitia. Cukup isi sekali; tersimpan sampai tab ini ditutup.',
+    stafMasuk: 'Masuk sebagai staf',
+    stafAktif: 'Masuk sebagai staf: PIN panitia tidak diperlukan.',
     pinSimpan: 'Pakai PIN ini',
     pinTersimpan: 'PIN panitia tersimpan di tab ini',
     pinGanti: 'Ganti PIN',
@@ -342,6 +344,8 @@ const kamus: KamusRuang = {
 
     pinLabel: 'Committee PIN',
     pinKet: 'This server is protected by a committee PIN. Enter it once; it is kept until this tab is closed.',
+    stafMasuk: 'Sign in as staff',
+    stafAktif: 'Signed in as staff: no committee PIN needed.',
     pinSimpan: 'Use this PIN',
     pinTersimpan: 'Committee PIN kept in this tab',
     pinGanti: 'Change PIN',
@@ -562,6 +566,8 @@ const kamus: KamusRuang = {
 
     pinLabel: '主办方 PIN',
     pinKet: '此服务器受主办方 PIN 保护。只需输入一次；在关闭此标签页之前一直有效。',
+    stafMasuk: '以工作人员身份登录',
+    stafAktif: '已以工作人员身份登录：无需主办方 PIN。',
     pinSimpan: '使用此 PIN',
     pinTersimpan: '主办方 PIN 已保存在此标签页',
     pinGanti: '更换 PIN',

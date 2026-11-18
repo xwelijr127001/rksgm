@@ -14,6 +14,7 @@
  */
 import { randomUUID } from 'node:crypto';
 import { getDb } from '../db';
+import { csvCell } from '../csvGuard';
 import { contentText, textKey } from '../../../shared/story/content';
 import { writeAudit, type AuditActor } from './auth/audit';
 import { getVersionContent } from './content/scenarios';
@@ -237,12 +238,7 @@ export function results(f: ResultFilter): ResultRow[] {
   }));
 }
 
-/** Spreadsheet formula injection guard: cells starting with = + - @ TAB CR are prefixed with an apostrophe. */
-export function csvCell(v: unknown): string {
-  let s = v === null || v === undefined ? '' : String(v);
-  if (/^[=+\-@\t\r]/.test(s)) s = "'" + s;
-  return /[",\r\n;]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s;
-}
+export { csvCell } from '../csvGuard';
 
 const fmtTime = (t: number | null) => (t === null ? '' : new Date(t).toISOString().replace('T', ' ').slice(0, 19) + 'Z');
 

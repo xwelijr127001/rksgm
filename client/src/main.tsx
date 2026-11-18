@@ -1,4 +1,5 @@
 import { StrictMode } from 'react';
+import { UJI_AUDIO } from './audio/bendera';
 import { createRoot } from 'react-dom/client';
 import App from './App';
 import { siapkanGerak } from './gerak';
@@ -21,7 +22,8 @@ import './player.css';
 import './gaya-game.css';
 
 // T-036: pengukuran SFX tanpa mendengar (tools/cek-audio-t036.mjs). Hanya dengan ?uji-audio di URL.
-if (typeof location !== 'undefined' && location.search.includes('uji-audio')) {
+// T-038: dev server or an explicit test build (VITE_UJI_AUDIO=on) only; production builds drop this block.
+if (UJI_AUDIO && typeof location !== 'undefined' && location.search.includes('uji-audio')) {
   void import('./audio/audio').then((m) => { (window as unknown as { __rekamSfx?: typeof m.rekamSfx }).__rekamSfx = m.rekamSfx; });
   (window as unknown as { __sfxLog?: string[] }).__sfxLog = [];
 }

@@ -22,7 +22,7 @@ import { actions, lupakanPin, savedPin, useGame } from '../../state/store';
 import { Modal, Pesan } from '../../ui/kit';
 import { EditorSoal } from './EditorSoal';
 import { LencanaAsal, LencanaProduk, LencanaTingkat, judulSoal } from './lencana';
-import { PinPanitia } from './PinPanitia';
+import { PinPanitia, adaSesiStaf } from './PinPanitia';
 import './bank.css';
 
 type StatusSimpan = { jenis: 'diam' | 'menyimpan' | 'tersimpan' } | { jenis: 'galat'; pesan: string };
@@ -83,7 +83,8 @@ export function AturSoal({ room }: { room: RoomPublicState }) {
   const bisaUbah = room.phase === 'LOBBY';
   const fase: Phase = room.phase === 'PAUSED' ? (room.prevPhase ?? 'LOBBY') : room.phase;
   const sedangMain = FASE_MAIN.includes(fase);
-  const butuhPin = konfig?.butuhPin === true;
+  // T-038 Fix 2: a staff session in this tab opens the bank without a PIN (x-staff-token).
+  const butuhPin = konfig?.butuhPin === true && !adaSesiStaf();
   const pinKurang = butuhPin && (!savedPin() || pinDitolak);
 
   const peta = useMemo(() => new Map((bank?.soal ?? []).map((r) => [r.id, r])), [bank]);

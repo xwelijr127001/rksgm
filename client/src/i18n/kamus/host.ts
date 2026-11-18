@@ -138,6 +138,7 @@ const kamus: KamusRuang = {
     eksporHasil: 'Ekspor Hasil',
     eksporCsv: 'Ekspor CSV',
     eksporJson: 'Ekspor JSON',
+    eksporGagal: 'Unduhan gagal. Coba lagi.',
     eksporKet:
       'File berisi hasil lengkap per misi untuk tiap peserta: ketepatan, poin, bonus kecepatan, dan waktu menjawab. Unduh sebelum menekan reset.',
   },
@@ -263,6 +264,7 @@ const kamus: KamusRuang = {
     eksporHasil: 'Export Results',
     eksporCsv: 'Export CSV',
     eksporJson: 'Export JSON',
+    eksporGagal: 'Download failed. Please try again.',
     eksporKet:
       'The file holds the full results per mission for every player: accuracy, points, speed bonus and answer time. Download it before you press reset.',
   },
@@ -384,6 +386,7 @@ const kamus: KamusRuang = {
     eksporHasil: '导出结果',
     eksporCsv: '导出 CSV',
     eksporJson: '导出 JSON',
+    eksporGagal: '下载失败，请重试。',
     eksporKet:
       '文件包含每位玩家每个任务的完整结果：正确率、分数、速度加分和答题用时。请在按下重置之前下载。',
   },

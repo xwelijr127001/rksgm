@@ -13,6 +13,8 @@
  * - Berkas musik gagal dimuat (404/offline) -> mode senyap, dicatat sekali saja.
  */
 
+import { UJI_AUDIO } from './bendera';
+
 export type Track = 'lobby' | 'game' | 'podium' | 'cerita-kantor' | 'cerita-periksa' | 'cerita-penutup' | null;
 export type Sfx =
   | 'pilih'
@@ -459,8 +461,8 @@ function noise(bus: GainNode, start: number, dur: number, gain: number, hp = 240
 const sfxTerakhir = new Map<Sfx, number>();
 const SFX_REDAM = new Set<Sfx>(['taruh', 'kertas', 'pesanKirim', 'pesanTerima', 'ketuk', 'konfirmasi', 'batal']);
 export function playSfx(name: Sfx): void {
-  // T-036 Fix 2: log permintaan efek untuk alat uji (hanya bila ?uji-audio memasang __sfxLog), sebelum cek bisu.
-  (globalThis as { __sfxLog?: string[] }).__sfxLog?.push(name);
+  // T-036 Fix 2 / T-038 Fix 1: log for the test tool, compiled in only for dev or a VITE_UJI_AUDIO=on build.
+  if (UJI_AUDIO) (globalThis as { __sfxLog?: string[] }).__sfxLog?.push(name);
   if (!ctx || !sfxBus || prefs.muted || !prefs.sfxEnabled) return;
   const kini = typeof performance !== 'undefined' ? performance.now() : Date.now();
   // Peredam ketukan beruntun HANYA untuk efek mode cerita (mode lain tidak berubah).

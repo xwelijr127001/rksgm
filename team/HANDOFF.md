@@ -2685,3 +2685,53 @@ Fullstack · edited under `C:\Users\User\Desktop\rksgm-episode2` · NOT committe
 - **Test hook:** with `?uji-audio`, `playSfx` logs each request to `window.__sfxLog`. Nothing is logged otherwise.
 - **`cek-audio-t036`:** opens K02 on the test state, taps the document and asserts the log contains `kertas`. Result: `["kertas"]`, ALL PASS.
 - **Gate:** typecheck 0, `test:client` 771, `cek-audio-t036` ALL PASS. `client/dist` is an exact copy of the final build.
+
+## T-038 (2026-11-18): app security fixes, Codex findings 1, 2, 4, 5, 6, 7
+
+Fullstack · edited under `C:\Users\User\Desktop\rksgm-episode2` · NOT committed. Box items (finding 3, nginx, firewall) are the Lead's.
+
+- **1 CSV formula guard** (`server/src/csvGuard.ts`, new): one guard for the legacy export (`csv.ts`) and the Story report (`story/reports.ts` re-exports it). An apostrophe is prefixed when a cell starts with = + - @ (also full-width) or with any whitespace / control character (TAB, CR, LF, NUL, NBSP, BOM, ideographic space). Cells with a quote, comma, semicolon or line break are quoted.
+- **2 PIN brute force** (`server/src/keamanan.ts` `PembatasPin`):
+  - Per trusted client IP: 8 wrong PINs in 5 min. The socket path now uses `clientIp()` with `TRUST_PROXY_HOPS`; REST uses `req.ip`.
+  - Global: 60 wrong PINs in 10 min across all IPs locks PIN checks for everyone for 10 min. Every lockout is logged as `[keamanan] ...`.
+  - `RAKSA_LEGACY=on` + `NODE_ENV=production` without `PANITIA_PIN`: legacy routes answer 503 with a clear message and the legacy Socket.IO namespace is refused. Story mode keeps running. A startup log line says so. Live already has a PIN, so nothing changes there.
+  - Bank writes and key reads already needed host token AND PIN on every request when a PIN is set; with the production rule a PIN is always set there.
+- **4 Export token**: `results.csv` / `results.json` accept the token only from `x-host-token` (timing-safe compare) and send `Cache-Control: no-store`. The host page fetches the file and saves it from a blob; a failed download shows "Unduhan gagal. Coba lagi." (new key `host.eksporGagal`, id/en/zh). Tests, `loadtest.ts` and `tools/e2e-browser.mjs` use the header.
+- **5 Origins and headers**:
+  - New env `RAKSA_ORIGINS`. Allowed: no Origin header (non-browser), same origin (Origin host = Host, or `X-Forwarded-Host` behind trusted hops), `PUBLIC_BASE_URL`, the listed origins. Outside production, loopback/LAN origins are allowed too (Vite dev server).
+  - HTTP CORS reflects only allowed origins. Engine.IO `allowRequest` refuses other origins on every handshake, WebSocket upgrades included, with a log line.
+  - App-wide `X-Content-Type-Options: nosniff` and `Referrer-Policy: strict-origin-when-cross-origin`. frame-ancestors / X-Frame-Options unchanged. nginx also sets these; equal values, so harmless.
+  - `RAKSA_CSP_REPORT=on` sends `Content-Security-Policy-Report-Only` on pages (self, Google Fonts, data/blob media, ws/wss). Default off, never enforced.
+- **6 Legacy socket flood**: per-IP connection budget (600 per minute) and a per-socket event budget (100 events / 10 s get a "Terlalu banyak permintaan" ack; 300 disconnects the socket with a log line; `disconnect` is exempt). `RateLimiter` now has a hard key cap (20 000, oldest dropped), so all limiter maps are bounded.
+- **7 Debug hook**: `?uji-audio` / `__sfxLog` / `__rekamSfx` only when `import.meta.env.DEV` or a build with `VITE_UJI_AUDIO=on`. The production bundle no longer contains the string. `cek-audio-t036` therefore needs a build with `VITE_UJI_AUDIO=on`.
+- **Tests**: new `server/src/keamanan.test.ts` (guard cases, legacy export with hostile name/event/prize/badge/mission text, per-IP and global PIN lock with release after 10 min, origin policy incl. production, legacy-without-PIN rule, limiter cap). `integration.test.ts`: query token refused, no-store, nosniff, Referrer-Policy, foreign origin gets no CORS, foreign Engine.IO handshake 403.
+- **Docs**: `.env.example` and README §Pengaturan server (`RAKSA_ORIGINS`, `RAKSA_CSP_REPORT`, production PIN rule).
+
+**Gate:** typecheck 0, `test:server` 209 / 209, `test:client` 771 / 771, `cek-room-t028` ALL PASS (6), `uji-room-cerita` exit 0 (legacy off, :4003, scratch DB). `client/dist` is an exact copy of the final build; `server/dist-uji` rebuilt.
+**Not verified:** a real nginx in front (X-Forwarded-Host handling, duplicate headers), the CSP report-only output in a browser console.
+
+## T-038 Fix 1 (2026-11-18): Codex code review points 1-4
+
+- **1 Global PIN budget** (`server/src/keamanan.ts` `PembatasPin.cek`): order is per-IP lock, then the timing-safe compare. While the global budget is saturated a CORRECT PIN passes (log "pin benar saat budget global jenuh"); a wrong PIN answers the lockout message and is still counted per IP. A staff session with `hostRooms` (`x-staff-token` on bank REST, `staffToken` in `host:create`) skips the PIN gate; other staff roles do not. The legacy host page does not send a staff token yet (server path only).
+  - Tests: `keamanan.test.ts` (saturated + correct = ok, wrong during lock = denied and counted, per-IP lock first); `bank.integration.test.ts` (staff host creates a room and writes the bank while the address is locked; an author account is still refused).
+- **2 Audio hook**: new build constant `__UJI_AUDIO__` (vite.config define; `client/src/audio/bendera.ts`) true only for `vite serve` or `VITE_UJI_AUDIO=on`. It guards the `__sfxLog` push in `playSfx` and the `?uji-audio` / `__rekamSfx` setup in `main.tsx` (`import.meta.env?.X` was NOT folded by the minifier). New `tools/cek-rilis.mjs`: 0 hits in the release build, 3 hits in a `VITE_UJI_AUDIO=on` build (sanity).
+- **3 Origin**: same-origin now compares scheme + host + port. Behind trusted hops scheme and host come from `X-Forwarded-Proto` / `X-Forwarded-Host`, otherwise http + Host. Test: https on the forwarded host passes, http or another port on the same host fails. README: RAKSA_ORIGINS REPLACES the public-URL fallback; Tailscale/LAN :4000 note; nginx must overwrite the forwarded headers.
+- **4 CSV**: README documents that leading whitespace/control characters always get the apostrophe (normalisation).
+
+**Gate:** typecheck 0, `test:server` 209 / 209, `test:client` 771 / 771, `cek-rilis` on `client/dist` 0 hits (uji-audio / __sfxLog / __rekamSfx). `client/dist` = exact copy of the final build. Not committed.
+
+## T-038 Fix 2 (2026-11-18): global PIN lock stops verification; staff path from the host page
+
+- **Server** (`keamanan.ts` `PembatasPin.cek`): order is global lock, then per-IP lock, then compare. While the global budget is saturated NO unauthenticated PIN is checked (no compare, generic "Terlalu banyak percobaan PIN"), for the full 10 min. One log line when the lock starts (it now also says staff hosts can still sign in). The Fix 1 "correct PIN passes" path is gone. Per-IP lock unchanged.
+- **Staff path on the legacy host page (`/acara/host`)**:
+  - `client/src/story/staff.ts`: `storedStaffToken()` (same sessionStorage key as /admin, /cms, /host) and `staffReturnPath()` (allowlist: only `/acara/host`, so `?kembali=` is no open redirect).
+  - The bank requests (`state/bank.ts` `headerOtorisasi`) send `x-staff-token`; `host:create` (`state/store.ts`) sends `staffToken`, when a staff session is stored in this tab.
+  - The PIN field (`KolomPin`) shows a "Masuk sebagai staf" link (id/en/zh, `bank.stafMasuk`) to `/host?kembali=%2Facara%2Fhost`. After sign-in `StaffShell` returns there in the same tab, so the session carries over.
+  - With a staff session the create panel and the bank do not ask for the PIN, and show "Masuk sebagai staf: PIN panitia tidak diperlukan." The server still checks the host role; another role gets the normal PIN answer.
+- **Tests:**
+  - `keamanan.test.ts`: saturated budget refuses a correct PIN ("terkunci"), still locked at 9 min, PIN works again after 10 min.
+  - `bank.integration.test.ts`: during a global lock (`jenuhkanPinGlobal()` test helper) a correct PIN is refused and a staff host still creates rooms and writes the bank.
+  - New `client/src/state/bank-staf.test.ts`: header sent only with a stored staff token, return-path allowlist. `net/socket.ts` reads `import.meta.env?.` so the module loads in node.
+- **Coordinator add-on:** `tools/e2e-browser.mjs` takes `RAKSA_PIN` and sends it in `host:create` (the tool does not call the bank), and stops with a clear message when `host:create` fails.
+
+**Gate:** typecheck 0, `test:server` 209 / 209, `test:client` 772 / 772, `cek-rilis` 0 hits on the rebuilt `client/dist` (exact copy). e2e with a PIN not run by me (Lead gate). Not committed.

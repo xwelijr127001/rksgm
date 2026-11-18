@@ -149,6 +149,13 @@ export const CONFIG = {
    * (no third-party framing) until IT sets the embedding policy (docs/prd-v02/DECISIONS.md D-24, HOSTING.md).
    */
   frameAncestors: frameAncestorsFrom(process.env.FRAME_ANCESTORS),
+  /**
+   * T-038: browser origins allowed to call the API / open a Socket.IO connection besides the page's own origin
+   * (comma or space separated, e.g. "https://raksaonline.com"). Empty = same-origin + PUBLIC_BASE_URL.
+   */
+  origins: (process.env.RAKSA_ORIGINS || '').split(/[\s,]+/).filter(Boolean),
+  /** T-038: send a REPORT-ONLY resource CSP on pages (RAKSA_CSP_REPORT=on). Never enforced. */
+  cspReport: (process.env.RAKSA_CSP_REPORT || 'off').toLowerCase().trim() === 'on',
 };
 
 /** Keep only valid frame-ancestors sources (no header injection); empty/invalid input falls back to 'self'. */

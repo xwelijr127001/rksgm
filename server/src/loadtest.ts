@@ -197,7 +197,7 @@ async function main() {
   await rpc(host, 'host:action', { code, hostToken, action: 'next' });
   const akhir = await fin;
 
-  const csv = await fetch(`${BASE}/api/room/${code}/results.csv?hostToken=${hostToken}`);
+  const csv = await fetch(`${BASE}/api/room/${code}/results.csv`, { headers: { 'x-host-token': hostToken } });
   const csvText = await csv.text();
   const barisCsv = csvText.split('\r\n').filter((l) => l && !l.startsWith('#') && !l.startsWith('﻿#')).length;
 

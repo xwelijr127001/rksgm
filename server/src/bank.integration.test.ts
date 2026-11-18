@@ -518,18 +518,18 @@ test('playlist kustom lewat socket: 3 soal sampai FINISHED, kunci baru keluar sa
   assert.equal(fin.podium?.[0].answeredCount, 3);
   assert.deepEqual((await saya).badges.map((b) => b.id).sort(), ['juara', 'kilat', 'lengkap', 'tepat-sasaran']);
 
-  const csv = await (await fetch(`${BASE}/api/room/${code}/results.csv?hostToken=${hostToken}`)).text();
+  const csv = await (await fetch(`${BASE}/api/room/${code}/results.csv`, { headers: { 'x-host-token': hostToken } })).text();
   assert.match(csv, /misi3_poin/);
   assert.equal(csv.includes('misi4_poin'), false);
   assert.match(csv, /# misi 3,Hitung peti,CARGO - Pengangkutan Barang,30/);
-  const json = (await (await fetch(`${BASE}/api/room/${code}/results.json?hostToken=${hostToken}`)).json()) as { players: { rounds: unknown[] }[] };
+  const json = (await (await fetch(`${BASE}/api/room/${code}/results.json`, { headers: { 'x-host-token': hostToken } })).json()) as { players: { rounds: unknown[] }[] };
   assert.equal(json.players[0].rounds.length, 3);
   const matches = (await (await fetch(`${BASE}/api/matches`)).json()) as { matches: { code: string }[] };
   assert.ok(matches.matches.some((m) => m.code === code), 'hasil tersimpan di SQLite');
 
   // Setelah selesai soal boleh dihapus; ekspor room yang sudah selesai tetap utuh (salinan beku).
   assert.equal((await api('DELETE', `/api/bank/soal/${k2.id}`, { kepala: h.izin })).status, 200);
-  const csvLagi = await (await fetch(`${BASE}/api/room/${code}/results.csv?hostToken=${hostToken}`)).text();
+  const csvLagi = await (await fetch(`${BASE}/api/room/${code}/results.csv`, { headers: { 'x-host-token': hostToken } })).text();
   assert.match(csvLagi, /# misi 3,Hitung peti/);
   await api('DELETE', `/api/bank/soal/${k1.id}`, { kepala: h.izin });
   srv.manager.close(code);
@@ -559,9 +559,12 @@ test('practice/grade & /api/missions: hanya paket latihan + tutorial', async () 
 
   const lama = process.env.NODE_ENV;
   process.env.NODE_ENV = 'production';
+  // T-038: legacy routes in production need PANITIA_PIN (practice/grade itself asks no PIN).
+  CONFIG.panitiaPin = 'pin-uji';
   assert.equal((await nilai(TIEBREAK_MISSION.id)).status, 404, 'production: ronde penentuan tidak bisa dipancing');
   assert.equal((await nilai('m01-parkir', { s1: 'dokumentasi' })).status, 200);
   process.env.NODE_ENV = lama;
+  CONFIG.panitiaPin = '';
 
   const misi = await api<{ missions: { id: string; level?: number }[] }>('GET', '/api/missions');
   assert.deepEqual(misi.badan.missions.map((m) => m.id), MISSIONS.map((m) => m.id));
@@ -616,6 +619,27 @@ test('PIN panitia: wajib untuk membuat room & menulis bank; salah berulang -> di
     assert.match(ditahan.error!, /Terlalu banyak percobaan PIN/);
     srv.resetPembatasPin();
     assert.equal((await rpc(s, 'host:create', { pin: '2468' })).ok, true);
+
+    // T-038 Fix 1: a staff session with the host role skips the PIN gate, even while this address is locked.
+    const { createStaff, login } = require('./story/auth/staff') as typeof import('./story/auth/staff');
+    createStaff({ username: 'host.pin', displayName: 'Host PIN', password: 'Sandi-Uji-Panjang-123', roles: ['host'] }, { id: 'uji', name: 'uji' });
+    createStaff({ username: 'penulis.pin', displayName: 'Penulis', password: 'Sandi-Uji-Panjang-123', roles: ['author'] }, { id: 'uji', name: 'uji' });
+    const staffHost = (await login('host.pin', 'Sandi-Uji-Panjang-123'))!.token;
+    const staffLain = (await login('penulis.pin', 'Sandi-Uji-Panjang-123'))!.token;
+    for (let i = 0; i < 8; i++) await rpc(s, 'host:create', { pin: `salah-lagi-${i}` });
+    assert.match((await rpc(s, 'host:create', { pin: '2468' })).error!, /Terlalu banyak percobaan PIN/);
+    assert.equal((await rpc(s, 'host:create', { eventName: 'Staf', staffToken: staffHost })).ok, true, 'staf host lolos saat terkunci');
+    assert.equal((await rpc(s, 'host:create', { staffToken: staffLain })).ok, false, 'staf tanpa peran host tetap butuh PIN');
+    // T-038 Fix 2: global budget saturated -> a correct PIN is refused without being checked; staff host still works.
+    srv.resetPembatasPin();
+    srv.jenuhkanPinGlobal();
+    const jenuh = await rpc(s, 'host:create', { pin: '2468' });
+    assert.equal(jenuh.ok, false, 'PIN benar saat jenuh ditolak');
+    assert.match(jenuh.error!, /Terlalu banyak percobaan PIN/);
+    assert.equal((await rpc(s, 'host:create', { eventName: 'Staf jenuh', staffToken: staffHost })).ok, true, 'staf host lolos saat jenuh');
+    const hs = await buatRoom('Staf bank', { staffToken: staffHost });
+    assert.equal((await api('POST', '/api/bank/soal', { kepala: { ...hs.izin, 'x-staff-token': staffHost }, json: kiriman() })).status, 200, 'bank: staf host tanpa PIN');
+    assert.equal((await api('POST', '/api/bank/soal', { kepala: { ...hs.izin, 'x-staff-token': staffLain }, json: kiriman() })).status, 429, 'bank: staf lain tetap kena kunci');
   } finally {
     CONFIG.panitiaPin = '';
     srv.resetPembatasPin();

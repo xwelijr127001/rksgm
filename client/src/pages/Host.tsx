@@ -24,7 +24,7 @@ import { useHalaman } from '../ui/halaman';
 import { actions, savedHostToken, savedLastHostRoom, savedPin, useGame } from '../state/store';
 import { AturSoal } from './host/AturSoal';
 import { PaketAwal } from './host/PaketAwal';
-import { KolomPin } from './host/PinPanitia';
+import { KolomPin, adaSesiStaf } from './host/PinPanitia';
 import {
   AudioControls,
   ConnectionBadge,
@@ -86,7 +86,9 @@ function MulaiHost() {
   });
   // PIN panitia hanya diminta bila server memasangnya; paket soal hanya bila bank soal tersedia.
   const konfig = useKonfigBank();
-  const butuhPin = konfig?.butuhPin === true;
+  // T-038 Fix 2: a staff session in this tab replaces the PIN (sent as staffToken; the server checks the host role).
+  const sesiStaf = adaSesiStaf();
+  const butuhPin = konfig?.butuhPin === true && !sesiStaf;
   const [pin, setPin] = useState(() => savedPin() ?? '');
   const [paket, setPaket] = useState<IdPaket | null>(null);
 
@@ -125,6 +127,7 @@ function MulaiHost() {
         </div>
         <PaketAwal nilai={paket} onPilih={setPaket} />
         {butuhPin ? <KolomPin nilai={pin} onUbah={setPin} onEnter={() => void buat()} /> : null}
+        {konfig?.butuhPin === true && sesiStaf ? <p className="kecil lembut" data-staf-aktif style={{ margin: 0 }}>{t('bank.stafAktif')}</p> : null}
         <button
           className="btn btn-utama btn-blok"
           onClick={() => void buat()}
@@ -651,8 +654,30 @@ export default function Host() {
     preferMusicOn();
   }, []);
 
-  const tautanEkspor = (jenis: 'csv' | 'json') =>
-    `/api/room/${room?.code ?? ''}/results.${jenis}?hostToken=${encodeURIComponent(hostToken ?? '')}`;
+  // T-038: the host token goes in a header (never the URL); the file is fetched and saved from a blob.
+  const [eksporGagal, setEksporGagal] = useState(false);
+  const unduhEkspor = async (jenis: 'csv' | 'json') => {
+    setEksporGagal(false);
+    try {
+      const res = await fetch(`/api/room/${encodeURIComponent(room?.code ?? '')}/results.${jenis}`, {
+        headers: { 'x-host-token': hostToken ?? '' },
+        cache: 'no-store',
+      });
+      if (!res.ok) throw new Error(String(res.status));
+      const nama =
+        /filename="([^"]+)"/.exec(res.headers.get('content-disposition') ?? '')?.[1] ?? `raksa-game-${room?.code ?? ''}.${jenis}`;
+      const url = URL.createObjectURL(await res.blob());
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = nama;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 10_000);
+    } catch {
+      setEksporGagal(true);
+    }
+  };
 
   return (
     <div className="layar">
@@ -750,13 +775,18 @@ export default function Host() {
             <section className="panel stack" aria-labelledby="host-ekspor">
               <h3 id="host-ekspor">{t('host.eksporHasil')}</h3>
               <div className="baris">
-                <a className="btn btn-netral" href={tautanEkspor('csv')} download>
+                <button type="button" className="btn btn-netral" onClick={() => void unduhEkspor('csv')}>
                   {t('host.eksporCsv')}
-                </a>
-                <a className="btn btn-netral" href={tautanEkspor('json')} download>
+                </button>
+                <button type="button" className="btn btn-netral" onClick={() => void unduhEkspor('json')}>
                   {t('host.eksporJson')}
-                </a>
+                </button>
               </div>
+              {eksporGagal ? (
+                <p className="kecil" role="alert" style={{ margin: 0 }}>
+                  {t('host.eksporGagal')}
+                </p>
+              ) : null}
               <p className="kecil lembut" style={{ margin: 0 }}>
                 {t('host.eksporKet')}
               </p>

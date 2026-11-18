@@ -518,6 +518,17 @@ Gambar tampil di tempat adegan 2D; pemain menjawab lewat daftar pilihan di bawah
 | `RAKSA_PAKET` | `acara` | Paket untuk room baru bila host tidak memilih (`latihan` / `acara`) |
 | `PANITIA_PIN` | kosong | Bila diisi: wajib untuk membuat room dan untuk membuat/mengubah/melihat soal panitia |
 | `RAKSA_IKLAN_ROOM` | `on` | Spanduk "acara sedang dibuka" di halaman awal (hanya bila tepat satu room di lobby) |
+| `RAKSA_ORIGINS` | kosong | Origin browser lain yang boleh memanggil API / Socket.IO (dipisah koma). Kosong = origin halaman sendiri + `PUBLIC_BASE_URL`. Bila DIISI, daftar ini MENGGANTI `PUBLIC_BASE_URL` (tidak menambah): cantumkan URL publik juga bila perlu. Origin halaman sendiri selalu boleh |
+| `RAKSA_CSP_REPORT` | `off` | `on` = kirim CSP sumber daya mode REPORT-ONLY (hanya dilaporkan di konsol, tidak memblokir) |
+
+**T-038:** dengan `RAKSA_LEGACY=on` dan `NODE_ENV=production`, `PANITIA_PIN` WAJIB; tanpa PIN rute lama menjawab 503 dan namespace Socket.IO lama ditolak. PIN salah ditahan per alamat klien asli (8 per 5 menit, memakai `TRUST_PROXY_HOPS`) dan secara global (60 per 10 menit untuk semua alamat, lalu dikunci 10 menit; tiap penguncian dicatat di log). Ekspor hasil (`results.csv`/`.json`) hanya menerima token host lewat header `x-host-token`, tidak di URL.
+
+**T-038 Fix 1:**
+- Bila jatah PIN global sedang jenuh, PIN yang BENAR tetap diterima (dicatat "pin benar saat budget global jenuh"); PIN salah ditolak dan tetap dihitung per alamat. Akun staf dengan peran host (`x-staff-token` di REST, `staffToken` di `host:create`) tidak perlu PIN untuk membuat room dan untuk bank soal.
+- "Origin sendiri" = skema + host + port. Di belakang proxy (`TRUST_PROXY_HOPS` > 0) skema dan host diambil dari `X-Forwarded-Proto` / `X-Forwarded-Host`, jadi nginx WAJIB menimpa keduanya (`proxy_set_header X-Forwarded-Proto $scheme; proxy_set_header X-Forwarded-Host $host;`). Tanpa hop terpercaya: `http` + header `Host`.
+- **Tailscale / LAN ke :4000:** membuka `http://<ip-tailscale-atau-lan>:4000` langsung tetap jalan (origin = host yang sama). Bila halaman dibuka dari alamat/port LAIN lalu memanggil :4000 (mis. Vite di HP lewat Tailscale), origin itu harus dicantumkan di `RAKSA_ORIGINS` (alamat Tailscale 100.x tidak termasuk pola LAN otomatis, dan pola LAN hanya berlaku di luar production).
+- **CSV:** sel yang diawali = + - @ (juga versi lebar penuh) ATAU spasi / karakter kontrol (TAB, CR, LF, NBSP, BOM, spasi ideografis) diberi apostrof di depan, juga bila isinya sebenarnya aman (mis. nama berawalan spasi). Di Excel apostrof tidak tampil; di alat lain apostrof terlihat. Ini disengaja (normalisasi), bukan galat.
+- Build rilis tidak memuat kait uji audio; periksa dengan `node tools/cek-rilis.mjs [folder]` (bawaan `client/dist`). `cek-audio-t036` butuh build `VITE_UJI_AUDIO=on`.
 
 **Pasang `PANITIA_PIN` untuk acara berhadiah.** Tanpa PIN, siapa pun di jaringan bisa membuka `/host`,
 membuat room, lalu membaca kunci soal buatan panitia lewat API bank. Soal panitia tersimpan di SQLite

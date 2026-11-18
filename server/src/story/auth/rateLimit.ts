@@ -16,11 +16,20 @@ export class RateLimiter {
     private readonly max: number,
     private readonly windowMs: number,
     private readonly now: () => number = () => Date.now(),
+    /** Hard cap on tracked keys (T-038): past it the oldest keys are dropped, so memory stays bounded under a flood. */
+    private readonly maxKeys = 20_000,
   ) {}
 
   private current(key: string): { n: number; resetAt: number } | undefined {
     const t = this.now();
     if (this.hits.size > 5000) for (const [k, v] of this.hits) if (v.resetAt <= t) this.hits.delete(k);
+    if (this.hits.size > this.maxKeys) {
+      let drop = this.hits.size - this.maxKeys;
+      for (const k of this.hits.keys()) {
+        if (drop-- <= 0) break;
+        this.hits.delete(k);
+      }
+    }
     const cur = this.hits.get(key);
     return cur && cur.resetAt > t ? cur : undefined;
   }

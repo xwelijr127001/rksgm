@@ -8,6 +8,7 @@
  * PRD v0.2: ini menguji kuis acara MODE LAMA -> server wajib RAKSA_LEGACY=on; host lama ada di /acara/host
  * (kode 4 karakter di /join dan /projector diteruskan ke /acara/join dan /acara/layar).
  * Chrome: RAKSA_CHROME=<path chrome.exe> bila bukan lokasi standar.
+ * PIN: RAKSA_PIN=<PIN panitia> bila server memasang PANITIA_PIN (dikirim di host:create; bank tidak dipanggil alat ini).
  * Animasi: bawaan MENYALA; RAKSA_GERAK=kurang untuk menguji "kurangi gerak".
  *
  * Pemeran (satu pertandingan penuh 10 misi + tutorial):
@@ -377,7 +378,12 @@ const host = ioClient(BASE, { transports: ['websocket'], forceNew: true, reconne
 await new Promise((r) => host.once('connect', r));
 // Paket LATIHAN secara eksplisit: sejak paket acara ada, room baru bawaannya memakai paket acara
 // (RAKSA_PAKET), sedangkan kunci uji BENAR di atas milik 10 misi latihan.
-const dibuat = await rpc(host, 'host:create', { eventName: 'Uji E2E Adegan 2D', paket: 'latihan' });
+// T-038 Fix 2: RAKSA_PIN = PIN panitia bila server memasang PANITIA_PIN (gerbang Lead sama seperti production).
+const dibuat = await rpc(host, 'host:create', { eventName: 'Uji E2E Adegan 2D', paket: 'latihan', ...(process.env.RAKSA_PIN ? { pin: process.env.RAKSA_PIN } : {}) });
+if (!dibuat?.ok || !dibuat.data) {
+  console.error(`host:create gagal: ${dibuat?.error ?? 'tanpa jawaban'}${process.env.RAKSA_PIN ? '' : ' (server memakai PANITIA_PIN? set RAKSA_PIN)'}`);
+  process.exit(1);
+}
 const { code, hostToken } = dibuat.data;
 periksa(JSON.stringify(dibuat.data.playlist) === JSON.stringify(MISI.map((m) => m.id)), `room memakai 10 misi latihan (playlist ${JSON.stringify(dibuat.data.playlist)})`);
 await rpc(host, 'host:settings', { code, hostToken, autoAdvance: false });
@@ -601,7 +607,7 @@ try {
   await ani.reload({ waitUntil: 'networkidle2' });
   periksa(await tunggu(ani, () => /Ani/.test(document.body.innerText), 'identitas pulih setelah refresh'), 'reconnect setelah refresh');
 
-  const csv = await fetch(`${BASE}/api/room/${code}/results.csv?hostToken=${hostToken}`);
+  const csv = await fetch(`${BASE}/api/room/${code}/results.csv`, { headers: { 'x-host-token': hostToken } });
   const csvTeks = await csv.text();
   periksa(csv.status === 200 && /Ani/.test(csvTeks) && /Budi/.test(csvTeks), 'ekspor CSV berisi pemain');
 

@@ -7,6 +7,7 @@
  * mendapat pesan yang ramah.
  */
 
+import { storedStaffToken } from '../story/staff';
 import { useEffect, useState } from 'react';
 import type { BankSoal, IdPaket, RingkasSoal, SoalKustom } from '@shared/bankSoal';
 import { t } from '../i18n';
@@ -54,9 +55,12 @@ export function pesanGalatBank(g: GagalBank): string {
 
 // ------------------------------------------------------------------ dasar
 
-function headerOtorisasi(): Record<string, string> {
+export function headerOtorisasi(): Record<string, string> {
   const { room, hostToken } = getState();
   const h: Record<string, string> = {};
+  // T-038 Fix 2: a staff session in this tab (host role) replaces the committee PIN on the server.
+  const staf = storedStaffToken();
+  if (staf) h['x-staff-token'] = staf;
   if (room?.code) h['x-room-code'] = room.code;
   if (hostToken) h['x-host-token'] = hostToken;
   const pin = savedPin();

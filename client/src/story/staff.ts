@@ -38,6 +38,21 @@ function storeToken(token: string | null): void {
   }
 }
 
+/**
+ * T-038 Fix 2: the stored staff token for the legacy host page (/acara/host), which sends it as x-staff-token /
+ * staffToken so a staff host needs no committee PIN. Same sessionStorage key as /admin, /cms and /host.
+ */
+export function storedStaffToken(): string | null {
+  return storedToken();
+}
+
+/** Pages a staff sign-in may return to (?kembali=...). An allowlist, so the parameter is no open redirect. */
+export const STAFF_RETURN_PATHS = ['/acara/host'] as const;
+export function staffReturnPath(search: string): string | null {
+  const p = new URLSearchParams(search).get('kembali');
+  return p && (STAFF_RETURN_PATHS as readonly string[]).includes(p) ? p : null;
+}
+
 /** Validate a stored token once per page load (the server may have expired or revoked it). */
 export function checkStaffSession(): Promise<void> {
   if (state.status !== 'unknown') return Promise.resolve();

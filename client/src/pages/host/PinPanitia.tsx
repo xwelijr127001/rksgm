@@ -8,6 +8,24 @@ import { useId, useState } from 'react';
 import { Icon } from '../../art/Icon';
 import { t, useBahasa } from '../../i18n';
 import { savedPin, simpanPin } from '../../state/store';
+import { storedStaffToken } from '../../story/staff';
+
+/** T-038 Fix 2: staff sign-in (StaffShell on /host) that returns to this page; a staff host needs no PIN. */
+export const TAUTAN_MASUK_STAF = '/host?kembali=' + encodeURIComponent('/acara/host');
+
+/** true = a staff session exists in this tab; the server decides whether it has the host role. */
+export const adaSesiStaf = (): boolean => Boolean(storedStaffToken());
+
+export function TautanStaf() {
+  useBahasa();
+  return (
+    <p className="bank-ket" style={{ marginTop: 6 }}>
+      <a href={TAUTAN_MASUK_STAF} data-masuk-staf>
+        {t('bank.stafMasuk')}
+      </a>
+    </p>
+  );
+}
 import './bank.css';
 
 /** Kolom PIN terkendali (dipakai di panel "Buat Room"; PIN baru disimpan setelah server menerima). */
@@ -46,6 +64,7 @@ export function KolomPin({
           {t('bank.pinKet')}
         </p>
       ) : null}
+      <TautanStaf />
     </div>
   );
 }

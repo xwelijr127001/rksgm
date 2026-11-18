@@ -4,6 +4,7 @@
  * localStorage HANYA untuk identitas sesi & preferensi, BUKAN leaderboard.
  */
 
+import { storedStaffToken } from '../story/staff';
 import { useSyncExternalStore } from 'react';
 import type { IdPaket } from '@shared/bankSoal';
 import type { MePrivate, MissionAnswer, PlayerLook, Prizes, RoomPublicState } from '@shared/types';
@@ -270,6 +271,8 @@ export const actions = {
       eventName,
       ...(opsi.paket ? { paket: opsi.paket } : {}),
       ...(pin ? { pin } : {}),
+      // T-038 Fix 2: a staff host in this tab needs no committee PIN.
+      ...(storedStaffToken() ? { staffToken: storedStaffToken() } : {}),
     });
     if (!res.ok || !res.data) {
       // PIN tersimpan yang ditolak server ("PIN panitia salah") dibuang supaya diminta ulang.

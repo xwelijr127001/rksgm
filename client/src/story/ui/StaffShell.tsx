@@ -11,7 +11,7 @@ import { can, ROLE_LABEL, type Capability, type StaffIdentity } from '@shared/st
 import { Merek } from '../../components/Merek';
 import { useHalaman } from '../../ui/halaman';
 import { Memuat, Modal } from '../../ui/kit';
-import { checkStaffSession, staffLogin, staffLogout, useStaff } from '../staff';
+import { checkStaffSession, staffLogin, staffLogout, staffReturnPath, useStaff } from '../staff';
 import '../staff.css';
 
 const TOOLS: { to: string; label: string; caps: Capability[] }[] = [
@@ -122,6 +122,11 @@ function SignInForm({ reason, username: initial = '', autoFocus = false }: { rea
     const err = await staffLogin(username.trim(), password);
     setBusy(false);
     if (err) setError(err);
+    else {
+      // T-038 Fix 2: "Masuk sebagai staf" from the legacy host page returns there (same tab, so the session carries over).
+      const kembali = staffReturnPath(window.location.search);
+      if (kembali) window.location.assign(kembali);
+    }
   };
   return (
     <form className="stf-masuk-form" onSubmit={submit}>

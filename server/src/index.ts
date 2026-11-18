@@ -1,6 +1,5 @@
 /** Server RAKSA GAME: Express + Socket.IO. Sumber kebenaran pertandingan. */
 
-import { createHash, timingSafeEqual } from 'node:crypto';
 import fs from 'node:fs';
 import http from 'node:http';
 import path from 'node:path';
@@ -18,6 +17,22 @@ import { cariSoal, daftarBank } from './bankKustom';
 import { misiLatihan, playlistPaket, soalLatihan } from './bankSoal';
 import { CONFIG, detectLanIp, publicBaseUrl } from './config';
 import { buildResultsCsv } from './csv';
+import {
+  EVENT_SOCKET_JENDELA_MS,
+  EVENT_SOCKET_MAKS,
+  EVENT_SOCKET_PUTUS,
+  PESAN_LEGACY_TANPA_PIN,
+  PembatasPin,
+  headerKeamanan,
+  izinkanHandshake,
+  koneksiLegacy,
+  legacyTanpaPin,
+  opsiCors,
+  samaAman,
+} from './keamanan';
+import { clientIp } from './story/auth/clientIp';
+import { authenticate } from './story/auth/staff';
+import { can } from '../../shared/story/roles';
 import {
   BATAS_JUMLAH_SOAL_KUSTOM,
   ambilSoalKustom,
@@ -61,7 +76,10 @@ assertKeysComplete();
 const app = express();
 // Real client address behind N trusted proxies (per-IP rate limits); 0 = X-Forwarded-For ignored.
 app.set('trust proxy', CONFIG.trustProxyHops);
-app.use(cors());
+// T-038: only approved browser origins get CORS headers (same-origin + PUBLIC_BASE_URL + RAKSA_ORIGINS).
+app.use(cors(opsiCors));
+app.use(headerKeamanan);
+if (legacyTanpaPin()) console.error(`[keamanan] RAKSA_LEGACY=on tanpa PANITIA_PIN di production: fitur lama DITOLAK. Pasang PANITIA_PIN.`);
 // Small JSON limit for the legacy/public API; scenario drafts (/api/cms) are parsed by the story router (1 MB).
 const jsonKecil = express.json({ limit: '128kb' });
 app.use((req, res, next) => (req.path.startsWith('/api/cms/') ? next() : jsonKecil(req, res, next)));
@@ -72,6 +90,10 @@ const LEGACY_PATH = /^\/(api\/(missions|practice|room|matches|acara-terbuka|bank
 app.use((req, res, next) => {
   if (!CONFIG.legacy && LEGACY_PATH.test(req.path)) {
     res.status(404).json({ ok: false, error: 'Fitur lama tidak aktif pada konfigurasi MVP.' });
+    return;
+  }
+  if (legacyTanpaPin() && LEGACY_PATH.test(req.path)) {
+    res.status(503).json({ ok: false, error: PESAN_LEGACY_TANPA_PIN });
     return;
   }
   next();
@@ -88,13 +110,23 @@ app.use((req, res, next) => {
 
 const server = http.createServer(app);
 const io = new SocketServer(server, {
+  // T-038: CORS for polling plus an origin check on every handshake (WebSocket upgrades skip CORS).
   cors: { origin: true, credentials: false },
+  allowRequest: izinkanHandshake,
   pingTimeout: 20000,
   pingInterval: 10000,
   // Every game message is small; a 1 MB default would let one client stall the event loop with giant payloads.
   maxHttpBufferSize: 64 * 1024,
 });
 if (!CONFIG.legacy) io.of('/').use((_socket, next) => next(new Error('Fitur lama tidak aktif pada konfigurasi MVP.')));
+const ipSocket = (socket: Socket) =>
+  clientIp(socket.handshake.address, socket.handshake.headers['x-forwarded-for'], CONFIG.trustProxyHops);
+// T-038: legacy namespace refused in production without PIN, and a per-IP connection budget.
+io.of('/').use((socket, next) => {
+  if (legacyTanpaPin()) return next(new Error(PESAN_LEGACY_TANPA_PIN));
+  if (!koneksiLegacy.take(ipSocket(socket))) return next(new Error('Terlalu banyak koneksi dari alamat ini. Tunggu sebentar.'));
+  next();
+});
 
 // PRD v0.2 Story Room system: /story namespace, /api/staff|cms|host|admin|story routes, /aset-cerita files.
 const story = createStoryService(io);
@@ -227,12 +259,18 @@ app.post('/api/practice/grade', (req, res) => {
 
 function requireHost(req: express.Request): Room | null {
   const room = manager.get(String(req.params.code ?? ''));
-  const token = String(req.query.hostToken ?? req.header('x-host-token') ?? '');
-  if (!room || token !== room.hostToken) return null;
+  // T-038: header only (a query-string token ends up in access logs and browser history).
+  const token = String(req.header('x-host-token') ?? '');
+  if (!room || !token || !samaAman(token, room.hostToken)) return null;
   return room;
 }
 
-app.get('/api/room/:code/results.csv', (req, res) => {
+const tanpaSimpan: express.RequestHandler = (_req, res, next) => {
+  res.setHeader('Cache-Control', 'no-store');
+  next();
+};
+
+app.get('/api/room/:code/results.csv', tanpaSimpan, (req, res) => {
   const room = requireHost(req);
   if (!room) {
     res.status(403).type('text/plain').send('Token host tidak valid');
@@ -244,7 +282,7 @@ app.get('/api/room/:code/results.csv', (req, res) => {
   res.send(buildResultsCsv(room));
 });
 
-app.get('/api/room/:code/results.json', (req, res) => {
+app.get('/api/room/:code/results.json', tanpaSimpan, (req, res) => {
   const room = requireHost(req);
   if (!room) {
     res.status(403).json({ ok: false, error: 'Token host tidak valid' });
@@ -328,36 +366,28 @@ const GALAT_PIN = {
   salah: 'PIN panitia salah',
   terkunci: 'Terlalu banyak percobaan PIN. Coba lagi beberapa menit lagi.',
 } as const;
-const PIN_MAKS_GAGAL = 8;
-const PIN_JENDELA_MS = 5 * 60 * 1000;
-/** asal (alamat IP) -> jumlah PIN salah dalam jendela waktu. Rem untuk tebak-tebakan PIN. */
-const gagalPin = new Map<string, { n: number; sampai: number }>();
+/** T-038: per trusted-client-IP bucket + a global budget across all IPs (keamanan.ts). */
+const pembatasPin = new PembatasPin();
 
-/** Banding teks tanpa membocorkan posisi beda lewat waktu. */
-function samaAman(a: string, b: string): boolean {
-  const ha = createHash('sha256').update(a).digest();
-  const hb = createHash('sha256').update(b).digest();
-  return timingSafeEqual(ha, hb);
+/** T-038 Fix 1: a staff session with the host capability skips the PIN gate (room creation and bank access). */
+function staffHost(token: unknown): boolean {
+  const staff = authenticate(token);
+  return Boolean(staff && can(staff.roles, 'hostRooms'));
 }
 
-function cekPin(pin: unknown, asal: string): 'ok' | 'salah' | 'terkunci' {
-  if (!CONFIG.panitiaPin) return 'ok';
-  const kini = Date.now();
-  if (gagalPin.size > 2000) for (const [k, v] of gagalPin) if (v.sampai <= kini) gagalPin.delete(k);
-  let catatan = gagalPin.get(asal);
-  if (catatan && catatan.sampai <= kini) {
-    gagalPin.delete(asal);
-    catatan = undefined;
-  }
-  if (catatan && catatan.n >= PIN_MAKS_GAGAL) return 'terkunci';
-  if (typeof pin === 'string' && samaAman(pin, CONFIG.panitiaPin)) return 'ok';
-  gagalPin.set(asal, { n: (catatan?.n ?? 0) + 1, sampai: catatan?.sampai ?? kini + PIN_JENDELA_MS });
-  return 'salah';
+function cekPin(pin: unknown, asal: string, staffToken?: unknown): 'ok' | 'salah' | 'terkunci' {
+  if (CONFIG.panitiaPin && staffToken !== undefined && staffHost(staffToken)) return 'ok';
+  return pembatasPin.cek(pin, asal, CONFIG.panitiaPin);
 }
 
 /** Untuk tes. */
 function resetPembatasPin(): void {
-  gagalPin.clear();
+  pembatasPin.reset();
+}
+
+/** Untuk tes: kunci global PIN seolah jatah baru habis. */
+function jenuhkanPinGlobal(): void {
+  pembatasPin.jenuhkan();
 }
 
 // ------------------------------------------------------------------ bank soal
@@ -374,7 +404,7 @@ function izinBank(req: express.Request, res: express.Response): boolean {
     res.status(403).json({ ok: false, error: 'Token host tidak valid' });
     return false;
   }
-  const pin = cekPin(req.header('x-panitia-pin'), String(req.ip ?? 'rest'));
+  const pin = cekPin(req.header('x-panitia-pin'), String(req.ip ?? 'rest'), req.header('x-staff-token'));
   if (pin !== 'ok') {
     res.status(pin === 'terkunci' ? 429 : 403).json({ ok: false, error: GALAT_PIN[pin] });
     return false;
@@ -529,8 +559,24 @@ io.on('connection', (socket: Socket) => {
   // Satu paket cacat (mis. { code: { toString: 1 } }) tidak boleh menjatuhkan
   // server dan menghapus semua room: setiap handler dijaga, pengirim dapat ack gagal.
   const pasang = socket.on.bind(socket);
+  // T-038: per-socket event budget (join, resume and host actions alike); far past it the socket is dropped.
+  let jatah = { n: 0, sampai: Date.now() + EVENT_SOCKET_JENDELA_MS };
+  const lewatJatah = (): boolean => {
+    const kini = Date.now();
+    if (kini >= jatah.sampai) jatah = { n: 0, sampai: kini + EVENT_SOCKET_JENDELA_MS };
+    jatah.n++;
+    if (jatah.n === EVENT_SOCKET_PUTUS) {
+      console.warn(`[keamanan] socket legacy diputus: ${EVENT_SOCKET_PUTUS} event dalam ${EVENT_SOCKET_JENDELA_MS / 1000} s dari ${ipSocket(socket)}`);
+      socket.disconnect(true);
+    }
+    return jatah.n > EVENT_SOCKET_MAKS;
+  };
   socket.on = ((ev: string, fn: (...args: unknown[]) => unknown) =>
     pasang(ev, (...args: unknown[]) => {
+      if (ev !== 'disconnect' && ev !== 'disconnecting' && lewatJatah()) {
+        reply(args[args.length - 1], { ok: false, error: 'Terlalu banyak permintaan. Tunggu sebentar.' });
+        return;
+      }
       const gagal = (err: unknown): void => {
         console.warn(`[socket] ${ev} ditolak: ${(err as Error)?.message ?? String(err)}`);
         reply(args[args.length - 1], { ok: false, error: 'Permintaan tidak dapat diproses.' });
@@ -543,8 +589,8 @@ io.on('connection', (socket: Socket) => {
       }
     })) as typeof socket.on;
 
-  socket.on('host:create', (payload: { eventName?: string; paket?: string; pin?: string }, cb) => {
-    const pin = cekPin(payload?.pin, String(socket.handshake.address ?? 'ws'));
+  socket.on('host:create', (payload: { eventName?: string; paket?: string; pin?: string; staffToken?: string }, cb) => {
+    const pin = cekPin(payload?.pin, ipSocket(socket), payload?.staffToken);
     if (pin !== 'ok') return reply(cb, fail(GALAT_PIN[pin]));
     const paket: IdPaket =
       payload?.paket === 'latihan' || payload?.paket === 'acara' ? payload.paket : CONFIG.paketBawaan;
@@ -879,4 +925,4 @@ server.listen(CONFIG.port, CONFIG.host, () => {
   console.log('');
 });
 
-export { app, server, io, manager, resetPembatasPin, story };
+export { app, server, io, manager, jenuhkanPinGlobal, resetPembatasPin, story };

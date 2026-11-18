@@ -3,7 +3,7 @@
 import { io, type Socket } from 'socket.io-client';
 import type { Ack } from '@shared/types';
 
-const SERVER_URL = (import.meta.env.VITE_SERVER_URL as string | undefined) || undefined;
+const SERVER_URL = (import.meta.env?.VITE_SERVER_URL as string | undefined) || undefined;
 
 let socket: Socket | null = null;
 

@@ -19,6 +19,8 @@ export default defineConfig({
     __MEJA_KASUS__: JSON.stringify(process.env.VITE_MEJA_KASUS === '1'),
     // PROTOTIPE "Kejadian" (irisan K10): halaman /kejadian hanya ada di build VITE_KEJADIAN=1.
     __KEJADIAN__: JSON.stringify(process.env.VITE_KEJADIAN === '1'),
+    // T-038 Fix 1: audio test hook only in dev (vite serve) or a VITE_UJI_AUDIO=on build (client/src/audio/bendera.ts).
+    __UJI_AUDIO__: JSON.stringify(process.env.NODE_ENV !== 'production' || process.env.VITE_UJI_AUDIO === 'on'),
   },
   resolve: {
     alias: [

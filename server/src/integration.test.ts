@@ -354,7 +354,7 @@ test('pertandingan penuh: host + 2 pemain + penonton', async (t) => {
   assert.ok(budi.totalAccuracy < ani.totalAccuracy * 0.8, 'jawaban "pilih semua" jauh di bawah jawaban tepat');
 
   // ---------------------------------------------------------------- ekspor CSV
-  const csvRes = await fetch(`${BASE}/api/room/${code}/results.csv?hostToken=${hostToken}`);
+  const csvRes = await fetch(`${BASE}/api/room/${code}/results.csv`, { headers: { 'x-host-token': hostToken } });
   assert.equal(csvRes.status, 200);
   const csv = await csvRes.text();
   assert.match(csv, /kode_room,nama_acara,peringkat/);
@@ -367,8 +367,19 @@ test('pertandingan penuh: host + 2 pemain + penonton', async (t) => {
 
   const csvDenied = await fetch(`${BASE}/api/room/${code}/results.csv`);
   assert.equal(csvDenied.status, 403);
+  // T-038: the token is accepted from the header only, exports are never cached, and app-wide headers are present.
+  assert.equal((await fetch(`${BASE}/api/room/${code}/results.csv?hostToken=${hostToken}`)).status, 403, 'token di URL ditolak');
+  assert.equal(csvRes.headers.get('cache-control'), 'no-store');
+  assert.equal(csvRes.headers.get('x-content-type-options'), 'nosniff');
+  assert.equal(csvRes.headers.get('referrer-policy'), 'strict-origin-when-cross-origin');
+  const asing = await fetch(`${BASE}/api/health`, { headers: { origin: 'https://penyerang.example' } });
+  assert.equal(asing.headers.get('access-control-allow-origin'), null, 'origin asing tidak mendapat CORS');
+  const sendiri = await fetch(`${BASE}/api/health`, { headers: { origin: BASE } });
+  assert.equal(sendiri.headers.get('access-control-allow-origin'), BASE);
+  const wsAsing = await fetch(`${BASE}/socket.io/?EIO=4&transport=polling`, { headers: { origin: 'https://penyerang.example' } });
+  assert.equal(wsAsing.status, 403, 'handshake Engine.IO dari origin asing ditolak');
 
-  const jsonRes = await fetch(`${BASE}/api/room/${code}/results.json?hostToken=${hostToken}`);
+  const jsonRes = await fetch(`${BASE}/api/room/${code}/results.json`, { headers: { 'x-host-token': hostToken } });
   const json = (await jsonRes.json()) as { ok: boolean; players: { rounds: unknown[] }[] };
   assert.equal(json.ok, true);
   assert.equal(json.players.length, 2);

@@ -3,12 +3,11 @@
  * Kolom ronde mengikuti PLAYLIST room (jumlah soal bisa selain 10).
  */
 
+import { csvCell } from './csvGuard';
 import type { Room } from './rooms';
 
-function cell(v: unknown): string {
-  const s = v === null || v === undefined ? '' : String(v);
-  return /[",\r\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s;
-}
+// T-038: formula guard; names, event name, prizes and mission text are user-controlled.
+const cell = csvCell;
 
 export function buildResultsCsv(room: Room): string {
   const roundIdx: number[] = [];
