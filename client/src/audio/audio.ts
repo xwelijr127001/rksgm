@@ -184,12 +184,12 @@ const SFX_TOMBOL_URL = (import.meta.env?.BASE_URL ?? '/') + 'audio/sfx-tombol.wa
 /** Level of the sample (file peak 0.89, RMS 0.17) so it sits about as loud as 'konfirmasi'. Tweak here. */
 const GAIN_TOMBOL = 0.16;
 let bufTombol: AudioBuffer | null = null;
-let muatTombolMulai = false;
-function muatSampelTombol(): void {
-  if (muatTombolMulai || !ctx || typeof fetch === 'undefined') return;
-  muatTombolMulai = true;
+let janjiTombol: Promise<void> | null = null;
+function muatSampelTombol(): Promise<void> {
+  if (janjiTombol) return janjiTombol;
+  if (!ctx || typeof fetch === 'undefined') return Promise.resolve();
   const c = ctx;
-  fetch(SFX_TOMBOL_URL)
+  janjiTombol = fetch(SFX_TOMBOL_URL)
     .then((r) => { if (!r.ok) throw new Error(String(r.status)); return r.arrayBuffer(); })
     // Callback form as well: older Safari decodeAudioData returns no promise.
     .then((ab) => new Promise<AudioBuffer>((ok, gagal) => {
@@ -198,6 +198,17 @@ function muatSampelTombol(): void {
     }))
     .then((b) => { bufTombol = b; })
     .catch(() => { catatSekali('Suara tombol (sfx-tombol.wav) tidak bisa dimuat - memakai suara sintesis.'); });
+  return janjiTombol;
+}
+
+/**
+ * T-047 (story preloader): the button sample decoded into the engine. Without an AudioContext yet (no tap so far) the WAV is
+ * only fetched into the HTTP cache; initAudio decodes it later. Never rejects.
+ */
+export function siapkanAudio(): Promise<void> {
+  if (ctx) return muatSampelTombol();
+  if (typeof fetch === 'undefined') return Promise.resolve();
+  return fetch(SFX_TOMBOL_URL).then((r) => r.arrayBuffer()).then(() => undefined, () => undefined);
 }
 
 /** Dipanggil pada interaksi pengguna pertama (AudioUnlocker). */
@@ -471,6 +482,34 @@ function applyMusic() {
  * Memilih musik latar. `owner` opsional: bila diisi dan bukan pemilik aktif,
  * permintaan diabaikan supaya tidak ada dua trek berbunyi bersamaan.
  */
+/**
+ * T-047: buffer a music track ahead in the SAME element that will play it (one element per track). true = canplaythrough
+ * (or already buffered); false = error / timeout (the track then keeps loading lazily as before). Never restarts a playing track.
+ */
+export function pramuatMusik(track: Exclude<Track, null>, batasMs: number): Promise<boolean> {
+  const el = element(track);
+  if (!el) return Promise.resolve(false);
+  if (el.readyState >= 4) return Promise.resolve(true);
+  return new Promise<boolean>((ok) => {
+    let selesai = false;
+    const akhiri = (v: boolean) => {
+      if (selesai) return;
+      selesai = true;
+      window.clearTimeout(waktu);
+      el.removeEventListener('canplaythrough', bisa);
+      el.removeEventListener('error', gagal);
+      ok(v);
+    };
+    const bisa = () => akhiri(true);
+    const gagal = () => akhiri(false);
+    const waktu = window.setTimeout(() => akhiri(false), batasMs);
+    el.addEventListener('canplaythrough', bisa);
+    el.addEventListener('error', gagal);
+    // iOS does not start loading on preload="auto" alone; load() only on an idle, never-loaded element.
+    if (el.paused && el.readyState === 0) { try { el.load(); } catch { /* keeps loading lazily */ } }
+  });
+}
+
 export function setTrack(track: Track, owner?: string): void {
   if (owner !== undefined && owner !== activeOwner()) return;
   if (desired === track) return; // T-040: unchanged track = no-op (screen updates call this on every render)

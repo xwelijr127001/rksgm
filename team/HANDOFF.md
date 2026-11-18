@@ -2831,3 +2831,19 @@ QA added 3 expect (snapshot) tests with node:test `t.assert.snapshot` (record: `
 - The WAV is not re-encoded; Vite copies `client/public/audio/sfx-tombol.wav` to `client/dist/audio/sfx-tombol.wav` (byte-identical, 28 622 bytes).
 
 **Gate (owner rule):** typecheck 0; `client/dist` rebuilt = exact copy of the scratch build. Not tested in a browser or on a phone. Not committed.
+
+## T-047 (2026-11-19): real loading bar into the playable case + cache headers
+
+- **Where:** `client/src/App.tsx` route `/cerita/:episode` wraps CeritaMain in `PramuatCerita` (`client/src/cerita/PramuatCerita.tsx`). Only for `auto-2` (the playable truck case in the picker), only with a profile (else CeritaMain redirects to /kenalan as before), once per page session. Other episodes and routes pass straight through.
+- **Blocking preload (normal connection), 35 items, about 1.6 MB raw:**
+  - story chunk `CeritaMain` via the same `import('../pages/CeritaMain')` specifier as the router (201 KB raw, gzip on the wire) + list module `pramuatDaftar` (1.2 KB chunk, deps shared with the story chunk, main bundle unchanged). Phaser is NOT included: the playable case uses the phone player, the Phaser meja path is behind MEJA_KASUS (off in release).
+  - 31 pictures, 378 KB (`client/src/cerita/pramuatDaftar.ts`): Episode 2 pixel rooms (layers, props, committee atlas + sign), character atlases + icons, phone POV, and the CSS-only pictures (WhatsApp truck photo, SIM card, office board, committee icon) imported with the same hashed URLs; small files inlined as data: are skipped. Loaded with `muatPng` (fetch + decode, the same cache the pixel stage reads).
+  - first music `cerita-kantor.mp3` (1.08 MB) buffered to canplaythrough in the element that will play it (`pramuatMusik` in audio.ts; load() only on an idle never-loaded element, never restarts a playing track).
+  - `sfx-tombol.wav` (28 KB) decoded into the audio engine (`siapkanAudio()` in audio.ts; without an AudioContext yet it only fetches into the HTTP cache).
+- **Save-Data** (`navigator.connection.saveData`): only the chunks + the first-screen pictures (first composition of the story, or of the saved resume point) block; no music; the other pictures load in the background after 1.5 s.
+- **Not blocking:** after the first screen, `cerita-periksa` and `cerita-penutup` are buffered in idle time (3 s + requestIdleCallback), not with Save-Data.
+- **Caps:** per item 8 s, overall 12 s, then the story opens with what is ready (missing items load lazily as before). Finished in under 300 ms (second visit, HTTP cache) = no bar shown at all.
+- **Bar:** same Raksa loader look as PemuatAwal (RAKSA GAME mark, Raki, `.lp-pemuat-bar`) but REAL: 10 steps filled by finished items / total, `role="progressbar"` with aria-valuenow, status text `umum.pramuatCerita` + percent (id/en/zh). CSS in `client/src/player.css` (`[data-nyata]`, reduced-motion keeps empty/filled steps).
+- **Cache headers** (`server/src/index.ts` static): `/assets/*` unchanged (1 year immutable); `index.html` (static and the SPA fallback) `no-cache`; every other un-hashed public file (`/audio`, `/karakter`, icons) `public, max-age=86400` (was 1 hour for /karakter, nothing for /audio); ETag kept (express.static default). Security headers and the results no-store untouched.
+
+**Gate (owner rule):** typecheck 0; `client/dist` rebuilt = exact copy of the scratch build. Not tested in a browser or on a phone. Not committed.

@@ -549,6 +549,10 @@ button.alur-spanduk-gabung { border: 0; cursor: pointer; font: inherit; }
 .lp-pemuat-bar { display: flex; gap: 4px; margin-top: 20px; }
 .lp-pemuat-bar i { width: 28px; height: 10px; background: var(--krem-tua); border-bottom: 3px solid #e0e0e0; animation: lp-seg 1.2s steps(1) infinite; }
 .lp-pemuat-bar i:nth-child(2) { animation-delay: .3s; } .lp-pemuat-bar i:nth-child(3) { animation-delay: .6s; } .lp-pemuat-bar i:nth-child(4) { animation-delay: .9s; }
+/* T-047: REAL progress bar (story preloader, cerita/PramuatCerita.tsx): 10 steps, filled = orange key colour, no loop. */
+.lp-pemuat-bar[data-nyata] i { width: 16px; animation: none; }
+.lp-pemuat-bar[data-nyata] i[data-isi] { background: var(--kuning); border-bottom-color: var(--kuning-tua); }
+@media (min-width: 901px) { .lp-pemuat-bar[data-nyata] i { width: 24px; } }
 @keyframes lp-seg { 0%, 24% { background: var(--kuning); border-bottom-color: var(--kuning-tua); } 25%, 100% { background: var(--krem-tua); border-bottom-color: #e0e0e0; } }
 .lp-pemuat-teks { margin: 12px 0 0; font-size: 14px; line-height: 1.4; color: var(--tinta-lembut); }
 html:has(.lp-pemuat) { overflow: hidden; }
@@ -656,3 +660,9 @@ html:has(.lp-pemuat) { overflow: hidden; }
 }
 /* D-255: hero turun di bawah 640 px tinggi (dulu 620) dan, seperti dulu, di bawah 360 px lebar. */
 @media (max-width: 700px) and (orientation: portrait) and (max-height: 639px) { .lp-halaman .lp-kota-bingkai { display: none; } }
+
+/* T-047: the real progress bar keeps empty / filled steps under reduced motion (the loop rule above paints every step). */
+@media (prefers-reduced-motion: reduce) {
+  :root:not([data-gerak="penuh"]) .lp-pemuat-bar[data-nyata] i { background: var(--krem-tua); border-bottom-color: #e0e0e0; opacity: 1; }
+  :root:not([data-gerak="penuh"]) .lp-pemuat-bar[data-nyata] i[data-isi] { background: var(--kuning); border-bottom-color: var(--kuning-tua); }
+}

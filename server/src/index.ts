@@ -871,12 +871,16 @@ if (fs.existsSync(CONFIG.clientDist)) {
       // adegan tidak diunduh ulang oleh HP peserta setiap ronde/refresh.
       setHeaders: (res, filePath) => {
         if (/[\\/]assets[\\/]/.test(filePath)) res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
-        // Sprite tokoh: nama berkas tetap, jadi cukup di-cache 1 jam (tidak divalidasi ulang tiap halaman).
-        else if (/[\\/]karakter[\\/]/.test(filePath)) res.setHeader('Cache-Control', 'public, max-age=3600');
+        // T-047: index.html always revalidated (a new hashed bundle after deploy is picked up at once).
+        else if (/[\\/]index\.html$/.test(filePath)) res.setHeader('Cache-Control', 'no-cache');
+        // T-047: un-hashed public files (/audio, /karakter, icons): 1 day, ETag kept for revalidation afterwards. Audio URLs
+        // carry ?v= when a track is replaced, so the story preloader's second visit is served from the HTTP cache.
+        else res.setHeader('Cache-Control', 'public, max-age=86400');
       },
     }),
   );
   app.get(/^(?!\/api\/|\/socket\.io\/).*/, (_req, res) => {
+    res.setHeader('Cache-Control', 'no-cache'); // T-047: SPA fallback = index.html
     res.sendFile(path.join(CONFIG.clientDist, 'index.html'));
   });
   console.log('[static] menyajikan', CONFIG.clientDist);

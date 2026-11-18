@@ -17,6 +17,7 @@ import { Component, Suspense, lazy, useEffect, useRef, type ErrorInfo, type Reac
 import { BrowserRouter, Navigate, Route, Routes, useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import type { Phase } from '@shared/types';
 import { AudioUnlocker, Memuat } from './ui/kit';
+import { PramuatCerita } from './cerita/PramuatCerita';
 import { useHalaman } from './ui/halaman';
 import { t, useBahasa } from './i18n';
 import { bootstrapHost, bootstrapPlayer, initConnection, useGame } from './state/store';
@@ -249,7 +250,8 @@ export default function App() {
             <Route path="/admin/*" element={<AdminApp />} />
             <Route path="/kenalan" element={<Kenalan />} />
             <Route path="/cerita" element={<Cerita />} />
-            <Route path="/cerita/:episode" element={<CeritaMain />} />
+            {/* T-047: preload bar (pictures, first music, button SFX, story chunk) before the playable case opens. */}
+            <Route path="/cerita/:episode" element={<PramuatCerita><CeritaMain /></PramuatCerita>} />
             {ProtoMeja ? <Route path="/meja" element={<ProtoMeja />} /> : null}
             {ProtoKejadian ? <Route path="/kejadian" element={<ProtoKejadian />} /> : null}
             {ProtoLokasi ? <Route path="/lokasi" element={<ProtoLokasi />} /> : null}
