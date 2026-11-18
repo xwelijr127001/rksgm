@@ -1,0 +1,18 @@
+exports[`PIN limiter decision sequence 1`] = `
+[
+  "wrong #1: salah",
+  "wrong #2: salah",
+  "wrong #3: salah",
+  "wrong #4: salah",
+  "wrong #5: salah",
+  "wrong #6: salah",
+  "wrong #7: salah",
+  "wrong #8: salah",
+  "wrong #9: terkunci",
+  "correct while IP locked: terkunci",
+  "correct from another IP: ok",
+  "correct while global lock: terkunci",
+  "wrong while global lock: terkunci",
+  "correct after global lock: ok"
+]
+`;

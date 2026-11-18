@@ -1,0 +1,76 @@
+exports[`story-70-30-v2 score grid 1`] = `
+{
+  "a=0 t=0s": {
+    "accuracyPoints": 0,
+    "speedPoints": 0,
+    "roundScore": 0,
+    "speedFactor": 0
+  },
+  "a=0 t=15s": {
+    "accuracyPoints": 0,
+    "speedPoints": 0,
+    "roundScore": 0,
+    "speedFactor": 0
+  },
+  "a=0 t=30s": {
+    "accuracyPoints": 0,
+    "speedPoints": 0,
+    "roundScore": 0,
+    "speedFactor": 0
+  },
+  "a=0 t=45s": {
+    "accuracyPoints": 0,
+    "speedPoints": 0,
+    "roundScore": 0,
+    "speedFactor": 0
+  },
+  "a=0.5 t=0s": {
+    "accuracyPoints": 350,
+    "speedPoints": 300,
+    "roundScore": 650,
+    "speedFactor": 1
+  },
+  "a=0.5 t=15s": {
+    "accuracyPoints": 350,
+    "speedPoints": 150,
+    "roundScore": 500,
+    "speedFactor": 0.5
+  },
+  "a=0.5 t=30s": {
+    "accuracyPoints": 350,
+    "speedPoints": 0,
+    "roundScore": 350,
+    "speedFactor": 0
+  },
+  "a=0.5 t=45s": {
+    "accuracyPoints": 350,
+    "speedPoints": 0,
+    "roundScore": 350,
+    "speedFactor": 0
+  },
+  "a=1 t=0s": {
+    "accuracyPoints": 700,
+    "speedPoints": 300,
+    "roundScore": 1000,
+    "speedFactor": 1
+  },
+  "a=1 t=15s": {
+    "accuracyPoints": 700,
+    "speedPoints": 150,
+    "roundScore": 850,
+    "speedFactor": 0.5
+  },
+  "a=1 t=30s": {
+    "accuracyPoints": 700,
+    "speedPoints": 0,
+    "roundScore": 700,
+    "speedFactor": 0
+  },
+  "a=1 t=45s": {
+    "accuracyPoints": 700,
+    "speedPoints": 0,
+    "roundScore": 700,
+    "speedFactor": 0
+  }
+}
+`;

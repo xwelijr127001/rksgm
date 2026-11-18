@@ -1,0 +1,13 @@
+exports[`csv cell guard 1`] = `
+{
+  "formula": "'=SUM(1)",
+  "plus": "'+1",
+  "minus": "'-1",
+  "at": "'@x",
+  "tab": "'\\tx",
+  "digit": "7 Bintang",
+  "unicode": "Dewi 李",
+  "quotedComma": "\\"Dewi, \\"\\"Si\\"\\" Kecil\\"",
+  "empty": ""
+}
+`;

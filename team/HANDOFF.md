@@ -2797,3 +2797,6 @@ Owner phone pass item 5. Built by the Designer; uncommitted. Owner rule: no e2e,
 - T-040 fixes untouched: 70/80 ms per-sound gap, max 6 voices, idempotent music/ambience, single play per track.
 
 **Gate (owner rule):** typecheck 0; `client/dist` rebuilt = exact copy of the scratch build. Not tested in a browser or on a phone. Not committed.
+
+## T-043
+QA added 3 expect (snapshot) tests with node:test `t.assert.snapshot` (record: `tsx --test --test-update-snapshots <file>`): `server/src/story/skor.expect.test.ts` (12 cases), `server/src/csv.expect.test.ts` (1 snapshot, 9 inputs), `server/src/keamanan.expect.test.ts` (1 snapshot, 14 decisions); `*.snapshot` files sit beside them; the 3 files are appended to the server `test` script and run in about 0.7 s. Finding: `PembatasPin` builds its two `RateLimiter`s without its injected `now`, so a fake clock cannot expire the per-IP window; the staff-host bypass lives in `index.ts` `cekPin` and is not covered.
