@@ -2,16 +2,12 @@ import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import App from './App';
 import { siapkanGerak } from './gerak';
-import { aturBahasa, bahasaKini } from './i18n';
 import { loadAppConfig } from './story/appConfig';
 import './theme.css';
 
 siapkanGerak();
-// Rute & pilihan bahasa bergantung pada konfigurasi server (mode lama). Mandarin hanya di mode lama: tampilan kembali ke
-// Indonesia tanpa menimpa pilihan yang tersimpan di perangkat.
-void loadAppConfig().then((s) => {
-  if (s.status === 'ready' && !s.config.legacy && bahasaKini() === 'zh') aturBahasa('id', false);
-});
+// Rute bergantung pada konfigurasi server (mode lama). Bahasa TIDAK: id / en / zh selalu tersedia (T-035).
+void loadAppConfig();
 const el = document.getElementById('root');
 if (!el) throw new Error('Elemen #root tidak ditemukan');
 
@@ -23,3 +19,8 @@ createRoot(el).render(
 import './player.css';
 // T-030 + T-031: tombol pixel key, kartu dan latar piksel (terakhir, menang atas lembar gaya bagian).
 import './gaya-game.css';
+
+// T-036: pengukuran SFX tanpa mendengar (tools/cek-audio-t036.mjs). Hanya dengan ?uji-audio di URL.
+if (typeof location !== 'undefined' && location.search.includes('uji-audio')) {
+  void import('./audio/audio').then((m) => { (window as unknown as { __rekamSfx?: typeof m.rekamSfx }).__rekamSfx = m.rekamSfx; });
+}

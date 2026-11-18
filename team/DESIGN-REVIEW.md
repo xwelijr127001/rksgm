@@ -4032,3 +4032,43 @@ K15 at 390 × 745 and 360 × 640, id / en / zh: **0 px page scroll and 0 px inne
 - **D-333 · FIX (remaining) · K02 pointer does not move.** It sits on "Formulir klaim" on the table and stays there after six taps; the hint says "Baca dokumen di meja, lalu ketuk bakinya". After the document is opened the pointer must move to the tray. (If K02 needs another gesture than a click, the pointer still has to show that next target.)
 - **D-334 · Short phones: accepted.** Compact strip on K05 and K11; pointer + spoken hint on K08, K10, K-SIM, where the screen is full. No 1-line variant needed: the pointer carries the step there.
 - Not verified: K07 (my saved state did not open its guided view), real drag gestures, a screen reader.
+
+---
+
+## T-037 — mock (2026-11-18)
+
+Designer · Folder: C:\Users\User\Desktop\rksgm-episode2 · No client source edits, no commit. The tree (04:50) built into my scratch folder and served on my :4002 with my test database (stopped); the mock is injected into the real `/cerita` (DOM moves + `mock-rules-T-037.css`). Owner addendum 07:00 included: real case first, relabelled. Evidence `team/evidence/T-037/designer/`: `mock-T-037.png`, `mock-rules-T-037.css`, `fit.txt`, now/mock pictures.
+
+**Fit** (page scroll today → mock; free space under the last line):
+
+| Screen | Today | Mock | Free |
+| --- | --- | --- | --- |
+| 390 × 745 id (new / returning) | 616 | **0 / 0** | 160 / 160 px |
+| 390 × 745 en / zh | 616 / 570 | **0 / 0** | 120 / 178 px |
+| 360 × 640 id (new / returning) | 744 | **0 / 0** | 87 / 65 px |
+| 360 × 640 en / zh | 749 / 698 | **0 / 0** | 65 / 115 px |
+
+A third card needs about 215 px at 390 × 745 (card 205 + gap 10): it fits only in zh (178) — not in id or en; plan a third episode with a scroll or a carousel then.
+
+- **D-335 · No Join Game card on the picker** (home has it). Instead one centred text link under the list, 20 px: "Punya kode room? **Masuk di beranda**" → `/` (it fits, so it stays).
+- **D-336 · Header in one line:** the player header keeps back, "Mode cerita" with a 28 px Miss Raksa head before it, ID and sound; the hub header (eyebrow PILIH EPISODE, title, lead) is not rendered below 600 px wide. Above 600 px it stays as today.
+- **D-337 · Compact card (< 600 px):** K1 card, 12 px inset; row = 96 × 96 cover | meta (1 line), title (18/22), blurb clamped to 2 lines (1 line when the screen is ≤ 700 px high), status line ("Baru" / "Sedang berjalan · Bagian 2/4"); the pixel key full width under the row, 48 px ("Mulai", "Lanjutkan" when saved). Type badge on the cover's top-right corner. At ≥ 600 px the key may sit right of the row (not mocked).
+- **D-338 · Build notes:** (1) the cover thumbnail needs its own 96 × 96 crop per episode (the mock scales the live 356 × 150 art to 64 % and crops it, which shows the wrong part of the auto-2 stage): render the scene at 96 px height centred on the main subject (truck / Bu Rina), or ship a 96 px PNG; (2) keep the meta line on one line (`flex-wrap: nowrap`, ellipsis; the mock still wraps it at 390); (3) at 360 × 640 the status icon and text wrap in the returning card: put the icon inline at 16 px.
+- **D-339 · Order and labels (owner):** the real case (auto-2, Truk Trailer, KASUS NYATA) is first; its meta reads "Episode 1 · Kendaraan · ± 17 menit"; the demo (auto-1, Baret di Parkiran, DEMO) reads "Demo · Kendaraan · ± 8 menit". Ids and saved progress unchanged.
+- **D-340 · Keys:** new `cerita.hubKode` = "Punya kode room? {tautan}" / "Have a room code? {tautan}" / "有房间代码？{tautan}" and `cerita.hubKodeTautan` = "Masuk di beranda" / "Join on the home page" / "在首页加入"; new `cerita.labelDemo` = "Demo" / "Demo" / "演示" (replaces `episodeKe` for demo episodes); the episode number shown comes from list order (real case = 1), not from the id: `episodeKe` ('Episode {n}' / 'Episode {n}' / '第 {n} 集') unchanged as a key, its `{n}` changes. No other texts change.
+
+**Not verified:** ≥ 600 px layout, a profile line (none shows on this page today), a third card, real phone.
+
+---
+
+## T-035 — re-check (2026-11-18)
+
+Designer · Folder: C:\Users\User\Desktop\rksgm-episode2 · No source edits, no commit. `client/dist` built 07:23 by Fullstack, served on my :4002 with my test database (stopped), 390 × 745 and 360 × 640 (id), language menu in id and zh. Evidence `team/evidence/T-035/designer/recheck/` (`ukur.txt`, pictures).
+
+### Verdict: PASS.
+- **Result card (TINDAKANMU)** on K09 (`result-wawancara-3-*.png`): the tab is drawn by the card and sits on its top frame line, left 12 px; content starts 26 px down, 14 px in, clear of the tab; the action quote has its 14 px inset; the **Kenapa / status panel** has 14 px padding on all sides; no rounded corners.
+- **TUGAS** on K02, K08, K11: tab centred on the frame line (2–4 px from the box top = the 3 px line), 26 px top padding, 14 px side inset, at both sizes.
+- **PELAJARAN** (phone end card): tab on the bubble's frame, text clear.
+- **Pointer only in K08:** K08 shows pointer + ring on sign 1; K02, K04, K05, K10 and K-SIM show the strip and no pointer or ring, at both sizes.
+- **Language menu:** ID / EN / 中文 on the home page in both id and zh (server flag not touched by me; Fullstack's test covers it).
+- **Not verified:** only one result card was reachable from my saved states (K09); K03, K06, K11 and K-SIM results share the same component and rule, but I did not see them.

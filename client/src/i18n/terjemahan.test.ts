@@ -41,8 +41,8 @@ function samaAngka(terjemahan: string, sumber: string): boolean {
   return sisa.every((n) => n.length <= 2 && Number(n) >= 1 && Number(n) <= 12);
 }
 
-// Kontrak PRD v0.2 (DECISIONS.md D-03): Mandarin = fitur mode lama, jadi ruang KAMUS_MVP wajib id + en saja dan zh-nya
-// boleh kosong (t() memakai teks Indonesia). Ruang lain tetap wajib lengkap dalam tiga bahasa.
+// Kontrak: Mandarin selalu ditawarkan (T-035, tidak lagi bergantung pada mode lama). Ruang KAMUS_MVP (layar room cerita
+// yang di-host, id/en menurut T-028 rev 1.1) wajib id + en saja dan zh-nya boleh kosong (t() memakai teks Indonesia). Ruang lain tetap wajib lengkap dalam tiga bahasa.
 test('kamus UI: kunci & parameter en/zh sama persis dengan id, tanpa teks kosong', () => {
   for (const [ruang, k] of Object.entries(KAMUS)) {
     const kunciId = Object.keys(k.id).sort();

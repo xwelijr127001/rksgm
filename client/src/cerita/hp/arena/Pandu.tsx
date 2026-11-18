@@ -48,6 +48,9 @@ function bacaKini(kode: string, arena: HTMLElement, adaIsian: boolean): number {
  * diketuk, D-325); `terakhir` = tombol yang terakhir diketuk.
  */
 function cariSasaran(kode: string, arena: HTMLElement, kini: number, disentuh: WeakSet<Element>, terakhir: Element | null): HTMLElement | null {
+  // T-035 (pemilik 18 Nov 06:3x): penunjuk dan cincin HANYA di K08 (adegan lajur truk). Di aktivitas lain penunjuk bisa menunjuk
+  // pilihan yang dinilai (K04 'Kantor Raksa' = jawabannya); di sana tinggal pita, petunjuk dan kartu cara main.
+  if (kode !== 'k08') return null;
   const semua = (sel: string, dalam: Element | null = arena) => [...(dalam?.querySelectorAll<HTMLElement>(sel) ?? [])].filter((e) => tampak(e) && !e.matches(SASARAN_LEWAT));
   const pertama = (sel: string, dalam: Element | null = arena) => semua(sel, dalam).find((e) => !disentuh.has(e)) ?? null;
   const kirim = () => semua('[data-kirim], .hp-kirim-tombol, [data-lanjut-rambu]').at(-1) ?? null;

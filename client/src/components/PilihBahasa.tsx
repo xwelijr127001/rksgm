@@ -1,15 +1,14 @@
 import { DAFTAR_BAHASA, bahasaSah } from '@shared/bahasa';
 import { t, useBahasa } from '../i18n';
-import { useLegacyEnabled } from '../story/appConfig';
 
 /**
- * Pemilih bahasa (ID / EN, plus 中文 di mode lama: Mandarin adalah fitur mode lama, DECISIONS.md D-03). <select> bawaan:
+ * Pemilih bahasa ID / EN / 中文, SELALU ketiganya (T-035, pemilik 18 Nov: Mandarin tidak boleh bergantung pada RAKSA_LEGACY;
+ * room cerita yang di-host tetap id/en menurut T-028 rev 1.1 dan tidak memakai pemilih ini). <select> bawaan:
  * mudah dipakai di HP, bisa dioperasikan keyboard & pembaca layar. Pilihan tersimpan di perangkat ini; bawaan Indonesia.
  */
 export function PilihBahasa({ className = '' }: { className?: string }) {
   const { bahasa, aturBahasa } = useBahasa();
-  const legacy = useLegacyEnabled();
-  const daftar = DAFTAR_BAHASA.filter((b) => legacy || b.kode !== 'zh');
+  const daftar = DAFTAR_BAHASA;
   return (
     <label className={'pilih-bahasa ' + className}>
       <span className="sr-only">{t('umum.pilihBahasa')}</span>

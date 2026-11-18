@@ -21,7 +21,7 @@ const VP = { n: '390x745', w: 390, h: 745, dpr: 2 };
 const hasil = []; let gagal = 0;
 const lapor = (n, ok, d) => { hasil.push({ nama: n, lulus: ok, ...d }); if (!ok) gagal++; console.log(ok ? 'PASS' : 'FAIL', n, JSON.stringify(d)); };
 let b = await luncur('chromium');
-const batal = pasangPenjaga(10, () => { try { b.process?.()?.kill('SIGKILL'); } catch { /* abaikan */ } });
+const batal = pasangPenjaga(40, () => { try { b.process?.()?.kill('SIGKILL'); } catch { /* abaikan */ } });
 for (const [kode, st] of AKT) {
   let h = null;
   try {
@@ -62,6 +62,67 @@ for (const [kode, st] of AKT) {
     })(), 90000, kode);
   } catch (e) { lapor('tugas-' + kode, false, { sebab: ['galat alat: ' + String(e?.message ?? e).slice(0, 160)] }); }
   await h?.tutup();
+}
+// ---- T-035: kartu HASIL / TUGAS / PELAJARAN dan panel dalamnya, di setiap state tersimpan (maju dengan Lanjut sampai 10 ketukan),
+// 390x745 dan 360x640 x id / en / zh: tidak ada kotak teks yang beririsan dengan kotak tab; tab berpusat di garis atas kartu;
+// teks panel dalam (Kenapa / status, kutipan tindakan) >= 14 px dari garis kirinya.
+if (!process.argv.includes('--tanpa-hasil')) {
+  const ukurKartu = (p) => p.evaluate(() => {
+    const out = [];
+    const r = (e) => e.getBoundingClientRect();
+    const tampak = (e) => { const x = r(e); return x.width > 0 && x.height > 0 && getComputedStyle(e).visibility !== 'hidden'; };
+    for (const tab of document.querySelectorAll('.hp-tindakan > b, .hp-aksi-label, .akh-pelajaran-label')) {
+      if (!tampak(tab) || tab.closest('.hp-vn-dialog[data-tab]')) continue;
+      const kartu = tab.closest('.hp-vn-dialog, section.hp-aksi, .hp-aksi, .akh-pelajaran'); if (!kartu) continue;
+      const tr = r(tab); const kr = r(kartu);
+      const teks = [...kartu.querySelectorAll('*')].filter((e) => e !== tab && !tab.contains(e) && !e.contains(tab) && tampak(e) && [...e.childNodes].some((n) => n.nodeType === 3 && n.textContent.trim()));
+      const tabrak = teks.filter((e) => { const x = r(e); return x.left < tr.right - 0.5 && tr.left < x.right - 0.5 && x.top < tr.bottom - 0.5 && tr.top < x.bottom - 0.5; }).map((e) => e.textContent.trim().slice(0, 24));
+      out.push({ jenis: 'tab', tab: tab.textContent.trim(), pusat: Math.round((tr.top + tr.height / 2 - kr.top) * 10) / 10, tabrak });
+    }
+    // Tab kartu HASIL digambar sebagai ::before dari data-tab: kotaknya dihitung dari gayanya (pusat di garis atas, kiri 12 px).
+    for (const kartu of document.querySelectorAll('.hp-vn-dialog[data-tab]')) {
+      if (!tampak(kartu)) continue; const kr = r(kartu); const cs = getComputedStyle(kartu, '::before'); if (cs.content === 'none') continue;
+      const uk = document.createElement('span'); uk.textContent = kartu.getAttribute('data-tab'); Object.assign(uk.style, { position: 'absolute', visibility: 'hidden', font: cs.font, letterSpacing: cs.letterSpacing, textTransform: cs.textTransform, whiteSpace: 'nowrap' }); document.body.append(uk);
+      const w = uk.getBoundingClientRect().width + 16; uk.remove(); const h = 22; const tr = { left: kr.left + 12, right: kr.left + 12 + w, top: kr.top + 1.5 - h / 2, bottom: kr.top + 1.5 + h / 2 };
+      const teks = [...kartu.querySelectorAll('*')].filter((e) => tampak(e) && r(e).width > 1 && [...e.childNodes].some((n) => n.nodeType === 3 && n.textContent.trim()));
+      const tabrak = teks.filter((e) => { const x = r(e); return x.left < tr.right - 0.5 && tr.left < x.right - 0.5 && x.top < tr.bottom - 0.5 && tr.top < x.bottom - 0.5; }).map((e) => e.textContent.trim().slice(0, 24));
+      out.push({ jenis: 'tab', tab: kartu.getAttribute('data-tab'), pusat: 1.5, tabrak });
+    }
+    for (const panel of document.querySelectorAll('.hp-status-catatan, .hp-vn-dialog .hp-tindakan')) {
+      if (!tampak(panel)) continue; const pr = r(panel);
+      const teks = [...panel.querySelectorAll('*')].concat([panel]).filter((e) => tampak(e) && r(e).width > 1 && [...e.childNodes].some((n) => n.nodeType === 3 && n.textContent.trim()));
+      // jarak teks dari garis kiri panel (rentang teks, bukan kotak elemen)
+      let kiri = Infinity; for (const e of teks) for (const n of e.childNodes) if (n.nodeType === 3 && n.textContent.trim()) { const rg = document.createRange(); rg.selectNodeContents(n); for (const q of rg.getClientRects()) kiri = Math.min(kiri, q.left - pr.left); }
+      out.push({ jenis: 'panel', kelas: panel.className.split(' ')[0], kiri: Math.round(kiri * 10) / 10 });
+    }
+    return out;
+  });
+  let tab = 0, panel = 0; const bertemu = new Set();
+  for (const vp of [{ n: '390x745', w: 390, h: 745, dpr: 2 }, { n: '360x640', w: 360, h: 640, dpr: 2 }]) for (const lang of ['id', 'en', 'zh']) for (const st of Object.keys(S)) {
+    let h = null;
+    try {
+      await denganBatas((async () => {
+        h = await bukaGulir('chromium', b, BASE, vp, lang, S[st].nilai); await siap(h.p);
+        const sebab = [];
+        for (let i = 0; i < 10; i++) {
+          const d = await ukurKartu(h.p);
+          for (const x of d) {
+            if (x.jenis === 'tab') { tab++; bertemu.add(x.tab); if (x.tabrak.length) sebab.push(`tab "${x.tab}" menutupi: ${x.tabrak.join(' | ')}`); if (Math.abs(x.pusat - 1.5) > 2) sebab.push(`tab "${x.tab}" pusat ${x.pusat} px dari garis atas`); }
+            else { panel++; if (x.kiri < 13.5) sebab.push(`panel ${x.kelas}: teks ${x.kiri} px dari garis kiri`); }
+          }
+          if (d.some((x) => x.jenis === 'tab' && x.tab.length) && !fs.existsSync(path.join(OUT, '..', '..', 'T-035', `hasil-${st}-${vp.n}-${lang}.png`)) && vp.n === '390x745' && lang === 'id') {
+            fs.mkdirSync(path.join(ROOT, 'team/evidence/T-035'), { recursive: true });
+            await h.p.screenshot({ path: path.join(ROOT, 'team/evidence/T-035', `hasil-${st}-${vp.n}-${lang}.png`) });
+          }
+          if (!(await h.p.evaluate(() => { const x = document.querySelector('.hp-vn-aksi [data-lanjut], [data-lanjut]'); if (!x) return false; x.click(); return true; }))) break;
+          await tunggu(700);
+        }
+        lapor(`kartu-${st}-${vp.n}-${lang}`, sebab.length === 0, { sebab: [...new Set(sebab)].slice(0, 6) });
+      })(), 120000, st);
+    } catch (e) { lapor(`kartu-${st}-${vp.n}-${lang}`, false, { sebab: ['galat alat: ' + String(e?.message ?? e).slice(0, 140)] }); }
+    await h?.tutup();
+  }
+  console.log(`# kartu: ${tab} tab diukur (${[...bertemu].join(', ')}), ${panel} panel dalam diukur`);
 }
 batal(); await b.close().catch(() => {});
 fs.writeFileSync(path.join(OUT, 'tugas-hasil.json'), JSON.stringify(hasil, null, 1));

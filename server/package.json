@@ -8,7 +8,7 @@
     "build": "tsc -p tsconfig.json",
     "start": "node dist/server/src/index.js",
     "typecheck": "tsc -p tsconfig.json --noEmit",
-    "test": "tsx --test src/scoring.test.ts src/rooms.test.ts src/bankSoal.test.ts src/unity.test.ts src/integration.test.ts src/bank.integration.test.ts src/story/domain.test.ts src/story/room.test.ts src/story/demo.test.ts src/story/seed.test.ts src/story/story.integration.test.ts src/hosting.test.ts",
+    "test": "tsx --test src/scoring.test.ts src/rooms.test.ts src/bankSoal.test.ts src/unity.test.ts src/integration.test.ts src/bank.integration.test.ts src/story/domain.test.ts src/story/room.test.ts src/story/demo.test.ts src/story/seed.test.ts src/story/story.integration.test.ts src/hosting.test.ts src/bahasa.config.test.ts",
     "loadtest": "tsx src/loadtest.ts",
     "staff": "tsx src/story/cli/staff.ts",
     "story:dev-setup": "tsx src/story/cli/devSetup.ts",

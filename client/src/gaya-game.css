@@ -285,6 +285,19 @@ section.hp-aksi {
 .hp-lembar .hp-opsi { padding-left: 6px !important; padding-right: 6px !important; column-gap: 6px !important; }
 /* Baris kode HP: inset 14 px membuat pesan kode salah dua baris (33,8 px > 30); dua baris 15 px = 30 px, baris tetap 110 px (D-263). */
 @media (max-width: 700px) { .lp-halaman .lp-join-galat { line-height: 15px !important; } }
+/* T-035 (pemilik, ponsel 18 Nov 06:2x): kartu HASIL "Tindakanmu": tab menutupi baris pertama karena kotak acuannya .hp-tindakan, bukan
+   kartunya. Tab kini berpusat di garis bingkai atas KARTU; bagian dalam atas = setengah tab (11 px) + 14 px. */
+/* Tab digambar oleh KARTU (::before dari data-tab), karena teks tindakan berada di dalam penggulir .hp-vn-isi yang memotong apa pun
+   di atasnya. Label asli (b) tetap untuk pembaca layar. */
+.hp-vn-dialog[data-tab]::before { content: attr(data-tab); position: absolute; top: 1.5px; left: 12px; z-index: 3; transform: translateY(-50%);
+  padding: 4px 8px; background: #212121; color: #ffffff; font-size: 11px; line-height: 14px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; white-space: nowrap; }
+.hp-vn-dialog[data-tab] .hp-tindakan > b { position: absolute !important; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; padding: 0 !important; transform: none !important; }
+.hp-vn-dialog:has(.hp-tindakan) { padding-top: 26px !important; }
+section.hp-aksi, .akh-pelajaran { padding-top: 26px !important; }
+/* Panel dalam (Kenapa + status) dan kutipan tindakan: isi 14 px dari garisnya. */
+.hp-status-catatan { padding: 14px !important; }
+.hp-vn-dialog .hp-tindakan { padding-left: 14px !important; }
+.hp-vn-dialog[data-tab] .hp-tindakan-sela { display: none; } /* tanda baca sesudah label yang kini menjadi tab */
 
 /* T-030 Fix 1 (Designer D-317 blocker, D-318): ruang cerita (join, lobi, babak, akibat, peringkat), konsol host, pemilih skenario,
    proyektor, staf, dan kuis lama memakai bahasa piksel yang sama: tidak ada sudut membulat kecuali lingkaran ikon / avatar / potret /

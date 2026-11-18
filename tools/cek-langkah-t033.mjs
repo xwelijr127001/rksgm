@@ -80,7 +80,9 @@ for (const [kode, st] of AKT) for (const vp of VP) for (const lang of BAHASA) {
       else if (pendek && KOMPAK.has(kode) && d.pitaTinggi !== 24) s.push(`pita ringkas ${d.pitaTinggi} px (harus 24)`);
       else if (pendek && !KOMPAK.has(kode) && d.pitaTampil) s.push('pita tampil di layar pendek (aktivitas ini pas)');
       if (pendek && KOMPAK.has(kode) && kode !== 'ksim' && !(d.petunjukBaris >= 1)) s.push('layar pendek: petunjuk tidak tampil');
-      if (!d.sasaranCocok[SASARAN1[kode]]) s.push(`sasaran langkah 1 ${d.sasaran}, harus ${SASARAN1[kode]}`);
+      // T-035 (pemilik): penunjuk + cincin HANYA di K08; di aktivitas lain tidak ada sama sekali (K04: menunjuk jawaban).
+      if (kode === 'k08' && !d.sasaranCocok[SASARAN1[kode]]) s.push(`sasaran langkah 1 ${d.sasaran}, harus ${SASARAN1[kode]}`);
+      if (kode !== 'k08' && (d.penunjuk || d.sasaran)) s.push(`penunjuk / cincin di luar K08: ${d.sasaran}`);
       if (kode === 'k08' && d.sasaranRambu !== '0') s.push('K08: penunjuk bukan di rambu 1');
       if (d.sasaran && !d.sasaranFokus && kode !== 'k02') s.push('sasaran tidak bisa difokus');
       if (d.penunjuk && !d.penunjukDiLayar) s.push('penunjuk di luar layar');
@@ -97,6 +99,7 @@ for (const [kode, st] of AKT) for (const vp of VP) for (const lang of BAHASA) {
         if ((await ukur(h.p)).gulir > 0.5) s.push('menggulir sesudah muat ulang');
       }
       // ketukan pada sasaran (sekali, 390x745 id): langkah / petunjuk berubah
+      if (vp.n === '390x745' && lang === 'id' && kode !== 'k08') await h.p.screenshot({ path: path.join(ROOT, 'team/evidence/T-035', `${kode}-tanpa-penunjuk-${vp.n}-${lang}.png`) });
       if (vp.n === '390x745' && lang === 'id' && d.sasaran) {
         const sebelum = await ukur(h.p);
         await h.p.evaluate(() => { const x = document.querySelector('.lgk-sasaran'); x?.setAttribute('data-uji-diketuk', ''); x?.click(); }); await tunggu(900);

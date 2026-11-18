@@ -2515,3 +2515,16 @@ Fullstack · edited under `C:\Users\User\Desktop\rksgm-episode2` · NOT committe
 - Tools: `cek-langkah-t033` asserts K02 tray after the document, the K08 lane hint and the conclusion pointer; `cek-k15-t034` the two touch un-taps.
 - Gate (final build): typecheck 0, `test:client` 771 / 771, `cek-langkah-t033` 54, `cek-k15-t034` 12, `cek-layar --keluarga aktivitas` 60.
 - `client/dist` rebuilt = an exact copy of the checked scratch build (146 files, `diff -r` identical; previous copy kept in my scratch folder). Neither :4000 (dist-rilis) nor QA's :4001 serves `client/dist`; both unchanged after the copy.
+
+## T-035 (2026-11-18): HOTFIX from the owner's phone
+
+Fullstack · edited under `C:\Users\User\Desktop\rksgm-episode2` · NOT committed.
+1. **Result card tab** ("Tindakanmu"): it was positioned against the inner action line and covered the first text line. The tab is now drawn by the card (`.hp-vn-dialog[data-tab]::before`) and centred on the card's top frame line; the card has 26 px top padding (11 px half-tab + 14 px). The same 26 px applies to TUGAS and PELAJARAN. The original label stays for screen readers, and the stray ": " after it is hidden.
+2. **Inner panels:** "Kenapa" plus the status panel (`.hp-status-catatan`) get 14 px padding, and the action quote gets 14 px left padding.
+3. **Pandu:** the pointer and its ring appear in K08 only (`cariSasaran` returns null elsewhere). The strip, hint and coach card are kept. K04 no longer points at the answer.
+4. **Mandarin** (coordinator item 4): `PilihBahasa` always offers id/en/zh. `main.tsx` no longer switches zh back to id when legacy mode is off. The comment in `terjemahan.test.ts` is updated. New `server/src/bahasa.config.test.ts` (added to the server test script) boots with RAKSA_LEGACY=off and asserts `features.legacy=false` plus the three languages; it passes. The hosted story room does not use this picker and still has no zh, per T-028 rev 1.1.
+- **Tools:**
+  - `cek-tugas-t030` now walks every saved state, pressing Lanjut until a result card shows, at 390x745 and 360x640 in id/en/zh. It asserts that no text intersects the tab, that the tab sits on the top line, and that inner-panel text is at least 14 px from the left line.
+  - `cek-langkah-t033` asserts there is no pointer outside K08.
+- **Gate** (final build): typecheck 0, `test:client` 771, `cek-tugas` 141, `cek-langkah` 54, `cek-layar` adegan 76 and aktivitas 60, `cek-palet` 56. `client/dist` is an exact copy of that build.
+- **Screens** are in `team/evidence/T-035/`: result cards plus each activity without a pointer.
