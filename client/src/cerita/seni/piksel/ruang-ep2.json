@@ -532,7 +532,7 @@
     "hp": {
      "x": 250,
      "y": 0,
-     "w": 1316,
+     "w": 1100,
      "h": 900
     },
     "lebar": {
@@ -545,7 +545,7 @@
    "fokus": {
     "x": 252,
     "y": 0,
-    "w": 1308,
+    "w": 1096,
     "h": 472
    },
    "komite": {
@@ -764,59 +764,6 @@
         13
        ]
       }
-     },
-     {
-      "id": "missRaksa",
-      "bingkai": {
-       "x": 1352,
-       "y": 124,
-       "w": 244,
-       "h": 736
-      },
-      "sel": {
-       "kepala": [
-        254,
-        0,
-        61,
-        56
-       ],
-       "badan": [
-        254,
-        56,
-        61,
-        128
-       ],
-       "kedip": [
-        254,
-        185,
-        23,
-        8
-       ],
-       "tangan": [
-        278,
-        185,
-        1,
-        1
-       ]
-      },
-      "letak": {
-       "kepala": [
-        0,
-        0
-       ],
-       "badan": [
-        0,
-        56
-       ],
-       "kedip": [
-        14,
-        32
-       ],
-       "tangan": [
-        0,
-        0
-       ]
-      }
      }
     ],
     "pose": {
@@ -865,8 +812,7 @@
        "ketua": "diam",
        "penjamin": "diam",
        "surveyor": "diam",
-       "klaim": "diam",
-       "missRaksa": "diam"
+       "klaim": "diam"
       },
       "tanda": {},
       "kedip": true
@@ -876,8 +822,7 @@
        "ketua": "angguk",
        "penjamin": "angguk",
        "surveyor": "angguk",
-       "klaim": "angguk",
-       "missRaksa": "diam"
+       "klaim": "angguk"
       },
       "tanda": {
        "ketua": "setuju",
@@ -898,8 +843,7 @@
        "ketua": "diam",
        "penjamin": "angkat",
        "surveyor": "angkat",
-       "klaim": "diam",
-       "missRaksa": "diam"
+       "klaim": "diam"
       },
       "tanda": {
        "penjamin": "catatan",

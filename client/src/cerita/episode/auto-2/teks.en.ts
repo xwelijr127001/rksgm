@@ -66,9 +66,9 @@ export const TEKS_AUTO_2_EN: Record<string, string> = {
   // T-025: Ruang Rapat Komite Klaim. Nama ruang + SATU kalimat per keadaan ruang untuk pembaca layar (anggota komite dan tanda
   // SETUJU / CATATAN adalah gambar; tandanya tetap berbahasa Indonesia di semua bahasa, jadi kalimat ini yang membawa artinya).
   'lokasi.komite': 'Claims Committee meeting room',
-  'lokasi.komite.tunggu': 'Claims Committee meeting room. Four committee members sit waiting behind a long table. Miss Raksa stands at the end of the table as the host.',
-  'lokasi.komite.setuju': 'Claims Committee meeting room. All four members nod, and an approval tag appears above each of them. Miss Raksa stands at the end of the table as the host.',
-  'lokasi.komite.catatan': 'Claims Committee meeting room. Two members raise a hand, and a tag for a note appears above each of the two. Miss Raksa stands at the end of the table as the host.',
+  'lokasi.komite.tunggu': 'Claims Committee meeting room. Four committee members sit waiting behind a long table.',
+  'lokasi.komite.setuju': 'Claims Committee meeting room. All four members nod, and an approval tag appears above each of them.',
+  'lokasi.komite.catatan': 'Claims Committee meeting room. Two members raise a hand, and a tag for a note appears above each of the two.',
   'lokasi.komite.kosong': 'Claims Committee meeting room. The four chairs behind the long table are empty.',
   'latar.bengkel.antrean': 'This week’s queue',
   'latar.bengkel.penuh': 'FULL',

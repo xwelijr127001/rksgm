@@ -666,3 +666,31 @@ html:has(.lp-pemuat) { overflow: hidden; }
   :root:not([data-gerak="penuh"]) .lp-pemuat-bar[data-nyata] i { background: var(--krem-tua); border-bottom-color: #e0e0e0; opacity: 1; }
   :root:not([data-gerak="penuh"]) .lp-pemuat-bar[data-nyata] i[data-isi] { background: var(--kuning); border-bottom-color: var(--kuning-tua); }
 }
+
+
+/* T-051 (Designer, owner iPhone zh 19 Nov): name & character screen (/kenalan, first time and ?ubah=1) fits one phone screen.
+   Miss Raksa = half-body crop of the same pixel sprite (rows 0-107 of 184 at 1 CSS px per art px; background-size 400% auto keeps
+   the pixel scale), bubble beside her in one row; title one step smaller; 4 cards one row with 56 px avatars; the 'design your
+   own' row 44 px; save bar 50 px key. Calculated: 390x700 about 570 px of 700, 360x640 about 578 of 640 (header 56). */
+@media (max-width: 700px) {
+  .player-ui:has(.alur-kenalan) .player-header { min-height: 56px; padding-top: 6px; padding-bottom: 6px; }
+  .alur-kenalan { padding: 0 16px 12px; }
+  .alur-kenalan .alur-kenalan-sapa { justify-content: flex-start; }
+  .alur-kenalan .alur-kenalan-sapa .tokoh { align-items: center; gap: 10px; width: 100%; }
+  .alur-kenalan .alur-tokoh .tokoh-sprite.tokoh-missRaksa { height: 108px !important; background-size: 400% auto; border-bottom: 3px solid #ecd5cb; }
+  .alur-kenalan .alur-kenalan-sapa .tokoh-balon { flex: 1 1 auto; min-width: 0; max-width: none; margin-bottom: 0 !important; padding: 8px 12px; font-size: 14px; line-height: 1.35; }
+  .alur-kenalan .alur-kenalan-sapa .tokoh-samping .tokoh-balon::before { bottom: auto; top: 26px; }
+  .alur-kenalan-judul { margin: 4px 0 8px; font-size: 22px; line-height: 28px; }
+  .alur-kenalan .alur-kenalan-form { gap: 10px; }
+  .alur-kenalan .character-picker.stack { gap: 8px; }
+  .alur-kenalan .label-kolom { margin-bottom: 6px; }
+  .alur-kenalan .avatar-presets { margin: 0; }
+  .alur-kenalan .avatar-presets legend { margin-bottom: 6px; }
+  .alur-kenalan .avatar-options { gap: 8px; }
+  .alur-kenalan .avatar-option { padding: 6px 2px 4px; gap: 4px; min-height: 44px; }
+  .alur-kenalan .avatar-option.selected { padding: 5px 1px 3px; }
+  .alur-kenalan .avatar-option svg { width: 56px; height: 56px; }
+  .alur-kenalan .simple-details > summary { padding: 12px 0; min-height: 44px; }
+  .alur-kenalan .alur-aksi-lengket { margin: 0 -16px; padding: 8px 16px calc(8px + env(safe-area-inset-bottom)); }
+  .alur-kenalan .alur-aksi-baris .primary-action { min-height: 50px; padding-top: 12px; padding-bottom: 12px; }
+}

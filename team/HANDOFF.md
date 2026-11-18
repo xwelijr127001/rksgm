@@ -2940,3 +2940,38 @@ Built by the Designer and uncommitted. Owner rule: NOTHING was opened in a brows
 **Risks:**
 - Tests that count 4 committee members (`data-komite-anggota`), that pin the office room's layer list, or that pin the samping.png hash will need updating. None were run (owner rule).
 - The camera scale numbers for the committee room are calculated from the README table, not measured.
+
+## T-051 (2026-11-19): name & character screen on one phone screen; committee room without Miss Raksa again (Designer)
+
+Built by the Designer; uncommitted. Owner rule: nothing was opened in a browser. Gate: client typecheck 0 errors; client/dist rebuilt.
+
+**1. /kenalan (the first-time screen and ?ubah=1, same component Kenalan.tsx + CharacterPicker): CSS only, `client/src/player.css` block "T-051", phones up to 700 px wide, scoped to `.alur-kenalan` (the /join picker is untouched).**
+
+Why it scrolled: the pixel sprite is never drawn under 1 CSS px per art pixel, so `tinggi={104}` was ignored and Miss Raksa was always 184 px tall.
+
+- **Miss Raksa:** a half-body crop of the same sprite (rows 0–107, 108 px tall, with a 3 px #ECD5CB ground line). The pixel scale is kept (`background-size: 400% auto`) and the wave animation still runs.
+- **Bubble:** beside her in one row (14 px text, the arrow at head height).
+- **Title:** 22/28 px (was 27).
+- **Header:** 56 px (was 76) on this page only.
+- **Avatar cards:** still one row of 4, with 56 px avatars (was 72); every card stays at least 44 px.
+- **"Design your own":** a 44 px row, still collapsible, above the save bar.
+- **Save bar:** still sticky; key 50 px (was 58).
+
+Heights by calculation (header + bust row + title + name 74 + cards 115 + design row 45 + gaps + save bar 67 + note + padding):
+
+| Screen | Height | Spare |
+| --- | --- | --- |
+| 390×700 | ≈570 px | ≈130 px |
+| 360×640 | ≈578 px | ≈62 px |
+
+The 360×640 figure assumes the longest bubble (en first-time text) wraps to 3 lines.
+
+The first-time "story" variant (name + "change your look" fold) is shorter still. When "design your own" is opened the page may scroll, as the brief allows.
+
+**2. Committee room: Miss Raksa removed (owner changed his mind).**
+- **Restored, byte-identical to the T-025 state before T-050:** `character/komite-ep2-pixel-v1/komite.png`, `komite.json` and `ruang-komite.json`, the client `seni/piksel/komite.png` and the `komite-ep2` entry in `ruang-ep2.json`. That means no host sprite and the old camera focus (art x 63–337, faces back at 1.33 CSS px on 390–402 px phones).
+- **Text:** the three room sentences in `teks.{id,en,zh}.ts` match the pre-T-050 commit 792ef9b again.
+- **Kept:**
+  - the `tamu` support in `tools/piksel/ruang-komite-ep2.mjs` (unused, harmless);
+  - all T-050 desk work (monitor, keyboard, Sogok sign, headset) and Pak Rudi's yellow polo.
+- **Records:** `alat/miss-raksa-t050.mjs` is marked "reverted, do not run", and the komite README notes the revert.

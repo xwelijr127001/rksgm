@@ -65,9 +65,9 @@ export const TEKS_AUTO_2_ZH: Record<string, string> = {
   // T-025: Ruang Rapat Komite Klaim. Nama ruang + SATU kalimat per keadaan ruang untuk pembaca layar (anggota komite dan tanda
   // SETUJU / CATATAN adalah gambar; tandanya tetap berbahasa Indonesia di semua bahasa, jadi kalimat ini yang membawa artinya).
   'lokasi.komite': '理赔委员会会议室',
-  'lokasi.komite.tunggu': '理赔委员会会议室。四位委员坐在长桌后面等候。Miss Raksa 作为主持人站在长桌一端。',
-  'lokasi.komite.setuju': '理赔委员会会议室。四位委员都点了头，每人头顶出现“同意”标记。Miss Raksa 作为主持人站在长桌一端。',
-  'lokasi.komite.catatan': '理赔委员会会议室。两位委员举起了手，两人头顶出现“备注”标记。Miss Raksa 作为主持人站在长桌一端。',
+  'lokasi.komite.tunggu': '理赔委员会会议室。四位委员坐在长桌后面等候。',
+  'lokasi.komite.setuju': '理赔委员会会议室。四位委员都点了头，每人头顶出现“同意”标记。',
+  'lokasi.komite.catatan': '理赔委员会会议室。两位委员举起了手，两人头顶出现“备注”标记。',
   'lokasi.komite.kosong': '理赔委员会会议室。长桌后面的四把椅子都空着。',
   'latar.bengkel.antrean': '本周排期',
   'latar.bengkel.penuh': '已满',
