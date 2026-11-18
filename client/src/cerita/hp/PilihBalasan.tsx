@@ -16,6 +16,7 @@ import { URL_IKON_PIKSEL } from '../seni/piksel';
 import type { DokumenCerita, Episode, KunciTeks, NodePilihan, Pilihan } from '../tipe';
 import { KartuDokumen } from '../ui/KartuDokumen';
 import { TombolKirim } from './bagianHp';
+import { PotretSaya } from './lookPemain';
 import { LembarObrolan } from './ekor';
 
 /** Catatan yang sudah pernah dibuka (titik merah "belum dibaca" hilang), per dokumen, selama halaman hidup. */
@@ -123,6 +124,7 @@ export function PilihBalasan({ ep, node, pilihan, tx, gaya, petunjuk, onKirim, a
               label={terpilih ? t('ceritaHp.kirimBalasanN', { n: indeks + 1 }) : t('ceritaHp.pilihSatuBalasan')}
               siap={dipilih !== null}
               onKirim={() => { if (dipilih) onKirim(dipilih); }}
+              potret={<PotretSaya ukuran={32} />}
             />
           </>
         )}

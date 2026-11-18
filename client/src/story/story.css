@@ -490,3 +490,7 @@ button.sr-penanda::before { content: ''; position: absolute; inset: -9px; border
 @media (prefers-reduced-motion: reduce) {
   .sr-timer-bar i, .sr-opsi-kartu, .sr-waktu-bar i { transition: none; }
 }
+
+/* T-052: pixel portrait of the participant's character on the ranking (32 px = 2 px per art cell, also on the projector so a
+   10-row board does not grow). */
+.sr-peringkat-avatar { flex: 0 0 auto; display: block; width: 32px; height: 32px; }

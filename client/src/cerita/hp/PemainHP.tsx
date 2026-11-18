@@ -46,6 +46,7 @@ import { MEJA_KASUS, mejaAktif } from './meja/bendera';
 import { akibatMeja } from './meja/logika';
 import { KUERI_CANGKANG_LAYAR, useKueri } from './cangkang';
 import { Obrolan } from './Obrolan';
+import { LookPemain } from './lookPemain';
 import { PilihBalasan } from './PilihBalasan';
 import { KontrolSuara, PetunjukSuara, useAudioCerita, type TemaCerita } from './AudioCerita';
 import './hp.css';
@@ -411,8 +412,9 @@ function lupakanBalasan(): void {
 export function PemainHP(props: Parameters<typeof PemainHPInti>[0]) {
   const { tampil, tahan, lapis } = useTransisiTelepon(props.ep, props.state);
   const beku = useMemo<KendaliCerita>(() => ({ ...props.kendali, kirim: () => false, baca: () => tampil }), [props.kendali, tampil]);
-  return <>
+  // T-052: karakter pilihan pemain untuk gelembung pesannya, lembar balasan, dan kartu petugas di layar akhir.
+  return <LookPemain.Provider value={props.profil.look ?? null}>
     <PemainHPInti {...props} state={tampil} kendali={tahan ? beku : props.kendali} />
     {lapis}
-  </>;
+  </LookPemain.Provider>;
 }

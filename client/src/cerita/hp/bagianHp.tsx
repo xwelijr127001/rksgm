@@ -96,7 +96,7 @@ export function Kutipan({ ep, baris, tx, namaPemain }: { ep: Episode; baris: Bar
  * T-018 Tahap 2 (D-133): di cangkang aktivitas HP (SlotKirimArena) tombolnya pindah ke bilah bawah yang disematkan; alasan "belum"
  * menjadi label tombol yang nonaktif, dan catatan tetap di tempat asalnya (ujung isi yang menggulir).
  */
-export function TombolKirim({ label, siap, onKirim, catatan, alasanBelum, alasanRingkas }: { label: string; siap: boolean; onKirim: () => void; catatan?: ReactNode; alasanBelum?: string | null; /** (D-180) versi pendek alasan untuk label tombol di bilah bawah cangkang HP. */ alasanRingkas?: string | null }) {
+export function TombolKirim({ label, siap, onKirim, catatan, alasanBelum, alasanRingkas, potret }: { label: string; siap: boolean; onKirim: () => void; catatan?: ReactNode; alasanBelum?: string | null; /** (D-180) versi pendek alasan untuk label tombol di bilah bawah cangkang HP. */ alasanRingkas?: string | null; /** (T-052) potret pemain di kiri tombol (lembar balasan); tidak dipakai di bilah tersemat arena. */ potret?: ReactNode }) {
   const sudah = useRef(false);
   const [mengirim, setMengirim] = useState(false);
   const slot = useContext(SlotKirimArena);
@@ -120,7 +120,7 @@ export function TombolKirim({ label, siap, onKirim, catatan, alasanBelum, alasan
   if (slot) return <>{createPortal(tombol, slot)}{catatan ? <p className="hp-kirim-catatan">{catatan}</p> : null}</>;
   return (
     <div className="hp-kirim">
-      {tombol}
+      {potret ? <div className="hp-kirim-baris">{potret}{tombol}</div> : tombol}
       {alasanBelum ? <p id="hp-kirim-belum" className="hp-kirim-belum">{alasanBelum}</p> : null}
       {catatan ? <p className="hp-kirim-catatan">{catatan}</p> : null}
     </div>

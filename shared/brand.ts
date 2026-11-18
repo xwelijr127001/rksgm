@@ -141,7 +141,11 @@ export const ACCESSORIES: { id: PlayerAccessory; label: string }[] = [
 
 export type PlayerAccessory = 'none' | 'helm' | 'jaket' | 'headset' | 'topi';
 
-/** Warna seragam petugas (kosmetik saja, tidak mempengaruhi skor). */
-export const UNIFORM_COLORS = ['#176B45', '#2F6FB0', '#C4452F', '#5B4636', '#8A6A1F', '#3F3D8A'];
+/**
+ * Warna seragam petugas (kosmetik saja, tidak mempengaruhi skor). T-052: keluarga warna Asuransi Raksa (PALET.md bagian 12
+ * "Karakter pemain"): empat seragam resmi Raksa (foto raksaonline.com 'Nasabah Raksa?': limau, kuning mentega, mauve, navy),
+ * lalu putih, krem, arang, jingga merek. Server menjepit indeks dengan panjang daftar ini.
+ */
+export const UNIFORM_COLORS = ['#D0C282', '#FBD7A3', '#CA94AE', '#1C1D30', '#FFFFFF', '#F9EEEA', '#33363F', '#FF9000'];
 export const SKIN_TONES = ['#F2C9A0', '#E0AC7E', '#C68A5E', '#9C6240', '#7A4A2E'];
 export const HAIR_COLORS = ['#2B2118', '#4A3527', '#6E4A2E', '#151515', '#7E6B58'];

@@ -40,16 +40,17 @@ import { GambarToken, IsiLembarTitik, PetaTitik, RingkasanKeputusan, RingkasanSa
 import { PemilihBagian } from './PemilihBagian';
 import { PerjalananKu, TandaNada } from './PerjalananKu';
 import { kartuAkhir } from './tinjauan';
+import { KartuPetugas } from './KartuPetugas';
 import { infoTitik } from './titik';
 
 /** Isi lembar bawah layar akhir satu layar: rincian satu keputusan, kalimat sebab utuh, atau teks Pelajaran utuh. */
 type IsiLembar = { jenis: 'titik'; indeks: number } | { jenis: 'sebab' } | { jenis: 'pelajaran'; denganSebab: boolean };
 
-export function LayarAkhir({ ep, state, bahasa, tx, ditemukan, onUlangBab, onUlangEpisode, slotAksi = null, satuLayar = false }: {
+export function LayarAkhir({ ep, state, bahasa, namaPemain, tx, ditemukan, onUlangBab, onUlangEpisode, slotAksi = null, satuLayar = false }: {
   ep: Episode;
   state: StateCerita;
   bahasa: Bahasa;
-  /** Tidak dipakai kartu v2 (epilog tidak diulang); tetap di antarmuka karena CeritaMain mengirimnya. */
+  /** Nama pemain: kartu petugas di kepala (T-052; epilog tidak mengulangnya). */
   namaPemain: string;
   tx: (k: KunciTeks) => string;
   /** Akhir yang pernah dicapai di perangkat ini (simpan.ts). */
@@ -205,6 +206,7 @@ export function LayarAkhir({ ep, state, bahasa, tx, ditemukan, onUlangBab, onUla
               <span>{namaAkhir}</span>
             </p>
           </div>
+          <KartuPetugas nama={namaPemain} />
         </div>
 
         <div className="akh-hasil">
@@ -302,6 +304,7 @@ export function LayarAkhir({ ep, state, bahasa, tx, ditemukan, onUlangBab, onUla
             <span>{t(`cerita.nada.${k.nada}`)}{selaPembicara()}<b>{tx(info.judul)}</b></span>
           </p>
         </div>
+        <KartuPetugas nama={namaPemain} />
       </div>
 
       <h2 id="akh-judul" className="akh-judul" tabIndex={-1} data-cer-fokus="" data-ukur="akhir-judul">{tx(k.judul)}</h2>

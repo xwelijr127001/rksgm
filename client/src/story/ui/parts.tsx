@@ -9,6 +9,7 @@ import { STORY_SCORE_POLICY } from '@shared/story/scorePolicy';
 import { PotretNasabah } from '../../cerita/seni';
 import { PotretMissRaksa } from '../../cerita/seni/tokoh/PotretMissRaksa';
 import { t } from '../../i18n';
+import { AvatarPiksel } from '../../art/AvatarPiksel';
 import { causalText, delayedText } from '../round/notes';
 import { pixelExpression } from '../stage/StoryStage';
 import { signedNumber } from '../view';
@@ -181,6 +182,8 @@ export function RankList({ rows, highlightId, limit = 10 }: { rows: StoryRankRow
   const row = (r: StoryRankRow) => (
     <li key={r.participantId} className={`sr-peringkat-baris${r.participantId === highlightId ? ' saya' : ''}${r.rank <= 3 ? ` r${r.rank}` : ''}`}>
       <span className="sr-peringkat-no">{r.rank}</span>
+      {/* T-052: the participant's character (pixel portrait) next to the name when their device sent one. */}
+      {r.look ? <AvatarPiksel look={r.look} ukuran={32} className="sr-peringkat-avatar" /> : null}
       <span className="sr-peringkat-nama">
         {r.name}
         {r.participantId === highlightId ? <span className="sr-kecil"> {t('ruang.kamu')}</span> : null}

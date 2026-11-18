@@ -16,6 +16,7 @@ import { serverUrl } from '../../story/base';
 import { useLegacyEnabled } from '../../story/appConfig';
 import { storyErrorText } from '../../story/errors';
 import { joinRoom, normalizeCode, savedSession } from '../../story/participant';
+import { savedProfil } from '../../state/profil';
 import '../../story/story.css';
 
 type InfoState = { status: 'idle' } | { status: 'loading' } | { status: 'ok'; info: StoryRoomInfo } | { status: 'error'; message: string };
@@ -148,7 +149,8 @@ function NameStep({ info, onChangeCode }: { info: StoryRoomInfo; onChangeCode: (
       return;
     }
     setBusy(true);
-    const res = await joinRoom(info.code, name);
+    // T-052: the character chosen on this device (if any) shows next to the name on the room's ranking.
+    const res = await joinRoom(info.code, name, savedProfil()?.look);
     setBusy(false);
     if (res.ok) nav(`/room/${res.data.state.code}`, { replace: true });
     else setServerError(storyErrorText(res));

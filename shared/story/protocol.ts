@@ -9,6 +9,7 @@
  * render time (`personalize`): the participant's own name on their device, a neutral word on shared screens. Servers
  * never substitute, so persisted summaries stay neutral.
  */
+import type { PlayerLook } from '../types';
 import type { ChoiceForm, Classification, EndingKind, EvidenceKind, EvidenceMark, MoodBand, RoundLayout, Speaker } from './content';
 import type { DecisionOutcome } from './engine';
 
@@ -114,6 +115,8 @@ export interface StoryParticipantPublic {
   answered: boolean;
   /** Reported the current scene's assets ready. */
   ready: boolean;
+  /** (T-052) The character the participant picked on their device (sanitised server-side); absent = none sent. */
+  look?: PlayerLook;
 }
 
 export interface StoryRankRow {
@@ -122,6 +125,8 @@ export interface StoryRankRow {
   rank: number;
   tied: boolean;
   totalScore: number;
+  /** (T-052) The participant's character, shown next to the name; absent = none sent. */
+  look?: PlayerLook;
 }
 
 export interface StoryScenarioLabel {

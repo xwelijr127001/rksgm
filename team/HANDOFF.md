@@ -2975,3 +2975,64 @@ The first-time "story" variant (name + "change your look" fold) is shorter still
   - the `tamu` support in `tools/piksel/ruang-komite-ep2.mjs` (unused, harmless);
   - all T-050 desk work (monitor, keyboard, Sogok sign, headset) and Pak Rudi's yellow polo.
 - **Records:** `alat/miss-raksa-t050.mjs` is marked "reverted, do not run", and the komite README notes the revert.
+
+## T-052 (2026-11-19): the player's character has a job in the truck story + Raksa uniform palette (Designer)
+
+Built by the Designer; uncommitted. Owner rule: nothing was opened in a browser. Gate: typecheck 0 errors (server + client); client/dist rebuilt. server/dist was NOT rebuilt, so the Lead decides when; until then the old server ignores the new optional `look` field.
+
+**Palette** (`character/palet-raksa-v1/PALET.md` section 12 has the full table).
+- **The 4 official uniforms** are sampled from the owner's raksaonline.com photo (`character/kantor-raksa-ref/seragam-raksa-empat-warna.jpg`): lime #D0C282, butter yellow #FBD7A3, mauve #CA94AE, navy #1C1D30.
+- **The other 4 clothing colours:**
+  - white #FFFFFF;
+  - cream #F9EEEA (site CSS);
+  - charcoal #33363F;
+  - brand orange #FF9000 (site CSS, 61 uses).
+- **Accents:**
+  - surveyor yellow #F6D25C (helmet, cap brim, reflective stripe, badge);
+  - logo owl brown #73502F and logo red #C02430 (navy neckline trim);
+  - cream portrait backgrounds #FFF1E2.
+- **Not sampleable:** raksaonline.com loads its Miss Raksa image by script, so there was no file to sample from the page HTML.
+- **Where it lives:** `shared/brand.ts` `UNIFORM_COLORS` now has 8 entries. The server's `sanitizeLook` clamps to the list length, so saved looks stay valid.
+- **The 4 presets**, one per uniform:
+  - Sigap: lime field jacket with a yellow stripe. Still color 0 + jaket, which equals LOOK_BAWAAN.
+  - Teliti: butter yellow + headset.
+  - Tangguh: navy + helmet.
+  - Ceria: mauve + charcoal cap.
+- **Labels:** the "design your own" colour names are new in id/en/zh (`pemain.seragam*`).
+- **Round SVG avatar (`art/Avatar.tsx`):**
+  - cream background instead of green;
+  - the jacket takes the uniform colour;
+  - dark front buttons;
+  - accents in Raksa yellow / charcoal.
+
+**Where the character now appears** (new pixel portrait `client/src/art/AvatarPiksel.tsx`):
+- **What it is:** 16×16 art cells from look (5 skins, 5 hairs, 4 hair styles, 8 colours, 5 accessories), drawn as SVG rects at 32 px (2 px per cell).
+- **Your messages in the chat:** a 32 px portrait beside each message the player sent (`Obrolan.tsx`, `.hp-keluar`). The row does not get taller.
+- **Reply sheet:** a 32 px portrait to the left of the send key (`TombolKirim` new optional `potret`, used by `PilihBalasan.tsx`). The sheet height is unchanged.
+- **End card staff ID card** (`client/src/cerita/ui/KartuPetugas.tsx`):
+  - Content: an 84×56 lanyard card with an orange band, a pixel Raksa owl and "RAKSA", the portrait, the player's name and "Petugas Klaim" (id/en/zh).
+  - Position: in the head row next to Pak Hendra's 56 px portrait, so the T-024 one-screen card does not get taller at 360×640 or 390×700. The head texts were already single-line with ellipsis; they give up about 94 px of width.
+  - Accessibility: aria-label "Kartu petugas: {nama}, Petugas Klaim Raksa" (en/zh too).
+  - It is also on the scrolling end card.
+- **Hosted story rooms (T-028):**
+  - The protocol had no look. Now `participant:join` may carry `look`, which the server passes through `sanitizeLook`; nothing sent means no character.
+  - The look is stored on the participant (in memory, not persisted, so it is gone after a server restart) and sent in `StoryParticipantPublic.look` and `StoryRankRow.look`.
+  - `StoryJoin` sends the device's `savedProfil().look`. `RankList` shows a 32 px pixel portrait beside the name (participant round view, final summary, host console, projector).
+- **Plumbing:** the look reaches the story player via a small context (`cerita/hp/lookPemain.tsx`, provided in `PemainHP`).
+
+**Files:**
+- Shared and server:
+  - `shared/brand.ts`, `shared/story/protocol.ts`
+  - `server/src/story/socket.ts`, `server/src/story/runtime/room.ts`
+- Client:
+  - `client/src/art/Avatar.tsx`, `client/src/art/AvatarPiksel.tsx` (new)
+  - `client/src/components/CharacterPicker.tsx`
+  - `client/src/i18n/kamus/{pemain,ceritaAkhir}.ts`
+  - `client/src/cerita/hp/{lookPemain.tsx (new), PemainHP.tsx, Obrolan.tsx, PilihBalasan.tsx, bagianHp.tsx, hp.css}`
+  - `client/src/cerita/ui/{KartuPetugas.tsx (new), LayarAkhir.tsx, akhir.css}`
+  - `client/src/story/{participant.ts, ui/parts.tsx, story.css}`, `client/src/pages/story/StoryJoin.tsx`
+- Art and docs: `character/palet-raksa-v1/PALET.md` (section 12) and `karakter-pemain-t052/` (preview script + PNG).
+
+**Risks:**
+- Tests that pin the old colour list or labels, the `.hp-keluar` markup (a new inner column), or the head row of the end card will need updating. None were run.
+- The legacy Phaser art (`game/art/characters.ts`) also reads `UNIFORM_COLORS`, so it gets the new colours.

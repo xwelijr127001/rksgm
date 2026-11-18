@@ -25,6 +25,7 @@ import { PotretPikselHp } from '../ui/latar/piksel/PotretPikselHp';
 import { tokohPotret } from '../ui/latar/piksel/potret';
 import { CatatanStatus, GambarSeni, PotretHp, judulStatus } from './bagianHp';
 import { idCutIn, ringkasCatatan, utasObrolan, type PesanObrolan } from './alur';
+import { PotretSaya } from './lookPemain';
 
 /** Lama indikator "sedang mengetik" sebelum pesan masuk tampil (ms). Bisa dilewati; gerak dikurangi = tanpa indikator. */
 export const LAMA_MENGETIK = 750;
@@ -313,8 +314,12 @@ function ItemPesan({ ep, p, tx, nama, baru, gaya, cutIn = false, kini = false }:
   if (p.jenis === 'keluar') {
     return (
       <li className="hp-pesan hp-keluar" {...umum}>
-        <p className="hp-gelembung"><span className="sr-only">{t('ceritaHp.kamu')}{selaPembicara()}</span>{p.teks ? tx(p.teks) : p.isi}</p>
-        <span className="hp-terkirim">{t('ceritaHp.terkirim')}</span>
+        {/* T-052: potret piksel karakter pemain di samping pesannya sendiri. */}
+        <div className="hp-keluar-kolom">
+          <p className="hp-gelembung"><span className="sr-only">{t('ceritaHp.kamu')}{selaPembicara()}</span>{p.teks ? tx(p.teks) : p.isi}</p>
+          <span className="hp-terkirim">{t('ceritaHp.terkirim')}</span>
+        </div>
+        <PotretSaya ukuran={32} />
       </li>
     );
   }

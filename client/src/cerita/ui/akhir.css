@@ -428,3 +428,19 @@
   justify-self: start; min-height: 44px; margin: 0; padding: 0; border: 0; background: none; color: #9a4f00; font: inherit; font-size: 15px; font-weight: 700;
   text-decoration: underline; text-underline-offset: 4px; cursor: pointer;
 }
+
+
+/* T-052: kartu petugas piksel di kepala layar akhir (KartuPetugas.tsx). 84 x 56 = setinggi potret nasabah satu layar, jadi tinggi
+   kartu akhir tidak berubah; teks kepala (sudah satu baris + elipsis) mengalah lebarnya. Bingkai jingga 2 px, pita jingga dengan
+   burung hantu Raksa, isi krem. */
+.akh-kartu-petugas {
+  flex: 0 0 auto; display: flex; flex-direction: column; width: 84px; height: 56px; box-sizing: border-box; overflow: hidden;
+  border: 2px solid #FF9000; border-radius: 0 !important; background: #FFF1E2; box-shadow: 0 2px 0 #e07e00;
+}
+.akh-kp-pita { display: flex; align-items: center; gap: 3px; height: 12px; padding: 0 4px; background: #FF9000; color: #212121; font-size: 9px; line-height: 12px; font-weight: 800; letter-spacing: .08em; }
+.akh-kp-pita svg { flex: 0 0 auto; }
+.akh-kp-isi { display: flex; align-items: center; gap: 4px; padding: 3px 3px 0; min-width: 0; }
+.akh-kp-isi .avatar-piksel { flex: 0 0 auto; }
+.akh-kp-teks { display: flex; flex-direction: column; min-width: 0; }
+.akh-kp-teks b { font-size: 10px; line-height: 12px; font-weight: 800; color: #212121; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.akh-kp-teks small { font-size: 8px; line-height: 10px; color: #5f5f5f; overflow-wrap: anywhere; }

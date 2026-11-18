@@ -17,6 +17,7 @@ import { ScenarioError } from './content/scenarios';
 import { StoryRoomManager } from './runtime/manager';
 import type { StoryRoom, StoryRoomEvents } from './runtime/room';
 import { codeExists } from './runtime/sqliteStore';
+import { sanitizeLook } from '../rooms';
 
 interface StorySocketData {
   /** Staff bearer token from the handshake; re-validated on every host event (revocation takes effect at once). */
@@ -170,7 +171,7 @@ export function createStoryService(io: Server): StoryService {
 
     // ---------------------------------------------------------------- participants
 
-    on<{ code?: unknown; name?: unknown; acceptNotice?: unknown }, StoryJoinResult>('participant:join', (p, reply) => {
+    on<{ code?: unknown; name?: unknown; acceptNotice?: unknown; look?: unknown }, StoryJoinResult>('participant:join', (p, reply) => {
       if (!lookupAllowed(ip)) return reply(fail('rate_limited', RATE_LIMITED));
       if (p.acceptNotice !== true) {
         return reply(fail('invalid', 'Setujui dulu pemberitahuan bahwa namamu tampil di papan peringkat dan pengumuman pemenang.'));
@@ -178,7 +179,9 @@ export function createStoryService(io: Server): StoryService {
       const room = manager.get(p.code);
       if (!room) return reply(missingRoom(p.code, ip));
       const credential = randomBytes(24).toString('base64url');
-      const added = room.addParticipant(randomUUID().slice(0, 12), p.name, credentialHash(credential));
+      // T-052: optional character; anything sent is clamped to the known look ids (sanitizeLook), nothing sent = no character.
+      const look = p.look !== undefined && p.look !== null && typeof p.look === 'object' ? sanitizeLook(p.look) : undefined;
+      const added = room.addParticipant(randomUUID().slice(0, 12), p.name, credentialHash(credential), look);
       if (!added.ok) return reply(added);
       bindParticipant(room, added.data.id);
       reply({ ok: true, data: { participantId: added.data.id, credential, state: room.publicState(), me: room.privateState(added.data.id)! } });

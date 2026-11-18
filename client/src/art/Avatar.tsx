@@ -12,7 +12,9 @@ type Mood = 'senang' | 'netral' | 'fokus';
 
 const TINTA = 'var(--tinta)';
 // T-029: warna aksesori avatar dipaku (D-276: tokoh mempertahankan warnanya; token --kuning / --hijau kini jingga merek).
-const KUNING = '#f6c445';
+// T-052: kuning polo surveyor Raksa (T-050, #F6D25C) untuk helm, lis, lencana; arang #33363F untuk jaket & topi.
+const KUNING = '#F6D25C';
+const ARANG = '#33363F';
 
 /** Ambil warna dengan indeks apa pun (negatif / pecahan / NaN tetap aman). */
 function pilih(daftar: readonly string[], i: number): string {
@@ -123,16 +125,17 @@ function wajah(mood: Mood): ReactElement {
   );
 }
 
-/** Jaket lapangan digambar di atas badan (sebelum kerah & lencana). */
-function jaket(torso: string, clipTorso: string): ReactElement {
+/** Jaket lapangan digambar di atas badan (sebelum kerah & lencana). T-052: warna seragam yang dipilih, sedikit lebih gelap, lis kuning. */
+function jaket(torso: string, clipTorso: string, warna: string): ReactElement {
   return (
     <>
-      <path d={torso} fill="var(--tinta-lembut)" />
+      <path d={torso} fill={warna} />
+      <path d={torso} fill="rgba(0,0,0,0.16)" />
       <g clipPath={`url(#${clipTorso})`}>
-        <rect x="4" y="46" width="56" height="3.4" fill="rgba(255,249,233,0.92)" />
-        <rect x="4" y="54" width="56" height="3.4" fill="rgba(255,249,233,0.92)" />
+        <rect x="4" y="46" width="56" height="3.4" fill={KUNING} />
+        <rect x="4" y="54" width="56" height="3.4" fill={KUNING} />
       </g>
-      <path d="M32 41.6V64" fill="none" stroke="rgba(23,54,42,0.35)" strokeWidth={1.8} />
+      <path d="M32 41.6V64" fill="none" stroke="rgba(0,0,0,0.35)" strokeWidth={1.8} />
     </>
   );
 }
@@ -147,7 +150,7 @@ function aksesoriKepala(jenis: PlayerLook['accessory']): ReactElement | null {
       <>
         <path d="M20 19a12 12 0 0 1 24 0Z" fill={KUNING} />
         <rect x="16.6" y="18" width="30.8" height="4.2" rx="2.1" fill={KUNING} />
-        <path d="M32 7.2v10.8" fill="none" stroke="rgba(23,54,42,0.25)" strokeWidth={2} />
+        <path d="M32 7.2v10.8" fill="none" stroke="rgba(0,0,0,0.2)" strokeWidth={2} />
       </>
     );
   }
@@ -171,7 +174,7 @@ function aksesoriKepala(jenis: PlayerLook['accessory']): ReactElement | null {
   if (jenis === 'topi') {
     return (
       <>
-        <path d="M21 19.2a11 11 0 0 1 22 0Z" fill="#215c40" />
+        <path d="M21 19.2a11 11 0 0 1 22 0Z" fill={ARANG} />
         <path d="M20.2 19.2h23.6a1.9 1.9 0 0 1 0 3.8H20.2a1.9 1.9 0 0 1 0-3.8Z" fill={KUNING} />
         <circle cx="32" cy="14.4" r="2.1" fill={KUNING} />
       </>
@@ -228,17 +231,20 @@ export function Avatar({
         </clipPath>
       </defs>
 
-      <circle cx="32" cy="32" r="31" fill="#eef5e9" />
+      <circle cx="32" cy="32" r="31" fill="#FFF1E2" />
 
       <g clipPath={`url(#${clipBulat})`}>
         {/* leher lalu badan */}
         <rect x="28.4" y="32" width="7.2" height="11" rx="3.4" fill={kulit} />
-        <path d={torso} fill={seragam} />
-        {look.accessory === 'jaket' ? jaket(torso, clipTorso) : null}
+        <path d={torso} fill={seragam} stroke="rgba(0,0,0,0.18)" strokeWidth={1} />
+        {look.accessory === 'jaket' ? jaket(torso, clipTorso, seragam) : (
+          /* T-052: kancing gelap di depan seperti seragam resmi Raksa */
+          <g fill="rgba(0,0,0,0.55)"><circle cx="32" cy="51" r="1" /><circle cx="32" cy="56" r="1" /><circle cx="32" cy="61" r="1" /></g>
+        )}
         {/* kerah */}
         <path d="M26.6 42.4 32 47.4l5.4-5a13 13 0 0 0-10.8 0Z" fill="rgba(255,255,255,0.9)" />
         {/* lencana identitas Raksa */}
-        <rect x="22.2" y="48.6" width="9.4" height="7.2" rx="2.2" fill={KUNING} />
+        <rect x="22.2" y="48.6" width="9.4" height="7.2" rx="2.2" fill={KUNING} stroke="rgba(0,0,0,0.45)" strokeWidth={0.8} />
         <path
           d="M24.4 52.2l1.9 1.9 3.1-3.4"
           fill="none"
@@ -256,7 +262,7 @@ export function Avatar({
         {aksesoriKepala(look.accessory)}
       </g>
 
-      <circle cx="32" cy="32" r="30" fill="none" stroke="rgba(23,54,42,0.16)" strokeWidth={2} />
+      <circle cx="32" cy="32" r="30" fill="none" stroke="rgba(33,33,33,0.16)" strokeWidth={2} />
     </svg>
   );
 }

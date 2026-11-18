@@ -4,6 +4,7 @@
  * The store only mirrors server snapshots; it never decides timing, correctness or score.
  */
 import { useSyncExternalStore } from 'react';
+import type { PlayerLook } from '@shared/types';
 import type { StoryAck, StoryErrorCode, StoryFinalSummary, StoryJoinResult, StoryPrivateState, StoryPublicState } from '@shared/story/protocol';
 import { serverUrl } from './base';
 import { ServerClock } from './clock';
@@ -107,9 +108,10 @@ function adopt(session: ParticipantSession, room: StoryPublicState, me: StoryPri
   set({ session, room, me, removed: false, lost: null });
 }
 
-export async function joinRoom(code: string, name: string): Promise<StoryAck<StoryJoinResult>> {
+export async function joinRoom(code: string, name: string, look?: PlayerLook): Promise<StoryAck<StoryJoinResult>> {
   wire();
-  const res = await storyRpc<StoryJoinResult>(storySocket(), 'participant:join', { code, name, acceptNotice: true });
+  // T-052: the device's character (profil.look) travels with the join; the server sanitises it.
+  const res = await storyRpc<StoryJoinResult>(storySocket(), 'participant:join', { code, name, acceptNotice: true, ...(look ? { look } : {}) });
   if (res.ok) {
     const session: ParticipantSession = { code: res.data.state.code, participantId: res.data.participantId, credential: res.data.credential, name: res.data.me.name };
     saveSession(session);

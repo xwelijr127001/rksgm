@@ -17,6 +17,7 @@
  * Transport (sockets) and persistence (SQLite) are injected ports so the rules are testable with a manual clock.
  */
 import { randomBytes } from 'node:crypto';
+import type { PlayerLook } from '../../../../shared/types';
 import {
   STORY_ROUND_COUNT,
   contentText,
@@ -183,6 +184,8 @@ export interface ParticipantRuntime {
   /** decisions[roundIndex] once that round has settled. */
   decisions: DecisionResult[];
   lastSeenAt: number;
+  /** (T-052) Character picked on the participant's device, already sanitised (sanitizeLook); not persisted. */
+  look?: PlayerLook;
 }
 
 interface AcceptedAnswer {
@@ -301,7 +304,7 @@ export class StoryRoom {
     return null;
   }
 
-  addParticipant(id: string, rawName: unknown, credentialHash: string): StoryAck<ParticipantRuntime> {
+  addParticipant(id: string, rawName: unknown, credentialHash: string, look?: PlayerLook): StoryAck<ParticipantRuntime> {
     const blocked = this.joinBlocker();
     if (blocked) return blocked;
     const check = this.checkNameFor(rawName);
@@ -318,6 +321,7 @@ export class StoryRoom {
       mood: clampMood(this.content.initialMood),
       decisions: [],
       lastSeenAt: now,
+      ...(look ? { look } : {}),
     };
     this.participants.set(id, p);
     this.persist('participantJoined', () => this.store.participantJoined(this, p));
@@ -740,7 +744,7 @@ export class StoryRoom {
 
   private rankRows(): StoryRankRow[] | null {
     if (!this.rankings || !['leaderboard', 'finished', 'interrupted', 'consequence'].includes(this.phase)) return null;
-    return this.rankings.map((r) => ({ participantId: r.participantId, name: r.name, rank: r.rank, tied: r.tied, totalScore: r.totalScore }));
+    return this.rankings.map((r) => { const look = this.participants.get(r.participantId)?.look; return { participantId: r.participantId, name: r.name, rank: r.rank, tied: r.tied, totalScore: r.totalScore, ...(look ? { look } : {}) }; });
   }
 
   publicState(): StoryPublicState {
@@ -769,6 +773,7 @@ export class StoryRoom {
         connected: p.connected,
         answered: answering ? this.answers.has(p.id) : this.phase === 'consequence' || this.phase === 'leaderboard' ? Boolean(p.decisions[this.roundIndex]?.choiceId) : false,
         ready: this.readyThisRound.has(p.id),
+        ...(p.look ? { look: p.look } : {}),
       })),
       participantCount: active.length,
       connectedCount: active.filter((p) => p.connected).length,

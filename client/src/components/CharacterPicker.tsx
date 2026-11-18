@@ -4,18 +4,23 @@ import type { PlayerLook } from '@shared/types';
 import { Avatar } from '../art/Avatar';
 import { playSfx } from '../audio/audio';
 import { t, useBahasa } from '../i18n';
-/** `name` = kunci kamus `pemain.<name>` (Si Sigap, Si Teliti, Si Tangguh, Si Ceria). */
+/**
+ * `name` = kunci kamus `pemain.<name>` (Si Sigap, Si Teliti, Si Tangguh, Si Ceria). T-052: satu preset per seragam resmi Raksa (foto
+ * raksaonline.com): Sigap = limau + jaket lapangan limau berlis kuning (= LOOK_BAWAAN), Teliti = kuning mentega (seragam Miss Raksa) +
+ * headset, Tangguh = navy + helm kuning, Ceria = mauve + topi arang.
+ */
 const PRESETS: { name: string; look: PlayerLook }[] = [
   { name: 'presetSigap', look: { body: 0, skin: 2, hair: 0, color: 0, accessory: 'jaket' } },
-  { name: 'presetTeliti', look: { body: 1, skin: 1, hair: 1, color: 4, accessory: 'headset' } },
-  { name: 'presetTangguh', look: { body: 2, skin: 3, hair: 0, color: 0, accessory: 'helm' } },
+  { name: 'presetTeliti', look: { body: 1, skin: 1, hair: 1, color: 1, accessory: 'headset' } },
+  { name: 'presetTangguh', look: { body: 2, skin: 3, hair: 0, color: 3, accessory: 'helm' } },
   { name: 'presetCeria', look: { body: 1, skin: 2, hair: 2, color: 2, accessory: 'topi' } },
 ];
 // Kunci kamus per indeks pilihan (urutan = urutan lama; indeks tetap menjadi nilainya).
 const BADAN = ['badanRamping', 'badanSedang', 'badanTegap', 'badanKekar'];
 const KULIT = ['kulitTerang', 'kulitCerah', 'kulitSawoMatang', 'kulitCokelat', 'kulitGelap'];
 const RAMBUT = ['rambutHitam', 'rambutCokelatTua', 'rambutCokelat', 'rambutHitamPekat', 'rambutAbu'];
-const SERAGAM = ['seragamHijau', 'seragamBiru', 'seragamMerah', 'seragamCokelat', 'seragamEmas', 'seragamUngu'];
+// T-052: keluarga warna Raksa (urutan = UNIFORM_COLORS).
+const SERAGAM = ['seragamLimau', 'seragamMentega', 'seragamMauve', 'seragamNavy', 'seragamPutih', 'seragamKrem', 'seragamArang', 'seragamJingga'];
 const pilihan = (daftar: string[], i: number): string | number => (daftar[i] ? t('pemain.' + daftar[i]) : i + 1);
 /** Label aksesori lewat kamus berdasarkan id; id yang belum ada di kamus memakai label bawaan. */
 function labelAksesori(a: { id: string; label: string }): string {
