@@ -213,7 +213,7 @@ export default function AktivitasCerita({ ep, state, node, bahasa, look, namaPem
             look={look}
             namaPemain={namaPemain}
             tx={tx}
-            onMulai={() => { playSfx('tik'); setMulai(true); }}
+            onMulai={() => { playSfx('tik'); requestAnimationFrame(() => setMulai(true)); /* T-044: sound first, mount next frame */ }}
           />
         ))}
       />

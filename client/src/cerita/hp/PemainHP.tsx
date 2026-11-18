@@ -212,7 +212,7 @@ function PemainHPInti({ ep, state, kendali, profil, bahasa, tx: txAsli }: {
       <p className="hp-aksi-label">{t('ceritaHp.tugas')}</p>
       <h2 id="hp-aksi-judul">{misi.title}</h2>
       <p>{misi.instruction}</p>
-      <button type="button" className="primary-action" data-mulai-tugas="" onClick={() => { playSfx('kertas'); setArenaUntuk(kunciNode); }}>
+      <button type="button" className="primary-action" data-mulai-tugas="" onClick={() => { playSfx('kertas'); requestAnimationFrame(() => setArenaUntuk(kunciNode)); /* T-044: sound first, mount the arena next frame */ }}>
         {adaDrafArena(ep, state) ? t('ceritaHp.lanjutkanTugas') : t('ceritaHp.mulaiTugas')} <Arrow />
       </button>
     </section>

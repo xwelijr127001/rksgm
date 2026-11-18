@@ -2800,3 +2800,15 @@ Owner phone pass item 5. Built by the Designer; uncommitted. Owner rule: no e2e,
 
 ## T-043
 QA added 3 expect (snapshot) tests with node:test `t.assert.snapshot` (record: `tsx --test --test-update-snapshots <file>`): `server/src/story/skor.expect.test.ts` (12 cases), `server/src/csv.expect.test.ts` (1 snapshot, 9 inputs), `server/src/keamanan.expect.test.ts` (1 snapshot, 14 decisions); `*.snapshot` files sit beside them; the 3 files are appended to the server `test` script and run in about 0.7 s. Finding: `PembatasPin` builds its two `RateLimiter`s without its injected `now`, so a fake clock cannot expire the per-IP window; the staff-host bypass lives in `index.ts` `cekPin` and is not covered.
+
+## T-044 (2026-11-19): Mulai sound on iPhone; suara=b permanent
+
+- **SFX lead** (`client/src/audio/audio.ts` `playSfx`): sounds are scheduled at `ctx.currentTime + 0.02`, so a short main-thread stall right after the tap does not put the start of the envelope in the past. Still started in the same call (no await, resume fire-and-forget).
+- **Deferred mounts (sound first, heavy screen on the next frame via requestAnimationFrame, about one frame):**
+  - `client/src/cerita/hp/PemainHP.tsx` Mulai / Lanjutkan tugas (`playSfx('kertas')` then `setArenaUntuk`).
+  - `client/src/cerita/ui/Aktivitas.tsx` desktop story activity start (`playSfx('tik')` then `setMulai(true)`).
+  - Not changed: the Lanjut / Lihat ringkasan button to the end card and the episode picker play no SFX, so there is nothing to protect there.
+- **Optional pointerdown trigger:** skipped (would need a click/keyboard double-play guard; the frame deferral covers the case).
+- **T-042 A/B removed:** no `?suara=`, no sessionStorage key `raksa:suara-ab` (0 hits in the build). Behaviour b is permanent: no audioSession 'playback', music through Web Audio, latencyHint 'interactive'. T-040 gap / voice cap / idempotent music untouched.
+
+**Gate (owner rule):** typecheck 0; `client/dist` rebuilt = exact copy of the scratch build. Not tested in a browser or on a phone. Not committed.

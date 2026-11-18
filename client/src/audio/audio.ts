@@ -175,43 +175,11 @@ function ready(): boolean {
   return ctx !== null && ctx.state === 'running';
 }
 
-// ---- T-042 temporary A/B, remove after owner picks ------------------------------------------------------------------
-// SFX became late on iPhone after T-040. Two suspects cannot be settled without the phone, so the owner flips them by URL:
-//   ?suara=a  T-040 as shipped: audioSession 'playback' + music routed through Web Audio
-//   ?suara=b  no audioSession 'playback'; music still routed (in-app music volume keeps working on iOS)   <- DEFAULT
-//   ?suara=c  audioSession 'playback'; music NOT routed (el.volume as before T-040)
-//   ?suara=d  neither (pre-T-040 behaviour)
-// Read once at initAudio, kept in sessionStorage so navigation inside the game keeps it.
-type ModeSuara = 'a' | 'b' | 'c' | 'd';
-const MODE_SUARA_BAWAAN: ModeSuara = 'b';
-const KUNCI_MODE_SUARA = 'raksa:suara-ab';
-let modeSuara: ModeSuara | null = null;
-function bacaModeSuara(): ModeSuara {
-  const sah = (v: string | null): v is ModeSuara => v === 'a' || v === 'b' || v === 'c' || v === 'd';
-  try {
-    const q = new URLSearchParams(window.location.search).get('suara');
-    if (sah(q)) { try { sessionStorage.setItem(KUNCI_MODE_SUARA, q); } catch { /* this page only */ } return q; }
-    const tersimpan = sessionStorage.getItem(KUNCI_MODE_SUARA);
-    if (sah(tersimpan)) return tersimpan;
-  } catch { /* no storage */ }
-  return MODE_SUARA_BAWAAN;
-}
-const sesiPlayback = () => modeSuara === 'a' || modeSuara === 'c';
-const musikLewatWebAudio = () => modeSuara === 'a' || modeSuara === 'b';
-// ---- end T-042 A/B ----------------------------------------------------------------------------------------------------
-
 /** Dipanggil pada interaksi pengguna pertama (AudioUnlocker). */
 export function initAudio(): void {
   userGesture = true;
-  modeSuara ??= bacaModeSuara();
-  // T-040 (owner on iPhone): declare media playback so the hardware volume buttons and the silent switch behave like normal
-  // media (iOS 16.4+ / Safari 17). Unsupported browsers: no-op. T-042: only in A/B modes a and c.
-  if (sesiPlayback()) {
-    try {
-      const sesi = (navigator as unknown as { audioSession?: { type: string } }).audioSession;
-      if (sesi && sesi.type !== 'playback') sesi.type = 'playback';
-    } catch { /* not supported */ }
-  }
+  // T-044: behaviour "b" of the T-042 A/B is permanent: NO audioSession 'playback' (owner picked b on iPhone), music routed
+  // through Web Audio (in-app music volume works on iOS), AudioContext with latencyHint 'interactive'.
   if (ctx) {
     if (ctx.state !== 'running') ctx.resume().catch(() => { /* ditolak browser: dicoba lagi pada interaksi berikutnya */ });
     applyMusic();
@@ -266,7 +234,6 @@ const gainEl = new Map<HTMLAudioElement, GainNode>();
 
 function sambungkan(el: HTMLAudioElement): void {
   if (!ctx || !musicBus || gainEl.has(el)) return;
-  if (!musikLewatWebAudio()) return; // T-042 A/B modes c and d: el.volume as before T-040
   try {
     const g = ctx.createGain();
     g.gain.value = el.volume;
@@ -568,7 +535,9 @@ export function playSfx(name: Sfx): void {
   if (kini - (sfxTerakhir.get(name) ?? -1e9) < (SFX_REDAM.has(name) ? 80 : SFX_JEDA_MS)) return;
   sfxTerakhir.set(name, kini);
   if (ctx.state !== 'running') ctx.resume().catch(() => { /* ditolak browser: dicoba lagi pada interaksi berikutnya */ });
-  const t = ctx.currentTime;
+  // T-044: 20 ms lead, so a short main-thread stall right after the tap (a heavy screen mounting) does not put the start of
+  // the envelope in the past (silent or clipped on iPhone).
+  const t = ctx.currentTime + 0.02;
   // Voices that already ended leave the list; when the cap is reached the OLDEST is faded out in ~10 ms (no clipping pile-up).
   for (let i = suaraSfx.length - 1; i >= 0; i--) if (suaraSfx[i].akhir <= t) suaraSfx.splice(i, 1);
   while (suaraSfx.length >= SFX_SUARA_MAKS) lepasSuara(suaraSfx.shift()!, true);
