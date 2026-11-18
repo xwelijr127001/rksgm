@@ -2847,3 +2847,27 @@ QA added 3 expect (snapshot) tests with node:test `t.assert.snapshot` (record: `
 - **Cache headers** (`server/src/index.ts` static): `/assets/*` unchanged (1 year immutable); `index.html` (static and the SPA fallback) `no-cache`; every other un-hashed public file (`/audio`, `/karakter`, icons) `public, max-age=86400` (was 1 hour for /karakter, nothing for /audio); ETag kept (express.static default). Security headers and the results no-store untouched.
 
 **Gate (owner rule):** typecheck 0; `client/dist` rebuilt = exact copy of the scratch build. Not tested in a browser or on a phone. Not committed.
+
+## T-048 (2026-11-19): story SFX from samples, quieter orange button, no click on overlap
+
+- **Samples** (`client/src/audio/audio.ts` table `SAMPEL`, file + gain): the T-046 single loader is generalised. All six WAVs are fetched and decoded once at initAudio and by the T-047 preloader (`siapkanAudio()`, one item); playback = buffer source -> level gain -> per-voice gain -> sfxBus at the same 20 ms lead; synth recipe until a file is decoded or if it fails (logged once per file). pesanKirim / pesanTerima stay synth bells; legacy quiz sounds (pilih, tik, bukti, kirim, naik, salah, papan, confetti, masuk) unchanged.
+- **Gains** (measured: loudest 100 ms RMS of each file, aiming at the tombol level):
+  - tombol 0.08 (was 0.16, owner "about half"; RMS100 0.63 -> ~0.050)
+  - konfirmasi 0.07 (RMS100 0.70 -> ~0.049)
+  - kertas 1.8 (quiet file, peak 0.33, RMS100 0.024 -> ~0.043)
+  - taruh 0.22 (peak 1.00, RMS100 0.22 -> ~0.048)
+  - ketuk 0.06 (RMS100 0.43 -> ~0.026, quieter than tombol)
+  - batal 0.065 (RMS100 0.60 -> ~0.039)
+- **Overlap rule (no start-then-cut):** the capture-phase listener only ARMS the default tombol; any `playSfx` that really starts a sound during the same click disarms it; the window bubble listener (after the React handlers) starts tombol only if still armed. A 0 ms timer settles it when a handler stops propagation. So a button with its own sound (Mulai = kertas, Kirim = pesanKirim, ...) never starts the default at all. Trade-off: a button WITHOUT its own sound that renders heavily in the same click hears tombol after that render (Mulai already defers its mount by a frame, T-044).
+- **Voice cap:** the oldest voice now fades out linearly over 40 ms (was setTargetAtTime 10 ms), disconnected after 120 ms.
+- The noise() bursts that sounded crackly (kertas / taruh / ketuk synth) only play now as fallback before the samples are decoded.
+- Preloader: `pramuatDaftar.ts` / `PramuatCerita.tsx` comments updated; the sounds come from SAMPEL via siapkanAudio (no URL list duplicated). No ?v bump: gains are in code, files unchanged.
+
+**Gate (owner rule):** typecheck 0; `client/dist` rebuilt = exact copy of the scratch build; the six sfx-*.wav are byte-identical in client/dist/audio. Not tested in a browser or on a phone. Not committed.
+
+### T-048 Fix 1 (2026-11-19): default orange sound never waits for a heavy render
+
+- `client/src/audio/audio.ts`: `tombolUtamaDiklik()` (capture phase, before React handlers and render) starts the `tombol` sample at once, scheduled `ctx.currentTime + 0.035` (`LEAD_TOMBOL_S`). If `playSfx` starts the button's own sound in the same click, the default voice is cancelled BEFORE its start time with `src.stop()` + disconnect in the same task (never audible, no click); a voice whose start time has passed is never cut by this rule. `akhiriKlikTombol()` (bubble) only closes the window; no timer, nothing deferred. Voice-cap cuts of sounding voices keep the 40 ms linear fade.
+- This removes the T-048 trade-off: Lanjut / next-scene and other orange buttons without their own sound now sound before the render.
+
+**Gate:** typecheck 0; `client/dist` rebuilt = exact copy. Not tested in a browser or on a phone. Not committed.

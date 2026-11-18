@@ -5,6 +5,7 @@
  *   hand / POV art, and the CSS-only pictures (WhatsApp truck photo, SIM card, office board, committee icon). Same hashed URLs
  *   as the CSS / modules (Vite dedupes the asset), small files inlined as data: are skipped.
  * - awal: the first composition of the story (resume state when there is saved progress) = the first-screen pictures.
+ * - sounds are not listed here: the six story SFX WAVs (T-048) come from the SAMPEL table in audio/audio.ts via siapkanAudio().
  */
 import { cariEpisode } from './episode';
 import { stateAwal } from './mesin';

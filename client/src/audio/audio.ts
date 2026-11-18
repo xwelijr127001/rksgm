@@ -177,38 +177,46 @@ function ready(): boolean {
   return ctx !== null && ctx.state === 'running';
 }
 
-// T-046: orange-button sound = the owner's pick, Kenney Interface Sounds "confirmation_003" (CC0, public/audio/CREDITS.md).
-// WAV on purpose (no MP3 encoder silence at the head). Loaded once at initAudio; until it is decoded (or if it fails) the
-// T-045 synth recipe plays instead, silently.
-const SFX_TOMBOL_URL = (import.meta.env?.BASE_URL ?? '/') + 'audio/sfx-tombol.wav';
-/** Level of the sample (file peak 0.89, RMS 0.17) so it sits about as loud as 'konfirmasi'. Tweak here. */
-const GAIN_TOMBOL = 0.16;
-let bufTombol: AudioBuffer | null = null;
-let janjiTombol: Promise<void> | null = null;
-function muatSampelTombol(): Promise<void> {
-  if (janjiTombol) return janjiTombol;
+// T-046 / T-048: story-mode SFX from CC0 samples (public/audio/CREDITS.md). WAV on purpose (no MP3 encoder silence at the
+// head), mono 16-bit 44.1 kHz, head silence trimmed. Loaded once at initAudio (and by the T-047 preloader via siapkanAudio);
+// until a file is decoded (or if it fails) that sound plays its synth recipe, silently. pesanKirim / pesanTerima stay synth
+// (owner-approved bells); legacy quiz sounds (pilih, tik, bukti, kirim, ...) are unchanged.
+// Gains (T-048) from the loudest 100 ms RMS of each file, so they sit at similar loudness; tombol = owner's "about half".
+const BASIS_AUDIO = (import.meta.env?.BASE_URL ?? '/') + 'audio/';
+const SAMPEL: Partial<Record<Sfx, { berkas: string; gain: number }>> = {
+  tombol: { berkas: 'sfx-tombol.wav', gain: 0.08 }, //       Kenney confirmation_003, peak 0.89, RMS100 0.63 -> ~0.050
+  konfirmasi: { berkas: 'sfx-konfirmasi.wav', gain: 0.07 }, // confirmation_001, peak 0.90, RMS100 0.70 -> ~0.049
+  kertas: { berkas: 'sfx-kertas.wav', gain: 1.8 }, //       bookFlip2, peak 0.33, RMS100 0.024 -> ~0.043 (quiet file)
+  taruh: { berkas: 'sfx-taruh.wav', gain: 0.22 }, //        bookPlace1, peak 1.00, RMS100 0.22 -> ~0.048
+  ketuk: { berkas: 'sfx-ketuk.wav', gain: 0.06 }, //        select_002, peak 0.90, RMS100 0.43 -> ~0.026 (quieter than tombol)
+  batal: { berkas: 'sfx-batal.wav', gain: 0.065 }, //       back_002, peak 0.90, RMS100 0.60 -> ~0.039
+};
+const bufSampel = new Map<Sfx, AudioBuffer>();
+let janjiSampel: Promise<void> | null = null;
+function muatSampel(): Promise<void> {
+  if (janjiSampel) return janjiSampel;
   if (!ctx || typeof fetch === 'undefined') return Promise.resolve();
   const c = ctx;
-  janjiTombol = fetch(SFX_TOMBOL_URL)
+  janjiSampel = Promise.all(Object.entries(SAMPEL).map(([nama, x]) => fetch(BASIS_AUDIO + x!.berkas)
     .then((r) => { if (!r.ok) throw new Error(String(r.status)); return r.arrayBuffer(); })
     // Callback form as well: older Safari decodeAudioData returns no promise.
     .then((ab) => new Promise<AudioBuffer>((ok, gagal) => {
       const p = c.decodeAudioData(ab, ok, gagal) as Promise<AudioBuffer> | undefined;
       if (p && typeof p.then === 'function') p.then(ok, gagal);
     }))
-    .then((b) => { bufTombol = b; })
-    .catch(() => { catatSekali('Suara tombol (sfx-tombol.wav) tidak bisa dimuat - memakai suara sintesis.'); });
-  return janjiTombol;
+    .then((b) => { bufSampel.set(nama as Sfx, b); })
+    .catch(() => { catatSekali(`Suara ${x!.berkas} tidak bisa dimuat - memakai suara sintesis.`); }))).then(() => undefined);
+  return janjiSampel;
 }
 
 /**
- * T-047 (story preloader): the button sample decoded into the engine. Without an AudioContext yet (no tap so far) the WAV is
- * only fetched into the HTTP cache; initAudio decodes it later. Never rejects.
+ * T-047 / T-048 (story preloader): every SFX sample decoded into the engine. Without an AudioContext yet (no tap so far) the
+ * WAVs are only fetched into the HTTP cache; initAudio decodes them later. Never rejects.
  */
 export function siapkanAudio(): Promise<void> {
-  if (ctx) return muatSampelTombol();
+  if (ctx) return muatSampel();
   if (typeof fetch === 'undefined') return Promise.resolve();
-  return fetch(SFX_TOMBOL_URL).then((r) => r.arrayBuffer()).then(() => undefined, () => undefined);
+  return Promise.all(Object.values(SAMPEL).map((x) => fetch(BASIS_AUDIO + x!.berkas).then((r) => r.arrayBuffer()).catch(() => null))).then(() => undefined);
 }
 
 /** Dipanggil pada interaksi pengguna pertama (AudioUnlocker). */
@@ -217,7 +225,7 @@ export function initAudio(): void {
   // T-044: behaviour "b" of the T-042 A/B is permanent: NO audioSession 'playback' (owner picked b on iPhone), music routed
   // through Web Audio (in-app music volume works on iOS), AudioContext with latencyHint 'interactive'.
   if (ctx) {
-    muatSampelTombol();
+    muatSampel();
     if (ctx.state !== 'running') ctx.resume().catch(() => { /* ditolak browser: dicoba lagi pada interaksi berikutnya */ });
     applyMusic();
     return;
@@ -244,7 +252,7 @@ export function initAudio(): void {
   } else {
     catatSekali('Web Audio tidak tersedia - efek suara dimatikan.');
   }
-  muatSampelTombol();
+  muatSampel();
   applyMusic();
   applyAmbience();
 }
@@ -583,28 +591,37 @@ const SFX_REDAM = new Set<Sfx>(['taruh', 'kertas', 'pesanKirim', 'pesanTerima', 
 const SFX_JEDA_MS = 70;
 const SFX_SUARA_MAKS = 6;
 const SFX_UMUR_S = 0.9; // longest effect (pesanTerima ~0.8 s) + tail
-const suaraSfx: { g: GainNode; akhir: number }[] = [];
+const suaraSfx: Suara[] = [];
 
 function lepasSuara(v: { g: GainNode }, cepat: boolean): void {
   if (!ctx) return;
   if (cepat) {
-    try { v.g.gain.cancelScheduledValues(ctx.currentTime); v.g.gain.setTargetAtTime(0, ctx.currentTime, 0.01); } catch { /* ignore */ }
+    // T-048: a 40 ms linear fade (never 10 ms: an abrupt cut clicks on a phone speaker).
+    try {
+      const nu = ctx.currentTime;
+      v.g.gain.cancelScheduledValues(nu);
+      v.g.gain.setValueAtTime(v.g.gain.value, nu);
+      v.g.gain.linearRampToValueAtTime(0, nu + 0.04);
+    } catch { /* ignore */ }
   }
-  window.setTimeout(() => { try { v.g.disconnect(); } catch { /* already */ } }, cepat ? 80 : 50);
+  window.setTimeout(() => { try { v.g.disconnect(); } catch { /* already */ } }, cepat ? 120 : 50);
 }
 /**
- * T-045 (owner: "all orange buttons have a sfx"): ONE default button sound for every orange main-action key.
- * tombolUtamaDiklik() runs in the CAPTURE phase of the click (before React handlers and before React renders, so a heavy
- * screen mounting cannot delay it) and starts 'tombol'. If the button's own handler then starts its own sound in the same
- * click (Mulai = kertas, Kirim = pesanKirim, ...), that default voice is cut before it is heard (it is scheduled 20 ms ahead),
- * so a button never plays two sounds. akhiriKlikTombol() (bubble phase, end of the click) closes the window.
+ * T-045 / T-048 Fix 1 (owner: "all orange buttons have a sfx"; it must never wait for a heavy render, and never click):
+ * tombolUtamaDiklik() runs in the CAPTURE phase of the click, i.e. before the React handlers and before React renders, and
+ * starts the default 'tombol' right there, scheduled 35 ms ahead. If the button's own handler then starts its own sound in
+ * the same click (Mulai = kertas, Kirim = pesanKirim, ...), playSfx() cancels the default voice BEFORE its start time with
+ * src.stop() + disconnect in the same task: both messages reach the audio thread together, so it is never audible and cannot
+ * click. A voice whose start time has already passed is never cut by this rule. akhiriKlikTombol() (bubble phase) only closes
+ * the window; nothing is deferred to the bubble phase or timers.
  */
-let suaraBawaan: { v: { g: GainNode; akhir: number }; waktu: number; sebelum: number | undefined } | null = null;
+const LEAD_TOMBOL_S = 0.035;
+let suaraBawaan: { v: Suara; sebelum: number | undefined } | null = null;
 export function tombolUtamaDiklik(): void {
   suaraBawaan = null;
   const sebelum = sfxTerakhir.get('tombol');
-  const v = mulaiSfx('tombol');
-  if (v) suaraBawaan = { v, waktu: typeof performance !== 'undefined' ? performance.now() : Date.now(), sebelum };
+  const v = mulaiSfx('tombol', LEAD_TOMBOL_S);
+  if (v) suaraBawaan = { v, sebelum };
 }
 export function akhiriKlikTombol(): void {
   suaraBawaan = null;
@@ -612,22 +629,23 @@ export function akhiriKlikTombol(): void {
 
 export function playSfx(name: Sfx): void {
   const v = mulaiSfx(name);
-  // T-045: the button's own sound replaces the default button sound of this same click.
   const b = suaraBawaan;
-  if (v && b && b.v !== v) {
-    suaraBawaan = null;
-    const kini = typeof performance !== 'undefined' ? performance.now() : Date.now();
-    if (kini - b.waktu < 1000) {
-      const i = suaraSfx.indexOf(b.v);
-      if (i >= 0) suaraSfx.splice(i, 1);
-      try { b.v.g.disconnect(); } catch { /* already */ }
-      if (b.sebelum === undefined) sfxTerakhir.delete('tombol'); else sfxTerakhir.set('tombol', b.sebelum);
-    }
-  }
+  if (!v || !b || b.v === v) return;
+  suaraBawaan = null;
+  // Only while the default has not started yet (a sounding voice is never cut here).
+  if (!ctx || ctx.currentTime >= b.v.mulai) return;
+  try { b.v.henti?.(); } catch { /* not started */ }
+  try { b.v.g.disconnect(); } catch { /* already */ }
+  const k = suaraSfx.indexOf(b.v);
+  if (k >= 0) suaraSfx.splice(k, 1);
+  if (b.sebelum === undefined) sfxTerakhir.delete('tombol'); else sfxTerakhir.set('tombol', b.sebelum);
 }
 
+/** One sounding effect: its voice gain, start / end time on the audio clock, and (sample) a stop for its source. */
+type Suara = { g: GainNode; mulai: number; akhir: number; henti?: () => void };
+
 /** Starts one effect now (same call, no await). null = not started (no context, muted, effects off, or inside the gap). */
-function mulaiSfx(name: Sfx): { g: GainNode; akhir: number } | null {
+function mulaiSfx(name: Sfx, lead = 0.02): Suara | null {
   // T-036 Fix 2 / T-038 Fix 1: log for the test tool, compiled in only for dev or a VITE_UJI_AUDIO=on build.
   if (UJI_AUDIO) (globalThis as { __sfxLog?: string[] }).__sfxLog?.push(name);
   if (!ctx || !sfxBus || prefs.muted || !prefs.sfxEnabled) return null;
@@ -638,16 +656,16 @@ function mulaiSfx(name: Sfx): { g: GainNode; akhir: number } | null {
   if (ctx.state !== 'running') ctx.resume().catch(() => { /* ditolak browser: dicoba lagi pada interaksi berikutnya */ });
   // T-044: 20 ms lead, so a short main-thread stall right after the tap (a heavy screen mounting) does not put the start of
   // the envelope in the past (silent or clipped on iPhone).
-  const t = ctx.currentTime + 0.02;
-  // Voices that already ended leave the list; when the cap is reached the OLDEST is faded out in ~10 ms (no clipping pile-up).
+  const t = ctx.currentTime + lead;
+  // Voices that already ended leave the list; when the cap is reached the OLDEST is faded out over 40 ms (no clipping pile-up).
   for (let i = suaraSfx.length - 1; i >= 0; i--) if (suaraSfx[i].akhir <= t) suaraSfx.splice(i, 1);
   while (suaraSfx.length >= SFX_SUARA_MAKS) lepasSuara(suaraSfx.shift()!, true);
   const g = ctx.createGain();
   g.gain.value = 1;
   g.connect(sfxBus);
-  const v = { g, akhir: t + SFX_UMUR_S };
+  const v: Suara = { g, mulai: t, akhir: t + SFX_UMUR_S };
   suaraSfx.push(v);
-  bunyikan(name, g, t);
+  v.henti = bunyikan(name, g, t);
   window.setTimeout(() => {
     const i = suaraSfx.indexOf(v);
     if (i >= 0) { suaraSfx.splice(i, 1); lepasSuara(v, false); }
@@ -687,7 +705,20 @@ export async function rekamSfx(name: Sfx, detik = 1.2): Promise<Float32Array> {
   return (await off.startRendering()).getChannelData(0);
 }
 
-function bunyikan(name: Sfx, sfxBus: GainNode, t: number): void {
+/** Returns a stop for the sample source (used to cancel a not-yet-started default button sound); synth returns nothing. */
+function bunyikan(name: Sfx, sfxBus: GainNode, t: number): (() => void) | undefined {
+  // T-046 / T-048: the decoded sample (same voice gain, same 20 ms lead); otherwise the synth recipe below.
+  const buf = bufSampel.get(name);
+  const x = SAMPEL[name];
+  if (buf && x) {
+    const src = sfxBus.context.createBufferSource();
+    src.buffer = buf;
+    const lvl = sfxBus.context.createGain();
+    lvl.gain.value = x.gain;
+    src.connect(lvl).connect(sfxBus);
+    src.start(t);
+    return () => src.stop();
+  }
   switch (name) {
     case 'pilih':
       tone(sfxBus, N(16), t, 0.09, 0.3, 'triangle');
@@ -760,16 +791,7 @@ function bunyikan(name: Sfx, sfxBus: GainNode, t: number): void {
       tone(sfxBus, N(23), t + 0.06, 0.14, 0.07, 'sine');
       break;
     case 'tombol': {
-      // T-046: the owner's sample when it is decoded (same voice gain, same 20 ms lead); otherwise the T-045 synth below.
-      if (bufTombol) {
-        const src = sfxBus.context.createBufferSource();
-        src.buffer = bufTombol;
-        const lvl = sfxBus.context.createGain();
-        lvl.gain.value = GAIN_TOMBOL;
-        src.connect(lvl).connect(sfxBus);
-        src.start(t);
-        break;
-      }
+      // Synth fallback until sfx-tombol.wav is decoded (T-045 recipe).
       // T-045 orange key press (~130 ms, original synth): soft low "thock" (sine 180 -> 110 Hz, 25 ms) + bright two-note rising
       // chime N(24) -> N(31), triangle, 10 ms apart, through a 5 kHz lowpass. 2.5 ms attack (no click), exponential release,
       // peak a little below 'konfirmasi' so it does not tire on repeat.

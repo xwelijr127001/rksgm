@@ -3,7 +3,8 @@
  * PRELOAD with a real progress bar before the first story screen of the playable case (route /cerita/auto-2).
  * Blocking items: the story chunk (same import() specifier as the router, so the same hashed chunk), the episode list module,
  * every picture of the episode (fetched + decode()), the first music track (canplaythrough in the element that will play it)
- * and the button SFX sample (decoded into the audio engine). Save-Data: only chunks + first-screen pictures block; the rest
+ * and the story SFX samples (T-048: sfx-tombol/kertas/taruh/ketuk/konfirmasi/batal.wav, decoded into the audio engine via
+ * siapkanAudio, counted as one item). Save-Data: only chunks + first-screen pictures block; the rest
  * loads in the background. Progress = finished items / total. Per item 8 s, overall cap 12 s, then the story opens with what is
  * ready (the rest keeps loading lazily as before). Done in under 300 ms (second visit, HTTP cache) = no bar at all. Once per
  * page session; other episodes and routes pass straight through. After the first screen: remaining story music in the

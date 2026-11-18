@@ -127,3 +127,12 @@ dengar manusia, komposisi tidak diubah berdasarkan dugaan):
 `confirmation_003` dari **Interface Sounds** oleh Kenney (www.kenney.nl), lisensi **CC0 1.0** (domain publik; boleh komersial,
 tanpa wajib kredit). Dipilih owner dari halaman pilih bunyi (nomor 20). Diubah ke WAV mono 16-bit 44,1 kHz tanpa pengolahan lain
 (WAV dipakai, bukan MP3, supaya tidak ada jeda encoder di kepala bunyi).
+
+### Set efek mode cerita (19 Nov 2026, T-048)
+
+Semua CC0 1.0 (domain publik, boleh komersial, tanpa wajib kredit), oleh Kenney (www.kenney.nl):
+- `sfx-kertas.wav` = `bookFlip2` dari **RPG Audio** (berkas dibuka).
+- `sfx-taruh.wav` = `bookPlace1` dari **RPG Audio** (dokumen ditaruh di baki).
+- `sfx-ketuk.wav` = `select_002`, `sfx-konfirmasi.wav` = `confirmation_001`, `sfx-batal.wav` = `back_002` dari **Interface Sounds**.
+Diubah ke WAV mono 16-bit 44,1 kHz, hening di kepala dipotong, maksimal 0,6 s dengan pudar 0,1 s. Bunyi pesan (pesanKirim,
+pesanTerima) tetap sintesis asli T-036.
