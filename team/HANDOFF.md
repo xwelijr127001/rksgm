@@ -3303,3 +3303,41 @@ Briefing at 360x640: 426..483 px content, strip 143..200 (a09 has the longest st
 **Cannot show the scene while answering at 360x640** (content still fits, no scroll): a06 (5 parts x 5 order numbers), a07 / a08 step 2 (four long answer sentences, 50..112 chars), a10 (5 buckets of up to 64 chars). The answer lists themselves need the height; the scene is hidden there and "Dokumen" / "Cerita" stay one tap away. At 390x700 they show a small scene except a10 (72x54, hidden).
 
 **Gate (owner rule):** typecheck 0; `client/dist` rebuilt = exact copy. Heights are calculated, NOT measured in a browser or on a phone. Not committed.
+
+## T-061a (2026-11-19): event cases 2, 3 and 4 in the case-1 pixel style (Designer)
+
+Built by the Designer; uncommitted. Owner rule: nothing was opened in a browser. Gate: client typecheck 0 errors; client/dist rebuilt. The only size warning is Phaser's chunk, which was there before. The scene chunk is 129 kB (48 kB gzip).
+
+**Scope kept**
+- Only scene files changed, under `client/src/game/scenes/acara/`.
+- Untouched: MissionPlay, HasilAcara, the hasil/acara CSS, the engine, `shared/acara/*` and `server/acara/*`.
+- Option ids, positions, `acakPosisi` slots, hit areas, `labelDy`, labels (id/en/zh, the `aNN.label.ts` files are unchanged), the a04 notes board, behaviour and the answer key are all unchanged.
+
+**Files**
+- **New helpers:** `rle.ts` (compact pixel grids) and `piksel-umum.ts` (crate with damage states, 3×5 mini digits, extra 5×7 glyphs C/D/M/P/R/5, floor shadow).
+- **New pixel art:** `a02.piksel.ts`, `a03.piksel.ts`, `a04.piksel.ts`.
+- **Generated, do not edit:** `a02.gen.ts`, `a03.gen.ts`, `a04.gen.ts`, `truk.gen.ts`, from `character/acara-t061/bangun.mjs`.
+- **Rewritten:** `a02.ts`, `a03.ts`, `a04.ts`. All three now set `gaya: 'piksel'`.
+
+**Per case**
+- **a02 parkiran:**
+  - Background: the Episode 1 story parkiran with its baked-in van painted out, plus a front pavement.
+  - Truck: the Episode 2 trailer with an orange courier band.
+  - Courier: a new person from the side cast "tol", with an orange cap.
+  - Objects: six pixel photo objects.
+- **a03 bengkel:** the Episode 2 bengkel; a pixel teal hatchback with the rear-right dent; the photo line; four identical polaroids. The contents are A whole car, B dent close-up, C plate "B1703", D selfie.
+- **a04 pelabuhan:**
+  - Background: the Episode 2 pool yard with harbour cranes, containers and gulls added behind the fence.
+  - Truck and driver: the same truck stands at the left (it was part of the old m06 background). The driver is a new person from the side cast "polisi", recoloured to a teal work shirt and navy cap, with the worried face.
+  - Objects: 21 crates with the same numbers and damage (#3, #9, #15, #20); the six-photo board, shipping list and stamped receipt; four identical pixel action boards.
+- **Cast:** no Darto or Hendra.
+
+**Previews** (`character/acara-t061/`, see README):
+- Before: `sebelum-a0N.svg`. This is SVG because nothing can rasterise vector art without a browser, the same as T-054.
+- After: `sesudah-a0N-2x.png`, painted from the real scene specs.
+
+**Risks**
+- **Pixel-font glyphs:** HURUF_HALUS only has A B I K N O T U. Any new in-scene text must use `teksBesar` (piksel-umum.ts) or add glyphs; T-061b/c should reuse it.
+- **a02 background:** a faint stray parking-bay line from the story background remains between the truck and the crate stack.
+- **a04 truck:** the trailer's rear is cut off straight where the crate stack starts.
+- **Not checked in a browser:** Phaser label positions and the photo/tag effects in the pixel style. The engine already handles `gaya: 'piksel'` generically.
