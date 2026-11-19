@@ -109,6 +109,9 @@ const kamus: KamusRuang = {
     peringkatSeri: 'peringkat seri',
     sepuluhBesar: '10 besar',
     terimaKasih: 'Terima kasih sudah bermain. Sampai jumpa di acara berikutnya.',
+    // T-057 panggung juara (proyektor, akhir pertandingan)
+    panggungSelamat: 'Selamat, para juara!',
+    panggungLain: 'Peringkat 4-10',
     // ---- proyektor: header & jeda
     rondeKe: 'Ronde {n} / {total}',
     pesertaTersambung: '{n} peserta ({tersambung} tersambung)',
@@ -221,6 +224,8 @@ const kamus: KamusRuang = {
     peringkatSeri: 'tied rank',
     sepuluhBesar: 'Top 10',
     terimaKasih: 'Thanks for playing. See you at the next event.',
+    panggungSelamat: 'Congratulations, champions!',
+    panggungLain: 'Ranks 4-10',
     rondeKe: 'Round {n} / {total}',
     pesertaTersambung: 'Players: {n} ({tersambung} connected)',
     nPenonton: 'Spectators: {n}',
@@ -330,6 +335,8 @@ const kamus: KamusRuang = {
     peringkatSeri: '名次并列',
     sepuluhBesar: '前 10 名',
     terimaKasih: '感谢你的参与，下次活动再见。',
+    panggungSelamat: '恭喜各位冠军！',
+    panggungLain: '第 4-10 名',
     rondeKe: '第 {n} / {total} 回合',
     pesertaTersambung: '{n} 位玩家（{tersambung} 位在线）',
     nPenonton: '{n} 位观众',

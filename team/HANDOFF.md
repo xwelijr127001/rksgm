@@ -3172,3 +3172,35 @@ Built by the Designer; uncommitted. Owner rule: nothing was opened in a browser.
 **Risks:**
 - Tests that look for the old result markup in event cases (`.hasil-daftar`, `.hasil-inti`, the round `PotretTokoh` isti) or for the old case 1 texture keys will need updating. None were run.
 - Server ranking, points and answers are untouched.
+
+## T-057 (2026-11-19): projector winners screen = concept A "Panggung podium" (Designer)
+
+Built by the Designer; uncommitted. Owner rule: nothing was opened in a browser. Gate: client typecheck 0 errors; client/dist rebuilt. Previews of the built geometry, final state, are in `character/proyektor-t056/`: `bangun-a-10-pemain.png` and `bangun-a-2-pemain.png` (static, drawn from the CSS numbers, not screenshots).
+
+**What was built**
+- **Files:** `client/src/pages/proyektor/PanggungJuara.tsx` and `panggung.css` (new). `client/src/pages/Projector.tsx`: the FINISHED state renders `<PanggungJuara rows={room.podium ?? leaderboard} …/>` full-bleed under the status bar. The old chibi trio (Bu Isti / Mr Roger / Miss Raksa), the rank-1 box, the "10 besar" table and the generic Confetti on FINISHED are gone.
+- **Stage:**
+  - Maroon curtain stage with a bulb valance, a soft spotlight cone that widens for rank 1, plank floor and pixel confetti.
+  - 2-1-3 podium blocks (gold / silver / bronze) with each player's T-052 pixel officer (kisiHeroPiksel, 8 px per cell for rank 1 and 7 for the others), rank, name, points, prize label and "peringkat seri" when tied.
+  - Miss Raksa (pixel sprite) announcing in a stepped bubble: "Selamat, para juara!", later the thank-you line. Mr Roger is removed.
+  - Ranks 4–10 side list with 48 px AvatarPiksel faces.
+- **Reveal** (README A):
+  - 2.0 s: rows 4–10, 150 ms apart, each with "tik".
+  - 4.0 s: rank 3 ("podium"). 6.0 s: rank 2 ("podium").
+  - 6.7 s and 7.5 s: drum roll.
+  - 8.5 s: rank 1, confetti, fanfare, then the confetti sound 0.3 s later.
+  - 11 s: thank-you line.
+  - Reduced motion: all at once plus one "chime", with still confetti.
+- **Sounds:** 4 new ORIGINAL synth cues in `client/src/audio/audio.ts` (`drum`, `podium`, `fanfare`, `chime`; each ≤0.85 s, the drum roll is played twice). They go through `playSfx`, so mute and the effects toggle are respected.
+- **1–3 players:** only filled blocks, centred. No side list when nobody is 4th or lower. Ranks and ties are taken as the server sends them.
+- **No protocol change.** Strings: the new `layar.panggungSelamat` and `layar.panggungLain` in id/en/zh; the others are existing (`layar.juara`, `nPoin`, `peringkatSeri`, `terimaKasih`, `belumAdaHasil`).
+
+**Sizes (by calculation)**
+- The stage is a fixed 1920×1016 box scaled whole into the space under the status bar (≈64 px at full width), so the page never scrolls.
+- 1920×1080: scale ≈1.0. Title 64 px, block names 40 px, points 30 px, side list 32 px.
+- 1366×768: scale ≈0.68 (title 44, names 27, list 22).
+- 1280×720: scale ≈0.63 (title 40, names 25, list 20).
+
+**Risks**
+- Tests or tools that looked for the old FINISHED markup (`.pj-podium`, `.pj-tiang`, the Leaderboard table on the projector, the CEO speech) will need updating. None were run.
+- The SpriteTokoh size is computed for an unscaled page, so inside the scaled stage Miss Raksa is resampled at non-integer scales on 1366/1280 (nearest neighbour, still pixel-sharp).

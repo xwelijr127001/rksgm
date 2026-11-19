@@ -20,6 +20,7 @@ import { RakiBubble } from '../art/Raki';
 import { AdeganLayar } from '../game/AdeganLayar';
 import { misiBergambar } from '../game/gambar';
 import { KarakterTokoh } from '../game/KarakterTokoh';
+import { PanggungJuara } from './proyektor/PanggungJuara';
 import { Merek } from '../components/Merek';
 import { PilihBahasa } from '../components/PilihBahasa';
 import { TombolGerak } from '../components/TombolGerak';
@@ -199,10 +200,7 @@ export default function Projector() {
   useOnChange(fase, (berikut) => {
     setTrack(TRACK[berikut]);
     if (berikut === 'LEADERBOARD') playSfx('papan');
-    if (berikut === 'FINISHED') {
-      setKonfeti(true);
-      playSfx('confetti');
-    }
+    // T-057: FINISHED = panggung juara (PanggungJuara) dengan urutan muncul, konfeti piksel, dan suaranya sendiri.
   });
 
   useEffect(() => {
@@ -540,58 +538,8 @@ export default function Projector() {
     </div>
   );
 
-  const tigaBesar = podium.slice(0, 3);
-  const akhir = (
-    <div className="stack stack-l">
-      <h2 className="pj-judul tengah">{t('layar.juara', { acara: namaAcara })}</h2>
-      <div className="tokoh-trio">
-        <KarakterTokoh tokoh="isti" tinggi={170} susun="bawah" />
-        <KarakterTokoh tokoh="ceo" tinggi={190} susun="bawah" teks={t('tokoh.ceo.podium')} />
-        <KarakterTokoh tokoh="missRaksa" tinggi={170} susun="bawah" />
-      </div>
-      {room.tie ? (
-        <Pesan jenis="kuning">
-          {t('layar.adaSeri')}
-        </Pesan>
-      ) : null}
-      {tigaBesar.length === 0 ? (
-        <div className="kosong">{t('layar.belumAdaHasil')}</div>
-      ) : (
-        <div className="pj-podium">
-          {[1, 0, 2].map((idx, kolom) => {
-            const r = tigaBesar[idx];
-            if (!r) return <div key={`kosong-${kolom}`} aria-hidden />;
-            const tinggi = idx === 0 ? 300 : idx === 1 ? 240 : 210;
-            return (
-              <div
-                key={r.playerId}
-                className={'pj-tiang anim-masuk' + (idx === 0 ? ' emas' : '')}
-                style={{ minHeight: tinggi }}
-              >
-                <span className="papan-peringkat" style={{ width: 44, height: 44, fontSize: 22 }}>
-                  {r.rank}
-                </span>
-                <Avatar look={r.look} size={110} mood="senang" />
-                <div className="pj-nama">{r.nickname}</div>
-                <div className="pj-poin">{t('layar.nPoin', { n: r.totalPoints.toLocaleString('id-ID') })}</div>
-                <span className="chip chip-kuning">
-                  <Icon name="medali" size={16} /> {hadiah[idx]}
-                </span>
-                {r.tied ? <span className="pj-teks2">{t('layar.peringkatSeri')}</span> : null}
-              </div>
-            );
-          })}
-        </div>
-      )}
-      <div className="panel stack">
-        <h2 className="pj-judul2">{t('layar.sepuluhBesar')}</h2>
-        <div className="pj-papan">
-          <Leaderboard rows={podium} limit={10} prizes={room.prizes} />
-        </div>
-      </div>
-      <p className="pj-teks2 tengah">{t('layar.terimaKasih')}</p>
-    </div>
-  );
+  // T-057: konsep A 'Panggung podium' (character/proyektor-t056), menggantikan trio tokoh + kotak juara 1 + tabel 10 besar.
+  const akhir = <PanggungJuara rows={podium} acara={namaAcara} hadiah={hadiah} />;
 
   const isi =
     fase === 'LOBBY' || fase === 'TUTORIAL'
@@ -609,7 +557,7 @@ export default function Projector() {
   // ---------------------------------------------------------------- render
 
   return (
-    <div className="proyektor">
+    <div className={'proyektor' + (fase === 'FINISHED' ? ' pj-akhir' : '')}>
       <style>{CSS}</style>
       <header className="wrap-lebar pj-lebar baris-antara" style={{ flexWrap: 'wrap', gap: 12 }}>
         <div className="baris">
@@ -635,12 +583,15 @@ export default function Projector() {
         </div>
       </header>
 
-      <div className="wrap-lebar pj-lebar stack">
-        {status !== 'connected' ? (
-          <Pesan jenis="kuning">{t('layar.menyambungUlangServer')}</Pesan>
-        ) : null}
-        {isi}
-      </div>
+      {status !== 'connected' && fase === 'FINISHED' ? <Pesan jenis="kuning">{t('layar.menyambungUlangServer')}</Pesan> : null}
+      {fase === 'FINISHED' ? isi : (
+        <div className="wrap-lebar pj-lebar stack">
+          {status !== 'connected' ? (
+            <Pesan jenis="kuning">{t('layar.menyambungUlangServer')}</Pesan>
+          ) : null}
+          {isi}
+        </div>
+      )}
 
       {konfeti ? <Confetti jumlah={90} /> : null}
 

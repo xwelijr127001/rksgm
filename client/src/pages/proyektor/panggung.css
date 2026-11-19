@@ -1,0 +1,89 @@
+/* T-057: panggung juara proyektor (PanggungJuara.tsx). Semua ukuran dalam piksel PANGGUNG 1920 x 1016; kotaknya diskalakan
+   utuh (transform) ke ruang di bawah bilah status. Ukuran tampil = ukuran di sini x skala: 1920x1080 -> x 1,0; 1366x768 ->
+   x 0,68 (judul 64 -> 44 px, nama di blok 40 -> 27 px, daftar 4-10 32 -> 22 px); 1280x720 -> x 0,63 (40 -> 25 px).
+   Warna: PALET.md (marun tirai, kuning surveyor, jingga merek, krem) + emas/perak/perunggu podium. */
+
+.proyektor.pj-akhir { height: 100vh; height: 100dvh; min-height: 0; padding: 8px clamp(12px, 2vw, 32px) 0; gap: 8px; overflow: hidden; }
+.proyektor.pj-akhir > header { flex: 0 0 auto; }
+.pjp-wadah { position: relative; flex: 1 1 auto; min-height: 0; overflow: hidden; margin: 0 calc(-1 * clamp(12px, 2vw, 32px)); }
+
+.pjp-panggung {
+  position: absolute; left: 0; top: 0; width: 1920px; height: 1016px; transform-origin: 0 0; overflow: hidden;
+  background: #1c1d30; color: #fff1e2; font-family: var(--font-judul); image-rendering: pixelated;
+}
+.pjp-tirai {
+  position: absolute; left: 0; right: 0; top: 0; height: 806px;
+  background:
+    linear-gradient(90deg, transparent 0 26%, rgba(28, 29, 48, .62) 36% 64%, transparent 74% 100%),
+    repeating-linear-gradient(90deg, #5b2533 0 12px, #7a3346 12px 30px, #5b2533 30px 66px, #3e1620 66px 78px, #5b2533 78px 96px);
+}
+.pjp-lampu-atas {
+  position: absolute; left: 0; right: 0; top: 0; height: 60px;
+  background: repeating-linear-gradient(90deg, #f6d25c 0 24px, transparent 24px 48px) left 12px bottom 0 / 100% 18px no-repeat, #3e1620;
+}
+.pjp-sorot {
+  position: absolute; left: 50%; top: 60px; width: 1000px; height: 746px; transform: translateX(-50%);
+  clip-path: polygon(44% 0, 56% 0, 100% 100%, 0 100%); background: rgba(255, 241, 194, .08); transition: background 600ms ease;
+}
+.pjp-sorot.lebar { background: rgba(255, 241, 194, .16); }
+.pjp-lantai {
+  position: absolute; left: 0; right: 0; top: 806px; bottom: 0; border-top: 10px solid #c3976a;
+  background: repeating-linear-gradient(90deg, #9c6b3f 0 116px, #7a5232 116px 120px);
+}
+
+.pjp-judul {
+  position: absolute; top: 76px; left: 380px; right: 380px; margin: 0; text-align: center;
+  font-size: 64px; line-height: 1.1; font-weight: 900; color: #f6d25c; text-shadow: 6px 6px 0 #9a4f00; overflow-wrap: anywhere;
+}
+
+/* Miss Raksa + gelembung */
+.pjp-miss { position: absolute; left: 130px; bottom: 210px; }
+.pjp-gelembung {
+  position: absolute; left: 36px; top: 96px; width: 360px; margin: 0; padding: 18px 22px 26px;
+  background: #ffffff; color: #212121; font-size: 30px; line-height: 1.25; font-weight: 800;
+  box-shadow: 0 0 0 6px #212121, inset 0 -10px 0 #f3ded3;
+}
+.pjp-gelembung b { display: block; margin-bottom: 4px; font-size: 20px; color: #9a4f00; letter-spacing: .02em; }
+.pjp-gelembung::after { /* ekor bertangga ke arah Miss Raksa */
+  content: ''; position: absolute; left: 150px; bottom: -30px; width: 12px; height: 12px; background: #212121;
+  box-shadow: 0 12px 0 #212121, 12px -6px 0 #212121, -12px 6px 0 #ffffff;
+}
+
+/* Podium 2-1-3 (hanya blok yang ada pemainnya, di tengah) */
+.pjp-podium { position: absolute; left: 0; right: 0; bottom: 150px; margin: 0; padding: 0; list-style: none; display: flex; justify-content: center; align-items: flex-end; gap: 40px; }
+.pjp-blok { width: 240px; display: flex; flex-direction: column; align-items: center; opacity: 0; transform: translateY(-80px); transition: opacity 260ms ease-out, transform 380ms cubic-bezier(.3, 1.6, .5, 1); }
+.pjp-blok.tampil { opacity: 1; transform: none; }
+.pjp-orang { margin-bottom: -6px; line-height: 0; }
+.pjp-muka {
+  width: 240px; height: var(--tinggi); display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 14px 10px 0; text-align: center;
+  box-shadow: 0 0 0 6px #212121, inset 0 -16px 0 rgba(0, 0, 0, .16); color: #212121;
+}
+.pjp-blok.emas .pjp-muka { background: #f6d25c; }
+.pjp-blok.perak .pjp-muka { background: #e2e2e2; }
+.pjp-blok.perunggu .pjp-muka { background: #e8a87c; }
+.pjp-angka { font-size: 96px; line-height: .95; font-weight: 900; }
+.pjp-nama { max-width: 220px; font-size: 40px; line-height: 1.1; font-weight: 900; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.pjp-poin { font-size: 30px; line-height: 1.15; font-weight: 800; color: #5b2533; }
+.pjp-hadiah, .pjp-seri { max-width: 220px; font-size: 18px; line-height: 1.2; font-weight: 700; color: #3e1620; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.pjp-kosong { position: absolute; left: 0; right: 0; top: 480px; margin: 0; text-align: center; font-size: 40px; }
+
+/* Peringkat 4-10 */
+.pjp-samping { position: absolute; left: 1430px; top: 250px; width: 450px; padding: 18px; background: #2a2b45; box-shadow: 0 0 0 6px #f6d25c; }
+.pjp-samping h3 { margin: 0 0 12px; font-size: 32px; line-height: 1.1; color: #f6d25c; }
+.pjp-samping ol { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; }
+.pjp-samping li {
+  display: grid; grid-template-columns: 44px 48px minmax(0, 1fr) auto; align-items: center; gap: 12px; height: 58px; padding: 0 12px;
+  background: #30314e; font-size: 32px; font-weight: 800; opacity: 0; transform: translateX(40px); transition: opacity 200ms ease-out, transform 220ms ease-out;
+}
+.pjp-samping li:nth-child(even) { background: #24253c; }
+.pjp-samping li.tampil { opacity: 1; transform: none; }
+.pjp-s-no { color: #f6d25c; }
+.pjp-s-nama { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: #ffffff; }
+.pjp-s-poin { color: #fbd7a3; font-variant-numeric: tabular-nums; }
+
+/* Konfeti piksel */
+.pjp-konfeti { position: absolute; inset: 0; pointer-events: none; overflow: hidden; }
+.pjp-konfeti i { position: absolute; animation: pjp-jatuh linear infinite; }
+.pjp-konfeti.diam i { animation: none; }
+@keyframes pjp-jatuh { from { transform: translateY(0); } to { transform: translateY(1060px); } }
+@media (prefers-reduced-motion: reduce) { :root:not([data-gerak="penuh"]) .pjp-konfeti i { animation: none; } :root:not([data-gerak="penuh"]) :is(.pjp-blok, .pjp-samping li) { transition: none; } }

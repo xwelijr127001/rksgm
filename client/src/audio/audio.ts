@@ -35,7 +35,12 @@ export type Sfx =
   | 'konfirmasi'
   | 'batal'
   // T-045: default sound of every orange main-action key (one central listener, ui/kit.tsx AudioUnlocker).
-  | 'tombol';
+  | 'tombol'
+  // T-057: projector winners stage (original synth): drum roll (0.8 s, played twice), podium pop, short fanfare, one chime.
+  | 'drum'
+  | 'podium'
+  | 'fanfare'
+  | 'chime';
 
 export interface AudioPrefs {
   muted: boolean;
@@ -743,6 +748,28 @@ function bunyikan(name: Sfx, sfxBus: GainNode, t: number): (() => void) | undefi
       break;
     case 'tik':
       tone(sfxBus, N(28), t, 0.035, 0.12, 'square');
+      break;
+    case 'drum':
+      // T-057 snare roll ~0.8 s: 22 band-passed noise taps getting slightly louder, low tom under the start.
+      for (let i = 0; i < 22; i++) noise(sfxBus, t + i * 0.036, 0.03, 0.05 + i * 0.0035, 1800, [2200, 1.1]);
+      pop(sfxBus, t, 160, 90, 0.18, 0.16);
+      break;
+    case 'podium':
+      // T-057 a winner lands on the block: soft low thump + two bright bell notes.
+      pop(sfxBus, t, 220, 110, 0.12, 0.28);
+      bel(sfxBus, N(19), t + 0.06, 0.25, 0.12);
+      bel(sfxBus, N(26), t + 0.13, 0.3, 0.1);
+      break;
+    case 'fanfare':
+      // T-057 short 8-bit fanfare ~0.85 s: G-C-E-G rising (square), last note held, triangle octave under it.
+      [7, 12, 16].forEach((s, i) => tone(sfxBus!, N(s + 12), t + i * 0.11, 0.1, 0.16, 'square'));
+      tone(sfxBus, N(31), t + 0.33, 0.48, 0.17, 'square');
+      tone(sfxBus, N(19), t + 0.33, 0.48, 0.14, 'triangle');
+      break;
+    case 'chime':
+      // T-057 reduced motion: everything appears at once with one calm chime.
+      bel(sfxBus, N(24), t, 0.5, 0.14);
+      bel(sfxBus, N(31), t + 0.08, 0.6, 0.11);
       break;
     case 'papan':
       [7, 12, 16].forEach((s, i) => tone(sfxBus!, N(s), t + i * 0.055, 0.14, 0.2, 'triangle'));
