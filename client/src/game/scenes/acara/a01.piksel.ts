@@ -20,15 +20,25 @@ export function latarA01(): Piksel {
   p.dither(0, 3, 160, 21, '#e8cfab', 0.07);
   p.rect(0, 0, 160, 3, '#e2cda5');
   p.rect(0, 3, 160, 1, '#cdb48a');
-  // jelaga: lidah asap di dinding di atas rak (api sudah padam, bekasnya tinggal)
-  const lidah = (i: number, j: number, kuat: number) => Math.max(0, (j / 20) * kuat + Math.abs(Math.sin((i + 3) * 0.55)) * 0.45 - 0.55);
-  p.dither(40, 3, 40, 21, '#d8bf9b', (i, j) => lidah(i, j, 1.2));
-  p.dither(40, 3, 40, 21, '#b59c7c', (i, j) => lidah(i, j, 0.9) - 0.15);
-  p.dither(44, 3, 30, 3, '#d8bf9b', 0.35);
-  // rak hangus: dua tiang, dua papan, kotak gosong
-  p.rect(47, 5, 2, 19, '#6f5a49').rect(75, 5, 2, 19, '#6f5a49');
-  p.rect(46, 12, 32, 2, JELAGA).rect(46, 21, 32, 2, JELAGA);
-  const kotak = (x: number, y: number, w: number, h: number, c: string) => { p.rect(x, y, w, h, c); p.dither(x, y, w, 2, HANGUS, 0.7); p.set(x + 1, y + 2, HANGUS); };
+  // T-054 Fix 1: BEKAS KEBAKARAN yang jelas (api sudah padam, aman): jelaga hitam naik dari rak ke plafon, plafon menghitam,
+  // pojok kiri atas gosong. Lidah api tergambar sebagai lidah jelaga bertingkat (cokelat tua -> hitam di tengahnya).
+  const lidah = (i: number, j: number, lebar: number) => {
+    const t = Math.abs(Math.sin((i + 2) * 0.42)) * 0.6 + 0.4; // tinggi lidah 40..100 %
+    return (21 - j) / 21 < t * lebar ? 1 : 0;
+  };
+  p.rect(34, 0, 52, 3, '#5f4c3e').rect(38, 3, 44, 1, '#4a3b30'); // plafon menghitam di atas rak
+  p.dither(30, 3, 60, 21, '#a48b70', (i, j) => lidah(i - 4, j, 1.0) * 0.85);
+  p.dither(36, 3, 48, 21, '#6f5a49', (i, j) => lidah(i, j, 0.85));
+  p.dither(40, 3, 40, 21, HANGUS, (i, j) => lidah(i + 3, j, 0.7));
+  p.dither(44, 6, 32, 18, '#2a211e', (i, j) => lidah(i + 5, j, 0.45));
+  p.rect(0, 0, 9, 3, '#5f4c3e').dither(0, 3, 6, 6, '#6f5a49', (i, j) => (6 - i - j) / 6); // pojok kiri atas gosong
+  // asap tipis di bawah plafon (tersisa sesudah dipadamkan)
+  p.dither(0, 4, 160, 4, '#d9d2c8', (i, j) => (4 - j) / 4 * 0.35);
+  // rak hangus: tiang & papan menghitam, bibir papan gosong, kotak gosong
+  p.rect(47, 5, 2, 19, '#4a3b30').rect(75, 5, 2, 19, '#4a3b30');
+  p.rect(46, 12, 32, 2, '#2a211e').rect(46, 21, 32, 2, '#2a211e');
+  for (let x = 46; x < 78; x += 3) p.set(x, 11, '#2a211e').set(x + 1, 20, '#2a211e');
+  const kotak = (x: number, y: number, w: number, h: number, c: string) => { p.rect(x, y, w, h, c); p.rect(x, y, w, 2, HANGUS); p.dither(x, y + 2, w, 2, HANGUS, 0.6); p.set(x + 1, y + 2, '#2a211e'); };
   kotak(50, 6, 8, 6, '#8d7663'); kotak(60, 8, 6, 4, '#7e6c5d'); kotak(67, 5, 7, 7, '#978269');
   kotak(50, 16, 5, 5, '#908a82'); kotak(57, 17, 9, 4, '#806a58'); p.bulat(70, 18.5, 2.5, '#8c7b6b').bulat(70, 18.5, 1, '#6b5a4c');
   // APAR merah di dinding
@@ -36,9 +46,11 @@ export function latarA01(): Piksel {
   p.kartu(7, 6, 6, 14, '#d32f2f', '#9e1f1f');
   p.rect(8, 11, 4, 3, '#fff1e2').rect(8, 8, 1, 10, '#ef9a9a');
   p.rect(8, 3, 3, 3, '#33363f').rect(11, 4, 3, 1, '#33363f');
-  // bingkai foto
-  p.kartu(23, 5, 14, 11, '#aec8da', '#73502f');
-  p.rect(24, 12, 12, 3, '#8db07a').set(33, 8, '#f6d25c').set(34, 8, '#f6d25c');
+  // papan nama toko di dinding (T-054 Fix 1: pindah dari atas pintu supaya pemilik di ambang pintu tidak menutupinya)
+  p.kartu(20, 4, 21, 15, '#ff9000', '#9a4f00');
+  p.teks(23, 6, 'TOKO', TINTA);
+  p.teks(23, 12, 'KAIN', TINTA);
+  p.set(39, 5, '#5f4c3e').set(38, 5, '#5f4c3e').set(39, 6, '#5f4c3e'); // sudut papan terkena jelaga
   // pintu rolling terangkat + jalan cerah di luar
   p.rect(86, 7, 48, 18, '#cfe6ee');
   p.rect(86, 7, 48, 2, '#b8dbe8');
@@ -49,12 +61,11 @@ export function latarA01(): Piksel {
   p.rect(86, 21, 48, 4, '#7a7a7a').rect(86, 21, 48, 1, '#9a9a9a');
   for (let x = 88; x < 134; x += 6) p.rect(x, 23, 3, 1, '#f6d25c');
   p.rect(84, 7, 2, 18, '#8c8c8c').rect(134, 7, 2, 18, '#8c8c8c');
-  // gulungan pintu rolling (bilah besi) + papan "TOKO KAIN"
+  // gulungan pintu rolling (bilah besi, sisi kiri ikut berjelaga)
   p.rect(84, 2, 52, 6, '#b8b8b8');
   for (let y = 3; y < 8; y += 2) p.rect(84, y, 52, 1, '#9a9a9a');
   p.rect(84, 7, 52, 1, '#6f6f6f');
-  p.kartu(91, 1, 37, 7, '#ff9000', '#9a4f00');
-  p.teks(93, 2, 'TOKO KAIN', TINTA);
+  p.dither(84, 2, 10, 6, '#6f5a49', (i) => (10 - i) / 12);
   // lantai keramik
   p.rect(0, 25, 160, 95, '#e9dfcb');
   for (let y = 30; y < 120; y += 6) p.rect(0, y, 160, 1, '#d6c6a6');
@@ -73,7 +84,17 @@ export function latarA01(): Piksel {
   };
   gulung(4, 49, 26, '#dcb0a6', '#c29188', false);
   gulung(6, 44, 22, '#aec8da', '#8fb0c6', true);
-  gulung(8, 39, 18, '#e7d59a', '#cfba78', false);
+  gulung(8, 39, 18, '#e7d59a', '#cfba78', true);
+  // tumpukan kain hangus di lantai depan lemari (sudah dingin): gundukan hitam + abu
+  p.kotakTangga(2, 86, 18, 5, '#2a211e').kotakTangga(4, 84, 12, 3, HANGUS);
+  p.rect(5, 85, 3, 1, '#7a5a48').rect(12, 88, 4, 1, '#5f4c3e').set(8, 89, '#8d7663').set(16, 87, '#8d7663');
+  p.dither(1, 91, 22, 1, '#a59c90', 0.5);
+  // genangan air bekas pemadaman (biru pucat, kilap), di lantai kiri dan di bawah meja
+  const genangan = (x: number, y: number, w: number) => {
+    p.kotakTangga(x, y, w, 4, '#aec8da').rect(x + 1, y + 1, w - 2, 2, '#c3d8e6');
+    p.rect(x + 2, y + 1, Math.max(2, Math.floor(w / 3)), 1, '#eef6fa');
+  };
+  genangan(6, 95, 22); genangan(20, 101, 10);
   // meja panjang tampak atas-depan (sama dengan m03)
   p.rect(32, 113, 128, 3, '#d4c3a2');
   p.rect(37, 112, 4, 7, '#9c6b3f').rect(151, 112, 4, 7, '#9c6b3f');
@@ -85,7 +106,12 @@ export function latarA01(): Piksel {
   p.rect(38, 24, 122, 2, '#d3b083');
   p.rect(37, 56, 123, 1, '#d4b286').rect(36, 90, 124, 1, '#d4b286');
   p.dither(40, 27, 118, 82, '#dcba8d', 0.05);
+  // tepi belakang meja ikut berjelaga di bawah rak
+  p.dither(38, 24, 44, 3, HANGUS, (i) => Math.max(0, 0.7 - Math.abs(i - 22) / 30));
   p.rect(32, 110, 128, 3, '#c3976a').rect(32, 110, 128, 1, '#a97b50');
+  // genangan di lantai depan meja (di atas bayangan meja)
+  p.kotakTangga(60, 115, 18, 4, '#aec8da').rect(61, 116, 16, 2, '#c3d8e6').rect(62, 116, 5, 1, '#eef6fa');
+  p.kotakTangga(104, 116, 12, 3, '#aec8da').rect(106, 117, 3, 1, '#eef6fa');
   return p;
 }
 
@@ -110,8 +136,12 @@ export function kainA01(): Piksel {
     if (gosong) p.kotakTangga(x, y, 4, 7, HANGUS).set(x + 4, y + 1, HANGUS).set(x + 4, y + 4, HANGUS).set(x + 5, y + 2, JELAGA).set(x + 4, y + 3, JELAGA);
   };
   rol(1, 13, 31, '#dcb0a6', '#c29188', '#ead0c9', false);
-  rol(3, 7, 27, '#aec8da', '#8fb0c6', '#d3e3ee', false);
+  rol(3, 7, 27, '#aec8da', '#8fb0c6', '#d3e3ee', true);
   rol(5, 1, 24, '#e7d59a', '#cfba78', '#f3e8c1', true);
+  // T-054 Fix 1: gulungan atas hangus sampai separuh (hitam, bertepi cokelat) + noda gosong di gulungan tengah
+  p.kotakTangga(5, 1, 12, 7, '#2a211e').rect(17, 2, 1, 5, HANGUS).set(18, 3, JELAGA).set(18, 5, JELAGA).set(17, 1, HANGUS);
+  p.rect(7, 2, 3, 1, '#5f4c3e').set(12, 5, '#5f4c3e');
+  p.rect(14, 8, 3, 2, HANGUS).set(17, 9, JELAGA);
   return p;
 }
 

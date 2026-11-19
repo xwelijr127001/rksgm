@@ -11,8 +11,8 @@
  *   dan slot depan kiri + kanan; posisinya diacak antar slot (`acakPosisi`).
  * - Slot depan-tengah tanpa pilihan: di situ tumpukan gulungan kain (prop pucat tanpa garis
  *   tepi, penanda "toko kain"). Akibatnya dua label baris depan tidak pernah bertetangga.
- * - Pemilik toko (prop, kepala & bahu) berdiri di balik meja, di kanan pintu rolling (T-054: x 588,
- *   supaya papan "TOKO KAIN" di atas pintu tetap terlihat).
+ * - Pemilik toko (prop, kepala & bahu) berdiri di balik meja, di ambang pintu rolling, di sela kolom tengah & kanan
+ *   (T-054 Fix 1: x 453, tepi bawah y 120; papan "TOKO KAIN" kini di dinding kiri).
  *
  * Lebar label (teks tebal 20 px + bantalan 44): jarak kolom 178 berarti jumlah lebar dua label
  * bertetangga di baris belakang <= 356, dan label kolom kanan <= 184 supaya tidak dijepit tepi.
@@ -42,7 +42,10 @@ const OH = 88;
  */
 const kartu = (j: JenisKartuA01): ArtRef => art(`a01-${j}-piksel`, OW, OH, kartuA01(j).svg(4));
 
-/** Pemilik toko (Pak Darto, atlas tokoh samping cerita, diperkecil 2 : 1, menghadap meja), kepala & bahu di balik meja. */
+/**
+ * Pemilik toko (T-054 Fix 1): Ibu pemilik toko kain, tokoh BARU dari bagian tokoh cerita (wanita atlas tokoh samping, blus
+ * marun + celemek toko krem bertali jingga; ./a01.pemilik.ts), diperkecil 2 : 1, menghadap meja, kepala & bahu.
+ */
 function pemilikToko(): ArtRef {
   const p = new Piksel(PEMILIK_A01[0]!.length, PEMILIK_A01.length).pola(0, 0, PEMILIK_A01, PEMILIK_A01_PETA);
   return art('a01-pemilik-piksel', p.w * 4, p.h * 4, p.svg(4));
@@ -63,8 +66,9 @@ function sceneApiPadam(): SceneSpec {
     background: art('a01-latar-piksel', 640, 480, latarA01().svg(4)),
     props: [
       { id: 'lampu', x: 334, y: 34, art: art('a01-lampu-piksel', 40, 68, lampuA01().svg(4)), motion: 'sway', depth: 5 },
-      // T-054: di kanan pintu rolling (papan TOKO KAIN tetap terlihat); bahu tepat di tepi belakang meja (y 96).
-      { id: 'pemilik', x: 588, y: 96 - pemilik.h / 2, art: pemilik, depth: 6 },
+      // T-054 Fix 1: Ibu pemilik toko kain berdiri di ambang pintu rolling, di balik meja, kepala & bahu utuh (tidak terpotong
+      // tepi): tepi bawah gambar y 120, 24 dunia terakhir (bahu) di balik kartu baris belakang yang digambar di atasnya.
+      { id: 'pemilik', x: 453, y: 120 - pemilik.h / 2, art: pemilik, depth: 6 },
       { id: 'kain', x: kol[1]!, y: 282, art: art('a01-kain-piksel', 132, 84, kainA01().svg(4)), depth: 6 },
     ],
     hero: { x: 60, y: 478 },
