@@ -8,6 +8,8 @@
  */
 import { useEffect, useId, useRef, useState, type FormEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { TOKOH } from '@shared/brand';
+import { IkonMissPose } from '../art/IkonMissPose';
 import { PotretSurveyor } from '../art/Surveyor';
 import { POTRET_AWAL } from '../art/WelcomeArt';
 import { t, useBahasa } from '../i18n';
@@ -39,7 +41,8 @@ export function JoinGame({ kodeSaran = null, className = '' }: { kodeSaran?: str
   return (
     <section className={'lp-join ' + className + (galat ? ' lp-join-ada-galat' : '')} aria-labelledby={id + 'j'} data-join-game="">
       <div className="lp-join-kepala">
-        <PotretSurveyor ukuran={POTRET_AWAL} />
+        {/* T-058: Miss Raksa dengan telepon (piksel), beda dari kartu Mode Cerita; 30 px di HP (player.css). */}
+        {TOKOH.missRaksa.aktif ? <span className="lp-join-ikon"><IkonMissPose pose="telepon" className="lp-join-ikon-besar" /><IkonMissPose pose="telepon30" className="lp-join-ikon-kecil" /></span> : <PotretSurveyor ukuran={POTRET_AWAL} />}
         <div className="lp-join-teks"><h2 className="lp-join-judul" id={id + 'j'}><span className="lp-join-judul-lebar">{t('pemain.joinJudul')}</span><span className="lp-join-judul-hp">{t('pemain.joinTanya')}</span></h2><p className="lp-join-isi" id={id + 'i'}>{t('pemain.joinIsi')}</p></div>
       </div>
       <form className="lp-join-form" onSubmit={kirim} noValidate>

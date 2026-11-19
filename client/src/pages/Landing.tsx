@@ -8,7 +8,7 @@ import { POTRET_AWAL, WelcomeArt } from '../art/WelcomeArt';
 import { JoinGame } from '../components/JoinGame';
 import { PemuatAwal } from '../components/PemuatAwal';
 import { Arrow, PlayerShell } from '../components/PlayerShell';
-import { PotretTokoh } from '../game/KarakterTokoh';
+import { IkonMissPose } from '../art/IkonMissPose';
 import { t, useBahasa } from '../i18n';
 import { terjemahkanBawaan } from '../i18n/galat';
 import { useLegacyEnabled } from '../story/appConfig';
@@ -35,7 +35,7 @@ function useAcaraTerbuka(aktif: boolean): Acara | null {
   }, [aktif]);
   return aktif ? acara : null;
 }
-/** Raki di bingkai potret bulat yang SAMA dengan PotretTokoh (kelas .tokoh-potret dari game/tokoh.css). */
+/** Raki di bingkai potret bulat (kelas .tokoh-potret dari game/tokoh.css); hanya bila Miss Raksa nonaktif. */
 function PotretRaki() {
   return <span className="tokoh-potret lp-potret-raki" style={{ width: POTRET_AWAL, height: POTRET_AWAL }}><Raki size={Math.round(POTRET_AWAL * 1.2)} mood="sapa" /></span>;
 }
@@ -71,7 +71,7 @@ function ModeCerita() {
     <h2 className="lp-sendiri-judul" id={id + 's'}>{t('pemain.mainSendiri')}</h2>
     <Link className="lp-pintu lp-pintu-cerita-solo" to={ke} onPointerEnter={hangatkan} onFocus={hangatkan} aria-labelledby={`${id}j ${id}m`} aria-describedby={id + 'i'} data-pintu-cerita="">
       <span className="lp-pintu-potret" aria-hidden="true">
-        {TOKOH.missRaksa.aktif ? <PotretTokoh tokoh="missRaksa" ukuran={POTRET_AWAL} hias /> : <PotretRaki />}
+        {TOKOH.missRaksa.aktif ? <IkonMissPose pose="kasus" /> : <PotretRaki />}
       </span>
       <span className="lp-pintu-teks"><b className="lp-pintu-judul" id={id + 'j'}>{t('pemain.pintuCeritaJudul')}</b><span className="lp-pintu-isi lp-pintu-isi-lebar" id={id + 'i'}>{t('pemain.pintuCeritaIsi')}</span><span className="lp-pintu-isi lp-pintu-isi-hp" aria-hidden="true">{t('pemain.pintuCeritaIsiHp')}</span></span>
       <span className="lp-pintu-aksi" id={id + 'm'}>{t('pemain.pintuCeritaMulai')} <Arrow /></span>

@@ -694,3 +694,12 @@ html:has(.lp-pemuat) { overflow: hidden; }
   .alur-kenalan .alur-aksi-lengket { margin: 0 -16px; padding: 8px 16px calc(8px + env(safe-area-inset-bottom)); }
   .alur-kenalan .alur-aksi-baris .primary-action { min-height: 50px; padding-top: 12px; padding-bottom: 12px; }
 }
+
+/* T-058: Miss Raksa pixel pose icons (art/IkonMissPose.tsx). Ring + disc are baked into the PNG; 1 art px = 1 CSS px. */
+.ikon-miss-pose { display: inline-block; flex: 0 0 auto; border-radius: 50%; background-repeat: no-repeat; image-rendering: pixelated; }
+.lp-join-ikon { display: inline-flex; flex: 0 0 auto; }
+.lp-join-ikon-kecil { display: none !important; }
+@media (max-width: 700px) {
+  .lp-halaman .lp-join-kepala .lp-join-ikon-besar { display: none !important; }
+  .lp-halaman .lp-join-kepala .lp-join-ikon-kecil { display: inline-block !important; }
+}

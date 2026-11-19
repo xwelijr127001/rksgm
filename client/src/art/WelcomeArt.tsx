@@ -1,5 +1,6 @@
 import { TOKOH } from '@shared/brand';
-import { PotretTokoh, SpriteTokoh, namaTokoh } from '../game/KarakterTokoh';
+import { SpriteTokoh, namaTokoh } from '../game/KarakterTokoh';
+import { IkonMissPose } from './IkonMissPose';
 import { Raki } from './Raki';
 import { t, useBahasa } from '../i18n';
 
@@ -80,7 +81,7 @@ export function WelcomeArt() {
     </div>
     {/* Catatan kota = sapaan Miss Raksa. Potret disembunyikan dari pembaca layar: namanya sudah dibacakan di balon. */}
     <figcaption className="lp-kota-sapa">
-      {miss ? <span className="lp-kota-potret" aria-hidden="true"><PotretTokoh tokoh="missRaksa" ukuran={POTRET_AWAL} /></span> : null}
+      {miss ? <span className="lp-kota-potret" aria-hidden="true"><IkonMissPose pose="sapa" /></span> : null}
       {/* T-007 D-38: tanpa potret (tokoh nonaktif) balon tidak memakai ekor ke kiri. */}
       <p className={miss ? 'lp-kota-balon' : 'lp-kota-balon lp-kota-balon-tanpa-potret'}>
         {miss ? <b>{namaTokoh('missRaksa')}</b> : null}

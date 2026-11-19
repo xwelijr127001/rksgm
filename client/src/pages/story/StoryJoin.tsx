@@ -9,6 +9,8 @@ import { Link, Navigate, useNavigate, useSearchParams } from 'react-router-dom';
 import { personalize } from '@shared/story/content';
 import { checkName, NAME_MAX_CHARS } from '@shared/story/names';
 import type { StoryRoomInfo } from '@shared/story/protocol';
+import { TOKOH } from '@shared/brand';
+import { IkonMissPose } from '../../art/IkonMissPose';
 import { PotretSurveyor } from '../../art/Surveyor';
 import { Arrow, PlayerShell } from '../../components/PlayerShell';
 import { t, useBahasa } from '../../i18n';
@@ -81,7 +83,7 @@ function JoinFlow({ initialCode, legacy }: { initialCode: string; legacy: boolea
     <PlayerShell back="/" className="sr-halaman" judul={t('ruang.joinJudul')}>
       <main className="sr-join">
         <div className="sr-join-kepala">
-          <PotretSurveyor ukuran={56} />
+          {TOKOH.missRaksa.aktif ? <IkonMissPose pose="telepon56" /> : <PotretSurveyor ukuran={56} />}
           <div>
             <h1>{t('ruang.joinJudul')}</h1>
             <p className="sr-lembut">{t('ruang.joinPengantar')}</p>

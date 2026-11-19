@@ -50,6 +50,7 @@ import { bacaAngka, misiBergambar, visualMisi } from './gambar';
 import { GameStage, type StageApi, type StageStatus } from './GameStage';
 import { judulHasil, nilaiMisi, statusMisi, type BarisHasil, type HasilLangkah } from './hasil';
 import { PotretTokoh } from './KarakterTokoh';
+import { IkonMissPose } from '../art/IkonMissPose';
 import { HasilAcara } from './HasilAcara';
 import { sceneFor } from './scenes';
 import type { ActionFx, SceneSpec, StageMode, StageStats, StageView } from './types';
@@ -598,7 +599,7 @@ export function MissionPlay(props: MissionPlayProps) {
           ) : null}
           <div className="tugas-inti">
             <span className="tugas-pemandu" aria-hidden="true">
-              {pemandu === 'raki' ? <Raki size={44} mood="sapa" /> : props.potretPemandu ?? <PotretTokoh tokoh="missRaksa" ukuran={44} />}
+              {pemandu === 'raki' ? <Raki size={44} mood="sapa" /> : props.potretPemandu ?? <IkonMissPose pose="jelaskan" />}
             </span>
             <div>
               <h2 ref={tanyaRef} id="misi-tanya" className="misi-tanya">{step.prompt}</h2>
