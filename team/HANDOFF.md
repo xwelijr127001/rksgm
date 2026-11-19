@@ -3073,3 +3073,48 @@ The 10 event cases (paket acara) are the next task, as the brief says.
 
 ## T-054a
 QA added `server/src/acara/a01.expect.test.ts` (2 snapshots: public mission shape in id/en/zh, 11 verdict+score cases; appended to the server test script, about 0.7 s); values checked by eye, scoring is (correct - wrong)/required so 1 correct + 1 wrong = 0 and 1 option or 3 options = 0.5; speed bonus sits on top of 1000 so a perfect fast answer scores 1267 at 5 s.
+
+## T-054 (2026-11-19): event case 1 "Setelah Api Padam" in the pixel style (Designer, step 1 of 10)
+
+Built by the Designer; uncommitted. Owner rule: nothing was opened in a browser. Gate: client typecheck 0 errors; client/dist rebuilt. shared/acara/* and server/src/acara/* are untouched (git status clean). Previews are in `character/acara-a01-t054/` (README): before = the old scene as SVG, after = PNG composed from the game's own grids.
+
+**Case 1 only (scene art)**
+- Files: `client/src/game/scenes/acara/a01.ts`, `a01.piksel.ts` (new), `a01.pemilik.ts` (new, generated), `client/src/game/art/piksel.ts` (new pixel-grid helper that outputs SVG rect runs with crispEdges; it uses the existing SVG rasteriser, so there is no new atlas or loader).
+- **Background:** the burnt-but-safe fabric shop as a pixel grid of 160×120 cells (1 cell = 4 world units).
+  - The same m03 geometry is kept.
+  - Contents: soot tongues on the wall, a burnt shelf, the fire extinguisher, a photo, the rolled-up rolling door with an orange "TOKO KAIN" plate, the street outside, a cabinet with fabric rolls (one scorched), a tiled floor and the long table.
+- **Props and cards:**
+  - pixel lamp;
+  - fabric pile;
+  - five pixel action cards (camera, report sheet + orange check, screwdriver, bin with burnt goods, maroon "BUKA" sign).
+- **Shop owner:** Pak Darto from the story side-character atlas, reduced 2:1, mirrored to face the table, head and collar. He moved to x 588 (right of the door) so the "TOKO KAIN" plate shows.
+- **Unchanged:** option ids, labels (id/en/zh), slots, acakPosisi, behaviour and socket events.
+
+**Engine (shared code, active ONLY for scenes that opt in; only case 1 does)**
+- `SceneSpec.gaya: 'piksel'` (`client/src/game/types.ts`). MissionScene then draws:
+  - square stepped label pills with a 4 px ink base;
+  - square tap/pick markers;
+  - a square focus ring;
+  - an orange stepped frame (orange 8 + dark orange 4) with a check badge around each selected option.
+- Selection rules are unchanged (max 2, tap again to undo).
+
+**Shared chrome (all 10 event cases, scene art untouched for cases 2–10)**
+- `MissionPlay` root gets `data-paket="acara"` for mission ids `aNN-*`. New `client/src/game/acara-piksel.css`, imported by MissionPlay:
+  - the task card as a K1 stepped orange frame;
+  - the scene in an ink pixel frame with a base;
+  - the "Pilihanmu" chip and tool keys as pixel chips.
+- On phones (≤899 px wide, ≤760 px tall) while answering, a compact layout: smaller title and prompt, one-line hint, first-visit tip hidden, 48 px send key.
+- Practice missions, the tutorial and story activities do not change.
+- The timer and keys were already pixel (T-030, header Timer).
+- The projector shows the same scene art; its chrome already follows the `.proyektor` pixel rules.
+
+**Fit by calculation (answering, one step)**
+
+| Phone | Used | Spare |
+| --- | --- | --- |
+| 360×640 | 622 px | 18 px |
+| 390×700 | 645 px | 55 px |
+
+Before this change it was about 742 px at 360×640, so it scrolled. A transient "max 2" message can still push it a little past 640 while it shows.
+
+**Next:** cases 2–10, one by one after the owner checks this one. The engine flag and the chrome are ready; each case needs only its art.

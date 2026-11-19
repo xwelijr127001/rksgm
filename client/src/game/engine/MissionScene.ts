@@ -84,6 +84,8 @@ interface ObjView {
   verdict: Phaser.GameObjects.Container | null;
   caption: Phaser.GameObjects.Container | null;
   focusRing: Phaser.GameObjects.Graphics;
+  /** (T-054, gaya 'piksel') bingkai jingga bertangga + centang di sekeliling objek yang dipilih; null = gaya lama. */
+  bingkai: Phaser.GameObjects.Graphics | null;
   zone: Phaser.GameObjects.Zone;
   state: ObjectState | null;
   baseScale: number;
@@ -233,10 +235,34 @@ export function defineMissionScene(P: Ph) {
       const root = this.add.container(o.x, o.y).setDepth(depth);
       const ui = this.add.container(o.x, o.y).setDepth(200 + depth);
 
+      const piksel = this.cfg.spec.gaya === 'piksel';
       const focusRing = this.add.graphics();
       focusRing.lineStyle(6, HEX.tinta, 1); // T-029: cincin fokus antarmuka = tinta (jingga 2,9 : 1 pada halaman)
-      focusRing.strokeRoundedRect(-o.art.w / 2 - 12, -o.art.h / 2 - 12, o.art.w + 24, o.art.h + 24, 18);
+      if (piksel) focusRing.strokeRect(-o.art.w / 2 - 12, -o.art.h / 2 - 12, o.art.w + 24, o.art.h + 24);
+      else focusRing.strokeRoundedRect(-o.art.w / 2 - 12, -o.art.h / 2 - 12, o.art.w + 24, o.art.h + 24, 18);
       focusRing.setVisible(false);
+      // T-054 gaya piksel: bingkai pilihan = dua garis bertangga (jingga 8 + jingga tua 4) 4..12 dunia di luar kartu, centang
+      // dalam kotak jingga bertangga di pojok kanan atas (sama dengan kunci piksel T-030; tidak bergantung warna saja).
+      let bingkai: Phaser.GameObjects.Graphics | null = null;
+      if (piksel) {
+        bingkai = this.add.graphics();
+        const kotakTangga = (x: number, y: number, w: number, h: number, t: number, c: number) => {
+          bingkai!.fillStyle(c, 1);
+          bingkai!.fillRect(x + t, y, w - 2 * t, t).fillRect(x + t, y + h - t, w - 2 * t, t);
+          bingkai!.fillRect(x, y + t, t, h - 2 * t).fillRect(x + w - t, y + t, t, h - 2 * t);
+        };
+        const L = -o.art.w / 2 - 12, T = -o.art.h / 2 - 12, BW = o.art.w + 24, BH = o.art.h + 24;
+        kotakTangga(L, T, BW, BH, 4, HEX.kuning);
+        kotakTangga(L + 4, T + 4, BW - 8, BH - 8, 4, HEX.kuning);
+        kotakTangga(L + 8, T + 8, BW - 16, BH - 16, 4, 0x9a4f00);
+        // centang 28 x 28 di pojok kanan atas
+        const cx = L + BW - 22, cy = T - 6;
+        bingkai.fillStyle(HEX.tinta, 1).fillRect(cx + 4, cy, 20, 28).fillRect(cx, cy + 4, 28, 20);
+        bingkai.fillStyle(HEX.kuning, 1).fillRect(cx + 4, cy + 4, 20, 20);
+        bingkai.fillStyle(HEX.tinta, 1);
+        for (const [x, y] of [[0, 3], [1, 4], [2, 5], [3, 4], [4, 3], [5, 2], [6, 1]] as const) bingkai.fillRect(cx + 4 + x * 2.6, cy + 6 + y * 2.6, 3, 3);
+        bingkai.setVisible(false);
+      }
 
       const img = this.add.image(0, 0, this.tex(o.art)).setDisplaySize(o.art.w, o.art.h);
 
@@ -248,7 +274,7 @@ export function defineMissionScene(P: Ph) {
       const tandaTeks = this.teks(0, 1, '', 15);
       label.add([labelBg, tanda, tandaTeks, labelText]);
 
-      root.add([focusRing, img]);
+      root.add(bingkai ? [focusRing, bingkai, img] : [focusRing, img]);
       ui.add(label);
 
       const hitW = Math.max(o.hit?.w ?? o.art.w, 76);
@@ -281,7 +307,7 @@ export function defineMissionScene(P: Ph) {
 
       const v: ObjView = {
         spec: o, root, ui, img, label, labelBg, labelText, tanda, tandaTeks, penanda: null, denyut: null, labelX0: label.x, labelW: 0,
-        tag: null, verdict: null, caption: null, focusRing, zone, state: null, baseScale: img.scaleX,
+        tag: null, verdict: null, caption: null, focusRing, bingkai, zone, state: null, baseScale: img.scaleX,
       };
       this.objs.set(o.id, v);
       this.gambarLabel(v, 'biasa', null, null);
@@ -296,8 +322,16 @@ export function defineMissionScene(P: Ph) {
       const bg = v.labelBg;
       bg.clear();
       const isi = gaya === 'pilih' ? HEX.kuning : HEX.putih;
-      bg.fillStyle(isi, gaya === 'redup' ? 0.7 : 0.96).fillRoundedRect(-w / 2, -h / 2, w, h, 14);
-      bg.lineStyle(2, HEX.tinta, gaya === 'redup' ? 0.3 : 0.85).strokeRoundedRect(-w / 2, -h / 2, w, h, 14);
+      const piksel = this.cfg.spec.gaya === 'piksel';
+      if (piksel) {
+        // T-054: pil label piksel = kotak bertangga (sudut 2 dunia) bergaris tinta 2 + alas tinta 4 (kunci piksel T-030).
+        const a = gaya === 'redup' ? 0.45 : 1;
+        bg.fillStyle(HEX.tinta, a).fillRect(-w / 2 + 2, -h / 2, w - 4, h + 4).fillRect(-w / 2, -h / 2 + 2, w, h);
+        bg.fillStyle(isi, gaya === 'redup' ? 0.7 : 1).fillRect(-w / 2 + 2, -h / 2 + 2, w - 4, h - 4);
+      } else {
+        bg.fillStyle(isi, gaya === 'redup' ? 0.7 : 0.96).fillRoundedRect(-w / 2, -h / 2, w, h, 14);
+        bg.lineStyle(2, HEX.tinta, gaya === 'redup' ? 0.3 : 0.85).strokeRoundedRect(-w / 2, -h / 2, w, h, 14);
+      }
       t.setX(ruang / 2);
 
       const g = v.tanda;
@@ -305,7 +339,16 @@ export function defineMissionScene(P: Ph) {
       g.clear().setPosition(mx, 0);
       const nomor = penanda === 'pilih' && urutan !== null;
       v.tandaTeks.setPosition(mx, 1).setText(nomor ? String(urutan) : '').setVisible(nomor);
-      if (penanda === 'ketuk') {
+      if (piksel && (penanda === 'ketuk' || penanda === 'pilih')) {
+        // T-054: penanda kotak piksel. Ketuk = kotak putih + inti jingga; pilih = kotak putih + centang atau nomor urut.
+        g.fillStyle(HEX.tinta, 1).fillRect(-9, -11, 18, 22).fillRect(-11, -9, 22, 18);
+        g.fillStyle(HEX.putih, 1).fillRect(-9, -9, 18, 18);
+        if (penanda === 'ketuk') g.fillStyle(HEX.kuning, 1).fillRect(-4, -4, 8, 8);
+        else if (!nomor) {
+          g.fillStyle(HEX.tinta, 1);
+          for (const [x, y] of [[0, 3], [1, 4], [2, 5], [3, 4], [4, 3], [5, 2], [6, 1]] as const) g.fillRect(-8 + x * 2.2, -6 + y * 2.2, 3, 3);
+        }
+      } else if (penanda === 'ketuk') {
         g.fillStyle(HEX.putih, 1).fillCircle(0, 0, 9);
         g.lineStyle(2.5, HEX.tinta, 1).strokeCircle(0, 0, 9);
         g.fillStyle(HEX.kuning, 1).fillCircle(0, 0, 4.5);
@@ -416,6 +459,8 @@ export function defineMissionScene(P: Ph) {
           if (!awal && s.tags.length >= (lama?.tags.length ?? 0) && s.tags.length > 0) aksiBaru = { v, fx: 'stamp' };
         }
 
+        // T-054 gaya piksel: bingkai jingga + centang di sekeliling opsi yang dipilih (bukan saat pembahasan: tanda vonis berlaku).
+        v.bingkai?.setVisible(s.selected && v.spec.role === 'option' && view.mode !== 'reveal');
         // Fokus item assign.
         v.focusRing.setVisible(s.focus);
         if (s.focus && !lama?.focus && !awal) fokusBaru = v;

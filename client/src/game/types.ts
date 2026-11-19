@@ -109,6 +109,11 @@ export interface BoardSpec {
 
 export interface SceneSpec {
   missionId: string;
+  /**
+   * (T-054) Gaya penanda engine. 'piksel' = label & penanda kotak bertangga, pilihan ditandai bingkai jingga bertangga di
+   * sekeliling objek + centang (bahasa piksel game). Tanpa nilai = gaya lama (pil membulat). Saat ini hanya misi acara 01.
+   */
+  gaya?: 'piksel';
   background: ArtRef;
   props?: PropSpec[];
   /** Posisi awal petugas (pemain). */

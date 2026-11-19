@@ -1,0 +1,51 @@
+/* T-054 (Designer, owner 19 Nov): bingkai misi PAKET ACARA (10 kasus pertandingan, id misi aNN-*) dalam bahasa piksel game, dan
+   muat satu layar HP saat menjawab. BERSAMA untuk kesepuluh kasus acara (atribut data-paket="acara" di akar MissionPlay); misi
+   latihan, tutorial, dan aktivitas cerita tidak berubah. Kunci (.primary-action) & sudut kotak sudah piksel lewat gaya-game.css
+   (T-030); di sini: kartu tugas = K1 bertangga, adegan berbingkai tinta piksel, chip "Pilihanmu" bertangga, judul & jarak rapat.
+   Hitungan HP (menjawab, satu langkah, tanpa petunjuk kunjungan pertama):
+     360x640: kepala 56 + judul 40 + kartu tugas 136 + adegan 336 x 252 + panel 52 + bar aksi 86 = 622 <= 640 (sisa 18)
+     390x700: kepala 56 + judul 40 + kartu tugas 136 + adegan 366 x 275 + panel 52 + bar aksi 86 = 645 <= 700 (sisa 55) */
+
+/* ------------------------------------------------------------------ bingkai piksel (semua ukuran) */
+.misi[data-paket="acara"] .misi-tugas {
+  --c-muka: #ffffff; --c-tepi: #ff9000; --c-dasar: #e07e00;
+  border: 0; border-radius: 0; padding-bottom: 14px;
+  background: linear-gradient(var(--c-muka), var(--c-muka)) left 5px top 2px / calc(100% - 10px) calc(100% - 9px) no-repeat,
+    linear-gradient(var(--c-muka), var(--c-muka)) left 4px top 3px / calc(100% - 8px) calc(100% - 11px) no-repeat,
+    linear-gradient(var(--c-muka), var(--c-muka)) left 3px top 4px / calc(100% - 6px) calc(100% - 13px) no-repeat,
+    linear-gradient(var(--c-muka), var(--c-muka)) left 2px top 5px / calc(100% - 4px) calc(100% - 15px) no-repeat,
+    linear-gradient(var(--c-tepi), var(--c-tepi)) left 3px top 0px / calc(100% - 6px) calc(100% - 5px) no-repeat,
+    linear-gradient(var(--c-tepi), var(--c-tepi)) left 2px top 1px / calc(100% - 4px) calc(100% - 7px) no-repeat,
+    linear-gradient(var(--c-tepi), var(--c-tepi)) left 1px top 2px / calc(100% - 2px) calc(100% - 9px) no-repeat,
+    linear-gradient(var(--c-tepi), var(--c-tepi)) left 0px top 3px / 100% calc(100% - 11px) no-repeat,
+    linear-gradient(var(--c-dasar), var(--c-dasar)) left 3px top 5px / calc(100% - 6px) calc(100% - 5px) no-repeat,
+    linear-gradient(var(--c-dasar), var(--c-dasar)) left 2px top 6px / calc(100% - 4px) calc(100% - 7px) no-repeat,
+    linear-gradient(var(--c-dasar), var(--c-dasar)) left 1px top 7px / calc(100% - 2px) calc(100% - 9px) no-repeat,
+    linear-gradient(var(--c-dasar), var(--c-dasar)) left 0px top 8px / 100% calc(100% - 11px) no-repeat !important;
+}
+/* adegan: bingkai tinta piksel 3 px + alas 4 px (tidak memotong kanvas: bayangan di luar kotak) */
+.misi[data-paket="acara"] .adegan { border: 0 !important; border-radius: 0 !important; box-shadow: 0 0 0 3px #2a211e, 0 7px 0 0 #2a211e; }
+.misi[data-paket="acara"] .misi-adegan { padding: 3px 3px 7px; }
+/* "Pilihanmu" / jumlah pilihan: chip piksel bertangga (krem, garis #ECD5CB, alas) */
+.misi[data-paket="acara"] .pilihan-status { border-radius: 0; background: #fff1e2; box-shadow: inset 0 0 0 2px #ecd5cb, inset 0 -5px 0 #ffd9a8; }
+.misi[data-paket="acara"] .pilihan-status.terisi { background: #fff1e2; box-shadow: inset 0 0 0 2px #ff9000, inset 0 -5px 0 #ffd9a8; }
+.misi[data-paket="acara"] .pilihan-chip { border-radius: 0; }
+.misi[data-paket="acara"] .alat { border-radius: 0; background: #ffffff; border: 2px solid #ecd5cb; box-shadow: inset 0 -3px 0 #f3ded3; }
+.misi[data-paket="acara"] .alat[aria-expanded="true"] { border-color: #ff9000; background: #fff1e2; }
+.misi[data-paket="acara"] .misi-pesan, .misi[data-paket="acara"] .misi-gagal { border-radius: 0; }
+
+/* ------------------------------------------------------------------ HP: satu layar saat menjawab */
+@media (max-width: 899px) and (max-height: 760px) {
+  .misi-main:has(.misi[data-paket="acara"][data-mode="play"]) .misi-judul { padding: 2px 16px 4px; }
+  .misi-main:has(.misi[data-paket="acara"][data-mode="play"]) .misi-judul h1 { font-size: 18px; line-height: 22px; margin: 0; }
+  .misi[data-paket="acara"][data-mode="play"] .misi-tugas { margin: 0 12px 6px; padding: 8px 10px 12px; gap: 6px; }
+  .misi[data-paket="acara"][data-mode="play"] .misi-tanya { font-size: 17px; line-height: 22px; margin: 0 0 2px; }
+  .misi[data-paket="acara"][data-mode="play"] .misi-petunjuk { font-size: 13px; line-height: 18px; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 1; overflow: hidden; }
+  .misi[data-paket="acara"][data-mode="play"] .misi-adegan { margin: 0 12px; }
+  .misi[data-paket="acara"][data-mode="play"] .misi-panel { padding: 6px 16px 0; }
+  .misi[data-paket="acara"][data-mode="play"] .pilihan-status { min-height: 40px; margin: 0 0 6px; padding: 6px 10px; }
+  .misi[data-paket="acara"][data-mode="play"] .misi-kiat { display: none; } /* "Cara main" tetap di kartu tugas */
+  .misi[data-paket="acara"][data-mode="play"] .misi-aksi { margin-top: 6px; padding-top: 8px; padding-bottom: calc(8px + env(safe-area-inset-bottom)); }
+  .misi[data-paket="acara"][data-mode="play"] .aksi-baris .primary-action { min-height: 48px; padding-top: 10px; padding-bottom: 10px; }
+  .misi[data-paket="acara"][data-mode="play"] .aksi-ket { font-size: 12px; line-height: 16px; min-height: 0; margin-top: 4px; }
+}

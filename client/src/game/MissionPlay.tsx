@@ -53,6 +53,7 @@ import { PotretTokoh } from './KarakterTokoh';
 import { sceneFor } from './scenes';
 import type { ActionFx, SceneSpec, StageMode, StageStats, StageView } from './types';
 import './stage.css';
+import './acara-piksel.css';
 
 export type SubmitState = 'idle' | 'sending' | 'sent' | 'failed';
 
@@ -585,7 +586,7 @@ export function MissionPlay(props: MissionPlayProps) {
   const kurangKustom = konfirmasi && props.konfirmasiKurang ? props.konfirmasiKurang(infoKurang(mission, answer, konfirmasi, step)) : null;
 
   return (
-    <div ref={akar} className={`misi misi-${mode}`} data-mode={mode} data-fokus={fokus} data-visual={visual}>
+    <div ref={akar} className={`misi misi-${mode}`} data-mode={mode} data-fokus={fokus} data-visual={visual} data-paket={/^a\d\d-/.test(mission.id) ? 'acara' : undefined}>
       {menjawab ? (
         <header className="misi-tugas">
           {mission.steps.length > 1 ? (
