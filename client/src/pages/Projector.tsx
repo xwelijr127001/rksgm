@@ -12,15 +12,13 @@
 
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import type { LeaderRow, Phase } from '@shared/types';
+import type { Phase } from '@shared/types';
 import { Avatar } from '../art/Avatar';
 import { CityMap } from '../art/CityMap';
 import { Icon } from '../art/Icon';
-import { RakiBubble } from '../art/Raki';
-import { AdeganLayar } from '../game/AdeganLayar';
-import { misiBergambar } from '../game/gambar';
 import { KarakterTokoh } from '../game/KarakterTokoh';
 import { PanggungJuara } from './proyektor/PanggungJuara';
+import { PanggungRonde } from './proyektor/PanggungRonde';
 import { Merek } from '../components/Merek';
 import { PilihBahasa } from '../components/PilihBahasa';
 import { TombolGerak } from '../components/TombolGerak';
@@ -35,7 +33,6 @@ import {
   AudioControls,
   Confetti,
   KodeRoom,
-  Leaderboard,
   Memuat,
   Pesan,
   PhaseBadge,
@@ -60,7 +57,6 @@ const TRACK: Record<Phase, 'lobby' | 'game' | 'podium'> = {
 const GAGAL_TANPA_PESAN = 'layar.roomTidakDitemukan';
 
 const MAKS_AVATAR = 40;
-const MAKS_TITIK = 60;
 
 const CSS = `
 .pj-lebar{max-width:1500px}
@@ -133,25 +129,6 @@ const CSS = `
 /** Potong daftar panjang agar layar tetap terbaca; sisanya diringkas. */
 function potong<T>(daftar: readonly T[], maks: number): { tampil: T[]; sisa: number } {
   return { tampil: daftar.slice(0, maks), sisa: Math.max(0, daftar.length - maks) };
-}
-
-function rondeSelesai(sampai: number): number[] {
-  return Array.from({ length: Math.max(0, sampai) }, (_, i) => i);
-}
-
-/**
- * Rata-rata ketepatan per ronde yang dijawab.
- * `totalAccuracy` pada LeaderRow adalah JUMLAH ketepatan seluruh ronde,
- * jadi pembaginya adalah total ronde terjawab. null bila belum ada data.
- */
-function rataKetepatan(rows: readonly LeaderRow[]): number | null {
-  let jumlah = 0;
-  let ronde = 0;
-  for (const r of rows) {
-    jumlah += r.totalAccuracy;
-    ronde += r.answeredCount;
-  }
-  return ronde > 0 ? jumlah / ronde : null;
 }
 
 export default function Projector() {
@@ -281,19 +258,15 @@ export default function Projector() {
 
   // ---------------------------------------------------------------- data turunan
 
-  const selesai = rondeSelesai(room.roundIndex);
   const papan = room.leaderboard ?? [];
   const podium = room.podium ?? papan;
   const tampilRonde = room.roundIndex >= 0 && fase !== 'LOBBY' && fase !== 'TUTORIAL';
-  const masuk = room.submittedCount;
   const totalPeserta = room.playerCount;
-  const persen = totalPeserta > 0 ? Math.round((masuk / totalPeserta) * 100) : 0;
   // Nama acara & label hadiah BAWAAN ikut bahasa aktif; isian panitia tampil apa adanya.
   const hadiah = [room.prizes.first, room.prizes.second, room.prizes.third].map(terjemahkanBawaan);
   const namaAcara = terjemahkanBawaan(room.eventName);
 
   const galeri = potong(room.players, MAKS_AVATAR);
-  const titik = potong(room.players, MAKS_TITIK);
 
   // ---------------------------------------------------------------- bagian layar
 
@@ -368,175 +341,9 @@ export default function Projector() {
     </div>
   );
 
-  const progres = (
-    <div className="panel stack">
-      <div className="baris-antara">
-        <h2 className="pj-judul2">{t('layar.progresPengiriman')}</h2>
-        <strong className="pj-teks">
-          {t('layar.jawabanMasuk', { masuk, total: totalPeserta })}
-        </strong>
-      </div>
-      <div
-        className="pj-bar"
-        role="progressbar"
-        aria-valuemin={0}
-        aria-valuemax={100}
-        aria-valuenow={persen}
-        aria-label={t('layar.jawabanMasukAria', { masuk, total: totalPeserta })}
-      >
-        <i style={{ width: `${persen}%` }} />
-      </div>
-      {totalPeserta === 0 ? (
-        <div className="kosong">{t('layar.belumAdaPesertaRoom')}</div>
-      ) : (
-        <>
-          <div className="pj-titik">
-            {titik.tampil.map((p) => (
-              <span key={p.id} className={'pj-kirim' + (p.submittedThisRound ? ' ok' : '')}>
-                <Avatar look={p.look} size={30} mood={p.submittedThisRound ? 'senang' : 'fokus'} />
-                <span>
-                  <b title={p.nickname}>{p.nickname}</b>
-                  <i>
-                    <Icon name={p.submittedThisRound ? 'cek' : 'jam'} size={13} />
-                    {p.submittedThisRound ? t('layar.terkirim') : t('layar.menunggu')}
-                  </i>
-                </span>
-              </span>
-            ))}
-          </div>
-          {titik.sisa > 0 ? <p className="pj-teks2">{t('layar.pesertaLain', { n: titik.sisa })}</p> : null}
-        </>
-      )}
-      <p className="pj-teks2">
-        {t('layar.kunciSaatPembahasan')}
-      </p>
-    </div>
-  );
-
-  const misiBerjalan = (
-    <div className="pj-kolom">
-      <div className="stack">
-        <div className="panel">
-          <h2 className="pj-judul2">{t('layar.perjalananMisi')}</h2>
-          <CityMap currentRound={room.roundIndex} completed={selesai} />
-        </div>
-        {/* Kasus dibawakan Miss Raksa (CS) di kolom kiri supaya terlihat tanpa menggulung. */}
-        {fase === 'BRIEFING' && misi && misi.id !== 'tutorial' ? (
-          <KarakterTokoh tokoh="missRaksa" className="pj-ceo" tinggi={190} teks={misi.rakiBriefing} />
-        ) : null}
-      </div>
-      <div className="stack">
-        <div className="panel stack">
-          <div className="baris">
-            <span className="label-produk">{misi ? misi.productLabel : t('layar.labelMisi')}</span>
-            {misi ? <span className="chip chip-biru">{misi.location}</span> : null}
-          </div>
-          <h2 className="pj-judul">
-            {misi ? t('layar.judulMisi', { n: misi.number, judul: misi.title }) : t('layar.menungguMisi')}
-          </h2>
-          {misi ? <p className="pj-teks">{misi.story}</p> : null}
-          {misi ? (
-            // Soal bergambar: gambar adalah bahan utamanya, jadi boleh selebar kolom (dibaca dari jauh).
-            <div style={{ maxWidth: misiBergambar(misi) ? 760 : 560 }}>
-              <AdeganLayar mission={misi} roundIndex={room.roundIndex} reveal={null} />
-            </div>
-          ) : null}
-          {fase === 'BRIEFING' && misi && (misi.id === 'tutorial' || !TOKOH.missRaksa.aktif) ? (
-            <RakiBubble judul={t('layar.briefing')} teks={misi.rakiBriefing} mood="bicara" size={88} />
-          ) : null}
-          {fase === 'BRIEFING' && totalPeserta > 0 ? (
-            <p className="pj-teks tebal">
-              <Icon name="cek" size={20} /> {t('layar.adeganSiap', { siap: room.sceneReadyCount, total: totalPeserta })}
-            </p>
-          ) : null}
-          {fase === 'ACTIVE' && misi ? <p className="pj-teks tebal">{misi.instruction}</p> : null}
-        </div>
-        {progres}
-      </div>
-    </div>
-  );
-
-  const pembahasan = !reveal ? (
-    <div className="kosong">{t('layar.pembahasanBelum')}</div>
-  ) : (
-    <div className="pj-kolom">
-      <div className="stack">
-        <div className="panel stack-s">
-          <h2 className="pj-judul">
-            {misi ? t('layar.pembahasanMisi', { n: misi.number, judul: misi.title }) : t('layar.pembahasan')}
-          </h2>
-          <p className="pj-teks">{reveal.summary}</p>
-        </div>
-        {reveal.steps.map((s) => (
-          <div className="panel stack-s" key={s.stepId}>
-            <strong className="pj-teks">{s.prompt}</strong>
-            <ul className="pj-kunci">
-              {s.correctText.map((teksBenar, i) => (
-                <li key={i} className="pj-teks">
-                  <Icon name="cek" size={22} />
-                  <span>{teksBenar}</span>
-                </li>
-              ))}
-            </ul>
-            <p className="pj-teks2">{s.explanation}</p>
-          </div>
-        ))}
-      </div>
-      <div className="stack">
-        {/* Bu Isti sebagai juri membacakan inti pembahasan (Raki bila tokoh dinonaktifkan). */}
-        {TOKOH.isti.aktif ? (
-          <KarakterTokoh tokoh="isti" className="pj-juri" tinggi={140} label={`${TOKOH.isti.nama} · ${t('tokoh.isti.juri')}`} teks={<><strong>{t('layar.dibawaPulangTitik')}</strong> {reveal.learning}</>} />
-        ) : (
-          <RakiBubble judul={t('layar.dibawaPulang')} teks={reveal.learning} mood="bicara" size={110} />
-        )}
-        {misi ? <AdeganLayar mission={misi} roundIndex={room.roundIndex} reveal={reveal} /> : null}
-        <div className="panel">
-          <h2 className="pj-judul2">{t('layar.perjalananMisi')}</h2>
-          <CityMap currentRound={room.roundIndex} completed={selesai} compact />
-        </div>
-      </div>
-    </div>
-  );
-
-  const rata = rataKetepatan(papan);
-  const naik = papan.filter((r) => r.delta > 0).length;
-
-  const peringkat = (
-    <div className="pj-kolom">
-      <div className="panel stack">
-        <h2 className="pj-judul">{t('layar.peringkat10')}</h2>
-        {/* key = ronde: papan dianimasikan ulang tiap kali peringkat diperbarui. */}
-        <div className="pj-papan anim-masuk" key={`papan-${room.roundIndex}`}>
-          <Leaderboard rows={papan} limit={10} prizes={room.prizes} />
-        </div>
-      </div>
-      <div className="stack">
-        <KarakterTokoh tokoh="isti" className="pj-ceo" tinggi={130} teks={t('tokoh.isti.ringkasan')} />
-        <div className="panel stack-s">
-          <h2 className="pj-judul2">{t('layar.ringkasanRonde', { n: room.roundIndex + 1 })}</h2>
-          <p className="pj-teks">
-            <strong>{masuk}</strong> {t('layar.dariPesertaMengirim', { total: totalPeserta })}
-          </p>
-          {rata !== null ? (
-            <p className="pj-teks">
-              {t('layar.rataKetepatan')} <strong>{Math.round(rata * 100)}%</strong>
-            </p>
-          ) : (
-            <p className="pj-teks2">{t('layar.rataBelum')}</p>
-          )}
-          {naik > 0 ? (
-            <p className="pj-teks2">
-              <Icon name="kilat" size={18} /> {t('layar.naikPeringkat', { n: naik })}
-            </p>
-          ) : null}
-        </div>
-        <div className="panel">
-          <h2 className="pj-judul2">{t('layar.perjalananMisi')}</h2>
-          <CityMap currentRound={room.roundIndex} completed={selesai} compact />
-        </div>
-      </div>
-    </div>
-  );
+  // T-059: menjawab / pembahasan / peringkat = panggung piksel 1920x1016 yang diskalakan (PanggungRonde), menggantikan panel
+  // gelap, peta besar, dan tokoh chibi (character/proyektor-t059).
+  const ronde = <PanggungRonde fase={fase} room={room} misi={misi} reveal={reveal} />;
 
   // T-057: konsep A 'Panggung podium' (character/proyektor-t056), menggantikan trio tokoh + kotak juara 1 + tabel 10 besar.
   const akhir = <PanggungJuara rows={podium} acara={namaAcara} hadiah={hadiah} />;
@@ -544,20 +351,18 @@ export default function Projector() {
   const isi =
     fase === 'LOBBY' || fase === 'TUTORIAL'
       ? gerbangGabung
-      : fase === 'BRIEFING' || fase === 'ACTIVE'
-        ? misiBerjalan
-        : fase === 'REVEAL'
-          ? pembahasan
-          : fase === 'LEADERBOARD'
-            ? peringkat
-            : fase === 'FINISHED'
+      : fase === 'BRIEFING' || fase === 'ACTIVE' || fase === 'REVEAL' || fase === 'LEADERBOARD'
+        ? ronde
+        : fase === 'FINISHED'
               ? akhir
-              : gerbangGabung;
+            : gerbangGabung;
 
   // ---------------------------------------------------------------- render
 
+  const panggung = fase === 'FINISHED' || fase === 'BRIEFING' || fase === 'ACTIVE' || fase === 'REVEAL' || fase === 'LEADERBOARD';
+
   return (
-    <div className={'proyektor' + (fase === 'FINISHED' ? ' pj-akhir' : '')}>
+    <div className={'proyektor' + (panggung ? ' pj-akhir' : '')}>
       <style>{CSS}</style>
       <header className="wrap-lebar pj-lebar baris-antara" style={{ flexWrap: 'wrap', gap: 12 }}>
         <div className="baris">
@@ -583,8 +388,8 @@ export default function Projector() {
         </div>
       </header>
 
-      {status !== 'connected' && fase === 'FINISHED' ? <Pesan jenis="kuning">{t('layar.menyambungUlangServer')}</Pesan> : null}
-      {fase === 'FINISHED' ? isi : (
+      {status !== 'connected' && panggung ? <Pesan jenis="kuning">{t('layar.menyambungUlangServer')}</Pesan> : null}
+      {panggung ? isi : (
         <div className="wrap-lebar pj-lebar stack">
           {status !== 'connected' ? (
             <Pesan jenis="kuning">{t('layar.menyambungUlangServer')}</Pesan>

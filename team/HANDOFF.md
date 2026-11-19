@@ -3243,3 +3243,33 @@ Built by the Designer; uncommitted. Owner rule: nothing was opened in a browser.
 - **Previews in `character/beranda-ekspresi-t058/`:**
   - `sebelum-sesudah.png`: the old portrait is cleared and the icon is drawn at the screenshots' ~1.1 zoom.
   - `ikon-miss-pose-8x.png`.
+
+## T-059 (2026-11-19): projector in-match screens, friendly and pixel (Designer)
+
+Built by the Designer; uncommitted. Owner rule: nothing was opened in a browser. Gate: client typecheck 0 errors; client/dist rebuilt.
+
+**What changed**
+- **New files:** `client/src/pages/proyektor/PanggungRonde.tsx` and `ronde.css`, plus `isti-piksel.png`. The PNG is Bu Isti full body in two pixel frames, "hands clasped" and "waving", 86×107. It is made by `character/proyektor-t059/isti-badan.mjs` from her pixel sheet.
+- **Projector.tsx:** BRIEFING, ACTIVE, REVEAL and LEADERBOARD now render `<PanggungRonde/>` full height under the slim status bar, using the same `pj-akhir` layout as the T-057 podium. Removed: the old panels, the big CityMap "Perjalanan misi" panel, the chibi Bu Isti / Miss Raksa / Raki bubbles, the Leaderboard table and the progress panel. The lobby (QR) screen is unchanged.
+- **Stage:**
+  - A fixed 1920×1016 box scaled whole, like T-057: ×1.0 at 1080p, ×0.68 at 1366×768, ×0.63 at 1280×720. No scroll.
+  - Warm claim-office backdrop: cream wall, wood rail and wainscot, plank floor, and white pixel cards with a 6 px dark edge.
+- **Menjawab:**
+  - Left: the case scene, large (1000 px wide).
+  - Right: mission title (56 px), story clamped to 2 lines (32 px), the instruction in a big orange card (40 px), and a 24-segment pixel time bar with large seconds.
+  - Below that: "X / N sudah menjawab" (40 px) and the pixel faces of players who have sent, which pop in. No answers are shown. A light "tik" plays when a new answer arrives.
+  - During BRIEFING the instruction card is replaced by Miss Raksa's pixel sprite with the briefing in a bubble, plus "Adegan siap".
+- **Pembahasan:** the scene with the correct marks (as before); pixel Bu Isti with the "Yang dibawa pulang" bubble (32 px); up to 3 correct answers as green check cards (32 px); the explanation in a smaller line, clamped to 2 lines.
+- **Peringkat:**
+  - Top 10 as pixel rows (64 px): rank box, T-052 face, name (38 px), ▲/▼ from `delta`, and points counting up over 0.9 s. There is no "new" arrow because that is not in the data.
+  - Round summary card: sent X/N, average accuracy, and the fastest player from `submitElapsedSeconds` when present.
+  - Waving pixel Bu Isti with the existing one-line `tokoh.isti.ringkasan`.
+- **Perjalanan misi:** a small pixel strip in the top-left corner with 10 stops (done = green ✓, current = orange) and the location name.
+- **Strings:** new `layar.sudahMenjawab`, `menungguJawabanPertama`, `jawabanTepat`, `tercepat`, `rataKetepatanPendek`, `terkirimDari` in id/en/zh.
+- **Data and motion:** no protocol change. Reduced motion means no pop-in, slide or count-up animations.
+- **Previews in `character/proyektor-t059/`:** `sesudah-menjawab.png`, `sesudah-pembahasan.png`, `sesudah-peringkat.png`. They are static, drawn from the CSS geometry with example data. The scene image is the T-055 case-1 render, and the pixel font only approximates the real web font.
+
+**Notes / risks**
+- Long text is clamped or clipped inside the stage rather than scrolled. Height budgets are written in comments in ronde.css.
+- The scene inside the scaled stage keeps its Phaser/image size logic at 1000 px wide (4:3 gives 750 px tall). Scenes with a different aspect are centred and clipped by the card.
+- Tests or selectors that target the old in-match markup will need updating: `.pj-titik`, `.pj-kirim`, the projector Leaderboard and CityMap panels, and the `pj-juri`/`pj-ceo` chibis. None were run.

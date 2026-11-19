@@ -1,0 +1,116 @@
+/* T-059: panggung ronde proyektor (PanggungRonde.tsx). Semua ukuran = piksel PANGGUNG 1920 x 1016, kotak diskalakan utuh
+   (lihat .pjp-wadah di panggung.css): 1920x1080 x 1,0; 1366x768 x 0,68 (isi 32 -> 22 px, judul 60 -> 41 px); 1280x720 x 0,63.
+   Tata letak: kiri x 40..1140 adegan / papan; kanan x 1180..1880 teks. Strip peta di y 24..96. Bingkai piksel: garis 6 px
+   #212121 (box-shadow), tanpa sudut membulat. Warna PALET: krem dinding, kayu, jingga merek #ff9000, kuning #f6d25c. */
+
+.pjr-panggung {
+  position: absolute; left: 0; top: 0; width: 1920px; height: 1016px; transform-origin: 0 0; overflow: hidden;
+  background: #f9eeea; color: #212121; font-family: var(--font-judul); image-rendering: pixelated;
+}
+.pjr-dinding {
+  position: absolute; left: 0; right: 0; top: 0; height: 900px;
+  background:
+    repeating-linear-gradient(90deg, transparent 0 94px, rgba(156, 107, 63, .08) 94px 96px),
+    linear-gradient(#fbf3ee 0 690px, #c3976a 690px 702px, #e8cfae 702px 900px);
+}
+.pjr-lantai {
+  position: absolute; left: 0; right: 0; top: 900px; bottom: 0; border-top: 8px solid #7a5232;
+  background: repeating-linear-gradient(90deg, #9c6b3f 0 116px, #7a5232 116px 120px);
+}
+
+/* kartu piksel dasar */
+.pjr-peta, .pjr-adegan, .pjr-papan, .pjr-ringkas, .pjr-gelembung, .pjr-instruksi, .pjr-kartu li {
+  background: #ffffff; box-shadow: 0 0 0 6px #212121, 6px 6px 0 6px rgba(33, 33, 33, .18);
+}
+
+/* Strip "Perjalanan misi" */
+.pjr-peta { position: absolute; left: 46px; top: 30px; height: 60px; display: flex; align-items: center; gap: 16px; padding: 0 18px; }
+.pjr-peta-judul { font-size: 22px; font-weight: 900; color: #9a4f00; white-space: nowrap; }
+.pjr-peta ol { display: flex; align-items: center; gap: 0; margin: 0; padding: 0; list-style: none; }
+.pjr-peta li { width: 36px; height: 36px; display: grid; place-items: center; font-size: 18px; font-weight: 900; color: #6b6b6b; background: #ececec; box-shadow: 0 0 0 3px #212121; }
+.pjr-peta li + li { margin-left: 18px; position: relative; }
+.pjr-peta li + li::before { content: ''; position: absolute; right: 100%; top: 15px; width: 18px; height: 6px; margin-right: 3px; background: #c3976a; }
+.pjr-peta li.selesai { background: #5aa86a; color: #ffffff; }
+.pjr-peta li.kini { width: 46px; height: 46px; font-size: 24px; background: #ff9000; color: #212121; box-shadow: 0 0 0 3px #212121, 0 0 0 7px #f6d25c; }
+.pjr-peta-lokasi { max-width: 360px; font-size: 22px; font-weight: 800; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* Adegan kasus (kiri ~60 %) */
+.pjr-adegan { position: absolute; left: 46px; top: 126px; width: 1088px; bottom: 46px; display: flex; flex-direction: column; gap: 12px; padding: 16px; }
+.pjr-adegan-label { display: flex; gap: 12px; flex-wrap: wrap; }
+.pjr-chip { padding: 4px 14px; font-size: 24px; font-weight: 800; background: #e8eef9; box-shadow: 0 0 0 3px #212121; }
+.pjr-chip.jingga { background: #ff9000; }
+.pjr-adegan-isi { flex: 1 1 auto; min-height: 0; overflow: hidden; display: flex; align-items: center; justify-content: center; }
+.pjr-adegan-isi > .adegan-layar { width: 1000px; max-width: 100%; } /* 4:3 adegan -> 750 tinggi, muat di 772 */
+.pjr-adegan-isi .adegan { border-radius: 0; border: 0; }
+
+/* Kolom kanan */
+.pjr-kanan { position: absolute; left: 1180px; right: 46px; top: 126px; bottom: 46px; display: flex; flex-direction: column; gap: 22px; overflow: hidden; }
+.pjr-judul { margin: 0; font-size: 56px; line-height: 1.08; font-weight: 900; color: #212121; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.pjr-sub { margin: 0; font-size: 34px; line-height: 1.15; font-weight: 900; }
+.pjr-cerita { margin: 0; font-size: 32px; line-height: 1.3; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.pjr-instruksi { margin: 6px 0 0; padding: 18px 22px; font-size: 40px; line-height: 1.2; font-weight: 900; background: #ff9000; }
+.pjr-hitung { margin: 0; font-size: 40px; line-height: 1.15; font-weight: 900; }
+.pjr-kecil { margin: 0; font-size: 26px; line-height: 1.3; color: #4a4a4a; }
+.pjr-kosong { margin: auto; font-size: 36px; font-weight: 800; text-align: center; }
+.pjr-kirim { display: flex; flex-direction: column; gap: 14px; }
+
+/* Bar waktu piksel */
+.pjr-waktu { display: flex; align-items: center; gap: 18px; }
+.pjr-waktu b { min-width: 116px; padding: 2px 10px; text-align: center; font-size: 64px; line-height: 1; font-variant-numeric: tabular-nums; background: #212121; color: #f6d25c; }
+.pjr-waktu-bar { display: flex; gap: 4px; }
+.pjr-waktu-bar i { width: 18px; height: 44px; background: #e2d6c8; }
+.pjr-waktu-bar i.isi { background: #5aa86a; }
+.pjr-waktu.mendesak b { color: #ff6b5a; }
+.pjr-waktu.mendesak .pjr-waktu-bar i.isi { background: #e0473b; }
+
+/* Wajah yang sudah menjawab */
+.pjr-wajah { display: flex; flex-wrap: wrap; gap: 10px; margin: 0; padding: 0; list-style: none; }
+.pjr-wajah li { width: 64px; height: 64px; line-height: 0; box-shadow: 0 0 0 3px #212121; background: #fbefd0; }
+.pjr-wajah-sisa { display: grid; place-items: center; font-size: 26px; font-weight: 900; line-height: 1 !important; }
+
+/* Gelembung tokoh */
+.pjr-gelembung { position: relative; margin: 0; padding: 16px 20px; font-size: 32px; line-height: 1.25; font-weight: 700; }
+.pjr-gelembung b { display: block; margin-bottom: 4px; font-size: 22px; color: #9a4f00; }
+.pjr-sapa, .pjr-juri { display: flex; align-items: flex-end; gap: 20px; }
+.pjr-sapa-tokoh { flex: 0 0 auto; line-height: 0; }
+.pjr-sapa .pjr-gelembung { align-self: center; display: -webkit-box; -webkit-line-clamp: 6; -webkit-box-orient: vertical; overflow: hidden; }
+.pjr-isti { flex: 0 0 auto; display: inline-block; background-repeat: no-repeat; image-rendering: pixelated; }
+.pjr-juri .pjr-gelembung { align-self: flex-start; display: -webkit-box; -webkit-line-clamp: 6; -webkit-box-orient: vertical; overflow: hidden; }
+
+/* Jawaban tepat: kartu piksel besar */
+.pjr-kartu { display: flex; flex-direction: column; gap: 16px; margin: 0; padding: 0 0 0 6px; list-style: none; }
+.pjr-kartu li { display: flex; align-items: center; gap: 16px; padding: 12px 18px; font-size: 32px; line-height: 1.15; font-weight: 900; background: #e6f4e3; }
+.pjr-kartu li span { flex: 0 0 auto; width: 44px; height: 44px; display: grid; place-items: center; background: #5aa86a; color: #ffffff; font-size: 30px; box-shadow: 0 0 0 3px #212121; }
+.pjr-alasan { margin: 0; font-size: 26px; line-height: 1.3; color: #3c3c3c; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+
+/* Peringkat 10 besar */
+.pjr-papan { position: absolute; left: 46px; top: 126px; width: 1088px; bottom: 46px; display: flex; flex-direction: column; gap: 16px; padding: 18px 24px; }
+.pjr-papan ol { display: flex; flex-direction: column; gap: 6px; margin: 0; padding: 0; list-style: none; }
+.pjr-papan li { display: grid; grid-template-columns: 64px 56px minmax(0, 1fr) 96px 180px; align-items: center; gap: 18px; height: 64px; padding: 0 16px; background: #f6efe6; } /* 10 x 64 + 9 x 6 = 694 + judul 62 + 16 + 36 = 808 <= 844 */
+.pjr-papan li:nth-child(even) { background: #efe5d8; }
+.pjr-papan li.satu { background: #f6d25c; }
+.pjr-no { display: grid; place-items: center; width: 56px; height: 56px; font-size: 32px; font-weight: 900; background: #212121; color: #f6d25c; }
+.pjr-nama { font-size: 38px; font-weight: 900; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.pjr-gerak { font-size: 30px; font-weight: 900; text-align: center; }
+.pjr-gerak.naik { color: #2e8540; }
+.pjr-gerak.turun { color: #c0392b; }
+.pjr-poin { font-size: 40px; font-weight: 900; text-align: right; font-variant-numeric: tabular-nums; }
+
+/* Ringkasan ronde + Bu Isti */
+.pjr-ringkas { position: absolute; left: 1186px; right: 52px; top: 126px; display: flex; flex-direction: column; gap: 18px; padding: 22px 26px; }
+.pjr-ringkas dl { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin: 0; }
+.pjr-ringkas dl > div { padding: 12px 16px; background: #fbefd0; box-shadow: 0 0 0 3px #212121; }
+.pjr-ringkas dt { font-size: 26px; font-weight: 800; color: #5b4636; }
+.pjr-ringkas dd { margin: 0; font-size: 64px; line-height: 1.05; font-weight: 900; font-variant-numeric: tabular-nums; }
+.pjr-cepat { display: flex; align-items: center; gap: 14px; margin: 0; font-size: 32px; font-weight: 800; }
+.pjr-juri-papan { position: absolute; left: 1186px; right: 52px; bottom: 46px; }
+
+/* Muncul (gerak penuh saja) */
+.pjr-wajah li.muncul { animation: pjr-pop 360ms cubic-bezier(.3, 1.6, .5, 1) both; }
+.pjr-kartu li.muncul { animation: pjr-geser 380ms ease-out both; }
+.pjr-papan li.muncul { animation: pjr-geser 360ms ease-out both; }
+@keyframes pjr-pop { from { transform: scale(.2); opacity: 0; } to { transform: none; opacity: 1; } }
+@keyframes pjr-geser { from { transform: translateX(-60px); opacity: 0; } to { transform: none; opacity: 1; } }
+@media (prefers-reduced-motion: reduce) { :root:not([data-gerak="penuh"]) :is(.pjr-wajah li, .pjr-kartu li, .pjr-papan li) { animation: none; } }
+/* Pembahasan, tinggi kolom kanan 844: judul 121 + juri 321 + 3 kartu <= 3 x 98 + alasan 68 + 4 x 22 = 892 -> tanpa subjudul
+   (kartu bertanda centang) dan 2 kartu umumnya = 690; isi lebih panjang terpotong rapi di bawah, bukan menggulung. */
