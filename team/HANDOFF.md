@@ -3550,3 +3550,35 @@ Spec `docs/superpowers/specs/2026-11-19-episode-1-dev-design.md`, plan `docs/sup
 **Open points:** Task 2 must plug `ArenaPolaDashcam` into the `null` branch and hide the list view for 'dashcam'; the SIM how-to card for auto-2-dev (`cara.sim`) is Task 2 (Pandu). Story music stays the office theme for the whole cut (one part, b1). The guest name is not saved to a profile (only on the card). Owner still to confirm the dashcam moment (spec).
 
 **Gate (owner rule):** typecheck 0; `client/dist` rebuilt = exact copy. Not tested in a browser or on a phone. Not committed.
+
+## T-067 (2026-11-20): dashcam replay in the Codex look (owner pick) (Designer)
+
+Built by the Designer; uncommitted. Owner rule: nothing was opened in a browser. Gate: client typecheck 0 errors; client/dist rebuilt.
+
+**Kept from T-065:** the ArenaDashcam API and props, the 6 s replay, the freeze frame, three tap targets of at least 48 px with pixel rings, "Putar lagi", the reduced-motion three stills with "Lanjut", the `kdash` coach card, and the `tetapkan(langkah, item, bersih | ragu)` recording with its outcome rules.
+
+**Art.** It is now the Codex art: `character/dashcam-codex/draw.cjs`, ported into `character/dashcam-t065/bangun.mjs` (the T-065 K08-style generator is replaced). It is drawn at 1 art px = 1 CSS px, as a 320×240 scene centred in the arena (`--x0`), with grass filling the side margins.
+- **Background** `latar.png`:
+  - green verge with the orange/white striped barrier on the left, and Codex's asphalt tone, dashes and edge lines;
+  - the two road signs: red "TRUK DAN TRAILER DILARANG DI LAJUR 3 DAN 4" and blue "← TRUK DAN BUS GUNAKAN LAJUR KIRI";
+  - lane numbers 1-4 at the bottom of each lane;
+  - the stopped white utility truck on the shoulder with hazard lights, and the worker kneeling at the tyre.
+- **Vehicles:** pixel-rotated poses with the shadow baked in, at Codex's three frames. Truck: (186,177,0°) → (176,162,-14°) → (118,130,-36°). Car: (236,133,0°) → (204,105,-36°) → (178,33,+4°). Files: `truk-0/-m14/-m36.png`, `mobil-0/-m36/-p4.png`. Centres are in `sprite.json`.
+- **Impact layers:** `debu.png` (dust puff at impact) and `jejak.png` (skid marks).
+
+**Motion (dashcam.css)**
+- Pose 1 moves with CSS (rotating about the vehicle centre), then the pixel pose 3 takes over at the impact (76 %).
+- The cut-in reads in the motion: from 0.9 s the car steers out of lane 3 and settles in lane 2 directly in front of the truck. Only then (from 2.4 s) does the truck swerve left into the barrier and the small truck.
+- Then the dust puff, the skid marks and blinking hazards.
+- Reduced motion: stills 1 / 2 / 3 = Codex frames 1 / 2 / 3.
+
+**Sign text and translation:** the pixel signs carry Codex's id text, with 5 px glyphs. Underneath the scene, a two-line legend gives both signs in the active language (`dashcam.rambu.*` in id/en/zh, 14 px, with red and blue chips). The frame-1 caption now mentions the worker changing a tyre.
+
+**Fit on 360×640 (calculation):** the scene grows by +4 (240), and the sign legend adds +46. The separate button row is removed (−58): "Putar lagi" moved into the scene, top-right during the replay and stills 1-2 (with "Lanjut" under it), bottom-right in the frozen frame. Net −8 px, so the fit is unchanged or better. The preview checks at 336 px that no button covers a vehicle or a tap target in any frame; the reduced-motion caption moved to the bottom.
+
+**Preview:** `character/dashcam-t065/bingkai-dashcam-3x.png`. Top row: our three frames at 336 width, with the buttons and the frame-3 tap rings. Bottom row: Codex frames 1-3 for comparison.
+
+**Open points**
+- Mid-motion rotation is CSS (briefly not pixel-exact); all stills and the freeze frame are pixel-rotated.
+- The REC badge is HTML text ("REKAM 14:32"), not Codex's "REKAM 01/02, JEDA 03" frame counter.
+- Not checked in a browser.

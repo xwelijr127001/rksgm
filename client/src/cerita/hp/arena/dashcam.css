@@ -1,85 +1,93 @@
-/* T-065: arena "Rekaman dashcam" (ArenaDashcam.tsx). Adegan 236 px tinggi, blok jalan 278 px di tengah (var --x0), 1 piksel seni =
-   1 px CSS (gaya adegan lajur K08). Posisi akhir (bingkai beku) = posisi dasar tiap kendaraan; animasi 6 s hanya saat
-   data-bingkai="jalan" dan berakhir tepat di posisi dasar (fill forwards). Gerak dikurangi: data-bingkai 1 / 2 / 3 = bingkai diam.
-   Sasaran ketuk >= 48 px, cincin piksel saat fokus. Teks >= 14 px (label adegan), isi 16-18 px. */
+/* T-065 / T-067: arena "Rekaman dashcam" (ArenaDashcam.tsx), tampilan CODEX (pilihan pemilik; character/dashcam-codex/draw.cjs).
+   Adegan 320 x 240 (1 piksel seni = 1 px CSS) di tengah area: var --x0 = tepi kiri latar; sisi kiri/kanan diisi rumput yang sama.
+   Kendaraan = PNG berputar piksel per pose (sprite.json). Rekaman berjalan (data-bingkai="jalan"): pose 1 bergerak (CSS, titik putar
+   = pusat kendaraan) lalu diganti pose 3 (bingkai beku, piksel) pada 76 %; debu + jejak rem muncul saat benturan. Gerak dikurangi:
+   data-bingkai 1 / 2 / 3 = pose Codex 1 / 2 / 3. Tanpa atribut animasi = bingkai beku (pose 3).
+   Ukur 360 x 640 (hitung, tidak berubah dari T-065): adegan 240 (+4) + daftar rambu 2 x 19 + 8 = 46, baris tombol terpisah (48 + 10)
+   dihapus (tombol kini di dalam adegan, pojok kanan atas / bawah) -> selisih -8 px. Teks >= 14 px, tombol & sasaran >= 48 px. */
 
 .hp-dashcam { display: flex; flex-direction: column; gap: 10px; }
-.dc-adegan { position: relative; margin: 0; height: 236px; border: 3px solid #2a211e; background: #8a8f84; overflow: hidden; image-rendering: pixelated; --x0: calc(50% - 139px); }
+.dc-adegan { position: relative; margin: 0; height: 240px; border: 3px solid #212121; background: #93ae7d; overflow: hidden; image-rendering: pixelated; --x0: calc(50% - 160px); }
 .dc-isi { position: absolute; inset: 0; }
 .dc-isi > * { position: absolute; }
-.dc-jalan { left: var(--x0); top: 0; width: 278px; height: 100%; background: var(--jalan) repeat-y 0 0; }
-.dc-pembatas { left: calc(var(--x0) - 12px); top: 0; width: 12px; height: 100%; background: var(--pembatas) repeat-y 0 0; }
+.dc-latar { left: var(--x0); top: 0; width: 320px; height: 240px; background: var(--latar) no-repeat; }
 
-/* posisi DASAR = bingkai beku (akhir rekaman) */
-.dc-truk-kecil { left: calc(var(--x0) + 9px); top: 22px; width: 32px; height: 58px; background: var(--nyala) no-repeat; }
-.dc-mobil { left: calc(var(--x0) + 93px); top: 2px; }
-.dc-truk { left: calc(var(--x0) + 86px); top: 100px; transform-origin: 50% 50%; opacity: 0; }
-.dc-truk-miring { left: calc(var(--x0) + 34px); top: 78px; }
-.dc-serpih { left: calc(var(--x0) + 30px); top: 74px; }
+/* pose kendaraan: dasar = bingkai beku (pose 3) */
+.dc-kend { opacity: 0; }
+.dc-pose-3, .dc-debu, .dc-jejak { opacity: 1; }
+.dc-adegan[data-bingkai="1"] .dc-pose-1, .dc-adegan[data-bingkai="2"] .dc-pose-2 { opacity: 1; }
+.dc-adegan[data-bingkai="1"] :is(.dc-pose-3, .dc-debu, .dc-jejak),
+.dc-adegan[data-bingkai="2"] :is(.dc-pose-3, .dc-debu, .dc-jejak) { opacity: 0; }
 
-/* rekaman berjalan */
-.dc-adegan[data-bingkai="jalan"] .dc-jalan,
-.dc-adegan[data-bingkai="jalan"] .dc-pembatas { animation: dc-gulir 4.5s linear forwards; }
-.dc-adegan[data-bingkai="jalan"] .dc-truk-kecil { animation: dc-kecil 6s linear forwards, dc-hazard .6s steps(1) infinite; }
-.dc-adegan[data-bingkai="jalan"] .dc-mobil { animation: dc-mobil 6s ease-in-out forwards; }
-.dc-adegan[data-bingkai="jalan"] .dc-truk { animation: dc-truk 6s ease-in-out forwards; }
-.dc-adegan[data-bingkai="jalan"] .dc-truk-miring,
-.dc-adegan[data-bingkai="jalan"] .dc-serpih { animation: dc-muncul 6s steps(1) forwards; }
-@keyframes dc-gulir { from { background-position: 0 0; } to { background-position: 0 104px; } }
-@keyframes dc-hazard { 0% { background-image: var(--nyala); } 50% { background-image: var(--mati); } }
-@keyframes dc-kecil { 0% { transform: translateY(-86px); } 75%, 100% { transform: translateY(0); } }
-@keyframes dc-mobil {
-  0% { transform: translate(66px, 32px); }
-  25% { transform: translate(66px, 26px); }
-  38% { transform: translate(40px, 18px) rotate(-14deg); }
-  50% { transform: translate(0, 8px) rotate(0); }
-  100% { transform: translate(0, 0); }
-}
+/* rekaman berjalan, 6 s: truk (186,177) -> (176,162,-14) -> (118,130,-36); mobil (236,133) -> (204,105,-36) -> (178,33,+4) */
+.dc-adegan[data-bingkai="jalan"] .dc-truk.dc-pose-1 { animation: dc-truk 6s ease-in-out forwards; }
+.dc-adegan[data-bingkai="jalan"] .dc-mobil.dc-pose-1 { animation: dc-mobil 6s ease-in-out forwards; }
+.dc-adegan[data-bingkai="jalan"] :is(.dc-pose-3, .dc-jejak) { animation: dc-muncul 6s steps(1) forwards; }
+.dc-adegan[data-bingkai="jalan"] .dc-debu { animation: dc-debu 6s ease-out forwards; }
+.dc-adegan[data-bingkai="jalan"] .dc-hazard { animation: dc-hazard .6s steps(1) infinite; }
 @keyframes dc-truk {
-  0%, 50% { transform: translate(0, 0) rotate(0); opacity: 1; }
-  62% { transform: translate(-16px, -8px) rotate(-8deg); opacity: 1; }
-  75% { transform: translate(-34px, -18px) rotate(-16deg); opacity: 1; }
-  76%, 100% { transform: translate(-34px, -18px) rotate(-16deg); opacity: 0; }
+  0%, 40% { transform: translate(0, 0) rotate(0); opacity: 1; }
+  55% { transform: translate(-10px, -15px) rotate(-14deg); opacity: 1; }
+  75% { transform: translate(-68px, -47px) rotate(-36deg); opacity: 1; }
+  76%, 100% { transform: translate(-68px, -47px) rotate(-36deg); opacity: 0; }
+}
+/* potong jalur yang terbaca: mobil berbelok dari lajur 3 ke lajur 2 TEPAT di depan truk (1.0-3.5 s), sebelum truk membanting setir */
+@keyframes dc-mobil {
+  0%, 15% { transform: translate(0, 0) rotate(0); opacity: 1; }
+  30% { transform: translate(-14px, -12px) rotate(-24deg); opacity: 1; }
+  42% { transform: translate(-32px, -28px) rotate(-36deg); opacity: 1; }
+  58% { transform: translate(-52px, -70px) rotate(-10deg); opacity: 1; }
+  72% { transform: translate(-58px, -100px) rotate(4deg); opacity: 1; }
+  76%, 100% { transform: translate(-58px, -100px) rotate(4deg); opacity: 0; }
 }
 @keyframes dc-muncul { 0% { opacity: 0; } 76%, 100% { opacity: 1; } }
+@keyframes dc-debu { 0%, 75% { opacity: 0; transform: scale(.5); } 76% { opacity: 1; transform: scale(.6); } 90%, 100% { opacity: 1; transform: scale(1); } }
+.dc-debu { transform-origin: 80% 70%; }
+/* lampu hazard truk kecil: latar = menyala; lapisan ini memadamkannya bergantian */
+.dc-hazard { top: 65px; width: 4px; height: 3px; background: transparent; }
+@keyframes dc-hazard { 0% { background: transparent; } 50% { background: #9a4f00; } }
 
-/* gerak dikurangi: tiga bingkai diam */
-.dc-adegan[data-bingkai="1"] .dc-truk,
-.dc-adegan[data-bingkai="2"] .dc-truk { opacity: 1; }
-.dc-adegan[data-bingkai="1"] .dc-truk-miring, .dc-adegan[data-bingkai="1"] .dc-serpih,
-.dc-adegan[data-bingkai="2"] .dc-truk-miring, .dc-adegan[data-bingkai="2"] .dc-serpih { opacity: 0; }
-.dc-adegan[data-bingkai="1"] .dc-mobil { transform: translate(66px, 32px); }
-.dc-adegan[data-bingkai="2"] .dc-mobil { transform: translate(0, 8px); }
-.dc-adegan[data-bingkai="1"] .dc-truk-kecil { transform: translateY(-60px); }
-.dc-adegan[data-bingkai="2"] .dc-truk-kecil { transform: translateY(-24px); }
-
-/* bingkai kamera */
+/* bingkai kamera (gaya lencana Codex: tinta, teks krem) */
 .dc-sudut { inset: 6px; pointer-events: none;
   background:
-    linear-gradient(#fff, #fff) left top / 14px 3px no-repeat, linear-gradient(#fff, #fff) left top / 3px 14px no-repeat,
-    linear-gradient(#fff, #fff) right top / 14px 3px no-repeat, linear-gradient(#fff, #fff) right top / 3px 14px no-repeat,
-    linear-gradient(#fff, #fff) left bottom / 14px 3px no-repeat, linear-gradient(#fff, #fff) left bottom / 3px 14px no-repeat,
-    linear-gradient(#fff, #fff) right bottom / 14px 3px no-repeat, linear-gradient(#fff, #fff) right bottom / 3px 14px no-repeat; }
-.dc-rekam { right: 12px; top: 10px; display: flex; align-items: center; gap: 5px; padding: 1px 5px; background: rgba(33, 33, 33, .7); color: #fff; font: 700 14px/18px ui-monospace, monospace; pointer-events: none; }
-.dc-rekam i { width: 8px; height: 8px; background: #e0473b; }
+    linear-gradient(#fff9f5, #fff9f5) left top / 14px 3px no-repeat, linear-gradient(#fff9f5, #fff9f5) left top / 3px 14px no-repeat,
+    linear-gradient(#fff9f5, #fff9f5) right top / 14px 3px no-repeat, linear-gradient(#fff9f5, #fff9f5) right top / 3px 14px no-repeat,
+    linear-gradient(#fff9f5, #fff9f5) left bottom / 14px 3px no-repeat, linear-gradient(#fff9f5, #fff9f5) left bottom / 3px 14px no-repeat,
+    linear-gradient(#fff9f5, #fff9f5) right bottom / 14px 3px no-repeat, linear-gradient(#fff9f5, #fff9f5) right bottom / 3px 14px no-repeat; }
+.dc-rekam { left: 4px; top: 4px; display: flex; align-items: center; gap: 6px; padding: 1px 8px; background: #212121; color: #fff9f5; font: 700 14px/20px ui-monospace, monospace; pointer-events: none; box-shadow: 0 0 0 1px #212121; }
+.dc-rekam i { width: 8px; height: 8px; background: #ef7759; }
 .dc-adegan[data-bingkai="jalan"] .dc-rekam i { animation: dc-kedip 1s steps(1) infinite; }
+.dc-adegan[data-beku] .dc-rekam i { background: #ff9000; }
 @keyframes dc-kedip { 50% { opacity: 0; } }
-.dc-keterangan { position: absolute; left: 6px; right: 6px; bottom: 6px; padding: 4px 8px; background: rgba(33, 33, 33, .82); color: #fff; font-size: 14px; line-height: 1.3; }
+/* keterangan bingkai (gerak dikurangi, bingkai 1-2): di bawah, supaya tidak menimpa tombol kanan atas; menutup ekor truk saja */
+.dc-keterangan { position: absolute; left: 6px; right: 6px; bottom: 6px; padding: 4px 8px; background: rgba(33, 33, 33, .86); color: #fff9f5; font-size: 14px; line-height: 1.3; }
 
 /* sasaran ketuk (bingkai beku) */
 .dc-sasaran { z-index: 3; padding: 0; border: 0; background: transparent; cursor: pointer; outline: 2px dashed rgba(246, 210, 92, .95); outline-offset: -2px; }
-.dc-sasaran:focus-visible { outline: 3px solid #ff9000; outline-offset: 0; box-shadow: 0 0 0 3px #2a211e; }
+.dc-sasaran:focus-visible { outline: 3px solid #ff9000; outline-offset: 0; box-shadow: 0 0 0 3px #212121; }
 .dc-sasaran[data-keadaan="tepat"] { outline: 3px solid #3f8f5a; box-shadow: 0 0 0 3px #fff; }
-.dc-sasaran[data-keadaan="ragu"] { outline: 3px dashed #f6d25c; box-shadow: 0 0 0 3px #2a211e; }
+.dc-sasaran[data-keadaan="ragu"] { outline: 3px dashed #f6d25c; box-shadow: 0 0 0 3px #212121; }
 .dc-sasaran:disabled { cursor: default; }
 
-/* kendali + pesan */
-.dc-kendali { display: flex; gap: 8px; justify-content: center; }
-.dc-tombol { min-height: 48px; min-width: 48px; padding: 8px 16px; border: 2px solid #2a211e; background: #fff1e2; color: #2a211e; font-size: 17px; font-weight: 800; box-shadow: 0 3px 0 #2a211e; cursor: pointer; }
-.dc-tombol:active:not(:disabled) { transform: translateY(2px); box-shadow: 0 1px 0 #2a211e; }
-.dc-tombol:disabled { opacity: .5; cursor: default; }
+/* tombol di dalam adegan: selama rekaman & bingkai 1-2 di pojok KANAN ATAS (lajur 3-4 bagian atas: tidak dilalui kendaraan; "Lanjut"
+   bertumpuk di bawahnya, di atas posisi mobil bingkai 1); di bingkai beku pindah ke pojok KANAN BAWAH (kosong sesudah benturan, jauh
+   dari sasaran mobil di atas lajur 2). */
+.dc-kendali { position: absolute; right: 6px; top: 6px; z-index: 4; display: flex; flex-direction: column; align-items: flex-end; gap: 4px; }
+.dc-adegan[data-beku] .dc-kendali { top: auto; bottom: 12px; }
+.dc-tombol { min-height: 48px; min-width: 48px; padding: 6px 12px; border: 2px solid #212121; background: #fff9f5; color: #212121; font-size: 16px; font-weight: 800; box-shadow: 0 3px 0 #212121; cursor: pointer; }
+.dc-tombol:active:not(:disabled) { transform: translateY(2px); box-shadow: 0 1px 0 #212121; }
+.dc-tombol:disabled { opacity: .55; cursor: default; }
 .dc-putar[data-sorot] { background: #f6d25c; }
-.dc-pesan { padding: 10px 12px; border: 2px solid #2a211e; background: #fff9f0; font-size: 17px; line-height: 1.4; }
+
+/* tulisan rambu dalam bahasa aktif */
+.dc-rambu { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; font-size: 14px; line-height: 1.35; }
+.dc-rambu li { position: relative; padding-left: 20px; }
+.dc-rambu li::before { content: ''; position: absolute; left: 0; top: 3px; width: 12px; height: 12px; box-shadow: 0 0 0 2px #212121; }
+.dc-rambu li[data-rambu="merah"]::before { background: #a94133; }
+.dc-rambu li[data-rambu="biru"]::before { background: #326784; }
+
+/* pesan */
+.dc-pesan { padding: 10px 12px; border: 2px solid #212121; background: #fff9f0; font-size: 17px; line-height: 1.4; }
 .dc-pesan p { margin: 0; }
 .dc-pesan[data-jenis="tepat"] { background: #e6f4e3; border-color: #3f8f5a; }
 .dc-pesan[data-jenis="ragu"] { background: #fff4cf; }
