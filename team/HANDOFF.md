@@ -3395,3 +3395,54 @@ Built by the Designer; uncommitted. Owner rule: nothing was opened in a browser.
 - The a05 policy cards have lost their tilt and the "POLIS" word, because the 5×7 letters do not fit on a 64-unit card.
 - Not checked in a browser.
 - Cases 8-10 follow as T-061c, using the same helpers: `gudang.piksel.ts`, `piksel-umum.ts`, `rle.ts`, `bangun.mjs` and `cek-label.mts`.
+
+## T-061c (2026-11-19): event cases 8, 9, 10 in the case-1 pixel style + leftover scan of all 10 cases (Designer)
+
+Built by the Designer; uncommitted. Owner rule: nothing was opened in a browser. Gate: client typecheck 0 errors; client/dist rebuilt.
+
+**Scope kept**
+- Untouched: `shared/acara/*`, `server/acara/*`, MissionPlay, HasilAcara and the result/acara CSS.
+- Unchanged: ids, labels (id/en/zh), categories, behaviour and the answer key. Only label anchors moved where `cek-label.mts` required it.
+- `cek-label.mts` now covers cases 2-10. Result: every label is at least 8 inside the scene with no overlaps, in id, en and zh.
+
+**Case 8: Lini Masa Excavator (proyek)** — `a08.piksel.ts`, `a08.gen.ts`
+- **Background:** the project site with m04 geometry: sky, distant city, barricades, ground, excavation pit, cones and new road.
+- **Excavator:**
+  - EX-2085 is drawn as pixel layers on a world canvas, using the same pivot and -9° tilt as m04: body, track, boom, cracked glass, open engine bay, worn tread and leaking hose.
+  - Each layer is cut at the same box `potong()` used (`potongDunia`), so part positions shift by at most 2 world units and stickers and labels stay where they were.
+  - The damage is neutral, as before: boom dent, cracked windshield with a hole, open engine bay, shiny worn tread, oil drips and a puddle.
+- **Operator:** a NEW person from the side cast "tol", with a yellow helmet, blue shirt and vest, holding the teal service book.
+- **Report:** a pixel clipboard.
+- **Labels:** Buku servis `+49/-6`, Laporan `-23`, Track shoe `-8`.
+
+**Case 9: Hitung Berlapis (kantor-hitung)** — `a09.piksel.ts`
+- **Background:** the counting office with m09 geometry: wall, chalk ledge under the engine board, clock, window, desk with lamp, calculator, file pile and pencil cup, and a wood floor.
+- **Objects:** the estimate clipboard (orange strip and wrench badge) and the HVC policy card, drawn as equals, plus the miniature excavator on its stand.
+
+**Case 10: Banjir Susulan (kota-banjir)** — `a10.piksel.ts`
+- **Background:** the flooded business complex with m10 geometry, including the "KOMPLEKS USAHA" sign (widened so the 5×7 letters fit), the P sign, sandbag dike and dry road.
+- **Four equal flooded cases:** van, excavator, warehouse and pallet, each with the same blank ID plate. The pallet crates carry no numbers, so they give no hint.
+- **Other objects:** the policy cards reuse the case-7 pixel card (only the letter differs), and there is a rubber boat with a waving staff member in a life vest.
+- **Shared helper:** `excavatorSamping()` serves both case B and the case-9 miniature.
+
+**Leftover scan of all 10 cases**
+- **Scene files:** all 10 use `gaya: 'piksel'`, and no vector kit art or `personArt` remains. The remaining m04, m05, m08 and m09 imports are geometry only (positions, ink colours, board size).
+- **Found and fixed in the engine** (`MissionScene.ts`, only when `gaya === 'piksel'`, via a new `kotakPiksel()` stepped box; the practice missions are unchanged):
+  - the document marker (cases 4, 5, 7, 8, 9, 10);
+  - the notes boards (cases 4 and 9);
+  - category stickers (cases 3, 5, 6, 7, 8, 10), which are now upright;
+  - verdict pills at review;
+  - action captions;
+  - the photo fly-in polaroid (case 2), now upright;
+  - the pause overlay pill.
+- **Found and fixed in the art:** the case-10 pallet crate numbers (a possible hint) are removed.
+- **Found, not fixed:** in case 4 the engine's notes board (top-left, x 4-240) covers most of the harbour cranes added in T-061a, so the port is read mostly from the containers. Moving the cranes to the right means redrawing the warehouse side, which is left as a possible follow-up.
+
+**Previews** (`character/acara-t061/`)
+- Before: `sebelum-a08..a10.svg`, from HEAD via `sebelum-c.mts`.
+- After: `sesudah-a02..a10-2x.png`. The preview now draws the engine boards dark and centred, as in the game.
+
+**Risks**
+- None of this was checked in a browser.
+- Engine change: the shapes above changed only for the 10 pixel-style cases.
+- `scenes.test.ts` rules were kept: background 640×480, unique art keys, all options shown and identical slot sizes. Not run, by the owner rule.

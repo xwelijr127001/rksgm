@@ -64,6 +64,7 @@ export function peti(p: Piksel, x: number, y: number, w: number, h: number, nomo
     p.rect(x + 1, y + h, 0.5, 1, AIR).rect(x + w / 2, y + h + 0.5, 0.5, 1, AIR).rect(x + w - 2, y + h, 0.5, 0.5, AIR);
   }
   // pelat nomor krem: tepi 1 + jarak 1 sel halus di tiap sisi, diselaraskan ke kisi halus, digambar paling akhir (tetap terbaca)
+  if (!nomor) return p; // T-061c: peti tanpa pelat nomor (palet kiriman misi 10: nomor bisa terbaca sebagai petunjuk)
   const lw = lebarMini(nomor) + 4;
   const px = Math.round((x + w / 2 - lw / 4) * 2) / 2, py = Math.round((y + h / 2 - 2.25) * 2) / 2;
   p.kartu(px, py, lw / 2, 4.5, KREM, KAYU_GELAP);
@@ -134,4 +135,45 @@ export function teksBesar(p: Piksel, x: number, y: number, s: string, c: Warna):
     X += g[0]!.length + 1;
   }
   return X - 1;
+}
+
+/** T-061c: poligon terisi, titik dalam sel TATA LETAK (boleh pecahan), diisi per sel halus (pusat sel di dalam = terisi). */
+export function poligon(p: Piksel, titik: readonly (readonly [number, number])[], c: Warna): Piksel {
+  const k = p.k;
+  const ys = titik.map((t) => t[1] * k);
+  const Y0 = Math.max(0, Math.floor(Math.min(...ys))), Y1 = Math.min(p.H - 1, Math.ceil(Math.max(...ys)));
+  for (let Y = Y0; Y <= Y1; Y++) {
+    const yc = Y + 0.5;
+    const xs: number[] = [];
+    for (let i = 0; i < titik.length; i++) {
+      const [ax, ay] = titik[i]!, [bx, by] = titik[(i + 1) % titik.length]!;
+      const y0 = ay * k, y1 = by * k;
+      if ((yc >= y0 && yc < y1) || (yc >= y1 && yc < y0)) xs.push(ax * k + ((yc - y0) / (y1 - y0)) * (bx - ax) * k);
+    }
+    xs.sort((a, b) => a - b);
+    for (let i = 0; i + 1 < xs.length; i += 2) for (let X = Math.ceil(xs[i]! - 0.5); X <= Math.floor(xs[i + 1]! - 0.5); X++) p.titik(X, Y, c);
+  }
+  return p;
+}
+
+/** T-061c: salinan diperkecil/diperbesar tetangga terdekat (faktor f), hasil k sama; sel transparan tetap transparan. */
+export function skala(src: Piksel, f: number): Piksel {
+  const p = new Piksel(Math.max(1, Math.round(src.w * f)), Math.max(1, Math.round(src.h * f)), null, src.k);
+  for (let Y = 0; Y < p.H; Y++) for (let X = 0; X < p.W; X++) {
+    const c = src.ambil(Math.min(src.W - 1, Math.floor(X / f)), Math.min(src.H - 1, Math.floor(Y / f)));
+    if (c) p.titik(X, Y, c);
+  }
+  return p;
+}
+
+/** T-061c: potong kotak DUNIA (x0, y0, w, h; dibulatkan ke sel tata letak 4 dunia) dari kanvas dunia 160 x 120 sel. */
+export function potongDunia(src: Piksel, x0: number, y0: number, w: number, h: number): { p: Piksel; x: number; y: number } {
+  const cx0 = Math.floor(x0 / 4), cy0 = Math.floor(y0 / 4);
+  const cw = Math.ceil((x0 + w) / 4) - cx0, ch = Math.ceil((y0 + h) / 4) - cy0;
+  const p = new Piksel(cw, ch, null, src.k);
+  for (let Y = 0; Y < p.H; Y++) for (let X = 0; X < p.W; X++) {
+    const c = src.ambil(cx0 * src.k + X, cy0 * src.k + Y);
+    if (c) p.titik(X, Y, c);
+  }
+  return { p, x: cx0 * 4 + cw * 2, y: cy0 * 4 + ch * 2 };
 }

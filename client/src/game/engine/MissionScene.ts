@@ -170,6 +170,20 @@ export function defineMissionScene(P: Ph) {
       return xLokal + (aman - dunia);
     }
 
+    /** T-061c: true = adegan bergaya piksel (kasus acara); bentuk UI kanvas memakai kotak bertangga, bukan kotak membulat. */
+    piksel(): boolean {
+      return this.cfg.spec.gaya === 'piksel';
+    }
+
+    /**
+     * T-061c (gaya piksel): kotak bertangga (sudut 2) bertepi `tebal` + alas tinta 4, sama dengan pil label piksel T-054.
+     * Pengganti fillRoundedRect/strokeRoundedRect di papan, stiker, vonis, keterangan, foto, dan lapisan jeda.
+     */
+    kotakPiksel(g: Phaser.GameObjects.Graphics, x: number, y: number, w: number, h: number, isi: number, tepi: number, tebal = 2, a = 1): void {
+      g.fillStyle(tepi, a).fillRect(x + 2, y, w - 4, h + 4).fillRect(x, y + 2, w, h);
+      if (tebal > 0) g.fillStyle(isi, a).fillRect(x + tebal, y + tebal, w - 2 * tebal, h - 2 * tebal);
+    }
+
     reduced(): boolean {
       return this.view.reducedMotion;
     }
@@ -360,6 +374,11 @@ export function defineMissionScene(P: Ph) {
           g.moveTo(-5.5, 0); g.lineTo(-1.5, 4.5); g.lineTo(6, -5);
           g.strokePath();
         }
+      } else if (penanda === 'dok' && piksel) {
+        // T-061c: penanda dokumen piksel (lembar persegi bertepi tinta + tiga baris).
+        g.fillStyle(HEX.tinta, 1).fillRect(-7, -9, 14, 18);
+        g.fillStyle(HEX.putih, 1).fillRect(-5, -7, 10, 14);
+        g.fillStyle(HEX.tinta, 0.75).fillRect(-3, -4, 6, 2).fillRect(-3, 0, 6, 2).fillRect(-3, 4, 4, 2);
       } else if (penanda === 'dok') {
         g.fillStyle(HEX.putih, 1).fillRoundedRect(-7, -9, 14, 18, 3);
         g.lineStyle(2, HEX.tinta, 1).strokeRoundedRect(-7, -9, 14, 18, 3);
@@ -380,9 +399,14 @@ export function defineMissionScene(P: Ph) {
     buatPapan(b: NonNullable<SceneSpec['boards']>[number]): void {
       const h = 48 + b.lines.length * 46;
       const g = this.add.graphics().setDepth(18);
-      g.fillStyle(HEX.tinta, 0.18).fillRoundedRect(b.x - b.w / 2 + 4, b.y + 6, b.w, h, 14);
-      g.fillStyle(0x212121, 1).fillRoundedRect(b.x - b.w / 2, b.y, b.w, h, 14);
-      g.lineStyle(4, HEX.kayuTua, 1).strokeRoundedRect(b.x - b.w / 2, b.y, b.w, h, 14);
+      if (this.piksel()) {
+        g.fillStyle(HEX.tinta, 0.18).fillRect(b.x - b.w / 2 + 4, b.y + 6, b.w, h);
+        this.kotakPiksel(g, b.x - b.w / 2, b.y, b.w, h, 0x212121, HEX.kayuTua, 4);
+      } else {
+        g.fillStyle(HEX.tinta, 0.18).fillRoundedRect(b.x - b.w / 2 + 4, b.y + 6, b.w, h, 14);
+        g.fillStyle(0x212121, 1).fillRoundedRect(b.x - b.w / 2, b.y, b.w, h, 14);
+        g.lineStyle(4, HEX.kayuTua, 1).strokeRoundedRect(b.x - b.w / 2, b.y, b.w, h, 14);
+      }
       const judul = this.teks(b.x, b.y + 24, b.title, 21, '#ff9000').setDepth(19);
       void judul;
       const baris: Phaser.GameObjects.Text[] = [];
@@ -400,8 +424,11 @@ export function defineMissionScene(P: Ph) {
       const g = this.add.graphics();
       g.fillStyle(HEX.tinta, 0.55).fillRect(0, 0, WORLD_W, WORLD_H);
       const pill = this.add.graphics();
-      pill.fillStyle(HEX.krem, 1).fillRoundedRect(-150, -34, 300, 68, 22);
-      pill.lineStyle(3, HEX.tinta, 1).strokeRoundedRect(-150, -34, 300, 68, 22);
+      if (this.piksel()) this.kotakPiksel(pill, -150, -34, 300, 68, HEX.krem, HEX.tinta, 3);
+      else {
+        pill.fillStyle(HEX.krem, 1).fillRoundedRect(-150, -34, 300, 68, 22);
+        pill.lineStyle(3, HEX.tinta, 1).strokeRoundedRect(-150, -34, 300, 68, 22);
+      }
       pill.setPosition(WORLD_W / 2, WORLD_H / 2);
       const t = this.teks(WORLD_W / 2, WORLD_H / 2, this.cfg.kata.dijeda, 28);
       this.pauseLayer = this.add.container(0, 0, [g, pill, t]).setDepth(500).setVisible(false);
@@ -521,9 +548,14 @@ export function defineMissionScene(P: Ph) {
         const w = t.width + 24;
         lebar = Math.max(lebar, w);
         const g = this.add.graphics();
-        g.fillStyle(warna, 1).fillRoundedRect(-w / 2, -16, w, 32, 10);
-        g.lineStyle(3, HEX.tinta, 1).strokeRoundedRect(-w / 2, -16, w, 32, 10);
-        const satu = this.add.container(0, -i * 34, [g, t]).setAngle(i % 2 === 0 ? -4 : 3);
+        const piksel = this.piksel();
+        if (piksel) this.kotakPiksel(g, -w / 2, -16, w, 32, warna, HEX.tinta, 3);
+        else {
+          g.fillStyle(warna, 1).fillRoundedRect(-w / 2, -16, w, 32, 10);
+          g.lineStyle(3, HEX.tinta, 1).strokeRoundedRect(-w / 2, -16, w, 32, 10);
+        }
+        // Gaya piksel: stiker tegak (rotasi memecah tepi piksel).
+        const satu = this.add.container(0, -i * 34, [g, t]).setAngle(piksel ? 0 : i % 2 === 0 ? -4 : 3);
         c.add(satu);
         if (animasiTerakhir && i === tags.length - 1 && !this.reduced()) {
           satu.setScale(1.6).setAlpha(0);
@@ -543,8 +575,11 @@ export function defineMissionScene(P: Ph) {
       const w = t.width + 50;
       t.setX(-w / 2 + 34 + (t.width) / 2);
       const g = this.add.graphics();
-      g.fillStyle(warna, 1).fillRoundedRect(-w / 2, -18, w, 36, 18);
-      g.lineStyle(3, verdict === 'terlewat' ? HEX.hijauTua : HEX.tinta, 1).strokeRoundedRect(-w / 2, -18, w, 36, 18);
+      if (this.piksel()) this.kotakPiksel(g, -w / 2, -18, w, 36, warna, verdict === 'terlewat' ? HEX.hijauTua : HEX.tinta, 3);
+      else {
+        g.fillStyle(warna, 1).fillRoundedRect(-w / 2, -18, w, 36, 18);
+        g.lineStyle(3, verdict === 'terlewat' ? HEX.hijauTua : HEX.tinta, 1).strokeRoundedRect(-w / 2, -18, w, 36, 18);
+      }
       const ikon = this.add.graphics();
       ikon.lineStyle(4.5, verdict === 'terlewat' ? HEX.hijauTua : HEX.putih, 1);
       const ix = -w / 2 + 18;
@@ -685,7 +720,8 @@ export function defineMissionScene(P: Ph) {
       const t = this.teks(0, 0, s, 20, '#ffffff');
       const w = t.width + 26;
       const g = this.add.graphics();
-      g.fillStyle(HEX.tinta, 0.95).fillRoundedRect(-w / 2, -17, w, 34, 17);
+      if (this.piksel()) this.kotakPiksel(g, -w / 2, -17, w, 34, HEX.tinta, HEX.tinta, 0, 0.95);
+      else g.fillStyle(HEX.tinta, 0.95).fillRoundedRect(-w / 2, -17, w, 34, 17);
       const c = this.add.container(this.jepitX(v, v.label.x, w), v.label.y, [g, t]);
       v.ui.add(c);
       v.caption = c;
@@ -737,11 +773,14 @@ export function defineMissionScene(P: Ph) {
       const fw = 86;
       const fh = 96;
       const g = this.add.graphics();
-      g.fillStyle(HEX.putih, 1).fillRoundedRect(-fw / 2, -fh / 2, fw, fh, 8);
-      g.lineStyle(3, HEX.tinta, 1).strokeRoundedRect(-fw / 2, -fh / 2, fw, fh, 8);
+      if (this.piksel()) this.kotakPiksel(g, -fw / 2, -fh / 2, fw, fh, HEX.putih, HEX.tinta, 3);
+      else {
+        g.fillStyle(HEX.putih, 1).fillRoundedRect(-fw / 2, -fh / 2, fw, fh, 8);
+        g.lineStyle(3, HEX.tinta, 1).strokeRoundedRect(-fw / 2, -fh / 2, fw, fh, 8);
+      }
       const skala = Math.min((fw - 14) / v.spec.art.w, (fh - 28) / v.spec.art.h);
       const foto = this.add.image(0, -8, v.spec.art.key).setDisplaySize(v.spec.art.w * skala, v.spec.art.h * skala);
-      const c = this.add.container(x, y, [g, foto]).setDepth(260).setAlpha(0).setAngle(-6);
+      const c = this.add.container(x, y, [g, foto]).setDepth(260).setAlpha(0).setAngle(this.piksel() ? 0 : -6);
       this.tweens.add({
         targets: c, alpha: 1, duration: 120, delay,
         onComplete: () => {

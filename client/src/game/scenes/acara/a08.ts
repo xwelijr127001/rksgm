@@ -21,151 +21,65 @@
  * - roda rantai utuh = properti (potongan m04); item "Track shoe" hanya separuh DEPAN-nya
  *   (tanda aus), supaya stikernya tidak menutupi ruang mesin. Label "Mesin" menutupi ujung
  *   BELAKANG roda rantai yang bukan item.
+ *
+ * T-061c: gaya PIKSEL kasus 1 (k = 2): latar proyek, excavator per lapis, operator, laporan = seni piksel. Id, posisi, label,
+ * kategori, dan perilaku TIDAK berubah.
  */
 
-import { SKIN_TONES } from '@shared/brand';
 import type { ArtRef, SceneSpec } from '../../types';
-import { INK, INK_TIPIS, P, art, circle, line, path, rrect } from '../../art/kit';
-import { personArt } from '../../art/characters';
-import {
-  PX, PY, RANTAI, ROOT, SIKU,
-  badanDunia, boomLokal, dunia, kotakLokal, labelKe, latar, miring, potong, rodaRantaiLokal,
-} from '../m04-proyek';
+import { art } from '../../art/kit';
+import type { Piksel } from '../../art/piksel';
+import { PX, PY, RANTAI, ROOT, SIKU, dunia, kotakLokal, labelKe, potong } from '../m04-proyek';
+import { badanA08, boomA08, kacaA08, laporanA08, latarA08, mesinA08, rantaiA08, selangA08, tapakA08 } from './a08.piksel';
+import { OPERATOR_A08 } from './a08.gen';
+import { potongDunia } from './piksel-umum';
+import { pikselDariRle } from './rle';
 
-/** Oli hidrolik (cokelat tua netral, bukan merah/hijau). */
-const OLI = '#4a3524';
-
-// ------------------------------------------------------------------ bagian unit (baru)
-
-/**
- * Kaca kabin: panel kaca PERSIS seperti di `badanDunia()` m04 (menutup kaca utuh di
- * bawahnya) + retakan menjalar dari satu titik dan satu lubang pecahan. Rangka kabin
- * tidak digambar ulang: semua yang baru ada di dalam potongan, jadi tidak ada sambungan.
- * Koordinat lokal unit.
- */
-function kacaPecahLokal(): string {
-  return `
-    ${rrect(-84, -194, 52, 44, 7, P.kaca, INK_TIPIS)}
-    ${path('M-80 -190 L-66 -190 L-78 -164 L-80 -164 Z', P.putih, 'opacity="0.6"')}
-    <!-- lubang pecahan + retakan -->
-    ${path('M-52 -183 L-44 -187 L-38 -178 L-42 -169 L-51 -171 L-56 -177 Z', '#5d7482', INK_TIPIS)}
-    ${line('M-52 -183 L-62 -193 M-44 -187 L-41 -194 M-38 -178 L-32 -176 M-42 -169 L-36 -156 M-51 -171 L-58 -152 M-56 -177 L-72 -174 L-84 -180', P.tinta, 1.8)}
-    ${line('M-66 -188 L-64 -176 L-60 -166 M-47 -162 L-40 -163', P.tinta, 1.4, 'opacity="0.8"')}
-    ${line('M-62 -191 L-53 -182 M-57 -153 L-51 -170', P.putih, 1.2, 'opacity="0.9"')}`;
-}
+/** Piksel k = 2 -> ArtRef (1 sel tata letak = 4 dunia). */
+const gambar = (kunci: string, p: Piksel): ArtRef => art(kunci, p.w * 4, p.h * 4, p.svg(4));
 
 /**
- * Ruang mesin di bagian belakang rumah mesin: pintu samping terangkat, blok mesin
- * & puli terlihat. TANPA tanda tanya (beda dengan m08): gambar tidak memberi petunjuk kategori.
+ * T-061c: kotak bagian dihitung PERSIS seperti potong() m04 (titik + pad), lalu lapis piksel dunia dipotong di kotak itu
+ * (dibulatkan ke sel 4 dunia: pusat bergeser <= 2 satuan). Kembali: ArtRef + pusat dunia.
  */
-function mesinTerbukaLokal(): string {
-  return `
-    <!-- pintu samping terangkat (engsel di tepi atas ruang mesin) -->
-    ${line('M-130 -90 L-124 -138', P.besiMuda, 3.2)}
-    ${path('M-180 -120 L-124 -120 L-120 -150 L-172 -156 Z', P.kuning, INK)}
-    ${path('M-174 -125 L-129 -125 L-126 -146 L-168 -151 Z', '#e0b23a')}
-    ${line('M-167 -142 L-129 -138 M-170 -133 L-130 -131', P.kuningTua, 2.4, 'opacity="0.7"')}
-    <!-- ruang mesin -->
-    ${rrect(-178, -118, 52, 38, 5, '#2c3833', INK)}
-    ${rrect(-173, -112, 24, 27, 4, P.besi, INK_TIPIS)}
-    ${line('M-167 -108 v19 M-161 -108 v19 M-155 -108 v19', P.besiTua, 2.2)}
-    ${circle(-138, -96, 8.5, P.besiMuda, INK_TIPIS)}${circle(-138, -96, 3, P.besiTua)}
-    ${line('M-149 -104 C-146 -111 -134 -111 -130 -103', P.besiTua, 2.6)}`;
-}
-
-/**
- * Keausan di separuh depan roda rantai: tapak menipis & mengilap. HANYA tanda ausnya
- * (roda rantai utuh sudah digambar sebagai properti di bawahnya), jadi tidak ada
- * bagian semi-transparan yang tergambar dua kali di tepi potongan.
- */
-function tapakAusLokal(): string {
-  let aus = '';
-  for (let x = -106; x <= -31; x += 15) aus += rrect(x - 5, -48.5, 10, 5, 2, P.besiMuda) + rrect(x - 5, -6.5, 10, 5, 2, P.besiMuda);
-  return `
-    ${aus}
-    ${line('M-25 -45 C-11 -45 -5 -37 -5 -25 C-5 -13 -11 -5 -25 -5', P.besiMuda, 3)}`;
-}
-
-/**
- * Selang hidrolik di lengan bawah (koordinat DUNIA: lengan m04 tidak ikut miring):
- * selang melendut, bagian bawahnya basah, tiga tetes jatuh ke genangan kecil.
- */
-function selangDunia(): string {
-  const alur = 'M435 258 C455 262 473 284 465 306 C461 318 454 322 450 329';
-  const tetes = (x: number, y: number, s: number): string =>
-    `<g transform="translate(${x} ${y}) scale(${s})">${path('M0 -9 C6 -1 6 6 0 6 C-6 6 -6 -1 0 -9 Z', OLI)}${circle(-1.6, 1.4, 1.4, P.putih, 'opacity="0.55"')}</g>`;
-  return `
-    <ellipse cx="475" cy="377" rx="17" ry="4.5" fill="${OLI}" opacity="0.85"/>
-    ${line(alur, P.tinta, 9.5)}
-    ${line(alur, '#4a5750', 5)}
-    ${line('M443 263 C457 269 467 285 463 300', P.besiMuda, 1.6, 'opacity="0.6"')}
-    ${rrect(429, 252, 13, 11, 3, P.besiMuda, INK_TIPIS)}
-    ${rrect(443, 324, 13, 11, 3, P.besiMuda, INK_TIPIS)}
-    ${line('M468 290 C470 297 468 304 464 310', OLI, 5.5, 'opacity="0.92"')}
-    ${tetes(468, 325, 1)}${tetes(471, 346, 0.85)}${tetes(473, 363, 0.7)}`;
-}
-
-// ------------------------------------------------------------------ dokumen
-
-/** Operator proyek memegang buku servis unit (sampul teal, ikon roda gigi). Bukan tokoh pemandu. */
-function operatorBuku(): ArtRef {
-  const orang = personArt({ key: 'a08-operator-dasar', shirt: P.biru, pants: '#4b5563', helmet: true, vest: true, pose: 'diam', mood: 'netral' });
-  const isi = orang.svg.replace(/^<svg[^>]*>/, '').replace(/<\/svg>$/, '');
-  const buku = `<g transform="translate(42 76) rotate(-7)">
-    ${rrect(3, 2, 28, 37, 3, P.putih, INK_TIPIS)}
-    ${rrect(0, 0, 28, 37, 3, P.teal, INK)}
-    <rect x="0" y="0" width="6" height="37" rx="3" fill="#000" opacity="0.18"/>
-    ${rrect(9, 5, 15, 8, 2, P.krem)}
-    ${circle(16.5, 25, 6, P.krem)}${circle(16.5, 25, 2.4, P.teal)}
-    ${line('M16.5 17 v2.4 M16.5 30.6 v2.4 M8.5 25 h2.4 M22.1 25 h2.4', P.krem, 2.6)}</g>
-    ${circle(66, 108, 5.5, SKIN_TONES[1]!, INK_TIPIS)}`;
-  const a = art('a08-operator', 80, 152, isi + buku);
-  return { ...a, w: 68, h: 130 };
-}
-
-/** Papan klip laporan kejadian, digantung dengan tali di rel barikade. 64 x 98. */
-function laporanGantung(): string {
-  return `
-    ${line('M18 3 L32 18 L46 3', P.besiTua, 2)}
-    <g transform="translate(0 12)">
-      ${rrect(4, 6, 56, 76, 6, P.kayu, INK)}
-      ${rrect(9, 14, 46, 62, 3, P.putih)}
-      ${rrect(20, 2, 24, 12, 3, P.besi, INK_TIPIS)}
-      ${rrect(14, 21, 30, 8, 2.5, P.oranye)}
-      ${line('M14 38 H50 M14 48 H44 M14 58 H50 M14 68 H36', P.tintaLembut, 3)}
-    </g>`;
+function bagian(kunci: string, titik: [number, number][], pad: number, lapis: Piksel): { art: ArtRef; x: number; y: number } {
+  const k = potong(kunci, titik, pad, '');
+  const c = potongDunia(lapis, k.x - k.art.w / 2, k.y - k.art.h / 2, k.art.w, k.art.h);
+  return { art: gambar(`${kunci}-piksel`, c.p), x: c.x, y: c.y };
 }
 
 // ------------------------------------------------------------------ adegan
 
 function buat(): SceneSpec {
-  // Latar, badan, roda rantai, dan boom = gambar m04 apa adanya (kunci tekstur sama, SVG identik).
-  const bg = art('m04-latar', 640, 480, latar());
+  // T-061c: latar & semua lapis excavator = seni piksel (./a08.piksel.ts), geometri m04 yang sama.
+  const bg = gambar('a08-latar-piksel', latarA08());
   const siku = dunia(SIKU[0], SIKU[1]);
-  const badan = potong(
-    'm04-excavator',
+  const badan = bagian(
+    'a08-excavator',
     [dunia(-214, -210), dunia(10, -210), dunia(-214, 0), dunia(10, 0), [siku[0] - 16, siku[1] - 16], [siku[0] + 90, 380], [PX - 210, PY + 16]],
     8,
-    badanDunia(),
+    badanA08(),
   );
-  const rantai = potong('m04-rantai', kotakLokal(RANTAI.x, RANTAI.y, RANTAI.w, RANTAI.h), 6, miring(rodaRantaiLokal()));
-  const boom = potong(
-    'm04-boom',
+  const rantai = bagian('a08-rantai', kotakLokal(RANTAI.x, RANTAI.y, RANTAI.w, RANTAI.h), 6, rantaiA08());
+  const boom = bagian(
+    'a08-boom',
     [dunia(ROOT[0] - 18, ROOT[1] + 12), dunia(ROOT[0] + 20, ROOT[1] + 12), dunia(SIKU[0] + 14, SIKU[1] - 20), dunia(SIKU[0] + 16, SIKU[1] + 16), dunia(SIKU[0] - 40, SIKU[1] - 20)],
     6,
-    miring(boomLokal()),
+    boomA08(),
   );
 
   // Potongan baru.
-  const kaca = potong('a08-kaca', kotakLokal(-96, -208, 78, 64), 4, miring(kacaPecahLokal()));
-  const mesin = potong('a08-mesin', kotakLokal(-196, -160, 80, 84), 6, miring(mesinTerbukaLokal()));
-  const track = potong('a08-track', kotakLokal(-112, RANTAI.y, 112, RANTAI.h), 6, miring(tapakAusLokal()));
-  const selang = potong('a08-selang', [[430, 252], [492, 380]], 5, selangDunia());
+  const kaca = bagian('a08-kaca', kotakLokal(-96, -208, 78, 64), 4, kacaA08());
+  const mesin = bagian('a08-mesin', kotakLokal(-196, -160, 80, 84), 6, mesinA08());
+  const track = bagian('a08-track', kotakLokal(-112, RANTAI.y, 112, RANTAI.h), 6, tapakA08());
+  const selang = bagian('a08-selang', [[430, 252], [492, 380]], 5, selangA08());
 
-  const operator = operatorBuku();
+  // T-061c: operator proyek = orang baru dari tokoh samping (helm kuning, baju biru, rompi), memegang buku servis teal.
+  const operator = gambar('a08-operator-piksel', pikselDariRle(OPERATOR_A08));
 
   return {
     missionId: 'a08-linimasa-ex',
+    gaya: 'piksel',
     background: bg,
     props: [
       { id: 'excavator', x: badan.x, y: badan.y, art: badan.art, depth: 10 },
@@ -183,11 +97,15 @@ function buat(): SceneSpec {
       {
         id: 'buku-servis', role: 'doc', refId: 'servis',
         x: 40, y: 250, art: operator, label: 'Buku servis', depth: 20,
+        // T-061c: pil (~162) di x 40 keluar tepi kiri: pusat 89 (tepi 8), naik 6 supaya bebas dari pil 'Mesin'.
+        labelDx: 49, labelDy: -6,
         hit: { w: 80, h: 150 },
       },
       {
         id: 'laporan', role: 'doc', refId: 'laporan',
-        x: 591, y: 270, art: art('a08-laporan', 64, 98, laporanGantung()), label: 'Laporan', depth: 20,
+        x: 591, y: 270, art: gambar('a08-laporan-piksel', laporanA08()), label: 'Laporan', depth: 20,
+        // T-061c: pil (zh ~126) keluar tepi kanan: pusat 568 (tepi >= 8).
+        labelDx: -23,
         hit: { w: 90, h: 130 },
       },
       // Bagian unit (item). Kedalaman bagian kecil lebih tinggi supaya ketukannya menang
@@ -215,6 +133,8 @@ function buat(): SceneSpec {
       {
         id: 'track', role: 'item', stepId: 'pilah', refId: 'track', fx: 'tag',
         x: track.x, y: track.y, art: track.art, label: 'Track shoe', depth: 20,
+        // T-061c: geser 8 ke kiri supaya tidak menyentuh pil 'Selang hidrolik'.
+        labelDx: -8,
       },
       {
         id: 'selang', role: 'item', stepId: 'pilah', refId: 'selang', fx: 'tag',
