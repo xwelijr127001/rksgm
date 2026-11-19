@@ -1,0 +1,177 @@
+exports[`a01 public mission shape (id/en/zh) 1`] = `
+{
+  "id": {
+    "id": "a01-api-padam",
+    "title": "Setelah Api Padam",
+    "instruction": "Ketuk dua tindakan yang tepat dilakukan lebih dulu.",
+    "durationSeconds": 45,
+    "steps": [
+      {
+        "kind": "multi",
+        "requiredSelections": 2,
+        "options": [
+          [
+            "buang",
+            "Buang barang hangus supaya toko cepat rapi"
+          ],
+          [
+            "foto",
+            "Foto kerusakan dan barang terdampak sebelum dipindahkan"
+          ],
+          [
+            "perbaiki",
+            "Panggil tukang memperbaiki dulu, lapor setelah selesai"
+          ],
+          [
+            "lapor",
+            "Laporkan kejadian melalui kanal klaim"
+          ],
+          [
+            "abaikan",
+            "Buka toko seperti biasa; api sudah padam, tidak perlu lapor"
+          ]
+        ]
+      }
+    ]
+  },
+  "en": {
+    "id": "a01-api-padam",
+    "title": "After the Fire Is Out",
+    "instruction": "Tap the two actions that should be done first.",
+    "durationSeconds": 45,
+    "steps": [
+      {
+        "kind": "multi",
+        "requiredSelections": 2,
+        "options": [
+          [
+            "buang",
+            "Throw away the burnt items to get the shop tidy quickly"
+          ],
+          [
+            "foto",
+            "Photograph the damage and the affected items before they are moved"
+          ],
+          [
+            "perbaiki",
+            "Call a builder to repair things first, and report once it is done"
+          ],
+          [
+            "lapor",
+            "Report the incident through the claims channel"
+          ],
+          [
+            "abaikan",
+            "Open the shop as usual; the fire is out, so no need to report"
+          ]
+        ]
+      }
+    ]
+  },
+  "zh": {
+    "id": "a01-api-padam",
+    "title": "火灭之后",
+    "instruction": "点击应当先做的两项行动。",
+    "durationSeconds": 45,
+    "steps": [
+      {
+        "kind": "multi",
+        "requiredSelections": 2,
+        "options": [
+          [
+            "buang",
+            "把烧焦的物品扔掉，让店里尽快整洁"
+          ],
+          [
+            "foto",
+            "在搬动之前，拍下损坏情况和受损物品"
+          ],
+          [
+            "perbaiki",
+            "先请工人来修理，修完再报案"
+          ],
+          [
+            "lapor",
+            "通过理赔渠道报案"
+          ],
+          [
+            "abaikan",
+            "照常开店；火已经灭了，不用报案"
+          ]
+        ]
+      }
+    ]
+  }
+}
+`;
+
+exports[`a01 verdict and score 1`] = `
+{
+  "benar (foto+lapor) @5s": {
+    "ketepatan": 1,
+    "basePoints": 1000,
+    "speedBonus": 267,
+    "roundScore": 1267
+  },
+  "benar (foto+lapor) @40s": {
+    "ketepatan": 1,
+    "basePoints": 1000,
+    "speedBonus": 33,
+    "roundScore": 1033
+  },
+  "1 benar + 1 salah @5s": {
+    "ketepatan": 0,
+    "basePoints": 0,
+    "speedBonus": 0,
+    "roundScore": 0
+  },
+  "1 benar + 1 salah @40s": {
+    "ketepatan": 0,
+    "basePoints": 0,
+    "speedBonus": 0,
+    "roundScore": 0
+  },
+  "2 salah @5s": {
+    "ketepatan": 0,
+    "basePoints": 0,
+    "speedBonus": 0,
+    "roundScore": 0
+  },
+  "2 salah @40s": {
+    "ketepatan": 0,
+    "basePoints": 0,
+    "speedBonus": 0,
+    "roundScore": 0
+  },
+  "hanya 1 opsi @5s": {
+    "ketepatan": 0.5,
+    "basePoints": 500,
+    "speedBonus": 133,
+    "roundScore": 633
+  },
+  "hanya 1 opsi @40s": {
+    "ketepatan": 0.5,
+    "basePoints": 500,
+    "speedBonus": 17,
+    "roundScore": 517
+  },
+  "3 opsi @5s": {
+    "ketepatan": 0.5,
+    "basePoints": 500,
+    "speedBonus": 133,
+    "roundScore": 633
+  },
+  "3 opsi @40s": {
+    "ketepatan": 0.5,
+    "basePoints": 500,
+    "speedBonus": 17,
+    "roundScore": 517
+  },
+  "tanpa jawaban @45s": {
+    "ketepatan": 0,
+    "basePoints": 0,
+    "speedBonus": 0,
+    "roundScore": 0
+  }
+}
+`;

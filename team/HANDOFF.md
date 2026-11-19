@@ -3070,3 +3070,6 @@ Built by the Designer; uncommitted. Owner rule: nothing was opened in a browser.
 - None of those tools were run.
 
 The 10 event cases (paket acara) are the next task, as the brief says.
+
+## T-054a
+QA added `server/src/acara/a01.expect.test.ts` (2 snapshots: public mission shape in id/en/zh, 11 verdict+score cases; appended to the server test script, about 0.7 s); values checked by eye, scoring is (correct - wrong)/required so 1 correct + 1 wrong = 0 and 1 option or 3 options = 0.5; speed bonus sits on top of 1000 so a perfect fast answer scores 1267 at 5 s.
