@@ -609,11 +609,11 @@ export function MissionPlay(props: MissionPlayProps) {
           </div>
           <div className="tugas-alat">
             <button type="button" className="alat" aria-expanded={ceritaBuka} aria-controls="misi-cerita" onClick={() => setCeritaBuka((b) => !b)}>
-              <Icon name="daftar" size={17} /> {t('misi.cerita')}
+              <Icon name="daftar" size={17} /> <span className="alat-teks">{t('misi.cerita')}</span>
             </button>
             <TombolInfo akses={akses} buka={bukaDokumen} kelas="alat" teksDokumen={t('misi.dokumen')} teksChecklist={t('misi.checklist')} />
             <button type="button" className="alat" aria-expanded={bantuanBuka} aria-controls="misi-bantuan" onClick={() => { setBantuanBuka((b) => !b); setKiatBuka(false); }}>
-              <Icon name="tanya" size={17} /> {t('misi.caraMain')}
+              <Icon name="tanya" size={17} /> <span className="alat-teks">{t('misi.caraMain')}</span>
             </button>
           </div>
           {ceritaBuka ? <p id="misi-cerita" className="tugas-cerita"><b>{t('misi.kasus')}</b>{sela()}{mission.story}</p> : null}
@@ -793,12 +793,12 @@ function TombolInfo({ akses, buka, kelas, teksDokumen, teksChecklist }: {
     <>
       {akses.tombolChecklist ? (
         <button type="button" className={kelas} data-misi-buka="checklist" aria-haspopup="dialog" onClick={(e) => buka(ID_CHECKLIST, e.currentTarget)}>
-          <Icon name="cek" size={17} /> {teksChecklist ?? t('misi.lihatChecklist')}
+          <Icon name="cek" size={17} /> <span className="alat-teks">{teksChecklist ?? t('misi.lihatChecklist')}</span>
         </button>
       ) : null}
       {akses.tombolDokumen ? (
         <button type="button" className={kelas} data-misi-buka="dokumen" aria-haspopup="dialog" onClick={(e) => buka('semua', e.currentTarget)}>
-          <Icon name="polis" size={17} /> {teksDokumen}
+          <Icon name="polis" size={17} /> <span className="alat-teks">{teksDokumen}</span>
         </button>
       ) : null}
     </>
@@ -1210,18 +1210,25 @@ function KontrolLangkah({ step, seed, value, fx, adeganAktif, memuat = false, an
     const hitung = <span className={list.length === maks ? 'baki-hitung lengkap' : 'baki-hitung'}>{labelHitung ? labelHitung(list.length, maks) : <>{list.length} / {maks}</>}</span>;
     // Sisa pilihan: slot kosong bernomor (bawaan) atau satu baris pendek (baki ringkas).
     const teksSisa = (list.length ? t('misi.slotLagi', { n: sisa }) + sela() : '') + (adeganAktif ? t('misi.slotKetuk') : t('misi.slotDaftar'));
+    // T-063: on event phones the list opener sits in the album header next to the count (acara-piksel.css hides the 48 px
+    // summary row there and shows this button; elsewhere this button is hidden). Same open state as the <details>.
+    const tombolDaftar = (
+      <button type="button" className="baki-daftar-tombol" aria-expanded={daftarBuka} aria-controls={`${idPanel}-daftar`} onClick={() => setDaftarBuka((b) => !b)}>
+        {adeganAktif ? t('misi.pilihLewatDaftar') : t('misi.daftarPilihan')}
+      </button>
+    );
     return (
       <div className="kontrol" ref={kontrolRef}>
         <div className={ringkas ? 'baki baki-ringkas' : 'baki'} aria-label={t('misi.bakiAria', { baki: judul, n: list.length, total: maks })}>
           {bukaChecklist ? (
             <div className="baki-kepala misi-baki-cek">
-              <span className="misi-baki-judul"><strong>{judul}</strong>{hitung}</span>
+              <span className="misi-baki-judul"><strong>{judul}</strong>{tombolDaftar}{hitung}</span>
               <button type="button" className="misi-cek-baki" data-misi-buka="checklist" aria-haspopup="dialog" onClick={(e) => bukaChecklist(e.currentTarget)}>
                 <Icon name="cek" size={16} /> {t('misi.lihatChecklist')}
               </button>
             </div>
           ) : (
-            <div className="baki-kepala"><strong>{judul}</strong>{hitung}</div>
+            <div className="baki-kepala"><strong>{judul}</strong>{tombolDaftar}{hitung}</div>
           )}
           {ringkas && !list.length ? null : <ul className="baki-slot">
             {list.map((id, i) => {
@@ -1260,6 +1267,7 @@ function KontrolLangkah({ step, seed, value, fx, adeganAktif, memuat = false, an
           {sisa > 0 && ringkas ? <p className="baki-sisa">{teksSisa}</p> : null}
         </div>
         <details
+          id={`${idPanel}-daftar`}
           className="daftar-alternatif"
           open={daftarBuka}
           onToggle={(e) => {

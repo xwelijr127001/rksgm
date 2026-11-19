@@ -98,12 +98,17 @@
   /* T-062: width from the REAL box (100%), never from cqw alone; height-based shrink only down to a hard floor of
      min(100%, 300px), so a wrong container size can never produce a tiny canvas (the stage sizes from its parent width
      through a ResizeObserver). Below the floor the frame is clipped (strip) by the container instead of shrinking. */
-  .player-ui.kompak:not(.solo-layar) .misi[data-paket="acara"] > .misi-adegan > .adegan { flex: none; width: min(100%, max(min(100%, 300px), calc((100cqh - var(--adegan-ket, 0px)) * 4 / 3))); }
+  /* T-063 (owner: lower third of the scene cut off = untappable): CONTAIN, never clip. The frame always fits its box in both
+     dimensions: width = min(100%, height * 4/3). While answering the box never gets shorter than a 260 px wide frame
+     (min-height below); if the column has no room for that, the PAGE scrolls instead (scroll beats an untappable scene).
+     Other phases: contained too, hidden under 72 px (container query). */
+  .player-ui.kompak:not(.solo-layar) .misi[data-paket="acara"] > .misi-adegan > .adegan { flex: none; width: min(100%, calc((100cqh - var(--adegan-ket, 0px)) * 4 / 3)); }
+  .player-ui.kompak:not(.solo-layar) .misi[data-paket="acara"]:is([data-mode="play"], [data-mode="paused"]) > .misi-adegan { min-height: calc(min(100vw - 30px, 260px) * 3 / 4 + 10px); }
+  .player-ui.kompak:not(.solo-layar) .misi[data-paket="acara"]:is([data-mode="play"], [data-mode="paused"]) > .misi-adegan > .adegan { width: min(100%, max(min(100%, 260px), calc(100cqh * 4 / 3))); }
   .player-ui.kompak:not(.solo-layar) .misi[data-paket="acara"][data-mode="intro"] > .misi-adegan { --adegan-ket: 40px; }
   .player-ui.kompak:not(.solo-layar) .misi[data-paket="acara"] > .misi-adegan > .adegan-ket { margin: 6px 0 0; font-size: 12px; line-height: 16px; }
-  /* result / waiting / locked: a strip across the full width (middle band of the scene); legend off (marks are in the lists) */
+  /* result / waiting / locked: the contained scene centred in the rest of the height; legend off (marks are in the lists) */
   .player-ui.kompak:not(.solo-layar) .misi[data-paket="acara"]:is([data-mode="reveal"], [data-mode="sent"], [data-mode="locked"]) > .misi-adegan { justify-content: center; }
-  .player-ui.kompak:not(.solo-layar) .misi[data-paket="acara"]:is([data-mode="reveal"], [data-mode="sent"], [data-mode="locked"]) > .misi-adegan > .adegan { width: 100%; }
   .player-ui.kompak:not(.solo-layar) .misi[data-paket="acara"][data-mode="reveal"] > .misi-adegan > .adegan-ket { display: none; }
   @container (max-height: 72px) { .player-ui.kompak:not(.solo-layar) .misi[data-paket="acara"] .misi-adegan > * { visibility: hidden; } }
 
@@ -185,4 +190,52 @@
 @media (max-width: 899px) and (orientation: portrait) and (max-height: 660px) {
   .player-ui.kompak:not(.solo-layar) .misi[data-paket="acara"][data-mode="play"] .aksi-ket > span { display: none; }
   .player-ui.kompak:not(.solo-layar) .misi[data-paket="acara"][data-mode="play"] .aksi-ket:not(:has(button)) { margin-top: 0; }
+}
+
+/* T-063: win back height while answering so the scene stays big (target >= 330 px wide at 390 px with Safari bars).
+   - picked items (Album bukti): one line 36 px, number + icon + label with ellipsis, icon-only remove 36 x 36 (aria-label
+     "Batalkan ..." kept); the empty slot one line too;
+   - "Pilih lewat daftar" = small text button in the album header next to the count (the 48 px summary row is hidden);
+   - task card: tool buttons icon-only (label = accessible name) on the hint line, 44 px tap height, no extra row;
+   - the grey sentence under the submit key is gone (the key aria-describedby keeps it); "Lewati dulu" / time buttons stay. */
+.baki-daftar-tombol { display: none; }
+@media (max-width: 899px) and (orientation: portrait) {
+  .player-ui.kompak:not(.solo-layar) .misi[data-paket="acara"]:is([data-mode="play"], [data-mode="paused"]) .slot { min-height: 36px; padding: 0 0 0 6px; gap: 8px; }
+  .player-ui.kompak:not(.solo-layar) .misi[data-paket="acara"]:is([data-mode="play"], [data-mode="paused"]) .baki-slot { gap: 4px; }
+  .player-ui.kompak:not(.solo-layar) .misi[data-paket="acara"]:is([data-mode="play"], [data-mode="paused"]) .slot-no { width: 22px; height: 22px; flex-basis: 22px; font-size: 12px; }
+  .player-ui.kompak:not(.solo-layar) .misi[data-paket="acara"]:is([data-mode="play"], [data-mode="paused"]) .slot svg { flex: 0 0 auto; }
+  .player-ui.kompak:not(.solo-layar) .misi[data-paket="acara"]:is([data-mode="play"], [data-mode="paused"]) .slot-teks { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-size: 14px; line-height: 18px; }
+  .player-ui.kompak:not(.solo-layar) .misi[data-paket="acara"]:is([data-mode="play"], [data-mode="paused"]) .slot-hapus { flex: 0 0 36px; width: 36px; min-width: 36px; min-height: 36px; height: 36px; padding: 0; justify-content: center; }
+  .player-ui.kompak:not(.solo-layar) .misi[data-paket="acara"]:is([data-mode="play"], [data-mode="paused"]) .slot-hapus > span {
+    position: absolute; width: 1px; height: 1px; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap;
+  }
+  .player-ui.kompak:not(.solo-layar) .misi[data-paket="acara"]:is([data-mode="play"], [data-mode="paused"]) .baki-kepala { gap: 8px; margin-bottom: 4px; }
+  .player-ui.kompak:not(.solo-layar) .misi[data-paket="acara"]:is([data-mode="play"], [data-mode="paused"]) .baki-kepala > strong,
+  .player-ui.kompak:not(.solo-layar) .misi[data-paket="acara"]:is([data-mode="play"], [data-mode="paused"]) .misi-baki-judul > strong { margin-right: auto; }
+  .player-ui.kompak:not(.solo-layar) .misi[data-paket="acara"]:is([data-mode="play"], [data-mode="paused"]) .misi-baki-judul { flex: 1 1 auto; }
+  .player-ui.kompak:not(.solo-layar) .misi[data-paket="acara"]:is([data-mode="play"], [data-mode="paused"]) .baki-daftar-tombol {
+    display: inline-flex; align-items: center; min-height: 36px; margin: -4px 0; padding: 4px 8px; border: 0; background: none;
+    color: #9a4f00; font: inherit; font-size: 13px; font-weight: 700; text-decoration: underline; text-underline-offset: 2px; cursor: pointer; white-space: nowrap;
+  }
+  .player-ui.kompak:not(.solo-layar) .misi[data-paket="acara"]:is([data-mode="play"], [data-mode="paused"]) .baki-daftar-tombol[aria-expanded="true"] { text-decoration: none; }
+  .player-ui.kompak:not(.solo-layar) .misi[data-paket="acara"]:is([data-mode="play"], [data-mode="paused"]) .kontrol:has(.baki) > .daftar-alternatif { border-top: 0; }
+  .player-ui.kompak:not(.solo-layar) .misi[data-paket="acara"]:is([data-mode="play"], [data-mode="paused"]) .kontrol:has(.baki) > .daftar-alternatif > summary { display: none; }
+
+  /* task card: prompt on top, then ONE row = hint (ellipsis) + icon-only tool chips */
+  .player-ui.kompak:not(.solo-layar) .misi[data-paket="acara"]:is([data-mode="play"], [data-mode="paused"]) .misi-tugas { display: grid; grid-template-columns: minmax(0, 1fr) auto; column-gap: 8px; row-gap: 2px; align-items: center; }
+  .player-ui.kompak:not(.solo-layar) .misi[data-paket="acara"]:is([data-mode="play"], [data-mode="paused"]) .misi-tugas > :not(.tugas-inti):not(.tugas-alat) { grid-column: 1 / -1; }
+  .player-ui.kompak:not(.solo-layar) .misi[data-paket="acara"]:is([data-mode="play"], [data-mode="paused"]) .tugas-inti,
+  .player-ui.kompak:not(.solo-layar) .misi[data-paket="acara"]:is([data-mode="play"], [data-mode="paused"]) .tugas-inti > div { display: contents; }
+  .player-ui.kompak:not(.solo-layar) .misi[data-paket="acara"]:is([data-mode="play"], [data-mode="paused"]) .misi-tanya { grid-column: 1 / -1; }
+  .player-ui.kompak:not(.solo-layar) .misi[data-paket="acara"]:is([data-mode="play"], [data-mode="paused"]) .misi-petunjuk { grid-column: 1; -webkit-line-clamp: unset; display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .player-ui.kompak:not(.solo-layar) .misi[data-paket="acara"]:is([data-mode="play"], [data-mode="paused"]) .tugas-alat { grid-column: 2; grid-row: auto; justify-self: end; }
+  .player-ui.kompak:not(.solo-layar) .misi[data-paket="acara"]:is([data-mode="play"], [data-mode="paused"]) .misi-tugas:not([data-di-adegan]) .tugas-alat { grid-column: 1 / -1; }
+  .player-ui.kompak:not(.solo-layar) .misi[data-paket="acara"]:is([data-mode="play"], [data-mode="paused"]) .alat { min-width: 44px; min-height: 44px; padding: 0 10px; justify-content: center; }
+  .player-ui.kompak:not(.solo-layar) .misi[data-paket="acara"]:is([data-mode="play"], [data-mode="paused"]) .alat-teks {
+    position: absolute; width: 1px; height: 1px; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap;
+  }
+
+  /* submit key: the grey sentence goes; the row keeps only the "Lewati dulu" / time buttons when present */
+  .player-ui.kompak:not(.solo-layar) .misi[data-paket="acara"][data-mode="play"] .aksi-ket > span { display: none; }
+  .player-ui.kompak:not(.solo-layar) .misi[data-paket="acara"][data-mode="play"] .aksi-ket:not(:has(button)) { display: none; }
 }

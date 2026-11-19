@@ -3454,3 +3454,28 @@ Built by the Designer; uncommitted. Owner rule: nothing was opened in a browser.
 - Effect on the T-060 fit table: scenes that were calculated narrower than 300 px (a02..a08 at 360x640, a06 / a08 / a10 at 390x700) now show a 300 px wide frame clipped to the free height (still hidden under 72 px); all content heights unchanged, still no page scroll by calculation.
 
 **Gate (owner rule):** typecheck 0; `client/dist` rebuilt = exact copy. Not tested in a browser or on a phone. Not committed.
+
+## T-063 (2026-11-19): event scene clipped at the bottom on phones (objects untappable)
+
+- **Cause:** the T-062 floor (min 300 px wide) made the frame taller than its box whenever the panel grew (each pick added a 2-line row); `overflow: hidden` cut the lower third (Selfie kurir, Sisi penyok, Label peti).
+- **Never clip** (`client/src/game/acara-piksel.css`): the frame is CONTAINED: width = min(100%, box height x 4/3). While answering the box has `min-height` = a 260 px wide frame (`min(100vw - 30px, 260px) x 3/4 + 10`) and the frame uses max(that floor, height x 4/3), so it always fits; if the column has no room the PAGE scrolls (scroll beats untappable). Briefing / waiting / result: contained in the rest of the height, hidden under 72 px (no strip crop any more).
+- **Height won back while answering** (`MissionPlay.tsx` + CSS): picked items one line 36 px (number, icon, label with ellipsis, icon-only remove 36 x 36 with the existing aria-label "Batalkan ..."); "Pilih lewat daftar" = small text button in the album header next to the count (`.baki-daftar-tombol`, same open state, aria-expanded / aria-controls; the 48 px summary row hidden there); task card = prompt + ONE row with the hint (ellipsis) and icon-only tool chips 44 x 44 (labels in `.alat-teks` stay the accessible names); the grey sentence under "Kirim laporan" is gone (still the key aria-describedby), the row only shows when "Lewati dulu" / time buttons are there. Elsewhere (desktop, landscape, solo, cerita) the new button and spans are hidden / unchanged.
+
+**Answering fit at max picks** (calculated from the CSS and the id texts; header 56; scene = width x height; page scroll = how far the page scrolls when the scene is at its 260 px floor):
+
+| case (worst step) | 390x664: scene width x height | 390x664 page scroll | 360x560: scene | 360x560 page scroll |
+|---|---|---|---|---|
+| a01 (tindakan multi) | 360 x 270 | none | 260 x 195 (floor) | 17 px |
+| a02 (bukti multi) | 322 x 242 | none | 260 x 195 (floor) | 57 px |
+| a03 (fungsi assign) | 260 x 195 (floor) | 51 px | 260 x 195 (floor) | 161 px |
+| a04 (tindak single) | 260 x 195 (floor) | 55 px | 260 x 195 (floor) | 159 px |
+| a05 (simpul assign) | 260 x 195 (floor) | 18 px | 260 x 195 (floor) | 143 px |
+| a06 (urutan assign) | 260 x 195 (floor) | 115 px | 260 x 195 (floor) | 219 px |
+| a07 (alasan single) | 260 x 195 (floor) | 82 px | 260 x 195 (floor) | 201 px |
+| a08 (simpul single) | 260 x 195 (floor) | 91 px | 260 x 195 (floor) | 213 px |
+| a09 (dasar number) | 274 x 206 | none | 260 x 195 (floor) | 93 px |
+| a10 (temuan assign) | 260 x 195 (floor) | 134 px | 260 x 195 (floor) | 241 px |
+
+- Target >= 330 px at 390 px: a01 360 px; a02 (3 picks) 322 px. The single / assign / number steps answer in the panel lists (2-line answer sentences, 3..5 buckets), so at 390x664 they keep the scene at the 260 px floor and the page scrolls 18..134 px; at 360x560 every case scrolls (17..241 px). Nothing is clipped any more.
+
+**Gate (owner rule):** typecheck 0; `client/dist` rebuilt = exact copy. Heights calculated, NOT measured in a browser or on a phone. Not committed.
