@@ -3036,3 +3036,37 @@ Built by the Designer; uncommitted. Owner rule: nothing was opened in a browser.
 **Risks:**
 - Tests that pin the old colour list or labels, the `.hp-keluar` markup (a new inner column), or the head row of the end card will need updating. None were run.
 - The legacy Phaser art (`game/art/characters.ts`) also reads `UNIFORM_COLORS`, so it gets the new colours.
+
+## T-053 (2026-11-19): event host page /acara/host on one screen, guided, pixel style (Designer)
+
+Built by the Designer; uncommitted. Owner rule: nothing was opened in a browser. Gate: client typecheck 0 errors; client/dist rebuilt. The previews are wireframes drawn from the calculated sizes, not screenshots: `character/host-t053/` (README; before = the owner's screenshots, after = 3 states).
+
+**Files**
+- `client/src/pages/Host.tsx`: restructured. Every function and socket action is kept: hostCreate, hostAttach, hostAction start/next/close/pause/resume/end/reset/tiebreak/kick/retryScene, hostSettings, and export with the header token.
+- `client/src/pages/host/host.css`: new; it replaces the inline GAYA block.
+- `client/src/pages/host/AturSoal.tsx`: new optional prop `bukaAwal`.
+- `client/src/i18n/kamus/host.ts`: new step, hint and tab strings in id/en/zh. The existing id texts are unchanged.
+
+**Layout**
+- **Step rail:** 5 pixel chips plus a one-line hint for each step and phase.
+- **Step 1:** one pixel card with the question set as 2 pixel option cards, the PIN, one orange key, and the host token as an expander.
+- **Room steps:** a title row with 10 numbered round chips (done / now / next) and a "Daftar soal" drawer. The drawer is a Modal holding AturSoal, which includes the questions written by the organisers.
+- **Left column:** the invite (code, 168 px QR, link, joined count).
+- **Right column, controls:** ONE orange key per phase plus Jeda. Akhiri and Reset are small keys under "⋯ Lainnya", each with its existing Modal confirm.
+- **Right column, tabs:** Peserta / Peringkat / Kesiapan / Pengaturan / Ekspor / Suara. Only the tab body scrolls.
+- **Finished:** a compact podium sits above the tabs, and the Peringkat tab opens by itself.
+
+**Fit by calculation**
+- 1280×720: the columns get 506 px. The invite needs 464 px; the controls take 246 px, leaving 202 px for the tab body.
+- 1366×768: +48 px. 1920×1080: +360 px, and the QR grows to 240 px.
+- Create room: about 683 of 720 px.
+- Below 900×600 (phone, or a tablet held upright) the page scrolls as before.
+
+**Risks**
+- e2e and check tools will need updating if they look for:
+  - the old page order or headings (h3 changed to h4 inside the tabs);
+  - the visible Akhiri / Reset buttons (now under "Lainnya");
+  - the playlist section on the main page (now in the drawer).
+- None of those tools were run.
+
+The 10 event cases (paket acara) are the next task, as the brief says.

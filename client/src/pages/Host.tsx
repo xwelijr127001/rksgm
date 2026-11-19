@@ -4,15 +4,25 @@
  * Teks tampil dalam bahasa aktif (kamus: ../i18n/kamus/host.ts). Data acara (nama acara,
  * label hadiah) yang DIISI panitia tampil apa adanya; hanya nilai BAWAAN yang ikut bahasa aktif
  * saat ditampilkan (terjemahkanBawaan). Kolom isian selalu memuat nilai aslinya.
+ *
+ * T-053 (Designer, owner 19 Nov): SATU LAYAR di laptop (1280x720, 1366x768, 1920x1080), berpandu, gaya piksel game.
+ *  - Rel langkah di atas (1 Buat room -> 2 Undang -> 3 Tutorial & mulai -> 4 Jalankan ronde -> 5 Hasil) dengan langkah
+ *    sekarang disorot + SATU baris "apa yang dilakukan sekarang".
+ *  - Room aktif: baris judul + strip 10 chip ronde (selesai / sekarang / berikutnya) dengan "Daftar soal" (laci = AturSoal,
+ *    termasuk soal buatan panitia). Kolom kiri = undangan (kode, QR, tautan, jumlah peserta masuk). Kolom kanan = kendali
+ *    (SATU tombol utama jingga per fase + Jeda) dan panel bertab (peserta, peringkat, kesiapan, pengaturan, ekspor, suara);
+ *    hanya isi tab yang menggulir. Akhiri & Reset pindah ke "Lainnya" (konfirmasi Modal di halaman, bukan window.confirm).
+ *  - Fungsi & event socket sama persis dengan sebelumnya (actions.hostAction / hostSettings / hostCreate / hostAttach).
+ * Gaya: ./host/host.css.
  */
 
 import { Merek } from '../components/Merek';
 import { PilihBahasa } from '../components/PilihBahasa';
 import { TombolGerak } from '../components/TombolGerak';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useId, useMemo, useState, type ReactNode } from 'react';
 import type { IdPaket } from '@shared/bankSoal';
 import { BRAND, DEFAULT_EVENT_NAME } from '@shared/brand';
-import type { HostAction, PlayerPublic, Prizes, RoomPublicState } from '@shared/types';
+import type { HostAction, Phase, PlayerPublic, Prizes, RoomPublicState } from '@shared/types';
 import { Avatar } from '../art/Avatar';
 import { Icon } from '../art/Icon';
 import { preferMusicOn } from '../audio/audio';
@@ -30,27 +40,14 @@ import {
   ConnectionBadge,
   KodeRoom,
   Leaderboard,
+  Modal,
   Pesan,
   PhaseBadge,
   QrCode,
   Timer,
   TombolKonfirmasi,
 } from '../ui/kit';
-
-const GAYA = `
-.host-grid{display:grid;grid-template-columns:minmax(0,360px) minmax(0,1fr);gap:16px;align-items:start}
-@media (max-width:900px){.host-grid{grid-template-columns:minmax(0,1fr)}}
-.host-geser{overflow-x:auto;-webkit-overflow-scrolling:touch}
-.host-geser .tabel{min-width:600px}
-.host-podium{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px}
-.host-siap{list-style:none;margin:0;padding:0;display:grid;gap:8px}
-.host-siap li{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:8px 10px;
-  background:var(--krem);border:2px solid var(--krem-tua);border-radius:var(--radius)}
-.host-siap li > span{flex:1;min-width:140px}
-.host-siap strong{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.host-siap i{display:flex;align-items:center;gap:4px;font-style:normal;font-size:12px;
-  color:var(--tinta-lembut)}
-`;
+import './host/host.css';
 
 function jalankan(action: HostAction, extra?: Record<string, unknown>) {
   void actions.hostAction(action, extra);
@@ -68,6 +65,54 @@ function catatanAset(): string {
 /** "Juara 1" / "1st place" / "第一名". Peringkat di luar 1-3 memakai bentuk umum. */
 function teksJuara(rank: number): string {
   return rank >= 1 && rank <= 3 ? t(`host.juara${rank}`) : t('host.juaraN', { n: rank });
+}
+
+/** Fase yang sedang berlaku (saat dijeda: fase sebelum jeda). */
+const faseKini = (room: RoomPublicState): Phase => (room.phase === 'PAUSED' ? (room.prevPhase ?? 'LOBBY') : room.phase);
+
+// ------------------------------------------------------------------ rel langkah (T-053)
+
+type Langkah = 1 | 2 | 3 | 4 | 5;
+
+function langkahDari(room: RoomPublicState | null): Langkah {
+  if (!room) return 1;
+  const f = faseKini(room);
+  if (f === 'FINISHED') return 5;
+  if (f === 'LOBBY') return room.playerCount > 0 ? 3 : 2;
+  if (f === 'TUTORIAL') return 3;
+  return 4;
+}
+
+function kunciPetunjuk(room: RoomPublicState | null): string {
+  if (!room) return 'host.petunjuk1';
+  if (room.phase === 'PAUSED') return 'host.petunjukJeda';
+  const f = faseKini(room);
+  if (f === 'BRIEFING') return 'host.petunjukBriefing';
+  if (f === 'ACTIVE') return 'host.petunjukActive';
+  if (f === 'REVEAL') return 'host.petunjukReveal';
+  if (f === 'LEADERBOARD') return 'host.petunjukLeaderboard';
+  return `host.petunjuk${langkahDari(room)}`;
+}
+
+function RelLangkah({ room }: { room: RoomPublicState | null }) {
+  useBahasa();
+  const kini = langkahDari(room);
+  return (
+    <nav className="host-rel" aria-label={t('host.langkahRel')}>
+      <ol className="host-rel-daftar">
+        {([1, 2, 3, 4, 5] as const).map((n) => (
+          <li key={n} className="host-rel-langkah" data-status={n < kini ? 'selesai' : n === kini ? 'kini' : 'nanti'} aria-current={n === kini ? 'step' : undefined}>
+            <span className="host-rel-no" aria-hidden="true">{n < kini ? '✓' : n}</span>
+            <span className="host-rel-nama">{t(`host.langkah${n}`)}</span>
+          </li>
+        ))}
+      </ol>
+      <p className="host-petunjuk" role="status" aria-live="polite">
+        <span className="sr-only">{t('host.langkahKini', { n: kini, nama: t(`host.langkah${kini}`) })}. </span>
+        {t(kunciPetunjuk(room))}
+      </p>
+    </nav>
+  );
 }
 
 // ------------------------------------------------------------------ mulai
@@ -109,9 +154,9 @@ function MulaiHost() {
   };
 
   return (
-    <div className="wrap stack-l" style={{ padding: 0 }}>
-      <section className="panel stack">
-        <h2>{t('host.buatRoom')}</h2>
+    <div className="host-mulai">
+      <section className="panel host-mulai-kartu" aria-labelledby="host-buat">
+        <h2 id="host-buat">{t('host.buatRoom')}</h2>
         <div>
           <label className="label-kolom" htmlFor="host-nama">
             {t('host.namaAcara')}
@@ -144,46 +189,51 @@ function MulaiHost() {
             {t('host.lanjutkanRoom', { kode: tersimpan.code })}
           </button>
         ) : null}
-      </section>
 
-      <section className="panel stack">
-        <h3>{t('host.masukToken')}</h3>
-        <p className="kecil lembut">{t('host.masukTokenKet')}</p>
-        <div>
-          <label className="label-kolom" htmlFor="host-kode">
-            {t('host.kodeRoom')}
-          </label>
-          <input
-            id="host-kode"
-            className="kolom kolom-kode"
-            value={kode}
-            maxLength={4}
-            autoCapitalize="characters"
-            autoComplete="off"
-            onChange={(e) => setKode(e.target.value.toUpperCase())}
-          />
-        </div>
-        <div>
-          <label className="label-kolom" htmlFor="host-token">
-            {t('host.tokenHost')}
-          </label>
-          <input
-            id="host-token"
-            className="kolom mono"
-            value={token}
-            autoComplete="off"
-            onChange={(e) => setToken(e.target.value)}
-            placeholder={t('host.tempelToken')}
-          />
-        </div>
-        <button
-          className="btn btn-blok"
-          onClick={() => void sambung(kode, token)}
-          disabled={sibuk || kode.trim().length < 4 || token.trim().length === 0}
-        >
-          {t('host.masukSebagaiHost')}
-        </button>
-        <Pesan jenis="info">{t('host.infoToken')}</Pesan>
+        {/* T-053: masuk dengan token host = pelipat kecil di bawah tombol utama (bukan kartu kedua). */}
+        <details className="host-token">
+          <summary>{t('host.tokenLain')}</summary>
+          <div className="host-token-isi">
+            <p className="kecil lembut" style={{ margin: 0 }}>{t('host.masukTokenKet')}</p>
+            <div className="host-token-baris">
+              <div>
+                <label className="label-kolom" htmlFor="host-kode">
+                  {t('host.kodeRoom')}
+                </label>
+                <input
+                  id="host-kode"
+                  className="kolom kolom-kode"
+                  value={kode}
+                  maxLength={4}
+                  autoCapitalize="characters"
+                  autoComplete="off"
+                  onChange={(e) => setKode(e.target.value.toUpperCase())}
+                />
+              </div>
+              <div>
+                <label className="label-kolom" htmlFor="host-token">
+                  {t('host.tokenHost')}
+                </label>
+                <input
+                  id="host-token"
+                  className="kolom mono"
+                  value={token}
+                  autoComplete="off"
+                  onChange={(e) => setToken(e.target.value)}
+                  placeholder={t('host.tempelToken')}
+                />
+              </div>
+            </div>
+            <button
+              className="btn btn-blok"
+              onClick={() => void sambung(kode, token)}
+              disabled={sibuk || kode.trim().length < 4 || token.trim().length === 0}
+            >
+              {t('host.masukSebagaiHost')}
+            </button>
+            <p className="mini lembut" style={{ margin: 0 }}>{t('host.infoToken')}</p>
+          </div>
+        </details>
       </section>
     </div>
   );
@@ -205,23 +255,24 @@ function Undang({ room }: { room: RoomPublicState }) {
   };
 
   return (
-    <section className="panel stack" aria-labelledby="host-undang">
+    <section className="panel host-undang" aria-labelledby="host-undang">
       <h3 id="host-undang">{t('host.undangPeserta')}</h3>
-      <div className="stack tengah">
-        <div>
-          <KodeRoom code={room.code} />
-        </div>
-        <div style={{ display: 'grid', placeItems: 'center' }}>
-          <QrCode value={room.joinUrl} size={230} label={room.joinUrl} />
-        </div>
+      <div className="host-undang-kode">
+        <KodeRoom code={room.code} />
       </div>
-      <p className="kecil lembut">{t('host.caraGabung')}</p>
-      <div className="baris">
-        <button className="btn btn-netral" onClick={() => void salinTautan()}>
-          <Icon name="dokumen" size={18} /> {t('host.salinTautan')}
+      <div className="host-undang-qr">
+        <QrCode value={room.joinUrl} size={168} label={room.joinUrl} />
+      </div>
+      <p className="host-undang-tautan mono">{room.joinUrl}</p>
+      <p className="host-undang-jumlah" role="status" aria-live="polite">
+        <Icon name="operator" size={16} /> {t('host.pesertaMasuk', { n: room.playerCount })}
+      </p>
+      <div className="host-undang-aksi">
+        <button className="btn btn-netral btn-kecil" onClick={() => void salinTautan()}>
+          <Icon name="dokumen" size={16} /> {t('host.salinTautan')}
         </button>
         <button
-          className="btn btn-garis"
+          className="btn btn-garis btn-kecil"
           onClick={() => window.open(`/acara/layar?room=${room.code}`, '_blank', 'noopener')}
         >
           {t('host.bukaProyektor')}
@@ -241,10 +292,35 @@ function Undang({ room }: { room: RoomPublicState }) {
           />
         </Pesan>
       ) : null}
-      <Pesan jenis="info">
-        <span className="mini">{catatanAset()}</span>
-      </Pesan>
+      <p className="mini lembut host-undang-cara">{t('host.caraGabung')}</p>
     </section>
+  );
+}
+
+// ------------------------------------------------------------------ strip ronde + laci soal (T-053)
+
+function StripRonde({ room, onBukaDaftar }: { room: RoomPublicState; onBukaDaftar: () => void }) {
+  useBahasa();
+  const f = faseKini(room);
+  const main = f !== 'LOBBY' && f !== 'TUTORIAL';
+  const selesai = f === 'FINISHED';
+  return (
+    <div className="host-strip">
+      <ol className="host-strip-chip" aria-label={t('host.stripRonde')}>
+        {Array.from({ length: room.totalRounds }, (_, i) => {
+          const status = selesai || (main && i < room.roundIndex) ? 'selesai' : main && i === room.roundIndex ? 'kini' : 'nanti';
+          const label = t('host.chipRonde', { n: i + 1, status: t(status === 'selesai' ? 'host.chipSelesai' : status === 'kini' ? 'host.chipKini' : 'host.chipNanti') });
+          return (
+            <li key={i} className="host-chip-ronde" data-status={status} title={label} aria-label={label} aria-current={status === 'kini' ? 'step' : undefined}>
+              {status === 'selesai' ? '✓' : i + 1}
+            </li>
+          );
+        })}
+      </ol>
+      <button type="button" className="btn btn-netral btn-kecil host-strip-daftar" aria-haspopup="dialog" onClick={onBukaDaftar}>
+        <Icon name="daftar" size={16} /> {t('host.daftarSoal')}
+      </button>
+    </div>
   );
 }
 
@@ -252,47 +328,60 @@ function Undang({ room }: { room: RoomPublicState }) {
 
 function Kendali({ room }: { room: RoomPublicState }) {
   const { bahasa } = useBahasa();
+  const idLainnya = useId();
+  const [lainnya, setLainnya] = useState(false);
   // Judul, lokasi, dan produk misi mengikuti bahasa aktif (id misi tidak berubah).
   const misi = useMemo(
     () => (room.mission ? misiDalamBahasa(room.mission, bahasa) : null),
     [room.mission, bahasa],
   );
   const dijeda = room.phase === 'PAUSED';
-  const fase = dijeda ? (room.prevPhase ?? 'LOBBY') : room.phase;
+  const fase = faseKini(room);
   const rondeTerakhir = room.roundIndex >= room.totalRounds - 1;
   const tanpaPeserta = room.playerCount === 0;
 
+  // T-053: SATU tombol utama jingga per fase (urutan & aksi sama dengan sebelumnya); tutorial = tombol kedua di lobby.
+  let utama: ReactNode = null;
+  if (fase === 'LOBBY' || fase === 'TUTORIAL') {
+    utama = (
+      <button className="btn btn-utama host-utama" onClick={() => jalankan('startMatch')} disabled={dijeda || tanpaPeserta}>
+        {t('host.mulaiPertandingan')}
+      </button>
+    );
+  } else if (fase === 'BRIEFING') {
+    utama = <button className="btn btn-utama host-utama" onClick={() => jalankan('next')} disabled={dijeda}>{t('host.mulaiMenjawab')}</button>;
+  } else if (fase === 'ACTIVE') {
+    utama = <button className="btn btn-utama host-utama" onClick={() => jalankan('closeRound')} disabled={dijeda}>{t('host.tutupRonde')}</button>;
+  } else if (fase === 'REVEAL') {
+    utama = <button className="btn btn-utama host-utama" onClick={() => jalankan('next')} disabled={dijeda}>{t('host.tampilkanPeringkat')}</button>;
+  } else if (fase === 'LEADERBOARD') {
+    utama = <button className="btn btn-utama host-utama" onClick={() => jalankan('next')} disabled={dijeda}>{rondeTerakhir ? t('host.selesaikan') : t('host.rondeBerikutnya')}</button>;
+  } else if (fase === 'FINISHED' && room.tie) {
+    utama = <button className="btn btn-utama host-utama" onClick={() => jalankan('tiebreak')} disabled={dijeda}>{t('host.rondePenentuan')}</button>;
+  }
+
   return (
-    <section className="panel stack" aria-labelledby="host-kendali">
-      <h3 id="host-kendali">{t('host.kendali')}</h3>
-
-      <div className="baris">
-        <PhaseBadge phase={room.phase} />
-        <span className="chip">
-          {t('host.ronde', { n: room.roundIndex + 1, total: room.totalRounds })}
-        </span>
-        <Timer endsAt={room.phaseEndsAt} durationMs={room.phaseDurationMs} />
+    <section className="panel host-kendali" aria-labelledby="host-kendali">
+      <div className="host-kendali-kepala">
+        <h3 id="host-kendali">{t('host.kendali')}</h3>
+        <div className="host-kendali-chip">
+          <PhaseBadge phase={room.phase} />
+          <span className="chip">{t('host.ronde', { n: room.roundIndex + 1, total: room.totalRounds })}</span>
+          <Timer endsAt={room.phaseEndsAt} durationMs={room.phaseDurationMs} />
+        </div>
       </div>
 
-      <div className="stack-s">
-        <strong>
-          {misi ? t('host.misiJudul', { n: misi.number, judul: misi.title }) : t('host.belumAdaMisi')}
-        </strong>
-        {misi ? (
-          <span className="kecil lembut">
-            {misi.location} - {misi.productLabel}
-          </span>
-        ) : null}
+      <div className="host-kendali-misi">
+        <strong>{misi ? t('host.misiJudul', { n: misi.number, judul: misi.title }) : t('host.belumAdaMisi')}</strong>
+        {misi ? <span className="kecil lembut"> · {misi.location} - {misi.productLabel}</span> : null}
       </div>
 
-      <div className="baris">
+      <div className="host-kendali-chip">
         <span className="chip chip-biru">
-          <Icon name="cek" size={15} />{' '}
-          {t('host.jawabanMasuk', { masuk: room.submittedCount, total: room.playerCount })}
+          <Icon name="cek" size={15} /> {t('host.jawabanMasuk', { masuk: room.submittedCount, total: room.playerCount })}
         </span>
         <span className="chip">
-          <Icon name="operator" size={15} />{' '}
-          {t('host.terhubung', { n: room.connectedCount, total: room.playerCount })}
+          <Icon name="operator" size={15} /> {t('host.terhubung', { n: room.connectedCount, total: room.playerCount })}
         </span>
       </div>
 
@@ -304,98 +393,62 @@ function Kendali({ room }: { room: RoomPublicState }) {
         </Pesan>
       ) : null}
 
-      <div className="baris">
+      <div className="host-kendali-aksi">
+        {utama}
         {fase === 'LOBBY' ? (
-          <button
-            className="btn btn-garis"
-            onClick={() => jalankan('startTutorial')}
-            disabled={dijeda}
-          >
+          <button className="btn btn-garis" onClick={() => jalankan('startTutorial')} disabled={dijeda}>
             {t('host.mulaiTutorial')}
-          </button>
-        ) : null}
-        {fase === 'LOBBY' || fase === 'TUTORIAL' ? (
-          <button
-            className="btn btn-utama"
-            onClick={() => jalankan('startMatch')}
-            disabled={dijeda || tanpaPeserta}
-          >
-            {t('host.mulaiPertandingan')}
-          </button>
-        ) : null}
-        {fase === 'BRIEFING' ? (
-          <button className="btn btn-utama" onClick={() => jalankan('next')} disabled={dijeda}>
-            {t('host.mulaiMenjawab')}
-          </button>
-        ) : null}
-        {fase === 'ACTIVE' ? (
-          <button
-            className="btn btn-utama"
-            onClick={() => jalankan('closeRound')}
-            disabled={dijeda}
-          >
-            {t('host.tutupRonde')}
-          </button>
-        ) : null}
-        {fase === 'REVEAL' ? (
-          <button className="btn btn-utama" onClick={() => jalankan('next')} disabled={dijeda}>
-            {t('host.tampilkanPeringkat')}
-          </button>
-        ) : null}
-        {fase === 'LEADERBOARD' ? (
-          <button className="btn btn-utama" onClick={() => jalankan('next')} disabled={dijeda}>
-            {rondeTerakhir ? t('host.selesaikan') : t('host.rondeBerikutnya')}
-          </button>
-        ) : null}
-        {fase === 'FINISHED' && room.tie ? (
-          <button className="btn btn-utama" onClick={() => jalankan('tiebreak')} disabled={dijeda}>
-            {t('host.rondePenentuan')}
           </button>
         ) : null}
         <button className="btn btn-netral" onClick={() => jalankan(dijeda ? 'resume' : 'pause')}>
           {dijeda ? t('host.lanjutkan') : t('host.jeda')}
         </button>
+        <button type="button" className="btn btn-netral host-lainnya-tombol" aria-expanded={lainnya} aria-controls={idLainnya} onClick={() => setLainnya((b) => !b)}>
+          <span aria-hidden="true">⋯</span> {t('host.lainnya')}
+        </button>
       </div>
 
       {(fase === 'LOBBY' || fase === 'TUTORIAL') && tanpaPeserta ? (
-        <p className="kecil lembut" style={{ margin: 0 }}>
-          {t('host.mulaiNonaktif')}
-        </p>
+        <p className="kecil lembut" style={{ margin: 0 }}>{t('host.mulaiNonaktif')}</p>
       ) : null}
       {fase === 'FINISHED' && room.tie ? (
-        <p className="kecil lembut" style={{ margin: 0 }}>
-          {t('host.adaSeri')}
-        </p>
+        <p className="kecil lembut" style={{ margin: 0 }}>{t('host.adaSeri')}</p>
       ) : null}
 
-      <div className="baris">
-        <TombolKonfirmasi
-          label={t('host.akhiri')}
-          judul={t('host.akhiriJudul')}
-          pesan={t('host.akhiriPesan')}
-          labelSetuju={t('host.akhiriSetuju')}
-          onSetuju={() => jalankan('end')}
-        />
-        <TombolKonfirmasi
-          label={t('host.reset')}
-          judul={t('host.resetJudul')}
-          pesan={t('host.resetPesan')}
-          labelSetuju={t('host.resetSetuju')}
-          onSetuju={() => jalankan('reset')}
-        />
+      {/* T-053: tindakan berbahaya = kecil, terlipat, dengan konfirmasi Modal di halaman (TombolKonfirmasi). */}
+      <div id={idLainnya} className="host-lainnya" hidden={!lainnya}>
+        <p className="mini lembut" style={{ margin: 0 }}>{t('host.lainnyaKet')}</p>
+        <div className="host-lainnya-aksi">
+          <TombolKonfirmasi
+            label={t('host.akhiri')}
+            kelas="btn btn-kecil btn-garis host-bahaya-kecil"
+            judul={t('host.akhiriJudul')}
+            pesan={t('host.akhiriPesan')}
+            labelSetuju={t('host.akhiriSetuju')}
+            onSetuju={() => jalankan('end')}
+          />
+          <TombolKonfirmasi
+            label={t('host.reset')}
+            kelas="btn btn-kecil btn-garis host-bahaya-kecil"
+            judul={t('host.resetJudul')}
+            pesan={t('host.resetPesan')}
+            labelSetuju={t('host.resetSetuju')}
+            onSetuju={() => jalankan('reset')}
+          />
+        </div>
       </div>
 
-      <label className="saklar">
+      <label className="saklar host-otomatis" title={room.autoAdvance ? t('host.otomatisAktif') : t('host.otomatisNonaktif')}>
         <input
           type="checkbox"
           checked={room.autoAdvance}
           onChange={(e) => void actions.hostSettings({ autoAdvance: e.target.checked })}
         />
-        {t('host.lanjutOtomatis')}
+        <span>
+          {t('host.lanjutOtomatis')}
+          <small className="mini lembut"> {room.autoAdvance ? t('host.otomatisAktif') : t('host.otomatisNonaktif')}</small>
+        </span>
       </label>
-      <p className="kecil lembut" style={{ margin: 0 }}>
-        {room.autoAdvance ? t('host.otomatisAktif') : t('host.otomatisNonaktif')}
-      </p>
     </section>
   );
 }
@@ -417,11 +470,11 @@ function KesiapanAdegan({ room }: { room: RoomPublicState }) {
   const belum = room.players.filter((p) => !p.sceneReady);
 
   return (
-    <section className="panel stack" aria-labelledby="host-kesiapan">
+    <div className="stack-s" aria-labelledby="host-kesiapan">
       <div className="baris-antara">
-        <h3 id="host-kesiapan" style={{ margin: 0 }}>
+        <h4 id="host-kesiapan" style={{ margin: 0 }}>
           {t('host.kesiapan')}
-        </h3>
+        </h4>
         <span className="chip chip-biru">
           <Icon name="cek" size={15} />{' '}
           {t('host.adeganSiap', { n: room.sceneReadyCount, total: room.playerCount })}
@@ -464,7 +517,7 @@ function KesiapanAdegan({ room }: { room: RoomPublicState }) {
           ))}
         </ul>
       )}
-    </section>
+    </div>
   );
 }
 
@@ -501,44 +554,48 @@ function Pengaturan({ room }: { room: RoomPublicState }) {
   ];
 
   return (
-    <section className="panel stack" aria-labelledby="host-pengaturan">
-      <h3 id="host-pengaturan">{t('host.pengaturan')}</h3>
+    <div className="stack-s host-pengaturan" aria-labelledby="host-pengaturan">
+      <h4 id="host-pengaturan" style={{ margin: 0 }}>{t('host.pengaturan')}</h4>
 
-      <div>
-        <label className="label-kolom" htmlFor="set-nama">
-          {t('host.namaAcara')}
-        </label>
-        <input
-          id="set-nama"
-          className="kolom"
-          value={nama}
-          maxLength={60}
-          onChange={(e) => setNama(e.target.value)}
-        />
-      </div>
-      <button
-        className="btn btn-kecil"
-        onClick={() =>
-          void simpan({ eventName: nama.trim() || DEFAULT_EVENT_NAME }, 'host.namaAcaraDisimpan')
-        }
-      >
-        {t('host.simpanNamaAcara')}
-      </button>
-
-      {LABEL.map((l) => (
-        <div key={l.kunci}>
-          <label className="label-kolom" htmlFor={`set-${l.kunci}`}>
-            {t(l.teks)}
+      <div className="host-pengaturan-baris">
+        <div>
+          <label className="label-kolom" htmlFor="set-nama">
+            {t('host.namaAcara')}
           </label>
           <input
-            id={`set-${l.kunci}`}
+            id="set-nama"
             className="kolom"
-            value={hadiah[l.kunci]}
+            value={nama}
             maxLength={60}
-            onChange={(e) => setHadiah({ ...hadiah, [l.kunci]: e.target.value })}
+            onChange={(e) => setNama(e.target.value)}
           />
         </div>
-      ))}
+        <button
+          className="btn btn-kecil"
+          onClick={() =>
+            void simpan({ eventName: nama.trim() || DEFAULT_EVENT_NAME }, 'host.namaAcaraDisimpan')
+          }
+        >
+          {t('host.simpanNamaAcara')}
+        </button>
+      </div>
+
+      <div className="host-pengaturan-hadiah">
+        {LABEL.map((l) => (
+          <div key={l.kunci}>
+            <label className="label-kolom" htmlFor={`set-${l.kunci}`}>
+              {t(l.teks)}
+            </label>
+            <input
+              id={`set-${l.kunci}`}
+              className="kolom"
+              value={hadiah[l.kunci]}
+              maxLength={60}
+              onChange={(e) => setHadiah({ ...hadiah, [l.kunci]: e.target.value })}
+            />
+          </div>
+        ))}
+      </div>
       <button
         className="btn btn-kecil"
         onClick={() => void simpan({ prizes: hadiah }, 'host.hadiahDisimpan')}
@@ -554,7 +611,7 @@ function Pengaturan({ room }: { room: RoomPublicState }) {
       <p className="mini lembut" style={{ margin: 0 }}>
         {t('host.berlakuSetelahSimpan')}
       </p>
-    </section>
+    </div>
   );
 }
 
@@ -608,11 +665,11 @@ function DaftarPeserta({ room }: { room: RoomPublicState }) {
   useBahasa();
   const urut = [...room.players].sort((a, b) => b.totalPoints - a.totalPoints);
   return (
-    <section className="panel stack" aria-labelledby="host-peserta">
+    <div className="stack-s" aria-labelledby="host-peserta">
       <div className="baris-antara">
-        <h3 id="host-peserta" style={{ margin: 0 }}>
+        <h4 id="host-peserta" style={{ margin: 0 }}>
           {t('host.daftarPeserta')}
-        </h3>
+        </h4>
         <span className="chip">{t('host.jumlahPeserta', { n: room.playerCount })}</span>
       </div>
       {urut.length === 0 ? (
@@ -638,6 +695,120 @@ function DaftarPeserta({ room }: { room: RoomPublicState }) {
           </table>
         </div>
       )}
+    </div>
+  );
+}
+
+// ------------------------------------------------------------------ hasil (podium) + ekspor
+
+function Podium({ room }: { room: RoomPublicState }) {
+  useBahasa();
+  if (room.phase !== 'FINISHED' || !room.podium || room.podium.length === 0) return null;
+  return (
+    <section className="panel host-hasil" aria-labelledby="host-podium">
+      <h3 id="host-podium">{t('host.podium')}</h3>
+      <div className="host-podium">
+        {room.podium.map((r) => (
+          <div key={r.playerId} className="panel-krem tengah stack-s">
+            <span className="chip chip-kuning">
+              <Icon name="medali" size={15} /> {teksJuara(r.rank)}
+            </span>
+            <div style={{ display: 'grid', placeItems: 'center' }}>
+              <Avatar look={r.look} size={56} mood="senang" />
+            </div>
+            <strong>{r.nickname}</strong>
+            <span className="kecil">{t('host.poin', { poin: r.totalPoints.toLocaleString('id-ID') })}</span>
+            <span className="mini lembut">
+              {terjemahkanBawaan(r.rank === 1 ? room.prizes.first : r.rank === 2 ? room.prizes.second : room.prizes.third)}
+            </span>
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+function Ekspor({ unduh, gagal }: { unduh: (jenis: 'csv' | 'json') => void; gagal: boolean }) {
+  useBahasa();
+  return (
+    <div className="stack-s" aria-labelledby="host-ekspor">
+      <h4 id="host-ekspor" style={{ margin: 0 }}>{t('host.eksporHasil')}</h4>
+      <div className="baris">
+        <button type="button" className="btn btn-netral" onClick={() => unduh('csv')}>
+          {t('host.eksporCsv')}
+        </button>
+        <button type="button" className="btn btn-netral" onClick={() => unduh('json')}>
+          {t('host.eksporJson')}
+        </button>
+      </div>
+      {gagal ? (
+        <p className="kecil" role="alert" style={{ margin: 0 }}>
+          {t('host.eksporGagal')}
+        </p>
+      ) : null}
+      <p className="kecil lembut" style={{ margin: 0 }}>
+        {t('host.eksporKet')}
+      </p>
+    </div>
+  );
+}
+
+// ------------------------------------------------------------------ panel bertab (T-053)
+
+type Tab = 'peserta' | 'peringkat' | 'kesiapan' | 'pengaturan' | 'ekspor' | 'suara';
+const TAB: { id: Tab; kunci: string }[] = [
+  { id: 'peserta', kunci: 'host.tabPeserta' },
+  { id: 'peringkat', kunci: 'host.tabPeringkat' },
+  { id: 'kesiapan', kunci: 'host.tabKesiapan' },
+  { id: 'pengaturan', kunci: 'host.tabPengaturan' },
+  { id: 'ekspor', kunci: 'host.tabEkspor' },
+  { id: 'suara', kunci: 'host.tabSuara' },
+];
+
+function PanelTab({ room, unduh, eksporGagal }: { room: RoomPublicState; unduh: (jenis: 'csv' | 'json') => void; eksporGagal: boolean }) {
+  useBahasa();
+  const selesai = room.phase === 'FINISHED';
+  const [tab, setTab] = useState<Tab>(selesai ? 'peringkat' : 'peserta');
+  // Hasil tampil: tab peringkat dibuka sekali saat pertandingan selesai.
+  useEffect(() => { if (selesai) setTab('peringkat'); }, [selesai]);
+  const uid = useId();
+  const pindah = (arah: 1 | -1) => {
+    const i = TAB.findIndex((x) => x.id === tab);
+    const b = TAB[(i + arah + TAB.length) % TAB.length]!;
+    setTab(b.id);
+    document.getElementById(`${uid}-tab-${b.id}`)?.focus();
+  };
+  return (
+    <section className="panel host-tab" aria-label={t('host.tabPanel')}>
+      <div className="host-tab-daftar" role="tablist" aria-label={t('host.tabPanel')}
+        onKeyDown={(e) => { if (e.key === 'ArrowRight') { e.preventDefault(); pindah(1); } else if (e.key === 'ArrowLeft') { e.preventDefault(); pindah(-1); } }}>
+        {TAB.map((x) => (
+          <button key={x.id} id={`${uid}-tab-${x.id}`} type="button" role="tab" className="host-tab-tombol" aria-selected={tab === x.id}
+            aria-controls={`${uid}-isi`} tabIndex={tab === x.id ? 0 : -1} onClick={() => setTab(x.id)}>
+            {t(x.kunci)}
+            {x.id === 'peserta' ? <span className="host-tab-angka">{room.playerCount}</span> : null}
+          </button>
+        ))}
+      </div>
+      <div id={`${uid}-isi`} className="host-tab-isi" role="tabpanel" aria-labelledby={`${uid}-tab-${tab}`} tabIndex={0}>
+        {tab === 'peserta' ? <DaftarPeserta room={room} /> : null}
+        {tab === 'peringkat' ? (
+          <div className="stack-s">
+            <h4 style={{ margin: 0 }}>{t('host.papanPeringkat')}</h4>
+            <Leaderboard rows={room.leaderboard ?? []} prizes={room.prizes} />
+          </div>
+        ) : null}
+        {tab === 'kesiapan' ? <KesiapanAdegan room={room} /> : null}
+        {tab === 'pengaturan' ? <Pengaturan room={room} /> : null}
+        {tab === 'ekspor' ? <Ekspor unduh={unduh} gagal={eksporGagal} /> : null}
+        {tab === 'suara' ? (
+          <div className="stack-s">
+            <AudioControls />
+            <TombolGerak className="btn btn-netral" />
+            <p className="mini lembut" style={{ margin: 0 }}>{catatanAset()}</p>
+          </div>
+        ) : null}
+      </div>
     </section>
   );
 }
@@ -647,6 +818,7 @@ function DaftarPeserta({ room }: { room: RoomPublicState }) {
 export default function Host() {
   useBahasa();
   const { room, hostToken, status, error } = useGame();
+  const [laciSoal, setLaciSoal] = useState(false);
   // Judul tab: "Panitia – RAKSA GAME" (dengan nama acara bila room sudah ada); fokus ke h1 saat dibuka dari tautan.
   useHalaman(room ? `${t('host.judulHalaman')} · ${terjemahkanBawaan(room.eventName)}` : t('host.judulHalaman'));
 
@@ -680,8 +852,7 @@ export default function Host() {
   };
 
   return (
-    <div className="layar">
-      <style>{GAYA}</style>
+    <div className="layar host-layar" data-langkah={langkahDari(room)}>
       {/* Header bersama (sama dengan pemain): wordmark + label konteks | bahasa + status koneksi.
           Wordmark bukan tautan: panitia tidak keluar dari layar kendali karena salah ketuk. */}
       <header className="mrk-kepala">
@@ -695,7 +866,8 @@ export default function Host() {
         </div>
       </header>
 
-      <main className="isi wrap-lebar stack-l" style={{ paddingTop: 16 }}>
+      <main className="host-isi">
+        <RelLangkah room={room} />
         {error ? (
           <Pesan jenis="error" onTutup={actions.clearError}>
             {terjemahkanGalat(error)}
@@ -713,84 +885,29 @@ export default function Host() {
           </>
         ) : (
           <>
-            <div className="baris-antara">
-              <h1 style={{ margin: 0 }}>{terjemahkanBawaan(room.eventName)}</h1>
+            <div className="host-judul">
+              <h1>{terjemahkanBawaan(room.eventName)}</h1>
               <span className="chip chip-kuning">{t('host.chipRoom', { kode: room.code })}</span>
+              <StripRonde room={room} onBukaDaftar={() => setLaciSoal(true)} />
             </div>
-
-            {/* Soal acara ini: playlist + soal buatan panitia (komponen terpisah, ringkas bila ditutup). */}
-            <AturSoal room={room} />
 
             <div className="host-grid">
-              <div className="stack-l">
+              <div className="host-kolom-kiri">
                 <Undang room={room} />
-                <AudioControls />
-                <TombolGerak className="btn btn-netral" />
               </div>
-              <div className="stack-l">
+              <div className="host-kolom-kanan">
                 <Kendali room={room} />
-                <KesiapanAdegan room={room} />
-                <Pengaturan room={room} />
+                <Podium room={room} />
+                <PanelTab room={room} unduh={(j) => void unduhEkspor(j)} eksporGagal={eksporGagal} />
               </div>
             </div>
 
-            <DaftarPeserta room={room} />
-
-            <section className="panel stack" aria-labelledby="host-papan">
-              <h3 id="host-papan">{t('host.papanPeringkat')}</h3>
-              <Leaderboard rows={room.leaderboard ?? []} prizes={room.prizes} />
-            </section>
-
-            {room.phase === 'FINISHED' && room.podium && room.podium.length > 0 ? (
-              <section className="panel stack" aria-labelledby="host-podium">
-                <h3 id="host-podium">{t('host.podium')}</h3>
-                <div className="host-podium">
-                  {room.podium.map((r) => (
-                    <div key={r.playerId} className="panel-krem tengah stack-s">
-                      <span className="chip chip-kuning">
-                        <Icon name="medali" size={15} /> {teksJuara(r.rank)}
-                      </span>
-                      <div style={{ display: 'grid', placeItems: 'center' }}>
-                        <Avatar look={r.look} size={72} mood="senang" />
-                      </div>
-                      <strong>{r.nickname}</strong>
-                      <span className="kecil">
-                        {t('host.poin', { poin: r.totalPoints.toLocaleString('id-ID') })}
-                      </span>
-                      <span className="mini lembut">
-                        {terjemahkanBawaan(
-                          r.rank === 1
-                            ? room.prizes.first
-                            : r.rank === 2
-                              ? room.prizes.second
-                              : room.prizes.third,
-                        )}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              </section>
+            {/* Laci "Daftar soal": playlist 10 kasus + soal buatan panitia (AturSoal apa adanya, langsung terbuka). */}
+            {laciSoal ? (
+              <Modal judul={t('host.daftarSoal')} onTutup={() => setLaciSoal(false)} lebar={860}>
+                <AturSoal room={room} bukaAwal />
+              </Modal>
             ) : null}
-
-            <section className="panel stack" aria-labelledby="host-ekspor">
-              <h3 id="host-ekspor">{t('host.eksporHasil')}</h3>
-              <div className="baris">
-                <button type="button" className="btn btn-netral" onClick={() => void unduhEkspor('csv')}>
-                  {t('host.eksporCsv')}
-                </button>
-                <button type="button" className="btn btn-netral" onClick={() => void unduhEkspor('json')}>
-                  {t('host.eksporJson')}
-                </button>
-              </div>
-              {eksporGagal ? (
-                <p className="kecil" role="alert" style={{ margin: 0 }}>
-                  {t('host.eksporGagal')}
-                </p>
-              ) : null}
-              <p className="kecil lembut" style={{ margin: 0 }}>
-                {t('host.eksporKet')}
-              </p>
-            </section>
           </>
         )}
       </main>

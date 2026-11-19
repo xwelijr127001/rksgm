@@ -52,12 +52,13 @@ function InfoSoal({ r }: { r: RingkasSoal }) {
   );
 }
 
-export function AturSoal({ room }: { room: RoomPublicState }) {
+/** `bukaAwal` (T-053): daftar langsung terbuka (dipakai di laci "Daftar soal" layar host satu layar). */
+export function AturSoal({ room, bukaAwal = false }: { room: RoomPublicState; bukaAwal?: boolean }) {
   const { bahasa } = useBahasa();
   const { status } = useGame();
   const konfig = useKonfigBank();
 
-  const [buka, setBuka] = useState(false);
+  const [buka, setBuka] = useState(bukaAwal);
   const [bank, setBank] = useState<BankSoal | null>(null);
   const [galatBank, setGalatBank] = useState<GagalBank | null>(null);
   const [memuat, setMemuat] = useState(true);
