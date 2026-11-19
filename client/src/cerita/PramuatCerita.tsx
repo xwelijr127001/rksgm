@@ -17,7 +17,8 @@ import { Raki } from '../art/Raki';
 import { t, useBahasa } from '../i18n';
 import { useProfil } from '../state/profil';
 
-const EPISODE = 'auto-2';
+/** T-064: Episode 1 Dev (auto-2-dev) shows the same case art, so it preloads the same list; guests there have no profile. */
+const EPISODE = ['auto-2', 'auto-2-dev'];
 const ITEM_MS = 8000;
 const BATAS_MS = 12000;
 const TANPA_BAR_MS = 300;
@@ -45,7 +46,7 @@ export function PramuatCerita({ children }: { children: ReactNode }) {
   useBahasa();
   const { episode } = useParams();
   const { profil } = useProfil();
-  const perlu = episode === EPISODE && !!profil && !sudahSiap && typeof window !== 'undefined';
+  const perlu = !!episode && EPISODE.includes(episode) && (!!profil || episode === 'auto-2-dev') && !sudahSiap && typeof window !== 'undefined';
   const [fase, setFase] = useState<'tunggu' | 'tampil' | 'siap'>(perlu ? 'tunggu' : 'siap');
   const [maju, setMaju] = useState(0);
 

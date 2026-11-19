@@ -42,5 +42,10 @@ export function ringkasTindakan(ep: Episode, idAktivitas: string, jawaban: Missi
       const w = petaLangkah(jawaban, k.langkah)[k.benda];
       return w ? tx(w === k.ragu ? 'akt.sim.wadah.ragu' : 'akt.sim.wadah.bersih') : null;
     }
+    case 'dashcam': {
+      // T-064 (Episode 1 Dev): mobil on the first tap = bersih; otherwise ragu.
+      const w = petaLangkah(jawaban, k.langkah)[k.item];
+      return w ? tx(w === k.ragu ? 'akt.dashcam.wadah.ragu' : 'akt.dashcam.wadah.bersih') : null;
+    }
   }
 }

@@ -22,6 +22,7 @@ import { KUERI_CANGKANG_LAYAR, SlotKepalaArena, SlotKirimArena, useKueri } from 
 import { jawabanKirim } from './logika';
 import { ArenaPolaBandingkan } from './ArenaBandingkan';
 import { ArenaPolaBundel, lupakanLangkahArena } from './ArenaBundel';
+import { ArenaPolaDashcam } from './ArenaDashcam';
 import { ArenaPolaPesan } from './ArenaPesan';
 import { ArenaPolaRambu } from './ArenaRambu';
 import { ArenaPolaSim } from './ArenaSim';
@@ -68,7 +69,7 @@ export function Arena({ ep, state, node, bahasa, tx, namaPemain, onKirim, onKemb
   // Kalimat tokoh pemberi tugas. Narasi tidak diulang: baru saja dibaca di adegan/obrolan tepat sebelum tugas.
   const kutipan = [...pengantar].reverse().find((b) => b.siapa !== 'narasi' && Object.prototype.hasOwnProperty.call(ep.pemeran, b.siapa)) ?? null;
   // Tokoh yang memberi tugas = tokoh yang dipindah (Mas Rudi di peta): kalimatnya tampil di kartu tokoh itu, tidak dua kali.
-  const kutipanDiPola = (!daftar && konfig.pola === 'tujuan' && !!kutipan && konfig.benda.tokoh?.id === kutipan.siapa) || ((konfig.pola === 'rambu' || konfig.pola === 'sim') && !!kutipan);
+  const kutipanDiPola = (!daftar && konfig.pola === 'tujuan' && !!kutipan && konfig.benda.tokoh?.id === kutipan.siapa) || ((konfig.pola === 'rambu' || konfig.pola === 'sim' || konfig.pola === 'dashcam') && !!kutipan);
   // Fakta tampil sebagai kartu, kecuali pola yang menampilkannya sendiri (isi bundel) atau gambar yang sudah memuatnya.
   const faktaKartu = konfig.pola === 'bundel' || konfig.pola === 'rambu' || (konfig.fakta?.hanyaDaftar && !daftar) ? undefined : konfig.fakta;
   // Pola susun: briefing sudah dibaca di obrolan/adegan tepat sebelum tugas, jadi konteks langsung diringkas: catatan fakta
@@ -131,7 +132,7 @@ export function Arena({ ep, state, node, bahasa, tx, namaPemain, onKirim, onKemb
       </header>
       <div ref={setSlotKepala} className="hp-arena-sematan" />
       <div ref={gulirRef} className="hp-arena-gulir" data-gulir-arena="">
-      {konfig.pola === 'rambu' || konfig.pola === 'sim' || (konfig.pola === 'bundel' && !(cangkang && tabInfo)) ? null : <div className="hp-arena-konteks" data-ringkas={ringkas ? '' : undefined}>
+      {konfig.pola === 'rambu' || konfig.pola === 'sim' || konfig.pola === 'dashcam' || (konfig.pola === 'bundel' && !(cangkang && tabInfo)) ? null : <div className="hp-arena-konteks" data-ringkas={ringkas ? '' : undefined}>
         {ringkas ? (
           <>
             {catatanTampil ? <p className="hp-konteks-catatan">{tx(konfig.catatan!)}</p> : null}
@@ -151,7 +152,7 @@ export function Arena({ ep, state, node, bahasa, tx, namaPemain, onKirim, onKemb
           </>
         )}
       </div>}
-      {kodePandu ? <PanduLangkah kode={kodePandu} arena={akarArena} adaIsian={adaIsian} slotKepala={cangkang ? slotKepala : null} /> : null}
+      {kodePandu ? <PanduLangkah kode={kodePandu} arena={akarArena} adaIsian={adaIsian} slotKepala={cangkang ? slotKepala : null} episode={ep.id} /> : null}
       {gagal ? <p className="hp-arena-gagal" role="status">{t('ceritaHp.gagalVisual')}</p> : null}
       <BatasArena key={daftar ? 'daftar' : 'gambar'} onGagal={() => { if (!daftar) setGagal(true); }}>
         {konfig.pola === 'susun' ? <ArenaPolaSusun {...props} konfig={konfig} />
@@ -160,9 +161,11 @@ export function Arena({ ep, state, node, bahasa, tx, namaPemain, onKirim, onKemb
               : konfig.pola === 'bundel' ? <ArenaPolaBundel {...props} konfig={konfig} />
                 : konfig.pola === 'rambu' ? <ArenaPolaRambu {...props} konfig={konfig} />
                   : konfig.pola === 'sim' ? <ArenaPolaSim {...props} konfig={konfig} />
-                  : <ArenaPolaPesan {...props} konfig={konfig} />}
+                  : konfig.pola === 'pesan' ? <ArenaPolaPesan {...props} konfig={konfig} />
+                  : konfig.pola === 'dashcam' ? <ArenaPolaDashcam {...props} konfig={konfig} />
+                  : null}
       </BatasArena>
-      {konfig.pola === 'rambu' || konfig.pola === 'sim' ? null : (
+      {konfig.pola === 'rambu' || konfig.pola === 'sim' || konfig.pola === 'dashcam' ? null : (
         <p className="hp-arena-alih">
           <button type="button" className="hp-tautan" onClick={ganti}>{daftar ? t('ceritaHp.tampilanVisual') : t('ceritaHp.tampilanDaftar')}</button>
         </p>

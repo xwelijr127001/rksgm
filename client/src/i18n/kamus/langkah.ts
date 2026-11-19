@@ -32,6 +32,11 @@ const kamus: KamusRuang = {
     'pelatih.judul': 'Cara main',
     'pelatih.isi': 'Ketuk benda atau tempat yang disebut petunjuk. Langkah di atas menandai yang sudah selesai.',
     'pelatih.ok': 'Mengerti',
+    // T-065 (Episode 1 Dev): rekaman dashcam + kartu cara main SIM khusus Episode 1 Dev
+    'kdash.1': 'Tonton', 'kdash.2': 'Ketuk penyebab', 'kdash.3': 'Lanjut',
+    'kdash.p1': 'Tonton rekamannya sampai berhenti', 'kdash.p2': 'Ketuk kendaraan yang memicu kejadian', 'kdash.p3': 'Penyebab ditemukan: lanjut',
+    'pelatih.isi.kdash': 'Tonton rekamannya, lalu ketuk penyebabnya.',
+    'pelatih.isi.ksimDev': 'Periksa SIM Pak Darto: ketuk benda yang disebut Pak Bima, lalu ikuti papan sampai empat cap terisi.',
   },
   en: {
     label: 'Steps',
@@ -58,6 +63,10 @@ const kamus: KamusRuang = {
     'pelatih.judul': 'How to play',
     'pelatih.isi': 'Tap the item or place the hint names. The steps above show what is done.',
     'pelatih.ok': 'Got it',
+    'kdash.1': 'Watch', 'kdash.2': 'Tap the cause', 'kdash.3': 'Continue',
+    'kdash.p1': 'Watch the footage until it stops', 'kdash.p2': 'Tap the vehicle that caused the incident', 'kdash.p3': 'Cause found: continue',
+    'pelatih.isi.kdash': 'Watch the footage, then tap the cause.',
+    'pelatih.isi.ksimDev': 'Check Pak Darto’s licence: tap what Pak Bima names, then follow the board until all four stamps are in.',
   },
   zh: {
     label: '步骤',
@@ -84,6 +93,10 @@ const kamus: KamusRuang = {
     'pelatih.judul': '玩法',
     'pelatih.isi': '点击提示所说的物体或位置。上方步骤会标出已完成的部分。',
     'pelatih.ok': '明白了',
+    'kdash.1': '观看', 'kdash.2': '点击起因', 'kdash.3': '继续',
+    'kdash.p1': '看完录像，直到画面停下', 'kdash.p2': '点击引发事故的车辆', 'kdash.p3': '已找到起因：继续',
+    'pelatih.isi.kdash': '先看录像，再点击起因。',
+    'pelatih.isi.ksimDev': '检查 Pak Darto 的驾照：点击 Pak Bima 提到的物品，然后按看板操作，直到盖满四个章。',
   },
 };
 

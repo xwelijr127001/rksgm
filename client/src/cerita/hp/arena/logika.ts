@@ -31,6 +31,7 @@ export function itemArena(k: KonfigArena): string[] {
     case 'bundel': return [];
     case 'rambu': return semuaItemRambu(k);
     case 'sim': return [k.benda];
+    case 'dashcam': return [k.item]; // T-064: one recorded item (rekaman -> bersih / ragu)
   }
 }
 
@@ -59,6 +60,7 @@ export function sisaArena(k: KonfigArena, j: MissionAnswer): number {
     }
     case 'rambu': return sisaRambu(k, j);
     case 'sim': return petaLangkah(j, k.langkah)[k.benda] ? 0 : 1;
+    case 'dashcam': return petaLangkah(j, k.langkah)[k.item] ? 0 : 1;
   }
 }
 

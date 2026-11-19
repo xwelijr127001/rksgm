@@ -513,3 +513,6 @@
 @media (max-width: 374.98px) {
   .cer-ep { column-gap: 10px; }
 }
+
+/* T-064: Episode 1 Dev card: "5 menit" chip beside the type chip (light orange, so KASUS NYATA stays the strong one). */
+.cer-ep-jenis.cer-ep-cepat { margin-left: 6px; background: #fff1e2; color: #7a3e00; box-shadow: inset 0 0 0 1px #ff9000; }

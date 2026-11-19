@@ -515,3 +515,17 @@
 .hp-kirim-baris { display: flex; align-items: center; gap: 8px; }
 .hp-kirim-baris > .hp-potret-saya { margin-bottom: 0; }
 .hp-kirim-baris > .hp-kirim-tombol { flex: 1 1 auto; min-width: 0; }
+
+/* T-064 Episode 1 Dev (Episode.tampilan.teksBesar, opt-in; other episodes unchanged): walk-up guests read on their own phone
+   without help, so body text >= 18 px, labels >= 14 px, tap targets >= 48 px. Episode 1 Dev has 3 replies per decision (not
+   5), so the reply sheet keeps fitting 360x640 at the bigger size (3 x (2 lines x 25 + 20) + gaps = ~225 px). */
+.hp-layar[data-teks-besar] .hp-ucapan-teks, .hp-layar[data-teks-besar] .hp-gelembung, .hp-layar[data-teks-besar] .hp-narasi { font-size: 18px; line-height: 1.45; }
+.hp-layar[data-teks-besar] .hp-ucapan-nama b { font-size: 16px; }
+.hp-layar[data-teks-besar] .hp-ucapan-nama span, .hp-layar[data-teks-besar] .hp-terkirim, .hp-layar[data-teks-besar] .hp-status-baris, .hp-layar[data-teks-besar] .hp-petunjuk, .hp-layar[data-teks-besar] .hp-topik, .hp-layar[data-teks-besar] .hp-kirim-catatan, .hp-layar[data-teks-besar] .hp-kirim-belum { font-size: 14px; }
+.hp-layar[data-teks-besar] .hp-catatan p, .hp-layar[data-teks-besar] .hp-kenapa { font-size: 17px; }
+.hp-layar[data-teks-besar] .hp-tanya { font-size: 20px; }
+.hp-layar[data-teks-besar] .hp-opsi, .hp-layar[data-teks-besar] .hp-lembar .hp-opsi { min-height: 48px; font-size: 18px; line-height: 1.35; }
+.hp-layar[data-teks-besar] .hp-opsi-teks b { font-size: 18px; }
+.hp-layar[data-teks-besar] .hp-opsi-teks span { font-size: 15px; }
+.hp-layar[data-teks-besar] :is(.hp-tautan, .hp-lama, .hp-menu, .hp-balas, .hp-lanjut) { min-height: 48px; }
+.hp-layar[data-teks-besar] .primary-action { min-height: 52px; font-size: 18px; }

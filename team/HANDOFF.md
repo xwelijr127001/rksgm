@@ -3479,3 +3479,74 @@ Built by the Designer; uncommitted. Owner rule: nothing was opened in a browser.
 - Target >= 330 px at 390 px: a01 360 px; a02 (3 picks) 322 px. The single / assign / number steps answer in the panel lists (2-line answer sentences, 3..5 buckets), so at 390x664 they keep the scene at the 260 px floor and the page scrolls 18..134 px; at 360x560 every case scrolls (17..241 px). Nothing is clipped any more.
 
 **Gate (owner rule):** typecheck 0; `client/dist` rebuilt = exact copy. Heights calculated, NOT measured in a browser or on a phone. Not committed.
+
+## T-065 (2026-11-20): Episode 1 Dev "Kenalan Raksa", plan Task 2: ArenaPolaDashcam + coach cards (Designer)
+
+Built by the Designer; uncommitted. Owner rule: nothing was opened in a browser. Gate: client typecheck 0 errors; client/dist rebuilt. The full Episode 1 is unchanged: no file under `episode/auto-2` was touched, and the shared files only gained a dashcam branch and opt-in coach cards.
+
+**Contract.** The arena uses Task 1's `KonfigArena` `pola: 'dashcam'` type from `cerita/tipe.ts` (`langkah`, `item`, `benda`, `tepat: 'mobil'`, `bersih`, `ragu`). I did not edit `tipe.ts`. The answer is recorded as `tetapkan(jawaban, konfig.langkah, konfig.item, bersih | ragu)`, which for Auto 2 Dev means `akt:dashcam:taruh:rekaman:<bersih|ragu>`, matching node `kdash`.
+
+**Files**
+- **New:**
+  - `client/src/cerita/hp/arena/ArenaDashcam.tsx`
+  - `client/src/cerita/hp/arena/dashcam.css`
+  - `client/src/i18n/kamus/dashcam.ts` (id/en/zh)
+- **New art:** `client/src/cerita/seni/aktivitas/dashcam/*.png`:
+  - `mobil-atas` 26×44
+  - `truk-kecil-atas-nyala` / `-mati` 32×58 (two hazard-light frames)
+  - `truk-miring` 75×133 (the Episode 1 top-down truck rotated -16° by nearest neighbour, crumpled front-left)
+  - `pembatas` (guardrail tile)
+  - `serpih` (debris)
+- **Sources:** `character/dashcam-t065/bangun.mjs` (sprites) and `pratinjau.mjs`, which writes `bingkai-dashcam-3x.png` (frames 1/2/3, frame 3 = freeze frame with the tap rings).
+- **Modified:**
+  - `hp/arena/Arena.tsx`: the dashcam branch. The context block and the list-view toggle are hidden as for SIM, and `episode={ep.id}` is passed to the coach.
+  - `hp/arena/Pandu.tsx`: `kdash` added to the guided steps and coach cards, and a special card for SIM in `auto-2-dev`.
+  - `i18n/kamus/langkah.ts`: `kdash.*` and the two coach texts.
+  - `i18n/kamus/index.ts`: registers `dashcam`.
+
+**What it does**
+- **Scene:** K08 lane-scene style: the same road strip and top-down truck, 1 art px = 1 CSS px, with the 278 px road centred in the 236 px scene.
+- **Replay, CSS, 6 s:**
+  - The road scrolls.
+  - 1.5-3 s: the small car moves from lane 3 into lane 2 in front of the truck.
+  - 3-4.5 s: the truck swerves left and hits the guardrail and the stopped small truck (hazard lights blinking). It swaps to the pixel-rotated crashed sprite and debris appears.
+  - Then the frame freezes.
+- **Tapping:**
+  - The three tap targets (car 48×52, small truck 48×70, truck 68×114) only appear in the frozen frame, so taps during the replay are ignored.
+  - They show a dashed yellow pixel ring, and a solid orange ring on keyboard focus.
+  - "Putar lagi" always restarts the replay.
+- **Reduced motion:** three still frames with a caption and "Lanjut"; frame 3 is the answerable freeze frame.
+- **Outcome:**
+  - Car on the first try: correct feedback plus the note "we still check signs and witnesses", recorded `bersih`.
+  - First wrong tap: a short hint per vehicle and "Putar lagi" highlighted.
+  - Second wrong tap: the explanation, recorded `ragu`.
+  - Car after one wrong tap: correct feedback, recorded `ragu`.
+  - Then the normal Kirim button.
+- **Coach cards:**
+  - `kdash`: "Tonton rekamannya, lalu ketuk penyebabnya." It shows once per device and closes itself after 5 s.
+  - `ksim` in `auto-2-dev`: its own SIM how-to text, with a separate "seen" key from the full episode, also closing after 5 s.
+  - The full-episode cards are unchanged.
+- **Readability:** body 17-18 px, in-scene labels at least 14 px, buttons and targets at least 48 px.
+
+**Open points**
+- Task 1's konfig carries `tanya: 'arena.dashcam.tanya'`. The arena does not read it; its prompt comes from the `dashcam` kamus, and the same goes for "Putar lagi" and the feedback. Task 1 may drop its duplicate dashcam UI keys or keep them for the list view.
+- The arena has no list view of its own; the toggle is hidden, as for SIM.
+- Fit on a 360×640 phone is calculated, not measured: scene 236, controls 48, feedback about 80, Kirim bar. The longest zh/en feedback may need the arena to scroll by one line.
+- Not checked in a browser. Mid-replay rotation uses a CSS rotate, which is briefly not pixel-exact; the frozen frame uses the pixel-rotated sprite.
+
+## T-064 (2026-11-20): Episode 1 Dev "Kenalan Raksa" - plan Task 1 (Fullstack)
+
+Spec `docs/superpowers/specs/2026-11-19-episode-1-dev-design.md`, plan `docs/superpowers/plans/2026-11-19-episode-1-dev.md` Task 1. Full Episode 1 (`cerita/episode/auto-2/*`) untouched: the new episode only re-uses its text, art, cast, documents and the SIM activity.
+
+- **Episode** `client/src/cerita/episode/auto-2-dev/episode.ts` (`EPISODE_AUTO_2_DEV`, id `auto-2-dev`, `antarmuka: 'hp'`, `durasiMenit: 5`, `tampilan: { teksBesar: true, akhirKenalan: true }`, own save entry under the same `raksa:cerita` root = separate from `auto-2`). Flow: `buka` (Miss Raksa, buka.1 + buka.2) -> `k01` (Babak 1: A +10, C -6, E 0) -> `k06` (Babak 6: B +14, A -10, D -10, document linimasa) -> `ksim` (auto-2 SIM activity + arena; bersih +8, ragu 0) -> `kdash` (NEW dashcam activity; bersih +8, ragu -4) -> `k14` (Babak 14: C +14, A -10, D 0, document banding) -> `akhir-cek` (>= 70 Puas, >= 45 Selesai dengan catatan, else Kurang puas) -> 3 akhir nodes (auto-2 ending lines). Start 30 (Cemas), best path 84. Reply / reaction lines = the auto-2 keys. Phone hand-off Miss Raksa -> chat at buka -> k01 and k14 -> endings (serahTelepon).
+- **Dashcam contract for Task 2** (`client/src/cerita/tipe.ts`, `KonfigArena`): `{ pola: 'dashcam'; langkah: string; item: string; benda: { id: 'mobil' | 'truk' | 'truk-kecil' }[]; tepat: 'mobil'; bersih: string; ragu: string }` - the Interfaces block plus `langkah` and `item`, which `tetapkan(jawaban, konfig.langkah, konfig.item, konfig.bersih | konfig.ragu)` needs (same as 'sim'). Values in the episode: langkah 'dashcam', item 'rekaman', benda truk / mobil / truk-kecil, bersih 'bersih', ragu 'ragu'. Node `kdash` (`aktivitas: 'dashcam'`, `langsung: true`) branches on `akt:dashcam:taruh:rekaman:ragu`. Synthetic mission = one assign step `dashcam` (item rekaman -> bersih / ragu). Texts for the arena (id/en/zh): `arena.dashcam.tanya`, `.putar`, `.lanjut`, `.benda.mobil|truk|truk-kecil`, `.tepat`, `.salah`, `.jelas`, `.diputar`; how-to cards `cara.sim`, `cara.dashcam`.
+  - To keep typecheck green I added the 'dashcam' cases to `hp/arena/logika.ts` (itemArena, sisaArena) and `hp/arena/ringkas.ts`, and ONE guard in `hp/arena/Arena.tsx`: the last branch is now `konfig.pola === 'pesan' ? <ArenaPolaPesan/> : null /* dashcam = Task 2 */` - the Designer replaces that `null` with `<ArenaPolaDashcam/>`. Note: the list-view toggle in Arena.tsx still shows for 'dashcam' (only rambu / sim hide it) and the list view would offer the bersih / ragu buckets directly: Task 2 should hide it like 'sim'.
+- **Texts** `auto-2-dev/teks.{id,en,zh}.ts` (NEW keys only) + `teks.ts` (= TEKS_AUTO_2 + new keys; `judul` / `ringkas` overridden for this episode only).
+- **Register / route / picker:** `episode/index.ts` (after auto-2), `episode/rintisan.ts` (null stub), `client/vite.config.ts` (VITE_CERITA_TANPA=auto-2 now also drops auto-2-dev, so the case never leaks through it). `App.tsx`: `/cerita/kenalan` -> `/cerita/auto-2-dev`. `pages/Cerita.tsx`: the dev card first, meta "Episode 1 Dev", chip "5 menit" (`cer-ep-cepat`, cerita.css); the full Episode 1 card unchanged.
+- **No name before playing:** `pages/CeritaMain.tsx` - for an `akhirKenalan` episode without a profile the session runs as "Tamu" / "Guest" / "访客" with `LOOK_BAWAAN` (no redirect to /kenalan); every other episode still asks first. `cerita/PramuatCerita.tsx` (T-047 preload bar) also runs for auto-2-dev, also without a profile.
+- **Large text** (`hp/PemainHP.tsx` root `data-teks-besar`, rules in `hp/hp.css`): speech / chat / narration 18 px, question 20 px, replies 18 px and >= 48 px, small labels 14 px, links / buttons >= 48 px. Fit by calculation (reply sheet: question + 3 replies, 18 px): 360x640 id 362..388 px, en 338..458 px (k01 longest), zh 266..338 px, + sheet chrome ~120 px <= 584 px under the header; 390x700 smaller.
+- **Ending** (`ui/LayarAkhir.tsx` -> `AkhirKenalan`, `ui/akhir.css`): Pak Hendra portrait + "Pak Hendra sekarang: <suasana>" + ending title, his final line, "Ini kasus nyata yang pernah Raksa tangani.", optional name (max 24, empty -> Tamu) that fills `KartuPetugas` (T-052) live, buttons "Main versi lengkap" (-> /cerita/auto-2) and "Kenal Raksa lebih jauh" (https://www.raksaonline.com/, new tab), pinned in the phone action bar. Fit at 360x640 ~568 px.
+
+**Open points:** Task 2 must plug `ArenaPolaDashcam` into the `null` branch and hide the list view for 'dashcam'; the SIM how-to card for auto-2-dev (`cara.sim`) is Task 2 (Pandu). Story music stays the office theme for the whole cut (one part, b1). The guest name is not saved to a profile (only on the card). Owner still to confirm the dashcam moment (spec).
+
+**Gate (owner rule):** typecheck 0; `client/dist` rebuilt = exact copy. Not tested in a browser or on a phone. Not committed.

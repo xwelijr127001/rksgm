@@ -1,0 +1,90 @@
+/* T-065: arena "Rekaman dashcam" (ArenaDashcam.tsx). Adegan 236 px tinggi, blok jalan 278 px di tengah (var --x0), 1 piksel seni =
+   1 px CSS (gaya adegan lajur K08). Posisi akhir (bingkai beku) = posisi dasar tiap kendaraan; animasi 6 s hanya saat
+   data-bingkai="jalan" dan berakhir tepat di posisi dasar (fill forwards). Gerak dikurangi: data-bingkai 1 / 2 / 3 = bingkai diam.
+   Sasaran ketuk >= 48 px, cincin piksel saat fokus. Teks >= 14 px (label adegan), isi 16-18 px. */
+
+.hp-dashcam { display: flex; flex-direction: column; gap: 10px; }
+.dc-adegan { position: relative; margin: 0; height: 236px; border: 3px solid #2a211e; background: #8a8f84; overflow: hidden; image-rendering: pixelated; --x0: calc(50% - 139px); }
+.dc-isi { position: absolute; inset: 0; }
+.dc-isi > * { position: absolute; }
+.dc-jalan { left: var(--x0); top: 0; width: 278px; height: 100%; background: var(--jalan) repeat-y 0 0; }
+.dc-pembatas { left: calc(var(--x0) - 12px); top: 0; width: 12px; height: 100%; background: var(--pembatas) repeat-y 0 0; }
+
+/* posisi DASAR = bingkai beku (akhir rekaman) */
+.dc-truk-kecil { left: calc(var(--x0) + 9px); top: 22px; width: 32px; height: 58px; background: var(--nyala) no-repeat; }
+.dc-mobil { left: calc(var(--x0) + 93px); top: 2px; }
+.dc-truk { left: calc(var(--x0) + 86px); top: 100px; transform-origin: 50% 50%; opacity: 0; }
+.dc-truk-miring { left: calc(var(--x0) + 34px); top: 78px; }
+.dc-serpih { left: calc(var(--x0) + 30px); top: 74px; }
+
+/* rekaman berjalan */
+.dc-adegan[data-bingkai="jalan"] .dc-jalan,
+.dc-adegan[data-bingkai="jalan"] .dc-pembatas { animation: dc-gulir 4.5s linear forwards; }
+.dc-adegan[data-bingkai="jalan"] .dc-truk-kecil { animation: dc-kecil 6s linear forwards, dc-hazard .6s steps(1) infinite; }
+.dc-adegan[data-bingkai="jalan"] .dc-mobil { animation: dc-mobil 6s ease-in-out forwards; }
+.dc-adegan[data-bingkai="jalan"] .dc-truk { animation: dc-truk 6s ease-in-out forwards; }
+.dc-adegan[data-bingkai="jalan"] .dc-truk-miring,
+.dc-adegan[data-bingkai="jalan"] .dc-serpih { animation: dc-muncul 6s steps(1) forwards; }
+@keyframes dc-gulir { from { background-position: 0 0; } to { background-position: 0 104px; } }
+@keyframes dc-hazard { 0% { background-image: var(--nyala); } 50% { background-image: var(--mati); } }
+@keyframes dc-kecil { 0% { transform: translateY(-86px); } 75%, 100% { transform: translateY(0); } }
+@keyframes dc-mobil {
+  0% { transform: translate(66px, 32px); }
+  25% { transform: translate(66px, 26px); }
+  38% { transform: translate(40px, 18px) rotate(-14deg); }
+  50% { transform: translate(0, 8px) rotate(0); }
+  100% { transform: translate(0, 0); }
+}
+@keyframes dc-truk {
+  0%, 50% { transform: translate(0, 0) rotate(0); opacity: 1; }
+  62% { transform: translate(-16px, -8px) rotate(-8deg); opacity: 1; }
+  75% { transform: translate(-34px, -18px) rotate(-16deg); opacity: 1; }
+  76%, 100% { transform: translate(-34px, -18px) rotate(-16deg); opacity: 0; }
+}
+@keyframes dc-muncul { 0% { opacity: 0; } 76%, 100% { opacity: 1; } }
+
+/* gerak dikurangi: tiga bingkai diam */
+.dc-adegan[data-bingkai="1"] .dc-truk,
+.dc-adegan[data-bingkai="2"] .dc-truk { opacity: 1; }
+.dc-adegan[data-bingkai="1"] .dc-truk-miring, .dc-adegan[data-bingkai="1"] .dc-serpih,
+.dc-adegan[data-bingkai="2"] .dc-truk-miring, .dc-adegan[data-bingkai="2"] .dc-serpih { opacity: 0; }
+.dc-adegan[data-bingkai="1"] .dc-mobil { transform: translate(66px, 32px); }
+.dc-adegan[data-bingkai="2"] .dc-mobil { transform: translate(0, 8px); }
+.dc-adegan[data-bingkai="1"] .dc-truk-kecil { transform: translateY(-60px); }
+.dc-adegan[data-bingkai="2"] .dc-truk-kecil { transform: translateY(-24px); }
+
+/* bingkai kamera */
+.dc-sudut { inset: 6px; pointer-events: none;
+  background:
+    linear-gradient(#fff, #fff) left top / 14px 3px no-repeat, linear-gradient(#fff, #fff) left top / 3px 14px no-repeat,
+    linear-gradient(#fff, #fff) right top / 14px 3px no-repeat, linear-gradient(#fff, #fff) right top / 3px 14px no-repeat,
+    linear-gradient(#fff, #fff) left bottom / 14px 3px no-repeat, linear-gradient(#fff, #fff) left bottom / 3px 14px no-repeat,
+    linear-gradient(#fff, #fff) right bottom / 14px 3px no-repeat, linear-gradient(#fff, #fff) right bottom / 3px 14px no-repeat; }
+.dc-rekam { right: 12px; top: 10px; display: flex; align-items: center; gap: 5px; padding: 1px 5px; background: rgba(33, 33, 33, .7); color: #fff; font: 700 14px/18px ui-monospace, monospace; pointer-events: none; }
+.dc-rekam i { width: 8px; height: 8px; background: #e0473b; }
+.dc-adegan[data-bingkai="jalan"] .dc-rekam i { animation: dc-kedip 1s steps(1) infinite; }
+@keyframes dc-kedip { 50% { opacity: 0; } }
+.dc-keterangan { position: absolute; left: 6px; right: 6px; bottom: 6px; padding: 4px 8px; background: rgba(33, 33, 33, .82); color: #fff; font-size: 14px; line-height: 1.3; }
+
+/* sasaran ketuk (bingkai beku) */
+.dc-sasaran { z-index: 3; padding: 0; border: 0; background: transparent; cursor: pointer; outline: 2px dashed rgba(246, 210, 92, .95); outline-offset: -2px; }
+.dc-sasaran:focus-visible { outline: 3px solid #ff9000; outline-offset: 0; box-shadow: 0 0 0 3px #2a211e; }
+.dc-sasaran[data-keadaan="tepat"] { outline: 3px solid #3f8f5a; box-shadow: 0 0 0 3px #fff; }
+.dc-sasaran[data-keadaan="ragu"] { outline: 3px dashed #f6d25c; box-shadow: 0 0 0 3px #2a211e; }
+.dc-sasaran:disabled { cursor: default; }
+
+/* kendali + pesan */
+.dc-kendali { display: flex; gap: 8px; justify-content: center; }
+.dc-tombol { min-height: 48px; min-width: 48px; padding: 8px 16px; border: 2px solid #2a211e; background: #fff1e2; color: #2a211e; font-size: 17px; font-weight: 800; box-shadow: 0 3px 0 #2a211e; cursor: pointer; }
+.dc-tombol:active:not(:disabled) { transform: translateY(2px); box-shadow: 0 1px 0 #2a211e; }
+.dc-tombol:disabled { opacity: .5; cursor: default; }
+.dc-putar[data-sorot] { background: #f6d25c; }
+.dc-pesan { padding: 10px 12px; border: 2px solid #2a211e; background: #fff9f0; font-size: 17px; line-height: 1.4; }
+.dc-pesan p { margin: 0; }
+.dc-pesan[data-jenis="tepat"] { background: #e6f4e3; border-color: #3f8f5a; }
+.dc-pesan[data-jenis="ragu"] { background: #fff4cf; }
+.dc-catatan { margin-top: 6px !important; font-size: 16px; color: #3c3c3c; }
+
+@media (prefers-reduced-motion: reduce) {
+  :root:not([data-gerak="penuh"]) .dc-adegan * { animation: none !important; }
+}

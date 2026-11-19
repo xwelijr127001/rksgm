@@ -385,6 +385,13 @@ export type KonfigArena = DasarArena & (
   | { pola: 'sim'; langkah: string; benda: string; bersih: string; ragu: string }
   /** Periksa rambu di jalan (K08): ketuk rambu -> tandai lajur sendiri (satu langkah assign per rambu) -> kesimpulan (satu langkah single). */
   | { pola: 'rambu'; jumlahLajur: number; lajurTruk: number; rambu: RambuArena[]; simpul: SimpulRambu }
+  /**
+   * T-064/T-065 (Episode 1 Dev): rekaman DASHCAM. Rekaman diputar, lalu pemain mengetuk kendaraan pemicu di bingkai beku.
+   * Kontrak Task 1 (Fullstack) <-> Task 2 (Designer, ArenaPolaDashcam): `benda` = tiga kendaraan yang bisa diketuk, `tepat` = 'mobil'.
+   * Jawaban = SATU item `item` di langkah `langkah` ke wadah `bersih` (mobil pada ketukan pertama) atau `ragu` (selain itu):
+   * `tetapkan(jawaban, konfig.langkah, konfig.item, konfig.bersih | konfig.ragu)` (pola sama dengan 'sim').
+   */
+  | { pola: 'dashcam'; langkah: string; item: string; benda: { id: 'mobil' | 'truk' | 'truk-kecil' }[]; tepat: 'mobil'; bersih: string; ragu: string }
 );
 
 /** Satu rambu di arena `rambu`: langkah assign yang menyimpan lajur yang ditandai pemain (item = `${awalanItem}${nomorLajur}` -> wadah `wadah`). */
@@ -641,6 +648,12 @@ export interface Episode {
   titik?: TitikKeputusan[];
   /** Catatan status naskah di bawah ringkasan keputusan (mis. draf, butir konfirmasi yang belum disahkan). */
   statusNaskah?: KunciTeks;
+  /**
+   * T-064 (Episode 1 Dev, opt-in; episode lain tanpa field ini = tidak berubah): `teksBesar` = teks pemutar HP lebih besar
+   * (badan >= 18 px, sasaran ketuk >= 48 px); `akhirKenalan` = layar akhir singkat (suasana akhir, kalimat kasus nyata, nama
+   * opsional untuk kartu petugas, dua tombol) dan TANPA layar nama sebelum bermain.
+   */
+  tampilan?: { teksBesar?: boolean; akhirKenalan?: boolean };
   /** Migrasi progres dari versi lama: kembalikan state baru, atau null bila tidak bisa. */
   migrasi?: Record<number, (lama: StateCerita) => StateCerita | null>;
 }

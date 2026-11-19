@@ -36,7 +36,7 @@ import { PilihBahasa } from '../components/PilihBahasa';
 import { Arrow, PlayerShell, SoundButton } from '../components/PlayerShell';
 import { useReducedMotion } from '../hooks';
 import { t, useBahasa } from '../i18n';
-import { useProfil, type Profil } from '../state/profil';
+import { LOOK_BAWAAN, useProfil, type Profil } from '../state/profil';
 import { useHalaman } from '../ui/halaman';
 import { Memuat, Modal } from '../ui/kit';
 import { adaDialogTerbuka } from '../ui/modal';
@@ -97,10 +97,13 @@ function catatPetunjukTampil(): boolean {
 export default function CeritaMain() {
   const { episode } = useParams();
   const { profil } = useProfil();
-  useBahasa();
+  const { bahasa } = useBahasa();
   // ?adegan=ringan|penuh disimpan SEKALI saat halaman dibuka, sebelum pengalihan ke /kenalan yang membuang query.
   useState(simpanModeAdegan);
   const ep = cariEpisode(episode);
+  // T-064: Episode 1 Dev (akhirKenalan) = no name screen before playing: a guest plays as "Tamu" with the default look; the
+  // name is optional at the ending (ID card). Every other episode still asks for the name first.
+  if (!profil && ep?.tampilan?.akhirKenalan) return <SesiCerita key={ep.id} ep={ep} profilAwal={{ nickname: teksCerita(ep, 'kenalan.namaBawaan', bahasa), look: { ...LOOK_BAWAAN } }} />;
   if (!profil) return <Navigate to={'/kenalan?lanjut=/cerita/' + encodeURIComponent(episode ?? '')} replace />;
   if (!ep) return <Navigate to="/cerita" replace />;
   return <SesiCerita key={ep.id} ep={ep} profilAwal={profil} />;

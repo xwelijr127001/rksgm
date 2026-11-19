@@ -16,8 +16,17 @@ import { t } from '../../../i18n';
 import { useKueri } from '../cangkang';
 import './pandu.css';
 
-export const KODE_PANDU = ['k02', 'k04', 'k05', 'k07', 'k08', 'k09', 'k10', 'k11', 'ksim'] as const;
-const PELATIH = new Set(['k05', 'k10', 'ksim']);
+export const KODE_PANDU = ['k02', 'k04', 'k05', 'k07', 'k08', 'k09', 'k10', 'k11', 'ksim', 'kdash'] as const;
+const PELATIH = new Set(['k05', 'k10', 'ksim', 'kdash']);
+/**
+ * T-065 (Episode 1 Dev): kartu cara main KHUSUS: isi sendiri, kunci 'sudah lihat' sendiri, dan menutup sendiri sesudah 5 detik (tamu
+ * tanpa pemandu). kdash = rekaman dashcam; ksim di episode auto-2-dev = kartu SIM ringkas (kunci terpisah dari Episode 1 lengkap,
+ * jadi tamu yang pernah main versi lengkap di perangkat yang sama tetap melihatnya). Kartu lain tidak berubah.
+ */
+const KARTU_KHUSUS = (kode: string, episode?: string): { kunci: string; isi: string } | null =>
+  kode === 'kdash' ? { kunci: 'kdash', isi: 'langkah.pelatih.isi.kdash' }
+    : kode === 'ksim' && episode === 'auto-2-dev' ? { kunci: 'ksimDev', isi: 'langkah.pelatih.isi.ksimDev' } : null;
+const TUTUP_SENDIRI_MD = 5000;
 const KUNCI_PELATIH = (k: string) => `raksa:pelatih:${k}`;
 const SASARAN_LEWAT = '.hp-tautan, .hp-arena-info, .hp-arena-kembali, [aria-pressed="true"], [aria-checked="true"], [disabled], .lgk-pelatih *, .hp-lembar-catatan, summary';
 
@@ -38,6 +47,8 @@ function bacaKini(kode: string, arena: HTMLElement, adaIsian: boolean): number {
   if (kode === 'k08') { const t = arena.querySelector('.hp-rambu')?.getAttribute('data-tahap'); const n = arena.querySelectorAll('.lk-tiang').length || 2; return t === 'putus' ? 2 : rambuDibaca(arena) >= n ? 1 : 0; }
   const kirim = [...arena.querySelectorAll<HTMLButtonElement>('[data-kirim], .hp-kirim-tombol, [data-lanjut-rambu]')].filter(tampak).at(-1);
   if (kode === 'ksim') { const l = arena.querySelector('.hp-sim')?.getAttribute('data-langkah'); return l === 'akhir' ? 2 : l && l !== 'meja' ? 1 : 0; }
+  // T-065: rekaman dashcam = putar (1) -> pilih penyebab (2) -> selesai (3).
+  if (kode === 'kdash') { const t = arena.querySelector('.hp-dashcam')?.getAttribute('data-tahap'); return t === 'selesai' ? 2 : t === 'pilih' ? 1 : 0; }
   if (kode === 'k11') { const l = arena.querySelector('.hp-bundel')?.getAttribute('data-langkah'); return l === 'kabar' ? 2 : l === 'tindakan' ? 1 : 0; }
   if (kirim && !kirim.disabled) return 2;
   return adaIsian ? 1 : 0;
@@ -77,13 +88,22 @@ function cariSasaran(kode: string, arena: HTMLElement, kini: number, disentuh: W
   return pertama('button', gulir);
 }
 
-export function PanduLangkah({ kode, arena, adaIsian, slotKepala }: { kode: string; arena: HTMLElement | null; adaIsian: boolean; slotKepala: HTMLElement | null }) {
+export function PanduLangkah({ kode, arena, adaIsian, slotKepala, episode }: { kode: string; arena: HTMLElement | null; adaIsian: boolean; slotKepala: HTMLElement | null; /** T-065: id episode (kartu cara main khusus Episode 1 Dev). */ episode?: string }) {
+  const khusus = KARTU_KHUSUS(kode, episode);
+  const kunciPelatih = khusus?.kunci ?? kode;
+  const adaKhusus = !!khusus;
   const [kini, setKini] = useState(0);
   const [petunjuk, setPetunjuk] = useState(1);
   const [pos, setPos] = useState<{ x: number; y: number; arah?: 'kiri' } | null>(null);
   const disentuh = useRef(new WeakSet<Element>()); const terakhir = useRef<Element | null>(null);
   const sasaranRef = useRef<HTMLElement | null>(null);
-  const [pelatih, setPelatih] = useState(() => PELATIH.has(kode) && !sudahLihatPelatih(kode));
+  const [pelatih, setPelatih] = useState(() => PELATIH.has(kode) && !sudahLihatPelatih(kunciPelatih));
+  // T-065: kartu khusus menutup sendiri sesudah 5 detik (dan dianggap sudah dilihat).
+  useEffect(() => {
+    if (!pelatih || !adaKhusus) return;
+    const id = window.setTimeout(() => { simpanPelatih(kunciPelatih); setPelatih(false); }, TUTUP_SENDIRI_MD);
+    return () => window.clearTimeout(id);
+  }, [pelatih, adaKhusus, kunciPelatih]);
   const idPelatih = useId();
   const okRef = useRef<HTMLButtonElement>(null);
   // Layar pendek: pita + petunjuk hanya untuk pembaca layar (pandu.css). Jangan masuk slot kepala: slot yang tidak kosong tampil dan
@@ -151,8 +171,8 @@ export function PanduLangkah({ kode, arena, adaIsian, slotKepala }: { kode: stri
       {arena && pelatih ? createPortal(
         <div className="lgk-pelatih" role="dialog" aria-modal="false" aria-labelledby={idPelatih}>
           <h3 id={idPelatih}>{t('langkah.pelatih.judul')}</h3>
-          <p>{t('langkah.pelatih.isi')}</p>
-          <button ref={okRef} type="button" className="primary-action" data-pelatih-ok="" onClick={() => { simpanPelatih(kode); setPelatih(false); }}>{t('langkah.pelatih.ok')}</button>
+          <p>{t(khusus?.isi ?? 'langkah.pelatih.isi')}</p>
+          <button ref={okRef} type="button" className="primary-action" data-pelatih-ok="" onClick={() => { simpanPelatih(kunciPelatih); setPelatih(false); }}>{t('langkah.pelatih.ok')}</button>
         </div>, arena) : null}
     </>
   );

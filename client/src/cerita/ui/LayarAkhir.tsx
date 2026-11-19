@@ -76,6 +76,8 @@ export function LayarAkhir({ ep, state, bahasa, namaPemain, tx, ditemukan, onUla
   usePasAkhir(kartuRef, satu, `${bahasa}|${k?.akhir ?? ''}|${k?.aturan ?? ''}|${slotAksi ? 1 : 0}`);
   // Keluar dari cangkang (layar diputar / dilebarkan) = lembar ditutup bersama bentuk satu layarnya.
   useEffect(() => { if (!satu) setLembar(null); }, [satu]);
+  // T-064: Episode 1 Dev = short walk-up ending (opt-in; every other episode keeps the card below).
+  if (ep.tampilan?.akhirKenalan) return <AkhirKenalan ep={ep} state={state} tx={tx} slotAksi={slotAksi} />;
   if (!k || !info) return null;
 
   const nasabah = ep.pemeran[ep.nasabah];
@@ -360,5 +362,54 @@ function IkonUlang() {
     <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true" focusable="false">
       <path d="M7 9.5a6 6 0 1 1-.8 6M7 4.5v5h5" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" />
     </svg>
+  );
+}
+
+/**
+ * T-064 Episode 1 Dev (`Episode.tampilan.akhirKenalan`): akhir SINGKAT untuk tamu acara (~30 detik). Suasana akhir Pak Hendra +
+ * kalimat terakhirnya, "Ini kasus nyata yang pernah Raksa tangani.", nama OPSIONAL (maks. 24 huruf, kosong = "Tamu") yang langsung
+ * mengisi kartu petugas (T-052) untuk ditangkap layar, lalu dua tombol: versi lengkap (/cerita/auto-2) dan raksaonline.com (tab
+ * baru). Tanpa ringkasan keputusan, tanpa "coba lagi dari bagian". Aksi di bilah tersemat cangkang HP bila ada (slotAksi).
+ */
+function AkhirKenalan({ ep, state, tx, slotAksi }: { ep: Episode; state: StateCerita; tx: (k: KunciTeks) => string; slotAksi: HTMLElement | null }) {
+  const [nama, setNama] = useState('');
+  const idJudul = useId();
+  const idNama = useId();
+  const akhir = state.akhir;
+  const info = akhir ? ep.akhir[akhir] : undefined;
+  if (!akhir || !info) return null;
+  const suasana = [...ep.suasana].sort((a, b) => b.min - a.min).find((s) => state.kepercayaan >= s.min) ?? ep.suasana[ep.suasana.length - 1];
+  const nasabah = ep.pemeran[ep.nasabah];
+  const tampilNama = nama.trim().slice(0, 24) || tx('kenalan.namaBawaan');
+  const aksi = (
+    <div className="akh-aksi akh-kenalan-aksi" data-tersemat={slotAksi ? '' : undefined}>
+      <Link className="primary-action akh-utama" to="/cerita/auto-2" data-ukur="aksi-utama"><span>{tx('kenalan.lengkap')}</span><Arrow /></Link>
+      <a className="akh-kedua" href="https://www.raksaonline.com/" target="_blank" rel="noopener noreferrer" data-ukur="aksi-kedua">
+        {tx('kenalan.raksa')}<span className="sr-only"> {tx('kenalan.tabBaru')}</span>
+      </a>
+    </div>
+  );
+  return (
+    <section className="akh-kenalan" data-akhir={akhir} aria-labelledby={idJudul}>
+      <div className="akh-kenalan-kepala">
+        <PotretPikselHp tokoh="hendra" ekspresi={suasana?.ekspresi ?? 'netral'} ukuran={56} label="" />
+        <div>
+          {suasana ? <p className="akh-kenalan-suasana">{tx('kenalan.suasana').replace('{suasana}', tx(suasana.label))}</p> : null}
+          <h2 id={idJudul} tabIndex={-1}>{tx(info.judul)}</h2>
+        </div>
+      </div>
+      <p className="akh-kenalan-kutip"><b>{nasabah ? tx(nasabah.nama) : ''}</b>{selaPembicara()}{tx(`akhir.${akhir}.1`)}</p>
+      <p className="akh-kenalan-nyata">
+        {TOKOH.missRaksa.aktif ? <span aria-hidden="true"><PotretMissRaksa ekspresi="tersenyum" ukuran={32} /></span> : null}
+        <b>{tx('kenalan.nyata')}</b>
+      </p>
+      <div className="akh-kenalan-kartu">
+        <label htmlFor={idNama}>{tx('kenalan.namaLabel')}</label>
+        <input id={idNama} type="text" maxLength={24} autoComplete="nickname" enterKeyHint="done" value={nama} placeholder={tx('kenalan.namaBawaan')} onChange={(e) => setNama(e.currentTarget.value)} />
+        <KartuPetugas nama={tampilNama} />
+        <small>{tx('kenalan.kartu')}</small>
+      </div>
+      {slotAksi ? createPortal(aksi, slotAksi) : aksi}
+    </section>
   );
 }

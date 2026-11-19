@@ -8,7 +8,9 @@ const serverTarget = process.env.VITE_SERVER_URL || 'http://localhost:4000';
 // Episode cerita yang dikeluarkan dari build (mis. VITE_CERITA_TANPA=auto-2 untuk deployment lomba yang memakai kasus yang
 // sama di room resmi): impor './<id>/episode' di registri diganti rintisan null, jadi naskah, kunci, arena, dan seni
 // kasusnya (semua diimpor dari modul episode) tidak dibundel.
-const episodeTanpa = (process.env.VITE_CERITA_TANPA || '').split(',').map((s) => s.trim()).filter((s) => /^[a-z0-9-]+$/.test(s));
+const episodeTanpaMentah = (process.env.VITE_CERITA_TANPA || '').split(',').map((s) => s.trim()).filter((s) => /^[a-z0-9-]+$/.test(s));
+// T-064: Episode 1 Dev (auto-2-dev) memakai ulang isi auto-2: mengeluarkan auto-2 ikut mengeluarkan auto-2-dev.
+const episodeTanpa = [...new Set([...episodeTanpaMentah, ...(episodeTanpaMentah.includes('auto-2') ? ['auto-2-dev'] : [])])];
 
 export default defineConfig({
   // Hosting under a path prefix behind a reverse proxy (docs/prd-v02/HOSTING.md), e.g. VITE_BASE_PATH=/game/.

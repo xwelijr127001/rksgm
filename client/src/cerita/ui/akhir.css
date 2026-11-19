@@ -444,3 +444,22 @@
 .akh-kp-teks { display: flex; flex-direction: column; min-width: 0; }
 .akh-kp-teks b { font-size: 10px; line-height: 12px; font-weight: 800; color: #212121; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .akh-kp-teks small { font-size: 8px; line-height: 10px; color: #5f5f5f; overflow-wrap: anywhere; }
+
+/* T-064 Episode 1 Dev: short walk-up ending (AkhirKenalan in LayarAkhir.tsx). Body 18 px, labels >= 14 px, targets >= 48 px.
+   Fit at 360x640 by calculation: header 56 + head row 60 + quote 3 x 26 + real-case line 34 + name + card block 168 + gaps 48
+   = 444, + pinned action bar ~124 = 568. */
+.akh-kenalan { display: grid; gap: 12px; padding: 12px 16px 16px; font-size: 18px; line-height: 1.45; color: #212121; }
+.akh-kenalan-kepala { display: flex; align-items: center; gap: 12px; }
+.akh-kenalan-kepala h2 { margin: 0; font-size: 22px; line-height: 1.25; }
+.akh-kenalan-kepala h2:focus { outline: none; }
+.akh-kenalan-suasana { margin: 0 0 2px; font-size: 14px; font-weight: 800; color: #9a4f00; }
+.akh-kenalan-kutip { margin: 0; padding: 10px 12px; background: #ffffff; box-shadow: inset 0 0 0 2px #ecd5cb; }
+.akh-kenalan-kutip b { color: #7a3e00; }
+.akh-kenalan-nyata { display: flex; align-items: center; gap: 10px; margin: 0; }
+.akh-kenalan-kartu { display: grid; justify-items: start; gap: 6px; padding: 10px 12px 12px; background: #fff1e2; box-shadow: inset 0 0 0 2px #ff9000; }
+.akh-kenalan-kartu label { font-size: 15px; font-weight: 700; }
+.akh-kenalan-kartu input { box-sizing: border-box; width: 100%; min-height: 48px; padding: 8px 12px; border: 2px solid #212121; border-radius: 0; background: #ffffff; font: inherit; font-size: 18px; color: #212121; }
+.akh-kenalan-kartu input:focus-visible { outline: 3px solid #1d6fd1; outline-offset: 2px; }
+.akh-kenalan-kartu small { font-size: 14px; color: #5f5f5f; }
+.akh-kenalan-aksi :is(.akh-utama, .akh-kedua) { min-height: 48px; font-size: 18px; }
+.akh-kenalan-aksi .akh-kedua { display: inline-flex; align-items: center; justify-content: center; text-decoration: none; }

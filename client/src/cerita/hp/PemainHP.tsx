@@ -267,7 +267,7 @@ function PemainHPInti({ ep, state, kendali, profil, bahasa, tx: txAsli }: {
   const akhirSatu = tampilan === 'akhir' && cangkangLayar && !!ep.titik?.length;
 
   return (
-    <div className="player-ui cer-layar hp-layar" data-kunci={kunciLayar ? '' : undefined} data-tampilan={tampilan} data-akhir-satu={akhirSatu ? '' : undefined} data-balas-terbuka={balasTerbuka ? '' : undefined}>
+    <div className="player-ui cer-layar hp-layar" data-teks-besar={ep.tampilan?.teksBesar ? '' : undefined} data-kunci={kunciLayar ? '' : undefined} data-tampilan={tampilan} data-akhir-satu={akhirSatu ? '' : undefined} data-balas-terbuka={balasTerbuka ? '' : undefined}>
       <header className="hp-kepala">
         <Link className="hp-kembali" to="/cerita" aria-label={t('cerita.kembaliDaftar')}><Arrow back /></Link>
         <div className="hp-judul">

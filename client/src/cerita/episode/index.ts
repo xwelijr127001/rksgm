@@ -10,8 +10,10 @@
 import type { Episode } from '../tipe';
 import { EPISODE_AUTO_1 } from './auto-1/episode';
 import { EPISODE_AUTO_2 } from './auto-2/episode';
+// T-064: Episode 1 Dev (potongan 5 menit auto-2; rute pendek /cerita/kenalan).
+import { EPISODE_AUTO_2_DEV } from './auto-2-dev/episode';
 
-export const DAFTAR_EPISODE: Episode[] = [EPISODE_AUTO_1, EPISODE_AUTO_2].filter((e): e is Episode => e !== null);
+export const DAFTAR_EPISODE: Episode[] = [EPISODE_AUTO_1, EPISODE_AUTO_2, EPISODE_AUTO_2_DEV].filter((e): e is Episode => e !== null);
 
 export function cariEpisode(id: string | undefined): Episode | null {
   return DAFTAR_EPISODE.find((e) => e.id === id) ?? null;

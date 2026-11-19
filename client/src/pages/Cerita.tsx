@@ -59,6 +59,8 @@ export default function Cerita() {
   // T-037: hanya kasus nyata yang bisa dimainkan; demo (auto-1) hanya untuk uji internal (RAKSA_DEMO_CERITA=on). Id episode,
   // rute /cerita/auto-1 dan progres tersimpan tidak berubah.
   const nyata = cariEpisode('auto-2');
+  // T-064: Episode 1 Dev (5-minute walk-up cut of the same case) is offered first; the full Episode 1 card is unchanged.
+  const dev = cariEpisode('auto-2-dev');
   const demo = cfg.status === 'ready' && cfg.config.demoCerita ? cariEpisode('auto-1') : null;
   const kartu = (ep: Episode) => (
     <KartuEpisode
@@ -93,6 +95,7 @@ export default function Cerita() {
         </header>
 
         <ul className="cer-hub-daftar" aria-label={t('cerita.daftarEpisodeAria')}>
+          {dev ? kartu(dev) : null}
           {nyata ? kartu(nyata) : null}
           <BarisSegera />
           {demo ? kartu(demo) : null}
@@ -318,9 +321,11 @@ function KartuEpisode({ ep, bahasa, nama, onMainLagi }: { ep: Episode; bahasa: B
         <div className="cer-ep-teks">
           {/* T-037 Fix 1 (D-341): chip jenis di BARIS SENDIRI di atas baris meta (meta tidak lagi terpotong di HP). */}
           {ep.jenis ? <span className="cer-ep-jenis" data-jenis={ep.jenis} title={ketJenis} aria-description={ketJenis}>{t(`cerita.jenis.${ep.jenis}`)}</span> : null}
+          {/* T-064: Episode 1 Dev = "5 menit" chip next to the type chip. */}
+          {ep.tampilan?.akhirKenalan ? <span className="cer-ep-jenis cer-ep-cepat" data-jenis="cepat">{t('cerita.durasi', { n: ep.durasiMenit })}</span> : null}
         <p className="cer-ep-meta">
           {/* Kasus nyata = Episode 1; demo tanpa nomor. */}
-          <span>{ep.jenis === 'demo' ? t('cerita.labelDemo') : t('cerita.episodeKe', { n: 1 })}</span>
+          <span>{ep.jenis === 'demo' ? t('cerita.labelDemo') : ep.tampilan?.akhirKenalan ? tx('dev.label') : t('cerita.episodeKe', { n: 1 })}</span>
           <span aria-hidden="true">·</span>
           <span>{t(`cerita.produk.${ep.produk}`)}</span>
           <span aria-hidden="true">·</span>
