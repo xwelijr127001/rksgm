@@ -1,12 +1,12 @@
 /**
  * T-065 (Episode 1 Dev "Kenalan Raksa", plan Task 2): POLA DASHCAM "Rekaman dashcam". Pengganti pertanyaan lajur di Episode 1 Dev.
- * T-067 (pilihan pemilik): tampilan CODEX (character/dashcam-codex/draw.cjs, dibangun ulang di character/dashcam-t065/bangun.mjs):
- * jalan tol tampak atas 320 x 240, bahu hijau + pembatas jingga-putih, dua rambu (merah: truk & trailer dilarang di lajur 3 dan 4;
- * biru: truk & bus gunakan lajur kiri), nomor lajur 1-4, truk putih kecil berhenti di bahu dengan pekerja berlutut mengganti ban.
+ * T-069 (pemilik memilih gaya Claude Designer, campuran): GAYA T-065 (sudut kamera + lencana REKAM, jalan K08, bahu abu-hijau,
+ * pembatas & sprite kendaraan T-065) DITAMBAH dua rambu di bahu kiri (merah: truk & trailer dilarang di lajur 3 dan 4; biru: truk &
+ * bus gunakan lajur kiri) dan nomor lajur 1-4, digambar dengan gaya yang sama (character/dashcam-t065/bangun-t069.mjs). Adegan 336 x 240.
  * Rekaman ~6 detik:
- *   0.0-0.9 s  truk di lajur 2, mobil gelap di lajur 3;
- *   0.9-3.5 s  mobil berbelok dari lajur 3 ke lajur 2 tepat di depan truk (terbaca dalam gerakan);
- *   2.4-4.5 s  truk membanting setir ke kiri, menabrak pembatas dan truk kecil; debu + jejak rem;
+ *   0.0-0.9 s  truk lurus di lajur 2, mobil biru di lajur 3, truk kecil berhenti di lajur 1 dekat pembatas (lampu hazard);
+ *   0.9-3.3 s  mobil berbelok dari lajur 3 ke lajur 2 tepat di depan truk (terbaca dalam gerakan);
+ *   3.3-4.5 s  truk membanting setir ke kiri, menabrak pembatas dan truk kecil; serpihan, debu, jejak rem;
  *   4.5-6.0 s  bingkai beku.
  * Lalu "Ketuk kendaraan yang memicu kejadian." Tiga sasaran ketuk (>= 48 px, cincin piksel saat fokus) baru aktif di bingkai beku;
  * ketukan selama rekaman berjalan diabaikan (tombolnya belum ada). "Putar lagi" selalu bisa. Gerak dikurangi: tiga bingkai diam
@@ -24,12 +24,12 @@ import { useReducedMotion } from '../../../hooks';
 import { t } from '../../../i18n';
 import '../../seni/aktivitas/piksel.css';
 import latar from '../../seni/aktivitas/dashcam/latar.png';
-import truk0 from '../../seni/aktivitas/dashcam/truk-0.png';
-import trukM14 from '../../seni/aktivitas/dashcam/truk-m14.png';
-import trukM36 from '../../seni/aktivitas/dashcam/truk-m36.png';
-import mobil0 from '../../seni/aktivitas/dashcam/mobil-0.png';
-import mobilM36 from '../../seni/aktivitas/dashcam/mobil-m36.png';
-import mobilP4 from '../../seni/aktivitas/dashcam/mobil-p4.png';
+import trukAtas from '../../seni/aktivitas/jalan/truk-atas.png';
+import trukMiring from '../../seni/aktivitas/dashcam/truk-miring.png';
+import mobilAtas from '../../seni/aktivitas/dashcam/mobil-atas.png';
+import trukKecilNyala from '../../seni/aktivitas/dashcam/truk-kecil-atas-nyala.png';
+import trukKecilMati from '../../seni/aktivitas/dashcam/truk-kecil-atas-mati.png';
+import serpih from '../../seni/aktivitas/dashcam/serpih.png';
 import jejak from '../../seni/aktivitas/dashcam/jejak.png';
 import debu from '../../seni/aktivitas/dashcam/debu.png';
 import SPRITE from '../../seni/aktivitas/dashcam/sprite.json';
@@ -49,28 +49,38 @@ type Tahap = 'putar' | 'pilih' | 'selesai';
 const LAMA = 6000;
 
 /**
- * T-067 (tampilan Codex, pilihan pemilik): adegan 320 x 240 (1 piksel seni = 1 px CSS) di tengah area, x0 = var(--x0). Pusat
- * kendaraan per bingkai = character/dashcam-codex/draw.cjs: truk (186,177,0) -> (176,162,-14) -> (118,130,-36); mobil (236,133,0) ->
- * (204,105,-36) -> (178,33,+4). Sprite = PNG berputar piksel (bayangan ikut), pusatnya di (ox, oy) dalam PNG (sprite.json).
+ * T-069: adegan 336 x 240 (1 piksel seni = 1 px CSS) di tengah area, x0 = var(--x0). Jalan x 57..335 (bahu 7 + empat lajur 66):
+ * lajur n = 64 + (n - 1) * 66. Posisi kiri-atas per bingkai (1 / 2 / 3 = gerak dikurangi; 3 = bingkai beku):
+ *   truk   (143,100) lurus di lajur 2 -> sama -> sprite miring (91,78) di pembatas
+ *   mobil  (216,34) lajur 3 -> (150,10) lajur 2 di depan truk -> (150,2)
+ * Rekaman berjalan = pose 1 digerakkan CSS (dashcam.css), lalu diganti pose 3 pada 76 %.
  */
-type Pose = keyof typeof SPRITE & ('truk-0' | 'truk-m14' | 'truk-m36' | 'mobil-0' | 'mobil-m36' | 'mobil-p4');
-const SRC: Record<Pose, string> = { 'truk-0': truk0, 'truk-m14': trukM14, 'truk-m36': trukM36, 'mobil-0': mobil0, 'mobil-m36': mobilM36, 'mobil-p4': mobilP4 };
-const POSE: Record<'truk' | 'mobil', [Pose, number, number][]> = {
-  truk: [['truk-0', 186, 177], ['truk-m14', 176, 162], ['truk-m36', 118, 130]],
-  mobil: [['mobil-0', 236, 133], ['mobil-m36', 204, 105], ['mobil-p4', 178, 33]],
+type Pose = { src: string; x: number; y: number; w: number; h: number };
+const POSE: Record<'truk' | 'mobil', Pose[]> = {
+  truk: [
+    { src: trukAtas, x: 143, y: 100, w: 40, h: 124 },
+    { src: trukAtas, x: 143, y: 100, w: 40, h: 124 },
+    { src: trukMiring, x: 91, y: 78, w: 75, h: 133 },
+  ],
+  mobil: [
+    { src: mobilAtas, x: 216, y: 34, w: 26, h: 44 },
+    { src: mobilAtas, x: 150, y: 10, w: 26, h: 44 },
+    { src: mobilAtas, x: 150, y: 2, w: 26, h: 44 },
+  ],
 };
-/** Gaya posisi sprite: kiri-atas = pusat - (ox, oy); titik putar CSS (animasi) = pusat kendaraan. */
-function posisi(pose: Pose, cx: number, cy: number): CSSProperties {
-  const sp = SPRITE[pose];
-  return { left: `calc(var(--x0) + ${cx - sp.ox}px)`, top: cy - sp.oy, width: sp.w, height: sp.h, transformOrigin: `${sp.ox}px ${sp.oy}px` };
+/** Gaya posisi: kiri-atas dari tepi kiri adegan (var --x0); titik putar CSS = pusat gambar. */
+function posisi(p: { x: number; y: number; w: number; h: number }): CSSProperties {
+  return { left: `calc(var(--x0) + ${p.x}px)`, top: p.y, width: p.w, height: p.h, transformOrigin: '50% 50%' };
 }
 
-/** Sasaran ketuk di bingkai beku (bingkai 3): px dari tepi kiri adegan 320 (var --x0) dan dari atas. */
+/** Sasaran ketuk di bingkai beku (bingkai 3): px dari tepi kiri adegan 336 (var --x0) dan dari atas. */
 const SASARAN: Record<IdKendaraan, CSSProperties> = {
-  mobil: { left: 'calc(var(--x0) + 154px)', top: 6, width: 48, height: 56 },
-  'truk-kecil': { left: 'calc(var(--x0) + 75px)', top: 20, width: 48, height: 58 },
-  truk: { left: 'calc(var(--x0) + 86px)', top: 86, width: 70, height: 90 },
+  mobil: { left: 'calc(var(--x0) + 139px)', top: 0, width: 48, height: 52 },
+  'truk-kecil': { left: 'calc(var(--x0) + 57px)', top: 18, width: 48, height: 66 },
+  truk: { left: 'calc(var(--x0) + 97px)', top: 96, width: 68, height: 112 },
 };
+/** Lajur 1-4: pusat x di adegan 336 (nomor lajur di pita K08). */
+const PUSAT_LAJUR = [97, 163, 229, 295];
 
 export function ArenaPolaDashcam({ ep, konfig, jawaban, ubah, tx, labelKirim, onKirim }: PropsPola & { konfig: KonfigDashcam }) {
   const kurang = useReducedMotion();
@@ -156,15 +166,15 @@ export function ArenaPolaDashcam({ ep, konfig, jawaban, ubah, tx, labelKirim, on
         <div className="dc-isi" key={putaran}>
           {/* T-067: latar Codex (bahu hijau, pembatas jingga-putih, dua rambu, aspal, nomor lajur, truk kecil + pekerja ganti ban) */}
           <span className="dc-latar" aria-hidden="true" />
-          {/* lampu hazard truk kecil (berkedip saat rekaman berjalan) */}
-          <span className="dc-hazard" aria-hidden="true" style={{ left: 'calc(var(--x0) + 85px)' }} />
-          <span className="dc-hazard" aria-hidden="true" style={{ left: 'calc(var(--x0) + 110px)' }} />
+          {/* truk kecil berhenti di lajur 1 dekat pembatas, lampu hazard (berkedip saat rekaman berjalan) */}
+          <span className="dc-truk-kecil" aria-hidden="true" style={{ left: 'calc(var(--x0) + 65px)', '--nyala': `url(${trukKecilNyala})`, '--mati': `url(${trukKecilMati})` } as CSSProperties} />
           <img className="dc-jejak" src={jejak} alt="" aria-hidden="true" style={{ left: `calc(var(--x0) + ${SPRITE.jejak.x}px)`, top: SPRITE.jejak.y, width: SPRITE.jejak.w, height: SPRITE.jejak.h }} />
           {/* animasi: pose 0 bergerak (CSS) lalu diganti pose piksel beku; gerak dikurangi: pose bingkai 1 / 2 / 3 */}
-          {(['truk', 'mobil'] as const).map((k) => POSE[k].map(([pose, cx, cy], i) => (
-            <img key={pose} className={`dc-kend dc-${k} dc-pose-${i + 1}`} src={SRC[pose]} alt="" aria-hidden="true" style={posisi(pose, cx, cy)}
+          {(['truk', 'mobil'] as const).map((k) => POSE[k].map((p, i) => (
+            <img key={`${k}${i}`} className={`dc-kend dc-${k} dc-pose-${i + 1}`} src={p.src} alt="" aria-hidden="true" style={posisi(p)}
               onAnimationEnd={k === 'truk' && i === 0 ? (e) => { if (e.animationName.includes('dc-truk')) akhirRekaman(); } : undefined} />
           )))}
+          <img className="dc-serpih" src={serpih} alt="" aria-hidden="true" style={{ left: 'calc(var(--x0) + 87px)', top: 74, width: 22, height: 14 }} />
           <img className="dc-debu" src={debu} alt="" aria-hidden="true" style={{ left: `calc(var(--x0) + ${SPRITE.debu.x}px)`, top: SPRITE.debu.y, width: SPRITE.debu.w, height: SPRITE.debu.h }} />
           {/* bingkai kamera: sudut, REKAM */}
           <span className="dc-sudut" aria-hidden="true" />
@@ -174,7 +184,6 @@ export function ArenaPolaDashcam({ ep, konfig, jawaban, ubah, tx, labelKirim, on
               data-keadaan={diketuk === id ? (id === konfig.tepat ? 'tepat' : 'ragu') : undefined} disabled={tahap === 'selesai'} onClick={() => ketuk(id)} />
           )) : null}
         </div>
-        {bingkai > 0 && main ? <figcaption className="dc-keterangan">{t('dashcam.bingkai', { n: bingkai })}: {t(`dashcam.bingkai.${bingkai}`)}</figcaption> : null}
         {/* T-067: tombol di dalam adegan: kanan atas selama rekaman / bingkai 1-2, kanan bawah di bingkai beku (dashcam.css) */}
         <div className="dc-kendali">
         <button ref={putarRef} type="button" className="dc-tombol dc-putar" data-putar="" disabled={fase === 'rekaman' && tahap === 'selesai'} data-sorot={pesan?.jenis === 'ragu' ? '' : undefined} onClick={putarLagi}>
@@ -185,6 +194,8 @@ export function ArenaPolaDashcam({ ep, konfig, jawaban, ubah, tx, labelKirim, on
         ) : null}
         </div>
       </figure>
+      {/* T-069: keterangan bingkai diam (gerak dikurangi) DI BAWAH adegan: tidak menutupi mobil, rambu, atau tombol */}
+      {bingkai > 0 && main ? <p className="dc-keterangan">{t('dashcam.bingkai', { n: bingkai })}: {t(`dashcam.bingkai.${bingkai}`)}</p> : null}
       {/* T-067: tulisan dua rambu dalam bahasa aktif (di rambu piksel tetap bahasa Indonesia, 5 px: dibaca di sini) */}
       <ul className="dc-rambu" aria-label={t('dashcam.rambu.judul')}>
         <li data-rambu="merah">{t('dashcam.rambu.1')}</li>
@@ -208,10 +219,11 @@ export function ArenaPolaDashcam({ ep, konfig, jawaban, ubah, tx, labelKirim, on
             <figure className="dc-pita" aria-label={t('dashcam.judul')} style={{ '--latar': `url(${latar})` } as CSSProperties}>
               <div className="dc-pita-isi">
                 <span className="dc-latar" aria-hidden="true" />
-                {(['truk', 'mobil'] as const).map((k) => { const [pose, cx, cy] = POSE[k][0]; return <img key={pose} className="dc-pita-kend" src={SRC[pose]} alt="" aria-hidden="true" style={posisi(pose, cx, cy)} />; })}
+                <span className="dc-truk-kecil" aria-hidden="true" style={{ left: 65, '--nyala': `url(${trukKecilNyala})`, '--mati': `url(${trukKecilMati})` } as CSSProperties} />
+                {(['truk', 'mobil'] as const).map((k) => <img key={k} className="dc-pita-kend" src={POSE[k][0]!.src} alt="" aria-hidden="true" style={posisi(POSE[k][0]!)} />)}
               </div>
               {/* nomor lajur 1-4 terbaca (14 px) di pusat tiap lajur: angka piksel di latar hanya 2,5 px pada skala 1/2 */}
-              {[1, 2, 3, 4].map((n) => <span key={n} className="dc-pita-lajur" aria-hidden="true" style={{ left: 68 + (n - 1) * 24.5 }}>{n}</span>)}
+              {PUSAT_LAJUR.map((x, i) => <span key={i} className="dc-pita-lajur" aria-hidden="true" style={{ left: x / 2 }}>{i + 1}</span>)}
             </figure>
             <div className="dc-pita-kanan">
               <p className="dc-tanya-ringkas"><span className="dc-ucap-potret" aria-hidden="true"><PotretHp ep={ep} id={simpul.penanya} nama="" /></span><b>{penanya}</b> {tx(simpul.tanya)}</p>
