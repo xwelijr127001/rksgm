@@ -388,6 +388,10 @@ export const TEKS_AUTO_2_ID: Record<string, string> = {
   'akt.rambu.petunjuk.lajur': 'Ketuk lajur untuk menandai; ketuk lagi untuk membatalkan.',
   'akt.rambu.kirim': 'Sampaikan ke Pak Bima',
   'akt.rambu.wadah.tanda': 'Ditandai',
+  // T-068: K08 = rekaman dashcam + kesimpulan (langkah rekaman tidak dinilai)
+  'akt.rambu.item.rekaman': 'Rekaman dashcam',
+  'akt.rambu.wadah.bersih': 'Penyebab ditemukan langsung',
+  'akt.rambu.wadah.ragu': 'Penyebab ditemukan sesudah melihat ulang',
   'akt.rambu.item.r1l1': 'Lajur 1 untuk Rambu 1',
   'akt.rambu.item.r1l2': 'Lajur 2 untuk Rambu 1',
   'akt.rambu.item.r1l3': 'Lajur 3 untuk Rambu 1',

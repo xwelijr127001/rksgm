@@ -13,9 +13,7 @@ import {
   kartuKontak, mapTertutup, mapTerbuka, mejaKayu, kartuPemeriksaan,
 } from '../../seni/auto-2/benda';
 import type { IdAktivitas, KonfigArena, KunciTeks, LampiranCerita, SeniArena } from '../../tipe';
-import { lajurTertulisRambu1 } from '../../lokasi/logika';
 import { daftarNama, gabungKalimat } from '../../hp/arena/rambu';
-import { JUMLAH_LAJUR, LAJUR_TRUK } from '../../lokasi/seni/geometri';
 
 const seni = (svg: string, w: number, h: number): SeniArena => ({ svg, w, h });
 const piksel = (kelas: string, w: number, h: number): SeniArena => ({ svg: '', w, h, piksel: kelas });
@@ -214,18 +212,14 @@ export const ARENA_AUTO_2: Record<IdAktivitas, KonfigArena> = {
       statusAwal: 'meja.status.awal',
     },
   },
-  // K08: periksa dua rambu di jalan, tandai lajur sendiri, simpulkan. Tulisan rambu 1 dibaca dari teks naskah (lajur yang disebutnya).
+  // K08 (T-068, pemilik: "ganti adegan truk di versi lengkap dengan yang ini"): REKAMAN DASHCAM tampilan Codex (sama dengan kdash
+  // Episode 1 Dev) lalu, di bingkai beku yang sama (dua rambu & nomor lajur terlihat), pertanyaan Babak 8 Pak Bima dengan lima
+  // kesimpulan naskah (k08.*). Langkah rekaman tidak dinilai (kunci kosong); cabang & skor hanya dari kesimpulan (akt:rambu:pilih:<alt>).
+  // Kisi tandai-lajur lama (pola 'rambu') tidak dipakai lagi di K08. Urutan pilihan = urutan naskah k08 (c, e, a, d, b).
   rambu: {
-    pola: 'rambu', tanya: 'k08.tanya', jumlahLajur: JUMLAH_LAJUR, lajurTruk: LAJUR_TRUK,
-    rambu: [
-      { langkah: 'r1', wadah: 'tanda', awalanItem: 'r1l', label: 'dok.rambu.1', isi: 'dok.rambu.1.isi', petunjuk: 'arena.rambu.petunjuk1', tulisan: lajurTertulisRambu1() },
-      { langkah: 'r2', wadah: 'tanda', awalanItem: 'r2l', label: 'dok.rambu.2', isi: 'dok.rambu.2.isi', petunjuk: 'arena.rambu.petunjuk2' },
-    ],
-    // Urutan tampil = urutan naskah k08 (c, e, a, d, b). Sikap hanya untuk "melanggar?" (a) dan "tidak melanggar" (c).
-    simpul: {
-      langkah: 'simpul', tanya: 'k08.tanya', sikap: { a: 'melanggar', c: 'tidak' },
-      pilihan: ['c', 'e', 'a', 'd', 'b'].map((id) => ({ id, label: `k08.${id}` })),
-    },
+    pola: 'dashcam', tanya: 'k08.tanya', langkah: 'dashcam', item: 'rekaman',
+    benda: [{ id: 'truk' }, { id: 'mobil' }, { id: 'truk-kecil' }], tepat: 'mobil', bersih: 'bersih', ragu: 'ragu',
+    simpul: { langkah: 'simpul', tanya: 'k08.2', judul: 'k08.tanya', penanya: 'bima', pilihan: ['c', 'e', 'a', 'd', 'b'].map((id) => ({ id, label: `k08.${id}` })) },
   },
   tutup: {
     pola: 'pesan', langkah: 'pesan', masuk: 'masuk', tidak: 'tidak', tanya: 'arena.tutup.tanya',

@@ -73,20 +73,6 @@ function susun(id: IdAktivitas, stepId: string, item: readonly (readonly [string
   });
 }
 
-/** Langkah assign "tandai lajur" untuk satu rambu: empat lajur (item) ke satu wadah "ditandai". */
-function tandaLajur(rambu: 'r1' | 'r2') {
-  return (tx: (k: KunciTeks) => string): StepDef => ({
-    kind: 'assign',
-    id: rambu,
-    prompt: tx(`akt.rambu.tanya.${rambu}`),
-    hint: tx('akt.rambu.petunjuk.lajur'),
-    presentation: 'match',
-    weight: 1,
-    items: [1, 2, 3, 4].map((n) => ({ id: `${rambu}l${n}`, label: tx(`akt.rambu.item.${rambu}l${n}`), icon: 'lokasi' as IconKey })),
-    buckets: [{ id: 'tanda', label: tx('akt.rambu.wadah.tanda'), icon: 'cek' as IconKey }],
-  });
-}
-
 const RANCANGAN: Rancangan[] = [
   // K02: delapan dokumen ke tiga baki.
   {
@@ -141,23 +127,20 @@ const RANCANGAN: Rancangan[] = [
     langkah: (tx) => [susun('sim', 'sim', [['periksa', 'dokumen']], [['bersih', 'cek'], ['ragu', 'jam']], 'match')(tx)],
     kunci: [{ stepId: 'sim', weight: 1, explanation: '', assign: { periksa: 'bersih' } }],
   },
-  // K08: tandai lajur untuk dua rambu, lalu kesimpulan (satu dari lima kalimat naskah). Kunci rambu 1 = lajur yang disebut
-  // tulisannya (hanya untuk ketepatan sesaat); tafsir rambu 2 ("lajur kiri") BELUM dikonfirmasi, jadi tanpa kunci. Hasil cabang
-  // hanya dari kesimpulan (akt:rambu:pilih:<alt>); tanda lajur dibaca tanggapan tokoh dan ringkasan.
+  // K08 (T-068): rekaman dashcam (satu item ke 'bersih' / 'ragu': siapa pemicu kejadian, TIDAK dinilai, kunci kosong) lalu kesimpulan
+  // Babak 8 (satu dari lima kalimat naskah). Hasil cabang hanya dari kesimpulan (akt:rambu:pilih:<alt>), skor tidak berubah.
   {
     id: 'rambu',
     titik: 'k08',
     langkah: (tx) => [
-      tandaLajur('r1')(tx),
-      tandaLajur('r2')(tx),
+      susun('rambu', 'dashcam', [['rekaman', 'kamera']], [['bersih', 'cek'], ['ragu', 'jam']], 'match')(tx),
       {
         kind: 'single', id: 'simpul', prompt: tx('akt.rambu.tanya'), hint: tx('akt.rambu.petunjuk'), presentation: 'cards', weight: 1,
         options: (['c', 'e', 'a', 'd', 'b'] as const).map((o) => ({ id: o, label: tx(`k08.${o}`), icon: 'dokumen' as IconKey })),
       },
     ],
     kunci: [
-      { stepId: 'r1', weight: 1, explanation: '', assign: { r1l3: 'tanda', r1l4: 'tanda' } },
-      { stepId: 'r2', weight: 1, explanation: '', assign: {} },
+      { stepId: 'dashcam', weight: 1, explanation: '', assign: {} },
       { stepId: 'simpul', weight: 1, explanation: '', single: 'c' },
     ],
   },

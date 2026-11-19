@@ -403,7 +403,8 @@ const NODE: NodeCerita[] = [
     },
     lanjut: 'k08',
   }),
-  // K08 = aktivitas arena 'rambu' (periksa rambu -> tandai lajur -> kesimpulan); id node & alternatif tetap, kesimpulan = alternatif.
+  // K08 = aktivitas 'rambu'. T-068 (pemilik): arena = rekaman dashcam tampilan Codex (ketuk penyebab, tidak dinilai) lalu pertanyaan
+  // Pak Bima di bingkai beku yang sama dengan lima kesimpulan naskah; id node, alternatif a-e, skor, dan catat tetap (kesimpulan = alternatif).
   ...titikAktivitas({
     id: 'k08', bab: 'b3', aktivitas: 'rambu',
     tata: { lokasi: 'tol', hadir: ['bima'], telepon: null, objek: [] },

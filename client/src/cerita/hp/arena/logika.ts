@@ -60,7 +60,7 @@ export function sisaArena(k: KonfigArena, j: MissionAnswer): number {
     }
     case 'rambu': return sisaRambu(k, j);
     case 'sim': return petaLangkah(j, k.langkah)[k.benda] ? 0 : 1;
-    case 'dashcam': return petaLangkah(j, k.langkah)[k.item] ? 0 : 1;
+    case 'dashcam': return (petaLangkah(j, k.langkah)[k.item] ? 0 : 1) + (k.simpul && !k.simpul.pilihan.some((o) => o.id === j[k.simpul!.langkah]) ? 1 : 0);
   }
 }
 

@@ -17,7 +17,7 @@ import { useKueri } from '../cangkang';
 import './pandu.css';
 
 export const KODE_PANDU = ['k02', 'k04', 'k05', 'k07', 'k08', 'k09', 'k10', 'k11', 'ksim', 'kdash'] as const;
-const PELATIH = new Set(['k05', 'k10', 'ksim', 'kdash']);
+const PELATIH = new Set(['k05', 'k10', 'ksim', 'kdash', 'k08']);
 /**
  * T-065 (Episode 1 Dev): kartu cara main KHUSUS: isi sendiri, kunci 'sudah lihat' sendiri, dan menutup sendiri sesudah 5 detik (tamu
  * tanpa pemandu). kdash = rekaman dashcam; ksim di episode auto-2-dev = kartu SIM ringkas (kunci terpisah dari Episode 1 lengkap,
@@ -25,6 +25,8 @@ const PELATIH = new Set(['k05', 'k10', 'ksim', 'kdash']);
  */
 const KARTU_KHUSUS = (kode: string, episode?: string): { kunci: string; isi: string } | null =>
   kode === 'kdash' ? { kunci: 'kdash', isi: 'langkah.pelatih.isi.kdash' }
+    // T-068: K08 Episode 1 lengkap = rekaman dashcam + pertanyaan Pak Bima (kartu baru, kunci baru: juga tampil bagi yang pernah main K08 lama)
+    : kode === 'k08' ? { kunci: 'k08dash', isi: 'langkah.pelatih.isi.k08dash' }
     : kode === 'ksim' && episode === 'auto-2-dev' ? { kunci: 'ksimDev', isi: 'langkah.pelatih.isi.ksimDev' } : null;
 const TUTUP_SENDIRI_MD = 5000;
 const KUNCI_PELATIH = (k: string) => `raksa:pelatih:${k}`;
@@ -44,6 +46,8 @@ function rambuDibaca(arena: HTMLElement): number {
 /** Langkah kini (0..2) dari keadaan DOM arena. */
 function bacaKini(kode: string, arena: HTMLElement, adaIsian: boolean): number {
   // T-033 Fix 1 (D-322): K08 langkah 1 selesai sesudah KEDUA rambu dibaca.
+  // T-068: K08 dashcam: tonton (1) -> ketuk penyebab (2) -> pertanyaan Pak Bima (3).
+  if (kode === 'k08' && arena.querySelector('.hp-dashcam')) { const d = arena.querySelector('.hp-dashcam')!; return d.getAttribute('data-fase') === 'tanya' ? 2 : d.getAttribute('data-tahap') === 'putar' ? 0 : 1; }
   if (kode === 'k08') { const t = arena.querySelector('.hp-rambu')?.getAttribute('data-tahap'); const n = arena.querySelectorAll('.lk-tiang').length || 2; return t === 'putus' ? 2 : rambuDibaca(arena) >= n ? 1 : 0; }
   const kirim = [...arena.querySelectorAll<HTMLButtonElement>('[data-kirim], .hp-kirim-tombol, [data-lanjut-rambu]')].filter(tampak).at(-1);
   if (kode === 'ksim') { const l = arena.querySelector('.hp-sim')?.getAttribute('data-langkah'); return l === 'akhir' ? 2 : l && l !== 'meja' ? 1 : 0; }
@@ -62,6 +66,8 @@ function cariSasaran(kode: string, arena: HTMLElement, kini: number, disentuh: W
   // T-035 (pemilik 18 Nov 06:3x): penunjuk dan cincin HANYA di K08 (adegan lajur truk). Di aktivitas lain penunjuk bisa menunjuk
   // pilihan yang dinilai (K04 'Kantor Raksa' = jawabannya); di sana tinggal pita, petunjuk dan kartu cara main.
   if (kode !== 'k08') return null;
+  // T-068: K08 dashcam: TANPA penunjuk (tidak pernah di jawaban mana pun).
+  if (arena.querySelector('.hp-dashcam')) return null;
   const semua = (sel: string, dalam: Element | null = arena) => [...(dalam?.querySelectorAll<HTMLElement>(sel) ?? [])].filter((e) => tampak(e) && !e.matches(SASARAN_LEWAT));
   const pertama = (sel: string, dalam: Element | null = arena) => semua(sel, dalam).find((e) => !disentuh.has(e)) ?? null;
   const kirim = () => semua('[data-kirim], .hp-kirim-tombol, [data-lanjut-rambu]').at(-1) ?? null;

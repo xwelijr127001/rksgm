@@ -15,6 +15,7 @@ const kamus: KamusRuang = {
     bingkai: 'Bingkai {n} dari 3',
     'bingkai.1': 'Truk melaju di lajur 2, mobil kecil di lajur 3. Truk kecil berhenti di bahu kiri, pekerjanya mengganti ban.',
     'rambu.judul': 'Rambu di tepi jalan',
+    'rambu.chip': 'Rambu',
     'rambu.1': 'Rambu merah: truk dan trailer dilarang di lajur 3 dan 4.',
     'rambu.2': 'Rambu biru: ← truk dan bus gunakan lajur kiri.',
     'bingkai.2': 'Mobil kecil pindah ke lajur 2, tepat di depan truk.',
@@ -29,6 +30,8 @@ const kamus: KamusRuang = {
     jelaskan: 'Pemicunya mobil kecil: ia pindah dari lajur 3 ke lajur 2 di depan truk. Karena itu kita tetap memeriksa rambu dan saksi sebelum menilai klaim.',
     belum: 'Tonton rekamannya, lalu ketuk penyebabnya.',
     selesai: 'Penyebab kejadian sudah ditemukan.',
+    keTanya: 'Lanjut: pertanyaan {nama}',
+    belumSimpul: 'Pilih satu kesimpulan dulu.',
   },
   en: {
     judul: 'Toll road dashcam footage',
@@ -40,6 +43,7 @@ const kamus: KamusRuang = {
     bingkai: 'Frame {n} of 3',
     'bingkai.1': 'The truck drives in lane 2, a small car in lane 3. A small truck is stopped on the left shoulder; its worker is changing a tyre.',
     'rambu.judul': 'Roadside signs',
+    'rambu.chip': 'Signs',
     'rambu.1': 'Red sign: trucks and trailers are not allowed in lanes 3 and 4.',
     'rambu.2': 'Blue sign: ← trucks and buses use the left lane.',
     'bingkai.2': 'The small car moves into lane 2, right in front of the truck.',
@@ -54,6 +58,8 @@ const kamus: KamusRuang = {
     jelaskan: 'The trigger was the small car: it moved from lane 3 into lane 2 in front of the truck. That is why we still check the signs and witnesses before judging the claim.',
     belum: 'Watch the footage, then tap the cause.',
     selesai: 'The cause of the incident has been found.',
+    keTanya: 'Next: {nama}’s question',
+    belumSimpul: 'Choose one conclusion first.',
   },
   zh: {
     judul: '收费公路行车记录仪录像',
@@ -65,6 +71,7 @@ const kamus: KamusRuang = {
     bingkai: '第 {n} 帧，共 3 帧',
     'bingkai.1': '卡车在第 2 车道行驶，小汽车在第 3 车道。一辆小货车停在左侧路肩，工人正在换轮胎。',
     'rambu.judul': '路边标志',
+    'rambu.chip': '标志',
     'rambu.1': '红色标志：卡车和拖挂车禁止驶入第 3、4 车道。',
     'rambu.2': '蓝色标志：← 卡车和巴士请走左侧车道。',
     'bingkai.2': '小汽车并入第 2 车道，就在卡车正前方。',
@@ -79,6 +86,8 @@ const kamus: KamusRuang = {
     jelaskan: '起因是小汽车：它从第 3 车道并入卡车前方的第 2 车道。所以在判断理赔前，我们仍要核查路标和证人。',
     belum: '先看录像，再点击起因。',
     selesai: '已找到事故起因。',
+    keTanya: '继续：{nama} 的问题',
+    belumSimpul: '请先选择一个结论。',
   },
 };
 

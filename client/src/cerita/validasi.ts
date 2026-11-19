@@ -405,6 +405,23 @@ function periksaArena(
       for (const id of Object.keys(k.simpul.sikap)) if (!k.simpul.pilihan.some((w) => w.id === id)) salah(`${t}.simpul.sikap: opsi "${id}" tidak ada`);
       break;
     }
+    case 'dashcam': {
+      // T-065 / T-068: rekaman dashcam (satu item ke bersih / ragu) + opsional kesimpulan pilih-satu di bingkai beku.
+      const st = langkah(k.langkah, 'assign');
+      if (st?.kind === 'assign') {
+        sama([k.item], st.items.map((x) => x.id), 'item', t);
+        sama([k.bersih, k.ragu], st.buckets.map((x) => x.id), 'wadah', t);
+      }
+      if (k.simpul) {
+        const s = langkah(k.simpul.langkah, 'single');
+        teks(k.simpul.tanya, `${t}.simpul.tanya`);
+        if (k.simpul.judul !== undefined) teks(k.simpul.judul, `${t}.simpul.judul`);
+        if (!ada(ep.pemeran ?? {}, k.simpul.penanya)) salah(`${t}.simpul.penanya: "${k.simpul.penanya}" tidak ada di pemeran`);
+        k.simpul.pilihan.forEach((w, i) => tujuan(w, `${t}.simpul.pilihan[${i}]`));
+        if (s?.kind === 'single') sama(k.simpul.pilihan.map((w) => w.id), s.options.map((x) => x.id), 'opsi', `${t}.simpul`);
+      }
+      break;
+    }
     case 'pesan': {
       const st = langkah(k.langkah, 'assign');
       k.benda.forEach((b, i) => {

@@ -3582,3 +3582,82 @@ Built by the Designer; uncommitted. Owner rule: nothing was opened in a browser.
 - Mid-motion rotation is CSS (briefly not pixel-exact); all stills and the freeze frame are pixel-rotated.
 - The REC badge is HTML text ("REKAM 14:32"), not Codex's "REKAM 01/02, JEDA 03" frame counter.
 - Not checked in a browser.
+
+## T-068 (2026-11-20): full Episode 1 - K08 lane scene replaced by the Codex-look dashcam (Designer)
+
+Built by the Designer; uncommitted. Owner rule: nothing was opened in a browser. Gate: client typecheck 0 errors; client/dist rebuilt. This is the change the owner explicitly asked for in the full Episode 1; the rest of `episode/auto-2` is untouched.
+
+**K08 now (activity id `rambu`, node `k08`, unchanged)**
+- **Step 1:** the dashcam replay (ArenaDashcam, Codex look): 6 s replay, freeze frame, "who caused it?" tap on 3 targets, Putar lagi, reduced-motion stills. It is recorded on a NEW unscored step `dashcam` (item `rekaman` -> `bersih` / `ragu`, empty key). Branching does not read it.
+- **Step 2:** on the SAME frozen frame (sticky at the top: both signs, lane numbers and the translated sign legend stay visible), Pak Bima's bubble asks `k08.2` ("Menurutmu, truk di lajur 2 ini melanggar rambu?"). The five script conclusions `k08.c, e, a, d, b` (keys unchanged) form a radio list. The pick goes to the existing single step `simpul`, then Kirim.
+- **Scores and branches unchanged:** `ATURAN_RAMBU` is still `pilih('rambu', a-e)`, so c tepat +6, a keliru -6, b keliru -3, d/e kurang 0. Also unchanged: `catat: ['rambu', 'lajur2']` and the akibat lines k08-a..e, so the ringkasan/akhir references still work.
+- **Removed from K08:** the lane-marking grid (steps r1/r2 and pola 'rambu').
+  - ArenaRambu, RingkasRambu and rambu.ts stay in the repo, unused by K08.
+  - The PemainHP lines that only apply to pola 'rambu' (lane-mark summary and the "sikap tidak" reaction) simply no longer trigger.
+  - The old `akt.rambu.item.r1l*`/`r2l*` and `arena.rambu.*` text keys are left in place.
+
+**Files**
+- `cerita/tipe.ts`: dashcam konfig gains an optional `simpul?: { langkah; tanya; judul?; penanya; pilihan }`.
+- `cerita/episode/auto-2/arena.ts`: `rambu` is now pola 'dashcam' + simpul (bima, k08.2, k08.tanya, c/e/a/d/b). Unused imports were removed.
+- `cerita/episode/auto-2/aktivitas.ts`: mission steps = assign `dashcam` (unscored) + single `simpul` (key c). The `tandaLajur` helper was removed.
+- `teks.id/en/zh.ts`: `akt.rambu.item.rekaman` and `akt.rambu.wadah.bersih/ragu`.
+- `cerita/hp/arena/ArenaDashcam.tsx`:
+  - New: fase rekaman/tanya, the step-1 button "Lanjut: pertanyaan {nama}", Pak Bima's bubble and the radio list.
+  - New: "Putar lagi" in step 2 replays without touching step 1 (no targets).
+  - Unchanged: without `simpul` it behaves exactly as before (Episode 1 Dev kdash).
+- `dashcam.css`: sticky frame, bubble and options (16-17 px, at least 48 px).
+- `hp/arena/logika.ts`: dashcam `sisaArena` also requires the simpul pick when present.
+- `validasi.ts`: new `dashcam` case (item/wadah vs mission, simpul step/options/penanya).
+- `hp/arena/Pandu.tsx`:
+  - K08 steps read from the dashcam (Tonton -> Ketuk penyebab -> Jawab Pak Bima).
+  - There is no pointer ever on K08.
+  - The new 5 s coach card "Tonton rekamannya, lalu jawab pertanyaan Pak Bima." shows once, with a new key `k08dash`.
+- `i18n/kamus/langkah.ts` (k08.* pita texts, `pelatih.isi.k08dash`) and `i18n/kamus/dashcam.ts` (`keTanya`, `belumSimpul`), each in id/en/zh.
+
+**Episode 1 Dev:** kdash is unchanged (no `simpul`; same flow, recording and coach card).
+
+**Fit on 360×640 (calculation)**
+- Step 1 is as T-067.
+- Step 2: the arena content area is about 480 px. That holds the frame (246) + sign legend (46) + bubble (52) + about 2 conclusions. Conclusions 3-5 scroll under the sticky frame, so nothing is cut off and the frame stays in view. The Kirim button sits in the bottom bar.
+
+**Preview:** `character/dashcam-t065/k08-dua-langkah-2x.png` (step 1 | step 2; the dashed line marks the visible bottom at 360×640). Generator: `pratinjau-k08.mjs`.
+
+**Open points**
+- In the frozen frame the truck has already swerved out of lane 2. The question is about the truck in lane 2, which is visible via Putar lagi (step 2 replays). Showing the pre-crash pose (Codex frame 1) in step 2 would be a one-line switch if the owner prefers.
+- Not checked in a browser. Tests were not run (owner rule); `teks.test` / `validasi` expectations for K08 r1/r2 may need the QA card's update.
+
+## T-068 Fix 1 (2026-11-20): K08 step 2 = pre-crash band, everything fits without scrolling (Designer)
+
+Built by the Designer; uncommitted. Owner rule: nothing was opened in a browser. Gate: client typecheck 0 errors; client/dist rebuilt. Step 1, the recording and scoring are as built in T-068.
+
+**Step 2 now** (ArenaDashcam, `fase` 'tanya', only when `konfig.simpul` is set; Episode 1 Dev kdash is unchanged):
+- **Band:** the PRE-CRASH pose (Codex frame 1: truck straight in lane 2, small car in lane 3), drawn as a static band.
+  - Exactly 1/2 scale (1 art px = 1 device px on DPR-2 phones), cropped to y 24-234: both signs, all four lanes, the truck and the car.
+  - 160×105 plus a 2 px border, so 109 px.
+  - Lane numbers 1-4 are overlaid as readable 14 px HTML numbers at each lane centre; the pixel numbers would be 2.5 px at this scale.
+- **Beside the band:** Pak Bima (28 px portrait) with `k08.2` at 14 px. Below it, a folded **"Rambu"** chip (`dashcam.rambu.chip` id/en/zh) that opens the translated sign texts as a small popover.
+- **Below:** the five conclusions `k08.c, e, a, d, b` as 14 px rows: line-height 1.2, padding 2/8, at least 44 px tall, 3 px apart. There is no tick box; the chosen row gets a light-orange background, an orange edge and bold text.
+- **Removed from step 2:** the big frame, the sticky behaviour and "Putar lagi" in step 2.
+
+**Heights (calculation; row text width 316 px at 360 / 346 px at 390; 14 px ≈ 7.3 px per Latin char, 14 px per CJK glyph)**
+- **Arena scroll area** = screen − story header 48 − activity header 44 − instruction 34 − 3 × 8 gaps − send bar 68 − 8, so about **414 px at 360×640** and **474 px at 390×700**.
+- **Step 2** = band row 109 (en question 4 lines = 111) + 6 + rows (+ 4 × 3 gaps). Row heights are max(44, lines × 16.8 + 8).
+
+| Language | Screen | Lines c, e, a, d, b | Total | Available |
+| --- | --- | --- | --- | --- |
+| id | 360×640 | 3, 3, 2, 3, 2 | 390 | 414 |
+| id | 390×700 | 3, 3, 2, 3, 2 | 390 | 474 |
+| en | 360×640 | 3, 2, 2, 3, 2 | 376 (+2) | 414 |
+| en | 390×700 | 3, 2, 2, 3, 2 | 376 (+2) | 474 |
+| zh | 360×640 | 2, 2, 2, 2, 1 | 347 | 414 |
+| zh | 390×700 | 2, 1, 1, 2, 1 | 347 | 474 |
+
+So step 2 needs no scrolling in any of the three languages on either screen. Some id/en conclusions take 3 lines at 14 px. Two lines would need about 380 px of text width, more than a 360 phone has, so it is only possible by shortening the script text (keys unchanged here).
+
+**Files:** `client/src/cerita/hp/arena/ArenaDashcam.tsx`, `dashcam.css`, `client/src/i18n/kamus/dashcam.ts`.
+
+**Preview:** `character/dashcam-t065/k08-dua-langkah-2x.png` (step 1 | step 2, with the 360×640 and 390×700 visible-bottom lines). Generator: `pratinjau-k08.mjs`.
+
+**Open:**
+- Not checked in a browser.
+- The 226 px chrome figure is an estimate from desain.css; the real header heights should be confirmed on the phone.

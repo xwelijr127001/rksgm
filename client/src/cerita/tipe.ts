@@ -391,7 +391,12 @@ export type KonfigArena = DasarArena & (
    * Jawaban = SATU item `item` di langkah `langkah` ke wadah `bersih` (mobil pada ketukan pertama) atau `ragu` (selain itu):
    * `tetapkan(jawaban, konfig.langkah, konfig.item, konfig.bersih | konfig.ragu)` (pola sama dengan 'sim').
    */
-  | { pola: 'dashcam'; langkah: string; item: string; benda: { id: 'mobil' | 'truk' | 'truk-kecil' }[]; tepat: 'mobil'; bersih: string; ragu: string }
+  | { pola: 'dashcam'; langkah: string; item: string; benda: { id: 'mobil' | 'truk' | 'truk-kecil' }[]; tepat: 'mobil'; bersih: string; ragu: string;
+      /**
+       * (T-068, Episode 1 lengkap K08) Langkah kedua pada bingkai beku yang SAMA: pertanyaan tokoh `penanya` (kalimat `tanya`) dengan
+       * pilihan kesimpulan (langkah pilih-satu misi `langkah`). Tanpa ini arena berakhir sesudah ketukan penyebab (Episode 1 Dev kdash).
+       */
+      simpul?: { langkah: string; tanya: KunciTeks; judul?: KunciTeks; penanya: string; pilihan: TujuanArena[] } }
 );
 
 /** Satu rambu di arena `rambu`: langkah assign yang menyimpan lajur yang ditandai pemain (item = `${awalanItem}${nomorLajur}` -> wadah `wadah`). */
