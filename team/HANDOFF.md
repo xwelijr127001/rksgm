@@ -3446,3 +3446,11 @@ Built by the Designer; uncommitted. Owner rule: nothing was opened in a browser.
 - None of this was checked in a browser.
 - Engine change: the shapes above changed only for the 10 pixel-style cases.
 - `scenes.test.ts` rules were kept: background 640×480, unique art keys, all options shown and identical slot sizes. Not run, by the owner rule.
+
+## T-062 (2026-11-19): URGENT fix of T-060 - event scene collapsed to a thin sliver on phones
+
+- **Root cause:** stage.css gives `.misi` `align-items: start` (meant for its grid). T-060 made `.misi` a flex COLUMN, where that value aligns the CROSS (horizontal) axis, so every child shrank to fit its content; the scene box has `container-type: size` (size containment = 0 intrinsic width), so it became ~6 px (its padding) and clipped the canvas, and the panel / submit bar went narrower than the screen.
+- **Fix** (`client/src/game/acara-piksel.css`, T-060 phone block): `.misi-main` and `.misi` `align-items: stretch; width: 100%; box-sizing: border-box`; task card, scene box, panel and submit bar `align-self: stretch` (panel and bar `width: 100%`). Scene width now `min(100%, max(min(100%, 300px), (100cqh - ket) * 4/3))`: taken from the real box, height-based shrink only down to a hard floor of min(100%, 300 px); below that the frame is clipped as a strip instead of shrinking, so a wrong container size can never give a tiny canvas. The stage already sizes from its parent clientWidth (min 200) with a ResizeObserver on that parent (engine/stage.ts), no change there. Desktop / landscape / solo untouched (block is portrait < 900 px, event page only).
+- Effect on the T-060 fit table: scenes that were calculated narrower than 300 px (a02..a08 at 360x640, a06 / a08 / a10 at 390x700) now show a 300 px wide frame clipped to the free height (still hidden under 72 px); all content heights unchanged, still no page scroll by calculation.
+
+**Gate (owner rule):** typecheck 0; `client/dist` rebuilt = exact copy. Not tested in a browser or on a phone. Not committed.

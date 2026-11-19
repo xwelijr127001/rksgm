@@ -69,7 +69,7 @@
 @media (max-width: 899px) and (orientation: portrait) {
   .player-ui.kompak:not(.solo-layar):has(.misi[data-paket="acara"]) { height: 100dvh; display: flex; flex-direction: column; }
   .player-ui.kompak:not(.solo-layar):has(.misi[data-paket="acara"]) > * { flex: none; }
-  .player-ui.kompak:not(.solo-layar):has(.misi[data-paket="acara"]) > .misi-main { flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column; padding-bottom: 0; }
+  .player-ui.kompak:not(.solo-layar):has(.misi[data-paket="acara"]) > .misi-main { flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column; align-items: stretch; width: 100%; box-sizing: border-box; padding-bottom: 0; }
   .player-ui.kompak:not(.solo-layar) .misi-main:has(> .misi[data-paket="acara"]) > .misi-judul { flex: none; padding: 2px 16px 4px; }
   .player-ui.kompak:not(.solo-layar) .misi-main:has(> .misi[data-paket="acara"]) > .misi-judul > div { min-width: 0; }
   .player-ui.kompak:not(.solo-layar) .misi-main:has(> .misi[data-paket="acara"]) > .misi-judul h1 { margin: 0; font-size: 18px; line-height: 22px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -77,7 +77,11 @@
   /* answering: the question card carries the task; the round title is in the briefing and the header timer (saves 42 px) */
   .player-ui.kompak:not(.solo-layar) .misi-main:has(> .misi[data-paket="acara"]:is([data-mode="play"], [data-mode="paused"])) > .misi-judul { display: none; }
 
-  .player-ui.kompak:not(.solo-layar) .misi[data-paket="acara"] { flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column; }
+  /* T-062: align-items STRETCH (stage.css gives .misi align-items: start for its grid; as a flex column that shrank every child
+     to fit, and the size-contained scene box to 0 px = the live sliver bug). Children full width, border-box. */
+  .player-ui.kompak:not(.solo-layar) .misi[data-paket="acara"] { flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column; align-items: stretch; width: 100%; box-sizing: border-box; }
+  .player-ui.kompak:not(.solo-layar) .misi[data-paket="acara"] > :is(.misi-tugas, .misi-adegan, .misi-panel, .misi-aksi) { align-self: stretch; box-sizing: border-box; }
+  .player-ui.kompak:not(.solo-layar) .misi[data-paket="acara"] > :is(.misi-panel, .misi-aksi) { width: 100%; }
   .player-ui.kompak:not(.solo-layar) .misi[data-paket="acara"] > * { flex: none; }
   .player-ui.kompak:not(.solo-layar) .misi[data-paket="acara"] > .misi-tugas { order: 1; }
   .player-ui.kompak:not(.solo-layar) .misi[data-paket="acara"] > .misi-adegan { order: 2; }
@@ -91,7 +95,10 @@
     display: flex; flex-direction: column; align-items: center; justify-content: flex-start;
     margin: 0 12px 4px; width: auto; padding: 3px 3px 7px;
   }
-  .player-ui.kompak:not(.solo-layar) .misi[data-paket="acara"] > .misi-adegan > .adegan { flex: none; width: max(160px, min(100cqw, calc((100cqh - var(--adegan-ket, 0px)) * 4 / 3))); }
+  /* T-062: width from the REAL box (100%), never from cqw alone; height-based shrink only down to a hard floor of
+     min(100%, 300px), so a wrong container size can never produce a tiny canvas (the stage sizes from its parent width
+     through a ResizeObserver). Below the floor the frame is clipped (strip) by the container instead of shrinking. */
+  .player-ui.kompak:not(.solo-layar) .misi[data-paket="acara"] > .misi-adegan > .adegan { flex: none; width: min(100%, max(min(100%, 300px), calc((100cqh - var(--adegan-ket, 0px)) * 4 / 3))); }
   .player-ui.kompak:not(.solo-layar) .misi[data-paket="acara"][data-mode="intro"] > .misi-adegan { --adegan-ket: 40px; }
   .player-ui.kompak:not(.solo-layar) .misi[data-paket="acara"] > .misi-adegan > .adegan-ket { margin: 6px 0 0; font-size: 12px; line-height: 16px; }
   /* result / waiting / locked: a strip across the full width (middle band of the scene); legend off (marks are in the lists) */
