@@ -10,6 +10,7 @@
 import type Phaser from 'phaser';
 import type { MissionPublic, PlayerLook } from '@shared/types';
 import { heroArt, type HeroProp } from '../art/characters';
+import { heroPiksel } from '../art/heroPiksel';
 import type { ArtRef, SceneSpec, StageStats, StageView } from '../types';
 import { WORLD_H, WORLD_W } from '../types';
 import { stepIdsOf } from '../draft';
@@ -78,7 +79,11 @@ function catat(): NonNullable<Window['__raksaStage']> {
 }
 
 function semuaArt(spec: SceneSpec, look: PlayerLook): { list: ArtRef[]; hero: Record<HeroProp, ArtRef> } {
-  const hero: Record<HeroProp, ArtRef> = {
+  // T-055: adegan bergaya piksel = petugas PIKSEL (potret piksel pemain + badan), satu gambar untuk semua pose tangan.
+  const piksel = spec.gaya === 'piksel' ? heroPiksel(look) : null;
+  const hero: Record<HeroProp, ArtRef> = piksel ? {
+    none: piksel, kamera: piksel, papan: piksel, stempel: piksel, tunjuk: piksel, kalkulator: piksel,
+  } : {
     none: heroArt(look, 'none'),
     kamera: heroArt(look, 'kamera'),
     papan: heroArt(look, 'papan'),

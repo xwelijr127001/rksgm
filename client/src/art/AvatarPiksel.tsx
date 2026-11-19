@@ -89,7 +89,7 @@ export function kisiAvatarPiksel(look: PlayerLook): (string | null)[][] {
 }
 
 /** Garis tepi gelap 1 sel di luar siluet (gaya piksel cerita). */
-function tepi(g: (string | null)[][]): (string | null)[][] {
+export function tepiAvatarPiksel(g: (string | null)[][]): (string | null)[][] {
   const o = g.map((r) => r.slice());
   for (let y = 0; y < N; y++) for (let x = 0; x < N; x++) {
     if (g[y]![x]) continue;
@@ -101,7 +101,7 @@ function tepi(g: (string | null)[][]): (string | null)[][] {
 
 export function AvatarPiksel({ look, ukuran = 32, label, className = '' }: { look: PlayerLook; ukuran?: number; label?: string; className?: string }) {
   const rect = useMemo(() => {
-    const g = tepi(kisiAvatarPiksel(look));
+    const g = tepiAvatarPiksel(kisiAvatarPiksel(look));
     const out: string[] = [];
     // cakram krem bertangga (latar potret, seperti potret tokoh lain)
     for (let y = 0; y < N; y++) for (let x = 0; x < N; x++) {

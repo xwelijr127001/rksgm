@@ -50,6 +50,7 @@ import { bacaAngka, misiBergambar, visualMisi } from './gambar';
 import { GameStage, type StageApi, type StageStatus } from './GameStage';
 import { judulHasil, nilaiMisi, statusMisi, type BarisHasil, type HasilLangkah } from './hasil';
 import { PotretTokoh } from './KarakterTokoh';
+import { HasilAcara } from './HasilAcara';
 import { sceneFor } from './scenes';
 import type { ActionFx, SceneSpec, StageMode, StageStats, StageView } from './types';
 import './stage.css';
@@ -1033,6 +1034,8 @@ export function HasilMisi({ mission, reveal, answer, akurasi, dijawab, poin = nu
   raihan?: ReactNode;
 }) {
   useBahasa();
+  // T-055: paket acara (10 kasus pertandingan) = panel hasil gaya Episode 1 (Bu Isti piksel); data & skor sama.
+  if (/^a\d\d-/.test(mission.id)) return <HasilAcara mission={mission} reveal={reveal} answer={answer} akurasi={akurasi} dijawab={dijawab} poin={poin} keterangan={keterangan} aksi={aksi} catatan={catatan} padat={padat} raihan={raihan} />;
   const st = statusMisi(akurasi, dijawab);
   const judul = judulHasil(st);
   const rinci = nilaiMisi(mission.steps, reveal, dijawab ? answer : null);

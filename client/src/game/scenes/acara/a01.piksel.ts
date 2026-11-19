@@ -14,12 +14,12 @@ const JELAGA = '#5f4c3e';
 // ------------------------------------------------------------------ latar 160 x 120 sel
 
 export function latarA01(): Piksel {
-  const p = new Piksel(160, 120);
+  const p = new Piksel(160, 120, null, 2);
   // dinding plester krem + bintik halus, plafon
   p.rect(0, 0, 160, 25, '#f1ddbf');
   p.dither(0, 3, 160, 21, '#e8cfab', 0.07);
   p.rect(0, 0, 160, 3, '#e2cda5');
-  p.rect(0, 3, 160, 1, '#cdb48a');
+  p.rect(0, 3, 160, 0.5, '#cdb48a');
   // T-054 Fix 1: BEKAS KEBAKARAN yang jelas (api sudah padam, aman): jelaga hitam naik dari rak ke plafon, plafon menghitam,
   // pojok kiri atas gosong. Lidah api tergambar sebagai lidah jelaga bertingkat (cokelat tua -> hitam di tengahnya).
   const lidah = (i: number, j: number, lebar: number) => {
@@ -48,8 +48,9 @@ export function latarA01(): Piksel {
   p.rect(8, 3, 3, 3, '#33363f').rect(11, 4, 3, 1, '#33363f');
   // papan nama toko di dinding (T-054 Fix 1: pindah dari atas pintu supaya pemilik di ambang pintu tidak menutupinya)
   p.kartu(20, 4, 21, 15, '#ff9000', '#9a4f00');
-  p.teks(23, 6, 'TOKO', TINTA);
-  p.teks(23, 12, 'KAIN', TINTA);
+  // huruf 5 x 7 sel halus (T-055): 'TOKO' 23 sel halus lebar, dua baris dalam papan 21 x 15 sel
+  p.teksHalus(24.5, 6, 'TOKO', TINTA);
+  p.teksHalus(24.5, 11.5, 'KAIN', TINTA);
   p.set(39, 5, '#5f4c3e').set(38, 5, '#5f4c3e').set(39, 6, '#5f4c3e'); // sudut papan terkena jelaga
   // pintu rolling terangkat + jalan cerah di luar
   p.rect(86, 7, 48, 18, '#cfe6ee');
@@ -63,13 +64,13 @@ export function latarA01(): Piksel {
   p.rect(84, 7, 2, 18, '#8c8c8c').rect(134, 7, 2, 18, '#8c8c8c');
   // gulungan pintu rolling (bilah besi, sisi kiri ikut berjelaga)
   p.rect(84, 2, 52, 6, '#b8b8b8');
-  for (let y = 3; y < 8; y += 2) p.rect(84, y, 52, 1, '#9a9a9a');
+  for (let y = 2.5; y < 8; y += 1) p.rect(84, y, 52, 0.5, '#9a9a9a');
   p.rect(84, 7, 52, 1, '#6f6f6f');
   p.dither(84, 2, 10, 6, '#6f5a49', (i) => (10 - i) / 12);
   // lantai keramik
   p.rect(0, 25, 160, 95, '#e9dfcb');
-  for (let y = 30; y < 120; y += 6) p.rect(0, y, 160, 1, '#d6c6a6');
-  for (let x = 0; x < 160; x += 10) p.rect(x, 25, 1, 95, '#ddd0b4');
+  for (let y = 30; y < 120; y += 6) p.rect(0, y, 160, 0.5, '#d6c6a6');
+  for (let x = 0; x < 160; x += 10) p.rect(x, 25, 0.5, 95, '#ddd0b4');
   p.rect(0, 23, 160, 2, '#dccaa6');
   // lemari kiri + gulungan kain di atasnya (sebagian gosong)
   p.rect(2, 84, 34, 2, '#d4c3a2');
@@ -77,9 +78,9 @@ export function latarA01(): Piksel {
   p.kartu(5, 60, 24, 10, '#c69d6e', '#a97b50').kartu(5, 71, 24, 10, '#c69d6e', '#a97b50');
   p.rect(14, 64, 6, 2, '#9c6b3f').rect(14, 75, 6, 2, '#9c6b3f');
   const gulung = (x: number, y: number, w: number, c: string, tua: string, gosong: boolean) => {
-    p.rect(x, y, w, 5, c);
-    p.rect(x + w - 2, y, 2, 5, tua).set(x + w - 1, y + 2, '#f3e6cc');
-    p.rect(x, y + 4, w, 1, tua);
+    p.kotakTangga(x, y, w - 1, 5, c, 2);
+    p.rect(x + 1, y + 4.5, w - 3, 0.5, tua).rect(x + 2, y + 0.5, w - 6, 0.5, '#ffffff');
+    p.bulat(x + w - 2, y + 2.5, 2.6, tua).bulat(x + w - 2, y + 2.5, 1.8, c).bulat(x + w - 2, y + 2.5, 0.7, '#f3e6cc');
     if (gosong) p.rect(x, y, 3, 5, HANGUS).set(x + 3, y + 1, HANGUS).set(x + 3, y + 3, HANGUS).set(x + 4, y + 2, JELAGA);
   };
   gulung(4, 49, 26, '#dcb0a6', '#c29188', false);
@@ -104,11 +105,11 @@ export function latarA01(): Piksel {
     p.set(kiri, y, '#eed7b5').set(kiri + 1, y, '#eed7b5');
   }
   p.rect(38, 24, 122, 2, '#d3b083');
-  p.rect(37, 56, 123, 1, '#d4b286').rect(36, 90, 124, 1, '#d4b286');
+  p.rect(37, 56, 123, 0.5, '#d4b286').rect(36, 90, 124, 0.5, '#d4b286');
   p.dither(40, 27, 118, 82, '#dcba8d', 0.05);
   // tepi belakang meja ikut berjelaga di bawah rak
   p.dither(38, 24, 44, 3, HANGUS, (i) => Math.max(0, 0.7 - Math.abs(i - 22) / 30));
-  p.rect(32, 110, 128, 3, '#c3976a').rect(32, 110, 128, 1, '#a97b50');
+  p.rect(32, 110, 128, 3, '#c3976a').rect(32, 110, 128, 0.5, '#a97b50').rect(32, 112.5, 128, 0.5, '#a97b50');
   // genangan di lantai depan meja (di atas bayangan meja)
   p.kotakTangga(60, 115, 18, 4, '#aec8da').rect(61, 116, 16, 2, '#c3d8e6').rect(62, 116, 5, 1, '#eef6fa');
   p.kotakTangga(104, 116, 12, 3, '#aec8da').rect(106, 117, 3, 1, '#eef6fa');
@@ -117,7 +118,7 @@ export function latarA01(): Piksel {
 
 /** Lampu gantung 10 x 17 sel (40 x 68 dunia). */
 export function lampuA01(): Piksel {
-  const p = new Piksel(10, 17);
+  const p = new Piksel(10, 17, null, 2);
   p.rect(5, 0, 1, 8, '#5f5f5f');
   p.bulat(5, 13, 4.5, '#fff1c2');
   p.rect(2, 8, 7, 1, '#33363f').rect(1, 9, 9, 2, '#33363f').rect(1, 10, 9, 1, '#5f5f5f');
@@ -127,12 +128,12 @@ export function lampuA01(): Piksel {
 
 /** Tumpukan tiga gulungan kain di meja, 33 x 21 sel (132 x 84 dunia); yang paling atas gosong di ujungnya. */
 export function kainA01(): Piksel {
-  const p = new Piksel(33, 21);
+  const p = new Piksel(33, 21, null, 2);
   p.rect(2, 19, 30, 2, '#cfb085');
   const rol = (x: number, y: number, w: number, c: string, tua: string, terang: string, gosong: boolean) => {
-    p.kotakTangga(x, y, w, 7, c);
-    p.rect(x + 2, y + 1, w - 6, 1, terang);
-    p.kotakTangga(x + w - 4, y, 4, 7, tua).rect(x + w - 3, y + 3, 2, 1, '#f3e6cc');
+    p.kotakTangga(x, y, w - 2, 7, c, 2);
+    p.rect(x + 2, y + 1, w - 7, 0.5, terang).rect(x + 1, y + 6, w - 4, 0.5, tua);
+    p.bulat(x + w - 2.5, y + 3.5, 3.5, tua).bulat(x + w - 2.5, y + 3.5, 2.6, c).bulat(x + w - 2.5, y + 3.5, 1, '#f3e6cc');
     if (gosong) p.kotakTangga(x, y, 4, 7, HANGUS).set(x + 4, y + 1, HANGUS).set(x + 4, y + 4, HANGUS).set(x + 5, y + 2, JELAGA).set(x + 4, y + 3, JELAGA);
   };
   rol(1, 13, 31, '#dcb0a6', '#c29188', '#ead0c9', false);
@@ -151,10 +152,10 @@ export type JenisKartuA01 = 'foto' | 'lapor' | 'perbaiki' | 'buang' | 'buka';
 
 /** Kartu kosong: kertas krem bertangga, garis tinta, bayangan 1 sel di meja. */
 function kartuDasar(): Piksel {
-  const p = new Piksel(24, 22);
+  const p = new Piksel(24, 22, null, 2);
   p.kotakTangga(1, 2, 23, 20, '#c3a27a');
   p.kartu(0, 0, 23, 20, '#fff9f5', TINTA);
-  p.rect(2, 17, 19, 1, '#f3ded3');
+  p.rect(1.5, 17.5, 20, 1, '#f3ded3');
   return p;
 }
 
@@ -172,27 +173,15 @@ export function kartuA01(jenis: JenisKartuA01): Piksel {
     p.kartu(5, 3, 11, 14, '#ffffff', TINTA);
     p.rect(13, 3, 3, 1, null).set(13, 3, TINTA).rect(13, 4, 2, 2, '#ecd5cb');
     p.rect(7, 6, 5, 1, '#ff9000');
-    for (const y of [8, 10, 12, 14]) p.rect(7, y, 7, 1, '#a4a4a4');
+    for (const y of [8, 9.5, 11, 12.5, 14]) p.rect(7, y, y === 14 ? 4 : 7, 0.5, '#a4a4a4');
     p.bulat(16.5, 13.5, 3.6, '#ff9000').bulat(16.5, 13.5, 2.6, '#ff9000');
     p.pola(14, 12, ['....#', '#..#.', '.##..'], { '#': '#ffffff' });
   } else if (jenis === 'perbaiki') {
-    // obeng: gagang jingga, batang besi miring, dua sekrup
-    p.pola(4, 2, [
-      '...........dd...',
-      '..........dOOd..',
-      '.........dOOOd..',
-      '........dOyOd...',
-      '.......kdOOd....',
-      '......kkdd......',
-      '.....kss........',
-      '....kss.........',
-      '...kss..........',
-      '..kss...........',
-      '.kss............',
-      '.ks.............',
-      '..k.............',
-    ], { d: '#9a4f00', O: '#ff9000', y: '#ffd9a8', k: '#33363f', s: '#a4a4a4' });
-    p.pola(14, 12, ['.k.', 'ksk', '.k.'], { k: '#33363f', s: '#a4a4a4' }).pola(17, 15, ['.k.', 'ksk', '.k.'], { k: '#33363f', s: '#a4a4a4' });
+    // obeng (garis halus): batang besi miring, gagang jingga bertepi gelap + kilap, dua sekrup kecil
+    p.garis(4.5, 16.5, 12, 9, '#5f5f5f', 3).garis(4.5, 16.5, 12, 9, '#a4a4a4', 2);
+    p.garis(12, 9, 17, 4, '#9a4f00', 7).garis(12, 9, 17, 4, '#ff9000', 5).garis(13, 7.5, 16, 4.5, '#ffd9a8', 1);
+    p.garis(11.5, 9.5, 12.5, 8.5, '#33363f', 5);
+    for (const [x, y] of [[15.5, 14], [18.5, 16.5]] as const) { p.bulat(x, y, 1.3, '#33363f').bulat(x, y, 0.8, '#a4a4a4'); p.titik(x * 2 - 1, y * 2, '#33363f').titik(x * 2, y * 2, '#33363f'); }
   } else if (jenis === 'buang') {
     // tong sampah besi + barang hangus di atasnya
     p.rect(6, 7, 11, 1, TINTA).kotakTangga(5, 8, 13, 2, '#8c8c8c');
@@ -207,7 +196,7 @@ export function kartuA01(jenis: JenisKartuA01): Piksel {
     p.bulat(11.5, 3, 1.2, '#8c8c8c');
     p.kartu(3, 7, 17, 9, '#5b2533', '#3e1620');
     p.rect(4, 8, 15, 7, '#fff1e2');
-    p.teks(4, 9, 'BUKA', '#5b2533');
+    p.teksHalus(5.5, 9, 'BUKA', '#5b2533');
   }
   return p;
 }

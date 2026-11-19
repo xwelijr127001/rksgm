@@ -1,0 +1,79 @@
+/* T-055 (Designer, owner 19 Nov): hasil misi PAKET ACARA (HasilAcara.tsx) dalam bahasa piksel Episode 1.
+   Nyaman dibaca: isi 16 px / 1,5, paling lebar +- 60 huruf, jarak antar blok 12 px; lipatan "Kenapa begitu?" menggulir di
+   dalam (paling tinggi 40vh). Warna: PALET.md + warna status game (tepat hijau #277F5E, sebagian jingga tua #9A4F00,
+   belum / terlewat bata #B3261E), tidak bergantung warna saja (ikon + kata).
+   Hitungan tinggi: HP lihat blok max-width 480 di bawah (540 / 576 dari 640). Desktop (kolom kanan +- 560 px): +- 450 px. */
+
+.hasil-acara { display: flex; flex-direction: column; gap: 12px; font-size: 16px; line-height: 1.5; color: #212121; }
+.hasil-acara p, .hasil-acara li { max-width: 60ch; }
+
+/* kepala: Bu Isti piksel + gelembung bicara */
+.ha-kepala { display: flex; align-items: flex-start; gap: 12px; }
+.ha-isti { flex: 0 0 auto; width: 80px; height: 80px; image-rendering: pixelated; background: #fff1e2; box-shadow: inset 0 0 0 2px #ecd5cb, 0 4px 0 0 #ecd5cb; }
+.ha-gelembung {
+  position: relative; flex: 1 1 auto; min-width: 0; display: grid; gap: 4px; padding: 10px 14px 14px;
+  background: #ffffff; box-shadow: inset 0 0 0 2px #e8a87c, inset 0 -6px 0 #fff1e2;
+}
+.ha-gelembung::before { /* ekor gelembung bertangga ke arah Bu Isti */
+  content: ''; position: absolute; left: -8px; top: 22px; width: 8px; height: 12px;
+  background: linear-gradient(#e8a87c, #e8a87c) right 0 top 0 / 2px 12px no-repeat, linear-gradient(#ffffff, #ffffff) right 2px top 2px / 6px 8px no-repeat,
+    linear-gradient(#e8a87c, #e8a87c) right 0 top 4px / 8px 2px no-repeat, linear-gradient(#e8a87c, #e8a87c) right 0 top 8px / 8px 2px no-repeat;
+}
+.ha-juri { font-size: 13px; line-height: 16px; font-weight: 700; color: #9a4f00; letter-spacing: .02em; }
+.hasil-acara .hasil-judul { margin: 0; font-size: 20px; line-height: 26px; }
+.ha-chip-baris { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-top: 2px; }
+.ha-vonis {
+  display: inline-flex; align-items: center; gap: 6px; min-height: 30px; padding: 3px 10px 5px; font-size: 14px; font-weight: 800;
+  background: #e8f5ee; color: #1b5e44; box-shadow: inset 0 0 0 2px #277f5e, inset 0 -3px 0 #b9dcc9;
+}
+.ha-vonis[data-st="sebagian"] { background: #fff1e2; color: #9a4f00; box-shadow: inset 0 0 0 2px #e07e00, inset 0 -3px 0 #ffd9a8; }
+.ha-vonis:is([data-st="belum"], [data-st="terlewat"]) { background: #fdecea; color: #b3261e; box-shadow: inset 0 0 0 2px #b3261e, inset 0 -3px 0 #f4c7c3; }
+.ha-poin {
+  display: inline-flex; align-items: baseline; gap: 4px; min-height: 30px; padding: 3px 10px 6px; font-size: 14px; font-weight: 700; color: #212121;
+  background: #ff9000; box-shadow: inset 0 2px 0 #ffd9a8, inset 0 -4px 0 #9a4f00;
+}
+.ha-poin b { font-size: 18px; font-weight: 900; }
+.ha-sub { margin: 0; color: #5f5f5f; }
+
+/* daftar ringkas berikon */
+.ha-daftar-semua { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px; }
+.ha-daftar { padding: 8px 12px 10px; background: #ffffff; box-shadow: inset 0 0 0 2px #ecd5cb; }
+.ha-daftar h3 { display: flex; align-items: center; gap: 6px; margin: 0 0 4px; font-size: 15px; line-height: 20px; font-weight: 800; }
+.ha-daftar[data-jenis="tepat"] h3 { color: #1b5e44; }
+.ha-daftar[data-jenis="terlewat"] h3 { color: #9a4f00; }
+.ha-daftar[data-jenis="salah"] h3 { color: #b3261e; }
+.ha-daftar ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 2px; }
+.ha-daftar li { position: relative; padding-left: 16px; font-size: 16px; line-height: 1.5; }
+.ha-daftar li::before { content: ''; position: absolute; left: 2px; top: .62em; width: 6px; height: 6px; background: currentColor; opacity: .55; }
+.ha-kosong { display: flex; align-items: center; gap: 6px; margin: 0; color: #b3261e; font-weight: 700; }
+.ha-ikon { flex: 0 0 auto; }
+
+/* Intinya: kartu catatan berlampu */
+.ha-inti { display: flex; gap: 12px; align-items: flex-start; padding: 12px 14px 14px; background: #fff5ec; box-shadow: inset 0 0 0 2px #e8a87c, inset 0 -5px 0 #ffd9a8; }
+.ha-inti-lampu { flex: 0 0 auto; display: grid; place-items: center; width: 32px; height: 32px; color: #212121; background: #f6d25c; box-shadow: inset 0 0 0 2px #9a4f00; }
+.ha-inti p { margin: 0; font-size: 16px; line-height: 1.5; }
+.ha-inti b { display: block; font-size: 13px; line-height: 18px; letter-spacing: .04em; text-transform: uppercase; color: #9a4f00; }
+
+/* Kenapa begitu? = kunci; isinya menggulir di dalam */
+.ha-kenapa > summary { list-style: none; }
+.ha-kenapa > summary::-webkit-details-marker { display: none; }
+.ha-kenapa-kunci {
+  display: inline-flex; align-items: center; gap: 8px; min-height: 44px; padding: 8px 14px 11px; cursor: pointer; font-weight: 800; font-size: 15px;
+  background: #ffffff; color: #212121; box-shadow: inset 0 0 0 2px #212121, inset 0 -4px 0 #212121;
+}
+.ha-kenapa-kunci::after { content: '▸'; color: #ff9000; }
+.ha-kenapa[open] > .ha-kenapa-kunci::after { content: '▾'; }
+.ha-kenapa-kunci:focus-visible { outline: 3px solid #212121; outline-offset: 2px; }
+.ha-kenapa-isi { margin-top: 8px; max-height: 40vh; overflow-y: auto; padding: 10px 12px; background: #ffffff; box-shadow: inset 0 0 0 2px #ecd5cb; display: grid; gap: 8px; }
+.ha-kenapa-isi p { margin: 0; }
+
+/* HP: Bu Isti tetap 80 px (40 piksel seni x 2, kelipatan bulat); judul satu langkah lebih kecil; kedua daftar dalam SATU
+   bingkai; label "Intinya" sebaris dengan isinya. Hitungan 360 x 640 (pertandingan, kalimat sub tersembunyi): kepala 92 +
+   daftar 124 + Intinya 98 + Kenapa 44 + catatan 24 + celah 48 = 430, + kepala halaman 56 + judul misi 54 = 540 <= 640
+   (dengan kalimat sub +36 = 576). */
+@media (max-width: 480px) {
+  .hasil-acara .hasil-judul { font-size: 18px; line-height: 24px; }
+  .ha-daftar-semua { gap: 0; padding: 6px 0; box-shadow: inset 0 0 0 2px #ecd5cb; background: #ffffff; }
+  .ha-daftar { padding: 4px 12px; box-shadow: none; background: none; }
+  .ha-inti b { display: inline; margin-right: 6px; }
+}

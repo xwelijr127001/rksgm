@@ -47,8 +47,9 @@ const kartu = (j: JenisKartuA01): ArtRef => art(`a01-${j}-piksel`, OW, OH, kartu
  * marun + celemek toko krem bertali jingga; ./a01.pemilik.ts), diperkecil 2 : 1, menghadap meja, kepala & bahu.
  */
 function pemilikToko(): ArtRef {
-  const p = new Piksel(PEMILIK_A01[0]!.length, PEMILIK_A01.length).pola(0, 0, PEMILIK_A01, PEMILIK_A01_PETA);
-  return art('a01-pemilik-piksel', p.w * 4, p.h * 4, p.svg(4));
+  // T-055: resolusi asli atlas (1 piksel seni = 1 sel halus = 2 dunia), seperti ruang cerita Episode 1.
+  const p = new Piksel(Math.ceil(PEMILIK_A01[0]!.length / 2), Math.ceil(PEMILIK_A01.length / 2), null, 2).polaHalus(0, 0, PEMILIK_A01, PEMILIK_A01_PETA);
+  return art('a01-pemilik-piksel-halus', p.w * 4, p.h * 4, p.svg(4));
 }
 
 // ------------------------------------------------------------------ adegan
