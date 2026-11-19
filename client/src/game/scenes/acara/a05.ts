@@ -4,8 +4,7 @@
  * stempel); langkah `simpul` = MEJA STEMPEL misi 5 dengan TIGA map. Ketuk map kasus, lalu ketuk
  * salah satu dari tiga stempel di rak; stiker kesimpulan menempel di atas map.
  *
- * Dipakai ulang dari m05-kantor.ts: latar (diparametrikan menjadi tiga alas -> kunci `a05-latar`),
- * tiga stempel (gambar & kunci tekstur m05 apa adanya karena SVG identik), map kasus, kartu polis.
+ * Dari m05-kantor.ts hanya posisi & warna tinta stempel (STEMPEL_X/Y, TINTA_STEMPEL); gambar = seni piksel (T-061b).
  *
  * Tata letak (dunia 640 x 480), tiga kolom berpusat di x 112 / 320 / 528 (jarak 208):
  * - Belakang meja : rak stempel misi 5 (urutan = urutan kategori misi).
@@ -15,69 +14,55 @@
  *                   (sekitar 117 + 108) tidak muat dalam satu kolom, jadi barisnya dipisah.
  * - Petugas berdiri di celah antara baris kartu A dan B, jadi kepalanya (atas y 374) tidak
  *   tertutup label.
+ *
+ * T-061b: gaya PIKSEL kasus 1 (k = 2). Latar, stempel, map, dan kartu = seni piksel (./a05.piksel.ts); tata letak, id, label
+ * (id/en/zh), kategori, dan perilaku TIDAK berubah (map 120 x 88 dan kartu 64 x 48: selisih <= 1 dunia dari ukuran lama).
  */
 
-import type { SceneObjectSpec, SceneSpec } from '../../types';
-import { P, art } from '../../art/kit';
-import {
-  SKALA_STEMPEL, STEMPEL_X, STEMPEL_Y, TINTA_STEMPEL,
-  kartuPolis, latar, mapKasus, stempel,
-  type AlasKerja,
-} from '../m05-kantor';
+import type { ArtRef, SceneObjectSpec, SceneSpec } from '../../types';
+import { art } from '../../art/kit';
+import type { Piksel } from '../../art/piksel';
+import { STEMPEL_X, STEMPEL_Y, TINTA_STEMPEL } from '../m05-kantor';
+import { kartuA05, latarA05, mapA05, stempelA05, type AlasA05 } from './a05.piksel';
+
+/** Piksel k = 2 -> ArtRef (1 sel tata letak = 4 dunia). */
+const gambar = (kunci: string, p: Piksel): ArtRef => art(kunci, p.w * 4, p.h * 4, p.svg(4));
 
 const KOLOM_X = [112, 320, 528] as const;
 const HURUF = ['A', 'B', 'C'] as const;
 
 /** Alas kerja per kolom: lebar 200, dari bawah zona stiker sampai bawah baris kartu polis. */
-const ALAS: readonly AlasKerja[] = KOLOM_X.map((x): AlasKerja => [x - 100, 204, 200, 190]);
+const ALAS: readonly AlasA05[] = KOLOM_X.map((x): AlasA05 => [x - 100, 204, 200, 190]);
 
-/** Map kasus misi 5 (160 x 118) diperkecil supaya tiga kolom muat. */
-const SKALA_MAP = 0.75;
-const MAP_W = 120;
-const MAP_H = 89;
+/** Map kasus (piksel 30 x 22 sel = 120 x 88; dulu 120 x 89). */
+const MAP_W = 120; // tinggi 88
 /**
- * Atas map 216,5: stiker (192 - 225; ujungnya naik sekitar 6 karena miring) tetap di bawah label
+ * Atas map 217: stiker (192 - 225; ujungnya naik sekitar 6 karena miring) tetap di bawah label
  * stempel (bawah 181,5).
  */
 const MAP_Y = 261;
 /** Label map naik 4 (hanya menutup bayangan map, pola m10) supaya baris kartu muat di bawahnya. */
 const LABEL_MAP_DY = -4;
 
-/** Kartu polis misi 5 (104 x 80) diperkecil; labelnya ditaruh di kanan kartu, bukan di bawah. */
-const SKALA_KARTU = 0.6;
-const KARTU_W = 63;
+/** Kartu polis kecil (piksel 16 x 12 sel = 64 x 48); labelnya ditaruh di kanan kartu, bukan di bawah. */
 const KARTU_H = 48;
 /** Baris kartu (y 339 - 387) mulai 2,5 di bawah label map (bawah 336,5). */
 const KARTU_Y = 363;
 /**
- * Kartu di kiri kolom (x kolom - 95,5 s.d. - 32,5); label (lebar 108 - 118) mengisi sisa kolom di
+ * Kartu di kiri kolom (x kolom - 96 s.d. - 32); label (lebar 108 - 118) mengisi sisa kolom di
  * kanannya dan berhenti sebelum x kolom + 87, jadi celah tempat petugas berdiri tetap kosong.
  */
 const KARTU_DX = -64;
 const LABEL_KARTU_DX = 92;
 const MIRING_KARTU = [-4, 3, -3] as const;
 
-/**
- * Perkecil gambar misi 5 tanpa ikut menipiskan garis tepinya: tebal tinta dikembalikan ke
- * 3/2 satuan dunia (kebalikan dari trik stempel() di m05-kantor.ts).
- */
-function perkecil(isi: string, s: number): string {
-  const tebal = (n: number): string => `stroke="${P.tinta}" stroke-width="${(n / s).toFixed(2)}"`;
-  const tepi = isi
-    .split(`stroke="${P.tinta}" stroke-width="3"`).join(tebal(3))
-    .split(`stroke="${P.tinta}" stroke-width="2"`).join(tebal(2));
-  return `<g transform="scale(${s})">${tepi}</g>`;
-}
-
 function buat(): SceneSpec {
-  const sw = Math.round(56 * SKALA_STEMPEL);
-  const sh = Math.round(70 * SKALA_STEMPEL);
   const [xLanjut, xAmbang, xData] = STEMPEL_X;
 
   const map = HURUF.map((h, i): SceneObjectSpec => ({
     id: `map-${h.toLowerCase()}`, role: 'item', stepId: 'simpul', refId: `kasus-${h.toLowerCase()}`, fx: 'stamp',
     x: KOLOM_X[i]!, y: MAP_Y,
-    art: art(`a05-map-${h.toLowerCase()}`, MAP_W, MAP_H, perkecil(mapKasus(h), SKALA_MAP)),
+    art: gambar(`a05-map-${h.toLowerCase()}-piksel`, mapA05(h)),
     label: `Kasus ${h}`, labelDy: LABEL_MAP_DY, depth: 20,
     // Area sentuh (y 198 - 324) ikut mencakup stiker di atas map dan sebagian besar labelnya,
     // tetapi berhenti sebelum area sentuh kartu polis (mulai y 325).
@@ -87,7 +72,7 @@ function buat(): SceneSpec {
   const kartu = HURUF.map((h, i): SceneObjectSpec => ({
     id: `kartu-${h.toLowerCase()}`, role: 'doc', refId: `polis-${h.toLowerCase()}`,
     x: KOLOM_X[i]! + KARTU_DX, y: KARTU_Y,
-    art: art(`a05-kartu-${h.toLowerCase()}`, KARTU_W, KARTU_H, perkecil(kartuPolis(h, MIRING_KARTU[i]!), SKALA_KARTU)),
+    art: gambar(`a05-kartu-${h.toLowerCase()}-piksel`, kartuA05(h, MIRING_KARTU[i]!)),
     label: `Polis ${h}`, depth: 22,
     // Engine menaruh label di bawah gambar; geser ke kanan kartu, sejajar tengahnya.
     labelDx: LABEL_KARTU_DX, labelDy: -(KARTU_H / 2 + 18),
@@ -99,7 +84,9 @@ function buat(): SceneSpec {
 
   return {
     missionId: 'a05-nasib-beda',
-    background: art('a05-latar', 640, 480, latar(ALAS)),
+    // T-061b: gaya piksel kasus 1 (k = 2): dinding kantor Episode 2 + meja kerja piksel (./a05.piksel.ts, ./a05.gen.ts).
+    gaya: 'piksel',
+    background: gambar('a05-latar-piksel', latarA05(ALAS)),
     // Celah antara baris kartu A (label berakhir sekitar x 199, y 380) dan kartu B (mulai x 224,5):
     // kepala petugas (atas y 374) tidak tertutup label dan tidak menutupi kartu.
     hero: { x: 211, y: 478 },
@@ -113,17 +100,19 @@ function buat(): SceneSpec {
       // ---- kesimpulan: tiga stempel misi 5 di rak (urutan sama dengan urutan kategori misi)
       {
         id: 'stempel-lanjut', role: 'bucket', stepId: 'simpul', refId: 'lanjut',
-        x: xLanjut, y: STEMPEL_Y, art: art('m05-stempel-lanjut', sw, sh, stempel(TINTA_STEMPEL.lanjut, 'cek')),
+        x: xLanjut, y: STEMPEL_Y, art: gambar('a05-stempel-lanjut-piksel', stempelA05(TINTA_STEMPEL.lanjut, 'cek')),
         label: 'Lanjut dinilai', depth: 20,
+        // T-061b: pil 'Lanjut dinilai' (~195) di x 104 berjarak 6,5 dari tepi kiri: geser 3 -> tepi 9,5.
+        labelDx: 3,
       },
       {
         id: 'stempel-ambang', role: 'bucket', stepId: 'simpul', refId: 'tidak-ambang',
-        x: xAmbang, y: STEMPEL_Y, art: art('m05-stempel-ambang', sw, sh, stempel(TINTA_STEMPEL['tidak-ambang'], 'silang')),
+        x: xAmbang, y: STEMPEL_Y, art: gambar('a05-stempel-ambang-piksel', stempelA05(TINTA_STEMPEL['tidak-ambang'], 'silang')),
         label: 'Di bawah ambang', depth: 20,
       },
       {
         id: 'stempel-data', role: 'bucket', stepId: 'simpul', refId: 'perlu-data',
-        x: xData, y: STEMPEL_Y, art: art('m05-stempel-data', sw, sh, stempel(TINTA_STEMPEL['perlu-data'], 'tanya')),
+        x: xData, y: STEMPEL_Y, art: gambar('a05-stempel-data-piksel', stempelA05(TINTA_STEMPEL['perlu-data'], 'tanya')),
         label: 'Perlu info', depth: 20,
       },
       // ---- kasus: tiga map sama besar, satu per alas

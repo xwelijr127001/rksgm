@@ -35,6 +35,8 @@ function buat(): SceneSpec {
   const aksi = (refId: IkonAksiA04, x: number, label: string): SceneObjectSpec => ({
     id: `aksi-${refId}`, role: 'option', stepId: 'tindak', refId, fx: 'choose',
     x, y: Y_AKSI, art: gambar(`a04-aksi-${refId}-piksel`, papanAksiA04(refId)), label, depth: 20,
+    // T-061b: pil di bawah papan (pusat 400 + 42 + 18) berakhir di y 481 (alas tinta 4): dinaikkan 10 -> bawah 471, tepi 9.
+    labelDy: -10,
     hit: { w: 96, h: 90 },
   });
   const sopir = gambar('a04-sopir-piksel', pikselDariRle(SOPIR_A04));
@@ -73,12 +75,14 @@ function buat(): SceneSpec {
         // Kolom kanan rapat (foto - lembar - papan aksi): label dinaikkan 6 seperti misi 6.
         id: 'dok-foto', role: 'doc', refId: 'foto',
         x: 562, y: 144, art: gambar('a04-foto-piksel', fotoEnamA04()), label: 'Foto peti', depth: 20,
-        labelDy: -6,
+        // T-061b: pil (en 'Crate photos' ~182) dengan tepi kanan >= 8: pusat 541.
+        labelDy: -6, labelDx: -21,
       },
       {
         id: 'dok-terima', role: 'doc', refId: 'penerimaan',
         x: 562, y: 270, art: gambar('a04-terima-piksel', lembarTerimaA04()), label: 'Bukti terima', depth: 20,
-        labelDy: -6,
+        // T-061b: pil 'Bukti terima' (~182) dengan tepi kanan >= 8: pusat 541.
+        labelDy: -6, labelDx: -21,
       },
       // x di sini hanya daftar slot: engine mengacaknya secara deterministik (acakPosisi, benih id misi),
       // jadi urutan DAFTAR ini yang menentukan papan mana menempati slot mana. Urutan dipilih supaya

@@ -10,7 +10,6 @@ const TEAL = '#2a8c8c';
 const TEAL_TUA = '#1d6464';
 const TEAL_MUDA = '#4fb3ad';
 const KACA = '#bfe0ea';
-const KACA_TUA = '#8fbccc';
 const BESI = '#a4a4a4';
 const BAN = '#26232a';
 

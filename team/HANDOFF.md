@@ -3341,3 +3341,57 @@ Built by the Designer; uncommitted. Owner rule: nothing was opened in a browser.
 - **a02 background:** a faint stray parking-bay line from the story background remains between the truck and the crate stack.
 - **a04 truck:** the trailer's rear is cut off straight where the crate stack starts.
 - **Not checked in a browser:** Phaser label positions and the photo/tag effects in the pixel style. The engine already handles `gaya: 'piksel'` generically.
+
+## T-061b (2026-11-19): Fix 1 for cases 2-4, then event cases 5, 6, 7 in the case-1 pixel style (Designer)
+
+Built by the Designer; uncommitted. Owner rule: nothing was opened in a browser. Gate: client typecheck 0 errors; client/dist rebuilt.
+
+**Scope kept:** only scene files in `client/src/game/scenes/acara/` and the generator/previews in `character/acara-t061/`. Untouched: `shared/acara/*`, `server/acara/*`, MissionPlay, HasilAcara, hasil-acara.css, acara-piksel.css and the engine. Ids, positions, slot shuffling, hit areas, labels (id/en/zh), categories, behaviour and the answer key are unchanged; only the label anchors (`labelDx` / `labelDy`) moved.
+
+**Fix 1: labels (cases 2-4)**
+- **Cause:** the clipped pills in the T-061a previews came from the preview itself (too wide, wrong place). Even so, a few real pills were tight or past the edge:
+  - a04's action-board pills ended at y 481.
+  - Several right/left pills relied on the engine's 6-unit side clamp.
+- **Check:** `character/acara-t061/cek-label.mts` mirrors MissionScene: width = text + 44, centre `(x + labelDx, y + h/2 + 18 + labelDy)`, 34 high + 4 base. It uses a conservative per-character width and checks id/en/zh. It now reports every label of a02-a07 at least 8 units inside the scene, with no overlaps.
+- **Anchors moved:**
+
+| Case | Label | Change |
+| --- | --- | --- |
+| a02 | Selfie kurir | `labelDx +45` |
+| a02 | Label peti | `labelDx -24` |
+| a02 | Tumpukan peti | `labelDx -16` |
+| a04 | Foto peti | `labelDx -21` |
+| a04 | Bukti terima | `labelDx -21` |
+| a04 | Action boards | `labelDy -10` |
+| a05 | Lanjut dinilai | `labelDx +3` |
+| a06 | Item label rows | top `-25`, bottom `+21` (the old bottom row ended at y 480) |
+| a07 | Polis A/B/C | `labelDy -24` |
+| a07 | Kardus basah | `labelDx +33`, `labelDy -10` |
+
+- **Previews:** they now draw the pills where the engine puts them.
+
+**Fix 1: truck (cases 2 and 4)**
+- The Episode 2 trailer is the story's crashed truck. In `bangun.mjs` the smashed windshield is repainted as clean glass and the crumpled bumper replaced with a straight one before the 2:1 reduction (`truk.gen.ts`).
+
+**Cases 5-7**
+- **a05 (office):**
+  - Background: the Episode 2 office wall (`a05.gen.ts`) above a pixel desk seen from above, with the stamp rack, three work mats and a tiled floor (`a05.piksel.ts`).
+  - Objects: three pixel stamps (✓ / ✕ / ?, same ink colours), identical case folders A-C, and identical upright policy cards.
+- **a06 (heavy-equipment warehouse):**
+  - Background: pixel warehouse with m08 geometry (`gudang.piksel.ts`).
+  - Props: a pixel forklift GT-220, the bent rack, a clock and five equal action items (`a06.piksel.ts`).
+  - Warehouse head: a new person from the side cast "bima", with a yellow helmet, orange hi-vis vest and worried face (`a06.gen.ts`).
+- **a07 (flooded warehouse):**
+  - Background: pixel warehouse with m07 geometry, including the waterline, the flooded street with sandbags, the wet shelf boxes, the floor puddle, the mop and bucket, and the dry table with its card rack.
+  - Objects: identical stone-grey binders, identical policy cards, the text-free incident report and the wet boxes (`a07.piksel.ts`).
+- **Font:** `teksBesar` (piksel-umum.ts) now carries the full 5×7 font (A-Z, 0-9 and punctuation from the T-053 wireframe font), so no in-scene text depends on the 8-letter `HURUF_HALUS`.
+- **Previews** (`character/acara-t061/`, see README):
+  - Before: `sebelum-a05..a07.svg`, from the committed vector scenes via `git show HEAD`.
+  - After: `sesudah-a02..a07-2x.png`.
+
+**Risks**
+- The pill widths are estimates; the real font may be narrower, which only adds margin.
+- In a06 the top-row pills now cover the items' base strip.
+- The a05 policy cards have lost their tilt and the "POLIS" word, because the 5×7 letters do not fit on a 64-unit card.
+- Not checked in a browser.
+- Cases 8-10 follow as T-061c, using the same helpers: `gudang.piksel.ts`, `piksel-umum.ts`, `rle.ts`, `bangun.mjs` and `cek-label.mts`.

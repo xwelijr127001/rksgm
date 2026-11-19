@@ -55,7 +55,8 @@ function sceneJepretKiriman(): SceneSpec {
         // Label di atas tumpukan (di tepi trotoar), bukan di bawah: di bawahnya ada peti #5 & label kiriman.
         id: 'tumpukan', role: 'option', stepId: 'bukti', refId: 'tumpukan', fx: 'photo',
         x: 535, y: 300, art: gambar('a02-tumpukan-piksel', tumpukanA02()), label: 'Tumpukan peti', depth: 20,
-        labelDy: -133,
+        // T-061b: en 'Stack of crates' (~217 lebar pil) muat dengan tepi kanan >= 8: pusat label 519.
+        labelDy: -133, labelDx: -16,
       },
       {
         // Di depan pojok kiri bawah tumpukan; depth lebih tinggi supaya ketukan di sini tidak jatuh ke tumpukan.
@@ -66,10 +67,14 @@ function sceneJepretKiriman(): SceneSpec {
       {
         id: 'label', role: 'option', stepId: 'bukti', refId: 'label', fx: 'photo',
         x: 570, y: 396, art: gambar('a02-label-piksel', labelA02()), label: 'Label peti', depth: 24,
+        // T-061b: pil (en 'Crate label' ~171) di dalam adegan dengan tepi >= 8: pusat 546; bawah pil 471 (tepi 9).
+        labelDx: -24,
       },
       {
         id: 'selfie', role: 'option', stepId: 'bukti', refId: 'selfie', fx: 'photo',
         x: 66, y: 352, art: gambar('a02-selfie-piksel', selfieA02()), label: 'Selfie kurir', depth: 20,
+        // T-061b: pil (en 'Courier selfie' ~205) tidak terpotong tepi kiri: pusat 111, tepi kiri >= 8.
+        labelDx: 45,
       },
     ],
   };
