@@ -57,3 +57,125 @@
   .misi[data-paket="acara"][data-mode="play"] .aksi-baris .primary-action { min-height: 48px; padding-top: 10px; padding-bottom: 10px; }
   .misi[data-paket="acara"][data-mode="play"] .aksi-ket { font-size: 12px; line-height: 16px; min-height: 0; margin-top: 4px; }
 }
+
+/* ------------------------------------------------------------------ T-060: HP tegak = SATU layar di semua fase, 10 kasus
+   Owner (iPhone, 19 Nov): "make all 10 cases need no scrolling". The page is one 100dvh flex column (header, mission, bottom
+   bar); the SCENE takes whatever height is left (container query) instead of a fixed 336 x 252, so the longest panel of each
+   case still fits. Answering: task card, scene, panel (choice / count / numbers), submit bar. Briefing / waiting / result:
+   panel first, the scene below as a strip in the remaining height, hidden when less than 72 px is left. If a text is longer
+   than the calculation, the scene reaches 0 first and only then the page would scroll (nothing is clipped). Safe areas: the
+   bar keeps env(safe-area-inset-bottom); dvh follows the Safari toolbars. Per-case heights: team/HANDOFF.md "## T-060". */
+.item-chip-no { display: none; }
+@media (max-width: 899px) and (orientation: portrait) {
+  .player-ui.kompak:not(.solo-layar):has(.misi[data-paket="acara"]) { height: 100dvh; display: flex; flex-direction: column; }
+  .player-ui.kompak:not(.solo-layar):has(.misi[data-paket="acara"]) > * { flex: none; }
+  .player-ui.kompak:not(.solo-layar):has(.misi[data-paket="acara"]) > .misi-main { flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column; padding-bottom: 0; }
+  .player-ui.kompak:not(.solo-layar) .misi-main:has(> .misi[data-paket="acara"]) > .misi-judul { flex: none; padding: 2px 16px 4px; }
+  .player-ui.kompak:not(.solo-layar) .misi-main:has(> .misi[data-paket="acara"]) > .misi-judul > div { min-width: 0; }
+  .player-ui.kompak:not(.solo-layar) .misi-main:has(> .misi[data-paket="acara"]) > .misi-judul h1 { margin: 0; font-size: 18px; line-height: 22px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .player-ui.kompak:not(.solo-layar) .misi-main:has(> .misi[data-paket="acara"]) > .misi-judul .eyebrow { display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  /* answering: the question card carries the task; the round title is in the briefing and the header timer (saves 42 px) */
+  .player-ui.kompak:not(.solo-layar) .misi-main:has(> .misi[data-paket="acara"]:is([data-mode="play"], [data-mode="paused"])) > .misi-judul { display: none; }
+
+  .player-ui.kompak:not(.solo-layar) .misi[data-paket="acara"] { flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column; }
+  .player-ui.kompak:not(.solo-layar) .misi[data-paket="acara"] > * { flex: none; }
+  .player-ui.kompak:not(.solo-layar) .misi[data-paket="acara"] > .misi-tugas { order: 1; }
+  .player-ui.kompak:not(.solo-layar) .misi[data-paket="acara"] > .misi-adegan { order: 2; }
+  .player-ui.kompak:not(.solo-layar) .misi[data-paket="acara"] > .misi-panel { order: 3; }
+  .player-ui.kompak:not(.solo-layar) .misi[data-paket="acara"] > .misi-aksi { order: 4; position: static; margin-top: 6px; box-shadow: none; }
+  .player-ui.kompak:not(.solo-layar) .misi[data-paket="acara"]:not([data-mode="play"]):not([data-mode="paused"]) > .misi-panel { order: 1; }
+
+  /* the scene = the rest of the height; the frame keeps 4:3 and is never narrower than 160 px (stage resize) */
+  .player-ui.kompak:not(.solo-layar) .misi[data-paket="acara"] > .misi-adegan {
+    flex: 1 1 0; min-height: 0; container-type: size; overflow: hidden;
+    display: flex; flex-direction: column; align-items: center; justify-content: flex-start;
+    margin: 0 12px 4px; width: auto; padding: 3px 3px 7px;
+  }
+  .player-ui.kompak:not(.solo-layar) .misi[data-paket="acara"] > .misi-adegan > .adegan { flex: none; width: max(160px, min(100cqw, calc((100cqh - var(--adegan-ket, 0px)) * 4 / 3))); }
+  .player-ui.kompak:not(.solo-layar) .misi[data-paket="acara"][data-mode="intro"] > .misi-adegan { --adegan-ket: 40px; }
+  .player-ui.kompak:not(.solo-layar) .misi[data-paket="acara"] > .misi-adegan > .adegan-ket { margin: 6px 0 0; font-size: 12px; line-height: 16px; }
+  /* result / waiting / locked: a strip across the full width (middle band of the scene); legend off (marks are in the lists) */
+  .player-ui.kompak:not(.solo-layar) .misi[data-paket="acara"]:is([data-mode="reveal"], [data-mode="sent"], [data-mode="locked"]) > .misi-adegan { justify-content: center; }
+  .player-ui.kompak:not(.solo-layar) .misi[data-paket="acara"]:is([data-mode="reveal"], [data-mode="sent"], [data-mode="locked"]) > .misi-adegan > .adegan { width: 100%; }
+  .player-ui.kompak:not(.solo-layar) .misi[data-paket="acara"][data-mode="reveal"] > .misi-adegan > .adegan-ket { display: none; }
+  @container (max-height: 72px) { .player-ui.kompak:not(.solo-layar) .misi[data-paket="acara"] .misi-adegan > * { visibility: hidden; } }
+
+  /* answering, compact: question card */
+  .player-ui.kompak:not(.solo-layar) .misi[data-paket="acara"]:is([data-mode="play"], [data-mode="paused"]) .misi-tugas { margin: 6px 12px 6px; padding: 8px 10px 12px; gap: 5px; }
+  .player-ui.kompak:not(.solo-layar) .misi[data-paket="acara"]:is([data-mode="play"], [data-mode="paused"]) .tugas-pemandu { display: none; }
+  .player-ui.kompak:not(.solo-layar) .misi[data-paket="acara"]:is([data-mode="play"], [data-mode="paused"]) .misi-langkah { flex-direction: row; align-items: center; gap: 8px; font-size: 12px; line-height: 16px; }
+  .player-ui.kompak:not(.solo-layar) .misi[data-paket="acara"]:is([data-mode="play"], [data-mode="paused"]) .misi-tanya { font-size: 16px; line-height: 21px; margin: 0 0 2px; }
+  .player-ui.kompak:not(.solo-layar) .misi[data-paket="acara"]:is([data-mode="play"], [data-mode="paused"]) .misi-petunjuk { font-size: 13px; line-height: 18px; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 1; overflow: hidden; }
+  .player-ui.kompak:not(.solo-layar) .misi[data-paket="acara"]:is([data-mode="play"], [data-mode="paused"]) .tugas-alat { flex-wrap: nowrap; gap: 6px; }
+  .player-ui.kompak:not(.solo-layar) .misi[data-paket="acara"]:is([data-mode="play"], [data-mode="paused"]) .alat { min-height: 40px; padding: 4px 9px; font-size: 13px; white-space: nowrap; }
+  /* answering, compact: panel controls (choices 44 px, numbers in 3 columns, assign tabs = numbered chips) */
+  .player-ui.kompak:not(.solo-layar) .misi[data-paket="acara"]:is([data-mode="play"], [data-mode="paused"]) .misi-panel { padding: 4px 16px 0; }
+  .player-ui.kompak:not(.solo-layar) .misi[data-paket="acara"]:is([data-mode="play"], [data-mode="paused"]) .pilihan-status { min-height: 36px; margin: 0 0 6px; padding: 4px 10px; }
+  .player-ui.kompak:not(.solo-layar) .misi[data-paket="acara"]:is([data-mode="play"], [data-mode="paused"]) .pilihan-teks { font-size: 14px; line-height: 18px; }
+  .player-ui.kompak:not(.solo-layar) .misi[data-paket="acara"]:is([data-mode="play"], [data-mode="paused"]) .kontrol { gap: 6px; }
+  .player-ui.kompak:not(.solo-layar) .misi[data-paket="acara"]:is([data-mode="play"], [data-mode="paused"]) .opsi-daftar { gap: 5px; }
+  .player-ui.kompak:not(.solo-layar) .misi[data-paket="acara"]:is([data-mode="play"], [data-mode="paused"]) .opsi { min-height: 44px; padding: 5px 10px; gap: 8px; font-size: 14px; line-height: 18px; }
+  .player-ui.kompak:not(.solo-layar) .misi[data-paket="acara"]:is([data-mode="play"], [data-mode="paused"]) :is(.opsi-ikon, .opsi-kata) { display: none; }
+  .player-ui.kompak:not(.solo-layar) .misi[data-paket="acara"]:is([data-mode="play"], [data-mode="paused"]) .opsi-tanda { width: 22px; height: 22px; flex-basis: 22px; }
+  .player-ui.kompak:not(.solo-layar) .misi[data-paket="acara"]:is([data-mode="play"], [data-mode="paused"]) .angka-pilihan { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; }
+  .player-ui.kompak:not(.solo-layar) .misi[data-paket="acara"]:is([data-mode="play"], [data-mode="paused"]) .angka { min-height: 44px; font-size: 15px; padding: 0 4px; }
+  .player-ui.kompak:not(.solo-layar) .misi[data-paket="acara"]:is([data-mode="play"], [data-mode="paused"]) .daftar-alternatif > summary { min-height: 40px; font-size: 14px; }
+  .player-ui.kompak:not(.solo-layar) .misi[data-paket="acara"]:is([data-mode="play"], [data-mode="paused"]) .item-tab { flex-wrap: nowrap; gap: 6px; }
+  .player-ui.kompak:not(.solo-layar) .misi[data-paket="acara"]:is([data-mode="play"], [data-mode="paused"]) .item-chip { min-width: 44px; min-height: 40px; justify-content: center; padding: 4px 10px; }
+  .player-ui.kompak:not(.solo-layar) .misi[data-paket="acara"]:is([data-mode="play"], [data-mode="paused"]) .item-chip-no { display: inline; font-size: 15px; }
+  .player-ui.kompak:not(.solo-layar) .misi[data-paket="acara"]:is([data-mode="play"], [data-mode="paused"]) .item-chip > svg:not(:last-child) { display: none; }
+  .player-ui.kompak:not(.solo-layar) .misi[data-paket="acara"]:is([data-mode="play"], [data-mode="paused"]) .item-chip-label {
+    position: absolute; width: 1px; height: 1px; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap;
+  }
+  .player-ui.kompak:not(.solo-layar) .misi[data-paket="acara"]:is([data-mode="play"], [data-mode="paused"]) .item-panel { gap: 6px; }
+  .player-ui.kompak:not(.solo-layar) .misi[data-paket="acara"]:is([data-mode="play"], [data-mode="paused"]) .item-kini { padding: 4px 10px; font-size: 14px; }
+  .player-ui.kompak:not(.solo-layar) .misi[data-paket="acara"]:is([data-mode="play"], [data-mode="paused"]) .item-kini .text-button { min-height: 40px; }
+  /* multi (a01, a02): slots 40 px */
+  .player-ui.kompak:not(.solo-layar) .misi[data-paket="acara"]:is([data-mode="play"], [data-mode="paused"]) .baki { padding: 6px 10px; }
+  .player-ui.kompak:not(.solo-layar) .misi[data-paket="acara"]:is([data-mode="play"], [data-mode="paused"]) .baki-kepala { margin-bottom: 4px; }
+  .player-ui.kompak:not(.solo-layar) .misi[data-paket="acara"]:is([data-mode="play"], [data-mode="paused"]) .slot { min-height: 40px; padding: 2px 2px 2px 8px; font-size: 14px; }
+  .player-ui.kompak:not(.solo-layar) .misi[data-paket="acara"]:is([data-mode="play"], [data-mode="paused"]) .slot-hapus { min-height: 36px; padding: 4px 8px; }
+  /* submit bar */
+  .player-ui.kompak:not(.solo-layar) .misi[data-paket="acara"][data-mode="play"] .misi-aksi { padding: 6px 16px calc(6px + env(safe-area-inset-bottom)); }
+  .player-ui.kompak:not(.solo-layar) .misi[data-paket="acara"][data-mode="play"] .aksi-baris .primary-action { min-height: 48px; padding-top: 10px; padding-bottom: 10px; }
+  .player-ui.kompak:not(.solo-layar) .misi[data-paket="acara"][data-mode="play"] .aksi-kembali { flex-basis: 48px; min-height: 48px; }
+  .player-ui.kompak:not(.solo-layar) .misi[data-paket="acara"][data-mode="play"] .aksi-ket { font-size: 12px; line-height: 16px; min-height: 0; margin-top: 3px; }
+  /* briefing / waiting / result: compact panels */
+  .player-ui.kompak:not(.solo-layar) .misi[data-paket="acara"]:not([data-mode="play"]):not([data-mode="paused"]) .misi-panel { padding: 4px 16px 6px; }
+  .player-ui.kompak:not(.solo-layar) .misi[data-paket="acara"][data-mode="intro"] .status-panel { gap: 8px; }
+  .player-ui.kompak:not(.solo-layar) .misi[data-paket="acara"][data-mode="intro"] .status-panel p { font-size: 14px; line-height: 19px; }
+  .player-ui.kompak:not(.solo-layar) .misi[data-paket="acara"][data-mode="intro"] .status-tugas h2 { font-size: 16px; line-height: 21px; margin: 0; }
+}
+
+/* T-060 (2): more room for the assign steps (a03, a05, a06, a07, a08, a10). Defaults outside the phone layout: wrapper inert,
+   counter hidden. On the phone: progress "n/m" at the end of the numbered tab row (the separate status chip goes), the
+   step hint only when the step is answered in the scene, step dots without the text, current part on one line. */
+.item-tab-baris { display: contents; }
+.item-hitung { display: none; }
+@media (max-width: 899px) and (orientation: portrait) {
+  .player-ui.kompak:not(.solo-layar) .misi[data-paket="acara"]:is([data-mode="play"], [data-mode="paused"]) .pilihan-status[data-jenis="assign"] { display: none; }
+  .player-ui.kompak:not(.solo-layar) .misi[data-paket="acara"]:is([data-mode="play"], [data-mode="paused"]) .item-tab-baris { display: flex; align-items: center; gap: 8px; }
+  .player-ui.kompak:not(.solo-layar) .misi[data-paket="acara"]:is([data-mode="play"], [data-mode="paused"]) .item-hitung {
+    display: inline-flex; align-items: center; margin-left: auto; min-height: 32px; padding: 2px 8px; font-size: 13px; font-weight: 800;
+    background: #fff1e2; color: #7a3e00; box-shadow: inset 0 0 0 2px #ecd5cb;
+  }
+  .player-ui.kompak:not(.solo-layar) .misi[data-paket="acara"]:is([data-mode="play"], [data-mode="paused"]) .misi-tugas:not([data-di-adegan]) .misi-petunjuk { display: none; }
+  .player-ui.kompak:not(.solo-layar) .misi[data-paket="acara"]:is([data-mode="play"], [data-mode="paused"]) .misi-langkah > span {
+    position: absolute; width: 1px; height: 1px; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap;
+  }
+  .player-ui.kompak:not(.solo-layar) .misi[data-paket="acara"]:is([data-mode="play"], [data-mode="paused"]) .misi-langkah i { width: 18px; }
+  .player-ui.kompak:not(.solo-layar) .misi[data-paket="acara"]:is([data-mode="play"], [data-mode="paused"]) .item-kini small {
+    position: absolute; width: 1px; height: 1px; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap;
+  }
+  .player-ui.kompak:not(.solo-layar) .misi[data-paket="acara"]:is([data-mode="play"], [data-mode="paused"]) .item-kini > span { min-width: 0; }
+  .player-ui.kompak:not(.solo-layar) .misi[data-paket="acara"]:is([data-mode="play"], [data-mode="paused"]) .item-kini strong { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; line-height: 20px; }
+  .player-ui.kompak:not(.solo-layar) .misi[data-paket="acara"]:is([data-mode="play"], [data-mode="paused"]) .item-kini { min-height: 32px; padding: 2px 10px; }
+  .player-ui.kompak:not(.solo-layar) .misi[data-paket="acara"]:is([data-mode="play"], [data-mode="paused"]) .item-kini .text-button { min-height: 32px; padding: 2px 6px; }
+}
+
+/* T-060 (3): short phones (<= 660 px tall, e.g. 360 x 640): the grey status sentence under the submit key goes (it stays the
+   key aria-describedby); the "Lewati dulu" / "Waktu hampir habis" buttons in that row stay. Saves 16 px for a10 (assign). */
+@media (max-width: 899px) and (orientation: portrait) and (max-height: 660px) {
+  .player-ui.kompak:not(.solo-layar) .misi[data-paket="acara"][data-mode="play"] .aksi-ket > span { display: none; }
+  .player-ui.kompak:not(.solo-layar) .misi[data-paket="acara"][data-mode="play"] .aksi-ket:not(:has(button)) { margin-top: 0; }
+}

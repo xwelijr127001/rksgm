@@ -181,6 +181,9 @@ const kamus: KamusRuang = {
     lihatRincian: 'Lihat rinciannya',
     kenapaTepat: 'Kenapa ini tepat?',
     kenapaBegitu: 'Kenapa begitu?',
+    // T-060: daftar hasil acara di HP dipotong 3 butir; sisanya di lipatan Kenapa.
+    lainDiKenapa: '+{n} lagi di bawah',
+    daftarLengkap: 'Daftar lengkap',
     intinya: 'Intinya:',
 
     // Play: panel status pertandingan
@@ -441,6 +444,8 @@ const kamus: KamusRuang = {
     lihatRincian: 'See the details',
     kenapaTepat: 'Why is this correct?',
     kenapaBegitu: 'Why is that?',
+    lainDiKenapa: '+{n} more below',
+    daftarLengkap: 'Full list',
     intinya: 'Key point:',
 
     galatKirim: 'The server has not received your report yet.',
@@ -692,6 +697,8 @@ const kamus: KamusRuang = {
     lihatRincian: '查看详情',
     kenapaTepat: '为什么这样是对的？',
     kenapaBegitu: '为什么是这样？',
+    lainDiKenapa: '另有 {n} 项见下方',
+    daftarLengkap: '完整列表',
     intinya: '要点：',
 
     galatKirim: '服务器尚未收到你的报告。',

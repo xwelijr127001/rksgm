@@ -3273,3 +3273,33 @@ Built by the Designer; uncommitted. Owner rule: nothing was opened in a browser.
 - Long text is clamped or clipped inside the stage rather than scrolled. Height budgets are written in comments in ronde.css.
 - The scene inside the scaled stage keeps its Phaser/image size logic at 1000 px wide (4:3 gives 750 px tall). Scenes with a different aspect are centred and clipped by the card.
 - Tests or selectors that target the old in-match markup will need updating: `.pj-titik`, `.pj-kirim`, the projector Leaderboard and CityMap panels, and the `pj-juri`/`pj-ceo` chibis. None were run.
+
+## T-060 (2026-11-19): event mission phone screens without scrolling (all 10 cases)
+
+Owner (iPhone, live 05c807a): the case-1 result scrolled (title, 190 px Bu Isti, verdict card, lists, Intinya, Kenapa, "Peringkat sebentar lagi", then the scene below the fold). Shared fix for all 10 cases; desktop, landscape phones and solo practice (`.solo-layar`) unchanged. Scene art (`scenes/acara/a0N*.ts`) and `shared/acara/*` untouched.
+
+- **Layout** (`client/src/game/acara-piksel.css`, block "T-060"): on portrait phones / tablets the event page (`.player-ui.kompak` with `.misi[data-paket="acara"]`, not solo) is one `100dvh` flex column. Header, task card, panel and submit bar take their height; the SCENE takes the rest (`container-type: size`, frame 4:3, `width = min(100cqw, 100cqh * 4/3)`, never narrower than 160 px so the stage resize stays sane) and is hidden when less than 72 px is left (`@container`). If a text were longer than calculated, the scene reaches 0 first and only then the page scrolls (nothing clipped). The submit bar is no longer sticky (it is the last flex item); `env(safe-area-inset-bottom)` kept; `dvh` follows Safari's toolbars.
+- **Answering:** round title hidden (timer in the header, title in the briefing); compact task card (step dots without text, prompt 16 px, the generic hint only when the step is answered in the scene: `data-di-adegan`, tools row 40 px); panel controls compact: choices 44 px / 14 px, number chips 3 per row, assign tabs = numbered chips (`.item-chip-no`, label stays the accessible name and is shown in "Kategori untuk" on one line), progress "n/m" at the end of the tab row (`.item-hitung`, the separate status chip is hidden for assign), multi slots 40 px; submit key 48 px. On screens <= 660 px tall the grey sentence under the key is hidden (still its aria-describedby); "Lewati dulu" / "Waktu hampir habis" stay.
+- **Result** (`client/src/game/HasilAcara.tsx`, `hasil-acara.css` "T-060"): one row = Bu Isti 44 px + verdict chip + points (the verdict sentence and "Bu Isti · Juri" stay for screen readers); each list max 3 one-line items + "+n lagi di bawah", the full lists then also in the "Kenapa" fold (`misi.lainDiKenapa`, `misi.daftarLengkap`, id/en/zh); Intinya card; one footer row = "Kenapa ini tepat?" key + the small leaderboard note (Play's `catatan`, no separate line); the opened fold scrolls inside (`34dvh`). The scene below is a full-width strip (middle band) in the rest of the height, hidden under 72 px; the legend is off on the phone result (marks are in the lists).
+- **Briefing / waiting:** panel first (compact text), scene strip in the rest.
+
+**Fit table** (calculation from the CSS heights + the Indonesian text lengths of each case, longest step; header 56 px; scene = width x height that is left; result = all correct .. worst partial with three lists; strip 0 = hidden):
+
+| case | 360x640 answering (content, scene) | 360x640 result (content, strip) | 390x700 answering | 390x700 result |
+|---|---|---|---|---|
+| a01 multi | 443, scene 244x183 | 372..432, strip 248/194 | 459, 303x227 | 372..432, 270/254 |
+| a02 multi | 489, 183x137 | 392..452, 234/174 | 505, 241x181 | 392..452, 270/234 |
+| a03 assign | 539, 116x87 | 412..492, 214/134 | 549, 183x137 | 412..492, 270/194 |
+| a04 single (step 3) | 537, 119x89 | 413..473, 213/153 | 553, 177x133 | 392..452, 270/234 |
+| a05 assign | 521, 140x105 | 454..534, 172/92 | 516, 227x170 | 454..534, 232/152 |
+| a06 assign 5x5 | 597, scene hidden | 433..533, 193/93 | 613, 97x73 | 412..512, 270/174 |
+| a07 single (step 2) | 579, hidden | 412..492, 214/134 | 580, 141x106 | 412..492, 270/194 |
+| a08 single (step 2) | 591, hidden | 454..594, 172/0 | 589, 129x97 | 433..573, 253/113 |
+| a09 number | 471, 207x155 | 413..473, 213/153 | 487, 265x199 | 413..473, 270/213 |
+| a10 assign 4x5 | 619, hidden | 433..633, 193/0 | 632, 72x54 (hidden) | 433..633, 253/0 |
+
+Briefing at 360x640: 426..483 px content, strip 143..200 (a09 has the longest story).
+
+**Cannot show the scene while answering at 360x640** (content still fits, no scroll): a06 (5 parts x 5 order numbers), a07 / a08 step 2 (four long answer sentences, 50..112 chars), a10 (5 buckets of up to 64 chars). The answer lists themselves need the height; the scene is hidden there and "Dokumen" / "Cerita" stay one tap away. At 390x700 they show a small scene except a10 (72x54, hidden).
+
+**Gate (owner rule):** typecheck 0; `client/dist` rebuilt = exact copy. Heights are calculated, NOT measured in a browser or on a phone. Not committed.

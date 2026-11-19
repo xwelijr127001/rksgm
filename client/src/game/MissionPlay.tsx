@@ -590,7 +590,8 @@ export function MissionPlay(props: MissionPlayProps) {
   return (
     <div ref={akar} className={`misi misi-${mode}`} data-mode={mode} data-fokus={fokus} data-visual={visual} data-paket={/^a\d\d-/.test(mission.id) ? 'acara' : undefined}>
       {menjawab ? (
-        <header className="misi-tugas">
+        // T-060: data-di-adegan = this step is answered in the scene (its hint names the scene action; kept on event phones).
+        <header className="misi-tugas" data-di-adegan={langkahDiAdegan ? '' : undefined}>
           {mission.steps.length > 1 ? (
             <div className="misi-langkah" aria-label={t('misi.pertanyaanKe', { n: cursor + 1, total: mission.steps.length })}>
               <span>{t('misi.pertanyaanKe', { n: cursor + 1, total: mission.steps.length })}</span>
@@ -872,7 +873,7 @@ function StatusPilihan({ step, value }: { step: StepDef; value: StepAnswer | und
     const n = step.items.filter((i) => asRecord(value)[i.id]).length;
     if (!n) {
       return (
-        <p className="pilihan-status">
+        <p className="pilihan-status" data-jenis="assign">
           <span className="pilihan-ikon pilihan-ikon-belum" aria-hidden="true" />
           <span className="pilihan-teks"><span className="pilihan-label">{t('misi.kemajuan')}</span> <b>{t('misi.bagianDitandai', { n: 0, total: step.items.length })}</b></span>
         </p>
@@ -881,13 +882,13 @@ function StatusPilihan({ step, value }: { step: StepDef; value: StepAnswer | und
     isi = t('misi.bagianDitandai', { n, total: step.items.length });
   }
   return isi ? (
-    <p className="pilihan-status terisi">
+    <p className="pilihan-status terisi" data-jenis={step.kind}>
       <span className="pilihan-ikon" aria-hidden="true"><Icon name="cek" size={16} /></span>
       <span className="pilihan-teks"><span className="pilihan-label">{step.kind === 'assign' ? t('misi.kemajuan') : t('misi.pilihanmu')}</span> <b>{isi}</b></span>
       <span className="pilihan-chip">{t('misi.tersimpan')}</span>
     </p>
   ) : (
-    <p className="pilihan-status">
+    <p className="pilihan-status" data-jenis={step.kind}>
       <span className="pilihan-ikon pilihan-ikon-belum" aria-hidden="true" />
       <span className="pilihan-teks"><span className="pilihan-label">{t('misi.pilihanmu')}</span> <b>{t('misi.belumAda')}</b></span>
     </p>
@@ -1315,18 +1316,25 @@ function KontrolLangkah({ step, seed, value, fx, adeganAktif, memuat = false, an
     const adaKategori = kategori.some((b) => b.id === peta[item.id]);
     return (
       <div className="kontrol">
-        {/* Tab otomatis: panah kiri/kanan memindah fokus sekaligus membuka bagian itu. */}
+        {/* Tab otomatis: panah kiri/kanan memindah fokus sekaligus membuka bagian itu. T-060: on event-mission phones the
+            progress "n/m" sits at the end of this row (item-hitung) instead of the separate status chip. */}
+        <div className="item-tab-baris">
         <div className="item-tab" role="tablist" aria-label={t('misi.bagianDinilai')} onKeyDown={(e) => panahGrup(e, 'tab', (el) => { const id = el.dataset.item; if (id) onFokusItem(id); })}>
-          {step.items.map((it) => (
+          {step.items.map((it, nomor) => (
             <button
               key={it.id} type="button" role="tab" id={idTab(it.id)} data-item={it.id} aria-selected={it.id === item.id} aria-controls={idPanel}
               tabIndex={it.id === item.id ? 0 : -1} className={'item-chip' + (it.id === item.id ? ' kini' : '') + (peta[it.id] ? ' sudah' : '')} onClick={() => onFokusItem(it.id)}
             >
+              {/* T-060: event-mission phones show only this number (acara-piksel.css); the label stays the accessible name and is
+                  shown in full in "Kategori untuk ..." below. Other layouts hide the number. */}
+              <b className="item-chip-no" aria-hidden="true">{nomor + 1}</b>
               {it.icon ? <Icon name={it.icon} size={18} /> : null}
-              <span>{it.label.split(' - ')[0]}</span>
+              <span className="item-chip-label">{it.label.split(' - ')[0]}</span>
               {peta[it.id] ? <Icon name="cek" size={16} /> : null}
             </button>
           ))}
+        </div>
+        <span className="item-hitung"><span aria-hidden="true">{step.items.filter((i) => peta[i.id]).length}/{step.items.length}</span><span className="sr-only">{t('misi.bagianDitandai', { n: step.items.filter((i) => peta[i.id]).length, total: step.items.length })}</span></span>
         </div>
         <div className="item-panel" role="tabpanel" id={idPanel} aria-labelledby={idTab(item.id)}>
           <div className="item-kini">

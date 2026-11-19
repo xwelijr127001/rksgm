@@ -33,12 +33,19 @@ function IkonPiksel({ jenis }: { jenis: 'tepat' | 'salah' | 'terlewat' | 'lampu'
   return <svg className={'ha-ikon ha-ikon-' + jenis} width="18" height="18" viewBox="0 0 12 12" shapeRendering="crispEdges" fill="currentColor" aria-hidden="true" focusable="false">{rect}</svg>;
 }
 
-function Daftar({ jenis, judul, isi }: { jenis: 'tepat' | 'salah' | 'terlewat'; judul: string; isi: BarisHasil[] }) {
+/** T-060: on a phone a list shows at most DAFTAR_MAKS items (one line each, hasil-acara.css); the rest are in the "Kenapa" fold. */
+const DAFTAR_MAKS = 3;
+
+function Daftar({ jenis, judul, isi, potong = false }: { jenis: 'tepat' | 'salah' | 'terlewat'; judul: string; isi: BarisHasil[]; potong?: boolean }) {
   if (!isi.length) return null;
+  const tampil = potong ? isi.slice(0, DAFTAR_MAKS) : isi;
   return (
     <section className="ha-daftar" data-jenis={jenis}>
       <h3><IkonPiksel jenis={jenis} />{tanpaTitikDua(judul)}</h3>
-      <ul>{isi.map((b, i) => <li key={i}>{b.teks}</li>)}</ul>
+      <ul>
+        {tampil.map((b, i) => <li key={i}>{b.teks}</li>)}
+        {tampil.length < isi.length ? <li className="ha-lagi">{t('misi.lainDiKenapa', { n: isi.length - tampil.length })}</li> : null}
+      </ul>
     </section>
   );
 }
@@ -69,8 +76,12 @@ export function HasilAcara({ mission, reveal, answer, akurasi, dijawab, poin = n
   const sisa = rinci.flatMap((h, i) => h.tepat.filter((p) => p.tanda !== 'dipilih').map((p) => ({ ...p, teks: awalan(i) + p.teks })));
   const kumpul = mission.steps.some((s) => s.kind === 'multi');
   const alasan = rinci.filter((h) => h.alasan?.trim());
+  // T-060: lists longer than DAFTAR_MAKS are cut on the phone (padat); the full lists then also live in the "Kenapa" fold.
+  const terpotong = padat && [benar, sisa, salah].some((d) => d.length > DAFTAR_MAKS);
+  const judulSisa = kumpul && benar.length ? t('misi.masihTerlewat') : t('misi.yangTepat');
   return (
-    <div className="hasil hasil-acara" data-hasil={st}>
+    <div className="hasil hasil-acara" data-hasil={st} data-padat={padat ? '' : undefined}>
+      {/* T-060: phone = one compact row: Bu Isti 44 px + verdict chip + points (the verdict sentence stays for screen readers). */}
       <div className="ha-kepala">
         {juri ? <img className="ha-isti" src={urlIsti} width={80} height={80} alt="" aria-hidden="true" /> : null}
         <div className="ha-gelembung">
@@ -90,9 +101,9 @@ export function HasilAcara({ mission, reveal, answer, akurasi, dijawab, poin = n
 
       <div className="ha-daftar-semua">
         {st === 'terlewat' && !salah.length && !benar.length ? <p className="ha-kosong"><IkonPiksel jenis="salah" />{t('misi.belumMenjawab')}</p> : null}
-        <Daftar jenis="tepat" judul={t('misi.sudahTepat')} isi={benar} />
-        <Daftar jenis="terlewat" judul={kumpul && benar.length ? t('misi.masihTerlewat') : t('misi.yangTepat')} isi={sisa} />
-        <Daftar jenis="salah" judul={t('misi.kamuPilih')} isi={salah} />
+        <Daftar jenis="tepat" judul={t('misi.sudahTepat')} isi={benar} potong={padat} />
+        <Daftar jenis="terlewat" judul={judulSisa} isi={sisa} potong={padat} />
+        <Daftar jenis="salah" judul={t('misi.kamuPilih')} isi={salah} potong={padat} />
       </div>
 
       <div className="ha-inti">
@@ -102,20 +113,31 @@ export function HasilAcara({ mission, reveal, answer, akurasi, dijawab, poin = n
 
       {aksi ? <div className="hasil-aksi">{aksi}</div> : null}
 
-      {alasan.length ? (
-        <details className="ha-kenapa">
-          <summary className="ha-kenapa-kunci">{st === 'tepat' ? t('misi.kenapaTepat') : t('misi.kenapaBegitu')}</summary>
-          <div className="ha-kenapa-isi">
-            {alasan.map((h, i) => (
-              <div key={h.stepId}>
-                {banyak ? <b>{i + 1}. {h.prompt}</b> : null}
-                <p>{h.alasan}</p>
-              </div>
-            ))}
-          </div>
-        </details>
-      ) : null}
-      {catatan}
+      {/* T-060: "Kenapa" key and the small leaderboard note share one footer row (no separate line). */}
+      <div className="ha-kaki">
+        {alasan.length || terpotong ? (
+          <details className="ha-kenapa">
+            <summary className="ha-kenapa-kunci">{st === 'tepat' ? t('misi.kenapaTepat') : t('misi.kenapaBegitu')}</summary>
+            <div className="ha-kenapa-isi">
+              {alasan.map((h, i) => (
+                <div key={h.stepId}>
+                  {banyak ? <b>{i + 1}. {h.prompt}</b> : null}
+                  <p>{h.alasan}</p>
+                </div>
+              ))}
+              {terpotong ? (
+                <div className="ha-kenapa-daftar">
+                  <b>{t('misi.daftarLengkap')}</b>
+                  <Daftar jenis="tepat" judul={t('misi.sudahTepat')} isi={benar} />
+                  <Daftar jenis="terlewat" judul={judulSisa} isi={sisa} />
+                  <Daftar jenis="salah" judul={t('misi.kamuPilih')} isi={salah} />
+                </div>
+              ) : null}
+            </div>
+          </details>
+        ) : null}
+        {catatan ? <div className="ha-catatan">{catatan}</div> : null}
+      </div>
     </div>
   );
 }

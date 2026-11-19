@@ -77,3 +77,40 @@
   .ha-daftar { padding: 4px 12px; box-shadow: none; background: none; }
   .ha-inti b { display: inline; margin-right: 6px; }
 }
+
+/* T-060 (owner iPhone 19 Nov: "make all 10 cases need no scrolling"): phone result of an event round (HasilMisi padat).
+   One compact row (Bu Isti 44 px + verdict chip + points; the verdict sentence stays for screen readers), each list at most
+   3 one-line items ("+n lagi" -> the full lists sit in the "Kenapa" fold), Intinya card, and one footer row with the "Kenapa"
+   key + the small leaderboard note. Heights at 360 px (id): row 46 + list block 30..250 + Intinya 62..125 + footer 44, gaps 8. */
+@media (max-width: 599px) {
+  .hasil-acara[data-padat] { gap: 8px; font-size: 15px; line-height: 1.4; }
+  .hasil-acara[data-padat] .ha-kepala { align-items: center; gap: 10px; }
+  .hasil-acara[data-padat] .ha-isti { width: 44px; height: 44px; box-shadow: inset 0 0 0 2px #ecd5cb, 0 3px 0 0 #ecd5cb; }
+  .hasil-acara[data-padat] .ha-gelembung { padding: 0; background: none; box-shadow: none; }
+  .hasil-acara[data-padat] .ha-gelembung::before { display: none; }
+  .hasil-acara[data-padat] :is(.ha-juri, .hasil-judul) {
+    position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0;
+  }
+  .hasil-acara[data-padat] .ha-chip-baris { margin: 0; flex-wrap: nowrap; }
+  .hasil-acara[data-padat] .ha-sub { font-size: 14px; line-height: 19px; }
+  .hasil-acara[data-padat] .ha-daftar-semua { padding: 4px 0; }
+  .hasil-acara[data-padat] .ha-daftar { padding: 2px 10px; }
+  .hasil-acara[data-padat] .ha-daftar h3 { margin: 0; font-size: 14px; line-height: 20px; }
+  .hasil-acara[data-padat] .ha-daftar li { padding-left: 14px; font-size: 15px; line-height: 20px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .hasil-acara[data-padat] .ha-daftar li.ha-lagi { font-size: 13px; color: #5f5f5f; }
+  .hasil-acara[data-padat] .ha-daftar li.ha-lagi::before { display: none; }
+  .hasil-acara[data-padat] .ha-inti { gap: 8px; padding: 8px 10px 11px; }
+  .hasil-acara[data-padat] .ha-inti-lampu { width: 28px; height: 28px; }
+  .hasil-acara[data-padat] .ha-inti p { font-size: 15px; line-height: 21px; }
+  .hasil-acara[data-padat] .ha-kaki { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 12px; }
+  .hasil-acara[data-padat] .ha-kenapa[open] { flex-basis: 100%; }
+  .hasil-acara[data-padat] .ha-kenapa-isi { max-height: 34dvh; }
+  .hasil-acara[data-padat] .ha-kenapa-daftar { display: grid; gap: 4px; }
+  .hasil-acara[data-padat] .ha-kenapa-daftar .ha-daftar li { white-space: normal; }
+  .hasil-acara[data-padat] .ha-catatan :is(p, .status-caption) { margin: 0; font-size: 12px; line-height: 16px; color: #5f5f5f; }
+}
+/* Footer row everywhere: the Kenapa key and the note side by side, the opened fold takes the full width. */
+.ha-kaki { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; }
+.ha-kaki:empty { display: none; }
+.ha-kenapa[open] { flex-basis: 100%; }
+.ha-kenapa-daftar { display: grid; gap: 6px; }
