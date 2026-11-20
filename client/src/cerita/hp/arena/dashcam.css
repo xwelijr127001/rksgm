@@ -1,4 +1,4 @@
-/* T-065 / T-067 / T-069: arena "Rekaman dashcam" (ArenaDashcam.tsx). T-069 (pemilik memilih gaya Claude Designer): GAYA T-065 (jalan
+/* T-065 / T-067 / T-069 / T-071 (tanah bergulir, lihat .dc-latar): arena "Rekaman dashcam" (ArenaDashcam.tsx). T-069 (pemilik memilih gaya Claude Designer): GAYA T-065 (jalan
    K08, bahu abu-hijau, pembatas & sprite kendaraan T-065, sudut kamera + lencana REKAM kanan atas) + dua rambu di bahu kiri dan nomor
    lajur 1-4 (character/dashcam-t065/bangun-t069.mjs). Adegan 336 x 240 (1 piksel seni = 1 px CSS) di tengah area: var --x0 = tepi kiri
    latar; di HP 360 area dalam bingkai = 330 px, jadi 3 px tiap sisi terpotong (rambu mulai x 5, aman).
@@ -11,10 +11,38 @@
 .dc-adegan { position: relative; margin: 0; height: 240px; border: 3px solid #212121; background: #8a8f84; overflow: hidden; image-rendering: pixelated; --x0: calc(50% - 168px); }
 .dc-isi { position: absolute; inset: 0; }
 .dc-isi > * { position: absolute; }
-.dc-latar { left: var(--x0); top: 0; width: 336px; height: 240px; background: var(--latar) no-repeat; }
+/* T-071: tanah bergulir ke bawah (kamera mengikuti truk). Dua lapisan dengan GESER yang sama (px utuh):
+   .dc-latar = ubin jalan 336 x 26 berulang (background-position-y); .dc-tanah = lapisan 336 x 528 (dua pasang rambu berjarak 288 +
+   truk kecil berhenti di y 310 = 22 + 288), mulai di top -288 (transform translateY). Geser: bingkai 1 & pita = 0; bingkai 2 = 245
+   (mobil sudah di depan truk); bingkai 3 / beku = 288 (truk kecil di y 22, rambu pasangan kedua di posisi rambu bingkai 1).
+   Rekaman: 0-3,3 s 245 px (74 px/s = satu periode garis 26 px tiap 0,35 s), lalu 23 / 14 / 6 px (melambat), diam di 4,5 s = benturan.
+   Tiap segmen steps(n) = 1 px per langkah: tetap tajam. Nomor lajur (.dc-nomor) = UI, tidak ikut. */
+.dc-latar { left: var(--x0); top: 0; width: 336px; height: 240px; background: var(--ubin) repeat-y 0 288px; }
+.dc-tanah { left: var(--x0); top: -288px; width: 336px; height: 528px; background: var(--rambu) no-repeat; transform: translateY(288px); }
+.dc-tanah > * { position: absolute; }
+.dc-adegan[data-bingkai="1"] .dc-latar, .dc-pita .dc-latar { background-position: 0 0; }
+.dc-adegan[data-bingkai="1"] .dc-tanah, .dc-pita .dc-tanah { transform: none; }
+.dc-adegan[data-bingkai="2"] .dc-latar { background-position: 0 245px; }
+.dc-adegan[data-bingkai="2"] .dc-tanah { transform: translateY(245px); }
+.dc-adegan[data-bingkai="jalan"] .dc-latar { animation: dc-gulir-latar 6s linear forwards; }
+.dc-adegan[data-bingkai="jalan"] .dc-tanah { animation: dc-gulir-tanah 6s linear forwards; }
+@keyframes dc-gulir-latar {
+  0% { background-position: 0 0; animation-timing-function: steps(245, end); }
+  55% { background-position: 0 245px; animation-timing-function: steps(23, end); }
+  62% { background-position: 0 268px; animation-timing-function: steps(14, end); }
+  69% { background-position: 0 282px; animation-timing-function: steps(6, end); }
+  75%, 100% { background-position: 0 288px; }
+}
+@keyframes dc-gulir-tanah {
+  0% { transform: translateY(0); animation-timing-function: steps(245, end); }
+  55% { transform: translateY(245px); animation-timing-function: steps(23, end); }
+  62% { transform: translateY(268px); animation-timing-function: steps(14, end); }
+  69% { transform: translateY(282px); animation-timing-function: steps(6, end); }
+  75%, 100% { transform: translateY(288px); }
+}
 
-/* truk kecil berhenti di lajur 1 (lampu hazard) */
-.dc-truk-kecil { top: 22px; width: 32px; height: 58px; background: var(--nyala) no-repeat; }
+/* truk kecil berhenti di lajur 1 (lampu hazard), di lapisan tanah */
+.dc-truk-kecil { top: 310px; width: 32px; height: 58px; background: var(--nyala) no-repeat; }
 .dc-adegan[data-bingkai="jalan"] .dc-truk-kecil { animation: dc-hazard .6s steps(1) infinite; }
 @keyframes dc-hazard { 0% { background-image: var(--nyala); } 50% { background-image: var(--mati); } }
 
