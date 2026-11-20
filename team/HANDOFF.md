@@ -4119,3 +4119,39 @@ Built by the Designer on top of 2853bcb; uncommitted. Owner rule: nothing was op
 - `lengan-t081-6x.png`: the arm and card enlarged, at the "place" moment.
 
 **Open:** the motion has not been seen running in a browser.
+
+## T-082 (2026-11-21): the handover arm is now part of Pak Darto's body (Designer)
+
+Built by the Designer on top of f7f09ef; uncommitted. Owner rule: nothing was opened in a browser. Gate: client typecheck 0 errors; client/dist rebuilt. Only `SerahDashcam` and the live sprite's hide flag change (auto-2-inv).
+
+**Which option:** option 2. Option 1 was not possible: Pak Darto has exactly one pose (standing, arms hanging) in the atlas and in `character/tokoh-samping-ep2-pixel-v1`; `wawancara-ep2-pixel-v1` holds only the room.
+
+**What was wrong (T-081):** a newly drawn hand rose from behind the table under the MIDDLE of his torso. It was attached to nothing he has, so it read as a disembodied hand.
+
+**Fix: an edit of his own sprite, built from his own pixels** (`character/investigator-t082/bangun.mts` → `seni/investigasi/darto-serah.png`, 3 frames of 71×92 art px, shown 2×).
+- **The arm is his real one.** It is the arm at the viewer's right: sleeve, rolled cuff, forearm and fist are already in his sprite, hidden below the table.
+- **The same arm, bent forward at the elbow:**
+  - the rolled cuff moves up the sleeve to the table edge (the upper arm is seen foreshortened);
+  - the forearm is compressed and angled inward toward the table centre, and widened so it keeps the arm's thickness;
+  - his own fist is kept at full size at its end.
+- **Result:** one continuous limb from the shoulder seam to the hand, in his exact plaid, outline colour and skin ramp. Nothing new is drawn and no extra hand exists.
+- **Frames:** 0 rest (the untouched sprite), 1 reach, 2 place the card.
+
+**Motion** (same 3.2 s): rest → reach (the card is under the fist) → place the card on the table → withdraw → rest. The card then slides alone to the laptop's side; the laptop opens and lights up as before.
+- While the edited frames show (about 1.2 s), the live sprite (breathing, blink) is hidden, then returns.
+- The laptop sits 8 px further right, so its last 8 px are off-stage.
+
+**Reduced motion:** his normal sprite, the card lying on the table, the laptop lit.
+
+**Removed:** the separate T-081 arm sprite `tangan-serah.png` and its clipped box.
+
+**Files:** `client/src/cerita/investigasi/ui/SerahDashcam.tsx`, `bukti-adegan.css` (handover block), `LayarKeterangan.tsx` (`data-serah` on the live sprite), `client/src/cerita/seni/investigasi/darto-serah.png` (new), `tangan-serah.png` (deleted), `character/investigator-t080/bangun.mts` (old arm block removed).
+
+**Previews** in `character/investigator-t082/`:
+- `darto-lengan-t082-6x.png`: his normal sprite next to the reach and place frames, at 6×.
+- `serah-t082-3x.png`: five moments on the stage (rest, reach, place, card sliding, laptop lit).
+
+**Open:**
+- Not seen in a browser; the frame swap in motion is unseen.
+- The hand is his own hanging fist, so it holds the card under closed fingers; there is no open-palm or pinching drawing.
+- At the swap the body can shift by up to 2 px, because the live sprite breathes and the edited frames do not.

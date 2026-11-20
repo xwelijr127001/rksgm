@@ -5,27 +5,27 @@
 /* ---------------------------------------------------------------- serah terima dashcam (koordinat panggung 336 x 236, pusat 50%) */
 .sd { position: absolute; inset: 0; pointer-events: none; }
 .sd > * { position: absolute; background-repeat: no-repeat; image-rendering: pixelated; }
-/* laptop pemain di kanan meja (menutupi cangkir): 4 bingkai 128 x 92, terbuka pada 1,4-2,1 s */
-.sd-laptop { left: calc(50% + 40px); bottom: 0; width: 128px; height: 92px; background-size: 512px 92px; background-position: -384px 0; animation: sd-buka 3.2s steps(1) both; }
+/* laptop pemain di kanan meja (menutupi cangkir; 8 px terakhirnya di luar panggung): 4 bingkai 128 x 92, terbuka pada 1,4-2,1 s */
+.sd-laptop { left: calc(50% + 48px); bottom: 0; width: 128px; height: 92px; background-size: 512px 92px; background-position: -384px 0; animation: sd-buka 3.2s steps(1) both; }
 @keyframes sd-buka { 0%, 44% { background-position: 0 0; } 51% { background-position: -128px 0; } 58% { background-position: -256px 0; } 65%, 100% { background-position: -384px 0; } }
 /* kaca layar bingkai terbuka: x 6..58, y 2..34 (seni) = 104 x 64 px */
 .sd-layar { position: absolute; left: 12px; top: 4px; width: 104px; height: 64px; display: grid; place-items: center; align-content: center; gap: 4px; background: #10231a; color: #c8f5d8; font: 700 14px/16px ui-monospace, Menlo, Consolas, monospace; text-align: center; animation: sd-nyala 3.2s steps(1) both; }
 .sd-layar i { width: 10px; height: 10px; background: #e0473b; animation: kt-kedip-rek 1s steps(1) infinite; }
 @keyframes sd-nyala { 0%, 82% { opacity: 0; } 83%, 100% { opacity: 1; } }
 @keyframes kt-kedip-rek { 50% { opacity: 0; } }
-/* T-081 lengan Pak Darto: wadah 32 x 46 berpotong, tepi atasnya = tepi belakang meja (y 170) di bawah badannya (badan selebar
-   -67..+63 px dari pusat pada tinggi itu; lengan di +8..+40, di antara buku catatan dan laptop). Lengan 32 x 30 (pangkal lengan baju pendek: dilihat memendek) bergeser dari
-   balik tepi (tak terlihat) ke meja dalam langkah piksel, lalu kembali. Kartu di ujung jari ikut; sesudah ditaruh, kartu di luar
-   wadah menggantikannya dan meluncur ke sisi laptop. Dasar (gerak dikurangi): lengan tak terlihat, kartu tergeletak di meja. */
-.sd-lengan { left: calc(50% + 8px); top: 170px; width: 32px; height: 46px; overflow: hidden; }
-.sd-lengan > * { position: absolute; background-repeat: no-repeat; image-rendering: pixelated; }
-.sd-tangan { left: 0; top: 0; width: 32px; height: 30px; background-size: 32px 30px; translate: 0 -48px; animation: sd-tangan 3.2s steps(6, end) both; }
-.sd-kartu-jari { left: 6px; top: 20px; width: 20px; height: 24px; background-size: 20px 24px; opacity: 0; translate: 0 -48px; animation: sd-kartu-jari 3.2s steps(6, end) both; }
-@keyframes sd-tangan { 0%, 6% { translate: 0 -48px; } 24%, 36% { translate: 0 0; } 50%, 100% { translate: 0 -48px; } }
-@keyframes sd-kartu-jari { 0%, 6% { opacity: 1; translate: 0 -48px; } 24%, 35% { opacity: 1; translate: 0 0; } 36%, 100% { opacity: 0; translate: 0 0; } }
-/* kartu memori di meja: muncul saat ditaruh (1,15 s), meluncur ke sisi laptop (1,6-2,2 s) dan terselip di tepinya */
-.sd-kartu { left: calc(50% + 14px); top: 190px; width: 20px; height: 24px; background-size: 20px 24px; animation: sd-kartu 3.2s ease-in-out both; }
-@keyframes sd-kartu { 0%, 35% { opacity: 0; translate: 0 0; } 36%, 50% { opacity: 1; translate: 0 0; } 70%, 100% { opacity: 1; translate: 20px 4px; } }
+/* T-082 badan Pak Darto dengan lengan menjulur: 142 x 184 (71 x 92 seni, 2x) tepat di atas sprite hidupnya (.kt-saksi: left 50%,
+   top 26, lebar 142). Bingkai: 1 menjulur (0,2-0,45 s), 2 menaruh kartu (0,45-1,15 s), 1 menarik tangan (1,15-1,4 s); di luar itu
+   tak terlihat dan sprite hidup yang tampil. Sprite hidup disembunyikan pada rentang yang sama (data-serah). */
+.sd-badan { left: calc(50% - 71px); top: 26px; width: 142px; height: 184px; background-size: 426px 184px; background-position: -142px 0; opacity: 0; animation: sd-badan 3.2s steps(1) both; }
+@keyframes sd-badan { 0% { opacity: 0; } 6% { opacity: 1; background-position: -142px 0; } 14% { opacity: 1; background-position: -284px 0; } 36% { opacity: 1; background-position: -142px 0; } 44%, 100% { opacity: 0; } }
+.kt-saksi[data-serah] { animation: sd-saksi 3.2s steps(1) both; }
+@keyframes sd-saksi { 0% { visibility: visible; } 6% { visibility: hidden; } 44%, 100% { visibility: visible; } }
+/* kartu memori: di bawah kepalan saat menjulur (kanan atas), ditaruh di meja (1,15 s tangan pergi), lalu meluncur ke sisi laptop */
+.sd-kartu { left: calc(50% + 26px); top: 190px; width: 20px; height: 24px; background-size: 20px 24px; animation: sd-kartu 3.2s steps(1) both; }
+@keyframes sd-kartu {
+  0% { opacity: 0; translate: 12px -8px; } 6% { opacity: 1; translate: 12px -8px; } 14%, 50% { opacity: 1; translate: 0 0; }
+  55% { translate: 5px 1px; } 60% { translate: 10px 2px; } 65% { translate: 14px 3px; } 70%, 100% { opacity: 1; translate: 18px 4px; }
+}
 .kt-tombol-serah { width: 100%; min-height: 56px; margin: 0; font-size: 18px; font-weight: 800; justify-content: center; }
 
 /* ---------------------------------------------------------------- arena dashcam = layar laptop (hanya episode ber-investigasi) */
@@ -98,5 +98,5 @@
 .iv-bukti-baru .iv-bukti-kepala { display: flex; align-items: center; gap: 10px; }
 
 @media (prefers-reduced-motion: reduce) {
-  :root:not([data-gerak="penuh"]) :is(.sd-laptop, .sd-layar, .sd-layar i, .sd-tangan, .sd-kartu, .sd-kartu-jari, .ps-sim, .ps-sim-tombol, .ps-sasaran, .ps-cocok > *, .ps-holo, .ps-senter, .ps-hp, .ps-hp-pindai i::after, .ps-hp-hasil, .ps-lega, .bk-slip, .bk-slip .bk-klip) { animation: none !important; }
+  :root:not([data-gerak="penuh"]) :is(.sd-laptop, .sd-layar, .sd-layar i, .sd-badan, .sd-kartu, .kt-saksi[data-serah], .ps-sim, .ps-sim-tombol, .ps-sasaran, .ps-cocok > *, .ps-holo, .ps-senter, .ps-hp, .ps-hp-pindai i::after, .ps-hp-hasil, .ps-lega, .bk-slip, .bk-slip .bk-klip) { animation: none !important; }
 }

@@ -75,7 +75,7 @@ function useKetik(teks: string, kunci: string, langsung: boolean): { n: number; 
 }
 
 /** Saksi duduk: dua lapisan SVG (mata buka + mata tutup untuk kedip), 2x, dipotong tepi meja oleh panggung. */
-function SaksiDuduk({ id, ekspresi, bicara, gerak }: { id: string; ekspresi: Ekspresi; bicara: boolean; gerak?: Gerak }) {
+function SaksiDuduk({ id, ekspresi, bicara, gerak, serah }: { id: string; ekspresi: Ekspresi; bicara: boolean; gerak?: Gerak; /** T-082: serah terima dashcam sedang diputar (sprite disembunyikan sebentar oleh bingkai lengan). */ serah?: boolean }) {
   const svg = useMemo(() => {
     try {
       const buka = susunTokoh(id as IdTokohPiksel, { pose: 'berdiri', hadap: 'kanan', ekspresi });
@@ -86,7 +86,7 @@ function SaksiDuduk({ id, ekspresi, bicara, gerak }: { id: string; ekspresi: Eks
   }, [id, ekspresi]);
   if (!svg) return null;
   return (
-    <span className="kt-saksi" data-tokoh={id} data-bicara={bicara ? '' : undefined} data-gerak={gerak} style={{ width: svg.w, marginLeft: -svg.w / 2 } as CSSProperties}>
+    <span className="kt-saksi" data-tokoh={id} data-bicara={bicara ? '' : undefined} data-gerak={serah ? undefined : gerak} data-serah={serah ? '' : undefined} style={{ width: svg.w, marginLeft: -svg.w / 2 } as CSSProperties}>
       <span className="kt-saksi-badan">
         <span className="kt-lapis" dangerouslySetInnerHTML={{ __html: svg.buka }} />
         {svg.tutup ? <span className="kt-lapis kt-kedip" dangerouslySetInnerHTML={{ __html: svg.tutup }} /> : null}
@@ -149,9 +149,9 @@ export function LayarKeterangan({ ep, state, tx, nama, komposer, mulaiTugas }: {
         {kilas ? <KilasBalik jenis={kilas} nama={nama(ucapan!.siapa)} /> : (
           <>
             <span className="kt-latar" aria-hidden="true" style={{ backgroundImage: `url(${latarRuang})` }} />
-            {saksi ? <SaksiDuduk key={saksi} id={saksi} ekspresi={ekspresi} bicara={bicaraSaksi} gerak={gerak} /> : null}
+            {saksi ? <SaksiDuduk key={saksi} id={saksi} ekspresi={ekspresi} bicara={bicaraSaksi} gerak={gerak} serah={serah && saksi === 'darto'} /> : null}
             <span className="kt-meja" aria-hidden="true" style={{ backgroundImage: `url(${mejaDepan})` }} />
-            {serah ? <SerahDashcam key={kunci} /> : null}
+            {serah && saksi === 'darto' ? <SerahDashcam key={kunci} /> : null}
             {k.telepon ? (
               <span className="kt-telepon" data-bicara={lewatTelepon ? '' : undefined} aria-hidden="true">
                 <PotretReaksi reaksi={reaksi && reaksi.startsWith('miss-') ? reaksi : 'miss-berpikir'} ukuran={64} />
