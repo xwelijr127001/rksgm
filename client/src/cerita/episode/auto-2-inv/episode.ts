@@ -8,12 +8,13 @@
  * dijamin; pemain membuktikan dengan dashcam bahwa truk di LAJUR 2. Putarannya MELINDUNGI nasabah yang jujur.
  *
  * Alur (b1-b4 = bagian di kepala layar; jenis investigasi tiap node di kurung, lihat NodeInvestigasi di cerita/tipe.ts):
- *  b1 judul (judul) -> buka -> darto (catat) -> tol (catat) -> selisih
- *  b2 kdash [arena dashcam] -> bukti-dashcam (bukti) -> bukti-rambu (bukti) -> ksim (periksa-sim, T-080) -> bukti-sim (bukti)
+ *  b1 judul (judul) -> buka (SATU baris) -> tebak (tebak, PILIHAN lajur 1-4, T-087) -> darto (catat) -> tol (catat) -> selisih
+ *  b2 kdash [arena dashcam] -> bukti-rekaman (bukti dashcam + rambu dalam SATU halaman buku, T-087; kalimat "Tebakan awalmu")
+ *     -> ksim (periksa-sim, T-080) -> bukti-sim (bukti)
  *  b3 keb-buka -> keb0 (keberatan 0, PILIHAN) --tepat--> keb-cap
  *                    |--keliru--> keb0-<kartu> -> keb1 (keberatan 1, PILIHAN) --tepat--> keb-cap
  *                                                   |--keliru--> keb1-<kartu> -> keb2 (keberatan 2 dipandu, DIALOG) -> keb-cap
- *     keb-cap (cap) -> keb-akui (petugas memperbaiki catatannya)
+ *     keb-cap (cap) -> keb-akui (petugas mengakui kekeliruannya) -> keb-koreksi (koreksi: ia mencoret 3 dan menulis 2, T-087)
  *  b4 putusan-buka -> putusan (putusan, PILIHAN) -> putusan-<x> -> pesan (PILIHAN di obrolan Pak Hendra) -> pesan-<x>
  *     -> akhir-cek -> akhir-tuntas | akhir-tinjau (hasil-investigasi; AKHIR)
  * Kekeliruan tidak pernah menghentikan pemain (tanpa nyawa, tanpa waktu): hanya poin yang berbeda. Kartu yang tepat (dashcam)
@@ -25,7 +26,7 @@
  * (diluruskan Miss Raksa; klaim tetap dijamin di kedua akhir). Status Pak Hendra (30 = Cemas) hanya berubah oleh pesan.
  */
 import type { Baris, CueLatar, Efek, Ekspresi, Episode, IdNode, Kondisi, MusikNode, NodeCerita, NodeInvestigasi } from '../../tipe';
-import { tandaBukti, tandaCatat, tandaKeberatan, tandaPesan, tandaPutusan } from '../../investigasi/status';
+import { LAJUR, tandaBukti, tandaCatat, tandaKeberatan, tandaKoreksi, tandaPesan, tandaPutusan, tandaTebak } from '../../investigasi/status';
 import { EPISODE_AUTO_2 } from '../auto-2/episode';
 import { EPISODE_AUTO_2_DEV } from '../auto-2-dev/episode';
 import { TEKS_AUTO_2_INV } from './teks';
@@ -72,7 +73,14 @@ function bangunNode(): NodeCerita[] {
   return [
     // ---------------------------------------------------------------- b1: kartu judul, pembuka, dua keterangan
     dialog('judul', KANTOR, [b('inv.judul.kartu', 'narasi')], 'buka', { investigasi: { jenis: 'judul' } }),
-    dialog('buka', KANTOR, [b('inv.buka.1', 'missRaksa', 'tersenyum'), b('inv.buka.2', 'missRaksa', 'netral'), b('inv.buka.3', 'missRaksa', 'serius')], 'darto'),
+    // T-087 (review pilot butir 1: tamu ikut menyelidik dalam 30 detik): pembuka SATU baris, lalu tamu mengetuk lajur yang
+    // diperdebatkan di bingkai pembuka. Tanpa benar / salah: keempat pilihan hanya memasang tanda tebakannya.
+    dialog('buka', KANTOR, [b('inv.buka.1', 'missRaksa', 'serius')], 'tebak'),
+    {
+      id: 'tebak', bab: '', jenis: 'pilihan', tata: KANTOR, baris: [b('inv.tebak.1', 'narasi')], tanya: 'inv.tebak.tanya',
+      investigasi: { jenis: 'tebak' },
+      pilihan: LAJUR.map((n) => ({ id: String(n), teks: `inv.tebak.pilih.${n}`, efek: { pasang: [tandaTebak(n)] }, lanjut: 'darto' })),
+    },
     dialog('darto', RUANG('darto'), [b('inv.darto.1', 'narasi'), b('inv.darto.2', 'darto', 'cemas'), b('inv.darto.3', 'darto', 'serius')], 'tol',
       { efek: { pasang: [tandaCatat('darto')] }, investigasi: { jenis: 'catat', pernyataan: 'darto' } }),
     dialog('tol', RUANG('tol'), [b('inv.tol.1', 'narasi'), b('inv.tol.2', 'tol', 'netral'), b('inv.tol.3', 'tol', 'serius')], 'selisih',
@@ -83,12 +91,11 @@ function bangunNode(): NodeCerita[] {
     {
       id: 'kdash', bab: '', jenis: 'aktivitas', aktivitas: 'dashcam', langsung: true, tata: RUANG('darto'),
       baris: [b('inv.kdash.1', 'narasi'), b('inv.kdash.2', 'darto', 'netral')],
-      hasil: [{ lanjut: 'bukti-dashcam' }],
+      hasil: [{ lanjut: 'bukti-rekaman' }],
     },
-    dialog('bukti-dashcam', RUANG('darto'), [b('inv.bukti.dashcam.1', 'narasi')], 'bukti-rambu',
-      { efek: { pasang: [tandaBukti('dashcam')] }, investigasi: { jenis: 'bukti', bukti: 'dashcam' } }),
-    dialog('bukti-rambu', RUANG('darto'), [b('inv.bukti.rambu.1', 'narasi')], 'ksim',
-      { efek: { pasang: [tandaBukti('rambu')] }, investigasi: { jenis: 'bukti', bukti: 'rambu' } }),
+    // T-087: kartu dashcam dan kartu rambu (dari bingkai rekaman yang sama) dijepit dalam SATU langkah buku catatan.
+    dialog('bukti-rekaman', RUANG('darto'), [b('inv.bukti.rekaman.1', 'narasi')], 'ksim',
+      { efek: { pasang: [tandaBukti('dashcam'), tandaBukti('rambu')] }, investigasi: { jenis: 'bukti', bukti: 'dashcam', juga: ['rambu'] } }),
     // T-080 (Designer): periksa SIM DI MEJA wawancara (3 ketukan: golongan vs STNK, hologram, pindai QR), bukan arena SIM Satpas
     // Episode 1. Node dialog biasa + tampilan 'periksa-sim'; kartu bukti SIM tetap diberikan node 'bukti-sim' seperti semula.
     dialog('ksim', RUANG('darto'), [b('inv.sim.1', 'narasi'), b('inv.sim.2', 'darto', 'netral')], 'bukti-sim', { investigasi: { jenis: 'periksa-sim' } }),
@@ -107,7 +114,10 @@ function bangunNode(): NodeCerita[] {
     dialog('keb2', RUANG('tol', 'darto'), [b('inv.keb.3', 'narasi')], 'keb-cap',
       { efek: { pasang: [tandaKeberatan('dipandu')] }, investigasi: { jenis: 'keberatan', pernyataan: 'tol', tepat: TEPAT, percobaan: 2 } }),
     dialog('keb-cap', RUANG('tol', 'darto'), [b('inv.keb.cap', 'narasi')], 'keb-akui', { investigasi: { jenis: 'cap' } }),
-    dialog('keb-akui', RUANG('tol', 'darto'), [b('inv.akui.1', 'tol', 'bingung'), b('inv.akui.2', 'tol', 'netral'), b('inv.akui.3', 'darto', 'lega')], 'putusan-buka'),
+    dialog('keb-akui', RUANG('tol', 'darto'), [b('inv.akui.1', 'tol', 'bingung'), b('inv.akui.2', 'tol', 'netral'), b('inv.akui.3', 'darto', 'lega')], 'keb-koreksi'),
+    // T-087 / T-088: petugas mencoret "3" dan menulis "2"; sejak itu buku catatan menulis "Laporan dikoreksi: lajur 2".
+    dialog('keb-koreksi', RUANG('tol', 'darto'), [b('inv.koreksi.1', 'narasi')], 'putusan-buka',
+      { efek: { pasang: [tandaKoreksi('tol')] }, investigasi: { jenis: 'koreksi', pernyataan: 'tol' } }),
 
     // ---------------------------------------------------------------- b4: putusan, pesan untuk Pak Hendra, hasil
     dialog('putusan-buka', KANTOR, [b('inv.putusan.1', 'missRaksa', 'tersenyum'), b('inv.putusan.2', 'missRaksa', 'serius')], 'putusan'),
@@ -141,7 +151,7 @@ function bangunNode(): NodeCerita[] {
 
 /** Bagian tiap node (kepala layar "BAGIAN n/4"; id b2 / b3 = musik pemeriksaan, hp/audioTema.ts). */
 function babInv(id: IdNode): string {
-  if (['judul', 'buka', 'darto', 'tol', 'selisih'].includes(id)) return 'b1';
+  if (['judul', 'buka', 'tebak', 'darto', 'tol', 'selisih'].includes(id)) return 'b1';
   if (id.startsWith('kdash') || id.startsWith('ksim') || id.startsWith('bukti-')) return 'b2';
   if (id.startsWith('keb')) return 'b3';
   return 'b4';

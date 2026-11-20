@@ -1,0 +1,60 @@
+/* T-087 (Fullstack): alur Investigator: gerbang "Lanjutkan kasus / Mulai baru", pembuka hasil (kalimat Pak Hendra), keping rekor,
+   lembar "Main lagi", latihan pilihan terlemah, kalimat "Tebakan awalmu". Warna dan tepi mengikuti investigasi.css (tepi 2 px
+   #212121, jingga #ff9000, krem #fff9f5). Tidak ada gerak baru di berkas ini. */
+
+/* ---- hasil: keping "Rekor baru!" / "Terbaik 85" (baris keempat di kepala; kepala 80 -> 92 px) */
+.iv-rekor { justify-self: start; width: fit-content; margin-top: 2px !important; padding: 0 6px; border: 2px solid #212121; font-size: 13px; line-height: 16px; font-weight: 800; letter-spacing: .02em; }
+.iv-rekor[data-rekor="baru"] { background: #ff9000; color: #212121; }
+.iv-rekor[data-rekor="lama"] { background: #fff9f5; color: #5f5f5f; }
+
+/* ---- hasil dibuka dengan kalimat Pak Hendra (orang yang ditolong), baru rincian skor */
+.iv-hendra { gap: 12px; padding-top: 12px; }
+.iv-ucap { display: grid; grid-template-columns: 64px minmax(0, 1fr); gap: 12px; align-items: start; padding: 12px; border: 2px solid #212121; background: #ffffff; box-shadow: 0 3px 0 #212121; }
+.iv-ucap > .tokoh-potret { border: 2px solid #212121; background: #f9eeea; box-sizing: content-box; }
+.iv-ucap figcaption { min-width: 0; display: grid; gap: 4px; }
+.iv-ucap b { font-size: 16px; line-height: 20px; font-weight: 800; }
+.iv-ucap small { display: block; font-size: 13px; line-height: 16px; font-weight: 700; color: #5f5f5f; }
+.iv-ucap q { display: block; font-size: 18px; line-height: 26px; quotes: none; }
+.iv-ucap[data-kecil] { grid-template-columns: 48px minmax(0, 1fr); gap: 8px; padding: 8px; box-shadow: 0 2px 0 #212121; }
+.iv-ucap[data-kecil] q { font-size: 16px; line-height: 22px; }
+
+/* ---- lembar "Main lagi" */
+.iv-lagi { display: grid; gap: 10px; color: #212121; }
+.iv-lagi p { margin: 0; }
+.iv-lagi-pilih { display: grid; gap: 2px; width: 100%; min-height: 64px; box-sizing: border-box; margin: 0; padding: 8px 12px; border: 2px solid #212121; border-radius: 0; background: #ffffff; color: #212121; font: inherit; text-align: left; box-shadow: 0 2px 0 #212121; cursor: pointer; }
+.iv-lagi-pilih[data-utama] { background: #ff9000; }
+.iv-lagi-pilih:active { translate: 0 2px; box-shadow: none; }
+.iv-lagi-pilih:focus-visible { outline: 3px solid #1d6fd1; outline-offset: 2px; }
+.iv-lagi-pilih b { font-size: 18px; line-height: 24px; font-weight: 800; }
+.iv-lagi-pilih span { font-size: 14px; line-height: 18px; font-weight: 700; }
+.iv-lagi-pilih:not([data-utama]) span { color: #5f5f5f; }
+.iv-lagi-ket { font-size: 14px; line-height: 20px; color: #5f5f5f; }
+.iv-lagi-sempurna { font-size: 16px; line-height: 22px; font-weight: 700; }
+.iv-lagi .iv-tamu { margin: 0; text-align: center; }
+.iv-lagi .iv-tamu .hp-tautan { min-height: 44px !important; }
+.iv-lagi .iv-tamu .iv-label { font-size: 14px; line-height: 20px; font-weight: 700; color: #5f5f5f; }
+
+/* ---- latihan pilihan terlemah (tidak mengubah skor terbaik kasus) */
+.iv-latihan-pita { justify-self: start; width: fit-content; padding: 0 8px; border: 2px solid #212121; background: #fff1a8; font-size: 13px; line-height: 18px; font-weight: 800; letter-spacing: .04em; text-transform: uppercase; }
+.iv-latihan-sela { gap: 12px; padding-top: 12px; }
+.iv-pesan-kartu { display: grid; grid-template-columns: minmax(0, 1fr) 24px; gap: 8px; align-items: center; width: 100%; box-sizing: border-box; margin: 0; padding: 8px 10px; border: 2px solid #212121; border-radius: 0; background: #ffffff; color: #212121; font: inherit; font-size: 15px; line-height: 20px; text-align: left; box-shadow: 0 2px 0 #212121; cursor: pointer; }
+.iv-pesan-kartu[aria-checked="true"] { border-color: #ff9000; background: #fff1c2; box-shadow: 0 2px 0 #9a4f00; }
+.iv-pesan-kartu:focus-visible { outline: 3px solid #1d6fd1; outline-offset: 2px; }
+.iv-latihan-hasil { gap: 12px; padding-top: 8px; }
+.iv-latihan-hasil .iv-poin li { grid-template-columns: 96px minmax(0, 1fr) 62px; }
+.iv-latihan-hasil .iv-poin li[data-kini] .iv-poin-nama { font-weight: 800; }
+.iv-latihan-hasil .iv-poin li:not([data-kini]) .iv-poin-batang i { background: #bdbdbd; }
+.iv-latihan-aksi { display: grid; gap: 8px; }
+
+/* ---- gerbang masuk: progres belum selesai */
+.iv-gerbang { justify-items: center; gap: 12px; padding-top: 16px; text-align: center; }
+.iv-gerbang > :is(.iv-tombol, .iv-gerbang-tanya) { justify-self: stretch; }
+.iv-gerbang-posisi { padding: 2px 8px; border: 2px solid #212121; background: #fff9f5; font-size: 14px; line-height: 20px; font-weight: 800; }
+.iv-gerbang-tanya { display: grid; gap: 8px; text-align: left; }
+.iv-gerbang-tanya .iv-tempel { rotate: none; }
+
+/* ---- bukti baru: kalimat "Tebakan awalmu" (catatan tempel kecil di atas temuan) */
+.iv-tebak-balik { rotate: none; font-size: 15px; line-height: 20px; font-weight: 700; }
+
+/* "Sematkan" kedua kalinya: tombol tetap hidup selama tinta menulis (ketukan kedua = lanjut) */
+.iv-catat .iv-tombol[data-lewati] { background: #ffffff; color: #9a4f00; border: 2px solid #212121; }

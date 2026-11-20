@@ -4329,3 +4329,55 @@ All <= 400 KB (the script fails above 400 000 bytes). MP3 mono 64 kbps via ffmpe
 - The dev-only "Coba suara" list in the Menu still shows the three Episode 1 themes and does not list the new stings.
 - T-088 (Designer) landed while this was built; its new components are not wired here (T-087).
 - Not committed.
+
+
+## T-087 (2026-11-21): Investigator improvements batch: flow, resume, result, replay (Fullstack)
+
+Source: `team/REVIEW.md` "Investigator pilot review (2026-11-21)" points 1, 3, 4, 5, 6 (replay) and 7 (skippable). Only `auto-2-inv`. The Designer's T-088 components are wired, not redrawn. NOT opened in a browser or on a phone (owner rule). Gate: typecheck 0 (client + server), `client/dist` rebuilt = exact copy of the scratch build. Not committed.
+
+**New flow** (`episode/auto-2-inv/episode.ts`)
+`judul` -> `buka` (ONE line) -> `tebak` (lane hunch) -> `darto` -> `tol` -> `selisih` -> `kdash` -> `bukti-rekaman` (dashcam + sign in one notebook step) -> `ksim` -> `bukti-sim` -> `keb-buka` -> `keb0..2` -> `keb-cap` -> `keb-akui` -> `keb-koreksi` (officer crosses out 3, writes 2) -> `putusan-buka` -> ... -> result.
+- Removed nodes: `bukti-dashcam`, `bukti-rambu`. New: `tebak`, `bukti-rekaman`, `keb-koreksi`. Episode `versi` is still 1: a device saved exactly on a removed node gets the existing recovery dialog; any other saved progress continues (it just has no hunch, so no callback line).
+- New node kinds (`cerita/tipe.ts`): `tebak` (choice node, options '1'..'4', tag `tebak:<n>`, never scored), `koreksi` (dialog node, tag `koreksi:<id>`), and `bukti.juga` (more cards filed on the same screen).
+
+**1. Investigate within 30 s**
+- Opener is one line from Miss Raksa, then `TebakLajur`: one tap on lane 1-4 stores the hunch. No right or wrong.
+- After the TV replay the evidence screen starts with a sticky note "Tebakan awalmu: lajur X" (friendly either way, id/en/zh), then the finding, then both slips (dashcam + road sign) clip into the notebook together. `BukuCatatan.buktiBaru` now also takes a list (one-line change in the Designer's file).
+- Testimony and handover are untouched. The SIM check still has three steps.
+- `KoreksiCatatan` sits AFTER the officer admits the mistake (`keb-akui`), not right after the stamp: he says "saya perbaiki laporannya", then we watch him do it. From then on the notebook (Menu / book button) shows "Laporan dikoreksi: lajur 2".
+
+**3. Honest "Kasus berikutnya"**
+- The result shows `TeaserKasus` ("Kasus 2 · segera hadir") before any tap. Tapping it opens `PratinjauKasus2` and adds 1 to `intipKasus2` in `raksa:investigasi:v1`.
+- The "Kasus berikutnya" button is gone. The action row is "Main lagi" + orange "Selesai" (back to `/cerita`).
+- `intipKasus2` is a DEVICE counter for the trial: "Tamu baru" / "Mulai baru" keep it. Read it in the browser console with `JSON.parse(localStorage['raksa:investigasi:v1']).intipKasus2`.
+
+**4. Resume vs new guest**
+- Opening the episode with an unfinished case (any saved action, no ending yet) shows a gate inside the player: "Lanjutkan kasus" / "Mulai baru", with the part the case stopped in. "Mulai baru" asks once, then clears only Investigator data: this episode's progress (archived, as "Mulai ulang" always did) and the score / stamp record. It does not depend on a reward record.
+- A finished case still opens on its result (no gate); "Main lagi" there has "Ulang dari awal" and "Tamu baru".
+- `PeriksaSim` got `awal` + `onLangkah`: the step is kept as the visit draft of that node (`cerita/simpan.ts` draft store, cleared by any restart), and after a reload the SIM screen opens again on the same step.
+
+**5. Reward the person helped** (`HasilKasus`, `ui/HasilInvestigasi.tsx`)
+- The result is now two beats: first Pak Hendra's line for the message sent (`inv.hasil.hendra.baik / datar / janji`, id/en/zh) with "Lihat hasil investigasi", then the score breakdown. One screen could not hold the line, the breakdown, the ID card and the teaser at 360 x 640.
+- The stamp lands (animation + sting) only when this case's stamp was not on the device before this result; replay and reload show it already in place. "Rekor baru!" shows only when an existing best was beaten; a lower replay shows "Terbaik N".
+- Score screen height by calculation: head 80 (92 with the best / record chip) + points 80 + card 176 + teaser 96 + buttons 52 + gaps 32 = 516 (528) <= 544. "Tamu baru" and the best-score line left the footer to make that room.
+
+**6 / 7. Replay and skippable beats**
+- "Main lagi" opens a sheet: "Coba lagi pilihan terlemahmu" (the scored step that lost the most points; ties go to the earlier step), "Ulang dari awal", "Tamu baru".
+- The practice (`LatihanKasus`) replays just that step with the case's notebook: KEBERATAN (same three tries, hints and stamp), the verdict, or the message to Pak Hendra. It ends on "Tadi x / Latihan ini y" and returns to the result. It runs outside the story engine and never writes the record, so the full-case best cannot change.
+- At 100 points the sheet shows the corrected toll report (notebook page with the struck sentence and "Laporan dikoreksi: lajur 2") instead of a practice.
+- Pin: the first pin of a guest still plays in full. Once another statement is pinned in this case, or this device has finished the case before, the button stays live as "Lanjut" while the ink writes; a second tap (after 0.35 s) pins at once and continues.
+- Card clip and handover needed no change: "Simpan ke buku catatan" and "Putar rekaman" were already live from the first frame, so a tap during the animation continues.
+
+**Files**
+- Mine: `episode/auto-2-inv/episode.ts`, `teks.{id,en,zh}.ts` (opener, `inv.tebak.*`, `inv.bukti.rekaman.1`, `inv.koreksi.1`, `inv.hasil.*`, `inv.lagi.*`, `inv.latihan.*`, `inv.gerbang.*`; removed `inv.buka.2/3`, `inv.bukti.dashcam.1`, `inv.bukti.rambu.1`, `inv.ui.terbaik`), `cerita/tipe.ts`, `investigasi/status.ts` (`tebakanLajur`, `pernyataanDikoreksi`), `skor.ts` (`langkahTerlemah`, per-step points), `simpan.ts` (`intipKasus2`, `catatIntipKasus2`), `investigasi/LayarInvestigasi.tsx` (rewritten: gate, practice, result), `ui/HasilInvestigasi.tsx` (new props `stempelBaru`, `rekor`, `terbaik`, `teaser`, `onSelesai`; `onKasusBerikutnya` removed), `ui/PeriksaSim.tsx`, new `ui/alur.css`, `hp/PemainHP.tsx` (gate + SIM reopen, four small edits).
+- Designer's files, small edits: `ui/BukuCatatan.tsx` (`buktiBaru` list), `ui/reaksiBaris.tsx` (two dead opener keys removed).
+
+**Checks done (no browser, no test suite)**: one-off script (scratch, not committed) with the project's own `validasiEpisode` / `jelajahiSemuaJalur`: 0 validator messages, 504 paths, no dead ends; scripted runs 100 = S (no weakest step), 55 = B, 10 = C, each with the hunch tag, all three cards and the correction tag; record keeps `intipKasus2` through "Tamu baru"; 133 `inv.*` keys in each language.
+
+**Open**
+- Nothing was seen on a screen. Most worth a look: the evidence screen with the sticky note + long finding + two slips (the tallest new screen), the result's two beats, the practice screens, the gate.
+- The hunch is a reading task (T-088 note): the truck is plainly in lane 2 on the frame.
+- The 100-point payoff is the notebook page, which every player has already seen being corrected; it is a keepsake more than a surprise. A stronger payoff would need new art.
+- The practice for the message uses plain cards, not the chat screen.
+- `hasil.berikutnya` / `hasil.segera` in the app dictionary and `.iv-hasil-kaki` in `investigasi.css` are now unused (Designer's files, left).
+- Review point 8 (ten-guest trial) is not code. Timings (entry to first evidence tap, to stamp) are not recorded by the app; only the preview taps are.

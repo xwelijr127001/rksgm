@@ -14,8 +14,6 @@ import './investigasi.css';
 export const REAKSI_BARIS: Readonly<Record<string, Reaksi>> = {
   // T-084: Miss Raksa investigator (kaca pembesar) di kalimat pembuka dan pengantar putusan
   'inv.buka.1': 'miss-detektif',
-  'inv.buka.2': 'miss-detektif',
-  'inv.buka.3': 'miss-berpikir',
   'inv.putusan.1': 'miss-detektif',
   'inv.putusan.2': 'miss-berpikir',
   'inv.selisih.1': 'miss-berpikir',

@@ -140,8 +140,8 @@ export function BukuCatatan({ pernyataan, bukti, tx, menunggu, pernyataanBaru, s
   sorotPernyataan?: string;
   pilihBukti?: PilihBukti;
   tanpaPensil?: boolean;
-  /** T-080: bukti yang baru dikumpulkan: slipnya meluncur masuk lalu klipnya menjepit. */
-  buktiBaru?: Bukti['id'];
+  /** T-080: bukti yang baru dikumpulkan: slipnya meluncur masuk lalu klipnya menjepit. T-087: boleh beberapa sekaligus. */
+  buktiBaru?: Bukti['id'] | readonly Bukti['id'][];
   /** T-080: 'bukti' = hanya halaman "Bukti" (layar "Bukti baru!", supaya muat bersama kalimat temuannya). */
   halaman?: 'semua' | 'bukti' | 'keterangan';
   /** T-088: pernyataan yang sudah dikoreksi (KEBERATAN berhasil): "Laporan dikoreksi: lajur 2". */
@@ -167,7 +167,7 @@ export function BukuCatatan({ pernyataan, bukti, tx, menunggu, pernyataanBaru, s
       {halaman === 'keterangan' ? null : <div className="bk-halaman bk-bawah">
         <h3 className="bk-judul"><IkonInv nama="foto" kali={1} />{t('investigasi.bukti')}<span className="iv-hitung">{bukti.length}</span></h3>
         {bukti.length
-          ? <ul className="bk-daftar bk-slip-daftar">{bukti.map((b) => <SlipBukti key={b.id} b={b} pilih={pilihBukti} teks={teks} baru={b.id === buktiBaru} />)}</ul>
+          ? <ul className="bk-daftar bk-slip-daftar">{bukti.map((b) => <SlipBukti key={b.id} b={b} pilih={pilihBukti} teks={teks} baru={typeof buktiBaru === 'string' ? b.id === buktiBaru : !!buktiBaru?.includes(b.id)} />)}</ul>
           : <p className="bk-kosong bk-tulisan">{t('investigasi.kosongBukti')}</p>}
       </div>}
       {tanpaPensil ? null : <span className="bk-pensil" aria-hidden="true" />}

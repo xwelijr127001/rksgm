@@ -27,7 +27,7 @@ import { adaDialogTerbuka } from '../../ui/modal';
 import { babKini, barisTerlihat, bisaLanjut, nodeKini, pilihanTersedia, semuaBarisTampil, suasanaNasabah } from '../mesin';
 import { akhirDitemukan, berlanggananCerita, versiPenyimpananCerita } from '../simpan';
 import type { Episode, IdBab, KunciTeks, NodeAktivitas, NodePilihan, StateCerita } from '../tipe';
-import { HasilKasus, IsiBukuCatatan, LayarInvestigasi, kilasBalikKini } from '../investigasi/LayarInvestigasi';
+import { GerbangKasus, HasilKasus, IsiBukuCatatan, LayarInvestigasi, kilasBalikKini, langkahSimTersimpan, perluGerbangKasus } from '../investigasi/LayarInvestigasi';
 import { tamuBaru } from '../investigasi/simpan';
 import { hiasReaksi } from '../investigasi/ui/reaksiBaris';
 import { LayarKeterangan, pakaiKeterangan } from '../investigasi/ui/LayarKeterangan';
@@ -115,13 +115,17 @@ function PemainHPInti({ ep, state, kendali, profil, bahasa, tx: txAsli }: {
   // dua langkah: baris terakhir (pernyataannya) dibaca dulu di adegan, "Lanjut" membuka kartu pernyataan untuk disemat
   // (`sematUntuk`, tampilan saja: muat ulang = baris terakhir lagi). Hasil (node akhir) lewat alur akhir biasa.
   const inv = ep.investigasi ? node.investigasi : undefined;
-  const [sematUntuk, setSematUntuk] = useState<string | null>(null);
+  // T-087: periksa SIM yang ditinggal di tengah jalan (langkah tersimpan sebagai draf) langsung terbuka lagi sesudah muat ulang.
+  const [sematUntuk, setSematUntuk] = useState<string | null>(() => (inv?.jenis === 'periksa-sim' && lengkap && langkahSimTersimpan(ep, state) > 0 ? kunciNode : null));
+  // T-087 (review pilot butir 4): halaman dibuka dengan kasus yang belum selesai = gerbang "Lanjutkan kasus" / "Mulai baru"
+  // (sekali per kunjungan halaman; tampilan saja, mesin tidak disentuh sampai tamu memilih).
+  const [gerbang, setGerbang] = useState(() => perluGerbangKasus(ep, kendali.muat));
   // T-080: 'periksa-sim' juga dua langkah (baris terakhir dibaca di adegan dulu, "Lanjut" membuka layar periksa SIM).
   const duaLangkah = inv?.jenis === 'catat' || inv?.jenis === 'periksa-sim';
   const layarInv = !!inv && lengkap && inv.jenis !== 'hasil-investigasi' && (!duaLangkah || sematUntuk === kunciNode);
 
   const pandang = pandangKini(ep, state);
-  const tampilan: Tampilan = layarInv ? 'investigasi'
+  const tampilan: Tampilan = gerbang || layarInv ? 'investigasi'
     : akhirUntuk === kunciNode && node.jenis === 'akhir' ? 'akhir'
       : arenaUntuk === kunciNode && node.jenis === 'aktivitas' && lengkap ? 'arena'
         : pandang;
@@ -326,7 +330,9 @@ function PemainHPInti({ ep, state, kendali, profil, bahasa, tx: txAsli }: {
       <PetunjukSuara idEpisode={ep.id} layarPertama={state.node === ep.mulai && !state.riwayat.some((e) => e.jenis === 'pilihan' || e.jenis === 'aktivitas')} sembunyi={balasTerbuka || tampilan === 'arena'} />
       <main className="hp-main" data-tampilan={tampilan} data-node={state.node}>
         {tampilan === 'investigasi' ? (
-          <LayarInvestigasi ep={ep} state={state} node={node} tx={tx} onLanjut={lanjutInv} onPilih={pilihInv} onMulaiUlang={ulangEpisode} />
+          gerbang
+            ? <GerbangKasus ep={ep} state={state} tx={tx} onLanjut={() => setGerbang(false)} onBaru={() => { tamuBaru(); ulangEpisode(); setGerbang(false); }} />
+            : <LayarInvestigasi ep={ep} state={state} node={node} tx={tx} onLanjut={lanjutInv} onPilih={pilihInv} onMulaiUlang={ulangEpisode} />
         ) : tampilan === 'akhir' && ep.investigasi ? (
           <HasilKasus ep={ep} state={state} nama={namaPemain} look={profil.look} tx={tx} onMainLagi={ulangEpisode} />
         ) : tampilan === 'arena' && node.jenis === 'aktivitas' && pakaiMeja && MejaKasus ? (

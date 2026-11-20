@@ -252,11 +252,17 @@ export interface PernyataanInvestigasi {
  *  - hasil-investigasi: node AKHIR; layar hasil (skor, nilai, stempel, pangkat).
  *  - periksa-sim      : (T-080) node dialog; sesudah barisnya dibaca, layar "periksa SIM di meja" (3 ketukan) diputar; selesai =
  *                       lanjut. Tampilan saja: tidak memasang tanda dan tidak dinilai.
+ *  - tebak            : (T-087) node PILIHAN (id pilihan '1'..'4'): tebakan lajur di bingkai pembuka, tanda `tebak:<n>`. Tidak
+ *                       dinilai (tanpa benar / salah); diingat untuk kalimat "Tebakan awalmu" sesudah rekaman diputar.
+ *  - koreksi          : (T-087) node dialog; petugas mencoret catatannya (KoreksiCatatan), efek node memasang `koreksi:<id>`.
+ * `bukti.juga` (T-087): kartu bukti lain yang ikut dijepit di layar yang sama (satu halaman buku untuk dashcam + rambu).
  */
 export type NodeInvestigasi =
   | { jenis: 'judul' }
   | { jenis: 'catat'; pernyataan: string }
-  | { jenis: 'bukti'; bukti: BuktiInvestigasi['id'] }
+  | { jenis: 'bukti'; bukti: BuktiInvestigasi['id']; juga?: BuktiInvestigasi['id'][] }
+  | { jenis: 'tebak' }
+  | { jenis: 'koreksi'; pernyataan: string }
   | { jenis: 'keberatan'; pernyataan: string; tepat: BuktiInvestigasi['id']; percobaan: 0 | 1 | 2 }
   | { jenis: 'cap' }
   | { jenis: 'periksa-sim' }

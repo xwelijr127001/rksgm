@@ -1,11 +1,13 @@
 /**
  * T-076 EPISODE 1 INVESTIGATOR: REKAMAN PERANGKAT mode investigasi (kontrak rencana "Interfaces"). Kunci SENDIRI
  * `raksa:investigasi:v1`, terpisah dari progres cerita (`raksa:cerita`, entri per episode) dan dari profil pemain:
- *   { versi: 1, terbaik: { <idKasus>: skor terbaik 0..100 }, stempel: [<idKasus>, ...] }
+ *   { versi: 1, terbaik: { <idKasus>: skor terbaik 0..100 }, stempel: [<idKasus>, ...], intipKasus2: <jumlah ketukan> }
  * - Main lagi menyimpan skor TERBAIK (tidak pernah turun); total = jumlah skor terbaik semua kasus.
  * - Stempel = kasus yang pernah diselesaikan (satu per kasus). Pangkat dari jumlah stempel:
  *   0 Investigator Muda, >= 1 Investigator, >= 3 Senior, >= 4 Kepala.
  * - `tamuBaru()` menghapus HANYA rekaman ini (progres cerita episode lain dan profil tidak disentuh).
+ * - T-087 `intipKasus2`: berapa kali kartu "Kasus 2 · segera hadir" di layar hasil diketuk (minat sukarela, untuk uji coba
+ *   sepuluh tamu). Penghitung PERANGKAT, bukan milik satu tamu: `tamuBaru()` TIDAK mengenolkannya.
  * Semua akses dibungkus try/catch; bila localStorage diblokir / penuh, salinan di memori berlaku selama tab terbuka.
  * Isi yang rusak atau versi lain dibaca sebagai rekaman kosong (tidak melempar).
  */
@@ -15,13 +17,15 @@ export interface RekamanInvestigasi {
   versi: 1;
   terbaik: Record<string, number>;
   stempel: string[];
+  /** T-087: jumlah ketukan pratinjau kasus 2 di perangkat ini (bertahan melewati "Tamu baru"). */
+  intipKasus2: number;
 }
 
 export type Pangkat = 'muda' | 'investigator' | 'senior' | 'kepala';
 
 export const KUNCI_INVESTIGASI = 'raksa:investigasi:v1';
 
-const kosong = (): RekamanInvestigasi => ({ versi: 1, terbaik: {}, stempel: [] });
+const kosong = (): RekamanInvestigasi => ({ versi: 1, terbaik: {}, stempel: [], intipKasus2: 0 });
 
 /** Salinan di memori bila penyimpanan menolak (null = pakai localStorage). */
 let memori: string | null = null;
@@ -53,7 +57,7 @@ function tulisMentah(nilai: string | null): void {
 /** Rekaman dari bentuk apa pun (isi rusak / versi lain = kosong; nilai tidak sah dibuang). */
 export function bersihkanRekaman(data: unknown): RekamanInvestigasi {
   if (!data || typeof data !== 'object' || Array.isArray(data) || (data as { versi?: unknown }).versi !== 1) return kosong();
-  const d = data as { terbaik?: unknown; stempel?: unknown };
+  const d = data as { terbaik?: unknown; stempel?: unknown; intipKasus2?: unknown };
   const terbaik: Record<string, number> = {};
   if (d.terbaik && typeof d.terbaik === 'object' && !Array.isArray(d.terbaik)) {
     for (const [k, v] of Object.entries(d.terbaik as Record<string, unknown>)) {
@@ -61,7 +65,8 @@ export function bersihkanRekaman(data: unknown): RekamanInvestigasi {
     }
   }
   const stempel = Array.isArray(d.stempel) ? [...new Set(d.stempel.filter((x): x is string => typeof x === 'string' && x.length > 0))] : [];
-  return { versi: 1, terbaik, stempel };
+  const intip = typeof d.intipKasus2 === 'number' && Number.isFinite(d.intipKasus2) ? Math.max(0, Math.min(1e6, Math.floor(d.intipKasus2))) : 0;
+  return { versi: 1, terbaik, stempel, intipKasus2: intip };
 }
 
 export function bacaRekaman(): RekamanInvestigasi {
@@ -83,7 +88,7 @@ export function catatHasil(kasus: string, total: number): RekamanInvestigasi {
   const stempelBaru = !r.stempel.includes(kasus);
   if (!naik && !stempelBaru) return r;
   const berikut: RekamanInvestigasi = {
-    versi: 1,
+    ...r,
     terbaik: naik ? { ...r.terbaik, [kasus]: baru } : r.terbaik,
     stempel: stempelBaru ? [...r.stempel, kasus] : r.stempel,
   };
@@ -101,9 +106,18 @@ export function pangkat(stempel: number): Pangkat {
   return stempel >= 4 ? 'kepala' : stempel >= 3 ? 'senior' : stempel >= 1 ? 'investigator' : 'muda';
 }
 
-/** "Tamu baru": hapus HANYA rekaman mode investigasi di perangkat ini. */
+/** "Tamu baru": hapus HANYA rekaman mode investigasi di perangkat ini (penghitung uji coba `intipKasus2` bertahan). */
 export function tamuBaru(): void {
-  tulisMentah(null);
+  const intip = bacaRekaman().intipKasus2;
+  tulisMentah(intip > 0 ? JSON.stringify({ ...kosong(), intipKasus2: intip }) : null);
+}
+
+/** T-087: satu ketukan sukarela pada kartu "Kasus 2 · segera hadir". Mengembalikan jumlah sesudahnya. */
+export function catatIntipKasus2(): number {
+  const r = bacaRekaman();
+  const berikut: RekamanInvestigasi = { ...r, intipKasus2: r.intipKasus2 + 1 };
+  tulisMentah(JSON.stringify(berikut));
+  return berikut.intipKasus2;
 }
 
 /** Ada rekaman tamu sebelumnya (untuk menawarkan "Tamu baru")? */

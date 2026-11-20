@@ -1,17 +1,20 @@
 /**
  * T-077: HASIL INVESTIGASI. Lencana nilai S / A / B / C (seni/investigasi/nilai.png, 2x = 80 px) + total "85 / 100"; tiga baris poin
  * per bagian (Bukti 40, Putusan 30, Penanganan nasabah 30) dengan batang; kartu petugas (KartuPetugas T-072) dengan pangkat dan
- * baris stempel kasus; "Main lagi" dan "Kasus berikutnya" (untuk sekarang menampilkan "segera hadir").
- * Props rencana: { skor, nama, look, stempel, pangkat, onMainLagi, onKasusBerikutnya } (+ opsional berikutnyaSegera, bawaan true:
- * ketukan menampilkan catatan "segera hadir" lalu tetap memanggil onKasusBerikutnya).
+ * baris stempel kasus.
  * T-078: potret reaksi Miss Raksa 64 px di kanan kepala (opsional `reaksi`); stempel kasus TERBARU dicap sesudah 0,6 s (membesar
- * lalu mendarat + satu bunyi; gerak dikurangi: langsung terpasang; T-085: bunyinya 'stempel', juga saat gerak dikurangi); catatan "segera hadir" tidak lagi
- * memesan tempat. Ukur 360 x 640 (hitung; ruang isi 544 = 640 - kepala cerita 56 - bantalan .hp-main 12 + 28):
- * kepala 80 + poin 3 x 24 + 2 x 4 = 80 + kartu 176 + tombol 52 + jarak 3 x 8 = 412 (+ 28 bila "segera hadir" tampil);
- * + jarak 12 + kaki HasilKasus (skor terbaik 20 + 4 + "Tamu baru" 44 = 68) = 492; konfirmasi "Tamu baru" terbuka (keterangan 40 +
- * tombol 44, baris skor terbaik disembunyikan) = 508, dan 536 bila "segera hadir" juga tampil: semuanya <= 544.
+ * lalu mendarat + satu bunyi 'stempel', T-085).
+ * T-087 (review pilot butir 3 dan 5):
+ *  - `stempelBaru` (bawaan true): cap mendarat + bunyinya HANYA saat stempel kasus ini pertama kali didapat; main ulang = stempel
+ *    sudah terpasang, tanpa gerak dan tanpa bunyi.
+ *  - `rekor` = "Rekor baru!" hanya saat skor terbaik naik; `terbaik` (lebih tinggi dari skor ini) = keping "Terbaik 85".
+ *  - "Kasus berikutnya" (tombol yang hanya membuka tulisan "segera hadir") DIHAPUS: tempatnya diisi `teaser` (kartu "Kasus 2 ·
+ *    segera hadir", ui/TeaserKasus) yang sudah terlihat SEBELUM ketukan apa pun, dan baris aksi = "Main lagi" + "Selesai".
+ *  - "Tamu baru" dan skor terbaik tidak lagi di kaki layar ini (pindah ke lembar "Main lagi" dan ke kepala), supaya kartu teaser muat.
+ * Ukur 360 x 640 (hitung; ruang isi 544 = 640 - kepala cerita 56 - bantalan .hp-main 12 + 28): kepala 80 (92 bila keping rekor /
+ * terbaik tampil) + poin 3 x 24 + 2 x 4 = 80 + kartu 176 + teaser 96 + tombol 52 + jarak 4 x 8 = 516 (528) px <= 544.
  */
-import { useEffect, useState } from 'react';
+import { useEffect, type ReactNode } from 'react';
 import { playSfx } from '../../../audio/audio';
 import { useReducedMotion } from '../../../hooks';
 import type { PlayerLook } from '@shared/types';
@@ -19,35 +22,45 @@ import { t } from '../../../i18n';
 import { KartuPetugas } from '../../ui/KartuPetugas';
 import nilaiUrl from '../../seni/investigasi/nilai.png';
 import { PotretReaksi, type Reaksi } from './BukuCatatan';
-import type { Pangkat, SkorKasus } from './dasar';
+import { useTx, type Pangkat, type SkorKasus } from './dasar';
 import './investigasi.css';
+import './alur.css';
 
 const SEL_NILAI: Record<SkorKasus['nilai'], number> = { S: 0, A: 1, B: 2, C: 3 };
 
-export function HasilInvestigasi({ skor, nama, look, stempel, pangkat, onMainLagi, onKasusBerikutnya, berikutnyaSegera = true, reaksi }: {
+export function HasilInvestigasi({ skor, nama, look, stempel, pangkat, onMainLagi, onSelesai, reaksi, stempelBaru = true, rekor = false, terbaik, teaser }: {
   skor: SkorKasus;
   nama: string;
   look: PlayerLook;
   stempel: string[];
   pangkat: Pangkat;
+  /** "Main lagi": pemanggil membuka pilihannya (latih pilihan terlemah / ulang dari awal). */
   onMainLagi: () => void;
-  onKasusBerikutnya: () => void;
-  berikutnyaSegera?: boolean;
+  /** "Selesai": kembali ke daftar episode. */
+  onSelesai: () => void;
   /** T-078: potret reaksi di kanan kepala (mis. Miss Raksa "bangga"). */
   reaksi?: Reaksi;
+  /** T-087: stempel kasus ini BARU didapat sekarang (cap mendarat + bunyi). false = sudah punya (main ulang, muat ulang). */
+  stempelBaru?: boolean;
+  /** T-087: skor terbaik kasus ini baru saja naik. */
+  rekor?: boolean;
+  /** T-087: skor terbaik di perangkat (ditampilkan hanya bila lebih tinggi dari skor ini). */
+  terbaik?: number;
+  /** T-087: kartu "Kasus 2 · segera hadir" di antara kartu petugas dan baris aksi. */
+  teaser?: ReactNode;
 }) {
-  const [segera, setSegera] = useState(false);
   const kurang = useReducedMotion();
-  // Bunyi cap stempel tepat saat stempel mendarat (animasi CSS .kp-stempel i[data-baru]: mulai 0,6 s, mendarat 0,82 s).
-  // T-085: bunyi 'stempel' (arpeggio cerah, khusus investigator). Gerak dikurangi: stempel langsung terpasang, bunyinya tetap
-  // ada (arahan Lead: gerak dikurangi tidak mengubah audio), segera sesudah layar tampil.
+  const teks = useTx();
+  // Bunyi cap tepat saat stempel mendarat (animasi CSS .kp-stempel i[data-baru]: mulai 0,6 s, mendarat 0,82 s). Gerak dikurangi:
+  // stempel langsung terpasang, bunyinya tetap ada (T-085). Rekor baru tanpa stempel baru: bunyi yang sama, segera.
   useEffect(() => {
-    if (!stempel.length) return;
-    const w = window.setTimeout(() => playSfx('stempel'), kurang ? 150 : 820);
+    if (!(stempelBaru && stempel.length) && !rekor) return;
+    const w = window.setTimeout(() => playSfx('stempel'), stempelBaru && !kurang ? 820 : 150);
     return () => window.clearTimeout(w);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   const bagian: [string, number, number][] = [['bukti', skor.bukti, 40], ['putusan', skor.putusan, 30], ['penanganan', skor.penanganan, 30]];
+  const lebihBaik = terbaik !== undefined && terbaik > skor.total;
   return (
     <section className="iv-layar iv-hasil" data-hasil-investigasi="" data-nilai={skor.nilai} aria-labelledby="iv-hasil-judul">
       <div className="iv-hasil-kepala">
@@ -57,6 +70,8 @@ export function HasilInvestigasi({ skor, nama, look, stempel, pangkat, onMainLag
           <h2 id="iv-hasil-judul" tabIndex={-1} data-cer-fokus="">{t('investigasi.hasil.judul')}</h2>
           <p className="iv-hasil-angka"><b>{skor.total}</b><span> / 100</span></p>
           <p className="iv-hasil-pangkat">{t(`investigasi.pangkat.${pangkat}`)}</p>
+          {rekor ? <p className="iv-rekor" data-rekor="baru" role="status">{teks('inv.hasil.rekor')}</p>
+            : lebihBaik ? <p className="iv-rekor" data-rekor="lama">{teks('inv.hasil.terbaik')} {terbaik}</p> : null}
         </div>
         {reaksi ? <PotretReaksi reaksi={reaksi} ukuran={64} /> : null}
       </div>
@@ -69,14 +84,12 @@ export function HasilInvestigasi({ skor, nama, look, stempel, pangkat, onMainLag
           </li>
         ))}
       </ul>
-      <KartuPetugas nama={nama} look={look} investigasi={{ stempel, pangkat, baru: true }} />
+      <KartuPetugas nama={nama} look={look} investigasi={{ stempel, pangkat, baru: stempelBaru }} />
+      {teaser}
       <div className="iv-hasil-aksi">
-        <button type="button" className="akh-kedua iv-tombol" data-main-lagi="" onClick={onMainLagi}>{t('investigasi.hasil.mainLagi')}</button>
-        <button type="button" className="primary-action iv-tombol" data-kasus-berikutnya="" onClick={() => { if (berikutnyaSegera) setSegera(true); onKasusBerikutnya(); }}>
-          {t('investigasi.hasil.berikutnya')}
-        </button>
+        <button type="button" className="akh-kedua iv-tombol" data-main-lagi="" aria-haspopup="dialog" onClick={onMainLagi}>{t('investigasi.hasil.mainLagi')}</button>
+        <button type="button" className="primary-action iv-tombol" data-selesai-kasus="" onClick={onSelesai}>{teks('inv.hasil.selesai')}</button>
       </div>
-      <p className="iv-hasil-segera" role="status" data-tampil={segera ? '' : undefined}>{segera ? t('investigasi.hasil.segera') : ''}</p>
     </section>
   );
 }

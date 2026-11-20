@@ -12,6 +12,8 @@
  * Gerak dikurangi: tanpa balik / kilau / geser, keadaan akhir tiap langkah langsung tampil.
  * Ukur 360 x 640 (hitung; ruang isi 544): langkah 20 + perintah 26..52 + meja 240 + hasil 44..66 + tombol 56 + jarak 4 x 8 =
  * 418..466 px.
+ * T-087 (review pilot butir 4): langkahnya bisa DILANJUTKAN sesudah muat ulang: `awal` = langkah untuk memulai (0..2, langkah
+ * sebelumnya dianggap selesai) dan `onLangkah(n)` dipanggil tiap pindah ke langkah berikut; pemanggil yang menyimpannya.
  */
 import { useEffect, useState, type CSSProperties } from 'react';
 import { playSfx } from '../../../audio/audio';
@@ -27,9 +29,9 @@ import './bukti-adegan.css';
 
 type Langkah = 0 | 1 | 2;
 
-export function PeriksaSim({ onSelesai }: { onSelesai: () => void }) {
+export function PeriksaSim({ onSelesai, awal = 0, onLangkah }: { onSelesai: () => void; awal?: Langkah; onLangkah?: (langkah: Langkah) => void }) {
   const kurang = useReducedMotion();
-  const [langkah, setLangkah] = useState<Langkah>(0);
+  const [langkah, setLangkah] = useState<Langkah>(awal);
   /** Langkah kini sudah diketuk (hasilnya tampil). */
   const [sudah, setSudah] = useState(false);
   /** Langkah 3: pindai selesai (layar HP menampilkan hasil). */
@@ -45,7 +47,9 @@ export function PeriksaSim({ onSelesai }: { onSelesai: () => void }) {
   const maju = () => {
     if (!sudah || (langkah === 2 && !cocok)) return;
     if (langkah === 2) { onSelesai(); return; }
-    setLangkah((langkah + 1) as Langkah); setSudah(false);
+    const berikut = (langkah + 1) as Langkah;
+    setLangkah(berikut); setSudah(false);
+    onLangkah?.(berikut);
   };
   const depan = langkah > 0 || sudah; // SIM sudah dibalik
   const siap = sudah && (langkah !== 2 || cocok);
