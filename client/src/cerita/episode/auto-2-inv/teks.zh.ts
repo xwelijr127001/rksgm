@@ -96,6 +96,8 @@ export const TEKS_AUTO_2_INV_ZH: Record<string, string> = {
 
   // Antarmuka pembungkus Task 1 (teks komponen Task 2 ada di kamus aplikasi `investigasi`)
   'inv.ui.sematJudul': '这是一句重要的陈述。把它钉到你的记事本上。',
+  'inv.ui.sematTombol': '钉到笔记本',
+  'inv.ui.tersematBuku': '已钉到笔记本',
   'inv.ui.buktiBaru': '新证据！',
   'inv.ui.simpan': '存入记事本',
   'inv.ui.lanjut': '继续',

@@ -1,0 +1,77 @@
+/* T-079 (Designer): BUKU CATATAN INVESTIGATOR (BukuCatatan.tsx): buku kulit cokelat terbuka, dijilid di atas, dua halaman bertumpuk
+   selebar layar. Tinggi (HP 360): halaman atas 42 + 68 per pernyataan; jilid 12; halaman bawah 42 + 58 per bukti; pensil 20;
+   sampul 18 -> penuh (2 pernyataan + 3 bukti) 446 px. Tulisan tangan 16-18 px (fon tulisan sistem), judul & nama memakai fon biasa.
+   Gerak (kalimat menulis sendiri, pin jatuh, pendar) mati bila gerak dikurangi. */
+
+.bk {
+  --bk-tulis: 'Bradley Hand', 'Segoe Print', 'Chalkboard SE', casual, 'Comic Sans MS', 'Comic Neue', cursive;
+  position: relative; display: block; box-sizing: border-box; width: 100%; margin: 0; padding: 6px 18px 6px 6px; border: 3px solid #2a211e;
+  background: #6b4226; color: #212121; font-size: 16px; line-height: 1.3; text-align: left;
+  box-shadow: inset 0 0 0 2px #8a5a36, 0 3px 0 #2a211e, 4px 9px 14px rgba(33, 33, 33, .25);
+}
+.bk :is(h3, p, ul) { margin: 0; padding: 0; list-style: none; }
+/* jahitan sampul */
+.bk::before { content: ''; position: absolute; inset: 2px; border: 2px dashed #c9a27a; opacity: .55; pointer-events: none; }
+/* karet pengikat di tepi kanan sampul */
+.bk-elastis { position: absolute; right: 5px; top: -3px; bottom: -3px; width: 8px; background: #2a211e; box-shadow: inset 2px 0 0 #4d3f38; z-index: 2; }
+
+.bk-halaman { position: relative; box-sizing: border-box; padding: 6px 8px 8px 16px; border: 2px solid #2a211e; background: #fbf3df repeating-linear-gradient(transparent 0 25px, #e6d9be 25px 26px); }
+.bk-halaman::before { content: ''; position: absolute; left: 9px; top: 0; bottom: 0; width: 1px; background: #e7a39a; } /* garis tepi merah */
+.bk-atas { border-bottom: 0; }
+.bk-bawah { border-top: 0; }
+.bk-jilid { position: relative; z-index: 1; display: block; height: 12px; margin: -4px 0; background: url('../../seni/investigasi/spiral.png') 6px 0 repeat-x; image-rendering: pixelated; }
+.bk-judul { display: flex; align-items: center; gap: 6px; height: 20px; margin-bottom: 4px; font-size: 14px; line-height: 20px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; color: #7a3e00; }
+.bk-judul .iv-hitung { margin-left: 2px; }
+.bk-daftar { display: grid; gap: 4px; }
+.bk-tulisan { font-family: var(--bk-tulis); font-weight: 400; color: #26306b; }
+.bk-kosong { font-size: 16px; line-height: 26px; color: #9a917f; }
+
+/* ---- halaman atas: pernyataan = polaroid + pin + kalimat tulisan tangan */
+.bk-baris { position: relative; display: grid; grid-template-columns: 48px minmax(0, 1fr); gap: 10px; align-items: start; min-height: 64px; box-sizing: border-box; padding: 4px 2px 2px; }
+.bk-polaroid { position: relative; display: block; width: 48px; height: 56px; box-sizing: border-box; padding: 2px 2px 10px; border: 2px solid #2a211e; background: #ffffff; rotate: -3deg; box-shadow: 2px 2px 0 rgba(42, 33, 30, .25); }
+.bk-baris:nth-child(even) .bk-polaroid { rotate: 2deg; }
+.bk-polaroid .cer-potret { display: block; border: 0 !important; border-radius: 0 !important; box-shadow: none !important; background: #f9eeea; }
+.bk-pin { position: absolute; left: 14px; top: -10px; z-index: 1; }
+.bk-baris-teks { min-width: 0; display: grid; gap: 1px; }
+.bk-siapa { font-size: 14px; line-height: 16px; font-weight: 800; color: #7a3e00; }
+.bk-baris .bk-tulisan { display: block; font-size: 18px; line-height: 23px; overflow-wrap: anywhere; }
+/* belum disemat: coretan pensil pudar */
+.bk-baris[data-keadaan="menunggu"] { outline: 2px dashed #b9ae95; outline-offset: -1px; }
+.bk-baris[data-keadaan="menunggu"] .bk-tulisan { color: #9a917f; }
+.bk-baris[data-keadaan="menunggu"] .bk-polaroid { opacity: .55; }
+/* baru disemat: kalimat menulis sendiri 0,9 s, lalu pin jatuh */
+.bk-baris[data-keadaan="baru"] .bk-tulisan { animation: bk-tulis .9s steps(20) both; }
+.bk-baris[data-keadaan="baru"] .bk-pin { animation: bk-pin .3s cubic-bezier(.3, 1.6, .5, 1) .9s both; }
+@keyframes bk-tulis { from { clip-path: inset(0 100% 0 0); } to { clip-path: inset(0 0 0 0); } }
+@keyframes bk-pin { from { transform: translateY(-28px) rotate(-20deg); opacity: 0; } }
+/* sedang dibantah (KEBERATAN): stabilo jingga berpendar */
+.bk-baris[data-sorot] { background: rgba(255, 144, 0, .2); box-shadow: 0 0 0 2px #ff9000; animation: bk-pendar 1.4s ease-in-out infinite alternate; }
+@keyframes bk-pendar { from { box-shadow: 0 0 0 2px #ff9000; } to { box-shadow: 0 0 0 2px #ff9000, 0 0 12px 3px rgba(255, 144, 0, .6); } }
+
+/* ---- halaman bawah: bukti = slip kertas dijepit klip (gambar 84 x 44 + judul tulisan tangan 16 px, maks. 2 baris) */
+.bk-slip-daftar { gap: 6px; padding-top: 2px; }
+.bk-slip { position: relative; display: grid; grid-template-columns: 84px minmax(0, 1fr) auto; gap: 8px; align-items: center; width: 100%; height: 52px; box-sizing: border-box; margin: 0; padding: 2px 6px 2px 2px; border: 2px solid #2a211e; border-radius: 0; background: #fffdf6; color: #212121; font: inherit; text-align: left; box-shadow: 2px 2px 0 rgba(42, 33, 30, .25); }
+button.bk-slip { cursor: pointer; }
+button.bk-slip[aria-pressed="true"] { border-color: #ff9000; background: #fff1c2; box-shadow: 0 2px 0 #9a4f00; }
+button.bk-slip[data-redup] { opacity: .45; cursor: default; }
+button.bk-slip:focus-visible { outline: 3px solid #1d6fd1; outline-offset: 2px; }
+.bk-klip { position: absolute; left: 74px; top: -9px; z-index: 1; width: 10px; height: 22px; background-repeat: no-repeat; image-rendering: pixelated; }
+.bk-slip-gambar { position: relative; display: block; width: 84px; height: 44px; background-repeat: no-repeat; image-rendering: pixelated; }
+.bk-slip-sorot { position: absolute; inset: 1px; border: 2px solid #ff9000; box-shadow: 0 0 0 1px #212121, inset 0 0 0 1px #212121; animation: iv-kedip 1s steps(1) infinite; }
+.bk-slip-sorot[data-bukti="dashcam"] { inset: 0 0 auto 0; height: 14px; }
+.bk-slip-teks { min-width: 0; }
+.bk-slip .bk-tulisan { font-size: 16px; line-height: 19px; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden; }
+
+/* ---- pensil di sarungnya */
+.bk-pensil { position: relative; display: block; height: 20px; margin: 0 0 -4px 10px; background: var(--bk-pensil) 0 3px / 144px 16px no-repeat; image-rendering: pixelated; }
+.bk-pensil::before, .bk-pensil::after { content: ''; position: absolute; top: 1px; width: 10px; height: 20px; box-sizing: border-box; border: 2px solid #2a211e; background: #5a3620; }
+.bk-pensil::before { left: 28px; } .bk-pensil::after { left: 92px; }
+
+/* ---- layar semat (node catat) dan catatan tempel petunjuk (KEBERATAN) */
+.iv-catat { gap: 8px; }
+.iv-tempel { position: relative; padding: 6px 10px; background: #fff1a8; border: 2px solid #2a211e; box-shadow: 2px 3px 0 rgba(42, 33, 30, .3); font-size: 16px; line-height: 22px; rotate: -.6deg; }
+.iv-tempel.iv-pandu { display: grid; grid-template-columns: 48px minmax(0, 1fr); gap: 8px; align-items: center; font-size: 15px; line-height: 20px; rotate: none; }
+
+@media (prefers-reduced-motion: reduce) {
+  :root:not([data-gerak="penuh"]) :is(.bk-baris, .bk-baris .bk-tulisan, .bk-pin, .bk-slip-sorot) { animation: none !important; }
+}

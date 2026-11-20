@@ -17,7 +17,7 @@ import type { Episode, KunciTeks, NodeCerita, StateCerita } from '../tipe';
 import { adaRekaman, bacaRekaman, berlanggananInvestigasi, catatHasil, pangkat, tamuBaru, versiInvestigasi } from './simpan';
 import { skorKasus } from './skor';
 import { buktiTerkumpul, hasilKasus, pernyataanTercatat, type Bukti } from './status';
-import { BukuCatatan, KartuPernyataan, PotretReaksi } from './ui/BukuCatatan';
+import { BukuCatatan, PotretReaksi } from './ui/BukuCatatan';
 import { CapKeberatan } from './ui/CapKeberatan';
 import { PenyediaTeksInvestigasi } from './ui/dasar';
 import { HasilInvestigasi } from './ui/HasilInvestigasi';
@@ -33,8 +33,9 @@ type Tx = (k: KunciTeks) => string;
 const URUTAN_KARTU: readonly Bukti['id'][] = ['rambu', 'dashcam', 'sim'];
 const urutKartu = (bukti: Bukti[]): Bukti[] => [...bukti].sort((a, b) => URUTAN_KARTU.indexOf(a.id) - URUTAN_KARTU.indexOf(b.id));
 
-/** Lama tanda "Tersemat" terlihat sebelum cerita lanjut (md). T-078: 550 -> 900, pin jatuh 0,3 s lalu tanda terbaca. */
-const JEDA_SEMAT_MS = 900;
+/** T-079: sesudah "Sematkan": kalimat menulis sendiri 0,9 s, pin jatuh 0,3 s, lalu terbaca sebentar; baru cerita lanjut (md). */
+const JEDA_SEMAT_MS = 2000;
+const JEDA_PIN_MS = 900;
 
 /**
  * T-078 node `cap`: cap KEBERATAN menutupi layar 1,5 s (atau diketuk), LALU layar di bawahnya tinggal: petugas tol "kaget" +
@@ -69,22 +70,30 @@ function TamuBaru({ tx, onMulaiUlang }: { tx: Tx; onMulaiUlang: () => void }) {
 }
 
 /** Node `catat`: kartu pernyataan dengan tombol "Sematkan"; sesudah disemat tandanya terlihat sebentar, lalu mesin lanjut. */
-function LayarCatat({ ep, id, tx, onLanjut }: { ep: Episode; id: string; tx: Tx; onLanjut: () => void }) {
+function LayarCatat({ ep, state, id, tx, onLanjut }: { ep: Episode; state: StateCerita; id: string; tx: Tx; onLanjut: () => void }) {
   const [tersemat, setTersemat] = useState(false);
   const lanjutRef = useRef(onLanjut);
   lanjutRef.current = onLanjut;
   useEffect(() => {
     if (!tersemat) return;
+    const pin = window.setTimeout(() => playSfx('taruh'), JEDA_PIN_MS);
     const w = window.setTimeout(() => lanjutRef.current(), JEDA_SEMAT_MS);
-    return () => window.clearTimeout(w);
+    return () => { window.clearTimeout(pin); window.clearTimeout(w); };
   }, [tersemat]);
   const p = ep.investigasi?.pernyataan.find((x) => x.id === id);
   // Data episode keliru (pernyataan tidak ada): jangan menahan pemain.
   if (!p) return <section className="iv-layar"><button type="button" className="primary-action iv-tombol" onClick={onLanjut}>{tx('inv.ui.lanjut')}</button></section>;
   return (
+    // T-079: layar semat = BUKU CATATAN terbuka. Pernyataan baru tampil pudar (pensil) di halaman "Keterangan"; "Sematkan" =
+    // kalimatnya menulis sendiri dengan tinta, pin jatuh (bunyi kertas lalu 'taruh'), lalu cerita lanjut.
     <section className="iv-layar iv-catat" data-layar-catat="" aria-label={tx('inv.ui.sematJudul')}>
       <p className="iv-label">{tx('inv.ui.sematJudul')}</p>
-      <KartuPernyataan pernyataan={p} tersemat={tersemat} onSemat={() => { if (!tersemat) { playSfx('taruh'); setTersemat(true); } }} />
+      <BukuCatatan pernyataan={[...pernyataanTercatat(ep, state).filter((x) => x.id !== p.id), ...(tersemat ? [p] : [])]} bukti={buktiTerkumpul(ep, state)}
+        menunggu={tersemat ? undefined : p} pernyataanBaru={tersemat ? p.id : undefined} />
+      <button type="button" className="primary-action iv-tombol" data-semat="" disabled={tersemat} aria-live="polite"
+        onClick={() => { if (!tersemat) { playSfx('kertas'); setTersemat(true); } }}>
+        {tersemat ? tx('inv.ui.tersematBuku') : tx('inv.ui.sematTombol')}
+      </button>
     </section>
   );
 }
@@ -130,7 +139,7 @@ export function LayarInvestigasi({ ep, state, node, tx, onLanjut, onPilih, onMul
       );
       break;
     case 'catat':
-      isi = <LayarCatat key={node.id} ep={ep} id={inv.pernyataan} tx={tx} onLanjut={onLanjut} />;
+      isi = <LayarCatat key={node.id} ep={ep} state={state} id={inv.pernyataan} tx={tx} onLanjut={onLanjut} />;
       break;
     case 'bukti':
       isi = <LayarBukti key={node.id} bukti={konfig.bukti.find((x) => x.id === inv.bukti)} keterangan={barisPertama} tx={tx} onLanjut={onLanjut} />;

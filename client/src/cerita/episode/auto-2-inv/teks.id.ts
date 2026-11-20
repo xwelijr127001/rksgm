@@ -109,6 +109,8 @@ export const TEKS_AUTO_2_INV_ID: Record<string, string> = {
 
   // Antarmuka pembungkus Task 1 (teks komponen Task 2 ada di kamus aplikasi `investigasi`)
   'inv.ui.sematJudul': 'Pernyataan penting. Sematkan ke buku catatanmu.',
+  'inv.ui.sematTombol': 'Sematkan ke buku catatan',
+  'inv.ui.tersematBuku': 'Tersemat di buku catatan',
   'inv.ui.buktiBaru': 'Bukti baru!',
   'inv.ui.simpan': 'Simpan ke buku catatan',
   'inv.ui.lanjut': 'Lanjut',

@@ -96,6 +96,8 @@ export const TEKS_AUTO_2_INV_EN: Record<string, string> = {
 
   // Antarmuka pembungkus Task 1 (teks komponen Task 2 ada di kamus aplikasi `investigasi`)
   'inv.ui.sematJudul': 'An important statement. Pin it to your notebook.',
+  'inv.ui.sematTombol': 'Pin to the notebook',
+  'inv.ui.tersematBuku': 'Pinned in the notebook',
   'inv.ui.buktiBaru': 'New evidence!',
   'inv.ui.simpan': 'Save to the notebook',
   'inv.ui.lanjut': 'Next',

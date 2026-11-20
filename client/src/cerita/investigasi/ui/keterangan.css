@@ -1,0 +1,107 @@
+/* T-079 (Designer): LAYAR KETERANGAN + KILAS BALIK (Episode 1 Investigator). Panggung 336 x 236 di tengah kolom (HP 390: sisi
+   kiri-kanan = warna dinding / hitam film). Seni piksel pada kelipatan bulat. Semua gerak di sini mati bila gerak dikurangi
+   (blok terakhir): yang tersisa bingkai diam. */
+
+.kt { display: flex; flex-direction: column; min-height: 0; overflow: hidden; border: 2px solid #ff9000; background: #fff9f5; box-shadow: 0 3px 0 #9a4f00; }
+/* kartu tugas di baris aksi (pengantar dashcam / SIM): panggung 168 px, saksi & dinding naik 20 px */
+.kt[data-tugas] .kt-panggung { height: 168px; }
+.kt[data-tugas] .kt-latar { top: -28px; }
+.kt[data-tugas] .kt-saksi { top: 6px; height: 162px; }
+.kt-aksi .hp-aksi { gap: 6px; padding: 8px 0 0; border: 0; border-top: 1px dashed #e0e0e0; border-radius: 0; background: none; }
+.kt-panggung { position: relative; flex: none; height: 236px; overflow: hidden; background: #c9a57a; image-rendering: pixelated; border-bottom: 2px solid #212121; }
+.kt-panggung > * { position: absolute; }
+/* dinding: potongan ruang wawancara x 116..284, y 4..122 pada 2x (papan tulis + jam di belakang saksi) */
+.kt-latar { left: 50%; top: 0; width: 336px; height: 236px; margin-left: -168px; background-size: 800px 450px; background-position: -232px -8px; background-repeat: no-repeat; }
+.kt-meja { left: 50%; bottom: 0; width: 336px; height: 72px; margin-left: -168px; background-size: 336px 72px; background-repeat: no-repeat; box-shadow: -168px 0 0 #a56f3d, 168px 0 0 #a56f3d; }
+
+/* saksi duduk: kepala di y 26; tepi meja menutup dari y 164 */
+.kt-saksi { left: 50%; top: 26px; height: 210px; overflow: hidden; }
+.kt-saksi-badan { position: relative; display: block; transform-origin: 50% 70%; animation: kt-napas 2.6s steps(1) infinite; }
+.kt-lapis { display: block; }
+.kt-lapis svg { display: block; }
+.kt-kedip { position: absolute; left: 0; top: 0; opacity: 0; animation: kt-kedip 3.8s steps(1) infinite; }
+@keyframes kt-napas { 0%, 100% { translate: 0 0; } 50% { translate: 0 2px; } }
+@keyframes kt-kedip { 0%, 96% { opacity: 0; } 96.4%, 100% { opacity: 1; } }
+/* bicara: anggukan kecil cepat selama kalimat diketik */
+.kt-saksi[data-bicara] .kt-saksi-badan { animation: kt-bicara .36s steps(1) infinite; }
+@keyframes kt-bicara { 0%, 100% { translate: 0 0; } 50% { translate: 0 -2px; } }
+/* ketukan gerak (sekali, lalu kembali ke putaran diam / bicara lewat lapisan luar) */
+.kt-saksi[data-gerak] { animation: .9s cubic-bezier(.3, 1.3, .5, 1) both; }
+.kt-saksi[data-gerak="condong"] { animation-name: kt-condong; transform-origin: 50% 100%; }
+.kt-saksi[data-gerak="mundur"] { animation-name: kt-mundur; transform-origin: 50% 100%; }
+.kt-saksi[data-gerak="geleng"] { animation: kt-geleng .7s steps(1) both; }
+.kt-saksi[data-gerak="angguk"] { animation: kt-angguk .7s steps(1) both; }
+.kt-saksi[data-gerak="usap"] { animation: kt-mundur 1s cubic-bezier(.3, 1.3, .5, 1) both; transform-origin: 50% 100%; }
+@keyframes kt-condong { 0% { transform: none; } 45% { transform: translateY(8px) scale(1.07); } 100% { transform: translateY(5px) scale(1.04); } }
+@keyframes kt-mundur { 0% { transform: none; } 30% { transform: translate(10px, -6px) rotate(4deg); } 100% { transform: translate(5px, -2px) rotate(2deg); } }
+@keyframes kt-geleng { 0%, 100% { translate: 0 0; } 15%, 55% { translate: -4px 0; } 35%, 75% { translate: 4px 0; } }
+@keyframes kt-angguk { 0%, 100% { translate: 0 0; } 20%, 60% { translate: 0 5px; } 40%, 80% { translate: 0 0; } }
+/* keringat: dua tetes piksel jatuh dari pelipis */
+.kt-tetes { position: absolute; left: 32px; top: 50px; width: 6px; height: 10px; background: #9fd3e6; box-shadow: 0 0 0 2px #2a211e; clip-path: polygon(50% 0, 100% 60%, 50% 100%, 0 60%); animation: kt-tetes 1.2s steps(6) .2s infinite; }
+.kt-tetes-2 { left: auto; right: 30px; top: 60px; animation-delay: .7s; }
+@keyframes kt-tetes { from { translate: 0 0; opacity: 1; } to { translate: 0 30px; opacity: 0; } }
+
+/* potret reaksi T-078: muncul di kanan atas; Miss Raksa lewat telepon: sisipan di kiri atas */
+.kt-reaksi { right: calc(50% - 160px); top: 8px; animation: kt-muncul .28s cubic-bezier(.2, 1.6, .4, 1) both; }
+.kt-telepon { left: calc(50% - 160px); top: 8px; box-shadow: 0 0 0 2px #fff9f5, 0 3px 0 2px #212121; }
+.kt-telepon[data-bicara] { animation: kt-bicara .36s steps(1) 6; }
+@keyframes kt-muncul { from { transform: scale(.4); opacity: 0; } }
+
+/* kotak dialog: nama (tab jingga pemutar HP), kalimat 18 px diketik, baris aksi */
+.kt-dialog { flex: 0 1 auto; min-height: 0; display: flex; flex-direction: column; gap: 8px; padding: 10px 12px 12px; }
+.kt-isi { flex: 0 1 auto; min-height: 104px; overflow-y: auto; display: grid; gap: 8px; align-content: start; }
+.kt-aksi { flex: none; display: grid; }
+.kt-aksi .primary-action { margin: 0; }
+.kt-ketik { cursor: pointer; }
+.kt-belum { color: transparent; }
+.kt-via { font-style: normal; }
+
+/* ---------------------------------------------------------------- kilas balik: pita film 26 + isi 184 + pita 26 */
+.kb { position: absolute; inset: 0; margin: 0; background: #17110b; animation: kb-buka .3s steps(4) both; }
+.kb::before, .kb::after { content: ''; position: absolute; left: 0; right: 0; height: 26px; background: #17110b repeating-linear-gradient(90deg, transparent 0 8px, #e9dcc0 8px 20px, transparent 20px 28px) 0 7px / auto 12px no-repeat; }
+.kb::before { top: 0; } .kb::after { bottom: 0; }
+.kb-film { position: absolute; left: 50%; top: 26px; width: 336px; height: 184px; margin-left: -168px; overflow: hidden; background: #6b6f72; filter: sepia(.85) saturate(1.15) contrast(1.06); image-rendering: pixelated; }
+.kb-film > * { position: absolute; }
+.kb-butir { inset: 0; background: var(--kb-butir) 0 0 / 128px 128px; opacity: .22; animation: kb-butir .5s steps(1) infinite; pointer-events: none; }
+@keyframes kb-butir { 0% { background-position: 0 0; } 25% { background-position: 44px -30px; } 50% { background-position: -22px 52px; } 75% { background-position: 60px 18px; } }
+@keyframes kb-buka { from { clip-path: inset(46% 0); } to { clip-path: inset(0); } }
+.kb-tag { position: absolute; left: calc(50% - 162px); top: 30px; z-index: 2; display: inline-flex; align-items: center; gap: 6px; padding: 2px 8px 2px 6px; border: 2px solid #17110b; background: #f6e7c4; color: #3b2a14; font-size: 14px; line-height: 18px; font-weight: 700; max-width: 300px; white-space: nowrap; overflow: hidden; }
+.kb-tag b { font-weight: 800; letter-spacing: .1em; }
+.kb-tag b::before { content: ''; display: inline-block; width: 8px; height: 8px; margin-right: 6px; background: #b3261e; }
+
+/* darto: jalan bergulir (ubin 26 px tiap 0,35 s), truk di lajur 2, mobil memotong dari lajur 3, truk membanting setir.
+   Dasar (tanpa animasi) = keadaan AKHIR: bingkai diam untuk gerak dikurangi. */
+.kb-jalan { left: 0; top: -26px; width: 336px; height: 236px; background-repeat: repeat-y; animation: kb-jalan .35s steps(13) infinite; }
+@keyframes kb-jalan { from { translate: 0 0; } to { translate: 0 26px; } }
+.kb-truk { left: 143px; top: 66px; width: 40px; height: 124px; transform: translate(-18px, 4px) rotate(-9deg); animation: kb-truk 4.8s ease-in-out infinite; }
+.kb-mobil { left: 216px; top: 44px; width: 26px; height: 44px; transform: translate(-66px, -30px); animation: kb-mobil 4.8s ease-in-out infinite; }
+@keyframes kb-mobil { 0%, 22% { transform: none; } 34% { transform: translate(-24px, -10px) rotate(-16deg); } 46% { transform: translate(-58px, -24px) rotate(-8deg); } 54%, 100% { transform: translate(-66px, -30px); } }
+@keyframes kb-truk { 0%, 52% { transform: none; } 62% { transform: translate(-8px, 0) rotate(-5deg); } 74%, 100% { transform: translate(-18px, 4px) rotate(-9deg); } }
+.kb-nomor { left: 0; bottom: 5px; width: 336px; height: 13px; }
+.kb-cincin { left: 151px; bottom: 0; width: 24px; height: 22px; box-sizing: border-box; border: 3px solid #fff9f5; box-shadow: 0 0 0 2px #17110b, inset 0 0 0 2px #17110b; animation: kb-cincin 1s steps(1) infinite; }
+@keyframes kb-cincin { 50% { border-color: #f6d25c; } }
+
+/* tol: buku catatan 2x; angka 3 ditulis dalam 4 langkah; tangan mengikuti goresannya lalu menyingkir */
+.kb-buku { inset: 0; background-size: 336px 184px; }
+.kb-tiga { left: 174px; top: 120px; width: 28px; height: 36px; background-size: 140px 36px; background-position: -112px 0; animation: kb-tulis 3.6s steps(1) infinite; }
+@keyframes kb-tulis { 0% { background-position: 0 0; } 20% { background-position: -28px 0; } 32% { background-position: -56px 0; } 44% { background-position: -84px 0; } 56%, 100% { background-position: -112px 0; } }
+.kb-tangan { left: 232px; top: 150px; width: 80px; height: 72px; background-size: 80px 72px; animation: kb-tangan 3.6s linear infinite; }
+@keyframes kb-tangan {
+  0% { left: 250px; top: 190px; } 12% { left: 174px; top: 120px; } 20% { left: 192px; top: 120px; } 32% { left: 182px; top: 132px; }
+  38% { left: 190px; top: 134px; } 44% { left: 192px; top: 142px; } 50% { left: 186px; top: 148px; } 56% { left: 174px; top: 146px; }
+  70%, 100% { left: 232px; top: 150px; }
+}
+
+/* ---------------------------------------------------------------- tombol buku catatan di kepala layar (PemainHP) */
+.hp-kepala-kanan { display: flex; align-items: center; gap: 6px; }
+.hp-buku-tombol { position: relative; display: grid; place-items: center; width: 48px; height: 48px; margin: 0; padding: 0; border: 2px solid #212121; border-radius: 0; background: #f8e3c8; box-shadow: 0 3px 0 #212121; cursor: pointer; }
+.hp-buku-tombol:active { translate: 0 2px; box-shadow: 0 1px 0 #212121; }
+.hp-buku-tombol:focus-visible { outline: 3px solid #1d6fd1; outline-offset: 2px; }
+.hp-buku-tombol b { position: absolute; right: -6px; top: -6px; min-width: 18px; height: 18px; padding: 0 4px; box-sizing: border-box; background: #d32f2f; color: #ffffff; font-size: 12px; line-height: 18px; font-weight: 800; text-align: center; box-shadow: 0 0 0 2px #212121; }
+
+/* pemutar HP terkunci (tanpa gulir halaman): layar keterangan mengisi ruang, teks dialog menggulir di kotaknya bila perlu */
+.hp-layar[data-kunci] > .hp-main > .kt { flex: 0 1 auto; min-height: 0; }
+
+@media (prefers-reduced-motion: reduce) {
+  :root:not([data-gerak="penuh"]) :is(.kt-saksi, .kt-saksi-badan, .kt-kedip, .kt-tetes, .kt-reaksi, .kt-telepon, .kb, .kb-butir, .kb-jalan, .kb-truk, .kb-mobil, .kb-cincin, .kb-tiga, .kb-tangan) { animation: none !important; }
+}

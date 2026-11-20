@@ -30,6 +30,9 @@ import type { Episode, IdBab, KunciTeks, NodeAktivitas, NodePilihan, StateCerita
 import { HasilKasus, IsiBukuCatatan, LayarInvestigasi } from '../investigasi/LayarInvestigasi';
 import { tamuBaru } from '../investigasi/simpan';
 import { hiasReaksi } from '../investigasi/ui/reaksiBaris';
+import { LayarKeterangan, pakaiKeterangan } from '../investigasi/ui/LayarKeterangan';
+import { IkonInv } from '../investigasi/ui/dasar';
+import { buktiTerkumpul, pernyataanTercatat } from '../investigasi/status';
 import { IkonAlat, selaPembicara } from '../ui/bagian';
 import { IsiCatatanKasus } from '../ui/CatatanKasus';
 import { DaftarIstilah, istilahBaris } from '../ui/KotakDialog';
@@ -296,9 +299,22 @@ function PemainHPInti({ ep, state, kendali, profil, bahasa, tx: txAsli }: {
             <p className="hp-judul-teks"><span className="hp-bagian">{t('cerita.bagian', { n: bab.nomor, total: bab.jumlah })}</span><b>{tx(bab.bab.judul)}</b></p>
           ) : <p className="hp-judul-teks"><span className="hp-bagian">{t('cerita.akhirLabel')}</span><b>{tx(ep.judul)}</b></p>}
         </div>
+        {ep.investigasi ? (
+          // T-079: buku catatan investigator selalu terjangkau (ikon buku + jumlah isinya), di kiri Menu.
+          <div className="hp-kepala-kanan">
+            <button type="button" className="hp-buku-tombol" data-buku-tombol="" aria-haspopup="dialog" aria-label={t('investigasi.bukuInvestigator')} onClick={() => { playSfx('kertas'); setDialog('catatan'); }}>
+              <IkonInv nama="buku" />
+              {pernyataanTercatat(ep, state).length + buktiTerkumpul(ep, state).length > 0 ? <b aria-hidden="true">{pernyataanTercatat(ep, state).length + buktiTerkumpul(ep, state).length}</b> : null}
+            </button>
+            <button type="button" className="hp-menu" aria-haspopup="dialog" onClick={() => setDialog('menu')}>
+              <span aria-hidden="true">⋯</span><span className="hp-menu-teks">{t('ceritaHp.menu')}</span>
+            </button>
+          </div>
+        ) : (
         <button type="button" className="hp-menu" aria-haspopup="dialog" onClick={() => setDialog('menu')}>
           <span aria-hidden="true">⋯</span><span className="hp-menu-teks">{t('ceritaHp.menu')}</span>
         </button>
+        )}
       </header>
       {bab && tampilan !== 'akhir' && tampilan !== 'arena' && tampilan !== 'obrolan' && tampilan !== 'investigasi' && !akibatDiMeja ? (
         <p className="hp-tujuan"><b>{t('ceritaHp.tujuan')}</b>{selaPembicara()}{tx(bab.bab.tujuan)}</p>
@@ -336,6 +352,10 @@ function PemainHPInti({ ep, state, kendali, profil, bahasa, tx: txAsli }: {
           <LayarAkhir ep={ep} state={state} bahasa={bahasa} namaPemain={namaPemain} tx={tx} ditemukan={akhirDitemukan(ep.id)} onUlangBab={ulangBab} onUlangEpisode={ulangEpisode} slotAksi={cangkangLayar ? slotAkhir : null} satuLayar={cangkangLayar} />
         ) : tampilan === 'obrolan' ? (
           <Obrolan ep={ep} state={state} tx={tx} status={status} pesanAktivitas={pesanAktivitas} komposer={komposer} sisipan={<>{sisipanIstilah}{buktiTindakan}</>} tujuan={bab ? tx(bab.bab.tujuan) : undefined} lembar={balasTerbuka} />
+        ) : pakaiKeterangan(ep, state) ? (
+          // T-079 (Episode 1 Investigator): ruang wawancara = layar keterangan (saksi duduk, gerak, kilas balik); baris tetap maju lewat komposer.
+          <LayarKeterangan ep={ep} state={state} tx={tx} komposer={komposer}
+            nama={(id) => (id === 'pemain' ? namaPemain : Object.prototype.hasOwnProperty.call(ep.pemeran, id) ? tx(ep.pemeran[id]!.nama) : id)} />
         ) : (
           <AdeganTatap ep={ep} state={state} tx={tx} namaPemain={namaPemain} status={status} tindakan={tindakan} buktiTindakan={buktiTindakan} statusSesudah={statusSesudah} komposer={komposer} aksiDiDialog={!(node.jenis === 'pilihan' && lengkap)} sisipan={sisipanIstilah} hiasUcapan={ep.investigasi ? hiasReaksi : undefined}
             tugasNanti={node.jenis === 'aktivitas' && !lengkap && misi ? { judul: misi.title, instruksi: misi.instruction, tombol: t('ceritaHp.mulaiTugas') } : null} />
@@ -382,7 +402,7 @@ function PemainHPInti({ ep, state, kendali, profil, bahasa, tx: txAsli }: {
         </Modal>
       ) : null}
       {dialog === 'catatan' ? (
-        <Modal judul={ep.investigasi ? t('investigasi.buku') : t('cerita.catatanKasus')} onTutup={() => setDialog(null)} lebar={560}>
+        <Modal judul={ep.investigasi ? t('investigasi.bukuInvestigator') : t('cerita.catatanKasus')} onTutup={() => setDialog(null)} lebar={560}>
           {ep.investigasi ? <IsiBukuCatatan ep={ep} state={state} tx={tx} /> : <IsiCatatanKasus ep={ep} state={state} bahasa={bahasa} tx={tx} />}
         </Modal>
       ) : null}

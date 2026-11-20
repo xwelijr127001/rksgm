@@ -3978,3 +3978,62 @@ How the result was tightened: rows 26 → 24, gaps 10 → 8, the "segera hadir" 
 - The opener picture shows the truck in lane 2 before the player has heard either statement (as the spec asks). If the owner finds it gives the answer away, crop the frame to the signs and lanes without the truck.
 - The stamp screen now needs one more tap ("Lanjut").
 - The `:has()` rule for the result foot needs iOS 15.4 or newer; on older phones the best-score line stays visible and that one state can scroll by a few pixels.
+
+## T-079 (2026-11-21): Investigator redesign: testimony with motion + a real detective notebook (Designer)
+
+Built by the Designer on top of 43e39c1; uncommitted. Owner rule: nothing was opened in a browser. Gate: client typecheck 0 errors; client/dist rebuilt. Only the investigator episode changes: everything in the phone player is behind `ep.investigasi`. Scoring, saves and the graph are untouched (two wrapper text keys were added to the episode texts, id/en/zh).
+
+### 1. Testimony with motion
+New `investigasi/ui/LayarKeterangan.tsx` + `keterangan.css`. The phone player uses it instead of the general stage for investigator nodes in the interview room that have a witness with a pixel sprite (`pakaiKeterangan`). That covers the two statements, Miss Raksa's phone lines, the KEBERATAN intro and misses, the officer's correction, and the dashcam / SIM task intros. Lines still advance through the player's own "Lanjut".
+
+- **Staging (336×236, art at 2×):**
+  - The room wall is the backdrop.
+  - The witness is SEATED across a table: his existing sprite from head to chest, with the lower body hidden by the new table edge on the player's side (`meja-depan.png`: open notebook, pen, coffee cup).
+- **Loops:**
+  - Idle: breathing (2 px every 2.6 s) and a blink (the atlas's closed-eyes face, every 3.8 s).
+  - Talking: a quick small nod while his line types out letter by letter. Tapping the text shows it whole.
+- **Motion beats per line** (`GERAK_BARIS`): lean in, lean back, shake head, nod, and wipe sweat (two drops fall). The T-078 reaction portraits pop in at the top right. Miss Raksa on the phone is a portrait inset at the top left.
+- **Flashback on the key line** (`KilasBalik.tsx`, `KILAS_BARIS`): the stage cuts to a film-strip panel with sprocket holes, sepia, film grain and a "KETERANGAN · name" tag. The next line returns to the room.
+  - Pak Darto (`inv.darto.3`): the dashcam road scrolling, the truck in lane 2, the small car cutting in from lane 3, the truck swerving left; lane numbers at the bottom with "2" ringed. 4.8 s loop.
+  - Petugas tol (`inv.tol.3`): a close-up of his logbook "CATATAN KEJADIAN" with the hand writing "3" in the LAJUR box. 3.6 s loop.
+- **Reduced motion:** no typing and no loops. The flashbacks show their final still (car already cut in; "3" written).
+- **Task intros:** when the task card shows, the stage shortens to 168 px. If the text still overflows, the goal line hides (the same mechanism the general stage uses).
+
+### 2. Detective notebook
+`BukuCatatan.tsx` rewritten (same `{pernyataan, bukti}` props, new look) + `buku.css`.
+
+- **The book:** an open brown leather notebook with stitching, an elastic band and a pencil in its loop.
+- **Layout choice:** it is bound at the TOP like a reporter's notebook, so on a portrait phone the two pages stack and each stays full width. Side-by-side pages would be 150 px each, too narrow for 16 px text.
+  - Upper page "Keterangan": each pinned statement is a small polaroid of the speaker with a red pin, plus the sentence in handwriting.
+  - Ring binding between the pages.
+  - Lower page "Bukti": evidence as paper slips held by paper clips (picture + handwritten title).
+- **Handwriting:** the system's handwriting font (Bradley Hand / Segoe Print / Chalkboard / Android "casual"), 16-18 px, blue-black ink. Titles and names stay in the normal font.
+- **Pin screen (replaces the empty page):** the book fills the screen with the new statement in faint pencil inside a dashed outline. "Sematkan ke buku catatan" makes the sentence write itself in ink (0.9 s), then the pin drops (paper sound, then a soft "taruh"), and the story continues after 2 s.
+- **KEBERATAN picks FROM the book:** the contested statement is highlighted in orange on the upper page and the evidence slips are the choices on the lower page (same data and props). Hints are a yellow sticky note.
+- **Always reachable:** a book button with an item count sits at the top right of the header, left of Menu. It opens the full book.
+
+### Fit by calculation (360×640)
+- **Testimony:** 236 stage + about 218 dialog = about 454 of about 492 px (with the goal line showing).
+- **Pin screen:** at most about 398 of 544 px. Both pin screens come before any evidence, so the lower page is short there.
+- **KEBERATAN:** 466 px on the first try, up to 524 with a hint.
+- **Full book** (2 statements + 3 slips): about 450 to 480 px, in the dialog.
+- 390×700 has more room.
+
+### Files
+- **New components and CSS** (`client/src/cerita/investigasi/ui/`): `LayarKeterangan.tsx`, `KilasBalik.tsx`, `keterangan.css`, `buku.css`.
+- **Rewritten:** `BukuCatatan.tsx`, `LayarKeberatan.tsx`.
+- **Changed:** `investigasi/LayarInvestigasi.tsx` (pin screen), `hp/PemainHP.tsx` (testimony screen + book button, investigator only), `i18n/kamus/investigasi.ts`, `episode/auto-2-inv/teks.{id,en,zh}.ts` (two button labels).
+- **New art** (`client/src/cerita/seni/investigasi/`): `meja-depan`, `kilas-tol`, `kilas-tiga`, `kilas-tangan`, `butir`, `pensil`, `klip`, generated by `character/investigator-t079/bangun.mts`.
+
+### Previews
+Calculated mocks from the real art; text is a stand-in pixel font. In `character/investigator-t079/`, made by `pratinjau.mts`:
+- `keterangan-t079-2x.png`: the room with Pak Darto, the room with the officer and a reaction, and two frames of each flashback.
+- `buku-t079-2x.png`: the notebook empty (pin screen), half, and full.
+- `aset-t079-3x.png`: the new art.
+
+### Open
+- Not seen in a browser or on a phone; the motion in particular is unseen.
+- "Seated" is the standing sprite cropped by the table; there is no new seated or arm art. So "scratch head" is not drawn: the beats are body movement plus sweat drops and the reaction portraits. Real gesture sprites would be a follow-up.
+- There is no mouth animation (these sprites have no open-mouth face); talking is the nod.
+- The handwriting font differs per device, and Chinese falls back to the system font.
+- The notebook pages are stacked, not side by side (see the layout choice above).

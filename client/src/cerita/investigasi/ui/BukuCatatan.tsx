@@ -1,20 +1,32 @@
 /**
- * T-077: BUKU CATATAN detektif + KARTU PERNYATAAN (pernyataan saksi yang bisa disematkan).
+ * T-077 / T-079: BUKU CATATAN INVESTIGATOR.
+ * T-079 (pemilik: "catatannya seperti buku, seperti detektif"): buku catatan kulit cokelat TERBUKA yang mengisi layar. Buku dijilid
+ * di atas (gaya buku reporter), jadi di HP tegak kedua halamannya bertumpuk dan tetap selebar layar (teks >= 16 px terbaca):
+ *   halaman atas  "Keterangan": tiap pernyataan tersemat = foto polaroid kecil pembicara + pin merah + kalimat bertulisan tangan;
+ *   jilid         cincin spiral (seni/investigasi/spiral.png);
+ *   halaman bawah "Bukti": kartu bukti dijepit seperti slip / polaroid (gambar bukti + judul bertulisan tangan + klip kertas);
+ *   pensil di sarungnya di bawah, karet pengikat di tepi kanan, jahitan di sampul.
+ * Tulisan tangan = fon tulisan sistem (Bradley Hand / Segoe Print / Chalkboard / "casual" Android), 16-18 px, tinta biru-hitam.
  *
- * BukuCatatan { pernyataan, bukti }: kertas bergaris dengan spiral di atas; dua bagian, "Pernyataan" (kartu pernyataan tersemat) dan
- * "Bukti" (kartu bukti, tampilan saja). Bagian kosong = satu kalimat petunjuk. Isinya menggulir di dalam bukunya sendiri bila tinggi
- * tempatnya kurang (halaman tidak pernah ikut menggulir).
- *
- * KartuPernyataan { pernyataan, tersemat?, onSemat?, reaksi?, sorot? } (tambahan untuk node `catat` Task 1 dan LayarKeberatan):
- * potret piksel pembicara 48 px (atau potret reaksi), nama, kalimat 18 px. `onSemat` = tombol "Sematkan" (pin) 48 px; sesudah
- * tersemat: pin merah di sudut + pinggiran berpendar jingga (gerak dikurangi: pendar diam).
+ * Props rencana TETAP: { pernyataan, bukti } (+ opsional):
+ *   menunggu          pernyataan yang BELUM disemat (layar semat): tampil pudar seperti coretan pensil;
+ *   pernyataanBaru    id yang baru disemat: kalimatnya "menulis sendiri" (0,9 s) lalu pin jatuh;
+ *   sorotPernyataan   id yang sedang dibantah (KEBERATAN): baris berpendar jingga;
+ *   pilihBukti        KEBERATAN: slip bukti = pilihan tunggal (terpilih, sorot, redup, onPilih), datanya sama dengan KartuBukti;
+ *   tanpaPensil       tanpa baris pensil (layar yang butuh tinggi).
+ * Tinggi (hitung, HP 360): halaman atas 42 + 68 per pernyataan; jilid 12; halaman bawah 42 + 58 per bukti; pensil 20; sampul 18.
+ * Penuh (2 + 3) = 446 px. Diekspor juga: PotretReaksi (potret reaksi T-077) dan KartuPernyataan (kartu lama, masih dipakai uji).
  */
+import type { CSSProperties } from 'react';
 import { t } from '../../../i18n';
 import { PotretPikselHp } from '../../ui/latar/piksel/PotretPikselHp';
+import buktiUrl from '../../seni/investigasi/bukti.png';
+import klipUrl from '../../seni/investigasi/klip.png';
+import pensilUrl from '../../seni/investigasi/pensil.png';
 import reaksiUrl from '../../seni/investigasi/reaksi.png';
 import { IkonInv, useTx, type Bukti, type Pernyataan, type Tx } from './dasar';
-import { KartuBukti } from './KartuBukti';
 import './investigasi.css';
+import './buku.css';
 
 /** Potret reaksi 64 x 64 (seni/investigasi/reaksi.png): tokoh + tanda emosi. */
 const SEL_REAKSI = { 'tol-kaget': 0, 'tol-mengaku': 1, 'darto-lega': 2, 'miss-berpikir': 3, 'miss-bangga': 4 } as const;
@@ -28,16 +40,9 @@ export function PotretReaksi({ reaksi, ukuran = 64, label = '' }: { reaksi: Reak
 
 const TOKOH_PIKSEL = { darto: 'darto', petugasTol: 'tol' } as const;
 
+/** Kartu pernyataan lama (T-077): potret + nama + kalimat (+ tombol "Sematkan"). Layar semat & KEBERATAN kini memakai buku. */
 export function KartuPernyataan({ pernyataan, tersemat = false, onSemat, reaksi, sorot = false, tx }: {
-  pernyataan: Pernyataan;
-  tersemat?: boolean;
-  /** Ada = tombol "Sematkan" (node `catat`); sesudah tersemat tombolnya menjadi tanda "Tersemat". */
-  onSemat?: (id: string) => void;
-  /** Ganti potret biasa dengan potret reaksi (mis. petugas tol "kaget" sesudah KEBERATAN). */
-  reaksi?: Reaksi;
-  /** Pendar jingga (pernyataan yang sedang dibantah di LayarKeberatan). */
-  sorot?: boolean;
-  tx?: Tx;
+  pernyataan: Pernyataan; tersemat?: boolean; onSemat?: (id: string) => void; reaksi?: Reaksi; sorot?: boolean; tx?: Tx;
 }) {
   const teks = useTx(tx);
   const nama = t(`investigasi.siapa.${pernyataan.siapa}`);
@@ -47,10 +52,7 @@ export function KartuPernyataan({ pernyataan, tersemat = false, onSemat, reaksi,
       <span className="iv-pernyataan-potret" aria-hidden="true">
         {reaksi ? <PotretReaksi reaksi={reaksi} ukuran={48} /> : <PotretPikselHp tokoh={TOKOH_PIKSEL[pernyataan.siapa]} ekspresi="netral" ukuran={48} label="" />}
       </span>
-      <figcaption className="iv-pernyataan-teks">
-        <b>{nama}</b>
-        <q>{teks(pernyataan.teks)}</q>
-      </figcaption>
+      <figcaption className="iv-pernyataan-teks"><b>{nama}</b><q>{teks(pernyataan.teks)}</q></figcaption>
       {onSemat ? (
         tersemat
           ? <span className="iv-semat-sudah" role="status">{t('investigasi.tersemat')}</span>
@@ -60,21 +62,89 @@ export function KartuPernyataan({ pernyataan, tersemat = false, onSemat, reaksi,
   );
 }
 
-export function BukuCatatan({ pernyataan, bukti, tx }: { pernyataan: Pernyataan[]; bukti: Bukti[]; tx?: Tx }) {
+/** Potongan gambar bukti 84 x 44 di slip (dari sel 96 x 68 seni/investigasi/bukti.png). */
+const POTONG_BUKTI: Record<Bukti['id'], [number, number]> = { dashcam: [6, 0], rambu: [102, 10], sim: [198, 12] };
+
+export interface PilihBukti {
+  terpilih: Bukti['id'] | null;
+  /** Bukti yang bagian gambarnya disorot (petunjuk). */
+  sorot?: Bukti['id'] | null;
+  /** Bukti yang pudar dan tidak bisa dipilih (langkah dipandu). */
+  redup?: (id: Bukti['id']) => boolean;
+  onPilih: (id: Bukti['id']) => void;
+}
+
+function BarisKeterangan({ p, keadaan, sorot, teks }: { p: Pernyataan; keadaan: 'tersemat' | 'baru' | 'menunggu'; sorot: boolean; teks: Tx }) {
   return (
-    <section className="iv-buku" aria-label={t('investigasi.buku')} data-buku-catatan="">
-      <span className="iv-buku-spiral" aria-hidden="true" />
-      <div className="iv-buku-isi">
-        <h3 className="iv-buku-judul"><IkonInv nama="buku" kali={1} />{t('investigasi.buku')}</h3>
-        <h4>{t('investigasi.pernyataan')} <span className="iv-hitung">{pernyataan.length}</span></h4>
-        {pernyataan.length
-          ? <ul className="iv-daftar">{pernyataan.map((p) => <li key={p.id}><KartuPernyataan pernyataan={p} tersemat tx={tx} /></li>)}</ul>
-          : <p className="iv-kosong">{t('investigasi.kosongPernyataan')}</p>}
-        <h4>{t('investigasi.bukti')} <span className="iv-hitung">{bukti.length}</span></h4>
-        {bukti.length
-          ? <ul className="iv-daftar">{bukti.map((b) => <li key={b.id}><KartuBukti bukti={b} tx={tx} /></li>)}</ul>
-          : <p className="iv-kosong">{t('investigasi.kosongBukti')}</p>}
+    <li className="bk-baris" data-pernyataan={p.id} data-keadaan={keadaan} data-sorot={sorot ? '' : undefined}>
+      <span className="bk-polaroid" aria-hidden="true">
+        <PotretPikselHp tokoh={TOKOH_PIKSEL[p.siapa]} ekspresi="netral" ukuran={40} label="" />
+        {keadaan !== 'menunggu' ? <IkonInv nama="pin" kali={1} className="bk-pin" /> : null}
+      </span>
+      <span className="bk-baris-teks">
+        <b className="bk-siapa">{t(`investigasi.siapa.${p.siapa}`)}</b>
+        <q className="bk-tulisan">{teks(p.teks)}</q>
+      </span>
+    </li>
+  );
+}
+
+function SlipBukti({ b, pilih, teks }: { b: Bukti; pilih?: PilihBukti; teks: Tx }) {
+  const [px, py] = POTONG_BUKTI[b.id];
+  const isi = (
+    <>
+      <i className="bk-klip" aria-hidden="true" style={{ backgroundImage: `url(${klipUrl})` }} />
+      <span className="bk-slip-gambar" aria-hidden="true" style={{ backgroundImage: `url(${buktiUrl})`, backgroundPosition: `${-px}px ${-py}px` }}>
+        {pilih?.sorot === b.id ? <i className="bk-slip-sorot" data-bukti={b.id} /> : null}
+      </span>
+      <span className="bk-slip-teks"><b className="bk-tulisan">{teks(b.judul)}</b></span>
+      {pilih ? <span className="iv-bukti-tanda" aria-hidden="true">{pilih.terpilih === b.id ? '✓' : ''}</span> : null}
+    </>
+  );
+  if (!pilih) return <li><div className="bk-slip" data-bukti={b.id} title={teks(b.sumber)}>{isi}</div></li>;
+  const redup = pilih.redup?.(b.id) ?? false;
+  return (
+    <li>
+      <button type="button" className="bk-slip" data-bukti={b.id} data-redup={redup ? '' : undefined} aria-pressed={pilih.terpilih === b.id} disabled={redup}
+        aria-label={`${t('investigasi.bukti')}: ${teks(b.judul)}. ${teks(b.sumber)}`} onClick={() => pilih.onPilih(b.id)}>
+        {isi}
+      </button>
+    </li>
+  );
+}
+
+export function BukuCatatan({ pernyataan, bukti, tx, menunggu, pernyataanBaru, sorotPernyataan, pilihBukti, tanpaPensil = false }: {
+  pernyataan: Pernyataan[];
+  bukti: Bukti[];
+  tx?: Tx;
+  menunggu?: Pernyataan;
+  pernyataanBaru?: string;
+  sorotPernyataan?: string;
+  pilihBukti?: PilihBukti;
+  tanpaPensil?: boolean;
+}) {
+  const teks = useTx(tx);
+  const jumlah = pernyataan.length;
+  return (
+    <section className="bk" aria-label={t('investigasi.bukuInvestigator')} data-buku-catatan="" style={{ '--bk-pensil': `url(${pensilUrl})` } as CSSProperties}>
+      <span className="bk-elastis" aria-hidden="true" />
+      <div className="bk-halaman bk-atas">
+        <h3 className="bk-judul"><IkonInv nama="pin" kali={1} />{t('investigasi.keterangan')}<span className="iv-hitung">{jumlah}</span></h3>
+        {jumlah || menunggu ? (
+          <ul className="bk-daftar">
+            {pernyataan.map((p) => <BarisKeterangan key={p.id} p={p} keadaan={p.id === pernyataanBaru ? 'baru' : 'tersemat'} sorot={p.id === sorotPernyataan} teks={teks} />)}
+            {menunggu ? <BarisKeterangan key={`tunggu-${menunggu.id}`} p={menunggu} keadaan="menunggu" sorot={false} teks={teks} /> : null}
+          </ul>
+        ) : <p className="bk-kosong bk-tulisan">{t('investigasi.kosongPernyataan')}</p>}
       </div>
+      <span className="bk-jilid" aria-hidden="true" />
+      <div className="bk-halaman bk-bawah">
+        <h3 className="bk-judul"><IkonInv nama="foto" kali={1} />{t('investigasi.bukti')}<span className="iv-hitung">{bukti.length}</span></h3>
+        {bukti.length
+          ? <ul className="bk-daftar bk-slip-daftar">{bukti.map((b) => <SlipBukti key={b.id} b={b} pilih={pilihBukti} teks={teks} />)}</ul>
+          : <p className="bk-kosong bk-tulisan">{t('investigasi.kosongBukti')}</p>}
+      </div>
+      {tanpaPensil ? null : <span className="bk-pensil" aria-hidden="true" />}
     </section>
   );
 }

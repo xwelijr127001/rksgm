@@ -1,18 +1,18 @@
 /**
- * T-077: LAYAR KEBERATAN. Pernyataan tersemat yang akan dibantah (berpendar) + kartu bukti yang sudah dikumpulkan; pemain memilih SATU
- * kartu lalu menekan tombol besar "KEBERATAN!" -> onPilih(id). Tanpa nyawa, tanpa pewaktu; kekeliruan tidak pernah menghalangi:
- *   percobaan 0  pertanyaan + kartu;
- *   percobaan 1  petunjuk singkat + bagian gambar yang perlu dilihat disorot (baris nomor lajur di kartu dashcam);
- *   percobaan 2  Miss Raksa ("berpikir") menuntun: hanya bukti yang tepat yang aktif (sudah terpilih), kartu lain pudar.
+ * T-077 / T-079: LAYAR KEBERATAN. T-079: pemain membantah DARI BUKU CATATANNYA: buku terbuka (BukuCatatan) dengan pernyataan yang
+ * dibantah distabilo jingga di halaman "Keterangan" dan slip bukti yang bisa dipilih di halaman "Bukti"; pilih SATU slip lalu tekan
+ * tombol besar "KEBERATAN!" -> onPilih(id). Tanpa nyawa, tanpa pewaktu; kekeliruan tidak pernah menghalangi:
+ *   percobaan 0  pertanyaan + buku;
+ *   percobaan 1  catatan tempel kuning berisi petunjuk + bagian gambar yang perlu dilihat disorot (baris nomor lajur di slip dashcam);
+ *   percobaan 2  catatan tempel Miss Raksa ("berpikir") menuntun: hanya bukti yang tepat yang aktif (sudah terpilih), lainnya pudar.
  * Yang tampil hanya bukti di `bukti` (yang belum dikumpulkan tidak dikirim Task 1, jadi tidak bisa dipilih).
  * Props rencana: { pernyataan, bukti, percobaan, onPilih } (+ opsional tx; tepat = bukti yang benar, bawaan 'dashcam' sesuai desain).
- * Ukur 360 x 640 (hitung, lebar isi 328): tanya 26 + pernyataan 100 + petunjuk 20..75 + 3 kartu 76 + 2 x 6 + tombol 56 + jarak
- * 4 x 8 = 474..529 px <= 568 (layar - kepala cerita 56 - bantalan 16).
+ * Ukur 360 x 640 (hitung; ruang isi 544): tanya 26 + label 20 / tempel 56..78 + buku (halaman atas 108, jilid 4, halaman bawah 210,
+ * sampul 18 = 340) + tombol 56 + jarak 3 x 8 = 466 (percobaan 0) .. 524 px (percobaan 1 dan 2).
  */
 import { useEffect, useState } from 'react';
 import { t } from '../../../i18n';
-import { KartuPernyataan, PotretReaksi } from './BukuCatatan';
-import { KartuBukti } from './KartuBukti';
+import { BukuCatatan, PotretReaksi } from './BukuCatatan';
 import type { Bukti, Pernyataan, Tx } from './dasar';
 import './investigasi.css';
 
@@ -31,22 +31,16 @@ export function LayarKeberatan({ pernyataan, bukti, percobaan, onPilih, tx, tepa
   return (
     <section className="iv-layar iv-keberatan" data-layar-keberatan="" data-percobaan={percobaan} aria-labelledby="iv-keberatan-tanya">
       <h2 id="iv-keberatan-tanya" className="iv-tanya" tabIndex={-1} data-cer-fokus="">{t('investigasi.keberatan.tanya')}</h2>
-      <KartuPernyataan pernyataan={pernyataan} tersemat sorot tx={tx} />
       {percobaan === 0 ? <p className="iv-label">{t('investigasi.keberatan.pilih')}</p> : null}
-      {percobaan === 1 ? <p className="iv-petunjuk" role="status">{t('investigasi.keberatan.petunjuk1')}</p> : null}
+      {percobaan === 1 ? <p className="iv-tempel" role="status">{t('investigasi.keberatan.petunjuk1')}</p> : null}
       {dipandu ? (
-        <p className="iv-petunjuk iv-pandu" role="status">
+        <p className="iv-tempel iv-pandu" role="status">
           <PotretReaksi reaksi="miss-berpikir" ukuran={48} />
-          <span><b>Miss Raksa</b>{t('investigasi.keberatan.petunjuk2')}</span>
+          <span>{t('investigasi.keberatan.petunjuk2')}</span>
         </p>
       ) : null}
-      <ul className="iv-daftar">
-        {bukti.map((b) => (
-          <li key={b.id}>
-            <KartuBukti bukti={b} tx={tx} terpilih={pilih === b.id} sorot={percobaan >= 1 && b.id === tepat} redup={dipandu && b.id !== tepat} onPilih={setPilih} />
-          </li>
-        ))}
-      </ul>
+      <BukuCatatan pernyataan={[pernyataan]} bukti={bukti} tx={tx} sorotPernyataan={pernyataan.id} tanpaPensil
+        pilihBukti={{ terpilih: pilih, sorot: percobaan >= 1 ? tepat : null, redup: (id) => dipandu && id !== tepat, onPilih: setPilih }} />
       <button type="button" className="primary-action iv-tombol iv-tombol-keberatan" data-keberatan="" disabled={!pilih} onClick={() => { if (pilih) onPilih(pilih); }}>
         {pilih ? t('investigasi.keberatan.tombol') : t('investigasi.keberatan.belum')}
       </button>
