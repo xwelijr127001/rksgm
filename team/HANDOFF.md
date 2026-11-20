@@ -4094,3 +4094,28 @@ Calculated mocks from the real art, in `character/investigator-t080/`, made by `
 - Pak Darto pulling the card "out of his shirt pocket" is his arm coming down from the shoulder; there is no pocket animation.
 - The dashcam arena is 18 px taller in this episode; I did not re-measure its worst case after an answer.
 - A guest who is mid-case exactly at the old SIM arena when this deploys resumes at the new table check.
+
+## T-081 (2026-11-21): fix the broken hand in the dashcam handover (Designer)
+
+Built by the Designer on top of 2853bcb; uncommitted. Owner rule: nothing was opened in a browser. Gate: client typecheck 0 errors; client/dist rebuilt. Only `SerahDashcam` (auto-2-inv) changes.
+
+**What was wrong (T-080):** the arm was a tall brown block (a sleeve drawn 26×40 with a small hand) placed in front of Pak Darto's chest and moved down as one piece. It read as a floating block, not an arm.
+
+**Fix**
+- **New drawing** (`seni/investigasi/tangan-serah.png`, 16×15 art px, shown 2×): a forearm and hand seen from above over the table, in Pak Darto's own sprite colours sampled from the atlas (plaid shirt browns, darker cuff, his skin tone, his outline colour). It has a short foreshortened sleeve stub, the cuff, the back of the hand with a thumb at the side, and four fingers pointing toward the player.
+- **Attached to the body:** the arm sits in a clipped box whose top edge is the table's back edge, directly under his torso (his body spans −67..+63 px from the centre at that height; the arm is at +8..+40). It slides OUT from behind the table edge in pixel steps, so there is no gap, no floating block, and it never comes near his face.
+- **Motion** (same 3.2 s):
+  1. The arm reaches out with the memory card pinched under the fingertips.
+  2. It places the card on the table.
+  3. It withdraws behind the edge and the card stays.
+  4. The card slides alone to the laptop's side and tucks in; the laptop opens and lights "REKAMAN 14:32" as before.
+- **Laptop position:** moved 14 px right, so the arm has a clear strip of table between the notebook and the laptop.
+- **Reduced motion:** a still with no arm, the card lying on the table and the laptop lit.
+
+**Files:** `client/src/cerita/investigasi/ui/SerahDashcam.tsx`, `bukti-adegan.css` (handover block), `client/src/cerita/seni/investigasi/tangan-serah.png`, `character/investigator-t080/bangun.mts` and `pratinjau.mts`.
+
+**Preview** (calculated mocks from the real art), in `character/investigator-t080/`:
+- `serah-t081-2x.png`: four moments (reach, place, withdraw with the card left, card at the laptop with the screen lit).
+- `lengan-t081-6x.png`: the arm and card enlarged, at the "place" moment.
+
+**Open:** the motion has not been seen running in a browser.
