@@ -10,6 +10,7 @@
  * aplikasi `investigasi` (Task 2), teks pembungkus di sini di teks episode (`inv.ui.*`).
  */
 import { useEffect, useRef, useState, useSyncExternalStore, type ReactNode } from 'react';
+import { BingkaiDashcam } from '../hp/arena/ArenaDashcam';
 import type { PlayerLook } from '@shared/types';
 import { playSfx } from '../../audio/audio';
 import type { Episode, KunciTeks, NodeCerita, StateCerita } from '../tipe';
@@ -32,8 +33,24 @@ type Tx = (k: KunciTeks) => string;
 const URUTAN_KARTU: readonly Bukti['id'][] = ['rambu', 'dashcam', 'sim'];
 const urutKartu = (bukti: Bukti[]): Bukti[] => [...bukti].sort((a, b) => URUTAN_KARTU.indexOf(a.id) - URUTAN_KARTU.indexOf(b.id));
 
-/** Lama tanda "Tersemat" terlihat sebelum cerita lanjut (md). */
-const JEDA_SEMAT_MS = 550;
+/** Lama tanda "Tersemat" terlihat sebelum cerita lanjut (md). T-078: 550 -> 900, pin jatuh 0,3 s lalu tanda terbaca. */
+const JEDA_SEMAT_MS = 900;
+
+/**
+ * T-078 node `cap`: cap KEBERATAN menutupi layar 1,5 s (atau diketuk), LALU layar di bawahnya tinggal: petugas tol "kaget" +
+ * kalimat keberatan; "Lanjut" baru meneruskan cerita (dulu cap langsung lanjut, jadi reaksinya tidak pernah terlihat).
+ */
+function LayarCap({ kalimat, tx, onLanjut }: { kalimat: string; tx: Tx; onLanjut: () => void }) {
+  const [cap, setCap] = useState(true);
+  return (
+    <section className="iv-layar iv-cap-bawah" data-cap-bawah="" aria-live="polite">
+      {cap ? <CapKeberatan onSelesai={() => setCap(false)} /> : null}
+      <PotretReaksi reaksi="tol-kaget" ukuran={128} />
+      {kalimat ? <p className="iv-cap-kalimat">{kalimat}</p> : null}
+      <button type="button" className="primary-action iv-tombol" data-cap-lanjut="" onClick={onLanjut}>{tx('inv.ui.lanjut')}</button>
+    </section>
+  );
+}
 
 /** "Tamu baru": dua ketukan (tombol, lalu konfirmasi sebaris). Menghapus HANYA rekaman investigasi, lalu `onMulaiUlang`. */
 function TamuBaru({ tx, onMulaiUlang }: { tx: Tx; onMulaiUlang: () => void }) {
@@ -106,7 +123,8 @@ export function LayarInvestigasi({ ep, state, node, tx, onLanjut, onPilih, onMul
     case 'judul':
       isi = (
         <>
-          <JudulKasus nomor={konfig.nomor} judul={konfig.judul} onMulai={onLanjut} />
+          {/* T-078: bingkai dashcam diam (sebelum benturan: rambu + lajur) di kartu pembuka */}
+          <JudulKasus nomor={konfig.nomor} judul={konfig.judul} onMulai={onLanjut} gambar={<BingkaiDashcam besar />} />
           {adaRekaman() ? <TamuBaru tx={tx} onMulaiUlang={onMulaiUlang} /> : null}
         </>
       );
@@ -133,15 +151,7 @@ export function LayarInvestigasi({ ep, state, node, tx, onLanjut, onPilih, onMul
       break;
     }
     case 'cap':
-      // Cap menutupi layar (portal) lalu melanjutkan sendiri; di bawahnya kalimat keberatan + reaksi petugas (juga jalan cadangan).
-      isi = (
-        <section className="iv-layar iv-cap-bawah" data-cap-bawah="">
-          <CapKeberatan key={node.id} onSelesai={onLanjut} />
-          <PotretReaksi reaksi="tol-kaget" ukuran={128} />
-          {barisPertama ? <p>{barisPertama}</p> : null}
-          <button type="button" className="primary-action iv-tombol" onClick={onLanjut}>{tx('inv.ui.lanjut')}</button>
-        </section>
-      );
+      isi = <LayarCap key={node.id} kalimat={barisPertama} tx={tx} onLanjut={onLanjut} />;
       break;
     case 'putusan':
       isi = <LayarPutusan key={node.id} onPilih={(p) => { if (onPilih(p)) playSfx('konfirmasi'); }} />;
@@ -178,7 +188,9 @@ export function HasilKasus({ ep, state, nama, look, tx, onMainLagi }: {
   const terbaik = Math.max(r.terbaik[kasus] ?? 0, skor.total);
   return (
     <PenyediaTeksInvestigasi value={tx}>
-      <HasilInvestigasi skor={skor} nama={nama} look={look} stempel={stempel} pangkat={pangkat(stempel.length)} onMainLagi={onMainLagi} onKasusBerikutnya={() => { /* kasus 2 belum ada: komponen menampilkan "segera hadir" */ }} />
+      {/* T-078: Miss Raksa "bangga" bila putusannya tepat (akhir tuntas), "berpikir" bila diluruskan */}
+      <HasilInvestigasi skor={skor} nama={nama} look={look} stempel={stempel} pangkat={pangkat(stempel.length)} reaksi={h.putusan === 'layak' ? 'miss-bangga' : 'miss-berpikir'}
+        onMainLagi={onMainLagi} onKasusBerikutnya={() => { /* kasus 2 belum ada: komponen menampilkan "segera hadir" */ }} />
       <div className="iv-layar iv-hasil-kaki" data-hasil-kaki="">
         {terbaik > skor.total ? <p className="iv-label" data-skor-terbaik={terbaik}>{tx('inv.ui.terbaik')} {terbaik}</p> : null}
         <TamuBaru tx={tx} onMulaiUlang={onMainLagi} />

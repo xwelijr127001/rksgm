@@ -1,8 +1,9 @@
 /**
  * T-077: LAYAR PUTUSAN. Tiga kartu putusan (ikon piksel 32 px + nama putusan 18 px + alasan singkat 15 px), pilih satu lalu
  * "Tetapkan putusan" -> onPilih('layak' | 'tambahan' | 'polis'). Urutan kartu tetap dan tidak menaruh jawaban di tempat pertama.
- * Props rencana: { onPilih }. Ukur 360 x 640 (hitung): tanya 26 + keterangan 20 + 3 kartu (alasan 15 px, sampai 3 baris: 107) + 2 x 8 +
- * tombol 56 + jarak 3 x 8 = 463 px <= 568 (zh: kartu 87 -> 403).
+ * Props rencana: { onPilih }. T-078: alasan mengikuti laporan yang SUDAH diperbaiki (truk di lajur 2). Ukur 360 x 640 (hitung; ruang
+ * isi 544): tanya 26 + keterangan 20..40 + 3 kartu (alasan 15 px, sampai 3 baris: 107) + 2 x 8 + tombol 56 + jarak 3 x 8 = 463..483
+ * px <= 544 (zh: kartu 87 -> 403).
  */
 import { useState } from 'react';
 import { t } from '../../../i18n';

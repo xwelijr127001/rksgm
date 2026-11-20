@@ -89,6 +89,26 @@ const SASARAN: Record<IdKendaraan, CSSProperties> = {
 /** Lajur 1-4: pusat x di adegan 336 (nomor lajur di pita K08). */
 const PUSAT_LAJUR = [97, 163, 229, 295];
 
+/**
+ * Bingkai DIAM sebelum benturan (T-068 Fix 1 pita K08; T-078 dipakai juga kartu pembuka Episode 1 Investigator): adegan geser 0
+ * (dua rambu, truk lurus di lajur 2, mobil di lajur 3; truk kecil belum masuk layar), tanpa animasi.
+ *   bawaan  skala 1/2 tepat, dipotong ke y 20-236 = 168 x 108, nomor lajur 1-4 (14 px) di pusat tiap lajur;
+ *   besar   skala 1, x 0-292, y 20-170 = 292 x 150 (rambu merah & biru utuh, lajur 1-3 + tepi lajur 4), nomor lajur 1-3.
+ */
+export function BingkaiDashcam({ besar = false }: { besar?: boolean }) {
+  return (
+    <figure className="dc-pita" data-besar={besar ? '' : undefined} aria-label={t('dashcam.judul')} style={{ '--ubin': `url(${ubin})`, '--rambu': `url(${rambu})` } as CSSProperties}>
+      <div className="dc-pita-isi">
+        <span className="dc-latar" aria-hidden="true" />
+        <span className="dc-tanah" aria-hidden="true" />
+        {(['truk', 'mobil'] as const).map((k) => <img key={k} className="dc-pita-kend" src={POSE[k][0]!.src} alt="" aria-hidden="true" style={posisi(POSE[k][0]!)} />)}
+      </div>
+      {/* nomor lajur terbaca (14 px) di pusat tiap lajur: angka piksel di latar hanya 2,5 px pada skala 1/2 */}
+      {PUSAT_LAJUR.filter((x) => !besar || x < 280).map((x, i) => <span key={i} className="dc-pita-lajur" aria-hidden="true" style={{ left: besar ? x : x / 2 }}>{i + 1}</span>)}
+    </figure>
+  );
+}
+
 export function ArenaPolaDashcam({ ep, konfig, jawaban, ubah, tx, labelKirim, onKirim }: PropsPola & { konfig: KonfigDashcam }) {
   const kurang = useReducedMotion();
   const [tahap, setTahap] = useState<Tahap>('putar');
@@ -227,16 +247,7 @@ export function ArenaPolaDashcam({ ep, konfig, jawaban, ubah, tx, labelKirim, on
             dan chip "Rambu" yang bisa dibuka (tulisan rambu dalam bahasa aktif). Lima kesimpulan di bawahnya, tanpa gulir (dashcam.css).
           */}
           <div className="dc-pita-baris">
-            <figure className="dc-pita" aria-label={t('dashcam.judul')} style={{ '--ubin': `url(${ubin})`, '--rambu': `url(${rambu})` } as CSSProperties}>
-              <div className="dc-pita-isi">
-                {/* T-071: diam, geser 0 (bingkai 1: dua rambu terlihat; truk kecil belum masuk layar) */}
-                <span className="dc-latar" aria-hidden="true" />
-                <span className="dc-tanah" aria-hidden="true" />
-                {(['truk', 'mobil'] as const).map((k) => <img key={k} className="dc-pita-kend" src={POSE[k][0]!.src} alt="" aria-hidden="true" style={posisi(POSE[k][0]!)} />)}
-              </div>
-              {/* nomor lajur 1-4 terbaca (14 px) di pusat tiap lajur: angka piksel di latar hanya 2,5 px pada skala 1/2 */}
-              {PUSAT_LAJUR.map((x, i) => <span key={i} className="dc-pita-lajur" aria-hidden="true" style={{ left: x / 2 }}>{i + 1}</span>)}
-            </figure>
+            <BingkaiDashcam />
             <div className="dc-pita-kanan">
               <p className="dc-tanya-ringkas"><span className="dc-ucap-potret" aria-hidden="true"><PotretHp ep={ep} id={simpul.penanya} nama="" /></span><b>{penanya}</b> {tx(simpul.tanya)}</p>
               <details className="dc-rambu-chip">

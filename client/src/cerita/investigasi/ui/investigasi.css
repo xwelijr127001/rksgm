@@ -83,7 +83,8 @@ button.iv-bukti[data-redup] { opacity: .45; cursor: default; }
 .iv-putusan-teks small { font-size: 15px; line-height: 20px; color: #4a4a4a; }
 
 /* ---- hasil: lencana nilai 80 px, total, poin per bagian, kartu petugas, dua tombol */
-.iv-hasil { gap: 10px; }
+.iv-hasil { gap: 8px; }
+.iv-hasil-kepala > .iv-reaksi { margin-left: auto; }
 .iv-hasil-kepala { display: flex; align-items: center; gap: 14px; }
 .iv-nilai { width: 80px; height: 80px; background-size: 320px 80px; }
 .iv-hasil-total { min-width: 0; }
@@ -92,7 +93,7 @@ button.iv-bukti[data-redup] { opacity: .45; cursor: default; }
 .iv-hasil-angka span { font-size: 18px; font-weight: 700; color: #5f5f5f; }
 .iv-hasil-pangkat { font-size: 16px; line-height: 20px; font-weight: 800; }
 .iv-poin { display: grid; gap: 4px; padding: 0; list-style: none; }
-.iv-poin li { display: grid; grid-template-columns: minmax(0, 1fr) 84px 62px; gap: 8px; align-items: center; height: 26px; font-size: 15px; line-height: 20px; }
+.iv-poin li { display: grid; grid-template-columns: minmax(0, 1fr) 84px 62px; gap: 8px; align-items: center; height: 24px; font-size: 15px; line-height: 20px; }
 .iv-poin-nama { font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .iv-poin-batang { display: block; height: 14px; box-sizing: border-box; border: 2px solid #212121; background: #f9eeea; }
 .iv-poin-batang i { display: block; height: 100%; background: #ff9000; }
@@ -101,7 +102,32 @@ button.iv-bukti[data-redup] { opacity: .45; cursor: default; }
 .iv-hasil .kp { justify-self: center; }
 .iv-hasil-aksi { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
 .iv-hasil-aksi .iv-tombol { min-height: 52px; padding: 6px 8px; font-size: 16px; line-height: 1.2; }
-.iv-hasil-segera { min-height: 20px; font-size: 14px; line-height: 20px; text-align: center; color: #5f5f5f; }
+/* T-078: catatan "segera hadir" tidak memesan tempat (tampil sesudah diketuk) */
+.iv-hasil-segera { display: none; font-size: 14px; line-height: 20px; text-align: center; color: #5f5f5f; }
+.iv-hasil-segera[data-tampil] { display: block; }
+/* kaki layar hasil (HasilKasus): skor terbaik + "Tamu baru" rapat, sasaran ketuk 44 px */
+.iv-hasil-kaki { gap: 4px; text-align: center; }
+.iv-hasil-kaki .iv-tamu, .iv-judul + .iv-tamu { margin: 0; text-align: center; }
+.iv-hasil-kaki .hp-tautan { min-height: 44px !important; }
+/* konfirmasi "Tamu baru" terbuka: baris skor terbaik mengalah supaya layar hasil tetap muat */
+.iv-hasil-kaki:has([role="group"]) > .iv-label { display: none; }
+
+/* ---- T-078: potret reaksi di ucapan adegan (reaksiBaris.tsx): kolom kanan 52 px, setinggi nama + kalimat */
+.hp-ucapan[data-hias] { grid-template-columns: minmax(0, 1fr) 52px; column-gap: 8px; }
+.hp-ucapan[data-hias] > :not(.iv-reaksi-baris) { grid-column: 1; }
+.iv-reaksi-baris { grid-column: 2; grid-row: 1 / span 4; align-self: start; display: block; width: 52px; height: 52px; }
+.iv-reaksi-baris .iv-reaksi { animation: iv-reaksi-masuk .28s cubic-bezier(.2, 1.6, .4, 1) both; }
+@keyframes iv-reaksi-masuk { from { transform: scale(.4); opacity: 0; } }
+
+/* ---- T-078: layar di bawah cap (petugas tol "kaget" 128 px + kalimat keberatan), pin jatuh saat disemat */
+.iv-cap-bawah { justify-items: center; gap: 12px; padding-top: 16px; text-align: center; }
+.iv-cap-kalimat { font-size: 18px; line-height: 26px; font-weight: 700; }
+.iv-pernyataan[data-tersemat] .iv-pernyataan-pin { animation: iv-pin .3s cubic-bezier(.3, 1.6, .5, 1) both; }
+@keyframes iv-pin { from { transform: translateY(-26px) rotate(-20deg); opacity: 0; } }
+.iv-buku .iv-pernyataan-pin { animation: none !important; }
+/* dipandu (percobaan 2): tuntunan sedikit lebih rapat supaya ketiga kartu + tombol muat di 544 px */
+.iv-keberatan[data-percobaan="2"] .iv-pandu { font-size: 15px; line-height: 20px; }
+.iv-keberatan[data-percobaan="2"] .iv-daftar { gap: 4px; }
 
 /* ---- cap KEBERATAN: lapisan penuh; kilat putih, ledakan 336 x 168 (2x) membesar lalu bergetar, kata sebagai teks hidup */
 .iv-cap { position: fixed; inset: 0; z-index: 1200; }
@@ -116,5 +142,5 @@ button.iv-bukti[data-redup] { opacity: .45; cursor: default; }
 @keyframes iv-getar { 0% { translate: -6px 3px; } 16% { translate: 6px -4px; } 33% { translate: -5px -3px; } 50% { translate: 4px 4px; } 66% { translate: -3px 2px; } 83% { translate: 2px -2px; } 100% { translate: 0 0; } }
 
 @media (prefers-reduced-motion: reduce) {
-  :root:not([data-gerak="penuh"]) :is(.iv-pernyataan, .iv-bukti-sorot, .iv-judul-kartu, .iv-cap-kilat, .iv-cap-ledakan) { animation: none !important; }
+  :root:not([data-gerak="penuh"]) :is(.iv-pernyataan, .iv-bukti-sorot, .iv-judul-kartu, .iv-cap-kilat, .iv-cap-ledakan, .iv-pernyataan-pin, .iv-reaksi-baris .iv-reaksi) { animation: none !important; }
 }

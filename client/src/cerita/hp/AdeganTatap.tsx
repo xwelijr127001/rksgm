@@ -55,7 +55,7 @@ export function tinggiPanggung(panjangTeks: number, menungguPilihan: boolean): T
 let bentukRuang: { ruang: string; lebar: number; bentuk: string } | null = null;
 const URUT_BENTUK = ['tinggi', 'sedang', 'pendek'];
 
-export function AdeganTatap({ ep, state, tx, namaPemain, status, tindakan, buktiTindakan, statusSesudah, komposer, aksiDiDialog, sisipan, tugasNanti = null }: {
+export function AdeganTatap({ ep, state, tx, namaPemain, status, tindakan, buktiTindakan, statusSesudah, komposer, aksiDiDialog, sisipan, tugasNanti = null, hiasUcapan }: {
   ep: Episode;
   state: StateCerita;
   tx: (k: KunciTeks) => string;
@@ -77,6 +77,8 @@ export function AdeganTatap({ ep, state, tx, namaPemain, status, tindakan, bukti
    * kartu tugas tiba.
    */
   tugasNanti?: { judul: string; instruksi: string; tombol: string } | null;
+  /** T-078 (opt-in, Episode 1 Investigator): hiasan di kanan sebuah ucapan (potret reaksi 48 px); null = ucapan biasa. */
+  hiasUcapan?: (b: Baris) => ReactNode;
 }) {
   const k = komposisiLatar(ep, state);
   // T-013: adegan = panggung piksel (PanggungLatar memilihnya lewat adapter yang sama).
@@ -186,8 +188,10 @@ export function AdeganTatap({ ep, state, tx, namaPemain, status, tindakan, bukti
     if (jenis === 'narasi') return grup.map((x, j) => <p key={`${i}-${j}`} className="hp-narasi" data-topik={x.topik ? '' : undefined}>{x.topik ? <b className="hp-topik">{tx(x.topik)}</b> : null}{tx(x.teks)}</p>);
     const p = jenis === 'pemain' ? null : ep.pemeran[b.siapa];
     const akhir = grup[grup.length - 1]!;
+    const hias = hiasUcapan?.(akhir) ?? null;
     return (
-      <div key={i} className="hp-ucapan" data-penutur={b.siapa}>
+      <div key={i} className="hp-ucapan" data-penutur={b.siapa} data-hias={hias ? '' : undefined}>
+        {hias}
         <p className="hp-ucapan-nama">
           {jenis !== 'pemain' && (tanpaPanggung || !diPanggung.has(b.siapa)) ? <PotretHp ep={ep} id={b.siapa} ekspresi={akhir.ekspresi} nama={nama(b.siapa)} piksel={!!piksel} /> : null}
           <b>{nama(b.siapa)}</b>{p ? <span>{tx(p.peran)}</span> : null}

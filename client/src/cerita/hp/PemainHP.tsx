@@ -29,6 +29,7 @@ import { akhirDitemukan, berlanggananCerita, versiPenyimpananCerita } from '../s
 import type { Episode, IdBab, KunciTeks, NodeAktivitas, NodePilihan, StateCerita } from '../tipe';
 import { HasilKasus, IsiBukuCatatan, LayarInvestigasi } from '../investigasi/LayarInvestigasi';
 import { tamuBaru } from '../investigasi/simpan';
+import { hiasReaksi } from '../investigasi/ui/reaksiBaris';
 import { IkonAlat, selaPembicara } from '../ui/bagian';
 import { IsiCatatanKasus } from '../ui/CatatanKasus';
 import { DaftarIstilah, istilahBaris } from '../ui/KotakDialog';
@@ -336,7 +337,7 @@ function PemainHPInti({ ep, state, kendali, profil, bahasa, tx: txAsli }: {
         ) : tampilan === 'obrolan' ? (
           <Obrolan ep={ep} state={state} tx={tx} status={status} pesanAktivitas={pesanAktivitas} komposer={komposer} sisipan={<>{sisipanIstilah}{buktiTindakan}</>} tujuan={bab ? tx(bab.bab.tujuan) : undefined} lembar={balasTerbuka} />
         ) : (
-          <AdeganTatap ep={ep} state={state} tx={tx} namaPemain={namaPemain} status={status} tindakan={tindakan} buktiTindakan={buktiTindakan} statusSesudah={statusSesudah} komposer={komposer} aksiDiDialog={!(node.jenis === 'pilihan' && lengkap)} sisipan={sisipanIstilah}
+          <AdeganTatap ep={ep} state={state} tx={tx} namaPemain={namaPemain} status={status} tindakan={tindakan} buktiTindakan={buktiTindakan} statusSesudah={statusSesudah} komposer={komposer} aksiDiDialog={!(node.jenis === 'pilihan' && lengkap)} sisipan={sisipanIstilah} hiasUcapan={ep.investigasi ? hiasReaksi : undefined}
             tugasNanti={node.jenis === 'aktivitas' && !lengkap && misi ? { judul: misi.title, instruksi: misi.instruction, tombol: t('ceritaHp.mulaiTugas') } : null} />
         )}
         {kendali.hanyaMemori ? <p className="cer-memori" role="status">{t('cerita.hanyaMemori')}</p> : null}

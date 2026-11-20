@@ -476,6 +476,10 @@
 .kp-pangkat i { flex: none; width: 24px; height: 24px; background-repeat: no-repeat; image-rendering: pixelated; }
 .kp-stempel { display: inline-flex; align-items: center; gap: 4px; }
 .kp-stempel i { width: 16px; height: 16px; background-repeat: no-repeat; image-rendering: pixelated; }
+/* T-078: stempel yang baru didapat dicap: tak terlihat 0,6 s, lalu membesar 3x dan mendarat (0,22 s). Gerak dikurangi: langsung ada. */
+.kp-stempel i[data-baru] { animation: kp-cap .82s cubic-bezier(.3, 1.5, .5, 1) both; }
+@keyframes kp-cap { 0%, 73% { opacity: 0; transform: scale(3) rotate(-18deg); } 74% { opacity: 1; transform: scale(3) rotate(-18deg); } 100% { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) { :root:not([data-gerak="penuh"]) .kp-stempel i[data-baru] { animation: none; } }
 /* di lembar bawah (akhir Episode 1 lengkap): kartu di tengah, ruang untuk bayangan */
 .akh-lembar[data-lembar-akhir="kartu"] .kp { margin: 4px auto 14px; }
 

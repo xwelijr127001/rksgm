@@ -3923,3 +3923,58 @@ A miss never blocks: only points differ. Two endings exist because the episode v
 - "Kasus berikutnya" only shows "segera hadir" (no case 2). Rank needs 3 / 4 stamps, so with one case a guest tops out at "Investigator".
 - The investigator UI is imported statically by the phone player, so its small JS / CSS / art ride in the story chunk for every episode (no behaviour change; lazy-loading is a follow-up if size matters).
 - Card on the picker: set `RAKSA_INVESTIGATOR=on` and restart; `/cerita/investigator` works without it. Not committed.
+
+## T-078 (2026-11-20): Investigator pilot polish (open points from T-076 / T-077) (Designer)
+
+Built by the Designer on top of f2a4861; uncommitted. Owner rule: nothing was opened in a browser. Gate: client typecheck 0 errors; client/dist rebuilt. Scoring, saves and the graph (`episode.ts`, `status.ts`, `skor.ts`, `simpan.ts`) are untouched. Full Episode 1 and Episode 1 Dev are unchanged: the two shared-code changes are opt-in.
+
+**1. Verdict whys** (`i18n/kamus/investigasi.ts`, id/en/zh): they now follow the corrected report.
+- Sub-line: "Laporan petugas sudah diperbaiki. Pilih satu putusan."
+- Layak: the footage proves lane 2 and the report is corrected, so nothing was broken.
+- Butuh bukti tambahan: safer to check once more, although the footage, the sign and the licence are already in hand.
+- Masalah pertanggungan: the officer's FIRST note said lane 3, and the player treats that as still a problem (wrong, because that note was the mistake).
+
+**2. Reaction portraits placed**
+- **Mechanism:** new `investigasi/ui/reaksiBaris.tsx` maps text keys to reactions. `AdeganTatap` got an optional `hiasUcapan` prop; the phone player passes it only when `ep.investigasi`. The portrait (48 px in a 52 px frame) sits at the right of the spoken line and pops in.
+- **Placements:**
+
+| Moment | Line | Reaction |
+|---|---|---|
+| Opener | `inv.buka.3`, `inv.selisih.1` | Miss Raksa "berpikir" |
+| KEBERATAN hit | the screen under the stamp | petugas tol "kaget", 128 px |
+| Officer looks at the footage | `inv.akui.1` | petugas tol "kaget" |
+| The revision | `inv.akui.2` | petugas tol "mengaku" |
+| After | `inv.akui.3` | Pak Darto "lega" |
+| Right verdict | `inv.putusan.layak.1`, `inv.akhir.tuntas.1` | Miss Raksa "bangga" |
+| Result screen | head row, right | "bangga" when the verdict was layak, else "berpikir" |
+
+**3. Frozen dashcam picture in the opener card.** The pre-crash band of ArenaDashcam is now a small exported component, `BingkaiDashcam` (K08 step 2 uses it too, with the same markup as before). The opener card shows it large: a 1:1 crop of 292×150 with both signs, the truck in lane 2, the car in lane 3 and lane numbers 1-3. `JudulKasus` takes it through a new optional `gambar` prop; without it the folder art stays.
+
+**4. Checks by calculation** (big text, 360×640). The real room is 544 px: 640 − story header 56 − `.hp-main` padding 12 + 28. T-077 had assumed 568.
+
+| Check | Result |
+|---|---|
+| Miss Raksa phone inset, interview room | OK, no fix. The project's own geometry functions, for [tol] and [tol + darto] at 336 and 366 px wide in three stage shapes, put the inset top-left or top-right, 60 to 97 px, never over a head and always inside the stage |
+| Two-step pin | Fits (about 166 px). Pin time 550 → 900 ms and the pin now drops in, so "Tersemat" can be read |
+| KEBERATAN stamp timing | FIXED. The stamp used to continue the story by itself after 1.5 s, so the "kaget" screen under it was never seen. Now the stamp closes and that screen stays until "Lanjut" (one more tap) |
+| Case stamp on the result card | New: the just-earned stamp is stamped on after 0.6 s with one sound; reduced motion shows it at once |
+| KEBERATAN, guided try | Was about 542 with the real hint length; tightened to about 532 |
+| Verdict | 463 to 483 px; worst case (all whys 4 lines) 543 |
+| Result | FIXED. It was 514 to 542, and 590 with the "Tamu baru" confirmation open (scrolled). Now 412 for the result itself and 492 with best score + "Tamu baru"; 508 with the confirmation open; 536 with "segera hadir" also showing |
+| Opener card | 371 px, 431 with the "Tamu baru" link |
+
+How the result was tightened: rows 26 → 24, gaps 10 → 8, the "segera hadir" note no longer reserves space, the foot is compact (44 px link), and the best-score line hides while the confirmation is open.
+
+**Files**
+- `client/src/cerita/investigasi/ui/`: `reaksiBaris.tsx` (new), `HasilInvestigasi.tsx`, `JudulKasus.tsx`, `LayarPutusan.tsx` (comment), `investigasi.css`.
+- `client/src/cerita/investigasi/LayarInvestigasi.tsx` (presentation only: opener picture, `LayarCap`, result reaction, pin time).
+- `client/src/cerita/hp/AdeganTatap.tsx` + `PemainHP.tsx` (opt-in `hiasUcapan`), `hp/arena/ArenaDashcam.tsx` + `dashcam.css` (`BingkaiDashcam`).
+- `client/src/cerita/ui/KartuPetugas.tsx` + `akhir.css` (opt-in `baru` stamp animation), `client/src/i18n/kamus/investigasi.ts`.
+
+**Preview** (calculated mock from the real art): `character/investigator-t077/layar-t078-360x640-2x.png` (opener with the dashcam frame, the screen after the stamp, a stage line with a reaction, the result), made by `pratinjau-t078.mts`.
+
+**Open**
+- Not seen in a browser or on a phone.
+- The opener picture shows the truck in lane 2 before the player has heard either statement (as the spec asks). If the owner finds it gives the answer away, crop the frame to the signs and lanes without the truck.
+- The stamp screen now needs one more tap ("Lanjut").
+- The `:has()` rule for the result foot needs iOS 15.4 or newer; on older phones the best-score line stays visible and that one state can scroll by a few pixels.

@@ -144,6 +144,9 @@
 .dc-pita { position: relative; flex: 0 0 auto; margin: 0; width: 168px; height: 108px; overflow: hidden; border: 2px solid #212121; background: #8a8f84; image-rendering: pixelated; }
 .dc-pita-isi { position: absolute; left: 0; top: 0; width: 336px; height: 240px; --x0: 0px; transform: scale(.5) translateY(-20px); transform-origin: 0 0; }
 .dc-pita-isi > * { position: absolute; }
+/* T-078: bingkai besar (kartu pembuka Investigator): skala 1, 292 x 150 = adegan x 0-292, y 20-170 */
+.dc-pita[data-besar] { width: 292px; height: 150px; }
+.dc-pita[data-besar] .dc-pita-isi { transform: translateY(-20px); }
 .dc-pita-lajur { position: absolute; bottom: 1px; width: 14px; margin-left: -7px; text-align: center; font: 800 14px/16px ui-monospace, monospace; color: #fff9f5; text-shadow: 1px 1px 0 #212121, -1px 0 0 #212121, 0 -1px 0 #212121; z-index: 1; }
 .dc-pita-kanan { position: relative; flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; gap: 6px; }
 .dc-tanya-ringkas { margin: 0; font-size: 14px; line-height: 1.3; font-weight: 700; }
