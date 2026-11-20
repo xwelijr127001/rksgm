@@ -22,9 +22,9 @@ import { CapKeberatan } from './ui/CapKeberatan';
 import { PenyediaTeksInvestigasi } from './ui/dasar';
 import { HasilInvestigasi } from './ui/HasilInvestigasi';
 import { JudulKasus } from './ui/JudulKasus';
-import { KartuBukti } from './ui/KartuBukti';
 import { LayarKeberatan } from './ui/LayarKeberatan';
 import { LayarPutusan } from './ui/LayarPutusan';
+import { PeriksaSim } from './ui/PeriksaSim';
 import './ui/investigasi.css';
 
 type Tx = (k: KunciTeks) => string;
@@ -99,12 +99,18 @@ function LayarCatat({ ep, state, id, tx, onLanjut }: { ep: Episode; state: State
 }
 
 /** Node `bukti`: kartu bukti baru + kalimat temuannya (baris node), lalu "Simpan ke buku catatan" = lanjut. */
-function LayarBukti({ bukti, keterangan, tx, onLanjut }: { bukti: Bukti | undefined; keterangan: string; tx: Tx; onLanjut: () => void }) {
+function LayarBukti({ ep, state, bukti, keterangan, tx, onLanjut }: { ep: Episode; state: StateCerita; bukti: Bukti | undefined; keterangan: string; tx: Tx; onLanjut: () => void }) {
+  // T-080: kartu bukti baru DIJEPIT ke halaman "Bukti" buku catatan (slip meluncur masuk, klip menjepit, bunyi 'taruh').
+  useEffect(() => { const w = window.setTimeout(() => playSfx('taruh'), 500); return () => window.clearTimeout(w); }, []);
+  const daftar = bukti ? [...buktiTerkumpul(ep, state).filter((x) => x.id !== bukti.id), bukti] : buktiTerkumpul(ep, state);
   return (
     <section className="iv-layar iv-bukti-baru" data-bukti-baru={bukti?.id} aria-labelledby="iv-bukti-baru-judul">
-      <h2 id="iv-bukti-baru-judul" className="iv-tanya" tabIndex={-1} data-cer-fokus="">{tx('inv.ui.buktiBaru')}</h2>
+      <div className="iv-bukti-kepala">
+        {bukti?.id === 'sim' ? <PotretReaksi reaksi="darto-lega" ukuran={48} /> : null}
+        <h2 id="iv-bukti-baru-judul" className="iv-tanya" tabIndex={-1} data-cer-fokus="">{tx('inv.ui.buktiBaru')}</h2>
+      </div>
       {keterangan ? <p>{keterangan}</p> : null}
-      {bukti ? <KartuBukti bukti={bukti} /> : null}
+      <BukuCatatan pernyataan={[]} bukti={daftar} buktiBaru={bukti?.id} halaman="bukti" tanpaPensil />
       <button type="button" className="primary-action iv-tombol" data-simpan-bukti="" onClick={() => { playSfx('kertas'); onLanjut(); }}>{tx('inv.ui.simpan')}</button>
     </section>
   );
@@ -142,7 +148,7 @@ export function LayarInvestigasi({ ep, state, node, tx, onLanjut, onPilih, onMul
       isi = <LayarCatat key={node.id} ep={ep} state={state} id={inv.pernyataan} tx={tx} onLanjut={onLanjut} />;
       break;
     case 'bukti':
-      isi = <LayarBukti key={node.id} bukti={konfig.bukti.find((x) => x.id === inv.bukti)} keterangan={barisPertama} tx={tx} onLanjut={onLanjut} />;
+      isi = <LayarBukti key={node.id} ep={ep} state={state} bukti={konfig.bukti.find((x) => x.id === inv.bukti)} keterangan={barisPertama} tx={tx} onLanjut={onLanjut} />;
       break;
     case 'keberatan': {
       const pernyataan = konfig.pernyataan.find((x) => x.id === inv.pernyataan);
@@ -161,6 +167,10 @@ export function LayarInvestigasi({ ep, state, node, tx, onLanjut, onPilih, onMul
     }
     case 'cap':
       isi = <LayarCap key={node.id} kalimat={barisPertama} tx={tx} onLanjut={onLanjut} />;
+      break;
+    case 'periksa-sim':
+      // T-080: periksa SIM di meja wawancara (3 ketukan); selesai = lanjut ke node kartu bukti SIM.
+      isi = <PeriksaSim key={node.id} onSelesai={onLanjut} />;
       break;
     case 'putusan':
       isi = <LayarPutusan key={node.id} onPilih={(p) => { if (onPilih(p)) playSfx('konfirmasi'); }} />;

@@ -32,6 +32,7 @@ import { komposisiLatar } from '../../ui/latar/komposisi';
 import { PotretReaksi } from './BukuCatatan';
 import { KilasBalik, type Kilas } from './KilasBalik';
 import { REAKSI_BARIS } from './reaksiBaris';
+import { SerahDashcam } from './SerahDashcam';
 import './keterangan.css';
 
 /** Saksi yang bisa didudukkan (punya atlas piksel samping). */
@@ -95,13 +96,15 @@ function SaksiDuduk({ id, ekspresi, bicara, gerak }: { id: string; ekspresi: Eks
   );
 }
 
-export function LayarKeterangan({ ep, state, tx, nama, komposer }: {
+export function LayarKeterangan({ ep, state, tx, nama, komposer, mulaiTugas }: {
   ep: Episode;
   state: StateCerita;
   tx: (k: KunciTeks) => string;
   nama: (id: string) => string;
   /** Baris aksi pemutar HP (Lanjut). */
   komposer: ReactNode;
+  /** T-080: node aktivitas yang barisnya habis: buka arenanya (dipakai serah terima dashcam, pengganti kartu TUGAS umum). */
+  mulaiTugas?: () => void;
 }) {
   const kurang = useReducedMotion();
   const k = komposisiLatar(ep, state);
@@ -126,7 +129,11 @@ export function LayarKeterangan({ ep, state, tx, nama, komposer }: {
   // Kartu tugas (node aktivitas, baris habis) ikut di baris aksi: panggung memendek (168 px) supaya tetap satu layar. Bila teks
   // dialog masih meluap, baris tujuan di atas layar disembunyikan (cara yang sama dengan AdeganTatap: data-tanpa-tujuan; tujuan
   // tetap ada di Menu).
-  const adaTugas = nodeKini(ep, state)?.jenis === 'aktivitas' && state.baris >= semua.length;
+  const nodeIni = nodeKini(ep, state);
+  // T-080: pengantar arena DASHCAM = serah terima rekaman di meja (Pak Darto menyerahkan kartu memori, laptop menyala), dengan
+  // satu tombol "Putar rekaman"; panggung tetap utuh. Aktivitas lain tetap kartu tugas pemutar HP di panggung pendek.
+  const serah = !!mulaiTugas && nodeIni?.jenis === 'aktivitas' && nodeIni.aktivitas === 'dashcam' && state.baris >= semua.length;
+  const adaTugas = !serah && nodeIni?.jenis === 'aktivitas' && state.baris >= semua.length;
   const akar = useRef<HTMLDivElement>(null);
   useLayoutEffect(() => {
     const el = akar.current; const layar = el?.closest<HTMLElement>('.hp-layar'); const isi = el?.querySelector<HTMLElement>('.kt-isi');
@@ -144,6 +151,7 @@ export function LayarKeterangan({ ep, state, tx, nama, komposer }: {
             <span className="kt-latar" aria-hidden="true" style={{ backgroundImage: `url(${latarRuang})` }} />
             {saksi ? <SaksiDuduk key={saksi} id={saksi} ekspresi={ekspresi} bicara={bicaraSaksi} gerak={gerak} /> : null}
             <span className="kt-meja" aria-hidden="true" style={{ backgroundImage: `url(${mejaDepan})` }} />
+            {serah ? <SerahDashcam key={kunci} /> : null}
             {k.telepon ? (
               <span className="kt-telepon" data-bicara={lewatTelepon ? '' : undefined} aria-hidden="true">
                 <PotretReaksi reaksi={reaksi && reaksi.startsWith('miss-') ? reaksi : 'miss-berpikir'} ukuran={64} />
@@ -171,7 +179,9 @@ export function LayarKeterangan({ ep, state, tx, nama, komposer }: {
             );
           })}
         </div>
-        <div className="kt-aksi">{komposer}</div>
+        <div className="kt-aksi">
+          {serah ? <button type="button" className="primary-action kt-tombol-serah" data-putar-rekaman="" onClick={mulaiTugas}>▶ {t('investigasi.serah.putar')}</button> : komposer}
+        </div>
       </article>
     </div>
   );

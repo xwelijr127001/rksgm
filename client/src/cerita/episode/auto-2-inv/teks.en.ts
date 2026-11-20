@@ -38,9 +38,11 @@ export const TEKS_AUTO_2_INV_EN: Record<string, string> = {
   'inv.bukti.rambu.judul': 'Road sign: trucks not allowed in lanes 3 and 4',
   'inv.bukti.rambu.sumber': 'Source: photo of the sign from the recording',
   'inv.ksim.1': 'One more thing: was Mr Darto allowed to drive that truck? Mr Bima, the accident examiner, helps you.',
+  'inv.sim.1': 'One more thing: was Mr Darto allowed to drive that truck? You ask him to show his licence.',
+  'inv.sim.2': 'Here is my licence, and this is the truck’s registration slip. Please check them.',
   'inv.bukti.sim.1': 'Mr Darto’s licence is genuine and its class is right for a trailer truck.',
   'inv.bukti.sim.judul': 'Genuine B II Umum licence',
-  'inv.bukti.sim.sumber': 'Source: Mr Darto’s licence, checked with Satpas',
+  'inv.bukti.sim.sumber': 'Source: Mr Darto’s licence, checked at the interview table',
 
   'inv.keb-buka.1': 'The evidence cards are in your notebook. You meet the toll officer once more.',
   'inv.keb-buka.2': 'My note has not changed: the truck was in lane 3.',

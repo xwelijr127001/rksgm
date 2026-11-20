@@ -242,6 +242,8 @@ export interface PernyataanInvestigasi {
  *  - cap              : node dialog; cap KEBERATAN diputar, selesai = lanjut.
  *  - putusan          : node pilihan (id pilihan layak / tambahan / polis), tanda `putusan:<id>`.
  *  - hasil-investigasi: node AKHIR; layar hasil (skor, nilai, stempel, pangkat).
+ *  - periksa-sim      : (T-080) node dialog; sesudah barisnya dibaca, layar "periksa SIM di meja" (3 ketukan) diputar; selesai =
+ *                       lanjut. Tampilan saja: tidak memasang tanda dan tidak dinilai.
  */
 export type NodeInvestigasi =
   | { jenis: 'judul' }
@@ -249,6 +251,7 @@ export type NodeInvestigasi =
   | { jenis: 'bukti'; bukti: BuktiInvestigasi['id'] }
   | { jenis: 'keberatan'; pernyataan: string; tepat: BuktiInvestigasi['id']; percobaan: 0 | 1 | 2 }
   | { jenis: 'cap' }
+  | { jenis: 'periksa-sim' }
   | { jenis: 'putusan' }
   | { jenis: 'hasil-investigasi' };
 

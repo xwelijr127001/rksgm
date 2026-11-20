@@ -180,7 +180,7 @@ export function ArenaPolaDashcam({ ep, konfig, jawaban, ubah, tx, labelKirim, on
   const benda = new Set(konfig.benda.map((b) => b.id));
 
   return (
-    <div className="hp-dashcam" data-tahap={tahap} data-fase={fase} data-salah={salah}
+    <div className="hp-dashcam" data-tahap={tahap} data-fase={fase} data-salah={salah} data-laptop={ep.investigasi ? '' : undefined}
       onClickCapture={(e) => { lewatKeyboard.current = e.isTrusted && e.detail === 0; }}>
       <KeSlot ke={SlotKepalaArena}>
         <p ref={instruksiRef} tabIndex={-1} className="hp-instruksi-arena dc-instruksi" role="status" data-beres={tahap === 'selesai' ? '' : undefined}>
@@ -225,6 +225,8 @@ export function ArenaPolaDashcam({ ep, konfig, jawaban, ubah, tx, labelKirim, on
         ) : null}
         </div>
       </figure>
+      {/* T-080 (Episode 1 Investigator): rekaman diputar di LAYAR LAPTOP pemain (bingkai + dek papan ketik, investigasi/ui/bukti-adegan.css) */}
+      {ep.investigasi ? <span className="dc-laptop-dek" aria-hidden="true" /> : null}
       {/* T-069: keterangan bingkai diam (gerak dikurangi) DI BAWAH adegan: tidak menutupi mobil, rambu, atau tombol */}
       {bingkai > 0 && main ? <p className="dc-keterangan">{t('dashcam.bingkai', { n: bingkai })}: {t(`dashcam.bingkai.${bingkai}`)}</p> : null}
       {/* T-067: tulisan dua rambu dalam bahasa aktif (di rambu piksel tetap bahasa Indonesia, 5 px: dibaca di sini) */}

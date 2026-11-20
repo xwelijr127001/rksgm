@@ -9,7 +9,7 @@
  *
  * Alur (b1-b4 = bagian di kepala layar; jenis investigasi tiap node di kurung, lihat NodeInvestigasi di cerita/tipe.ts):
  *  b1 judul (judul) -> buka -> darto (catat) -> tol (catat) -> selisih
- *  b2 kdash [arena dashcam] -> bukti-dashcam (bukti) -> bukti-rambu (bukti) -> ksim [arena SIM] -> bukti-sim (bukti)
+ *  b2 kdash [arena dashcam] -> bukti-dashcam (bukti) -> bukti-rambu (bukti) -> ksim (periksa-sim, T-080) -> bukti-sim (bukti)
  *  b3 keb-buka -> keb0 (keberatan 0, PILIHAN) --tepat--> keb-cap
  *                    |--keliru--> keb0-<kartu> -> keb1 (keberatan 1, PILIHAN) --tepat--> keb-cap
  *                                                   |--keliru--> keb1-<kartu> -> keb2 (keberatan 2 dipandu, DIALOG) -> keb-cap
@@ -89,12 +89,10 @@ function bangunNode(): NodeCerita[] {
       { efek: { pasang: [tandaBukti('dashcam')] }, investigasi: { jenis: 'bukti', bukti: 'dashcam' } }),
     dialog('bukti-rambu', RUANG('darto'), [b('inv.bukti.rambu.1', 'narasi')], 'ksim',
       { efek: { pasang: [tandaBukti('rambu')] }, investigasi: { jenis: 'bukti', bukti: 'rambu' } }),
-    {
-      id: 'ksim', bab: '', jenis: 'aktivitas', aktivitas: 'sim', langsung: true, tata: RUANG('bima', 'darto'),
-      baris: [b('inv.ksim.1', 'narasi'), b('ksim.2', 'bima')],
-      hasil: [{ lanjut: 'bukti-sim' }],
-    },
-    dialog('bukti-sim', RUANG('bima', 'darto'), [b('inv.bukti.sim.1', 'narasi')], 'keb-buka',
+    // T-080 (Designer): periksa SIM DI MEJA wawancara (3 ketukan: golongan vs STNK, hologram, pindai QR), bukan arena SIM Satpas
+    // Episode 1. Node dialog biasa + tampilan 'periksa-sim'; kartu bukti SIM tetap diberikan node 'bukti-sim' seperti semula.
+    dialog('ksim', RUANG('darto'), [b('inv.sim.1', 'narasi'), b('inv.sim.2', 'darto', 'netral')], 'bukti-sim', { investigasi: { jenis: 'periksa-sim' } }),
+    dialog('bukti-sim', RUANG('darto'), [b('inv.bukti.sim.1', 'narasi')], 'keb-buka',
       { efek: { pasang: [tandaBukti('sim')] }, investigasi: { jenis: 'bukti', bukti: 'sim' } }),
 
     // ---------------------------------------------------------------- b3: KEBERATAN (pernyataan petugas tol vs satu kartu bukti)
@@ -178,7 +176,7 @@ function bangun(asal: Episode, dev: Episode): Episode {
     suasana: asal.suasana,
     node: Object.fromEntries(bangunNode().map((n) => [n.id, { ...n, bab: babInv(n.id) }])),
     // Aktivitas dipakai ulang apa adanya: SIM (auto-2, T-049) dan rekaman dashcam (auto-2-dev, T-065..T-073).
-    aktivitas: { sim: asal.aktivitas.sim!, dashcam: dev.aktivitas.dashcam! },
+    aktivitas: { dashcam: dev.aktivitas.dashcam! },
     teks: TEKS_AUTO_2_INV,
     bahasa: ['id', 'en', 'zh'],
     latar: asal.latar,

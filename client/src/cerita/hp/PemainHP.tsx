@@ -116,7 +116,9 @@ function PemainHPInti({ ep, state, kendali, profil, bahasa, tx: txAsli }: {
   // (`sematUntuk`, tampilan saja: muat ulang = baris terakhir lagi). Hasil (node akhir) lewat alur akhir biasa.
   const inv = ep.investigasi ? node.investigasi : undefined;
   const [sematUntuk, setSematUntuk] = useState<string | null>(null);
-  const layarInv = !!inv && lengkap && inv.jenis !== 'hasil-investigasi' && (inv.jenis !== 'catat' || sematUntuk === kunciNode);
+  // T-080: 'periksa-sim' juga dua langkah (baris terakhir dibaca di adegan dulu, "Lanjut" membuka layar periksa SIM).
+  const duaLangkah = inv?.jenis === 'catat' || inv?.jenis === 'periksa-sim';
+  const layarInv = !!inv && lengkap && inv.jenis !== 'hasil-investigasi' && (!duaLangkah || sematUntuk === kunciNode);
 
   const pandang = pandangKini(ep, state);
   const tampilan: Tampilan = layarInv ? 'investigasi'
@@ -143,7 +145,7 @@ function PemainHPInti({ ep, state, kendali, profil, bahasa, tx: txAsli }: {
   const maju = () => {
     if (!bolehAksi()) return;
     if (node.jenis === 'akhir' && lengkap) { setAkhirUntuk(kunciNode); return; }
-    if (inv?.jenis === 'catat' && lengkap) { setSematUntuk(kunciNode); return; }
+    if (duaLangkah && lengkap) { setSematUntuk(kunciNode); return; }
     if (bisaLanjut(ep, state)) kirim({ jenis: 'lanjut' });
   };
   // T-076: aksi layar investigasi (satu aksi mesin per layar; tanpa jeda ketuk ganda karena tombolnya milik layar itu sendiri).
@@ -355,6 +357,7 @@ function PemainHPInti({ ep, state, kendali, profil, bahasa, tx: txAsli }: {
         ) : pakaiKeterangan(ep, state) ? (
           // T-079 (Episode 1 Investigator): ruang wawancara = layar keterangan (saksi duduk, gerak, kilas balik); baris tetap maju lewat komposer.
           <LayarKeterangan ep={ep} state={state} tx={tx} komposer={komposer}
+            mulaiTugas={node.jenis === 'aktivitas' && lengkap && misi ? () => { playSfx('kertas'); requestAnimationFrame(() => setArenaUntuk(kunciNode)); } : undefined}
             nama={(id) => (id === 'pemain' ? namaPemain : Object.prototype.hasOwnProperty.call(ep.pemeran, id) ? tx(ep.pemeran[id]!.nama) : id)} />
         ) : (
           <AdeganTatap ep={ep} state={state} tx={tx} namaPemain={namaPemain} status={status} tindakan={tindakan} buktiTindakan={buktiTindakan} statusSesudah={statusSesudah} komposer={komposer} aksiDiDialog={!(node.jenis === 'pilihan' && lengkap)} sisipan={sisipanIstilah} hiasUcapan={ep.investigasi ? hiasReaksi : undefined}

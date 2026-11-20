@@ -89,7 +89,7 @@ function BarisKeterangan({ p, keadaan, sorot, teks }: { p: Pernyataan; keadaan: 
   );
 }
 
-function SlipBukti({ b, pilih, teks }: { b: Bukti; pilih?: PilihBukti; teks: Tx }) {
+function SlipBukti({ b, pilih, teks, baru }: { b: Bukti; pilih?: PilihBukti; teks: Tx; baru?: boolean }) {
   const [px, py] = POTONG_BUKTI[b.id];
   const isi = (
     <>
@@ -101,7 +101,7 @@ function SlipBukti({ b, pilih, teks }: { b: Bukti; pilih?: PilihBukti; teks: Tx 
       {pilih ? <span className="iv-bukti-tanda" aria-hidden="true">{pilih.terpilih === b.id ? '✓' : ''}</span> : null}
     </>
   );
-  if (!pilih) return <li><div className="bk-slip" data-bukti={b.id} title={teks(b.sumber)}>{isi}</div></li>;
+  if (!pilih) return <li><div className="bk-slip" data-bukti={b.id} data-baru={baru ? '' : undefined} title={teks(b.sumber)}>{isi}</div></li>;
   const redup = pilih.redup?.(b.id) ?? false;
   return (
     <li>
@@ -113,7 +113,7 @@ function SlipBukti({ b, pilih, teks }: { b: Bukti; pilih?: PilihBukti; teks: Tx 
   );
 }
 
-export function BukuCatatan({ pernyataan, bukti, tx, menunggu, pernyataanBaru, sorotPernyataan, pilihBukti, tanpaPensil = false }: {
+export function BukuCatatan({ pernyataan, bukti, tx, menunggu, pernyataanBaru, sorotPernyataan, pilihBukti, tanpaPensil = false, buktiBaru, halaman = 'semua' }: {
   pernyataan: Pernyataan[];
   bukti: Bukti[];
   tx?: Tx;
@@ -122,12 +122,17 @@ export function BukuCatatan({ pernyataan, bukti, tx, menunggu, pernyataanBaru, s
   sorotPernyataan?: string;
   pilihBukti?: PilihBukti;
   tanpaPensil?: boolean;
+  /** T-080: bukti yang baru dikumpulkan: slipnya meluncur masuk lalu klipnya menjepit. */
+  buktiBaru?: Bukti['id'];
+  /** T-080: 'bukti' = hanya halaman "Bukti" (layar "Bukti baru!", supaya muat bersama kalimat temuannya). */
+  halaman?: 'semua' | 'bukti';
 }) {
   const teks = useTx(tx);
   const jumlah = pernyataan.length;
   return (
-    <section className="bk" aria-label={t('investigasi.bukuInvestigator')} data-buku-catatan="" style={{ '--bk-pensil': `url(${pensilUrl})` } as CSSProperties}>
+    <section className="bk" aria-label={t('investigasi.bukuInvestigator')} data-buku-catatan="" data-halaman={halaman} style={{ '--bk-pensil': `url(${pensilUrl})` } as CSSProperties}>
       <span className="bk-elastis" aria-hidden="true" />
+      {halaman === 'bukti' ? null : <>
       <div className="bk-halaman bk-atas">
         <h3 className="bk-judul"><IkonInv nama="pin" kali={1} />{t('investigasi.keterangan')}<span className="iv-hitung">{jumlah}</span></h3>
         {jumlah || menunggu ? (
@@ -138,10 +143,11 @@ export function BukuCatatan({ pernyataan, bukti, tx, menunggu, pernyataanBaru, s
         ) : <p className="bk-kosong bk-tulisan">{t('investigasi.kosongPernyataan')}</p>}
       </div>
       <span className="bk-jilid" aria-hidden="true" />
+      </>}
       <div className="bk-halaman bk-bawah">
         <h3 className="bk-judul"><IkonInv nama="foto" kali={1} />{t('investigasi.bukti')}<span className="iv-hitung">{bukti.length}</span></h3>
         {bukti.length
-          ? <ul className="bk-daftar bk-slip-daftar">{bukti.map((b) => <SlipBukti key={b.id} b={b} pilih={pilihBukti} teks={teks} />)}</ul>
+          ? <ul className="bk-daftar bk-slip-daftar">{bukti.map((b) => <SlipBukti key={b.id} b={b} pilih={pilihBukti} teks={teks} baru={b.id === buktiBaru} />)}</ul>
           : <p className="bk-kosong bk-tulisan">{t('investigasi.kosongBukti')}</p>}
       </div>
       {tanpaPensil ? null : <span className="bk-pensil" aria-hidden="true" />}

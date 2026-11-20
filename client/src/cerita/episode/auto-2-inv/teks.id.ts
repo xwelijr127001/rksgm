@@ -47,9 +47,11 @@ export const TEKS_AUTO_2_INV_ID: Record<string, string> = {
   'inv.bukti.rambu.judul': 'Rambu: truk dilarang di lajur 3 dan 4',
   'inv.bukti.rambu.sumber': 'Sumber: foto rambu dari rekaman',
   'inv.ksim.1': 'Satu hal lagi: apakah Pak Darto berhak mengemudikan truk itu? Pak Bima, pemeriksa kejadian, membantumu.',
+  'inv.sim.1': 'Satu hal lagi: apakah Pak Darto berhak mengemudikan truk itu? Kamu memintanya menunjukkan SIM.',
+  'inv.sim.2': 'Ini SIM saya, dan ini STNK truknya. Silakan diperiksa.',
   'inv.bukti.sim.1': 'SIM Pak Darto asli dan golongannya sesuai untuk truk trailer.',
   'inv.bukti.sim.judul': 'SIM B II Umum asli',
-  'inv.bukti.sim.sumber': 'Sumber: SIM Pak Darto, dicek ke Satpas',
+  'inv.bukti.sim.sumber': 'Sumber: SIM Pak Darto, diperiksa di meja wawancara',
 
   // Keberatan
   'inv.keb-buka.1': 'Tiga kartu bukti sudah ada di buku catatanmu. Kamu menemui petugas tol sekali lagi.',

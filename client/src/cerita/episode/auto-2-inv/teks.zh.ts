@@ -38,9 +38,11 @@ export const TEKS_AUTO_2_INV_ZH: Record<string, string> = {
   'inv.bukti.rambu.judul': '路标：卡车禁止驶入第 3 和第 4 车道',
   'inv.bukti.rambu.sumber': '来源：从录像中拍下的路标照片',
   'inv.ksim.1': '还有一件事：Darto 先生有资格驾驶那辆卡车吗？事故调查员 Bima 先生来帮你。',
+  'inv.sim.1': '还有一件事：Darto 先生有资格驾驶那辆卡车吗？你请他出示驾照。',
+  'inv.sim.2': '这是我的驾照，这是卡车的行驶证。请检查吧。',
   'inv.bukti.sim.1': 'Darto 先生的驾照是真的，类别也适用于半挂卡车。',
   'inv.bukti.sim.judul': 'B II Umum 驾照为真',
-  'inv.bukti.sim.sumber': '来源：Darto 先生的驾照，已向 Satpas 核实',
+  'inv.bukti.sim.sumber': '来源：Darto 先生的驾照，已在问询桌上核验',
 
   'inv.keb-buka.1': '证据卡都已经在你的记事本里了。你再次去见收费站人员。',
   'inv.keb-buka.2': '我的记录没有变：卡车在第 3 车道。',
