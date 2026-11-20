@@ -37,12 +37,14 @@
 @keyframes kt-geleng { 0%, 100% { translate: 0 0; } 15%, 55% { translate: -4px 0; } 35%, 75% { translate: 4px 0; } }
 @keyframes kt-angguk { 0%, 100% { translate: 0 0; } 20%, 60% { translate: 0 5px; } 40%, 80% { translate: 0 0; } }
 /* keringat: dua tetes piksel jatuh dari pelipis */
-.kt-tetes { position: absolute; left: 32px; top: 50px; width: 6px; height: 10px; background: #9fd3e6; box-shadow: 0 0 0 2px #2a211e; clip-path: polygon(50% 0, 100% 60%, 50% 100%, 0 60%); animation: kt-tetes 1.2s steps(6) .2s infinite; }
+.kt-tetes { position: absolute; left: 32px; /* (posisi relatif sprite; sprite 20 px di kiri pusat sejak T-083) */ top: 50px; width: 6px; height: 10px; background: #9fd3e6; box-shadow: 0 0 0 2px #2a211e; clip-path: polygon(50% 0, 100% 60%, 50% 100%, 0 60%); animation: kt-tetes 1.2s steps(6) .2s infinite; }
 .kt-tetes-2 { left: auto; right: 30px; top: 60px; animation-delay: .7s; }
 @keyframes kt-tetes { from { translate: 0 0; opacity: 1; } to { translate: 0 30px; opacity: 0; } }
 
-/* potret reaksi T-078: muncul di kanan atas; Miss Raksa lewat telepon: sisipan di kiri atas */
-.kt-reaksi { right: calc(50% - 160px); top: 8px; animation: kt-muncul .28s cubic-bezier(.2, 1.6, .4, 1) both; }
+/* potret reaksi T-078: muncul di kiri atas; Miss Raksa lewat telepon: sisipan di kiri atas */
+/* T-083: potret reaksi pindah ke kiri atas (kanan atas kini TV dinding); di bawah sisipan telepon bila ada */
+.kt-telepon ~ .kt-reaksi { top: 80px; }
+.kt-reaksi { left: calc(50% - 160px); top: 8px; animation: kt-muncul .28s cubic-bezier(.2, 1.6, .4, 1) both; }
 .kt-telepon { left: calc(50% - 160px); top: 8px; box-shadow: 0 0 0 2px #fff9f5, 0 3px 0 2px #212121; }
 .kt-telepon[data-bicara] { animation: kt-bicara .36s steps(1) 6; }
 @keyframes kt-muncul { from { transform: scale(.4); opacity: 0; } }

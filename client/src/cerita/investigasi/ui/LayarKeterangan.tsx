@@ -5,6 +5,8 @@
  *
  * Panggung 336 x 236 (1 piksel seni = 2 px):
  *   latar   dinding ruang wawancara (seni/piksel/ep2-ruang-wawancara-latar.png, potongan 168 x 118 pada 2x);
+ *   TV      (T-083) TV dinding di kanan atas menggantikan papan tulis seni ruangan; saksi duduk 20 px di kiri pusat supaya
+ *           kepalanya tidak menutupi TV;
  *   saksi   DUDUK di seberang meja: potret piksel tokoh (pose berdiri atlas samping, 2x) dari kepala sampai dada; badan bawahnya
  *           tertutup tepi meja di sisi pemain (seni/investigasi/meja-depan.png: buku catatan, pena, cangkir kopi);
  *   putaran diam   napas (naik-turun 2 px tiap 2,6 s) + kedip (lapisan wajah "mata tutup" 0,14 s tiap 3,8 s);
@@ -32,7 +34,7 @@ import { komposisiLatar } from '../../ui/latar/komposisi';
 import { PotretReaksi } from './BukuCatatan';
 import { KilasBalik, type Kilas } from './KilasBalik';
 import { REAKSI_BARIS } from './reaksiBaris';
-import { SerahDashcam } from './SerahDashcam';
+import { SerahDashcam, TvDinding } from './SerahDashcam';
 import './keterangan.css';
 
 /** Saksi yang bisa didudukkan (punya atlas piksel samping). */
@@ -86,7 +88,7 @@ function SaksiDuduk({ id, ekspresi, bicara, gerak, serah }: { id: string; ekspre
   }, [id, ekspresi]);
   if (!svg) return null;
   return (
-    <span className="kt-saksi" data-tokoh={id} data-bicara={bicara ? '' : undefined} data-gerak={serah ? undefined : gerak} data-serah={serah ? '' : undefined} style={{ width: svg.w, marginLeft: -svg.w / 2 } as CSSProperties}>
+    <span className="kt-saksi" data-tokoh={id} data-bicara={bicara ? '' : undefined} data-gerak={serah ? undefined : gerak} data-serah={serah ? '' : undefined} style={{ width: svg.w, marginLeft: -svg.w / 2 - 20 } as CSSProperties}>
       <span className="kt-saksi-badan">
         <span className="kt-lapis" dangerouslySetInnerHTML={{ __html: svg.buka }} />
         {svg.tutup ? <span className="kt-lapis kt-kedip" dangerouslySetInnerHTML={{ __html: svg.tutup }} /> : null}
@@ -149,6 +151,8 @@ export function LayarKeterangan({ ep, state, tx, nama, komposer, mulaiTugas }: {
         {kilas ? <KilasBalik jenis={kilas} nama={nama(ucapan!.siapa)} /> : (
           <>
             <span className="kt-latar" aria-hidden="true" style={{ backgroundImage: `url(${latarRuang})` }} />
+            {/* T-083: TV dinding menggantikan papan tulis; menyala hanya saat serah terima rekaman dashcam */}
+            <TvDinding key={serah ? `tv:${kunci}` : 'tv'} nyala={serah && saksi === 'darto'} />
             {saksi ? <SaksiDuduk key={saksi} id={saksi} ekspresi={ekspresi} bicara={bicaraSaksi} gerak={gerak} serah={serah && saksi === 'darto'} /> : null}
             <span className="kt-meja" aria-hidden="true" style={{ backgroundImage: `url(${mejaDepan})` }} />
             {serah && saksi === 'darto' ? <SerahDashcam key={kunci} /> : null}

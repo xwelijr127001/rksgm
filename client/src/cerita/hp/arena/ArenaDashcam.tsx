@@ -225,7 +225,7 @@ export function ArenaPolaDashcam({ ep, konfig, jawaban, ubah, tx, labelKirim, on
         ) : null}
         </div>
       </figure>
-      {/* T-080 (Episode 1 Investigator): rekaman diputar di LAYAR LAPTOP pemain (bingkai + dek papan ketik, investigasi/ui/bukti-adegan.css) */}
+      {/* T-080 / T-083 (Episode 1 Investigator): rekaman diputar di LAYAR TV dinding ruang wawancara (bingkai + dagu TV, investigasi/ui/bukti-adegan.css) */}
       {ep.investigasi ? <span className="dc-laptop-dek" aria-hidden="true" /> : null}
       {/* T-069: keterangan bingkai diam (gerak dikurangi) DI BAWAH adegan: tidak menutupi mobil, rambu, atau tombol */}
       {bingkai > 0 && main ? <p className="dc-keterangan">{t('dashcam.bingkai', { n: bingkai })}: {t(`dashcam.bingkai.${bingkai}`)}</p> : null}

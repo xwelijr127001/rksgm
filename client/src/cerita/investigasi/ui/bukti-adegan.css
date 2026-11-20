@@ -1,36 +1,53 @@
 /* T-080 (Designer): adegan BUKTI Episode 1 Investigator: serah terima rekaman dashcam (SerahDashcam.tsx, di panggung keterangan),
-   bingkai laptop arena dashcam, periksa SIM di meja (PeriksaSim.tsx), dan slip bukti yang baru dijepit ke buku catatan.
+   TV dinding dan bingkai TV arena dashcam (T-083), periksa SIM di meja (PeriksaSim.tsx), dan slip bukti yang baru dijepit ke buku catatan.
    Seni piksel 2x. Keadaan dasar tiap unsur = keadaan AKHIR, jadi gerak dikurangi (blok terakhir) menyisakan bingkai diam yang benar. */
 
 /* ---------------------------------------------------------------- serah terima dashcam (koordinat panggung 336 x 236, pusat 50%) */
 .sd { position: absolute; inset: 0; pointer-events: none; }
 .sd > * { position: absolute; background-repeat: no-repeat; image-rendering: pixelated; }
-/* laptop pemain di kanan meja (menutupi cangkir; 8 px terakhirnya di luar panggung): 4 bingkai 128 x 92, terbuka pada 1,4-2,1 s */
-.sd-laptop { left: calc(50% + 48px); bottom: 0; width: 128px; height: 92px; background-size: 512px 92px; background-position: -384px 0; animation: sd-buka 3.2s steps(1) both; }
-@keyframes sd-buka { 0%, 44% { background-position: 0 0; } 51% { background-position: -128px 0; } 58% { background-position: -256px 0; } 65%, 100% { background-position: -384px 0; } }
-/* kaca layar bingkai terbuka: x 6..58, y 2..34 (seni) = 104 x 64 px */
-.sd-layar { position: absolute; left: 12px; top: 4px; width: 104px; height: 64px; display: grid; place-items: center; align-content: center; gap: 4px; background: #10231a; color: #c8f5d8; font: 700 14px/16px ui-monospace, Menlo, Consolas, monospace; text-align: center; animation: sd-nyala 3.2s steps(1) both; }
-.sd-layar i { width: 10px; height: 10px; background: #e0473b; animation: kt-kedip-rek 1s steps(1) infinite; }
-@keyframes sd-nyala { 0%, 82% { opacity: 0; } 83%, 100% { opacity: 1; } }
+/* T-083 TV DINDING di belakang Pak Darto (menggantikan papan tulis seni ruangan: tambalan 172 x 104 di x 164, y 28 panggung).
+   TV 128 x 80 di x 204..332, y 34..114; kaca layar 116 x 66 di x 210, y 40; kotak media + celah kartu di bawahnya (y 118..132).
+   Pak Darto duduk 20 px di kiri pusat (keterangan.css), jadi kepalanya (sampai x 194) tidak menutupi TV. */
+.kt-tv { left: calc(50% - 4px); top: 28px; width: 172px; height: 104px; background-size: 172px 104px; background-repeat: no-repeat; image-rendering: pixelated; }
+.kt-tv-lampu { position: absolute; left: 158px; top: 79px; width: 4px; height: 2px; background: #b3261e; }
+.kt-tv[data-nyala] .kt-tv-lampu { background: #3fd07a; animation: tv-lampu 3.4s steps(1) both; }
+@keyframes tv-lampu { 0%, 75% { background: #b3261e; } 76%, 100% { background: #3fd07a; } }
+.kt-tv-layar { position: absolute; left: 46px; top: 12px; width: 116px; height: 66px; display: grid; place-items: center; align-content: center; gap: 5px; background: #10231a repeating-linear-gradient(0deg, transparent 0 2px, rgba(0, 0, 0, .22) 2px 4px); color: #c8f5d8; font: 700 15px/18px ui-monospace, Menlo, Consolas, monospace; text-align: center; animation: tv-nyala 3.4s steps(1) both; }
+.kt-tv-layar i { width: 10px; height: 10px; background: #e0473b; animation: kt-kedip-rek 1s steps(1) infinite; }
+/* menyala gaya tabung: garis terang mendatar melebar, lalu gambar berkedip dua kali */
+@keyframes tv-nyala {
+  0%, 75% { opacity: 0; clip-path: inset(48% 0); filter: brightness(3); }
+  76% { opacity: 1; clip-path: inset(48% 0); filter: brightness(3); }
+  79% { opacity: 1; clip-path: inset(30% 0); filter: brightness(2); }
+  82% { opacity: 1; clip-path: inset(0); filter: brightness(1.6); }
+  85% { opacity: .35; clip-path: inset(0); filter: none; }
+  88% { opacity: 1; clip-path: inset(0); filter: none; }
+  91% { opacity: .6; clip-path: inset(0); filter: none; }
+  94%, 100% { opacity: 1; clip-path: inset(0); filter: none; }
+}
 @keyframes kt-kedip-rek { 50% { opacity: 0; } }
-/* T-082 badan Pak Darto dengan lengan menjulur: 142 x 184 (71 x 92 seni, 2x) tepat di atas sprite hidupnya (.kt-saksi: left 50%,
-   top 26, lebar 142). Bingkai: 1 menjulur (0,2-0,45 s), 2 menaruh kartu (0,45-1,15 s), 1 menarik tangan (1,15-1,4 s); di luar itu
-   tak terlihat dan sprite hidup yang tampil. Sprite hidup disembunyikan pada rentang yang sama (data-serah). */
-.sd-badan { left: calc(50% - 71px); top: 26px; width: 142px; height: 184px; background-size: 426px 184px; background-position: -142px 0; opacity: 0; animation: sd-badan 3.2s steps(1) both; }
+/* T-082 badan Pak Darto dengan lengan menjulur: 142 x 184 (71 x 92 seni, 2x) tepat di atas sprite hidupnya (.kt-saksi: 20 px di
+   kiri pusat, top 26, lebar 142). Bingkai: 1 menjulur (0,2-0,5 s), 2 menaruh kartu (0,5-1,2 s), 1 menarik tangan (1,2-1,5 s); di
+   luar itu tak terlihat dan sprite hidup yang tampil. Sprite hidup disembunyikan pada rentang yang sama (data-serah). */
+.sd-badan { left: calc(50% - 91px); top: 26px; width: 142px; height: 184px; background-size: 426px 184px; background-position: -142px 0; opacity: 0; animation: sd-badan 3.4s steps(1) both; }
 @keyframes sd-badan { 0% { opacity: 0; } 6% { opacity: 1; background-position: -142px 0; } 14% { opacity: 1; background-position: -284px 0; } 36% { opacity: 1; background-position: -142px 0; } 44%, 100% { opacity: 0; } }
-.kt-saksi[data-serah] { animation: sd-saksi 3.2s steps(1) both; }
+.kt-saksi[data-serah] { animation: sd-saksi 3.4s steps(1) both; }
 @keyframes sd-saksi { 0% { visibility: visible; } 6% { visibility: hidden; } 44%, 100% { visibility: visible; } }
-/* kartu memori: di bawah kepalan saat menjulur (kanan atas), ditaruh di meja (1,15 s tangan pergi), lalu meluncur ke sisi laptop */
-.sd-kartu { left: calc(50% + 26px); top: 190px; width: 20px; height: 24px; background-size: 20px 24px; animation: sd-kartu 3.2s steps(1) both; }
+/* kartu memori: di bawah kepalan saat menjulur, ditaruh di meja, lalu melayang melengkung ke celah kotak media di bawah TV
+   (1,7-2,5 s; dari x +6, y 190 ke x +90, y 112 relatif pusat) dan masuk. Dasar (gerak dikurangi): tergeletak di meja. */
+.sd-kartu { left: calc(50% + 6px); top: 190px; width: 20px; height: 24px; background-size: 20px 24px; animation: sd-kartu 3.4s linear both; }
 @keyframes sd-kartu {
-  0% { opacity: 0; translate: 12px -8px; } 6% { opacity: 1; translate: 12px -8px; } 14%, 50% { opacity: 1; translate: 0 0; }
-  55% { translate: 5px 1px; } 60% { translate: 10px 2px; } 65% { translate: 14px 3px; } 70%, 100% { opacity: 1; translate: 18px 4px; }
+  0% { opacity: 0; translate: 12px -8px; scale: 1; } 5.9% { opacity: 0; translate: 12px -8px; } 6%, 13.9% { opacity: 1; translate: 12px -8px; } 14%, 50% { opacity: 1; translate: 0 0; scale: 1; }
+  56% { translate: 18px -44px; scale: 1; } 62% { translate: 42px -78px; scale: .9; } 68% { translate: 66px -90px; scale: .8; } 73% { opacity: 1; translate: 84px -80px; scale: .6; }
+  74%, 100% { opacity: 0; translate: 84px -78px; scale: .6; }
 }
 .kt-tombol-serah { width: 100%; min-height: 56px; margin: 0; font-size: 18px; font-weight: 800; justify-content: center; }
 
-/* ---------------------------------------------------------------- arena dashcam = layar laptop (hanya episode ber-investigasi) */
-.hp-dashcam[data-laptop] .dc-adegan { height: 252px; border: 6px solid #2a2f36; box-shadow: 0 0 0 2px #212121; }
-.hp-dashcam[data-laptop] .dc-laptop-dek { display: block; height: 14px; margin: -8px 10px 0; border: 2px solid #212121; background: #8c9299 repeating-linear-gradient(90deg, transparent 0 6px, #5f666d 6px 10px) 8px 4px / calc(100% - 16px) 2px no-repeat; }
+/* ---------------------------------------------------------------- arena dashcam = layar TV dinding itu (hanya episode ber-investigasi)
+   Bingkai gelap 6 px + dagu TV dengan lampu daya hijau dan braket; tinggi tambahan sama dengan bingkai laptop T-080 (18 px). */
+.hp-dashcam[data-laptop] .dc-adegan { height: 252px; border: 6px solid #2a211e; box-shadow: 0 0 0 2px #3a3f44; }
+.hp-dashcam[data-laptop] .dc-laptop-dek { position: relative; display: block; height: 14px; margin: -8px 0 0; border: 2px solid #2a211e; border-top: 0; background: #2d3237 linear-gradient(#3fd07a, #3fd07a) right 10px top 4px / 6px 3px no-repeat; }
+.hp-dashcam[data-laptop] .dc-laptop-dek::after { content: ''; position: absolute; left: 50%; bottom: -6px; width: 44px; height: 6px; margin-left: -22px; background: #5f666d; box-shadow: 0 0 0 2px #2a211e; }
 
 /* ---------------------------------------------------------------- periksa SIM di meja: 336 x 236 */
 .ps { gap: 8px; }
@@ -98,5 +115,5 @@
 .iv-bukti-baru .iv-bukti-kepala { display: flex; align-items: center; gap: 10px; }
 
 @media (prefers-reduced-motion: reduce) {
-  :root:not([data-gerak="penuh"]) :is(.sd-laptop, .sd-layar, .sd-layar i, .sd-badan, .sd-kartu, .kt-saksi[data-serah], .ps-sim, .ps-sim-tombol, .ps-sasaran, .ps-cocok > *, .ps-holo, .ps-senter, .ps-hp, .ps-hp-pindai i::after, .ps-hp-hasil, .ps-lega, .bk-slip, .bk-slip .bk-klip) { animation: none !important; }
+  :root:not([data-gerak="penuh"]) :is(.kt-tv-layar, .kt-tv-layar i, .kt-tv-lampu, .sd-badan, .sd-kartu, .kt-saksi[data-serah], .ps-sim, .ps-sim-tombol, .ps-sasaran, .ps-cocok > *, .ps-holo, .ps-senter, .ps-hp, .ps-hp-pindai i::after, .ps-hp-hasil, .ps-lega, .bk-slip, .bk-slip .bk-klip) { animation: none !important; }
 }
