@@ -44,7 +44,7 @@ import { KartuPetugas } from './KartuPetugas';
 import { infoTitik } from './titik';
 
 /** Isi lembar bawah layar akhir satu layar: rincian satu keputusan, kalimat sebab utuh, atau teks Pelajaran utuh. */
-type IsiLembar = { jenis: 'titik'; indeks: number } | { jenis: 'sebab' } | { jenis: 'pelajaran'; denganSebab: boolean };
+type IsiLembar = { jenis: 'titik'; indeks: number } | { jenis: 'sebab' } | { jenis: 'pelajaran'; denganSebab: boolean } | { jenis: 'kartu' };
 
 export function LayarAkhir({ ep, state, bahasa, namaPemain, tx, ditemukan, onUlangBab, onUlangEpisode, slotAksi = null, satuLayar = false }: {
   ep: Episode;
@@ -208,7 +208,8 @@ export function LayarAkhir({ ep, state, bahasa, namaPemain, tx, ditemukan, onUla
               <span>{namaAkhir}</span>
             </p>
           </div>
-          <KartuPetugas nama={namaPemain} />
+          {/* T-072: kartu mini (84 x 56, tinggi kepala T-024 tetap) membuka kartu petugas utuh di lembar bawah */}
+          <KartuPetugas nama={namaPemain} varian="mini" onBuka={(el) => { pemicuRef.current = el; setLembar({ jenis: 'kartu' }); }} />
         </div>
 
         <div className="akh-hasil">
@@ -263,6 +264,11 @@ export function LayarAkhir({ ep, state, bahasa, namaPemain, tx, ditemukan, onUla
             <IsiLembarTitik state={state} titik={dibuka} tx={tx} namaMentor={namaMentor} wajah={wajahMentorKecil} />
           </LembarAkhir>
         ) : null}
+        {lembar?.jenis === 'kartu' ? (
+          <LembarAkhir jenis="kartu" nama={t('ceritaAkhir.petugasKlaim')} kecil={namaAkhir} judul={t('ceritaAkhir.petugasKlaim')} kembaliKe={() => pemicuRef.current} onTutup={tutupLembar}>
+            <KartuPetugas nama={namaPemain} cap={{ teks: tx(info.judul), nada: k.nada }} />
+          </LembarAkhir>
+        ) : null}
         {lembar?.jenis === 'sebab' ? (
           <LembarAkhir jenis="sebab" nama={tx(k.judul)} kecil={namaAkhir} judul={tx(k.judul)} kembaliKe={() => pemicuRef.current} onTutup={tutupLembar}>
             {isiSebab}
@@ -306,8 +312,9 @@ export function LayarAkhir({ ep, state, bahasa, namaPemain, tx, ditemukan, onUla
             <span>{t(`cerita.nada.${k.nada}`)}{selaPembicara()}<b>{tx(info.judul)}</b></span>
           </p>
         </div>
-        <KartuPetugas nama={namaPemain} />
       </div>
+      {/* T-072: kartu petugas utuh di bawah kepala (bentuk bergulir) */}
+      <KartuPetugas nama={namaPemain} cap={{ teks: tx(info.judul), nada: k.nada }} />
 
       <h2 id="akh-judul" className="akh-judul" tabIndex={-1} data-cer-fokus="" data-ukur="akhir-judul">{tx(k.judul)}</h2>
       <p className="akh-sebab">{tx(k.sebab)}</p>
@@ -404,9 +411,9 @@ function AkhirKenalan({ ep, state, tx, slotAksi }: { ep: Episode; state: StateCe
         <b>{tx('kenalan.nyata')}</b>
       </p>
       <div className="akh-kenalan-kartu">
-        <label htmlFor={idNama}>{tx('kenalan.namaLabel')}</label>
-        <input id={idNama} type="text" maxLength={24} autoComplete="nickname" enterKeyHint="done" value={nama} placeholder={tx('kenalan.namaBawaan')} onChange={(e) => setNama(e.currentTarget.value)} />
-        <KartuPetugas nama={tampilNama} />
+        {/* T-072: nama diketik langsung di kartu (kolom isian = baris nama kartu); kosong = Tamu */}
+        <KartuPetugas nama={tampilNama} cap={{ teks: tx(info.judul), nada: info.nada }}
+          ubahNama={{ id: idNama, nilai: nama, label: tx('kenalan.namaLabel'), placeholder: tx('kenalan.namaBawaan'), onUbah: setNama }} />
         <small>{tx('kenalan.kartu')}</small>
       </div>
       {slotAksi ? createPortal(aksi, slotAksi) : aksi}

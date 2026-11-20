@@ -430,25 +430,65 @@
 }
 
 
-/* T-052: kartu petugas piksel di kepala layar akhir (KartuPetugas.tsx). 84 x 56 = setinggi potret nasabah satu layar, jadi tinggi
-   kartu akhir tidak berubah; teks kepala (sudah satu baris + elipsis) mengalah lebarnya. Bingkai jingga 2 px, pita jingga dengan
-   burung hantu Raksa, isi krem. */
-.akh-kartu-petugas {
-  flex: 0 0 auto; display: flex; flex-direction: column; width: 84px; height: 56px; box-sizing: border-box; overflow: hidden;
-  border: 2px solid #FF9000; border-radius: 0 !important; background: #FFF1E2; box-shadow: 0 2px 0 #e07e00;
-}
-.akh-kp-pita { display: flex; align-items: center; gap: 3px; height: 12px; padding: 0 4px; background: #FF9000; color: #212121; font-size: 9px; line-height: 12px; font-weight: 800; letter-spacing: .08em; }
-.akh-kp-pita svg { flex: 0 0 auto; }
-.akh-kp-isi { display: flex; align-items: center; gap: 4px; padding: 3px 3px 0; min-width: 0; }
-.akh-kp-isi .avatar-piksel { flex: 0 0 auto; }
-.akh-kp-teks { display: flex; flex-direction: column; min-width: 0; }
-.akh-kp-teks b { font-size: 10px; line-height: 12px; font-weight: 800; color: #212121; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.akh-kp-teks small { font-size: 8px; line-height: 10px; color: #5f5f5f; overflow-wrap: anywhere; }
+/* T-052 / T-072: kartu petugas "Petugas Klaim Raksa" (KartuPetugas.tsx). T-072 (pemilik: lebih lucu, rapi, juga di Episode 1
+   lengkap): kartu ID berlanyard 300 px (lebar min(300px, 100%)), tinggi 176 = tali 14 + kartu 162 (tepi 3 + pita 26 + 2 + badan
+   102 + 2 + kaki 24 + 3). Badan: foto 76 x 84 (potret piksel 64 = 4x kisi 16) | nama 20 px satu baris (elipsis; kolom isian 44 px
+   di Episode 1 Dev) + jabatan 15 px (hanya patah di spasi, tidak pernah di tengah kata; kolom teks 186 px: "Claims Officer" +- 118 px)
+   + cap hasil. Kaki: "Lulus pelatihan Raksa" + tanggal. Bayangan lembut. Tanpa animasi (aman untuk tangkapan layar). */
+.kp { margin: 0; width: min(300px, 100%); justify-self: center; display: flex; flex-direction: column; align-items: center; color: #212121; }
+.kp-tali { position: relative; display: block; width: 14px; height: 14px;
+  background: linear-gradient(90deg, #b25c00 0 2px, #ff9000 2px 12px, #b25c00 12px); }
+.kp-tali i { position: absolute; left: -6px; bottom: -5px; z-index: 1; width: 26px; height: 9px; box-sizing: border-box; border: 2px solid #212121; background: #c9c9c9;
+  box-shadow: inset 0 -2px 0 #a4a4a4; }
+.kp-tali i::after { content: ''; position: absolute; left: 7px; top: 1px; width: 8px; height: 3px; background: #5f5f5f; }
+.kp-kartu { position: relative; width: 100%; box-sizing: border-box; border: 3px solid #212121; background: #fff9f5;
+  box-shadow: 0 3px 0 #212121, 4px 9px 14px rgba(33, 33, 33, .2); }
+.kp-pita { display: flex; align-items: center; justify-content: space-between; gap: 8px; height: 26px; padding: 0 8px; background: #ff9000; border-bottom: 2px solid #212121; }
+.kp-merek { display: inline-flex; align-items: center; gap: 6px; font-size: 16px; line-height: 1; font-weight: 800; letter-spacing: .12em; }
+.kp-merek svg { flex: none; }
+.kp-nomor { padding: 2px 5px; border: 2px solid #212121; background: #fff9f5; font: 700 12px/14px ui-monospace, Menlo, Consolas, monospace; letter-spacing: .04em; white-space: nowrap; }
+.kp-badan { display: grid; grid-template-columns: 76px minmax(0, 1fr); gap: 12px; align-items: center; padding: 8px 10px 6px; }
+.kp-foto { position: relative; display: grid; place-items: center; width: 76px; height: 84px; box-sizing: border-box; border: 2px solid #212121; background: #f9eeea; box-shadow: inset 0 0 0 2px #ffffff; }
+.kp-foto .avatar-piksel { display: block; }
+.kp-kilau { position: absolute; }
+.kp-kilau-1 { right: -8px; top: -8px; }
+.kp-kilau-2 { left: -5px; bottom: 8px; width: 7px; height: 7px; }
+.kp-teks { min-width: 0; display: grid; gap: 1px; align-content: center; justify-items: start; }
+.kp-nama { display: block; max-width: 100%; min-width: 0; font-size: 20px; line-height: 26px; font-weight: 800; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.kp-nama-isi { position: relative; display: flex; align-items: center; width: 100%; height: 44px; border-bottom: 2px dashed #e07e00; cursor: text; }
+.kp-nama-isi input { flex: 1 1 auto; min-width: 0; height: 40px; margin: 0; padding: 0 22px 0 0; border: 0; border-radius: 0; background: transparent;
+  font: inherit; font-size: 20px; font-weight: 800; color: #212121; text-overflow: ellipsis; }
+.kp-nama-isi input::placeholder { color: #212121; opacity: 1; }
+.kp-nama-isi input:focus { outline: none; }
+.kp-nama-isi:focus-within { outline: 3px solid #1d6fd1; outline-offset: 2px; }
+.kp-pena { position: absolute; right: 2px; top: 50%; translate: 0 -50%; font-size: 16px; color: #9a4f00; pointer-events: none; }
+.kp-jabatan { max-width: 100%; font-size: 15px; line-height: 18px; font-weight: 800; color: #9a4f00; white-space: normal; word-break: keep-all; overflow-wrap: normal; hyphens: none; }
+.kp-cap { display: inline-block; max-width: 100%; margin-top: 4px; padding: 1px 6px; box-sizing: border-box; border: 2px solid #1f5c3f; background: #e6f1ea; color: #1f5c3f;
+  font-size: 12px; line-height: 16px; font-weight: 800; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; rotate: -3deg; }
+.kp-cap[data-nada="campuran"] { border-color: #2c5a6b; background: #e4eef2; color: #2c5a6b; }
+.kp-cap[data-nada="buruk"] { border-color: #b3261e; background: #fdecea; color: #b3261e; }
+.kp-kaki { display: flex; align-items: center; justify-content: space-between; gap: 8px; height: 24px; padding: 0 8px; background: #f9eeea; border-top: 2px solid #ecd5cb; }
+.kp-lulus { display: inline-flex; align-items: center; gap: 4px; min-width: 0; font-size: 12px; line-height: 14px; font-weight: 800; color: #7a3e00; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.kp-kilau-kaki { flex: none; width: 10px; height: 10px; }
+.kp-tanggal { flex: none; font-size: 12px; line-height: 14px; font-weight: 700; color: #5f5f5f; font-variant-numeric: tabular-nums; white-space: nowrap; }
+/* di lembar bawah (akhir Episode 1 lengkap): kartu di tengah, ruang untuk bayangan */
+.akh-lembar[data-lembar-akhir="kartu"] .kp { margin: 4px auto 14px; }
 
-/* T-064 Episode 1 Dev: short walk-up ending (AkhirKenalan in LayarAkhir.tsx). Body 18 px, labels >= 14 px, targets >= 48 px.
-   Fit at 360x640 by calculation: header 56 + head row 60 + quote 3 x 26 + real-case line 34 + name + card block 168 + gaps 48
-   = 444, + pinned action bar ~124 = 568. */
-.akh-kenalan { display: grid; gap: 12px; padding: 12px 16px 16px; font-size: 18px; line-height: 1.45; color: #212121; }
+/* Varian mini (kepala akhir satu layar, T-024: 84 x 56 tetap): tombol yang membuka kartu utuh. */
+.kp-mini { flex: 0 0 auto; display: flex; flex-direction: column; width: 84px; height: 56px; margin: 0; padding: 0; box-sizing: border-box; overflow: hidden;
+  border: 2px solid #212121; border-radius: 0; background: #fff9f5; box-shadow: 0 2px 0 #212121; color: #212121; font: inherit; cursor: pointer; }
+.kp-mini-pita { display: flex; align-items: center; gap: 3px; height: 14px; padding: 0 4px; background: #ff9000; border-bottom: 2px solid #212121; font-size: 10px; line-height: 14px; font-weight: 800; letter-spacing: .1em; }
+.kp-mini-isi { flex: 1; display: flex; align-items: center; justify-content: space-between; padding: 2px 4px; }
+.kp-mini-lagi { width: 20px; height: 20px; box-sizing: border-box; display: grid; place-items: center; border: 2px solid #ff9000; background: #fffdf6; color: #9a4f00; font-size: 15px; font-weight: 800; line-height: 1; box-shadow: 0 2px 0 #ff9000; }
+.kp-mini:focus-visible { outline: 3px solid #1d6fd1; outline-offset: 2px; }
+@media (prefers-reduced-motion: no-preference) { .kp-mini:active { translate: 0 2px; box-shadow: none; } }
+
+/* T-064 Episode 1 Dev: short walk-up ending (AkhirKenalan in LayarAkhir.tsx). Body 18 px, labels >= 14 px, targets >= 44-48 px.
+   T-072 fit at 360x640 by calculation (the name is typed on the card, so the separate label + field are gone; gaps 12 -> 8):
+   story header 56 + pinned action bar (two buttons 18 px, two lines each, 63 + 17) 80 + scroll mask padding 28 -> 476 for the content:
+   padding 16 + head 60 + quote 3-4 x 26 + 20 (98-124) + real-case line 34-52 + card 176 + gap 4 + caption 20 + gaps 3 x 8 = 450 (id
+   Puas) .. 476 (en Kurang puas, worst) <= 476. 390x700: +60 px height, +30 px width. */
+.akh-kenalan { display: grid; gap: 8px; padding: 8px 16px 8px; font-size: 18px; line-height: 1.45; color: #212121; }
 .akh-kenalan-kepala { display: flex; align-items: center; gap: 12px; }
 .akh-kenalan-kepala h2 { margin: 0; font-size: 22px; line-height: 1.25; }
 .akh-kenalan-kepala h2:focus { outline: none; }
@@ -456,10 +496,7 @@
 .akh-kenalan-kutip { margin: 0; padding: 10px 12px; background: #ffffff; box-shadow: inset 0 0 0 2px #ecd5cb; }
 .akh-kenalan-kutip b { color: #7a3e00; }
 .akh-kenalan-nyata { display: flex; align-items: center; gap: 10px; margin: 0; }
-.akh-kenalan-kartu { display: grid; justify-items: start; gap: 6px; padding: 10px 12px 12px; background: #fff1e2; box-shadow: inset 0 0 0 2px #ff9000; }
-.akh-kenalan-kartu label { font-size: 15px; font-weight: 700; }
-.akh-kenalan-kartu input { box-sizing: border-box; width: 100%; min-height: 48px; padding: 8px 12px; border: 2px solid #212121; border-radius: 0; background: #ffffff; font: inherit; font-size: 18px; color: #212121; }
-.akh-kenalan-kartu input:focus-visible { outline: 3px solid #1d6fd1; outline-offset: 2px; }
-.akh-kenalan-kartu small { font-size: 14px; color: #5f5f5f; }
+.akh-kenalan-kartu { display: grid; justify-items: center; gap: 4px; }
+.akh-kenalan-kartu small { font-size: 14px; line-height: 20px; color: #5f5f5f; text-align: center; }
 .akh-kenalan-aksi :is(.akh-utama, .akh-kedua) { min-height: 48px; font-size: 18px; }
 .akh-kenalan-aksi .akh-kedua { display: inline-flex; align-items: center; justify-content: center; text-decoration: none; }

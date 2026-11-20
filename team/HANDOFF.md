@@ -3741,3 +3741,46 @@ Each segment uses `steps(n)` with exactly 1 px per step, so it stays crisp. Ther
 **Preview:** `character/dashcam-t065/gulir-dashcam-t071-3x.png` shows 0.0 s / 2.0 s / 3.3 s / 4.5 s+ with the offset written under each frame (vehicles drawn unrotated).
 
 **Open:** the motion has not been seen running in a browser.
+
+## T-072 (2026-11-20): cuter, fixed "Petugas Klaim Raksa" ID card in Episode 1 Dev AND the full Episode 1 (Designer)
+
+Built by the Designer; uncommitted. Owner rule: nothing was opened in a browser. Gate: client typecheck 0 errors; client/dist rebuilt.
+
+**Card** (`client/src/cerita/ui/KartuPetugas.tsx`, CSS `.kp*` in `cerita/ui/akhir.css`, which replaces the T-052 `.akh-kartu-petugas`): a lanyard ID card, `min(300px, 100%)` wide and 176 px tall (strap 14 + card 162).
+- **Top:** orange strap with a metal clip.
+- **Edge:** 3 px ink edge with a hard and a soft drop shadow.
+- **Header:** orange band with the pixel Raksa owl, "RAKSA", and an ID tag `RKS-0000`. The number is `nomorPetugas()`, an FNV-1a hash of name and date, so it is stable for the same name on the same day.
+- **Photo:** 76×84 framed photo box holding the player's pixel portrait at 64 px (exactly 4× the 16-cell grid), with two pixel sparkles.
+- **Name:** 20 px on ONE line, ellipsis when long (a 24-character name is cut with "…").
+- **Role:** "Petugas Klaim" / "Claims Officer" / 理赔专员 at 15 px. It wraps only at spaces (`word-break: keep-all`, no `overflow-wrap: anywhere`), and in the 186 px text column it stays on one line in all three languages.
+- **Result stamp:** the ending title (Puas / Selesai dengan catatan / Kurang puas, and the en/zh equivalents) in the game's status colours, tilted 3°.
+- **Footer:** blush strip with a sparkle, "Lulus pelatihan Raksa" / "Raksa training graduate" / "Raksa 培训结业", and today's date (`Intl`, follows the active language).
+- **No animation.** It renders nothing without a player look (same as before).
+
+New keys `ceritaAkhir.kartuLulus` and `ceritaAkhir.kartuBuka` (id/en/zh).
+
+**Episode 1 Dev ending** (`AkhirKenalan` in LayarAkhir.tsx):
+- The name is now typed ON the card. The name line is the input: 44 px tall, dashed underline, ✎ mark, the label read by screen readers, maxLength 24. The visible placeholder "Tamu" / "Guest" / 访客 is styled as the name, so an empty name screenshots cleanly.
+- The separate label and field are gone, and the caption is shorter (`kenalan.kartu`: "Ketuk nama untuk mengganti, lalu tangkap layar." / "Tap the name to change it, then screenshot." / 点名字可修改，然后截图保存。).
+- Spacing is tighter (gaps 12 → 8, and the card block has no frame).
+- **Fit at 360×640:** 476 px of content room below the 56 px story header, the 80 px pinned action bar and the 28 px fade padding.
+  - Indonesian, "Puas": 450 px.
+  - English, "Kurang puas" (4-line quote, worst case): 476 px, so it fits with 0 px spare.
+  - 390×700 has 60 px more height.
+
+**Full Episode 1 ending** (one-screen, T-024): the head row keeps an 84×56 slot, so the one-screen layout is unchanged.
+- The slot now holds a mini card button (`.kp-mini`): RAKSA band, portrait and a › chip. Its label is "Lihat kartu petugas {nama}". It no longer contains text that can break.
+- Tapping it opens the full card in the existing bottom sheet (`LembarAkhir`, new `jenis: 'kartu'`), with the result stamp; focus returns to the mini card when the sheet closes.
+- The scrolling (wide) form of the ending shows the full card under the head row instead.
+
+**Files:**
+- `client/src/cerita/ui/KartuPetugas.tsx`, `LayarAkhir.tsx`, `LembarAkhir.tsx` (type only), `akhir.css`.
+- `client/src/i18n/kamus/ceritaAkhir.ts`.
+- `client/src/cerita/episode/auto-2-dev/teks.{id,en,zh}.ts` (`kenalan.kartu`).
+
+**Previews** (calculated mocks with the real pixel avatar and owl; other text as grey bars; mock font is uppercase pixel), in `character/kartu-petugas-t072/`, made by `pratinjau.mts` (`npx tsx --tsconfig client/tsconfig.json character/kartu-petugas-t072/pratinjau.mts`):
+- `akhir-dev-t072-360x640.png` and `-390x700.png`
+- `akhir-lengkap-t072-360x640.png` and `-390x700.png` (mini card in the head row, plus the sheet with the full card)
+- `kartu-t072-varian-3x.png` (id Tamu/Puas; en 24-character name/Closed, with reservations; en Guest/Not satisfied)
+
+**Open:** not seen in a browser. The worst case at 360×640 (English, "Kurang puas") has 0 px spare by calculation, so if real font metrics run longer, that ending scrolls by a few pixels.

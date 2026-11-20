@@ -42,7 +42,7 @@ export const TEKS_AUTO_2_DEV_ZH: Record<string, string> = {
   'kenalan.suasana': 'Hendra 先生现在：{suasana}',
   'kenalan.namaLabel': '卡片上的名字（可留空）',
   'kenalan.namaBawaan': '访客',
-  'kenalan.kartu': '你的理赔专员卡。截图保存吧。',
+  'kenalan.kartu': '点名字可修改，然后截图保存。',
   'kenalan.lengkap': '玩完整版',
   'kenalan.raksa': '进一步认识 Raksa',
   'kenalan.tabBaru': '（新标签页）',

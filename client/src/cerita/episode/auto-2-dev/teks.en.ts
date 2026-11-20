@@ -42,7 +42,7 @@ export const TEKS_AUTO_2_DEV_EN: Record<string, string> = {
   'kenalan.suasana': 'Mr Hendra now: {suasana}',
   'kenalan.namaLabel': 'Your name on the card (optional)',
   'kenalan.namaBawaan': 'Guest',
-  'kenalan.kartu': 'Your officer card. Keep it with a screenshot.',
+  'kenalan.kartu': 'Tap the name to change it, then screenshot.',
   'kenalan.lengkap': 'Play the full version',
   'kenalan.raksa': 'Get to know Raksa',
   'kenalan.tabBaru': '(new tab)',

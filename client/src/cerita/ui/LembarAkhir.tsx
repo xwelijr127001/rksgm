@@ -16,7 +16,7 @@ import { kelasKonteks, useBisaGulir, useLapisanDialog, type KembaliKe } from '..
 
 export function LembarAkhir({ jenis, judul, nama, kecil, tanda, atasBadan, kaki, kunciIsi = '', kembaliKe, onTutup, onPanah, children }: {
   /** Isi lembar (atribut data untuk gaya & uji). */
-  jenis: 'titik' | 'sebab' | 'pelajaran';
+  jenis: 'titik' | 'sebab' | 'pelajaran' | 'kartu';
   judul: ReactNode;
   /** Judul sebagai teks polos (nama wilayah isi bila badan lembar perlu digulir). */
   nama: string;

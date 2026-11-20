@@ -51,7 +51,7 @@ export const TEKS_AUTO_2_DEV_ID: Record<string, string> = {
   'kenalan.suasana': 'Pak Hendra sekarang: {suasana}',
   'kenalan.namaLabel': 'Namamu di kartu (boleh dikosongkan)',
   'kenalan.namaBawaan': 'Tamu',
-  'kenalan.kartu': 'Kartu petugasmu. Simpan dengan tangkapan layar.',
+  'kenalan.kartu': 'Ketuk nama untuk mengganti, lalu tangkap layar.',
   'kenalan.lengkap': 'Main versi lengkap',
   'kenalan.raksa': 'Kenal Raksa lebih jauh',
   'kenalan.tabBaru': '(tab baru)',
