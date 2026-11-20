@@ -471,6 +471,11 @@
 .kp-lulus { display: inline-flex; align-items: center; gap: 4px; min-width: 0; font-size: 12px; line-height: 14px; font-weight: 800; color: #7a3e00; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .kp-kilau-kaki { flex: none; width: 10px; height: 10px; }
 .kp-tanggal { flex: none; font-size: 12px; line-height: 14px; font-weight: 700; color: #5f5f5f; font-variant-numeric: tabular-nums; white-space: nowrap; }
+/* T-077 (opt-in, Episode 1 Investigator): lencana pangkat 24 px di depan nama pangkat; baris stempel kasus 4 x 16 px di kaki. */
+.kp-pangkat { display: inline-flex; align-items: center; gap: 6px; }
+.kp-pangkat i { flex: none; width: 24px; height: 24px; background-repeat: no-repeat; image-rendering: pixelated; }
+.kp-stempel { display: inline-flex; align-items: center; gap: 4px; }
+.kp-stempel i { width: 16px; height: 16px; background-repeat: no-repeat; image-rendering: pixelated; }
 /* di lembar bawah (akhir Episode 1 lengkap): kartu di tengah, ruang untuk bayangan */
 .akh-lembar[data-lembar-akhir="kartu"] .kp { margin: 4px auto 14px; }
 

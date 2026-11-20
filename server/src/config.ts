@@ -139,6 +139,11 @@ export const CONFIG = {
    */
   ep1Dev: (process.env.RAKSA_EP1_DEV || 'off').toLowerCase().trim() === 'on',
   /**
+   * T-076 (pilot): the "Episode 1 · Investigator" card in the /cerita picker. Default off = card hidden. The direct links
+   * /cerita/investigator and /cerita/auto-2-inv work either way.
+   */
+  investigator: (process.env.RAKSA_INVESTIGATOR || 'off').toLowerCase().trim() === 'on',
+  /**
    * Seeded scenarios (T-028, story/seed/publish.ts): at start the server publishes the scenarios that ship with the code
    * (Episode 2 "Truk Trailer di Jalan Tol" as a hosted room) if they are not there yet. Idempotent: a start that finds
    * the same content writes nothing. STORY_SEED=off skips it.

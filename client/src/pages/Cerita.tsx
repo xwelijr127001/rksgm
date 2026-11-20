@@ -63,6 +63,8 @@ export default function Cerita() {
   // T-074 (owner, temporary): the card only with RAKSA_EP1_DEV=on (features.ep1Dev); /cerita/kenalan and /cerita/auto-2-dev
   // still open the episode directly when the card is hidden.
   const dev = cfg.status === 'ready' && cfg.config.ep1Dev ? cariEpisode('auto-2-dev') : null;
+  // T-076: Episode 1 Investigator (pilot) card only with RAKSA_INVESTIGATOR=on; /cerita/investigator opens it regardless.
+  const inv = cfg.status === 'ready' && cfg.config.investigator ? cariEpisode('auto-2-inv') : null;
   const demo = cfg.status === 'ready' && cfg.config.demoCerita ? cariEpisode('auto-1') : null;
   const kartu = (ep: Episode) => (
     <KartuEpisode
@@ -97,6 +99,7 @@ export default function Cerita() {
         </header>
 
         <ul className="cer-hub-daftar" aria-label={t('cerita.daftarEpisodeAria')}>
+          {inv ? kartu(inv) : null}
           {dev ? kartu(dev) : null}
           {nyata ? kartu(nyata) : null}
           <BarisSegera />
@@ -324,10 +327,10 @@ function KartuEpisode({ ep, bahasa, nama, onMainLagi }: { ep: Episode; bahasa: B
           {/* T-037 Fix 1 (D-341): chip jenis di BARIS SENDIRI di atas baris meta (meta tidak lagi terpotong di HP). */}
           {ep.jenis ? <span className="cer-ep-jenis" data-jenis={ep.jenis} title={ketJenis} aria-description={ketJenis}>{t(`cerita.jenis.${ep.jenis}`)}</span> : null}
           {/* T-064: Episode 1 Dev = "5 menit" chip next to the type chip. */}
-          {ep.tampilan?.akhirKenalan ? <span className="cer-ep-jenis cer-ep-cepat" data-jenis="cepat">{t('cerita.durasi', { n: ep.durasiMenit })}</span> : null}
+          {ep.tampilan?.akhirKenalan || ep.investigasi ? <span className="cer-ep-jenis cer-ep-cepat" data-jenis="cepat">{t('cerita.durasi', { n: ep.durasiMenit })}</span> : null}
         <p className="cer-ep-meta">
           {/* Kasus nyata = Episode 1; demo tanpa nomor. */}
-          <span>{ep.jenis === 'demo' ? t('cerita.labelDemo') : ep.tampilan?.akhirKenalan ? tx('dev.label') : t('cerita.episodeKe', { n: 1 })}</span>
+          <span>{ep.jenis === 'demo' ? t('cerita.labelDemo') : ep.tampilan?.akhirKenalan ? tx('dev.label') : ep.investigasi ? tx('inv.label') : t('cerita.episodeKe', { n: 1 })}</span>
           <span aria-hidden="true">·</span>
           <span>{t(`cerita.produk.${ep.produk}`)}</span>
           <span aria-hidden="true">·</span>

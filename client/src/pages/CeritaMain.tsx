@@ -103,7 +103,8 @@ export default function CeritaMain() {
   const ep = cariEpisode(episode);
   // T-064: Episode 1 Dev (akhirKenalan) = no name screen before playing: a guest plays as "Tamu" with the default look; the
   // name is optional at the ending (ID card). Every other episode still asks for the name first.
-  if (!profil && ep?.tampilan?.akhirKenalan) return <SesiCerita key={ep.id} ep={ep} profilAwal={{ nickname: teksCerita(ep, 'kenalan.namaBawaan', bahasa), look: { ...LOOK_BAWAAN } }} />;
+  // T-076: the Investigator pilot (Episode.investigasi) is walk-up too: same guest session, no name screen.
+  if (!profil && (ep?.tampilan?.akhirKenalan || ep?.investigasi)) return <SesiCerita key={ep.id} ep={ep} profilAwal={{ nickname: teksCerita(ep, 'kenalan.namaBawaan', bahasa), look: { ...LOOK_BAWAAN } }} />;
   if (!profil) return <Navigate to={'/kenalan?lanjut=/cerita/' + encodeURIComponent(episode ?? '')} replace />;
   if (!ep) return <Navigate to="/cerita" replace />;
   return <SesiCerita key={ep.id} ep={ep} profilAwal={profil} />;

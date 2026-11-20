@@ -253,6 +253,8 @@ export default function App() {
             {/* T-047: preload bar (pictures, first music, button SFX, story chunk) before the playable case opens. */}
             {/* T-064: short QR-able URL for Episode 1 Dev (walk-up guests). */}
             <Route path="/cerita/kenalan" element={<Navigate to="/cerita/auto-2-dev" replace />} />
+            {/* T-076: short QR-able URL for the Episode 1 Investigator pilot. */}
+            <Route path="/cerita/investigator" element={<Navigate to="/cerita/auto-2-inv" replace />} />
             <Route path="/cerita/:episode" element={<PramuatCerita><CeritaMain /></PramuatCerita>} />
             {ProtoMeja ? <Route path="/meja" element={<ProtoMeja />} /> : null}
             {ProtoKejadian ? <Route path="/kejadian" element={<ProtoKejadian />} /> : null}

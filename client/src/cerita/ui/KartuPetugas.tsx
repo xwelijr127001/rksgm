@@ -10,11 +10,23 @@
  *          (Episode 1 Dev: ketuk nama, ketik; kosong = Tamu).
  *   mini   84 x 56 di baris kepala akhir satu layar (T-024: tinggi kepala tetap): tombol yang membuka kartu utuh di lembar bawah.
  * Tanpa profil (bukan pemutar HP) = tidak digambar.
+ * T-077 (Episode 1 Investigator, opt-in, kartu lain tidak berubah): `investigasi={{ stempel, pangkat }}` mengganti jabatan dengan
+ * pangkat investigator + lencana pangkat piksel 24 px, dan teks kaki dengan BARIS STEMPEL kasus (4 slot, terisi = jumlah stempel).
+ * `look` = karakter dikirim langsung (layar hasil investigasi), menimpa konteks pemutar HP.
  */
 import { useMemo } from 'react';
+import type { PlayerLook } from '@shared/types';
 import { AvatarPiksel } from '../../art/AvatarPiksel';
 import { t, useBahasa } from '../../i18n';
 import { useLookPemain } from '../hp/lookPemain';
+import ikonInvUrl from '../seni/investigasi/ikon.png';
+import pangkatUrl from '../seni/investigasi/pangkat.png';
+import './akhir.css';
+
+/** T-077: pangkat investigator (sel lencana di seni/investigasi/pangkat.png) dan jumlah slot stempel kasus. */
+const SEL_PANGKAT = { muda: 0, investigator: 1, senior: 2, kepala: 3 } as const;
+const SLOT_STEMPEL = 4;
+export type KartuInvestigasi = { stempel: string[]; pangkat: keyof typeof SEL_PANGKAT };
 
 /** Tanda burung hantu Raksa 10 x 10 sel (cokelat logo #73502F, mata krem, paruh jingga). */
 const BURUNG = [
@@ -56,7 +68,7 @@ export function nomorPetugas(nama: string, tanggal: string): string {
 export type CapKartu = { teks: string; nada: 'baik' | 'campuran' | 'buruk' };
 export type UbahNamaKartu = { id: string; nilai: string; label: string; placeholder: string; onUbah: (nilai: string) => void };
 
-export function KartuPetugas({ nama, cap, ubahNama, varian = 'penuh', onBuka }: {
+export function KartuPetugas({ nama, cap, ubahNama, varian = 'penuh', onBuka, look: lookProp, investigasi }: {
   nama: string;
   /** Cap hasil (judul akhir + nada) di kaki kartu. */
   cap?: CapKartu;
@@ -65,8 +77,13 @@ export function KartuPetugas({ nama, cap, ubahNama, varian = 'penuh', onBuka }: 
   varian?: 'penuh' | 'mini';
   /** Varian mini: buka kartu utuh (lembar bawah). */
   onBuka?: (pemicu: HTMLElement) => void;
+  /** T-077: karakter dikirim langsung (menimpa konteks pemutar HP). */
+  look?: PlayerLook;
+  /** T-077: kartu investigator: pangkat + baris stempel kasus. */
+  investigasi?: KartuInvestigasi;
 }) {
-  const look = useLookPemain();
+  const lookKonteks = useLookPemain();
+  const look = lookProp ?? lookKonteks;
   const { bahasa } = useBahasa();
   const hari = new Date();
   const kunciHari = `${hari.getFullYear()}-${hari.getMonth() + 1}-${hari.getDate()}`;
@@ -92,7 +109,8 @@ export function KartuPetugas({ nama, cap, ubahNama, varian = 'penuh', onBuka }: 
 
   const nomor = nomorPetugas(nama, kunciHari);
   return (
-    <figure className="kp" data-kartu-petugas="" aria-label={t('ceritaAkhir.kartuPetugas', { nama })}>
+    <figure className="kp" data-kartu-petugas="" data-investigasi={investigasi ? investigasi.pangkat : undefined}
+      aria-label={investigasi ? t('investigasi.kartu', { nama, pangkat: t(`investigasi.pangkat.${investigasi.pangkat}`), n: Math.min(SLOT_STEMPEL, investigasi.stempel.length), total: SLOT_STEMPEL }) : t('ceritaAkhir.kartuPetugas', { nama })}>
       {/* tali lanyard + jepit logam */}
       <span className="kp-tali" aria-hidden="true"><i /></span>
       <div className="kp-kartu">
@@ -115,12 +133,23 @@ export function KartuPetugas({ nama, cap, ubahNama, varian = 'penuh', onBuka }: 
                 <span className="kp-pena" aria-hidden="true">✎</span>
               </label>
             ) : <b className="kp-nama">{nama}</b>}
-            <span className="kp-jabatan">{t('ceritaAkhir.petugasKlaim')}</span>
+            {investigasi ? (
+              <span className="kp-jabatan kp-pangkat">
+                <i aria-hidden="true" style={{ backgroundImage: `url(${pangkatUrl})`, backgroundPosition: `${-SEL_PANGKAT[investigasi.pangkat] * 24}px 0` }} />
+                {t(`investigasi.pangkat.${investigasi.pangkat}`)}
+              </span>
+            ) : <span className="kp-jabatan">{t('ceritaAkhir.petugasKlaim')}</span>}
             {cap ? <span className="kp-cap" data-nada={cap.nada}>{cap.teks}</span> : null}
           </div>
         </div>
         <div className="kp-kaki">
-          <span className="kp-lulus"><Kilau className="kp-kilau-kaki" />{t('ceritaAkhir.kartuLulus')}</span>
+          {investigasi ? (
+            <span className="kp-stempel" aria-hidden="true">
+              {Array.from({ length: SLOT_STEMPEL }, (_, i) => (
+                <i key={i} data-isi={i < investigasi.stempel.length ? '' : undefined} style={{ backgroundImage: `url(${ikonInvUrl})`, backgroundPosition: `${i < investigasi.stempel.length ? -112 : -128}px 0` }} />
+              ))}
+            </span>
+          ) : <span className="kp-lulus"><Kilau className="kp-kilau-kaki" />{t('ceritaAkhir.kartuLulus')}</span>}
           <span className="kp-tanggal">{tanggal}</span>
         </div>
       </div>

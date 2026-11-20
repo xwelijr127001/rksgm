@@ -27,7 +27,7 @@ const KARTU_KHUSUS = (kode: string, episode?: string): { kunci: string; isi: str
   kode === 'kdash' ? { kunci: 'kdash', isi: 'langkah.pelatih.isi.kdash' }
     // T-068: K08 Episode 1 lengkap = rekaman dashcam + pertanyaan Pak Bima (kartu baru, kunci baru: juga tampil bagi yang pernah main K08 lama)
     : kode === 'k08' ? { kunci: 'k08dash', isi: 'langkah.pelatih.isi.k08dash' }
-    : kode === 'ksim' && episode === 'auto-2-dev' ? { kunci: 'ksimDev', isi: 'langkah.pelatih.isi.ksimDev' } : null;
+    : kode === 'ksim' && (episode === 'auto-2-dev' || episode === 'auto-2-inv' /* T-076: pilot Investigator memakai kartu SIM ringkas yang sama */) ? { kunci: 'ksimDev', isi: 'langkah.pelatih.isi.ksimDev' } : null;
 const TUTUP_SENDIRI_MD = 5000;
 const KUNCI_PELATIH = (k: string) => `raksa:pelatih:${k}`;
 const SASARAN_LEWAT = '.hp-tautan, .hp-arena-info, .hp-arena-kembali, [aria-pressed="true"], [aria-checked="true"], [disabled], .lgk-pelatih *, .hp-lembar-catatan, summary';

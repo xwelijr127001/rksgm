@@ -204,6 +204,62 @@ interface NodeDasar {
   adegan?: CueAdegan;
   /** Tata panggung latar saat node ini mulai tampil (sebelum `tata` baris-barisnya). Hanya tampilan. */
   tata?: CueLatar;
+  /**
+   * T-076 (Episode 1 Investigator, opt-in; node tanpa field ini = tidak berubah): JENIS INVESTIGASI node ini. Mesin tidak
+   * membacanya (jenis mesin tetap dialog / pilihan / aktivitas / akhir); hanya pemutar HP, yang menggambar layar investigasi
+   * untuk node itu (cerita/investigasi). Lihat NodeInvestigasi.
+   */
+  investigasi?: NodeInvestigasi;
+}
+
+// ------------------------------------------------------------------ T-076 Episode 1 Investigator (opt-in)
+
+/** Kartu bukti (kontrak rencana Task 1 -> Task 2; `judul` & `sumber` = kunci teks episode). */
+export interface BuktiInvestigasi {
+  id: 'dashcam' | 'rambu' | 'sim';
+  judul: KunciTeks;
+  sumber: KunciTeks;
+  ikon: 'rekaman' | 'foto' | 'kartu';
+}
+
+/** Pernyataan saksi yang bisa dicatat ke buku catatan (kontrak rencana; `teks` = kunci teks episode). */
+export interface PernyataanInvestigasi {
+  id: string;
+  siapa: 'darto' | 'petugasTol';
+  teks: KunciTeks;
+}
+
+/**
+ * Jenis investigasi sebuah node (rencana: catat, bukti, keberatan, putusan, hasil-investigasi; + judul & cap untuk kartu judul
+ * dan cap KEBERATAN). Tiap jenis menumpang jenis mesin yang ADA, jadi simpanan, muat ulang, dan riwayat berjalan seperti biasa:
+ *  - judul            : node dialog; kartu judul kasus, "Mulai" = lanjut.
+ *  - catat            : node dialog; baris terakhirnya = pernyataan `pernyataan`; tombol lanjut = "Catat" dan efek node memasang
+ *                       tanda `catat:<id>`.
+ *  - bukti            : node dialog (sesudah arena / temuan); kartu bukti `bukti` masuk buku, efek node memasang `bukti:<id>`.
+ *  - keberatan        : percobaan 0 / 1 = node PILIHAN (id pilihan = id bukti, hanya bukti yang sudah terkumpul lewat `jika`);
+ *                       percobaan 2 (dipandu) = node DIALOG: hanya bukti `tepat` yang melanjutkan. Hasil = tanda
+ *                       `keb:tepat` | `keb:tepat-kedua` | `keb:dipandu`.
+ *  - cap              : node dialog; cap KEBERATAN diputar, selesai = lanjut.
+ *  - putusan          : node pilihan (id pilihan layak / tambahan / polis), tanda `putusan:<id>`.
+ *  - hasil-investigasi: node AKHIR; layar hasil (skor, nilai, stempel, pangkat).
+ */
+export type NodeInvestigasi =
+  | { jenis: 'judul' }
+  | { jenis: 'catat'; pernyataan: string }
+  | { jenis: 'bukti'; bukti: BuktiInvestigasi['id'] }
+  | { jenis: 'keberatan'; pernyataan: string; tepat: BuktiInvestigasi['id']; percobaan: 0 | 1 | 2 }
+  | { jenis: 'cap' }
+  | { jenis: 'putusan' }
+  | { jenis: 'hasil-investigasi' };
+
+/** Data kasus investigasi sebuah episode (`Episode.investigasi`). */
+export interface KonfigInvestigasi {
+  /** Id kasus untuk rekaman perangkat (skor terbaik & stempel), mis. 'kasus-1'. */
+  kasus: string;
+  nomor: number;
+  judul: KunciTeks;
+  pernyataan: PernyataanInvestigasi[];
+  bukti: BuktiInvestigasi[];
 }
 
 export interface NodeDialog extends NodeDasar {
@@ -659,6 +715,12 @@ export interface Episode {
    * opsional untuk kartu petugas, dua tombol) dan TANPA layar nama sebelum bermain.
    */
   tampilan?: { teksBesar?: boolean; akhirKenalan?: boolean };
+  /**
+   * T-076 (Episode 1 Investigator, opt-in): kasus investigasi. Dengan field ini pemutar HP menggambar layar investigasi untuk
+   * node ber-`investigasi`, buku catatan menggantikan Catatan kasus, layar akhir = hasil investigasi, dan tamu bermain tanpa
+   * layar nama. Episode lain tanpa field ini = tidak berubah.
+   */
+  investigasi?: KonfigInvestigasi;
   /** Migrasi progres dari versi lama: kembalikan state baru, atau null bila tidak bisa. */
   migrasi?: Record<number, (lama: StateCerita) => StateCerita | null>;
 }

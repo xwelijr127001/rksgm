@@ -13,6 +13,8 @@ export interface AppConfig {
   demoCerita: boolean;
   /** T-074: "Episode 1 Dev" card in the /cerita picker (RAKSA_EP1_DEV=on). Direct links work regardless. */
   ep1Dev: boolean;
+  /** T-076: "Episode 1 · Investigator" card in the /cerita picker (RAKSA_INVESTIGATOR=on). Direct links work regardless. */
+  investigator: boolean;
   story: { maxParticipants: number; answerWindowMs: number; scorePolicyId: string };
   /** Absolute base URL for join links/QR codes (server PUBLIC_BASE_URL or LAN address). */
   joinBaseUrl: string;
@@ -20,7 +22,7 @@ export interface AppConfig {
 
 export type AppConfigState = { status: 'loading' } | { status: 'ready'; config: AppConfig; offline: boolean };
 
-const FALLBACK: AppConfig = { legacy: false, demoCerita: false, ep1Dev: false, story: { maxParticipants: 100, answerWindowMs: 30_000, scorePolicyId: STORY_SCORE_POLICY.id }, joinBaseUrl: '' };
+const FALLBACK: AppConfig = { legacy: false, demoCerita: false, ep1Dev: false, investigator: false, story: { maxParticipants: 100, answerWindowMs: 30_000, scorePolicyId: STORY_SCORE_POLICY.id }, joinBaseUrl: '' };
 
 let state: AppConfigState = { status: 'loading' };
 let loading: Promise<AppConfigState> | null = null;
@@ -36,6 +38,7 @@ function parse(raw: unknown): AppConfig | null {
     legacy: features.legacy,
     demoCerita: features.demoCerita === true,
     ep1Dev: features.ep1Dev === true,
+    investigator: features.investigator === true,
     story: {
       maxParticipants: typeof story.maxParticipants === 'number' ? story.maxParticipants : FALLBACK.story.maxParticipants,
       answerWindowMs: typeof story.answerWindowMs === 'number' ? story.answerWindowMs : FALLBACK.story.answerWindowMs,

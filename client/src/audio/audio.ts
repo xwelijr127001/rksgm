@@ -40,7 +40,9 @@ export type Sfx =
   | 'drum'
   | 'podium'
   | 'fanfare'
-  | 'chime';
+  | 'chime'
+  // T-077: Episode 1 Investigator, the KEBERATAN stamp (original synth): desk slam + rising three-note stab.
+  | 'keberatan';
 
 export interface AudioPrefs {
   muted: boolean;
@@ -765,6 +767,16 @@ function bunyikan(name: Sfx, sfxBus: GainNode, t: number): (() => void) | undefi
       [7, 12, 16].forEach((s, i) => tone(sfxBus!, N(s + 12), t + i * 0.11, 0.1, 0.16, 'square'));
       tone(sfxBus, N(31), t + 0.33, 0.48, 0.17, 'square');
       tone(sfxBus, N(19), t + 0.33, 0.48, 0.14, 'triangle');
+      break;
+    case 'keberatan':
+      // T-077 KEBERATAN stamp ~0.65 s: hard slam (low pop + noise burst), then a rising two-note pickup and a held top note
+      // (square over a triangle fifth). Original synth, no sample.
+      pop(sfxBus, t, 190, 60, 0.16, 0.34);
+      noise(sfxBus, t, 0.05, 0.16, 1200);
+      tone(sfxBus, N(7), t + 0.07, 0.08, 0.18, 'sawtooth');
+      tone(sfxBus, N(14), t + 0.15, 0.08, 0.18, 'sawtooth');
+      tone(sfxBus, N(19), t + 0.23, 0.4, 0.19, 'square');
+      tone(sfxBus, N(7), t + 0.23, 0.4, 0.13, 'triangle');
       break;
     case 'chime':
       // T-057 reduced motion: everything appears at once with one calm chime.
