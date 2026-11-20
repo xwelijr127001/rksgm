@@ -171,12 +171,14 @@ export function ArenaPolaDashcam({ ep, konfig, jawaban, ubah, tx, labelKirim, on
       <figure className="dc-adegan" data-bingkai={keadaanBingkai} data-beku={beku ? '' : undefined} aria-label={t('dashcam.judul')}
         style={{ '--ubin': `url(${ubin})`, '--rambu': `url(${rambu})` } as CSSProperties}>
         <div className="dc-isi" key={putaran}>
-          {/* T-071: tanah bergulir (ubin jalan berulang + lapisan rambu & truk kecil berhenti, lampu hazard berkedip) */}
+          {/* T-071: tanah bergulir (ubin jalan berulang + lapisan rambu) */}
           <span className="dc-latar" aria-hidden="true" />
-          <span className="dc-tanah" aria-hidden="true">
-            <span className="dc-truk-kecil" style={{ left: 65, '--nyala': `url(${trukKecilNyala})`, '--mati': `url(${trukKecilMati})` } as CSSProperties} />
-          </span>
-          <img className="dc-nomor" src={nomorLajur} alt="" aria-hidden="true" style={{ left: 'var(--x0)', top: 226, width: 336, height: 13 }} />
+          <span className="dc-tanah" aria-hidden="true" />
+          {/* T-073: truk kecil berhenti = sprite SENDIRI di koordinat akhir (T-069: x 65, y 22), di luar lapisan bergulir. Tanpa animasi
+              (bingkai beku, bingkai diam, Safari mana pun) ia selalu di tempatnya; masuknya dari atas = animasi terpisah (dashcam.css). */}
+          <span className="dc-truk-kecil" aria-hidden="true" style={{ left: 'calc(var(--x0) + 65px)', '--nyala': `url(${trukKecilNyala})`, '--mati': `url(${trukKecilMati})` } as CSSProperties} />
+          {/* T-073: nomor lajur di DALAM adegan, 6 px dari tepi bawah (bukan top 226: tepi bingkai 3 px memotongnya di HP) */}
+          <img className="dc-nomor" src={nomorLajur} alt="" aria-hidden="true" style={{ left: 'var(--x0)', bottom: 6, width: 336, height: 13 }} />
           <img className="dc-jejak" src={jejak} alt="" aria-hidden="true" style={{ left: `calc(var(--x0) + ${SPRITE.jejak.x}px)`, top: SPRITE.jejak.y, width: SPRITE.jejak.w, height: SPRITE.jejak.h }} />
           {/* animasi: pose 0 bergerak (CSS) lalu diganti pose piksel beku; gerak dikurangi: pose bingkai 1 / 2 / 3 */}
           {(['truk', 'mobil'] as const).map((k) => POSE[k].map((p, i) => (

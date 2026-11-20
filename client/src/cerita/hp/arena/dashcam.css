@@ -20,12 +20,13 @@
 .dc-latar { left: var(--x0); top: 0; width: 336px; height: 240px; background: var(--ubin) repeat-y 0 288px; }
 .dc-tanah { left: var(--x0); top: -288px; width: 336px; height: 528px; background: var(--rambu) no-repeat; transform: translateY(288px); }
 .dc-tanah > * { position: absolute; }
-.dc-adegan[data-bingkai="1"] .dc-latar, .dc-pita .dc-latar { background-position: 0 0; }
-.dc-adegan[data-bingkai="1"] .dc-tanah, .dc-pita .dc-tanah { transform: none; }
-.dc-adegan[data-bingkai="2"] .dc-latar { background-position: 0 245px; }
-.dc-adegan[data-bingkai="2"] .dc-tanah { transform: translateY(245px); }
+/* T-073: bingkai diam (gerak dikurangi) = tanah DIAM di posisi akhir (geser 288) di ketiga bingkai: truk kecil & rambu selalu terlihat
+   di tempat T-069. Hanya pita K08 langkah 2 yang memakai geser 0 (tanpa truk kecil, lihat .dc-pita). */
+.dc-pita .dc-latar { background-position: 0 0; }
+.dc-pita .dc-tanah { transform: none; }
 .dc-adegan[data-bingkai="jalan"] .dc-latar { animation: dc-gulir-latar 6s linear forwards; }
 .dc-adegan[data-bingkai="jalan"] .dc-tanah { animation: dc-gulir-tanah 6s linear forwards; }
+.dc-adegan[data-bingkai="jalan"] .dc-truk-kecil { animation: dc-gulir-kecil 6s linear forwards, dc-hazard .6s steps(1) infinite; }
 @keyframes dc-gulir-latar {
   0% { background-position: 0 0; animation-timing-function: steps(245, end); }
   55% { background-position: 0 245px; animation-timing-function: steps(23, end); }
@@ -41,9 +42,18 @@
   75%, 100% { transform: translateY(288px); }
 }
 
-/* truk kecil berhenti di lajur 1 (lampu hazard), di lapisan tanah */
-.dc-truk-kecil { top: 310px; width: 32px; height: 58px; background: var(--nyala) no-repeat; }
-.dc-adegan[data-bingkai="jalan"] .dc-truk-kecil { animation: dc-hazard .6s steps(1) infinite; }
+/* T-073: truk kecil berhenti di lajur 1 (lampu hazard) = sprite sendiri di koordinat AKHIR (x 65, y 22 dari adegan), di luar lapisan
+   tanah. Akar masalah T-071: di dalam .dc-tanah (top -288 + translateY 288 = asal di y 0) ia diberi top 310 (22 + 288 dihitung dua
+   kali), jadi di bingkai beku ia di y 310, di bawah adegan 240 -> tidak terlihat di HP mana pun. Kini dasarnya top 22 tanpa transform;
+   masuknya dari atas = translateY(-288 -> 0) dengan langkah yang sama persis dengan tanah (dc-gulir-kecil). */
+.dc-truk-kecil { top: 22px; width: 32px; height: 58px; background: var(--nyala) no-repeat; }
+@keyframes dc-gulir-kecil {
+  0% { transform: translateY(-288px); animation-timing-function: steps(245, end); }
+  55% { transform: translateY(-43px); animation-timing-function: steps(23, end); }
+  62% { transform: translateY(-20px); animation-timing-function: steps(14, end); }
+  69% { transform: translateY(-6px); animation-timing-function: steps(6, end); }
+  75%, 100% { transform: none; }
+}
 @keyframes dc-hazard { 0% { background-image: var(--nyala); } 50% { background-image: var(--mati); } }
 
 /* pose kendaraan: dasar = bingkai beku (pose 3) */
@@ -100,7 +110,7 @@
 
 /* tombol di dalam adegan, SELALU pojok kanan bawah (lajur 3-4 bawah: mobil berangkat di kanan ATAS dan pindah ke kiri; truk di lajur 2;
    bingkai beku: kosong). "Lanjut" (gerak dikurangi) bertumpuk di atas "Putar lagi". */
-.dc-kendali { position: absolute; right: 6px; bottom: 12px; z-index: 4; display: flex; flex-direction: column-reverse; align-items: flex-end; gap: 4px; }
+.dc-kendali { position: absolute; right: 6px; bottom: 26px; /* T-073: di atas nomor lajur (bawah 6 + 13) */ z-index: 4; display: flex; flex-direction: column-reverse; align-items: flex-end; gap: 4px; }
 .dc-tombol { min-height: 48px; min-width: 48px; padding: 6px 12px; border: 2px solid #212121; background: #fff9f5; color: #212121; font-size: 16px; font-weight: 800; box-shadow: 0 3px 0 #212121; cursor: pointer; }
 .dc-tombol:active:not(:disabled) { transform: translateY(2px); box-shadow: 0 1px 0 #212121; }
 .dc-tombol:disabled { opacity: .55; cursor: default; }

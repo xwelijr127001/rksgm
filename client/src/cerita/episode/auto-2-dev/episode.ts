@@ -70,6 +70,17 @@ const DASHCAM: DefAktivitas = {
 
 // ------------------------------------------------------------------ graf
 
+/**
+ * T-073: bagian tiap node = bagiannya di kasus lengkap auto-2: buka + Babak 1 (k01) = b1 Laporan awal; Babak 6 (k06) = b2 Survey dan
+ * estimasi; SIM + dashcam = b3 Pemeriksaan kejadian; Babak 14 + akhir = b4 Keputusan dan penyelesaian.
+ */
+function babDev(id: IdNode): string {
+  if (id === 'buka' || id.startsWith('k01')) return 'b1';
+  if (id.startsWith('k06')) return 'b2';
+  if (id.startsWith('ksim') || id.startsWith('kdash')) return 'b3';
+  return 'b4';
+}
+
 function bangunNode(): NodeCerita[] {
   return [
     {
@@ -150,8 +161,9 @@ function bangun(asal: Episode): Episode {
     mulai: 'buka',
     pemeran: { missRaksa: asal.pemeran.missRaksa!, hendra: asal.pemeran.hendra!, bima: asal.pemeran.bima!, darto: asal.pemeran.darto! },
     nasabah: 'hendra',
-    // Satu bagian saja (tanpa "coba lagi dari bagian"): tujuan bagian = Bagian 1 auto-2.
-    bab: [{ id: 'b1', judul: 'bab.b1.judul', tujuan: 'bab.b1.tujuan' }],
+    // T-073: empat bagian = letak tiap langkah di kasus lengkap (judul & tujuan bagian auto-2), supaya kepala menunjukkan kemajuan
+    // nyata ("BAGIAN 3/4 · Pemeriksaan kejadian"). Akhir Kenalan tetap tanpa "coba lagi dari bagian".
+    bab: (['b1', 'b2', 'b3', 'b4'] as const).map((id) => ({ id, judul: `bab.${id}.judul`, tujuan: `bab.${id}.tujuan` })),
     akhir: asal.akhir,
     paham: {},
     proses: {},
@@ -164,7 +176,7 @@ function bangun(asal: Episode): Episode {
     lampiran: asal.lampiran,
     cutIn: ['k01.2'],
     suasana: asal.suasana,
-    node: Object.fromEntries(bangunNode().map((n) => [n.id, n])),
+    node: Object.fromEntries(bangunNode().map((n) => [n.id, { ...n, bab: babDev(n.id) }])),
     aktivitas: { sim: asal.aktivitas.sim!, dashcam: DASHCAM },
     teks: TEKS_AUTO_2_DEV,
     bahasa: ['id', 'en', 'zh'],

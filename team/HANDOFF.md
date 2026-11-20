@@ -3784,3 +3784,36 @@ New keys `ceritaAkhir.kartuLulus` and `ceritaAkhir.kartuBuka` (id/en/zh).
 - `kartu-t072-varian-3x.png` (id Tamu/Puas; en 24-character name/Closed, with reservations; en Guest/Not satisfied)
 
 **Open:** not seen in a browser. The worst case at 360×640 (English, "Kurang puas") has 0 px spare by calculation, so if real font metrics run longer, that ending scrolls by a few pixels.
+
+## T-073 (2026-11-20): URGENT dashcam bugs on the owner's iPhone + real parts for Episode 1 Dev (Designer)
+
+Built by the Designer; uncommitted. Owner rule: nothing was opened in a browser. Gate: client typecheck 0 errors; client/dist rebuilt. The dashcam fixes apply to both Episode 1 Dev (kdash) and full Episode 1 K08 step 1, since both use ArenaDashcam.
+
+**1. Stopped small truck missing in the freeze frame**
+- **Root cause (my T-071 error):** inside the scrolling ground layer (`.dc-tanah`, `top: -288px` + `translateY(288px)`, so its origin is the top of the scene in the freeze frame), the small truck was given `top: 310px`, adding the 288 offset a second time. So it ended at y 310, below the 240-px scene, and was never visible on any phone. My T-071 preview script placed it correctly, which hid the error.
+- **Fix:**
+  - The small truck is now its own sprite in the scene at its T-069 final coordinates (x 65, y 22), outside the scrolling layer, with no transform at rest. So it is always in place in the freeze frame and whenever animations are off or late (iOS Safari timing).
+  - Its entry from the top during the replay is a separate animation, `dc-gulir-kecil` (translateY −288 → 0, the same pixel steps as the ground), so it still stops beside the impact. The hazard blink is unchanged.
+  - Reduced-motion stills now keep the ground at its final position in all three frames, so the small truck and the signs are always visible at the T-069 spots.
+  - The K08 step-2 band still uses ground offset 0, as in T-071.
+
+**2. Lane numbers cut in half**
+- **Cause:** a global `* { box-sizing: border-box }` makes the 240-px scene 234 px tall inside its 3-px frame. The numbers sat at top 226 and are 13 px tall, so they ended at 239 and their bottom 5 px were cut.
+- **Fix:** they are now anchored `bottom: 6px` (y 215..228 inside). The in-scene buttons moved from bottom 12 to bottom 26 so they never cover lane 3-4 numbers. That spot is clear of the vehicles: the freeze truck reaches x 166 and the buttons start at about x 194.
+
+**3. Episode 1 Dev header showed "BAGIAN 1/1 · Laporan awal" everywhere.** `auto-2-dev/episode.ts` now has four parts with the full case's titles and goals (`bab.b1..b4`, id/en/zh already in the auto-2 texts). Each node's part is where that step sits in the full case (`babDev()`):
+
+| Steps | Part |
+|---|---|
+| buka + Babak 1 (k01) | 1/4 Laporan awal |
+| Babak 6 (k06) | 2/4 Survey dan estimasi |
+| SIM + dashcam | 3/4 Pemeriksaan kejadian |
+| Babak 14 + endings | 4/4 Keputusan dan penyelesaian |
+
+The header shows e.g. "BAGIAN 3/4 · Pemeriksaan kejadian" at the dashcam. Side effects:
+- Story music now follows the full case: parts 2-3 use the "periksa" theme, the endings the closing theme.
+- The Kenalan ending still has no "try again from part".
+
+**Files:** `client/src/cerita/hp/arena/ArenaDashcam.tsx`, `dashcam.css`, and `client/src/cerita/episode/auto-2-dev/episode.ts`.
+
+**Open:** not seen on a phone. Saves from the old single-part version keep working, since node ids are unchanged.
