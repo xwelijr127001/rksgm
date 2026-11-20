@@ -210,7 +210,15 @@ interface NodeDasar {
    * untuk node itu (cerita/investigasi). Lihat NodeInvestigasi.
    */
   investigasi?: NodeInvestigasi;
+  /**
+   * T-085 (opt-in; node tanpa field ini = tema menurut bagian seperti semula, hp/audioTema.ts): trek musik selama node ini
+   * tampil. Hanya pemutar HP yang membacanya (hp/AudioCerita.tsx); nilainya nama trek di audio/audio.ts.
+   */
+  musik?: MusikNode;
 }
+
+/** T-085: trek musik Episode 1 Investigator yang bisa diminta sebuah node ('inv-terungkap' = jingle lalu loop tenang sendiri). */
+export type MusikNode = 'inv-investigasi' | 'inv-keterangan' | 'inv-keberatan' | 'inv-terungkap';
 
 // ------------------------------------------------------------------ T-076 Episode 1 Investigator (opt-in)
 

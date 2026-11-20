@@ -15,7 +15,12 @@
 
 import { UJI_AUDIO } from './bendera';
 
-export type Track = 'lobby' | 'game' | 'podium' | 'cerita-kantor' | 'cerita-periksa' | 'cerita-penutup' | null;
+export type Track =
+  | 'lobby' | 'game' | 'podium' | 'cerita-kantor' | 'cerita-periksa' | 'cerita-penutup'
+  // T-085: Episode 1 Investigator only (8-bit detective, tools/make-music-inv.mjs). 'inv-terungkap' is a one-shot jingle that
+  // hands over to the loop 'inv-tenang' by itself (MUSIC_LANJUT).
+  | 'inv-investigasi' | 'inv-keterangan' | 'inv-keberatan' | 'inv-terungkap' | 'inv-tenang'
+  | null;
 export type Sfx =
   | 'pilih'
   | 'bukti'
@@ -41,8 +46,15 @@ export type Sfx =
   | 'podium'
   | 'fanfare'
   | 'chime'
-  // T-077: Episode 1 Investigator, the KEBERATAN stamp (original synth): desk slam + rising three-note stab.
-  | 'keberatan';
+  // T-077 / T-085: Episode 1 Investigator, the KEBERATAN stamp (original synth): big chiptune hit + noise burst, then a sting.
+  | 'keberatan'
+  // T-085: investigator stings (original synth): pencil scratch while a statement writes itself, the pin landing, an evidence
+  // slip clipped into the notebook (paper + snap), a wrong card (soft low buzz), the case stamp / rank up (bright arpeggio).
+  | 'pensil'
+  | 'pin'
+  | 'jepit'
+  | 'keliru'
+  | 'stempel';
 
 export interface AudioPrefs {
   muted: boolean;
@@ -67,6 +79,12 @@ const MUSIC_FILES: Record<Exclude<Track, null>, string> = {
   'cerita-kantor': (import.meta.env?.BASE_URL ?? '/') + 'audio/cerita-kantor.mp3?v=t036b', // ?v: kunci cache, naikkan saat trek diganti
   'cerita-periksa': (import.meta.env?.BASE_URL ?? '/') + 'audio/cerita-periksa.mp3?v=t036b', // ?v: kunci cache, naikkan saat trek diganti
   'cerita-penutup': (import.meta.env?.BASE_URL ?? '/') + 'audio/cerita-penutup.mp3?v=t036b', // ?v: kunci cache, naikkan saat trek diganti
+  // T-085 Episode 1 Investigator (tools/make-music-inv.mjs): original 8-bit detective set, 45 - 385 KB each.
+  'inv-investigasi': (import.meta.env?.BASE_URL ?? '/') + 'audio/inv-investigasi.mp3?v=t085',
+  'inv-keterangan': (import.meta.env?.BASE_URL ?? '/') + 'audio/inv-keterangan.mp3?v=t085',
+  'inv-keberatan': (import.meta.env?.BASE_URL ?? '/') + 'audio/inv-keberatan.mp3?v=t085',
+  'inv-terungkap': (import.meta.env?.BASE_URL ?? '/') + 'audio/inv-terungkap.mp3?v=t085',
+  'inv-tenang': (import.meta.env?.BASE_URL ?? '/') + 'audio/inv-tenang.mp3?v=t085',
 };
 
 /** Lobby & gameplay berulang; jingle podium hanya sekali. */
@@ -77,14 +95,33 @@ const MUSIC_LOOP: Record<Exclude<Track, null>, boolean> = {
   'cerita-kantor': true,
   'cerita-periksa': true,
   'cerita-penutup': true,
+  'inv-investigasi': true,
+  'inv-keterangan': true,
+  'inv-keberatan': true,
+  'inv-terungkap': false, // jingle, once
+  'inv-tenang': true,
 };
 
+/**
+ * T-085: a one-shot track that hands over to a loop by itself. LANJUT_SISA_S before the jingle ends (or at 'ended') the
+ * requested track becomes the follow-up, so the normal story crossfade brings the loop in under the jingle's last chord.
+ */
+const MUSIC_LANJUT: Partial<Record<Exclude<Track, null>, Exclude<Track, null>>> = { 'inv-terungkap': 'inv-tenang' };
+const LANJUT_SISA_S = 1.3;
+
 /** Trek cerita: lebih pelan dari musik acara (di belakang teks & SFX) dan crossfade lebih panjang. */
-const TREK_CERITA = new Set<string>(['cerita-kantor', 'cerita-periksa', 'cerita-penutup']);
+const TREK_CERITA = new Set<string>(['cerita-kantor', 'cerita-periksa', 'cerita-penutup', 'inv-investigasi', 'inv-keterangan', 'inv-keberatan', 'inv-terungkap', 'inv-tenang']);
 // T-036 (pemilik 18 Nov: musik terlalu keras): 0.55 -> 0.28 (-5,9 dB) DAN berkasnya kini RMS -21/-22 dBFS (dulu -17..-19):
 // total sekitar 9 dB lebih pelan dibanding SFX. Bawaan HP tetap musik mati.
 const GAIN_CERITA = 0.28;
 const FADE_CERITA_MS = 1600;
+// T-085: a story JINGLE (one-shot, 'inv-terungkap') must not lose its first notes in a long fade: it comes in at once and the
+// track before it leaves quickly. Loops keep the long story crossfade.
+const FADE_JINGLE_MASUK_MS = 120;
+const FADE_JINGLE_KELUAR_MS = 350;
+function fadeMasukCerita(track: Exclude<Track, null>): number {
+  return MUSIC_LOOP[track] ? FADE_CERITA_MS : FADE_JINGLE_MASUK_MS;
+}
 function volTrek(track: Exclude<Track, null>): number {
   return musicVolume() * (TREK_CERITA.has(track) ? GAIN_CERITA : 1);
 }
@@ -285,12 +322,77 @@ const memulai = new Set<HTMLAudioElement>();
 /** T-040: per-element gain (element -> MediaElementSource -> gain -> musicBus -> master). Missing = fallback el.volume. */
 const gainEl = new Map<HTMLAudioElement, GainNode>();
 
-function sambungkan(el: HTMLAudioElement): void {
+/**
+ * T-085: the interview track ('inv-keterangan') alone runs through one lowpass, wide open (18 kHz, flat) except during a
+ * testimony flashback: setKilasMusik(true) sweeps it down and lets it creep up again (tension), false opens it. No other
+ * track has this node, so every other music chain is exactly as before.
+ */
+const TREK_KILAS: Exclude<Track, null> = 'inv-keterangan';
+const KILAS_BUKA_HZ = 18000;
+let filterKilas: BiquadFilterNode | null = null;
+let kilas = false;
+
+function terapkanKilas(): void {
+  const f = filterKilas;
+  if (!f || !ctx) return;
+  try {
+    const t = ctx.currentTime;
+    const kini = Math.min(KILAS_BUKA_HZ, Math.max(60, f.frequency.value));
+    f.frequency.cancelScheduledValues(t);
+    f.Q.cancelScheduledValues(t);
+    f.frequency.setValueAtTime(kini, t);
+    f.Q.setValueAtTime(f.Q.value, t);
+    if (kilas) {
+      // Down in half a second (the "memory" colour), then a slow resonant climb while the flashback is on screen.
+      f.frequency.exponentialRampToValueAtTime(700, t + 0.5);
+      f.Q.linearRampToValueAtTime(3, t + 0.5);
+      f.frequency.exponentialRampToValueAtTime(2400, t + 7);
+    } else {
+      f.frequency.exponentialRampToValueAtTime(KILAS_BUKA_HZ, t + 0.6);
+      f.Q.linearRampToValueAtTime(0.7, t + 0.6);
+    }
+  } catch { /* automation not available: the track just plays unfiltered */ }
+}
+
+/** T-085: testimony flashback on screen (Episode 1 Investigator). Idempotent; without Web Audio routing it does nothing. */
+export function setKilasMusik(on: boolean): void {
+  if (kilas === on) return;
+  kilas = on;
+  terapkanKilas();
+}
+
+/**
+ * T-085: the KEBERATAN hit. All music drops to silence within 30 ms, stays silent for `diamS`, then comes back over `naikS`
+ * (the sting plays in that hole). On the music bus, so it needs the Web Audio routing; without it nothing happens.
+ */
+export function jedaMusik(diamS: number, naikS: number): void {
+  if (!ctx || !musicBus) return;
+  try {
+    const t = ctx.currentTime;
+    const g = musicBus.gain;
+    g.cancelScheduledValues(t);
+    g.setValueAtTime(g.value, t);
+    g.linearRampToValueAtTime(0, t + 0.03);
+    g.setValueAtTime(0, t + 0.03 + diamS);
+    g.linearRampToValueAtTime(1, t + 0.03 + diamS + naikS);
+  } catch { musicBus.gain.value = 1; }
+}
+
+function sambungkan(el: HTMLAudioElement, track?: Exclude<Track, null>): void {
   if (!ctx || !musicBus || gainEl.has(el)) return;
   try {
     const g = ctx.createGain();
     g.gain.value = el.volume;
-    ctx.createMediaElementSource(el).connect(g).connect(musicBus);
+    const src = ctx.createMediaElementSource(el);
+    if (track === TREK_KILAS) {
+      const f = ctx.createBiquadFilter();
+      f.type = 'lowpass';
+      f.frequency.value = KILAS_BUKA_HZ;
+      f.Q.value = 0.7;
+      src.connect(f).connect(g).connect(musicBus);
+      filterKilas = f;
+      if (kilas) terapkanKilas();
+    } else src.connect(g).connect(musicBus);
     el.volume = 1; // loudness is now the gain only
     gainEl.set(el, g);
   } catch {
@@ -354,7 +456,7 @@ function element(track: Exclude<Track, null>): HTMLAudioElement | null {
   const src = MUSIC_FILES[track];
   if (rusak.has(src) || typeof Audio === 'undefined') return null;
   const ada = els.get(src);
-  if (ada) { sambungkan(ada); return ada; }
+  if (ada) { sambungkan(ada, track); return ada; }
   const el = new Audio(src);
   el.loop = MUSIC_LOOP[track];
   el.preload = 'auto';
@@ -368,8 +470,15 @@ function element(track: Exclude<Track, null>): HTMLAudioElement | null {
   el.addEventListener('ended', () => {
     if (playing === track) playing = null; // jingle selesai, boleh diputar lagi
   });
+  const lanjut = MUSIC_LANJUT[track];
+  if (lanjut) {
+    // T-085: only while this jingle is still the requested track (a scene change in between wins).
+    const pindah = () => { if (desired === track) { desired = lanjut; applyMusic(); } };
+    el.addEventListener('timeupdate', () => { if (!el.paused && Number.isFinite(el.duration) && el.duration - el.currentTime <= LANJUT_SISA_S) pindah(); });
+    el.addEventListener('ended', pindah);
+  }
   els.set(src, el);
-  sambungkan(el);
+  sambungkan(el, track);
   return el;
 }
 
@@ -443,7 +552,7 @@ function applyMusic() {
     targetEl = el;
     if (lama && lama !== el) {
       const pindahCerita = !!want && TREK_CERITA.has(want) && [...TREK_CERITA].some((t) => els.get(MUSIC_FILES[t as Exclude<Track, null>]) === lama);
-      fade(lama, 0, pindahCerita ? FADE_CERITA_MS : FADE_OUT_MS, () => { if (targetEl !== lama) lama.pause(); });
+      fade(lama, 0, pindahCerita ? (want && !MUSIC_LOOP[want] ? FADE_JINGLE_KELUAR_MS : FADE_CERITA_MS) : FADE_OUT_MS, () => { if (targetEl !== lama) lama.pause(); });
     }
   }
   playing = want && el ? want : null;
@@ -476,7 +585,7 @@ function applyMusic() {
         blocked = false;
         // play() bisa selesai sesudah pemain keluar, membisukan, atau berganti tema: jangan hidupkan trek yang tidak relevan.
         if (!masihRelevan()) { if (targetEl !== el) hentikan(el); return; }
-        fade(el, volTrek(want), TREK_CERITA.has(want) ? FADE_CERITA_MS : FADE_IN_MS);
+        fade(el, volTrek(want), TREK_CERITA.has(want) ? fadeMasukCerita(want) : FADE_IN_MS);
       },
       () => {
         memulai.delete(el);
@@ -489,7 +598,7 @@ function applyMusic() {
       },
     );
   } else if (masihRelevan()) {
-    fade(el, volTrek(want), TREK_CERITA.has(want) ? FADE_CERITA_MS : FADE_IN_MS);
+    fade(el, volTrek(want), TREK_CERITA.has(want) ? fadeMasukCerita(want) : FADE_IN_MS);
   }
 }
 
@@ -528,6 +637,8 @@ export function pramuatMusik(track: Exclude<Track, null>, batasMs: number): Prom
 export function setTrack(track: Track, owner?: string): void {
   if (owner !== undefined && owner !== activeOwner()) return;
   if (desired === track) return; // T-040: unchanged track = no-op (screen updates call this on every render)
+  // T-085: the jingle asked for again while its follow-up loop is already the requested track = same phase, no replay.
+  if (track && desired && MUSIC_LANJUT[track] === desired) return;
   desired = track;
   applyMusic();
 }
@@ -551,7 +662,7 @@ if (typeof document !== 'undefined') {
 const N = (semitone: number) => 440 * Math.pow(2, (semitone - 9) / 12); // 0 = C4
 
 function tone(
-  bus: GainNode,
+  bus: AudioNode,
   freq: number,
   start: number,
   dur: number,
@@ -598,6 +709,8 @@ const SFX_REDAM = new Set<Sfx>(['taruh', 'kertas', 'pesanKirim', 'pesanTerima', 
 const SFX_JEDA_MS = 70;
 const SFX_SUARA_MAKS = 6;
 const SFX_UMUR_S = 0.9; // longest effect (pesanTerima ~0.8 s) + tail
+/** T-085: effects longer than that keep their voice this long (KEBERATAN = hit, 0.4 s hole, sting). */
+const SFX_UMUR_PANJANG: Partial<Record<Sfx, number>> = { keberatan: 1.3 };
 const suaraSfx: Suara[] = [];
 
 function lepasSuara(v: { g: GainNode }, cepat: boolean): void {
@@ -671,13 +784,14 @@ function mulaiSfx(name: Sfx, lead = 0.02): Suara | null {
   const g = ctx.createGain();
   g.gain.value = 1;
   g.connect(sfxBus);
-  const v: Suara = { g, mulai: t, akhir: t + SFX_UMUR_S };
+  const umur = SFX_UMUR_PANJANG[name] ?? SFX_UMUR_S;
+  const v: Suara = { g, mulai: t, akhir: t + umur };
   suaraSfx.push(v);
   v.henti = bunyikan(name, g, t);
   window.setTimeout(() => {
     const i = suaraSfx.indexOf(v);
     if (i >= 0) { suaraSfx.splice(i, 1); lepasSuara(v, false); }
-  }, SFX_UMUR_S * 1000 + 100);
+  }, umur * 1000 + 100);
   return v;
 }
 
@@ -769,14 +883,59 @@ function bunyikan(name: Sfx, sfxBus: GainNode, t: number): (() => void) | undefi
       tone(sfxBus, N(19), t + 0.33, 0.48, 0.14, 'triangle');
       break;
     case 'keberatan':
-      // T-077 KEBERATAN stamp ~0.65 s: hard slam (low pop + noise burst), then a rising two-note pickup and a held top note
-      // (square over a triangle fifth). Original synth, no sample.
-      pop(sfxBus, t, 190, 60, 0.16, 0.34);
-      noise(sfxBus, t, 0.05, 0.16, 1200);
-      tone(sfxBus, N(7), t + 0.07, 0.08, 0.18, 'sawtooth');
-      tone(sfxBus, N(14), t + 0.15, 0.08, 0.18, 'sawtooth');
-      tone(sfxBus, N(19), t + 0.23, 0.4, 0.19, 'square');
-      tone(sfxBus, N(7), t + 0.23, 0.4, 0.13, 'triangle');
+      // T-085 KEBERATAN ~1.0 s (replaces the T-077 recipe; original synth, no sample). With the stamp: a BIG chiptune hit (low
+      // pop + square D2 / D3) and a noise burst. Then 0.4 s of nothing (the music is silent there too, jedaMusik), then the
+      // sting in D minor, the key of the confrontation track: A4 D5 F5 up into a held A5 over D5 and a triangle D4.
+      pop(sfxBus, t, 240, 48, 0.24, 0.4);
+      tone(sfxBus, N(-22), t, 0.16, 0.2, 'square');
+      tone(sfxBus, N(-10), t, 0.12, 0.14, 'square');
+      noise(sfxBus, t, 0.16, 0.2, 700);
+      [9, 14, 17].forEach((s, i) => tone(sfxBus!, N(s), t + 0.4 + i * 0.055, 0.06, 0.15, 'square'));
+      tone(sfxBus, N(21), t + 0.565, 0.42, 0.17, 'square');
+      tone(sfxBus, N(14), t + 0.565, 0.42, 0.11, 'square');
+      tone(sfxBus, N(2), t + 0.565, 0.42, 0.13, 'triangle');
+      noise(sfxBus, t + 0.565, 0.05, 0.07, 3000);
+      break;
+    case 'pensil':
+      // T-085 a statement writes itself in the notebook (~0.65 s): four short graphite strokes (band-passed noise sweeps,
+      // alternating direction like a hand writing).
+      ([[0, 0.11, 3200, 2100], [0.16, 0.09, 2600, 3400], [0.31, 0.12, 3400, 2000], [0.5, 0.14, 2800, 3600]] as const)
+        .forEach(([d, l, f0, f1]) => noise(sfxBus!, t + d, l, 0.12, f0, [f1, 1.4]));
+      break;
+    case 'pin':
+      // T-085 the pin lands on the statement: a sharp click (noise tick + very short high square) with a small thud.
+      noise(sfxBus, t, 0.012, 0.14, 3800);
+      tone(sfxBus, N(33), t, 0.025, 0.09, 'square');
+      pop(sfxBus, t + 0.004, 420, 180, 0.05, 0.2);
+      break;
+    case 'jepit':
+      // T-085 an evidence slip is clipped into the notebook (~0.45 s): paper sliding in, then the clip snapping shut 0.38 s later.
+      noise(sfxBus, t, 0.2, 0.15, 3600, [1500, 0.9]);
+      noise(sfxBus, t + 0.38, 0.01, 0.2, 4200);
+      tone(sfxBus, N(36), t + 0.38, 0.02, 0.1, 'square');
+      pop(sfxBus, t + 0.383, 700, 260, 0.045, 0.24);
+      break;
+    case 'keliru': {
+      // T-085 wrong card: a SOFT low double buzz (square A2 with its octave, through a 900 Hz lowpass). Not a penalty sound.
+      const lp = sfxBus.context.createBiquadFilter();
+      lp.type = 'lowpass';
+      lp.frequency.value = 900;
+      lp.Q.value = 0.6;
+      lp.connect(sfxBus);
+      tone(lp, N(-15), t, 0.11, 0.11, 'square');
+      tone(lp, N(-3), t, 0.11, 0.035, 'square');
+      tone(lp, N(-15), t + 0.13, 0.2, 0.11, 'square', 35);
+      tone(lp, N(-3), t + 0.13, 0.2, 0.035, 'square', 35);
+      break;
+    }
+    case 'stempel':
+      // T-085 case stamp / rank up (~0.6 s): the stamp's thump, then a bright rising arpeggio in D major (D5 F#5 A5 D6, the key
+      // of the resolution music), the top note held, and a small sparkle.
+      pop(sfxBus, t, 210, 90, 0.1, 0.26);
+      noise(sfxBus, t, 0.03, 0.08, 1800);
+      [14, 18, 21, 26].forEach((s, i) => tone(sfxBus!, N(s), t + 0.07 + i * 0.065, i === 3 ? 0.3 : 0.08, 0.13, 'square'));
+      tone(sfxBus, N(18), t + 0.265, 0.3, 0.07, 'triangle');
+      bel(sfxBus, N(38), t + 0.33, 0.25, 0.05);
       break;
     case 'chime':
       // T-057 reduced motion: everything appears at once with one calm chime.

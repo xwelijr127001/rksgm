@@ -28,13 +28,22 @@ import { IkonInv, useTx, type Bukti, type Pernyataan, type Tx } from './dasar';
 import './investigasi.css';
 import './buku.css';
 
-/** Potret reaksi 64 x 64 (seni/investigasi/reaksi.png): tokoh + tanda emosi. */
-const SEL_REAKSI = { 'tol-kaget': 0, 'tol-mengaku': 1, 'darto-lega': 2, 'miss-berpikir': 3, 'miss-bangga': 4 } as const;
+/**
+ * Potret reaksi 64 x 64 (seni/investigasi/reaksi.png): tokoh + tanda emosi. T-084: Miss Raksa di episode ini = INVESTIGATOR:
+ * memegang kaca pembesar (di mata: 'miss-berpikir' dan 'miss-detektif'; diturunkan: 'miss-bangga') dan memakai lencana detektif.
+ */
+const SEL_REAKSI = { 'tol-kaget': 0, 'tol-mengaku': 1, 'darto-lega': 2, 'miss-berpikir': 3, 'miss-bangga': 4, 'miss-detektif': 5 } as const;
 export type Reaksi = keyof typeof SEL_REAKSI;
 export function PotretReaksi({ reaksi, ukuran = 64, label = '' }: { reaksi: Reaksi; ukuran?: 48 | 64 | 128; label?: string }) {
+  // T-084: Miss Raksa pada 48 px = POTONGAN 1:1 (x 12..60, y 2..50 selnya), bukan pengecilan 0,75: kaca pembesar dan matanya
+  // tetap piksel utuh. Sel lain pada 48 px tetap diperkecil (tanda emosinya ada di sudut sel).
+  const potong = ukuran === 48 && reaksi.startsWith('miss-');
+  const gaya = potong
+    ? { backgroundSize: '384px 64px', backgroundPosition: `${-SEL_REAKSI[reaksi] * 64 - 12}px -2px` }
+    : { backgroundSize: `${384 * ukuran / 64}px ${ukuran}px`, backgroundPosition: `${-SEL_REAKSI[reaksi] * ukuran}px 0` };
   return (
     <span className="iv-reaksi" data-reaksi={reaksi} {...(label ? { role: 'img', 'aria-label': label } : { 'aria-hidden': true })}
-      style={{ width: ukuran, height: ukuran, backgroundImage: `url(${reaksiUrl})`, backgroundSize: `${320 * ukuran / 64}px ${ukuran}px`, backgroundPosition: `${-SEL_REAKSI[reaksi] * ukuran}px 0` }} />
+      style={{ width: ukuran, height: ukuran, backgroundImage: `url(${reaksiUrl})`, ...gaya }} />
   );
 }
 
@@ -72,11 +81,16 @@ export interface PilihBukti {
   /** Bukti yang pudar dan tidak bisa dipilih (langkah dipandu). */
   redup?: (id: Bukti['id']) => boolean;
   onPilih: (id: Bukti['id']) => void;
+  /** T-088: bukti yang gambarnya bisa DIPERBESAR (ketuk gambarnya) sebelum memilih; mis. rekaman dashcam. */
+  bisaPerbesar?: readonly Bukti['id'][];
+  onPerbesar?: (id: Bukti['id']) => void;
 }
+/** T-088: pernyataan `id` sudah DIKOREKSI: kalimat lamanya dicoret, `teks` ditulis di bawahnya (tinta merah); `baru` = dengan gerak. */
+export interface KoreksiPernyataan { id: string; teks: string; baru?: boolean }
 
-function BarisKeterangan({ p, keadaan, sorot, teks }: { p: Pernyataan; keadaan: 'tersemat' | 'baru' | 'menunggu'; sorot: boolean; teks: Tx }) {
+function BarisKeterangan({ p, keadaan, sorot, teks, koreksi }: { p: Pernyataan; keadaan: 'tersemat' | 'baru' | 'menunggu'; sorot: boolean; teks: Tx; koreksi?: KoreksiPernyataan }) {
   return (
-    <li className="bk-baris" data-pernyataan={p.id} data-keadaan={keadaan} data-sorot={sorot ? '' : undefined}>
+    <li className="bk-baris" data-pernyataan={p.id} data-keadaan={keadaan} data-sorot={sorot ? '' : undefined} data-koreksi={koreksi ? (koreksi.baru ? 'baru' : 'ada') : undefined}>
       <span className="bk-polaroid" aria-hidden="true">
         <PotretPikselHp tokoh={TOKOH_PIKSEL[p.siapa]} ekspresi="netral" ukuran={40} label="" />
         {keadaan !== 'menunggu' ? <IkonInv nama="pin" kali={1} className="bk-pin" /> : null}
@@ -84,6 +98,7 @@ function BarisKeterangan({ p, keadaan, sorot, teks }: { p: Pernyataan; keadaan: 
       <span className="bk-baris-teks">
         <b className="bk-siapa">{t(`investigasi.siapa.${p.siapa}`)}</b>
         <q className="bk-tulisan">{teks(p.teks)}</q>
+        {koreksi ? <ins className="bk-tulisan bk-koreksi">{koreksi.teks}</ins> : null}
       </span>
     </li>
   );
@@ -103,8 +118,11 @@ function SlipBukti({ b, pilih, teks, baru }: { b: Bukti; pilih?: PilihBukti; tek
   );
   if (!pilih) return <li><div className="bk-slip" data-bukti={b.id} data-baru={baru ? '' : undefined} title={teks(b.sumber)}>{isi}</div></li>;
   const redup = pilih.redup?.(b.id) ?? false;
+  const zum = !!pilih.onPerbesar && !!pilih.bisaPerbesar?.includes(b.id);
   return (
-    <li>
+    <li className={zum ? 'bk-slip-berzum' : undefined}>
+      {/* T-088: gambar slip = tombol perbesar (saudara tombol pilih, bukan di dalamnya) */}
+      {zum ? <button type="button" className="bk-slip-zum" data-perbesar={b.id} aria-haspopup="dialog" aria-label={t('investigasi.keberatan.perbesar')} onClick={() => pilih.onPerbesar!(b.id)}><IkonInv nama="tambahan" kali={1} /></button> : null}
       <button type="button" className="bk-slip" data-bukti={b.id} data-redup={redup ? '' : undefined} aria-pressed={pilih.terpilih === b.id} disabled={redup}
         aria-label={`${t('investigasi.bukti')}: ${teks(b.judul)}. ${teks(b.sumber)}`} onClick={() => pilih.onPilih(b.id)}>
         {isi}
@@ -113,7 +131,7 @@ function SlipBukti({ b, pilih, teks, baru }: { b: Bukti; pilih?: PilihBukti; tek
   );
 }
 
-export function BukuCatatan({ pernyataan, bukti, tx, menunggu, pernyataanBaru, sorotPernyataan, pilihBukti, tanpaPensil = false, buktiBaru, halaman = 'semua' }: {
+export function BukuCatatan({ pernyataan, bukti, tx, menunggu, pernyataanBaru, sorotPernyataan, pilihBukti, tanpaPensil = false, buktiBaru, halaman = 'semua', koreksi }: {
   pernyataan: Pernyataan[];
   bukti: Bukti[];
   tx?: Tx;
@@ -125,7 +143,9 @@ export function BukuCatatan({ pernyataan, bukti, tx, menunggu, pernyataanBaru, s
   /** T-080: bukti yang baru dikumpulkan: slipnya meluncur masuk lalu klipnya menjepit. */
   buktiBaru?: Bukti['id'];
   /** T-080: 'bukti' = hanya halaman "Bukti" (layar "Bukti baru!", supaya muat bersama kalimat temuannya). */
-  halaman?: 'semua' | 'bukti';
+  halaman?: 'semua' | 'bukti' | 'keterangan';
+  /** T-088: pernyataan yang sudah dikoreksi (KEBERATAN berhasil): "Laporan dikoreksi: lajur 2". */
+  koreksi?: KoreksiPernyataan;
 }) {
   const teks = useTx(tx);
   const jumlah = pernyataan.length;
@@ -137,19 +157,19 @@ export function BukuCatatan({ pernyataan, bukti, tx, menunggu, pernyataanBaru, s
         <h3 className="bk-judul"><IkonInv nama="pin" kali={1} />{t('investigasi.keterangan')}<span className="iv-hitung">{jumlah}</span></h3>
         {jumlah || menunggu ? (
           <ul className="bk-daftar">
-            {pernyataan.map((p) => <BarisKeterangan key={p.id} p={p} keadaan={p.id === pernyataanBaru ? 'baru' : 'tersemat'} sorot={p.id === sorotPernyataan} teks={teks} />)}
+            {pernyataan.map((p) => <BarisKeterangan key={p.id} p={p} keadaan={p.id === pernyataanBaru ? 'baru' : 'tersemat'} sorot={p.id === sorotPernyataan} teks={teks} koreksi={koreksi?.id === p.id ? koreksi : undefined} />)}
             {menunggu ? <BarisKeterangan key={`tunggu-${menunggu.id}`} p={menunggu} keadaan="menunggu" sorot={false} teks={teks} /> : null}
           </ul>
         ) : <p className="bk-kosong bk-tulisan">{t('investigasi.kosongPernyataan')}</p>}
       </div>
-      <span className="bk-jilid" aria-hidden="true" />
+      {halaman === 'keterangan' ? null : <span className="bk-jilid" aria-hidden="true" />}
       </>}
-      <div className="bk-halaman bk-bawah">
+      {halaman === 'keterangan' ? null : <div className="bk-halaman bk-bawah">
         <h3 className="bk-judul"><IkonInv nama="foto" kali={1} />{t('investigasi.bukti')}<span className="iv-hitung">{bukti.length}</span></h3>
         {bukti.length
           ? <ul className="bk-daftar bk-slip-daftar">{bukti.map((b) => <SlipBukti key={b.id} b={b} pilih={pilihBukti} teks={teks} baru={b.id === buktiBaru} />)}</ul>
           : <p className="bk-kosong bk-tulisan">{t('investigasi.kosongBukti')}</p>}
-      </div>
+      </div>}
       {tanpaPensil ? null : <span className="bk-pensil" aria-hidden="true" />}
     </section>
   );

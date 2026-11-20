@@ -27,7 +27,7 @@ import { adaDialogTerbuka } from '../../ui/modal';
 import { babKini, barisTerlihat, bisaLanjut, nodeKini, pilihanTersedia, semuaBarisTampil, suasanaNasabah } from '../mesin';
 import { akhirDitemukan, berlanggananCerita, versiPenyimpananCerita } from '../simpan';
 import type { Episode, IdBab, KunciTeks, NodeAktivitas, NodePilihan, StateCerita } from '../tipe';
-import { HasilKasus, IsiBukuCatatan, LayarInvestigasi } from '../investigasi/LayarInvestigasi';
+import { HasilKasus, IsiBukuCatatan, LayarInvestigasi, kilasBalikKini } from '../investigasi/LayarInvestigasi';
 import { tamuBaru } from '../investigasi/simpan';
 import { hiasReaksi } from '../investigasi/ui/reaksiBaris';
 import { LayarKeterangan, pakaiKeterangan } from '../investigasi/ui/LayarKeterangan';
@@ -129,7 +129,8 @@ function PemainHPInti({ ep, state, kendali, profil, bahasa, tx: txAsli }: {
   const [temaUji, setTemaUji] = useState<TemaCerita | null>(null);
   // Contoh musik hanya selama Menu terbuka; ditutup = kembali mengikuti adegan (preferensi pemain tidak diubah).
   useEffect(() => { if (dialog !== 'menu') setTemaUji(null); }, [dialog]);
-  useAudioCerita(ep, state, { babId: bab?.bab.id, akhir: tampilan === 'akhir', obrolan: tampilan === 'obrolan', temaUji });
+  // T-085: kilas balik keterangan (LayarKeterangan) sedang tampil = sapuan filter pada trek wawancara.
+  useAudioCerita(ep, state, { babId: bab?.bab.id, akhir: tampilan === 'akhir', obrolan: tampilan === 'obrolan', temaUji, kilas: tampilan === 'adegan' && kilasBalikKini(ep, state) });
 
   const infoAkhir = tampilan === 'akhir' && state.akhir ? ep.akhir[state.akhir] : undefined;
   const bagianJudul = infoAkhir ? tx(infoAkhir.judul) : bab ? t('cerita.bagian', { n: bab.nomor, total: bab.jumlah }) : '';

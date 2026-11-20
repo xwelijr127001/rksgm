@@ -147,6 +147,12 @@
 /* T-078: bingkai besar (kartu pembuka Investigator): skala 1, 292 x 150 = adegan x 0-292, y 20-170 */
 .dc-pita[data-besar] { width: 292px; height: 150px; }
 .dc-pita[data-besar] .dc-pita-isi { transform: translateY(-20px); }
+/* T-088: potongan 'lajur' (x 44-336: keempat lajur), sorot truk, tanda tanya di atas truk (truk di adegan: x 143, y 100 -> y 80) */
+.dc-pita[data-besar][data-potong="lajur"] .dc-pita-isi { transform: translate(-44px, -20px); }
+.dc-pita-sorot { position: absolute; top: 74px; width: 48px; height: 78px; box-sizing: border-box; border: 3px solid #ff9000; box-shadow: 0 0 0 2px #212121, inset 0 0 0 2px #212121; animation: dc-pita-kedip 1s steps(1) infinite; z-index: 1; }
+@keyframes dc-pita-kedip { 50% { border-color: #f6d25c; } }
+.dc-pita-tanya { position: absolute; top: 40px; width: 28px; height: 28px; display: grid; place-items: center; box-sizing: border-box; border: 2px solid #212121; background: #ff9000; color: #212121; font: 800 20px/1 ui-monospace, monospace; font-style: normal; box-shadow: 0 2px 0 #212121; animation: dc-pita-denyut 1s steps(2) infinite; z-index: 1; }
+@keyframes dc-pita-denyut { 50% { translate: 0 -4px; background: #f6d25c; } }
 .dc-pita-lajur { position: absolute; bottom: 1px; width: 14px; margin-left: -7px; text-align: center; font: 800 14px/16px ui-monospace, monospace; color: #fff9f5; text-shadow: 1px 1px 0 #212121, -1px 0 0 #212121, 0 -1px 0 #212121; z-index: 1; }
 .dc-pita-kanan { position: relative; flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; gap: 6px; }
 .dc-tanya-ringkas { margin: 0; font-size: 14px; line-height: 1.3; font-weight: 700; }

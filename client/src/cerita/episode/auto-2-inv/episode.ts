@@ -24,7 +24,7 @@
  * pesan:<baik|datar|janji>. Dua akhir (penjaga episode mewajibkan >= 2): `tuntas` = putusan layak, `tinjau` = putusan lain
  * (diluruskan Miss Raksa; klaim tetap dijamin di kedua akhir). Status Pak Hendra (30 = Cemas) hanya berubah oleh pesan.
  */
-import type { Baris, CueLatar, Efek, Ekspresi, Episode, IdNode, Kondisi, NodeCerita, NodeInvestigasi } from '../../tipe';
+import type { Baris, CueLatar, Efek, Ekspresi, Episode, IdNode, Kondisi, MusikNode, NodeCerita, NodeInvestigasi } from '../../tipe';
 import { tandaBukti, tandaCatat, tandaKeberatan, tandaPesan, tandaPutusan } from '../../investigasi/status';
 import { EPISODE_AUTO_2 } from '../auto-2/episode';
 import { EPISODE_AUTO_2_DEV } from '../auto-2-dev/episode';
@@ -147,6 +147,21 @@ function babInv(id: IdNode): string {
   return 'b4';
 }
 
+/**
+ * T-085 musik per FASE investigasi (trek asli 8-bit detektif, tools/make-music-inv.mjs; hanya episode ini):
+ *  Investigasi  kartu judul, pengarahan Miss Raksa, dan pengumpulan bukti (b2): tema utama yang mengendap-endap;
+ *  Keterangan   dua wawancara + "ada yang tidak cocok": jarang, detak jam (kilas balik = sapuan filter, hp/AudioCerita.tsx);
+ *  Keberatan    seluruh b3 (konfrontasi sampai petugas memperbaiki catatannya); di cap KEBERATAN musik hening 0,4 detik;
+ *  Terungkap    b4 (putusan, pesan, hasil): jingle resolusi mayor sekali, lalu loop tenang sampai kartu hasil.
+ */
+function musikInv(id: IdNode): MusikNode {
+  if (['darto', 'tol', 'selisih'].includes(id)) return 'inv-keterangan';
+  const bab = babInv(id);
+  if (bab === 'b3') return 'inv-keberatan';
+  if (bab === 'b4') return 'inv-terungkap';
+  return 'inv-investigasi';
+}
+
 function bangun(asal: Episode, dev: Episode): Episode {
   return {
     id: 'auto-2-inv',
@@ -174,7 +189,7 @@ function bangun(asal: Episode, dev: Episode): Episode {
     seniArena: asal.seniArena,
     lampiran: asal.lampiran,
     suasana: asal.suasana,
-    node: Object.fromEntries(bangunNode().map((n) => [n.id, { ...n, bab: babInv(n.id) }])),
+    node: Object.fromEntries(bangunNode().map((n) => [n.id, { ...n, bab: babInv(n.id), musik: musikInv(n.id) }])),
     // Aktivitas dipakai ulang apa adanya: SIM (auto-2, T-049) dan rekaman dashcam (auto-2-dev, T-065..T-073).
     aktivitas: { dashcam: dev.aktivitas.dashcam! },
     teks: TEKS_AUTO_2_INV,

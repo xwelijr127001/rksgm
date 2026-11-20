@@ -12,7 +12,9 @@
 import { useEffect, useRef, useState, useSyncExternalStore, type ReactNode } from 'react';
 import { BingkaiDashcam } from '../hp/arena/ArenaDashcam';
 import type { PlayerLook } from '@shared/types';
-import { playSfx } from '../../audio/audio';
+import { jedaMusik, playSfx } from '../../audio/audio';
+import { jenisPenutur, ketukanKini } from '../hp/alur';
+import { barisTerlihat } from '../mesin';
 import type { Episode, KunciTeks, NodeCerita, StateCerita } from '../tipe';
 import { adaRekaman, bacaRekaman, berlanggananInvestigasi, catatHasil, pangkat, tamuBaru, versiInvestigasi } from './simpan';
 import { skorKasus } from './skor';
@@ -23,6 +25,7 @@ import { PenyediaTeksInvestigasi } from './ui/dasar';
 import { HasilInvestigasi } from './ui/HasilInvestigasi';
 import { JudulKasus } from './ui/JudulKasus';
 import { LayarKeberatan } from './ui/LayarKeberatan';
+import { KILAS_BARIS, pakaiKeterangan } from './ui/LayarKeterangan';
 import { LayarPutusan } from './ui/LayarPutusan';
 import { PeriksaSim } from './ui/PeriksaSim';
 import './ui/investigasi.css';
@@ -36,6 +39,25 @@ const urutKartu = (bukti: Bukti[]): Bukti[] => [...bukti].sort((a, b) => URUTAN_
 /** T-079: sesudah "Sematkan": kalimat menulis sendiri 0,9 s, pin jatuh 0,3 s, lalu terbaca sebentar; baru cerita lanjut (md). */
 const JEDA_SEMAT_MS = 2000;
 const JEDA_PIN_MS = 900;
+/** T-085: pin mendarat 150 md sesudah mulai jatuh (animasi bk-pin 0,3 s dengan pantulan): bunyi 'pin' di saat itu. */
+const JEDA_BUNYI_PIN_MS = JEDA_PIN_MS + 150;
+/** T-085: slip bukti meluncur 0 - 0,5 s, klip menjepit 0,5 - 0,8 s; 'jepit' = kertas lalu jepitan 0,38 s kemudian (0,68 s). */
+const JEDA_BUNYI_JEPIT_MS = 300;
+/** T-085 cap KEBERATAN: musik hening 0,4 s (sting 'keberatan' berbunyi di lubang itu), lalu kembali dalam 0,9 s. */
+const HENING_KEBERATAN_S = 0.4;
+const NAIK_KEBERATAN_S = 0.9;
+
+/**
+ * T-085: true = layar keterangan (ui/LayarKeterangan) sedang menampilkan panel KILAS BALIK. Aturannya sama dengan komponen itu:
+ * ucapan terakhir (bukan narasi) di ketukan kini adalah kalimat kunci KILAS_BARIS. Dipakai pemutar HP untuk sapuan filter musik.
+ */
+export function kilasBalikKini(ep: Episode, state: StateCerita): boolean {
+  if (!pakaiKeterangan(ep, state)) return false;
+  const ket = ketukanKini(ep, state);
+  if (!ket) return false;
+  const ucapan = barisTerlihat(ep, state).slice(ket.awal, ket.akhir + 1).reverse().find((b) => jenisPenutur(ep, b.siapa) !== 'narasi');
+  return !!ucapan && ucapan.teks in KILAS_BARIS;
+}
 
 /**
  * T-078 node `cap`: cap KEBERATAN menutupi layar 1,5 s (atau diketuk), LALU layar di bawahnya tinggal: petugas tol "kaget" +
@@ -43,6 +65,8 @@ const JEDA_PIN_MS = 900;
  */
 function LayarCap({ kalimat, tx, onLanjut }: { kalimat: string; tx: Tx; onLanjut: () => void }) {
   const [cap, setCap] = useState(true);
+  // T-085: di pukulan KEBERATAN musik konfrontasi jatuh hening; efek 'keberatan' (CapKeberatan) = pukulan + sting di lubang itu.
+  useEffect(() => { jedaMusik(HENING_KEBERATAN_S, NAIK_KEBERATAN_S); }, []);
   return (
     <section className="iv-layar iv-cap-bawah" data-cap-bawah="" aria-live="polite">
       {cap ? <CapKeberatan onSelesai={() => setCap(false)} /> : null}
@@ -76,7 +100,7 @@ function LayarCatat({ ep, state, id, tx, onLanjut }: { ep: Episode; state: State
   lanjutRef.current = onLanjut;
   useEffect(() => {
     if (!tersemat) return;
-    const pin = window.setTimeout(() => playSfx('taruh'), JEDA_PIN_MS);
+    const pin = window.setTimeout(() => playSfx('pin'), JEDA_BUNYI_PIN_MS);
     const w = window.setTimeout(() => lanjutRef.current(), JEDA_SEMAT_MS);
     return () => { window.clearTimeout(pin); window.clearTimeout(w); };
   }, [tersemat]);
@@ -85,13 +109,13 @@ function LayarCatat({ ep, state, id, tx, onLanjut }: { ep: Episode; state: State
   if (!p) return <section className="iv-layar"><button type="button" className="primary-action iv-tombol" onClick={onLanjut}>{tx('inv.ui.lanjut')}</button></section>;
   return (
     // T-079: layar semat = BUKU CATATAN terbuka. Pernyataan baru tampil pudar (pensil) di halaman "Keterangan"; "Sematkan" =
-    // kalimatnya menulis sendiri dengan tinta, pin jatuh (bunyi kertas lalu 'taruh'), lalu cerita lanjut.
+    // kalimatnya menulis sendiri dengan tinta, pin jatuh (T-085: bunyi goresan pensil lalu klik pin), lalu cerita lanjut.
     <section className="iv-layar iv-catat" data-layar-catat="" aria-label={tx('inv.ui.sematJudul')}>
       <p className="iv-label">{tx('inv.ui.sematJudul')}</p>
       <BukuCatatan pernyataan={[...pernyataanTercatat(ep, state).filter((x) => x.id !== p.id), ...(tersemat ? [p] : [])]} bukti={buktiTerkumpul(ep, state)}
         menunggu={tersemat ? undefined : p} pernyataanBaru={tersemat ? p.id : undefined} />
       <button type="button" className="primary-action iv-tombol" data-semat="" disabled={tersemat} aria-live="polite"
-        onClick={() => { if (!tersemat) { playSfx('kertas'); setTersemat(true); } }}>
+        onClick={() => { if (!tersemat) { playSfx('pensil'); setTersemat(true); } }}>
         {tersemat ? tx('inv.ui.tersematBuku') : tx('inv.ui.sematTombol')}
       </button>
     </section>
@@ -100,8 +124,8 @@ function LayarCatat({ ep, state, id, tx, onLanjut }: { ep: Episode; state: State
 
 /** Node `bukti`: kartu bukti baru + kalimat temuannya (baris node), lalu "Simpan ke buku catatan" = lanjut. */
 function LayarBukti({ ep, state, bukti, keterangan, tx, onLanjut }: { ep: Episode; state: StateCerita; bukti: Bukti | undefined; keterangan: string; tx: Tx; onLanjut: () => void }) {
-  // T-080: kartu bukti baru DIJEPIT ke halaman "Bukti" buku catatan (slip meluncur masuk, klip menjepit, bunyi 'taruh').
-  useEffect(() => { const w = window.setTimeout(() => playSfx('taruh'), 500); return () => window.clearTimeout(w); }, []);
+  // T-080: kartu bukti baru DIJEPIT ke halaman "Bukti" buku catatan (slip meluncur masuk, klip menjepit; T-085: bunyi 'jepit').
+  useEffect(() => { const w = window.setTimeout(() => playSfx('jepit'), JEDA_BUNYI_JEPIT_MS); return () => window.clearTimeout(w); }, []);
   const daftar = bukti ? [...buktiTerkumpul(ep, state).filter((x) => x.id !== bukti.id), bukti] : buktiTerkumpul(ep, state);
   return (
     <section className="iv-layar iv-bukti-baru" data-bukti-baru={bukti?.id} aria-labelledby="iv-bukti-baru-judul">
@@ -139,7 +163,7 @@ export function LayarInvestigasi({ ep, state, node, tx, onLanjut, onPilih, onMul
       isi = (
         <>
           {/* T-078: bingkai dashcam diam (sebelum benturan: rambu + lajur) di kartu pembuka */}
-          <JudulKasus nomor={konfig.nomor} judul={konfig.judul} onMulai={onLanjut} gambar={<BingkaiDashcam besar />} />
+          <JudulKasus nomor={konfig.nomor} judul={konfig.judul} onMulai={onLanjut} gambar={<BingkaiDashcam besar />} tokoh={<PotretReaksi reaksi="miss-detektif" ukuran={128} />} />
           {adaRekaman() ? <TamuBaru tx={tx} onMulaiUlang={onMulaiUlang} /> : null}
         </>
       );
@@ -160,7 +184,7 @@ export function LayarInvestigasi({ ep, state, node, tx, onLanjut, onPilih, onMul
           onPilih={(id) => {
             // Percobaan 2 (dipandu, node dialog): hanya kartu tepat yang melanjutkan. Percobaan 0 / 1: pilihan mesin.
             if (inv.percobaan === 2) { if (id === inv.tepat) onLanjut(); return; }
-            if (onPilih(id) && id !== inv.tepat) playSfx('batal');
+            if (onPilih(id) && id !== inv.tepat) playSfx('keliru'); // T-085: dengung rendah lembut
           }} />
       );
       break;

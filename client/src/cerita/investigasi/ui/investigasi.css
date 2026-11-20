@@ -72,6 +72,10 @@ button.iv-bukti[data-redup] { opacity: .45; cursor: default; }
 .iv-judul-gambar { width: 192px; height: 128px; background-size: 192px 128px; }
 .iv-judul-kartu h2 { font-size: 26px; line-height: 31px; font-weight: 800; letter-spacing: -.01em; overflow-wrap: anywhere; }
 .iv-judul-sub { font-size: 14px; line-height: 20px; font-weight: 700; color: #7a3e00; }
+/* T-084: Miss Raksa investigator (kaca pembesar) 128 px di kiri judul */
+.iv-judul-baris { justify-self: stretch; display: grid; gap: 4px; }
+.iv-judul-baris[data-tokoh] { grid-template-columns: 132px minmax(0, 1fr); gap: 12px; align-items: center; text-align: left; }
+.iv-judul-tokoh { display: block; box-shadow: 0 3px 0 #212121; }
 @keyframes iv-masuk { from { transform: translateY(12px) scale(.92); opacity: 0; } }
 
 /* ---- layar putusan: tiga kartu pilihan tunggal */

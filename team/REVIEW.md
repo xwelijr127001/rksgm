@@ -282,3 +282,25 @@ Confirmed working folder `C:\Users\User\Desktop\rksgm-episode2`.
 5. **Build one vertical slice.** Reuse the solo story engine, phone chat, truck and road art, `ArenaDashcam`, `CatatanKasus` and the message composer. The existing `PapanSaksi` sorts interview targets; it supplies card art and tap patterns, while pairing testimony to evidence needs new logic. Make only one new interaction for the pilot: select a frame, attach it to a statement and explain the discrepancy. One witness, two cards, one genuine truck case, one courteous close, one local stamp. Defer the map, extra rooms, online scores and four-case content production until the loop earns a second play.
 
 6. **Before the pitch, define a field trial.** Let ten first-time visitors play unaided on phones. Count who reaches the stamp within five minutes, who can explain the decisive clue in their own words, and who taps “Next case” when the exit is equally visible. That last choice tests the proposed reward curve more directly than a satisfaction rating.
+
+Confirmed working folder `C:\Users\User\Desktop\rksgm-episode2`.
+
+## Investigator pilot review (2026-11-21)
+
+1. **Let the guest investigate within 30 seconds (M).** The title already shows the road. Let the guest tap the disputed lane there, remember their hunch, and revisit it on the wall TV. In `auto-2-inv/episode.ts`, three opening lines, two witnesses, two pins and Miss Raksa’s recap precede the playable replay. Keep the testimony and handover. Combine the dashcam and sign filing into one notebook spread, and shorten the three-step SIM check if guests miss the five-minute finish. Actual duration needs observation.
+
+2. **Make the objection about what the camera proves (M).** The puzzle is fair: the officer specifies lane 3, the dashcam card explicitly says lane 2, the road sign establishes a rule, and the SIM establishes eligibility. But a guest can match the card title without understanding the footage (`teks.id.ts`, lines 37–45). Let them enlarge the numbered pre-swerve frame beside the quote before committing. On success, let the officer cross out “3” and write “2” in the guest’s notebook. Keep the existing hints and guided recovery. That correction gives the motion, sound and notebook a shared purpose.
+
+3. **Give “Kasus berikutnya” an honest destination (S).** The primary result button reveals “segera hadir” and calls an empty handler (`HasilInvestigasi.tsx`, `LayarInvestigasi.tsx`). Show “Case 2 · coming soon” before the tap. Offer a one-tap case preview and an equally visible finish action. A voluntary preview tap can then measure interest without counting guests who were simply looking for the exit.
+
+4. **Distinguish resume from a new booth guest (M).** Story flags preserve completed nodes and confrontation attempts. The SIM inspection’s current step lives in component state, so refreshing midway repeats those taps (`PeriksaSim.tsx`). The title’s fresh-guest control depends on an existing reward record, which an abandoned first run lacks. Offer “Resume this case” and “Start fresh” at re-entry when unfinished progress exists. Confirm reset and scope it to Investigator. Checkpoint the SIM step or explicitly tell returning guests that this short inspection restarts.
+
+5. **Reward the person helped (S).** The result already shows 40/30/30, grade, rank and stamp. Lead with one line from Hendra tied to the actual message choice. Then distinguish first promotion from personal best: `HasilInvestigasi.tsx` passes `baru: true` even on replay, although `simpan.ts` correctly awards each stamp once. Reserve the stamp landing for its first award.
+
+6. **Give replay a specific challenge (M).** “Main lagi” repeats the whole fixed graph after the guest knows the lane. Offer an optional practice retry for the weakest scored choice, such as telling Hendra the next step without promising a date. Keep this practice separate from the full-case personal best. At 100, offer the corrected report as the payoff.
+
+7. **Make repeated ceremony skippable (S).** Both witness pins disable the button for a fixed two seconds (`LayarInvestigasi.tsx`). Let a second tap finish the ink animation and advance. Keep the first pin, physical handover and objection stamp expressive; guests who have understood a beat should control its pace.
+
+8. **Run the ten-guest trial before adding another scene (S).** Start each guest fresh, unaided, on a phone. Time entry to first evidence interaction and to stamp; record exits, hints, facilitator interventions and voluntary preview taps. Ask “Which lane was the truck in before it swerved, and how do you know?” Record first-try card choice separately from correct explanation. Suggested pilot gates: 8/10 finish unaided within five minutes and 8/10 explain why the recording settles the lane dispute. Report counts and the slowest screen.
+
+Static review. HANDOFF entries for T-084 and T-085 were unavailable in this checkout.

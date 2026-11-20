@@ -9,25 +9,29 @@
  */
 import { useEffect, useState, type CSSProperties } from 'react';
 import {
-  initAudio, playSfx, setModeCerita, setMusicVolume, setMusikCerita, setMuted, setSfxEnabled, setSfxVolume, setSuasana, setTrack,
+  initAudio, playSfx, setKilasMusik, setModeCerita, setMusicVolume, setMusikCerita, setMuted, setSfxEnabled, setSfxVolume, setSuasana, setTrack,
   type Sfx,
 } from '../../audio/audio';
 import { UJI_AUDIO } from '../../audio/bendera';
 import { useAudioPrefs } from '../../hooks';
 import { t } from '../../i18n';
+import { nodeKini } from '../mesin';
 import type { Episode, StateCerita } from '../tipe';
 import { komposisiLatar } from '../ui/latar/komposisi';
 
 export { suasanaUntuk, temaUntuk, type TemaCerita } from './audioTema';
 import { suasanaUntuk, temaUntuk, type TemaCerita } from './audioTema';
 
-export function useAudioCerita(ep: Episode, state: StateCerita, opsi: { babId?: string; akhir: boolean; obrolan: boolean; temaUji: TemaCerita | null }) {
+export function useAudioCerita(ep: Episode, state: StateCerita, opsi: { babId?: string; akhir: boolean; obrolan: boolean; temaUji: TemaCerita | null; /** T-085: panel kilas balik keterangan sedang tampil. */ kilas?: boolean }) {
   useEffect(() => {
     setModeCerita(true);
-    return () => { setTrack(null); setSuasana(null); setModeCerita(false); };
+    return () => { setTrack(null); setSuasana(null); setKilasMusik(false); setModeCerita(false); };
   }, []);
-  const tema = opsi.temaUji ?? temaUntuk(opsi.babId, state.node, opsi.akhir);
+  // T-085: node dengan cue `musik` (hanya Episode 1 Investigator) memakai trek itu; node lain tema per bagian seperti semula.
+  const tema = opsi.temaUji ?? nodeKini(ep, state)?.musik ?? temaUntuk(opsi.babId, state.node, opsi.akhir);
   useEffect(() => { setTrack(tema); }, [tema]);
+  const kilas = !!opsi.kilas;
+  useEffect(() => { setKilasMusik(kilas); }, [kilas]);
   let lokasi: string | undefined;
   try { lokasi = komposisiLatar(ep, state).lokasi; } catch { lokasi = undefined; }
   const suasana = opsi.temaUji ? null : suasanaUntuk(lokasi, opsi.obrolan);

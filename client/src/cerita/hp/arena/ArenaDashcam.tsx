@@ -94,17 +94,22 @@ const PUSAT_LAJUR = [97, 163, 229, 295];
  * (dua rambu, truk lurus di lajur 2, mobil di lajur 3; truk kecil belum masuk layar), tanpa animasi.
  *   bawaan  skala 1/2 tepat, dipotong ke y 20-236 = 168 x 108, nomor lajur 1-4 (14 px) di pusat tiap lajur;
  *   besar   skala 1, x 0-292, y 20-170 = 292 x 150 (rambu merah & biru utuh, lajur 1-3 + tepi lajur 4), nomor lajur 1-3.
+ * T-088 (hanya dengan `besar`): potong 'lajur' = x 44-336 (KEEMPAT lajur utuh, tanpa rambu; nomor lajur 1-4); sorotTruk = bingkai
+ * jingga berkedip di sekeliling truk; tanya = tanda "?" berdenyut di atas truk (tebakan pembuka).
  */
-export function BingkaiDashcam({ besar = false }: { besar?: boolean }) {
+export function BingkaiDashcam({ besar = false, potong = 'rambu', sorotTruk = false, tanya = false }: { besar?: boolean; potong?: 'rambu' | 'lajur'; sorotTruk?: boolean; tanya?: boolean }) {
+  const geser = besar && potong === 'lajur' ? 44 : 0;
   return (
-    <figure className="dc-pita" data-besar={besar ? '' : undefined} aria-label={t('dashcam.judul')} style={{ '--ubin': `url(${ubin})`, '--rambu': `url(${rambu})` } as CSSProperties}>
+    <figure className="dc-pita" data-besar={besar ? '' : undefined} data-potong={besar ? potong : undefined} aria-label={t('dashcam.judul')} style={{ '--ubin': `url(${ubin})`, '--rambu': `url(${rambu})` } as CSSProperties}>
       <div className="dc-pita-isi">
         <span className="dc-latar" aria-hidden="true" />
         <span className="dc-tanah" aria-hidden="true" />
         {(['truk', 'mobil'] as const).map((k) => <img key={k} className="dc-pita-kend" src={POSE[k][0]!.src} alt="" aria-hidden="true" style={posisi(POSE[k][0]!)} />)}
       </div>
       {/* nomor lajur terbaca (14 px) di pusat tiap lajur: angka piksel di latar hanya 2,5 px pada skala 1/2 */}
-      {PUSAT_LAJUR.filter((x) => !besar || x < 280).map((x, i) => <span key={i} className="dc-pita-lajur" aria-hidden="true" style={{ left: besar ? x : x / 2 }}>{i + 1}</span>)}
+      {PUSAT_LAJUR.filter((x) => !besar || x - geser < 280).map((x, i) => <span key={i} className="dc-pita-lajur" aria-hidden="true" style={{ left: besar ? x - geser : x / 2 }}>{i + 1}</span>)}
+      {besar && sorotTruk ? <i className="dc-pita-sorot" aria-hidden="true" style={{ left: 139 - geser }} /> : null}
+      {besar && tanya ? <i className="dc-pita-tanya" aria-hidden="true" style={{ left: 149 - geser }}>?</i> : null}
     </figure>
   );
 }

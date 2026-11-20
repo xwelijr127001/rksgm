@@ -23,8 +23,12 @@ const ITEM_MS = 8000;
 const BATAS_MS = 12000;
 const TANPA_BAR_MS = 300;
 const SEGMEN = 10;
-const TREK_AWAL: Exclude<Track, null> = 'cerita-kantor';
-const TREK_LAIN: Exclude<Track, null>[] = ['cerita-periksa', 'cerita-penutup'];
+type Trek = Exclude<Track, null>;
+const TREK_AWAL: Trek = 'cerita-kantor';
+const TREK_LAIN: Trek[] = ['cerita-periksa', 'cerita-penutup'];
+// T-085: Episode 1 Investigator has its own set; its first track (title card) blocks, the rest loads after the first screen.
+const TREK_INV_AWAL: Trek = 'inv-investigasi';
+const TREK_INV_LAIN: Trek[] = ['inv-keterangan', 'inv-keberatan', 'inv-terungkap', 'inv-tenang'];
 
 let sudahSiap = false;
 
@@ -56,6 +60,7 @@ export function PramuatCerita({ children }: { children: ReactNode }) {
     const mulai = performance.now();
     const tBar = window.setTimeout(() => { if (!batal) setFase((f) => (f === 'tunggu' ? 'tampil' : f)); }, TANPA_BAR_MS);
     const hemat = hematData();
+    const inv = episode === 'auto-2-inv';
     let selesai = 0;
     let total = 2; // list module + story chunk; grows when the list is known
     const satu = <T,>(p: Promise<T>) => denganBatas(p, ITEM_MS).then((v) => { selesai++; if (!batal) setMaju(Math.min(1, selesai / total)); return v; });
@@ -68,7 +73,7 @@ export function PramuatCerita({ children }: { children: ReactNode }) {
         const blok = hemat ? awal : gambar;
         total += blok.length + (hemat ? 0 : 2);
         for (const u of blok) tugas.push(satu(daftar.muatPng(u)));
-        if (!hemat) { tugas.push(satu(pramuatMusik(TREK_AWAL, ITEM_MS)), satu(siapkanAudio())); }
+        if (!hemat) { tugas.push(satu(pramuatMusik(inv ? TREK_INV_AWAL : TREK_AWAL, ITEM_MS)), satu(siapkanAudio())); }
         // Not blocking: Save-Data = the other pictures in the background.
         if (hemat) nanti(() => { for (const u of gambar) void daftar.muatPng(u).catch(() => undefined); }, 1500);
       }
@@ -82,7 +87,7 @@ export function PramuatCerita({ children }: { children: ReactNode }) {
       sudahSiap = true;
       setFase('siap');
       // After the first screen: the remaining story music, lowest priority (not with Save-Data).
-      if (!hemat) nanti(() => { for (const tr of TREK_LAIN) void pramuatMusik(tr, 60000); }, 3000);
+      if (!hemat) nanti(() => { for (const tr of inv ? TREK_INV_LAIN : TREK_LAIN) void pramuatMusik(tr, 60000); }, 3000);
     });
     return () => { batal = true; window.clearTimeout(tBar); };
     // eslint-disable-next-line react-hooks/exhaustive-deps

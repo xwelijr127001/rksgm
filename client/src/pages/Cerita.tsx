@@ -38,6 +38,7 @@ import { useDpr } from '../game/tokoh';
 import { simpanModeAdegan } from '../cerita/ui/panggung/mode';
 import { statusEpisode, type StatusEpisode } from '../cerita/ui/tampilan';
 import { hangatkanEpisodeAwal } from '../cerita/ui/latar/hangatkanDaftar';
+import potretInvestigator from '../cerita/seni/investigasi/reaksi.png';
 import '../cerita/ui/cerita.css';
 
 export default function Cerita() {
@@ -310,7 +311,10 @@ function KartuEpisode({ ep, bahasa, nama, onMainLagi }: { ep: Episode; bahasa: B
     <li className="cer-ep" data-status={status.jenis}>
       {/* T-037: thumbnail = WAJAH tokoh (atlas potret piksel, aturan skala piksel bulat), di HP; sampul lama di >= 600 px. */}
       <span className="cer-ep-wajah" aria-hidden="true">
-        <PotretPikselHp tokoh={ep.jenis === 'demo' ? 'buRina' : 'hendra'} ekspresi={ekspresi} ukuran={88} label="" />
+        {ep.investigasi ? (
+          // T-084: kartu Episode 1 Investigator = Miss Raksa investigator dengan kaca pembesar (sel 'miss-detektif', 2x, dipotong ke wajah)
+          <span data-wajah-investigator="" style={{ display: 'block', width: 92, height: 92, imageRendering: 'pixelated', backgroundImage: `url(${potretInvestigator})`, backgroundSize: '768px 128px', backgroundPosition: '-662px -14px', backgroundRepeat: 'no-repeat' }} />
+        ) : <PotretPikselHp tokoh={ep.jenis === 'demo' ? 'buRina' : 'hendra'} ekspresi={ekspresi} ukuran={88} label="" />}
       </span>
       {ep.panggung ? (
         <SeniRuangKartu nama={ep.panggung.lokasi.nama} ekspresi={ekspresi} />

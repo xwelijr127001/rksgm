@@ -136,3 +136,27 @@ Semua CC0 1.0 (domain publik, boleh komersial, tanpa wajib kredit), oleh Kenney 
 - `sfx-ketuk.wav` = `select_002`, `sfx-konfirmasi.wav` = `confirmation_001`, `sfx-batal.wav` = `back_002` dari **Interface Sounds**.
 Diubah ke WAV mono 16-bit 44,1 kHz, hening di kepala dipotong, maksimal 0,6 s dengan pudar 0,1 s. Bunyi pesan (pesanKirim,
 pesanTerima) tetap sintesis asli T-036.
+
+## Episode 1 Investigator: musik 8-bit detektif (21 Nov 2026, T-085)
+
+Dibuat oleh `tools/make-music-inv.mjs` (100% disintesis di script itu: dua pulsa PolyBLEP duty 12,5 / 25 / 50 %, segitiga 4-bit
+bertangga + sedikit pulsa untuk bass, noise LFSR untuk hat / sikat / snare / kick / detak jam). Tanpa sampel, loop, atau rekaman
+pihak ketiga. Nada-nadanya DITULIS TANGAN di script (bukan kutipan lagu atau game mana pun); satu motif pengikat buatan sendiri
+(kepala "D . F D . Ab A", mayor "D . F# D . A B") dipakai di semua trek. Milik proyek RAKSA GAME / PT Asuransi Raksa Pratikara.
+Hanya dipakai episode `auto-2-inv`; musik Episode 1 (`cerita-*`) dan kuis acara tidak diubah.
+
+| Berkas                | Judul       | Durasi | BPM | Bar | Kunci   | Ukuran | Pemakaian                                                        |
+| --------------------- | ----------- | -----: | --: | --: | ------- | -----: | ---------------------------------------------------------------- |
+| `inv-investigasi.mp3` | Investigasi | 44,7 s |  86 |  16 | D minor | 358 KB | Kartu judul, pengarahan, pengumpulan bukti (loop, ayun ringan)   |
+| `inv-keterangan.mp3`  | Keterangan  | 37,9 s |  76 |  12 | D minor | 304 KB | Wawancara dua saksi (loop jarang, detak jam tik-tok)             |
+| `inv-keberatan.mp3`   | Keberatan   | 43,6 s | 132 |  24 | D minor | 350 KB | Konfrontasi sampai petugas memperbaiki catatan (loop, arpeggio)  |
+| `inv-terungkap.mp3`   | Terungkap   |  5,6 s | 120 |   - | D mayor |  45 KB | Jingle resolusi SEKALI saat masuk bagian putusan                 |
+| `inv-tenang.mp3`      | Tenang      | 48,0 s |  80 |  16 | D mayor | 385 KB | Loop tenang sesudah jingle: putusan, pesan, kartu hasil          |
+
+Loop: panjang tepat kelipatan bar, ekor di-wrap ke kepala, ketuk terakhir tiap loop hening (0,25 s terakhir = nol), jadi sambungan
+jatuh di hening. MP3 mono 64 kbps 44,1 kHz lewat ffmpeg libmp3lame DENGAN tag Info/LAME (delay + padding encoder dipotong pemutar):
+didekode ulang, jumlah sampel tiap berkas sama persis dengan sumbernya (tanpa hening encoder di kepala, beda dengan `cerita-*`).
+Level: RMS -21,5 / -24 / -21 / -19,5 / -23 dBFS, peak maks -3,7 dBFS; di game diputar 28 % dari volume musik pemain seperti trek
+cerita lain (T-036), jadi tetap jauh di bawah efek suara. Kunci cache URL `?v=t085`. Status **DRAF**: belum didengar manusia.
+
+Efek investigator (`keberatan`, `pensil`, `pin`, `jepit`, `keliru`, `stempel`) disintesis di `client/src/audio/audio.ts`, tanpa berkas.

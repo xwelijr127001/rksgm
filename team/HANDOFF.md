@@ -4188,3 +4188,144 @@ Built by the Designer on top of 505c6a4; uncommitted. Owner rule: nothing was op
 **Open**
 - Not seen in a browser; the flicker and the card's arc are unseen.
 - The T-079 / T-080 / T-082 previews still show the old room (whiteboard, witness centred, laptop); I did not re-render them.
+
+## T-084 (2026-11-21): Miss Raksa as investigator (magnifying glass) in the investigator episode (Designer)
+
+Built by the Designer on top of efc8973; uncommitted. Owner rule: nothing was opened in a browser. Gate: client typecheck 0 errors; client/dist rebuilt. Only auto-2-inv and its picker card change; her portraits elsewhere are untouched.
+
+**Art** (`seni/investigasi/reaksi.png`, now 384×64; the Miss Raksa cells are redrawn by `character/investigator-t077/bangun.mts`). Everything is drawn INTO her own 64 px pixel portrait, with skin, uniform yellow and outline colours sampled from it. Her face, hair and uniform are unchanged outside the props.
+- **Magnifying glass up at her eye** (cells `miss-berpikir` and the new `miss-detektif`):
+  - brass rim with her outline colour, a glass glint and a wooden handle;
+  - through the lens her eye is enlarged ×1.7 (the playful detective look);
+  - her fist grips the handle (fingers, thumb, white cuff, yellow sleeve running off the bottom edge).
+- **Proud, glass lowered** (`miss-bangga`): the same glass held at her chest, with the sparkles kept.
+- **Detective badge pin** (the optional touch): a small gold shield on her lapel in all three cells.
+- **Variants:** `miss-berpikir` keeps a small thought bubble and her serious face; `miss-detektif` is the friendly version without marks.
+
+**Where she appears**
+
+| Place | Cell | Size |
+|---|---|---|
+| Case title card (`JudulKasus`, new optional `tokoh` prop), left of the title | `miss-detektif` | 128 px |
+| Opener lines `inv.buka.1` / `.2` and verdict intro `inv.putusan.1` | `miss-detektif` | 48 px |
+| "Berpikir" lines `inv.buka.3`, `inv.selisih.1`, `inv.putusan.2` | `miss-berpikir` | 48 px |
+| Phone inset on the testimony stage | `miss-berpikir` | 64 px |
+| KEBERATAN coach note | `miss-berpikir` | 48 px |
+| Result screen, and the right-verdict lines | `miss-bangga` (lowered glass) | 64 / 48 px |
+| Episode picker card "Episode 1 · Investigator" (phone thumbnail) | `miss-detektif`, a 2× crop of the face and glass | 92 px box |
+
+**Related changes**
+- **48 px portraits:** for the Miss Raksa cells, 48 px is now a 1:1 crop (x 12..60, y 2..50) instead of the 0.75× shrink, so the glass and her eye stay whole pixels.
+- **Title card height:** it grows to about 444 px, and 504 px with the "Tamu baru" link, of 544 px at 360×640.
+
+**Not changed**
+- Her full-body sprite on the office stage (opener, verdict scenes) has no magnifier; the investigator look there is the portrait beside her line.
+- The wide-screen picker cover (≥ 600 px) is still the stage cover.
+
+**Files**
+- `client/src/cerita/investigasi/ui/`: `BukuCatatan.tsx` (`PotretReaksi`), `reaksiBaris.tsx`, `JudulKasus.tsx`, `investigasi.css`.
+- `client/src/cerita/investigasi/LayarInvestigasi.tsx`, `client/src/pages/Cerita.tsx` (investigator thumbnail only).
+- `client/src/cerita/seni/investigasi/reaksi.png`, `character/investigator-t077/bangun.mts`.
+
+**Previews** in `character/investigator-t084/`:
+- `miss-detektif-t084-6x.png`: the three cells at 6×.
+- `pakai-t084-2x.png`: in use (title card row, opener line, phone inset, coach note, result head, picker thumbnail), made by `pratinjau.mts`.
+
+**Open**
+- Not seen in a browser.
+- There is no separate full-body investigator pose. A redrawn standing sprite with a raised arm would be a follow-up if the owner wants her holding the glass on the office stage too.
+
+## T-088 (2026-11-21): Investigator improvements batch: KEBERATAN proof + art for the opener and the case-2 teaser (Designer)
+
+Built by the Designer; uncommitted. Owner rule: nothing was opened in a browser. Gate: client typecheck 0 errors; client/dist rebuilt (with Fullstack's files as they were on disk at that moment). I did not touch `episode.ts`, `status/skor/simpan`, `LayarInvestigasi`, `HasilInvestigasi` or `PeriksaSim`, and I moved no audio calls.
+
+### Live now (in my own files)
+**KEBERATAN zoom** (`LayarKeberatan.tsx`). The picture on the dashcam slip is now a zoom button. It opens a sheet with:
+- the pinned quote being contested;
+- the pre-swerve frame (all four numbered lanes, the truck in an orange blinking frame);
+- the line "Cocokkan dengan nomor lajur di bawah truk.";
+- the key "Pakai bukti ini", which selects that slip and closes the sheet.
+
+The player still presses KEBERATAN! themselves. Hints and the guided try are unchanged.
+
+### Built and waiting for Fullstack to wire (props for the Lead)
+
+| Component (in `cerita/investigasi/ui/`) | Props | What it is | Height at 360×640 |
+|---|---|---|---|
+| `KoreksiCatatan` | `{ onSelesai, pernyataan?, tx? }` | After the stamp: the officer's logbook close-up where the pen crosses out "3" and writes "2", then the player's notebook page with his sentence struck through and "Laporan dikoreksi: lajur 2" written in; "Lanjut" calls `onSelesai` | 496 to 516 px |
+| `TebakLajur` | `{ onPilih(lajur: 1 \| 2 \| 3 \| 4), pilihan? }` | Opener hunch: Miss Raksa (magnifier) asks "Truk di lajur berapa?", the frozen frame with a pulsing "?" over the truck, four 56×52 lane chips under their lanes; one tap calls `onPilih` | 314 to 334 px |
+| `TeaserKasus` | `{ onBuka }` | 96 px card: MPV silhouette at night with a pulsing "ONLINE" chip, "Kasus 2 · segera hadir", the question line, "Lihat pratinjau" | 96 px |
+| `PratinjauKasus2` | `{ onTutup }` | Preview sheet (the app's Modal): full picture, three lines, a locked case-2 stamp slot, a close key | sheet |
+
+- **`KoreksiCatatan` details:** pass the toll officer's `Pernyataan` so the notebook line shows. The animation is 2.6 s and plays once, with a paper sound and then a confirm sound. Reduced motion shows the final still.
+- **`TeaserKasus` / `PratinjauKasus2` details:** everything is fictional, with no brand name or logo; the car shape is generic.
+
+**Notebook additions** (`BukuCatatan`, all optional, for the notebook everywhere once the report is corrected):
+- `koreksi={{ id, teks, baru? }}`: strikes the statement `id` and writes `teks` under it in red ink. `baru` animates it.
+- `halaman="keterangan"`: shows only the statements page.
+- `pilihBukti.bisaPerbesar` / `pilihBukti.onPerbesar`: the zoom button on a slip.
+
+**Dashcam frame additions** (`BingkaiDashcam` in `hp/arena/ArenaDashcam.tsx`, only with `besar`): `potong="lajur"` (all four lanes, no signs), `sorotTruk`, `tanya`. The K08 band and the opener card are unchanged.
+
+### Text and art
+- **Text:** id/en/zh in `i18n/kamus/investigasi.ts`: `keberatan.perbesar / zumJudul / zumKet / zumPakai`, `koreksi.*`, `tebak.*`, `kasus2.*`.
+- **Art** (`seni/investigasi/`, generated by `character/investigator-t088/bangun.mts`): `kilas-dua.png` (the handwritten "2" in 5 frames) and `kasus2.png` (the teaser picture).
+- **CSS:** new `ui/tambahan.css`.
+
+### Preview
+`character/investigator-t088/layar-t088-2x.png` is a calculated mock from the real art. It shows the opener hunch, the zoom sheet, the logbook mid-correction and corrected, and the teaser card with its sheet.
+
+### Open
+- Not seen in a browser.
+- `KoreksiCatatan`, `TebakLajur`, `TeaserKasus` and `PratinjauKasus2` appear nowhere until T-087 wires them. Suggested places: the opener after the title card; `LayarCap` after the stamp; the result screen.
+- The teaser card adds 96 px to the result screen, which had about 52 px spare, so Fullstack needs to make room there.
+- In `TebakLajur` the truck is plainly in lane 2 with the lane numbers visible, so the hunch is a reading task, not a guess.
+
+
+## T-085 (2026-11-21): 8-bit detective soundtrack + stings, investigator episode only (Fullstack)
+
+Owner: "the audio still follows Episode 1; investigator needs something related: 8-bit audio but like a detective." Only `auto-2-inv` changes. Episode 1 (`auto-2`), Episode 1 Dev and the event quiz keep their music: their tracks, files and audio chains are untouched. NOT heard by anyone and NOT run in a browser or on a phone (owner rule): everything below is by construction and by measuring the files.
+
+**How the music was made.** `tools/make-music-inv.mjs` (new, `node tools/make-music-inv.mjs`) synthesises everything: two band-limited pulse channels, a stepped 4-bit triangle bass with a thin pulse on top (so the bass is audible on a phone speaker), LFSR noise for hats / brush / snare / kick / clock ticks. No samples. Every note is written by hand in that script in a small notation ("d5e re f5e ..."; a bar that does not add up to 4 beats is an error). No melody of any existing work is quoted. One original motif ties the set together: "D . F D . Ab A" tiptoes in Investigasi, is straightened and sped up in Keberatan, and turns major ("D . F# D . A B") in Terungkap / Tenang. All tracks sit on D: D minor during the case, D major once the truth is out.
+
+| File | What | Length | Size |
+| --- | --- | ---: | ---: |
+| `inv-investigasi.mp3` | main loop, D minor, 86 BPM, light swing: walking bass, ride hat + brush, staccato lead, off-beat chord plinks | 44.7 s, 16 bars | 358 KB |
+| `inv-keterangan.mp3` | interview loop, D minor, 76 BPM: sparse long notes with a fake echo, tick-tock on every beat, soft broken chords in bars 5-8 and 11-12 | 37.9 s, 12 bars | 304 KB |
+| `inv-keberatan.mp3` | confrontation loop, D minor, 132 BPM: driving 16th arpeggio, octave bass, kick + snare, lead from bar 5 | 43.6 s, 24 bars | 350 KB |
+| `inv-terungkap.mp3` | resolution jingle, D major, played ONCE: the motif in major, G and A arpeggios up, held D chord | 5.6 s | 45 KB |
+| `inv-tenang.mp3` | calm loop, D major, 80 BPM: soft arpeggio, half-note bass, sparse melody | 48.0 s, 16 bars | 385 KB |
+
+All <= 400 KB (the script fails above 400 000 bytes). MP3 mono 64 kbps via ffmpeg libmp3lame with the Info/LAME tag; decoded back, each file has exactly the sample count of its source, so there is no encoder silence at the head (the Episode 1 files have 16-26 ms). Loops are an exact number of bars, the tail is wrapped into the head, and the last beat of each loop is a deliberate rest (last 0.25 s = digital silence), so the loop point falls in silence. Levels: RMS -21.5 / -24 / -21 / -19.5 / -23 dBFS, played at the same 28 % story gain as the Episode 1 tracks (T-036), so well under the SFX. Without ffmpeg the script falls back to lamejs and warns (no gapless tag then).
+
+**Cues** (per node: new optional `musik` on a story node, `cerita/tipe.ts` `MusikNode`; set by `musikInv` in `episode/auto-2-inv/episode.ts`; `hp/AudioCerita.tsx` uses the node cue when present, else the old per-part theme, so other episodes are unchanged)
+- Investigasi: title card, Miss Raksa's briefing, all of part 2 (dashcam, sign, SIM).
+- Keterangan: the two interviews and "something does not match" (`darto`, `tol`, `selisih`). While the sepia FLASHBACK panel is on screen (`kilasBalikKini`, same rule as LayarKeterangan: lines `inv.darto.3` / `inv.tol.3`) a lowpass on this track alone sweeps down to 700 Hz in 0.5 s and creeps up to 2.4 kHz over 6.5 s with some resonance; leaving the flashback opens it in 0.6 s (`setKilasMusik`).
+- Keberatan: all of part 3, from the opening of the confrontation until the officer has corrected his note. On the KEBERATAN stamp (`LayarCap`) all music drops to silence in 30 ms, stays silent 0.4 s and returns over 0.9 s (`jedaMusik`); the `keberatan` effect is the big hit with the stamp, then the sting at 0.4 s, in that hole.
+- Terungkap: part 4. The jingle plays once on entering the verdict part (quick 0.12 s fade-in, the confrontation track leaves in 0.35 s); 1.3 s before it ends the engine hands over to the calm loop by itself (`MUSIC_LANJUT`), which fades in under the last chord and stays under the verdict, the message to Pak Hendra and the result card.
+- Track changes otherwise use the existing 1.6 s story crossfade. Mute, the Music switch, music volume, hidden tab and autoplay rules are the existing engine paths (the new tracks are ordinary story tracks).
+
+**Stings** (all original synth in `audio/audio.ts`, no files)
+- `pensil` + `pin`: "Sematkan" = four short pencil strokes while the sentence writes itself, then the pin click when the pin lands (1.05 s). Replaces `kertas` + `taruh` there.
+- `jepit`: new evidence slip = paper sliding in, then the clip snapping (lands at 0.68 s, with the clip animation). Replaces `taruh`.
+- `keberatan`: same name, new recipe: big chiptune hit (low pop + square D2 / D3) + noise burst, 0.4 s gap, then a rising A4 D5 F5 into a held A5 chord. About 1.0 s. `CapKeberatan.tsx` is unchanged (it already plays this name).
+- `keliru`: wrong card = a soft low double buzz through a 900 Hz lowpass. Replaces `batal` there.
+- `stempel`: case stamp / rank up on the result card = thump + bright D major arpeggio + sparkle. Replaces `podium` there (the projector still uses `podium`).
+
+**Files**
+- New: `tools/make-music-inv.mjs`, `client/public/audio/inv-{investigasi,keterangan,keberatan,terungkap,tenang}.mp3`.
+- `client/src/audio/audio.ts`: 5 tracks (story tracks), `MUSIC_LANJUT` (jingle -> loop), jingle fade times, `setKilasMusik` (filter only in the `inv-keterangan` chain), `jedaMusik`, 5 new effect names + new `keberatan` recipe, per-effect voice life (`keberatan` 1.3 s).
+- `client/src/cerita/tipe.ts` (`musik?`, `MusikNode`), `episode/auto-2-inv/episode.ts` (`musikInv`), `hp/AudioCerita.tsx`, `hp/PemainHP.tsx` (one line: passes `kilas`), `investigasi/LayarInvestigasi.tsx` (stings, music hole, `kilasBalikKini`), `PramuatCerita.tsx` (investigator: `inv-investigasi` blocks with the loading bar, the other four load after the first screen).
+- `investigasi/ui/HasilInvestigasi.tsx` (Designer's file, the stamp sound only): `podium` -> `stempel`, and the sting now also plays with reduced motion (at 0.15 s, the stamp is already in place there), following "reduced motion = no change" for audio.
+- `client/public/audio/CREDITS.md`: new section.
+
+**Gate**: typecheck 0 (client + server), `client/dist` rebuilt = exact copy of the scratch build. No tests, no browser.
+
+**Open**
+- Nobody has heard any of it: composition, balance between lead / bass / hats, and the loudness of the new stings are untested by ear. Levels are easy to change: track RMS per song at the bottom of each song function in the script, sting gains in `audio.ts`.
+- Looping still goes through `<audio loop>` like the Episode 1 music. The files are built for a clean loop (see above), but what a given phone does at the loop point was not heard.
+- The flashback sweep and the 0.4 s hole act only when music runs through Web Audio (the normal case since T-040). Without it the music simply plays on.
+- Reloading in part 4 plays the jingle again before the calm loop.
+- The dev-only "Coba suara" list in the Menu still shows the three Episode 1 themes and does not list the new stings.
+- T-088 (Designer) landed while this was built; its new components are not wired here (T-087).
+- Not committed.

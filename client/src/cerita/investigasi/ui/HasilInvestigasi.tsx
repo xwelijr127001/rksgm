@@ -5,7 +5,7 @@
  * Props rencana: { skor, nama, look, stempel, pangkat, onMainLagi, onKasusBerikutnya } (+ opsional berikutnyaSegera, bawaan true:
  * ketukan menampilkan catatan "segera hadir" lalu tetap memanggil onKasusBerikutnya).
  * T-078: potret reaksi Miss Raksa 64 px di kanan kepala (opsional `reaksi`); stempel kasus TERBARU dicap sesudah 0,6 s (membesar
- * lalu mendarat + satu bunyi; gerak dikurangi: langsung terpasang, tanpa bunyi tambahan); catatan "segera hadir" tidak lagi
+ * lalu mendarat + satu bunyi; gerak dikurangi: langsung terpasang; T-085: bunyinya 'stempel', juga saat gerak dikurangi); catatan "segera hadir" tidak lagi
  * memesan tempat. Ukur 360 x 640 (hitung; ruang isi 544 = 640 - kepala cerita 56 - bantalan .hp-main 12 + 28):
  * kepala 80 + poin 3 x 24 + 2 x 4 = 80 + kartu 176 + tombol 52 + jarak 3 x 8 = 412 (+ 28 bila "segera hadir" tampil);
  * + jarak 12 + kaki HasilKasus (skor terbaik 20 + 4 + "Tamu baru" 44 = 68) = 492; konfirmasi "Tamu baru" terbuka (keterangan 40 +
@@ -39,9 +39,11 @@ export function HasilInvestigasi({ skor, nama, look, stempel, pangkat, onMainLag
   const [segera, setSegera] = useState(false);
   const kurang = useReducedMotion();
   // Bunyi cap stempel tepat saat stempel mendarat (animasi CSS .kp-stempel i[data-baru]: mulai 0,6 s, mendarat 0,82 s).
+  // T-085: bunyi 'stempel' (arpeggio cerah, khusus investigator). Gerak dikurangi: stempel langsung terpasang, bunyinya tetap
+  // ada (arahan Lead: gerak dikurangi tidak mengubah audio), segera sesudah layar tampil.
   useEffect(() => {
-    if (kurang || !stempel.length) return;
-    const w = window.setTimeout(() => playSfx('podium'), 820);
+    if (!stempel.length) return;
+    const w = window.setTimeout(() => playSfx('stempel'), kurang ? 150 : 820);
     return () => window.clearTimeout(w);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);

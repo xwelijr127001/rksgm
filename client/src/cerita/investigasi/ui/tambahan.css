@@ -1,0 +1,80 @@
+/* T-088 (Designer): tambahan Investigator: perbesar rekaman di KEBERATAN, koreksi catatan petugas, tebak lajur, penggoda kasus 2.
+   Seni piksel 2x. Keadaan dasar tiap gerak = keadaan AKHIR, jadi gerak dikurangi (blok terakhir) menyisakan bingkai diam. */
+
+/* ---------------------------------------------------------------- slip bukti yang bisa diperbesar (BukuCatatan, KEBERATAN) */
+.bk-slip-berzum { position: relative; }
+/* tombol perbesar = seluruh gambar slip (84 x 44, + 2 px tepi): saudara tombol pilih, di atasnya */
+.bk-slip-zum { position: absolute; left: 2px; top: 2px; z-index: 2; width: 88px; height: 48px; margin: 0; padding: 0; border: 0; border-radius: 0; background: none; cursor: zoom-in; display: grid; place-items: end start; }
+.bk-slip-zum .iv-ikon { margin: 0 0 2px 2px; background-color: #fff9f5; box-shadow: 0 0 0 2px #2a211e; }
+.bk-slip-zum:focus-visible { outline: 3px solid #1d6fd1; outline-offset: 1px; }
+
+/* lembar perbesar: kutipan yang dibantah + bingkai 292 x 150 + keterangan + "Pakai bukti ini" */
+.iv-zum, .iv-pratinjau { display: grid; gap: 8px; justify-items: center; }
+.iv-zum > :is(p, button), .iv-pratinjau > :is(p, button) { justify-self: stretch; margin: 0; }
+.iv-zum-kutip { padding: 6px 10px; border: 2px solid #ff9000; background: #fff5ec; font-size: 18px; line-height: 24px; }
+.iv-zum-kutip b { display: block; font-size: 14px; line-height: 18px; font-weight: 800; color: #7a3e00; }
+.iv-zum-kutip q { font-family: 'Bradley Hand', 'Segoe Print', 'Chalkboard SE', casual, 'Comic Sans MS', 'Comic Neue', cursive; color: #26306b; }
+
+/* ---------------------------------------------------------------- halaman keterangan saja + baris koreksi */
+.bk[data-halaman="keterangan"] .bk-atas { border-bottom: 2px solid #2a211e; }
+.bk-baris[data-koreksi] q.bk-tulisan { text-decoration: line-through; text-decoration-color: #b3261e; text-decoration-thickness: 2px; color: #6f7391; }
+.bk-koreksi { display: block; text-decoration: none; font-size: 18px; line-height: 23px; color: #b3261e !important; }
+.bk-baris[data-koreksi="baru"] .bk-koreksi { animation: bk-tulis .9s steps(20) 1.7s both; }
+
+/* ---------------------------------------------------------------- koreksi catatan petugas: buku 336 x 184 (seni 2x) */
+.iv-koreksi { gap: 8px; }
+.kr { position: relative; margin: 0; height: 188px; box-sizing: border-box; border: 2px solid #212121; overflow: hidden; background: #7a5a3c; box-shadow: 0 2px 0 #212121; image-rendering: pixelated; }
+.kr-isi { position: absolute; left: 50%; top: 0; width: 336px; height: 184px; margin-left: -168px; }
+.kr-isi > * { position: absolute; background-repeat: no-repeat; }
+.kr-buku { inset: 0; background-size: 336px 184px; }
+/* angka 3 yang sudah tertulis (bingkai ke-5), di kotak LAJUR */
+.kr-tiga { left: 174px; top: 120px; width: 28px; height: 36px; background-size: 140px 36px; background-position: -112px 0; }
+/* coretan merah menyilang angka 3 (0,4-0,7 s) */
+.kr-coret { left: 168px; top: 135px; width: 40px; height: 5px; background: #b3261e; rotate: -32deg; transform-origin: 0 50%; animation: kr-coret 2.6s steps(6) both; }
+@keyframes kr-coret { 0%, 15% { transform: scaleX(0); } 27%, 100% { transform: scaleX(1); } }
+/* angka 2 ditulis di kanan kotak dalam 4 langkah (0,9-1,9 s) */
+.kr-dua { left: 220px; top: 120px; width: 28px; height: 36px; background-size: 140px 36px; background-position: -112px 0; animation: kr-dua 2.6s steps(1) both; }
+@keyframes kr-dua { 0%, 34% { background-position: 0 0; } 35% { background-position: -28px 0; } 48% { background-position: -56px 0; } 61% { background-position: -84px 0; } 74%, 100% { background-position: -112px 0; } }
+/* tangan + pena: mencoret, menulis, lalu menyingkir (ujung pena di 4, 4) */
+.kr-tangan { left: 270px; top: 150px; width: 80px; height: 72px; background-size: 80px 72px; animation: kr-tangan 2.6s linear both; }
+@keyframes kr-tangan {
+  0% { left: 280px; top: 190px; } 14% { left: 166px; top: 146px; } 27% { left: 202px; top: 124px; }
+  34% { left: 220px; top: 126px; } 48% { left: 238px; top: 122px; } 61% { left: 236px; top: 138px; } 74% { left: 240px; top: 148px; }
+  88%, 100% { left: 270px; top: 150px; }
+}
+
+/* ---------------------------------------------------------------- tebak lajur: Miss Raksa + bingkai 292 x 150 + 4 keping di bawah lajurnya */
+.iv-tebak { gap: 8px; }
+.iv-tebak-kepala { display: grid; grid-template-columns: 68px minmax(0, 1fr); gap: 10px; align-items: center; }
+.iv-tebak-balon { margin: 0; padding: 8px 12px; border: 2px solid #212121; background: #ffffff; box-shadow: 0 2px 0 #212121; font-size: 20px; line-height: 26px; font-weight: 800; }
+.iv-tebak-balon b { display: block; font-size: 14px; line-height: 18px; color: #7a3e00; }
+.iv-tebak-balon span:focus { outline: none; }
+.iv-tebak-jalan { justify-self: center; width: 292px; }
+.iv-tebak-keping { position: relative; height: 52px; margin-top: 4px; }
+/* keping lajur 56 x 52 (jarak antarlajur 66 px), berpusat di bawah lajurnya */
+.iv-keping { position: absolute; top: 0; width: 56px; height: 52px; margin: 0 0 0 -28px; padding: 0 0 4px; border: 2px solid #212121; border-radius: 0; background: #fff9f5; color: #212121; font: inherit; font-size: 24px; font-weight: 800; line-height: 1; box-shadow: 0 4px 0 #212121; cursor: pointer; }
+.iv-keping:active { translate: 0 3px; box-shadow: 0 1px 0 #212121; }
+.iv-keping[aria-pressed="true"] { background: #ff9000; }
+.iv-keping:focus-visible, .iv-teaser:focus-visible { outline: 3px solid #1d6fd1; outline-offset: 2px; }
+
+/* ---------------------------------------------------------------- penggoda kasus 2: kartu 96 px + lembar pratinjau */
+.iv-teaser { display: grid; grid-template-columns: 136px minmax(0, 1fr); gap: 10px; align-items: center; width: 100%; height: 96px; box-sizing: border-box; margin: 0; padding: 2px 8px 2px 2px; border: 2px solid #212121; border-radius: 0; background: #1b2233; color: #fff9f5; font: inherit; text-align: left; box-shadow: 0 3px 0 #212121; cursor: pointer; }
+.iv-teaser:active { translate: 0 2px; box-shadow: 0 1px 0 #212121; }
+/* gambar 2x dipotong ke x 14..82, y 8..52 seni (136 x 88): mobil + HP menyala (63, 21 seni) */
+.iv-teaser-gambar { position: relative; display: block; width: 136px; height: 88px; background-size: 240px 112px; background-position: -28px -16px; background-repeat: no-repeat; image-rendering: pixelated; overflow: hidden; }
+.iv-teaser-gambar i, .iv-pratinjau-gambar i { position: absolute; padding: 0 4px; border: 2px solid #0a0d14; background: #7cffb2; color: #0a0d14; font: 800 11px/14px ui-monospace, Menlo, Consolas, monospace; font-style: normal; letter-spacing: .04em; animation: iv-online 1.2s steps(1) infinite; }
+.iv-teaser-gambar i { left: 82px; top: 4px; }
+@keyframes iv-online { 50% { background: #2f8f5b; color: #eafff2; } }
+.iv-teaser-teks { min-width: 0; display: grid; gap: 2px; }
+.iv-teaser-teks b { font-size: 16px; line-height: 20px; font-weight: 800; color: #f6d25c; }
+.iv-teaser-teks span { font-size: 14px; line-height: 18px; }
+.iv-teaser-teks em { font-style: normal; font-size: 14px; line-height: 18px; font-weight: 800; color: #7cffb2; }
+.iv-pratinjau { font-size: 16px; line-height: 22px; color: #212121; }
+.iv-pratinjau-gambar { position: relative; display: block; width: 240px; height: 112px; border: 2px solid #212121; background-size: 240px 112px; background-repeat: no-repeat; image-rendering: pixelated; }
+.iv-pratinjau-gambar i { left: 112px; top: 14px; }
+.iv-pratinjau-tanya { font-size: 18px; line-height: 24px; font-weight: 800; }
+.iv-pratinjau-stempel { display: flex; align-items: center; gap: 6px; padding: 6px 8px; border: 2px dashed #a4a4a4; background: #f9eeea; font-size: 14px; line-height: 18px; font-weight: 700; color: #5f5f5f; }
+
+@media (prefers-reduced-motion: reduce) {
+  :root:not([data-gerak="penuh"]) :is(.kr-coret, .kr-dua, .kr-tangan, .bk-koreksi, .iv-teaser-gambar i, .iv-pratinjau-gambar i, .dc-pita-sorot, .dc-pita-tanya) { animation: none !important; }
+}
