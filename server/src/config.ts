@@ -134,6 +134,11 @@ export const CONFIG = {
   /** T-037 (pemilik 18 Nov): kartu demo (auto-1) di pemilih /cerita hanya untuk uji internal. Bawaan off. */
   demoCerita: (process.env.RAKSA_DEMO_CERITA || 'off').toLowerCase().trim() === 'on',
   /**
+   * T-074 (owner, temporary until a senior advisor reviews it): the "Episode 1 Dev · Kenalan Raksa" card in the /cerita picker.
+   * Default off = card hidden. The direct links /cerita/kenalan and /cerita/auto-2-dev keep working either way (QR posters).
+   */
+  ep1Dev: (process.env.RAKSA_EP1_DEV || 'off').toLowerCase().trim() === 'on',
+  /**
    * Seeded scenarios (T-028, story/seed/publish.ts): at start the server publishes the scenarios that ship with the code
    * (Episode 2 "Truk Trailer di Jalan Tol" as a hosted room) if they are not there yet. Idempotent: a start that finds
    * the same content writes nothing. STORY_SEED=off skips it.

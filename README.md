@@ -519,6 +519,8 @@ Gambar tampil di tempat adegan 2D; pemain menjawab lewat daftar pilihan di bawah
 | `PANITIA_PIN` | kosong | Bila diisi: wajib untuk membuat room dan untuk membuat/mengubah/melihat soal panitia |
 | `RAKSA_IKLAN_ROOM` | `on` | Spanduk "acara sedang dibuka" di halaman awal (hanya bila tepat satu room di lobby) |
 | `RAKSA_ORIGINS` | kosong | Origin browser lain yang boleh memanggil API / Socket.IO (dipisah koma). Kosong = origin halaman sendiri + `PUBLIC_BASE_URL`. Bila DIISI, daftar ini MENGGANTI `PUBLIC_BASE_URL` (tidak menambah): cantumkan URL publik juga bila perlu. Origin halaman sendiri selalu boleh |
+| `RAKSA_DEMO_CERITA` | `off` | `on` = kartu demo (auto-1) tampil di pemilih `/cerita` (uji internal) |
+| `RAKSA_EP1_DEV` | `off` | `on` = kartu "Episode 1 Dev · Kenalan Raksa" tampil di pemilih `/cerita` (T-074, sementara: disembunyikan sampai ditinjau penasihat senior Raksa). Tautan langsung `/cerita/kenalan` dan `/cerita/auto-2-dev` (poster QR) tetap jalan walau `off` |
 | `RAKSA_CSP_REPORT` | `off` | `on` = kirim CSP sumber daya mode REPORT-ONLY (hanya dilaporkan di konsol, tidak memblokir) |
 
 **T-038:** dengan `RAKSA_LEGACY=on` dan `NODE_ENV=production`, `PANITIA_PIN` WAJIB; tanpa PIN rute lama menjawab 503 dan namespace Socket.IO lama ditolak. PIN salah ditahan per alamat klien asli (8 per 5 menit, memakai `TRUST_PROXY_HOPS`) dan secara global (60 per 10 menit untuk semua alamat, lalu dikunci 10 menit; tiap penguncian dicatat di log). Ekspor hasil (`results.csv`/`.json`) hanya menerima token host lewat header `x-host-token`, tidak di URL.

@@ -3817,3 +3817,12 @@ The header shows e.g. "BAGIAN 3/4 · Pemeriksaan kejadian" at the dashcam. Side 
 **Files:** `client/src/cerita/hp/arena/ArenaDashcam.tsx`, `dashcam.css`, and `client/src/cerita/episode/auto-2-dev/episode.ts`.
 
 **Open:** not seen on a phone. Saves from the old single-part version keep working, since node ids are unchanged.
+
+## T-074 (2026-11-20): Episode 1 Dev card hidden behind a server flag (temporary, owner)
+
+- Same pattern as RAKSA_DEMO_CERITA: env `RAKSA_EP1_DEV` (on|off, default **off = hidden**) -> `CONFIG.ep1Dev` (server/src/config.ts) -> `/api/config` `features.ep1Dev` (server/src/index.ts) -> `AppConfig.ep1Dev` (client/src/story/appConfig.ts, fallback false).
+- `client/src/pages/Cerita.tsx`: the "Episode 1 Dev · Kenalan Raksa" card renders only when `features.ep1Dev` is true (config loaded). The full Episode 1 card and the locked Episode 2 row are unchanged; with the card hidden the picker is exactly the pre-T-064 picker (fits one screen as before).
+- Direct links keep working when hidden: `/cerita/kenalan` -> `/cerita/auto-2-dev` (route and episode registry untouched), so the owner can show it privately and printed QR posters do not break.
+- Docs: README env table rows for `RAKSA_DEMO_CERITA` (was missing) and `RAKSA_EP1_DEV`; `.env.example` `RAKSA_EP1_DEV=off`. To show the card on the live server: set `RAKSA_EP1_DEV=on` in the server .env and restart.
+
+**Gate (owner rule):** typecheck 0; `client/dist` rebuilt = exact copy. Not tested in a browser or on a phone. Not committed.

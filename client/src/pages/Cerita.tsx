@@ -60,7 +60,9 @@ export default function Cerita() {
   // rute /cerita/auto-1 dan progres tersimpan tidak berubah.
   const nyata = cariEpisode('auto-2');
   // T-064: Episode 1 Dev (5-minute walk-up cut of the same case) is offered first; the full Episode 1 card is unchanged.
-  const dev = cariEpisode('auto-2-dev');
+  // T-074 (owner, temporary): the card only with RAKSA_EP1_DEV=on (features.ep1Dev); /cerita/kenalan and /cerita/auto-2-dev
+  // still open the episode directly when the card is hidden.
+  const dev = cfg.status === 'ready' && cfg.config.ep1Dev ? cariEpisode('auto-2-dev') : null;
   const demo = cfg.status === 'ready' && cfg.config.demoCerita ? cariEpisode('auto-1') : null;
   const kartu = (ep: Episode) => (
     <KartuEpisode

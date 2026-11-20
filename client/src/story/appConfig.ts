@@ -11,6 +11,8 @@ export interface AppConfig {
   legacy: boolean;
   /** T-037: kartu demo (auto-1) tampil di pemilih /cerita (RAKSA_DEMO_CERITA=on, uji internal). */
   demoCerita: boolean;
+  /** T-074: "Episode 1 Dev" card in the /cerita picker (RAKSA_EP1_DEV=on). Direct links work regardless. */
+  ep1Dev: boolean;
   story: { maxParticipants: number; answerWindowMs: number; scorePolicyId: string };
   /** Absolute base URL for join links/QR codes (server PUBLIC_BASE_URL or LAN address). */
   joinBaseUrl: string;
@@ -18,7 +20,7 @@ export interface AppConfig {
 
 export type AppConfigState = { status: 'loading' } | { status: 'ready'; config: AppConfig; offline: boolean };
 
-const FALLBACK: AppConfig = { legacy: false, demoCerita: false, story: { maxParticipants: 100, answerWindowMs: 30_000, scorePolicyId: STORY_SCORE_POLICY.id }, joinBaseUrl: '' };
+const FALLBACK: AppConfig = { legacy: false, demoCerita: false, ep1Dev: false, story: { maxParticipants: 100, answerWindowMs: 30_000, scorePolicyId: STORY_SCORE_POLICY.id }, joinBaseUrl: '' };
 
 let state: AppConfigState = { status: 'loading' };
 let loading: Promise<AppConfigState> | null = null;
@@ -33,6 +35,7 @@ function parse(raw: unknown): AppConfig | null {
   return {
     legacy: features.legacy,
     demoCerita: features.demoCerita === true,
+    ep1Dev: features.ep1Dev === true,
     story: {
       maxParticipants: typeof story.maxParticipants === 'number' ? story.maxParticipants : FALLBACK.story.maxParticipants,
       answerWindowMs: typeof story.answerWindowMs === 'number' ? story.answerWindowMs : FALLBACK.story.answerWindowMs,
