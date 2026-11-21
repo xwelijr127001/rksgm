@@ -52,6 +52,7 @@ const KASUS: KonfigInvestigasi = {
   nomor: 1,
   judul: 'inv.kasus.judul',
   awalan: 'inv',
+  kait: 'inv.kait',
   nasabah: 'hendra',
   balasan: { baik: 'lega', datar: 'bingung', janji: 'senang' },
   bingkai: 'dashcam',

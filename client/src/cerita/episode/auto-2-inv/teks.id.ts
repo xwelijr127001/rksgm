@@ -8,6 +8,7 @@ export const TEKS_AUTO_2_INV_ID: Record<string, string> = {
   judul: 'Episode 1 · Investigator',
   ringkas: 'Kamu investigatornya. Catat keterangan saksi, kumpulkan bukti, lalu bantah pernyataan yang keliru. 5 menit, langsung main.',
   'inv.label': 'Kasus 1',
+  'inv.kait': 'Petugas mencatat lajur 3. Benarkah?', // T-094: kalimat kait di hub Raksa Investigator
   'inv.kasus.judul': 'Truk di Tol',
 
   // Bagian (kepala layar)

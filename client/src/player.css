@@ -703,3 +703,14 @@ html:has(.lp-pemuat) { overflow: hidden; }
   .lp-halaman .lp-join-kepala .lp-join-ikon-besar { display: none !important; }
   .lp-halaman .lp-join-kepala .lp-join-ikon-kecil { display: inline-block !important; }
 }
+
+/* ==================================================================== T-094: tautan kecil "Raksa Investigator" di halaman awal
+   Hanya ada bila RAKSA_INVESTIGATOR=on (Landing.tsx memasang .lp-ada-inv). Satu baris tautan di bawah pintu Mode Cerita, bukan
+   kartu ketiga. Di HP baris ini 36 px (32 + jarak 4); bingkai hero memendek sebanyak itu (140..190 -> 104..190, pengurang
+   525 -> 561 px) supaya baris kode room tetap di atas lipatan seperti sebelum tautan ini ada. */
+.lp-inv { margin: 10px 0 0; font-size: 15px; }
+.lp-inv-tautan { display: inline-flex; align-items: center; gap: 6px; min-height: 32px; font-weight: 700; color: var(--utama-teks); text-decoration: underline; text-underline-offset: 3px; }
+@media (max-width: 700px) {
+  .lp-halaman .lp-inv { margin: 4px 0 0; text-align: center; font-size: 14px; line-height: 1.3; }
+  .lp-halaman.lp-ada-inv .lp-kota-bingkai { height: min(30vw,190px); height: clamp(104px, calc(100svh - 561px), 190px); }
+}

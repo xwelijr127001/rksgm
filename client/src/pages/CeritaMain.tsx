@@ -41,6 +41,7 @@ import { useHalaman } from '../ui/halaman';
 import { Memuat, Modal } from '../ui/kit';
 import { adaDialogTerbuka } from '../ui/modal';
 import { cariEpisode } from '../cerita/episode';
+import { idEpisodeRute, useRumahCerita } from '../cerita/investigasi/rute';
 import {
   babKini, bisaLanjut, nodeKini, pilihanTersedia, semuaBarisTampil, suasanaNasabah,
 } from '../cerita/mesin';
@@ -95,12 +96,17 @@ function catatPetunjukTampil(): boolean {
 
 
 export default function CeritaMain() {
-  const { episode } = useParams();
+  // T-094: /investigator/:kasus (hub Raksa Investigator) = pemain yang sama dengan /cerita/:episode; jalan pulangnya hub.
+  const param = useParams();
+  const episode = idEpisodeRute(param);
+  const rumah = useRumahCerita();
   const { profil } = useProfil();
   const { bahasa } = useBahasa();
   // ?adegan=ringan|penuh disimpan SEKALI saat halaman dibuka, sebelum pengalihan ke /kenalan yang membuang query.
   useState(simpanModeAdegan);
   const ep = cariEpisode(episode);
+  // Nomor kasus yang tidak dikenal (atau kasusnya tidak ada di build ini): kembali ke hub, bukan ke layar nama.
+  if (!ep && param.kasus !== undefined) return <Navigate to={rumah} replace />;
   // T-064: Episode 1 Dev (akhirKenalan) = no name screen before playing: a guest plays as "Tamu" with the default look; the
   // name is optional at the ending (ID card). Every other episode still asks for the name first.
   // T-076: the Investigator pilot (Episode.investigasi) is walk-up too: same guest session, no name screen.
@@ -129,16 +135,17 @@ function SesiCerita({ ep, profilAwal }: { ep: Episode; profilAwal: Profil }) {
 
 function LayarPemulihan({ ep, muat, tx, onMulai }: { ep: Episode; muat: HasilMuat; tx: (k: KunciTeks) => string; onMulai: () => void }) {
   const nav = useNavigate();
+  const rumah = useRumahCerita();
   const alasan = muat.status === 'tidakCocok' ? muat.alasan : 'rusak';
-  const kembali = () => nav('/cerita');
+  const kembali = () => nav(rumah);
   return (
-    <PlayerShell back="/cerita" label={t('cerita.labelHub')} className="cer-layar">
+    <PlayerShell back={rumah} label={t('cerita.labelHub')} className="cer-layar">
       <main className="cer-pulih">
         <h1>{tx(ep.judul)}</h1>
         <p>{t(`cerita.pulih.${alasan}`)}</p>
         <div className="cer-pulih-aksi">
           <button type="button" className="primary-action" onClick={onMulai}>{t('cerita.pulihMulai')} <Arrow /></button>
-          <Link className="cer-tombol-garis" to="/cerita">{t('cerita.pulihKembali')}</Link>
+          <Link className="cer-tombol-garis" to={rumah}>{t('cerita.pulihKembali')}</Link>
         </div>
       </main>
       <Modal

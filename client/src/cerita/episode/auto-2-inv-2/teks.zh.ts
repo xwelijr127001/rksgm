@@ -6,6 +6,7 @@ export const TEKS_AUTO_2_INV_2_ZH: Record<string, string> = {
   judul: '调查员 · 案件 2',
   ringkas: '一辆家用车、一次夜间碰擦，还有一张行程小票。不指责任何人，查清事实，再有礼貌地说明。5 分钟。',
   'inv.label': '案件 2',
+  'inv2.kait': '家用车……还是正在载客？', // T-094: kalimat kait di hub Raksa Investigator
   'inv2.kasus.judul': '茉莉街之夜',
   'pemeran.yusuf.nama': 'Yusuf 先生',
   'pemeran.yusuf.peran': '客户 · 车主',

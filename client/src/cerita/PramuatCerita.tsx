@@ -16,6 +16,7 @@ import { pramuatMusik, siapkanAudio, type Track } from '../audio/audio';
 import { Raki } from '../art/Raki';
 import { t, useBahasa } from '../i18n';
 import { useProfil } from '../state/profil';
+import { idEpisodeRute } from './investigasi/rute';
 
 /** T-064: Episode 1 Dev (auto-2-dev) shows the same case art, so it preloads the same list; guests there have no profile. */
 const EPISODE = ['auto-2', 'auto-2-dev', 'auto-2-inv', 'auto-2-inv-2']; // T-076: the Investigator pilot shows the same case art (T-090: case 2 too)
@@ -50,7 +51,8 @@ function nanti(fn: () => void, ms: number) {
 
 export function PramuatCerita({ children }: { children: ReactNode }) {
   useBahasa();
-  const { episode } = useParams();
+  // T-094: /investigator/:kasus is the same player as /cerita/:episode.
+  const episode = idEpisodeRute(useParams());
   const { profil } = useProfil();
   const perlu = !!episode && EPISODE.includes(episode) && (!!profil || episode === 'auto-2-dev' || EPISODE_INV.includes(episode)) && !sudahSiap && typeof window !== 'undefined';
   const [fase, setFase] = useState<'tunggu' | 'tampil' | 'siap'>(perlu ? 'tunggu' : 'siap');

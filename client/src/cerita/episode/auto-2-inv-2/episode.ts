@@ -54,6 +54,7 @@ const KASUS: KonfigInvestigasi = {
   nomor: 2,
   judul: 'inv2.kasus.judul',
   awalan: 'inv2',
+  kait: 'inv2.kait',
   nasabah: 'yusuf',
   // Wajah Pak Yusuf saat membalas (./pemeran.ts: lega / senang -> lega, cemas / bingung -> cemas).
   balasan: { baik: 'lega', datar: 'cemas', janji: 'senang' },

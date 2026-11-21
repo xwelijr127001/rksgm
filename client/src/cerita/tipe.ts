@@ -308,6 +308,8 @@ export interface KonfigInvestigasi {
   bukti: BuktiInvestigasi[];
   /** Awalan kunci teks naskah kasus ('inv' = kasus 1, 'inv2' = kasus 2); lihat daftar di atas. */
   awalan: string;
+  /** T-094: kalimat kait kasus di hub Raksa Investigator (sampul dan baris "kasus berikutnya"), mis. "Petugas mencatat lajur 3. Benarkah?". */
+  kait: KunciTeks;
   /** Nasabah kasus ini (id pemeran; sama dengan `Episode.nasabah`): ucapannya membuka layar hasil. */
   nasabah: 'hendra' | 'yusuf';
   /** Wajah nasabah saat membalas tiap pesan (layar hasil dan latihan pesan). */

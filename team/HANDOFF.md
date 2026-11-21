@@ -4547,3 +4547,41 @@ The room picture is still cropped by the camera at the sides (the "SOGOK = NO" p
 - Episode keys `inv2.jalan.l1/l2/l4.*`, `inv2.jalan.l3.sebelum/tengah/sesudah/coba`, `inv2.jalan.sama`, `inv2.jalan.tertutup`, `inv2.jalan.struk.ket`, `inv2.jalan.form.jam`, `inv2.polis.klausul.judul` are no longer shown by these screens (left in place; Fullstack's files). `inv2.jalan.l3.hasil` is still shown after placing.
 - The success sentence "Jam 21:18 penumpang masih di dalam mobil." is in my dictionary, not in the script; PIC may want to see it.
 - `seni/investigasi/sensor.png` (the mosaic) is now unused.
+
+
+## T-094 (2026-11-21): "Raksa Investigator" hub at /investigator, hidden behind the flag (Fullstack)
+
+Spec: `team/REVIEW.md` "Investigator placement review (2026-11-21)" (Codex). NOT opened in a browser or on a phone (owner rule). Gate: `npm run typecheck` exit 0 (server + client), `client/dist` rebuilt = exact copy of the scratch build. Not committed. No save migration: episode ids, story saves and `raksa:investigasi:v1` are untouched.
+
+**Routes** (`App.tsx`, `cerita/investigasi/rute.ts`)
+- `/investigator` = the hub (`pages/Investigator.tsx`, lazy chunk). `/investigator/1` and `/investigator/2` = the SAME story player as `/cerita/auto-2-inv` and `/cerita/auto-2-inv-2` (same episode, same save), with the hub as the way back.
+- Old short URLs still open the case: `/cerita/investigator` -> `/investigator/1`, `/cerita/investigator/2` -> `/investigator/2` (so they now exit to the hub). `/cerita/auto-2-inv` and `/cerita/auto-2-inv-2` work as before and still exit to `/cerita`.
+- An unknown case number (`/investigator/9`) goes back to the hub. The hub needs no profile (walk-up guest, like the players).
+
+**Hub, two shapes, each one phone screen by calculation** (header 56, content room 544 at 360 x 640)
+- **Fresh device** (no stamp, no score, no story progress): Miss Raksa with the magnifier + "Kasus 1 · Truk di Tol", the frozen dashcam frame, "Petugas mencatat lajur 3. Benarkah?", "±5 menit · Main sendiri", ONE button "Buka Kasus 1". 404 px.
+  - The tap goes into the case WITHOUT the title card: the hub link carries the intent `lewati-judul` and the player does the title card's "Mulai selidiki" step itself before the first paint (`cerita/hp/PemainHP.tsx`). The guest lands on Miss Raksa's one briefing line, then the lane hunch. I kept that one line (it is the only place that says the driver claims lane 2); skipping it too would make it "one tap to the hunch" exactly as the review words it. One line of code decides it.
+  - Only the cover the hub actually showed is skipped: "Buka Kasus 2", "Main lagi" and the case list open the normal title card.
+- **Returning device**: primary button from `aksiUtamaHub` (`cerita/investigasi/hub.ts`): "Lanjutkan Kasus N" if a case has unfinished story progress (the player's "Lanjutkan / Mulai baru" gate is not asked a second time); else "Buka Kasus N" for the first case without a stamp; else "Main lagi" (the case with the lower best score, from its title card; best score and stamps stay). Below: officer card (stamps, rank), "Total x / 200" (+ "1 kasus lagi menuju Senior" at two stamps), the two cases with stamp and best score (each row opens its case; a finished case opens on its result), "Kasus 3 · segera hadir" locked, "Tamu baru" with a confirm dialog. 516 px (536 if the Senior line wraps).
+- "Tamu baru" on the hub clears the Investigator record and restarts BOTH cases (`tamuBaruSemuaKasus()` moved to `hub.ts`; the players use the same function).
+- Texts: new dictionary room `hubInv` (`i18n/kamus/hubInv.ts`, id/en/zh). Case titles and the hook line come from the episode: new case field `KonfigInvestigasi.kait` (`inv.kait`, `inv2.kait`). Art: only existing pieces (dashcam frame / `seniKasus`, reaction portrait, KartuPetugas, stamp icons).
+
+**Exits**
+- Player back arrow, result "Selesai", recovery dialog: `useRumahCerita()` = `/investigator` when the address is under the hub, else `/cerita` as before.
+- Case 1 result -> case 2 stays under the hub (`/investigator/2`); from `/cerita/auto-2-inv` it still goes to `/cerita/auto-2-inv-2`.
+- `ui/kit.tsx`: the "story player" path pattern for the soft button tap sound now also matches `/investigator/<n>` (otherwise the player under the hub would have lost that sound).
+
+**Discovery behind RAKSA_INVESTIGATOR (default off; direct links always work)**
+- Landing: one small text link "Raksa Investigator · kasus 5 menit" under the Mode Cerita door (`.lp-inv`), no third card. On phones the row is 36 px and the hero frame gives up exactly that (min 140 -> 104 px, only when the flag is on), so the room-code row sits where it sat before.
+- Cerita picker: ONE "Raksa Investigator" card (stamps n / 2, total) that opens the hub, instead of one card per case.
+
+**Skipped: item 5** ("Selidiki kasus ini" after the full Episode 1). The only place for it is auto-2's end screen, which is a measured one-screen layout I cannot look at; the brief said skip if it touches auto-2. The picker card already offers the hub from the same list.
+
+**Checks done (no browser, no test suite)**: one-off script (scratch, not committed): validator 0 messages for both cases after the new key; route table matches the episodes' case numbers; hub decision on real save modules: empty -> cover case 1; case 1 in progress -> continue 1; stamp 1 -> open case 2; case 2 in progress -> continue 2; two stamps (85, 70) -> play again case 2, (85, 100) -> case 1; after "Tamu baru" -> cover again. Entry bundle of the landing page loads the same files as before (the hub is its own chunk).
+
+**Open**
+- Nothing was seen on a screen. Most worth a look: the fresh cover, the returning hub with two stamps (tightest height), the landing page with the flag on at a short phone height (hero 36 px shorter), the single picker card.
+- The hub header shows language and sound buttons next to the title; at 360 px that row was sized by reading the CSS, not by eye.
+- The landing link names "kasus 5 menit"; the hub name is not translated ("Raksa Investigator" in id/en/zh).
+- The hub loads the player's stylesheets (it reuses the player shell), so its first load is not light; the next step is the player anyway.
+- A device that finished case 1's story but has no stamp for it (record cleared by hand) gets "Buka Kasus 1", which opens that result and records the stamp.

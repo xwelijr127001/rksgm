@@ -25,15 +25,17 @@ import type { PlayerLook } from '@shared/types';
 import { jedaMusik, playSfx } from '../../audio/audio';
 import { t } from '../../i18n';
 import { Modal } from '../../ui/kit';
-import { cariEpisode, DAFTAR_EPISODE } from '../episode';
+import { cariEpisode } from '../episode';
 import { jenisPenutur, ketukanKini } from '../hp/alur';
 import { BingkaiDashcam } from '../hp/arena/ArenaDashcam';
 import { babKini, barisTerlihat } from '../mesin';
-import { bacaDrafAktivitas, kunjunganAktivitas, mulaiBaru, simpanDrafAktivitas } from '../simpan';
+import { bacaDrafAktivitas, kunjunganAktivitas, simpanDrafAktivitas } from '../simpan';
 import type { Ekspresi, Episode, HasilMuat, KonfigInvestigasi, KunciTeks, NodeCerita, NodeInvestigasi, StateCerita } from '../tipe';
 import { PotretPikselHp } from '../ui/latar/piksel/PotretPikselHp';
 import { tokohPotret } from '../ui/latar/piksel/potret';
-import { adaRekaman, bacaRekaman, berlanggananInvestigasi, catatHasil, catatIntipKasus2, pangkat, STEMPEL_SENIOR, tamuBaru, TOTAL_MAKS, totalSkor, versiInvestigasi } from './simpan';
+import { tamuBaruSemuaKasus } from './hub';
+import { RUTE_HUB, ruteKasus, useRumahCerita } from './rute';
+import { adaRekaman, bacaRekaman, berlanggananInvestigasi, catatHasil, catatIntipKasus2, pangkat, STEMPEL_SENIOR, TOTAL_MAKS, totalSkor, versiInvestigasi } from './simpan';
 import { langkahTerlemah, MAKS_LANGKAH, poinKeberatan, poinLangkah, poinPesan, poinPutusan, putusanTepat, skorKasus, type LangkahNilai, type SkorKasus } from './skor';
 import { buktiTerkumpul, hasilKasus, PESAN, pernyataanDikoreksi, pernyataanTercatat, tebakanAwal, type Bukti, type HasilKeberatan, type Pernyataan, type Pesan } from './status';
 import { BukuCatatan, PotretReaksi, reaksiSah, type KoreksiPernyataan } from './ui/BukuCatatan';
@@ -209,10 +211,7 @@ function LayarCap({ ep, kalimat, tx, onLanjut }: { ep: Episode; kalimat: string;
  * sebelumnya (yang akan mencatat stempelnya lagi). Progres kasus yang sedang terbuka dimulai ulang oleh pemanggil. Episode
  * lain (bukan Investigator) dan profil tidak disentuh.
  */
-export function tamuBaruSemuaKasus(kini: Episode): void {
-  tamuBaru();
-  for (const e of DAFTAR_EPISODE) if (e.investigasi && e.id !== kini.id) mulaiBaru(e);
-}
+export { tamuBaruSemuaKasus }; // T-094: logikanya pindah ke ./hub.ts (hub memakainya tanpa kasus yang sedang terbuka)
 
 /** "Tamu baru": dua ketukan (tombol, lalu konfirmasi sebaris). Menghapus HANYA data Investigator, lalu `onMulaiUlang`. */
 function TamuBaru({ ep, tx, onMulaiUlang }: { ep: Episode; tx: Tx; onMulaiUlang: () => void }) {
@@ -610,6 +609,8 @@ export function HasilKasus({ ep, state, nama, look, tx, onMainLagi }: {
 }) {
   useSyncExternalStore(berlanggananInvestigasi, versiInvestigasi, () => 0);
   const navigasi = useNavigate();
+  // T-094: kasus yang dibuka dari hub Raksa Investigator (atau alamat pendeknya) pulang ke hub; kasus berikutnya tetap di bawah hub.
+  const rumah = useRumahCerita();
   const konfig = ep.investigasi;
   const kasus = konfig?.kasus ?? ep.id;
   const h = hasilKasus(state);
@@ -650,7 +651,7 @@ export function HasilKasus({ ep, state, nama, look, tx, onMainLagi }: {
   // T-090: kasus berikutnya (episode yang bisa dimainkan di build ini) dan total semua kasus.
   const berikut = konfig.berikut ? cariEpisode(konfig.berikut) : null;
   const berikutTamat = !!berikut?.investigasi && stempel.includes(berikut.investigasi.kasus);
-  const keBerikut = () => { catatIntipKasus2(); if (berikut) navigasi('/cerita/' + berikut.id); else setLembar('pratinjau'); };
+  const keBerikut = () => { catatIntipKasus2(); if (berikut) navigasi(rumah === RUTE_HUB && berikut.investigasi ? ruteKasus(berikut.investigasi.nomor) : '/cerita/' + berikut.id); else setLembar('pratinjau'); };
   const totalSemua = totalSkor({ terbaik: { ...r.terbaik, [kasus]: Math.max(r.terbaik[kasus] ?? 0, skor.total) } });
   const tampilTotal = !konfig.berikut || stempel.length >= 2;
   const nodePesan = ep.node.pesan;
@@ -675,7 +676,7 @@ export function HasilKasus({ ep, state, nama, look, tx, onMainLagi }: {
       <HasilInvestigasi skor={skor} nama={nama} look={look} stempel={stempel} pangkat={pangkat(stempel.length)} reaksi={putusanTepat(konfig.putusan, h.putusan) ? 'miss-bangga' : 'miss-berpikir'}
         stempelBaru={segar && !sebelum.stempel.includes(kasus)} rekor={segar && lama !== undefined && skor.total > lama} terbaik={Math.max(r.terbaik[kasus] ?? 0, lama ?? 0)}
         total={tampilTotal ? { skor: totalSemua, maks: TOTAL_MAKS, menuju: stempel.length === STEMPEL_SENIOR - 1 ? tx('inv.hasil.menuju') : undefined } : undefined}
-        onMainLagi={() => setLembar('lagi')} onSelesai={() => navigasi('/cerita')} teaser={kaki} />
+        onMainLagi={() => setLembar('lagi')} onSelesai={() => navigasi(rumah)} teaser={kaki} />
       {lembar === 'pratinjau' ? <PratinjauKasus2 onTutup={tutup} /> : null}
       {lembar === 'arsip' && konfig.arsip ? (
         <Modal judul={tx('inv.hasil.arsip')} onTutup={tutup} lebar={420}>

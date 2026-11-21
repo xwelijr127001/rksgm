@@ -7,6 +7,7 @@ export const TEKS_AUTO_2_INV_2_EN: Record<string, string> = {
   judul: 'Investigator · Case 2',
   ringkas: 'A family car, a night-time bump, and one trip receipt. Find the facts without accusing anyone, then explain them with respect. 5 minutes.',
   'inv.label': 'Case 2',
+  'inv2.kait': 'A family car... or carrying a passenger?', // T-094: kalimat kait di hub Raksa Investigator
   'inv2.kasus.judul': 'A Night on Jalan Melati',
   'pemeran.yusuf.nama': 'Mr Yusuf',
   'pemeran.yusuf.peran': 'Customer · car owner',

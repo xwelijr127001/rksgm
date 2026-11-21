@@ -14,7 +14,7 @@
  *   akibatnya = MejaAkibat; build biasa tidak memuat kodenya.
  */
 import { Suspense, lazy, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import type { Bahasa } from '@shared/bahasa';
 import type { MissionAnswer } from '@shared/types';
 import { playSfx } from '../../audio/audio';
@@ -31,6 +31,7 @@ import { GerbangKasus, HasilKasus, IsiBukuCatatan, LayarInvestigasi, jenisPeriks
 import { hiasReaksi } from '../investigasi/ui/reaksiBaris';
 import { LayarKeterangan, pakaiKeterangan } from '../investigasi/ui/LayarKeterangan';
 import { IkonInv } from '../investigasi/ui/dasar';
+import { niatHub, useRumahCerita } from '../investigasi/rute';
 import { buktiTerkumpul, pernyataanTercatat } from '../investigasi/status';
 import { IkonAlat, selaPembicara } from '../ui/bagian';
 import { IsiCatatanKasus } from '../ui/CatatanKasus';
@@ -119,7 +120,20 @@ function PemainHPInti({ ep, state, kendali, profil, bahasa, tx: txAsli }: {
   const [sematUntuk, setSematUntuk] = useState<string | null>(() => (jenisPeriksa(inv) && lengkap && periksaTersimpan(ep, state) > 0 ? kunciNode : null));
   // T-087 (review pilot butir 4): halaman dibuka dengan kasus yang belum selesai = gerbang "Lanjutkan kasus" / "Mulai baru"
   // (sekali per kunjungan halaman; tampilan saja, mesin tidak disentuh sampai tamu memilih).
-  const [gerbang, setGerbang] = useState(() => perluGerbangKasus(ep, kendali.muat));
+  // T-094: kasus yang dibuka dari hub Raksa Investigator membawa niat tamu (state navigasi): "Lanjutkan Kasus N" di hub sudah
+  // menjawab gerbang ini, jadi tidak ditanyakan dua kali.
+  const niat = niatHub(useLocation().state);
+  const rumah = useRumahCerita();
+  const [gerbang, setGerbang] = useState(() => perluGerbangKasus(ep, kendali.muat) && niat !== 'lanjut');
+  // T-094: hub baru saja menampilkan SAMPUL kasus ini (seni judul + ajakan "Buka Kasus 1"): kartu judul pemain tidak ditampilkan
+  // lagi. Ketukan di hub = ketukan "Mulai selidiki": satu aksi 'lanjut' sebelum gambar pertama, sekali, hanya di awal kasus.
+  const judulDilewati = useRef(false);
+  useLayoutEffect(() => {
+    if (judulDilewati.current) return;
+    judulDilewati.current = true;
+    if (niat === 'lewati-judul' && state.langkah === 0 && state.node === ep.mulai && inv?.jenis === 'judul') kirim({ jenis: 'lanjut' });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
   // T-080: 'periksa-sim' juga dua langkah (baris terakhir dibaca di adegan dulu, "Lanjut" membuka layar periksa SIM).
   const duaLangkah = inv?.jenis === 'catat' || jenisPeriksa(inv);
   const layarInv = !!inv && lengkap && inv.jenis !== 'hasil-investigasi' && (!duaLangkah || sematUntuk === kunciNode);
@@ -299,7 +313,7 @@ function PemainHPInti({ ep, state, kendali, profil, bahasa, tx: txAsli }: {
   return (
     <div className="player-ui cer-layar hp-layar" data-teks-besar={ep.tampilan?.teksBesar ? '' : undefined} data-kunci={kunciLayar ? '' : undefined} data-tampilan={tampilan} data-akhir-satu={akhirSatu ? '' : undefined} data-balas-terbuka={balasTerbuka ? '' : undefined}>
       <header className="hp-kepala">
-        <Link className="hp-kembali" to="/cerita" aria-label={t('cerita.kembaliDaftar')}><Arrow back /></Link>
+        <Link className="hp-kembali" to={rumah} aria-label={t('cerita.kembaliDaftar')}><Arrow back /></Link>
         <div className="hp-judul">
           <h1 className="sr-only">{tx(ep.judul)}</h1>
           {bab && tampilan !== 'akhir' ? (

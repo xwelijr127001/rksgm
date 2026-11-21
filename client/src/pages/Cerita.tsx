@@ -22,6 +22,9 @@ import { Arrow, PlayerShell } from '../components/PlayerShell';
 import { t, useBahasa } from '../i18n';
 import { useProfil } from '../state/profil';
 import { cariEpisode } from '../cerita/episode';
+import { daftarKasusHub } from '../cerita/investigasi/hub';
+import { RUTE_HUB } from '../cerita/investigasi/rute';
+import { bacaRekaman, berlanggananInvestigasi, TOTAL_MAKS, totalSkor, versiInvestigasi } from '../cerita/investigasi/simpan';
 import { LatarPanggung, TokohNasabah } from '../cerita/seni';
 import { PotretMissRaksa } from '../cerita/seni/tokoh/PotretMissRaksa';
 import { akhirDitemukan, berlanggananCerita, muatProgres, mulaiBaru, versiPenyimpananCerita } from '../cerita/simpan';
@@ -64,10 +67,9 @@ export default function Cerita() {
   // T-074 (owner, temporary): the card only with RAKSA_EP1_DEV=on (features.ep1Dev); /cerita/kenalan and /cerita/auto-2-dev
   // still open the episode directly when the card is hidden.
   const dev = cfg.status === 'ready' && cfg.config.ep1Dev ? cariEpisode('auto-2-dev') : null;
-  // T-076: Episode 1 Investigator (pilot) card only with RAKSA_INVESTIGATOR=on; /cerita/investigator opens it regardless.
+  // T-076 / T-094: with RAKSA_INVESTIGATOR=on the picker shows ONE "Raksa Investigator" card that opens the hub (/investigator),
+  // not one card per case; the hub and the case links work regardless of the flag.
   const inv = cfg.status === 'ready' && cfg.config.investigator ? cariEpisode('auto-2-inv') : null;
-  // T-090: Investigator case 2 sits behind the same flag; /cerita/investigator/2 opens it regardless.
-  const inv2 = cfg.status === 'ready' && cfg.config.investigator ? cariEpisode('auto-2-inv-2') : null;
   const demo = cfg.status === 'ready' && cfg.config.demoCerita ? cariEpisode('auto-1') : null;
   const kartu = (ep: Episode) => (
     <KartuEpisode
@@ -102,8 +104,7 @@ export default function Cerita() {
         </header>
 
         <ul className="cer-hub-daftar" aria-label={t('cerita.daftarEpisodeAria')}>
-          {inv ? kartu(inv) : null}
-          {inv2 ? kartu(inv2) : null}
+          {inv ? <KartuInvestigator ep={inv} bahasa={bahasa} nama={profil.nickname} /> : null}
           {dev ? kartu(dev) : null}
           {nyata ? kartu(nyata) : null}
           <BarisSegera />
@@ -113,6 +114,53 @@ export default function Cerita() {
         <p className="cer-hub-catatan">{t('cerita.catatanPerangkat')}</p>
       </main>
     </PlayerShell>
+  );
+}
+
+/**
+ * T-094: SATU kartu "Raksa Investigator" di daftar episode (dulu satu kartu per kasus): wajah Miss Raksa investigator, sampul
+ * kasus 1, stempel dan total perangkat ini, dan satu tautan ke hub /investigator. Kelas kartunya sama dengan KartuEpisode.
+ */
+function KartuInvestigator({ ep, bahasa, nama }: { ep: Episode; bahasa: Bahasa; nama: string }) {
+  useSyncExternalStore(berlanggananInvestigasi, versiInvestigasi, () => 0);
+  const tx = (k: string) => teksCerita(ep, k, bahasa, { nama });
+  const r = bacaRekaman();
+  const daftar = daftarKasusHub(r);
+  const stempel = daftar.filter((k) => k.stempel).length;
+  const status = daftar.length > 0 && stempel >= daftar.length ? 'selesai' : stempel > 0 || daftar.some((k) => k.status === 'jalan') ? 'lanjut' : 'baru';
+  const ekspresi: Ekspresi = status === 'selesai' ? 'lega' : 'cemas';
+  const idJudul = 'cer-ep-investigator';
+  const ketJenis = ep.jenis ? t(`cerita.jenisKet.${ep.jenis}`) : '';
+  return (
+    <li className="cer-ep" data-status={status} data-kartu-investigator="">
+      <span className="cer-ep-wajah" aria-hidden="true">
+        <span data-wajah-investigator="" style={{ display: 'block', width: 92, height: 92, imageRendering: 'pixelated', backgroundImage: `url(${potretInvestigator})`, backgroundSize: '768px 128px', backgroundPosition: '-662px -14px', backgroundRepeat: 'no-repeat' }} />
+      </span>
+      {ep.latar ? <SampulLatar ep={ep} ekspresi={ekspresi} tx={tx} /> : null}
+      <div className="cer-ep-isi">
+        <div className="cer-ep-teks">
+          {ep.jenis ? <span className="cer-ep-jenis" data-jenis={ep.jenis} title={ketJenis} aria-description={ketJenis}>{t(`cerita.jenis.${ep.jenis}`)}</span> : null}
+          <span className="cer-ep-jenis cer-ep-cepat" data-jenis="cepat">{t('cerita.durasi', { n: ep.durasiMenit })}</span>
+          <p className="cer-ep-meta">
+            <span>{t('hubInv.kartuMeta', { n: daftar.length })}</span>
+            <span aria-hidden="true">·</span>
+            <span>{t(`cerita.produk.${ep.produk}`)}</span>
+            <span aria-hidden="true">·</span>
+            <span>{t('cerita.durasi', { n: ep.durasiMenit })}</span>
+          </p>
+          <h2 id={idJudul}>{t('hubInv.nama')}</h2>
+          <p className="cer-ep-ringkas">{t('hubInv.kartuRingkas')}</p>
+          <p className="cer-ep-status" data-status={status}>
+            <span className="cer-ep-status-ikon" aria-hidden="true"><Icon name={status === 'selesai' ? 'cek' : status === 'lanjut' ? 'jam' : 'bintang'} size={16} /></span>
+            <span>{t('hubInv.kartuStempel', { n: stempel, total: daftar.length })}</span>
+            {stempel > 0 ? <span className="cer-ep-akhir">{t('hubInv.total')} {totalSkor(r)} / {TOTAL_MAKS}</span> : null}
+          </p>
+        </div>
+        <div className="cer-ep-aksi">
+          <Link className="primary-action" to={RUTE_HUB} aria-describedby={idJudul}>{t('hubInv.kartuBuka')} <Arrow /></Link>
+        </div>
+      </div>
+    </li>
   );
 }
 

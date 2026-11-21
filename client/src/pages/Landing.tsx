@@ -11,7 +11,7 @@ import { Arrow, PlayerShell } from '../components/PlayerShell';
 import { IkonMissPose } from '../art/IkonMissPose';
 import { t, useBahasa } from '../i18n';
 import { terjemahkanBawaan } from '../i18n/galat';
-import { useLegacyEnabled } from '../story/appConfig';
+import { useAppConfig, useLegacyEnabled } from '../story/appConfig';
 import { useProfil } from '../state/profil';
 
 type Acara = NonNullable<AcaraTerbuka['acara']>;
@@ -48,7 +48,7 @@ function PotretRaki() {
  * Seluruh kartu = tautan (target sentuh besar); nama tautan = judul + label aksi "Mulai" yang terlihat (perintah suara
  * "klik Mulai" berfungsi), keterangannya = kalimat (aria-labelledby/-describedby).
  */
-function ModeCerita() {
+function ModeCerita({ investigator }: { investigator: boolean }) {
   const { profil } = useProfil();
   const id = useId();
   const ke = profil ? '/cerita' : '/kenalan?lanjut=/cerita';
@@ -76,6 +76,10 @@ function ModeCerita() {
       <span className="lp-pintu-teks"><b className="lp-pintu-judul" id={id + 'j'}>{t('pemain.pintuCeritaJudul')}</b><span className="lp-pintu-isi lp-pintu-isi-lebar" id={id + 'i'}>{t('pemain.pintuCeritaIsi')}</span><span className="lp-pintu-isi lp-pintu-isi-hp" aria-hidden="true">{t('pemain.pintuCeritaIsiHp')}</span></span>
       <span className="lp-pintu-aksi" id={id + 'm'}>{t('pemain.pintuCeritaMulai')} <Arrow /></span>
     </Link>
+    {/* T-094: tautan KECIL ke hub Raksa Investigator di samping pintu main sendiri (bukan kartu ketiga), hanya dengan
+        RAKSA_INVESTIGATOR=on; /investigator sendiri selalu bisa dibuka. Di HP bingkai hero memendek setinggi baris ini
+        (player.css .lp-ada-inv) supaya baris kode room tetap di layar. */}
+    {investigator ? <p className="lp-inv"><Link className="lp-inv-tautan" to="/investigator" data-tautan-investigator="">{t('hubInv.tautan')} <Arrow /></Link></p> : null}
     {profil ? <div className="alur-sebagai lp-sebagai"><span className="alur-sebagai-avatar" aria-hidden="true"><Avatar look={profil.look} size={30} mood="senang" /></span><span className="alur-sebagai-nama">{t('alur.mainSebagai', { nama: profil.nickname })}</span><span aria-hidden="true">·</span><Link className="alur-sebagai-ubah" to="/kenalan?ubah=1" aria-label={t('alur.ubahProfilAria')}>{t('alur.ubahKecil')}</Link></div> : null}
   </section>;
 }
@@ -92,17 +96,19 @@ export default function Landing() {
   const legacy = useLegacyEnabled();
   const acara = useAcaraTerbuka(legacy);
   const { profil } = useProfil();
+  const cfg = useAppConfig();
+  const investigator = cfg.status === 'ready' && cfg.config.investigator;
   const [kodeSaran, setKodeSaran] = useState<string | null>(null);
   // Spanduk melayang (fixed), jadi kemunculannya tidak menggeser kartu yang hendak diketuk.
   // T-003 D-01: ilustrasi + sapaan (.lp-seni) DULUAN di DOM supaya di HP tampil paling atas & urutan baca = urutan lihat;
   // di desktop (>900px) grid menaruhnya kembali di kolom kanan (player.css, D-09).
-  return <><PemuatAwal /><PlayerShell className={'lp-halaman alur-landing' + (acara ? ' alur-ada-spanduk' : '') + (profil ? ' lp-ada-profil' : '')} footer judul={null}><main className="lp-utama"><div className="lp-seni"><WelcomeArt /></div><div className="lp-kiri">
+  return <><PemuatAwal /><PlayerShell className={'lp-halaman alur-landing' + (acara ? ' alur-ada-spanduk' : '') + (profil ? ' lp-ada-profil' : '') + (investigator ? ' lp-ada-inv' : '')} footer judul={null}><main className="lp-utama"><div className="lp-seni"><WelcomeArt /></div><div className="lp-kiri">
     <div className="lp-sapa">
       <span className="eyebrow">{t('pemain.landingEyebrow')}</span>
       <h1 className="lp-judul">{t('pemain.landingJudul1')}<br />{' '}<span>{t('pemain.landingJudul2')}</span></h1>
       <p className="lp-isi">{t('pemain.landingPilih')}</p>
     </div>
-    <ModeCerita />
+    <ModeCerita investigator={investigator} />
     <JoinGame kodeSaran={kodeSaran} />
     <span className="lp-catatan">{t('pemain.landingCatatan')}</span>
   </div></main>

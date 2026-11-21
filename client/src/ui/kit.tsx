@@ -760,8 +760,11 @@ export function AudioControls({ ringkas = false }: { ringkas?: boolean }) {
 const TOMBOL_ORANYE = '.primary-action, .btn-utama, .kj-utama, .lk-btn-utama, .meja-utama, .akh-utama, .lp-pintu-aksi';
 /** Staff authoring pages keep silent buttons (not the game). */
 const TANPA_SUARA_TOMBOL = /^\/(cms|admin)(\/|$)/;
-/** T-049: the story player route (an episode open, not the picker); tolerant of a hosting base path. */
-const DI_PEMAIN_CERITA = /\/cerita\/[^/]+/;
+/**
+ * T-049: the story player route (an episode open, not the picker); tolerant of a hosting base path.
+ * T-094: also the same player under the Raksa Investigator hub (/investigator/<n>; the hub page itself is not the player).
+ */
+const DI_PEMAIN_CERITA = /\/(cerita|investigator)\/[^/]+/;
 
 /** Panggil initAudio() pada interaksi pertama halaman. T-045: also the one default sound for orange buttons. */
 export function AudioUnlocker() {

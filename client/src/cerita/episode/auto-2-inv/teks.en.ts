@@ -3,6 +3,7 @@ export const TEKS_AUTO_2_INV_EN: Record<string, string> = {
   judul: 'Episode 1 · Investigator',
   ringkas: 'You are the investigator. Note what the witnesses say, collect evidence, then challenge the statement that is wrong. 5 minutes, play straight away.',
   'inv.label': 'Case 1',
+  'inv.kait': 'The officer wrote lane 3. Is that right?', // T-094: kalimat kait di hub Raksa Investigator
   'inv.kasus.judul': 'Truck on the Toll Road',
 
   'inv.bab.1.judul': 'Witness accounts',

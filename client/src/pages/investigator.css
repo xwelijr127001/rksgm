@@ -1,0 +1,42 @@
+/* T-094 (Fullstack): hub "Raksa Investigator" (/investigator, pages/Investigator.tsx). Cangkang = cangkang pemutar HP (.hp-layar,
+   kepala 56 px, .hp-main) dan komponen Investigator yang sudah ada (.iv-layar, .iv-tombol, .iv-total, kartu petugas .kp); di sini
+   hanya tata letak hub. Warna dan tepi mengikuti investigasi.css (tepi 2 px #212121, jingga #ff9000, krem #fff9f5). Tanpa gerak. */
+.inv-hub .hp-kepala { grid-template-columns: 44px minmax(0, 1fr) auto; }
+.inv-hub-kanan { display: flex; align-items: center; gap: 8px; }
+/* .player-ui h1 / h2 (player.css) memberi letter-spacing dan tebal sendiri: aturan di sini berawalan .inv-hub supaya menang. */
+.inv-hub .inv-hub-nama { margin: 0; letter-spacing: -.01em; }
+.inv-hub .inv-hub-nama:focus { outline: none; }
+.inv-hub .inv-hub-nama b { font-size: 18px; font-weight: 800; }
+
+/* kepala isi: Miss Raksa investigator + kasus yang dituju tindakan utama */
+.inv-hub-kepala { display: grid; grid-template-columns: 64px minmax(0, 1fr); gap: 12px; align-items: center; }
+.inv-hub-kepala[data-kecil] { grid-template-columns: 48px minmax(0, 1fr); gap: 10px; min-height: 48px; }
+.inv-hub .inv-hub-kasus { margin: 0; font-size: 20px; line-height: 26px; font-weight: 800; letter-spacing: -.01em; }
+.inv-hub .inv-hub-kepala[data-kecil] .inv-hub-kasus { font-size: 17px; line-height: 22px; }
+.inv-hub-sub { font-size: 14px; line-height: 18px; font-weight: 700; color: #5f5f5f; overflow: hidden; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 1; }
+
+/* ---- sampul (perangkat kosong) */
+/* berawalan .inv-hub: lembar gaya ini dan investigasi.css dimuat sebagai berkas terpisah, urutannya tidak dijamin */
+.inv-hub .inv-hub-sampul { gap: 10px; padding-top: 4px; }
+.inv-hub-sampul > :is(.dc-pita, .iv-seni-kasus) { justify-self: center; }
+.inv-hub-kait { font-size: 24px; line-height: 30px; font-weight: 800; letter-spacing: -.01em; }
+.inv-hub .inv-hub-durasi { font-size: 16px; line-height: 22px; }
+/* .hp-layar .primary-action (hp.css) = 52 px / 17 px: tombol utama hub ditetapkan di sini. */
+.inv-hub .inv-hub-utama { box-sizing: border-box; min-height: 56px; font-size: 18px; text-decoration: none; }
+.inv-hub .inv-hub-sampul .inv-hub-utama { min-height: 60px; font-size: 20px; }
+
+/* ---- pulang (ada stempel / skor / progres) */
+.inv-hub .inv-hub-pulang { gap: 8px; }
+.inv-hub-pulang .kp { justify-self: center; }
+.inv-hub-daftar { display: grid; gap: 4px; margin: 0; padding: 0; list-style: none; }
+.inv-hub-baris { display: grid; grid-template-columns: 32px minmax(0, 1fr) 12px; gap: 8px; align-items: center; min-height: 48px; box-sizing: border-box; padding: 4px 8px; border: 2px solid #212121; background: #ffffff; color: #212121; text-decoration: none; box-shadow: 0 2px 0 #212121; }
+.inv-hub-baris:active { translate: 0 2px; box-shadow: none; }
+.inv-hub-baris:focus-visible { outline: 3px solid #1d6fd1; outline-offset: 2px; }
+.inv-hub-baris[data-stempel] { background: #fff9f5; }
+.inv-hub-baris-teks { min-width: 0; display: grid; }
+.inv-hub-baris-teks b { font-size: 15px; line-height: 20px; font-weight: 800; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.inv-hub-baris-teks small { font-size: 13px; line-height: 16px; font-weight: 700; color: #5f5f5f; font-variant-numeric: tabular-nums; }
+.inv-hub-panah { font-size: 20px; line-height: 20px; font-weight: 800; color: #9a4f00; }
+.inv-hub-terkunci { display: flex; align-items: center; gap: 6px; min-height: 20px; padding: 0 10px; font-size: 14px; line-height: 20px; font-weight: 700; color: #5f5f5f; }
+.inv-hub-tamu { margin: 0; text-align: center; }
+.inv-hub-tamu .hp-tautan { min-height: 44px; }

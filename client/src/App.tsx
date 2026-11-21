@@ -46,6 +46,8 @@ const SoloMain = lazy(() => import('./pages/SoloMain'));
 const SoloHasil = lazy(() => import('./pages/SoloHasil'));
 const Cerita = lazy(() => import('./pages/Cerita'));
 const CeritaMain = lazy(() => import('./pages/CeritaMain'));
+// T-094: "Raksa Investigator" hub (own name and QR destination; the story player stays underneath).
+const Investigator = lazy(() => import('./pages/Investigator'));
 const Host = lazy(() => import('./pages/Host'));
 const Projector = lazy(() => import('./pages/Projector'));
 // PROTOTIPE meja kasus K11 (D-68): halaman lompat /meja hanya ada di build VITE_MEJA_KASUS=1.
@@ -253,10 +255,13 @@ export default function App() {
             {/* T-047: preload bar (pictures, first music, button SFX, story chunk) before the playable case opens. */}
             {/* T-064: short QR-able URL for Episode 1 Dev (walk-up guests). */}
             <Route path="/cerita/kenalan" element={<Navigate to="/cerita/auto-2-dev" replace />} />
-            {/* T-076: short QR-able URL for the Episode 1 Investigator pilot. */}
-            <Route path="/cerita/investigator" element={<Navigate to="/cerita/auto-2-inv" replace />} />
-            {/* T-090: Investigator kasus 2 "Malam di Jalan Melati" */}
-            <Route path="/cerita/investigator/2" element={<Navigate to="/cerita/auto-2-inv-2" replace />} />
+            {/* T-094: Raksa Investigator hub + its case players (/investigator/1, /investigator/2: the same story player and
+                saves as /cerita/auto-2-inv and /cerita/auto-2-inv-2, with the hub as the way back). */}
+            <Route path="/investigator" element={<Investigator />} />
+            <Route path="/investigator/:kasus" element={<PramuatCerita><CeritaMain /></PramuatCerita>} />
+            {/* T-076 / T-090: the old short URLs (QR codes, bookmarks) still open the case; they now land under the hub. */}
+            <Route path="/cerita/investigator" element={<Navigate to="/investigator/1" replace />} />
+            <Route path="/cerita/investigator/2" element={<Navigate to="/investigator/2" replace />} />
             <Route path="/cerita/:episode" element={<PramuatCerita><CeritaMain /></PramuatCerita>} />
             {ProtoMeja ? <Route path="/meja" element={<ProtoMeja />} /> : null}
             {ProtoKejadian ? <Route path="/kejadian" element={<ProtoKejadian />} /> : null}
