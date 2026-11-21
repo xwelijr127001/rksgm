@@ -66,6 +66,8 @@ export default function Cerita() {
   const dev = cfg.status === 'ready' && cfg.config.ep1Dev ? cariEpisode('auto-2-dev') : null;
   // T-076: Episode 1 Investigator (pilot) card only with RAKSA_INVESTIGATOR=on; /cerita/investigator opens it regardless.
   const inv = cfg.status === 'ready' && cfg.config.investigator ? cariEpisode('auto-2-inv') : null;
+  // T-090: Investigator case 2 sits behind the same flag; /cerita/investigator/2 opens it regardless.
+  const inv2 = cfg.status === 'ready' && cfg.config.investigator ? cariEpisode('auto-2-inv-2') : null;
   const demo = cfg.status === 'ready' && cfg.config.demoCerita ? cariEpisode('auto-1') : null;
   const kartu = (ep: Episode) => (
     <KartuEpisode
@@ -101,6 +103,7 @@ export default function Cerita() {
 
         <ul className="cer-hub-daftar" aria-label={t('cerita.daftarEpisodeAria')}>
           {inv ? kartu(inv) : null}
+          {inv2 ? kartu(inv2) : null}
           {dev ? kartu(dev) : null}
           {nyata ? kartu(nyata) : null}
           <BarisSegera />

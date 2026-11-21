@@ -26,6 +26,8 @@ import './akhir.css';
 /** T-077: pangkat investigator (sel lencana di seni/investigasi/pangkat.png) dan jumlah slot stempel kasus. */
 const SEL_PANGKAT = { muda: 0, investigator: 1, senior: 2, kepala: 3 } as const;
 const SLOT_STEMPEL = 4;
+/** T-091: sel stempel (ikon.png, 16 px) per id kasus di `stempel`: kasus 1 merah (sel 7), kasus 2 nila (sel 14); slot kosong = sel 8. */
+const SEL_STEMPEL: Readonly<Record<string, number>> = { 'kasus-1': 7, 'kasus-2': 14 };
 export type KartuInvestigasi = { stempel: string[]; pangkat: keyof typeof SEL_PANGKAT; /** T-078: stempel terakhir baru saja didapat (dicap dengan animasi). */ baru?: boolean };
 
 /** Tanda burung hantu Raksa 10 x 10 sel (cokelat logo #73502F, mata krem, paruh jingga). */
@@ -146,7 +148,7 @@ export function KartuPetugas({ nama, cap, ubahNama, varian = 'penuh', onBuka, lo
           {investigasi ? (
             <span className="kp-stempel" aria-hidden="true">
               {Array.from({ length: SLOT_STEMPEL }, (_, i) => (
-                <i key={i} data-isi={i < investigasi.stempel.length ? '' : undefined} data-baru={investigasi.baru && i === Math.min(SLOT_STEMPEL, investigasi.stempel.length) - 1 ? '' : undefined} style={{ backgroundImage: `url(${ikonInvUrl})`, backgroundPosition: `${i < investigasi.stempel.length ? -112 : -128}px 0` }} />
+                <i key={i} data-isi={i < investigasi.stempel.length ? '' : undefined} data-baru={investigasi.baru && i === Math.min(SLOT_STEMPEL, investigasi.stempel.length) - 1 ? '' : undefined} style={{ backgroundImage: `url(${ikonInvUrl})`, backgroundPosition: `${i < investigasi.stempel.length ? -16 * (SEL_STEMPEL[investigasi.stempel[i]!] ?? 7) : -128}px 0` }} data-kasus={investigasi.stempel[i]} />
               ))}
             </span>
           ) : <span className="kp-lulus"><Kilau className="kp-kilau-kaki" />{t('ceritaAkhir.kartuLulus')}</span>}

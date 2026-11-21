@@ -1,15 +1,21 @@
 /**
  * T-076 EPISODE 1 INVESTIGATOR (rencana Task 1): PENGHUBUNG antara mesin cerita dan komponen Task 2 (cerita/investigasi/ui).
  * Pemutar HP (hp/PemainHP.tsx) memanggil pintu-pintu ini hanya untuk episode ber-`investigasi`:
- *  - LayarInvestigasi: layar node ber-`investigasi` (judul, tebak, catat, bukti, periksa-sim, keberatan, cap, koreksi, putusan).
+ *  - LayarInvestigasi: layar node ber-`investigasi` (judul, tebak, catat, bukti, periksa-*, keberatan, cap, koreksi, putusan).
  *    Semua kemajuan lewat mesin (`onLanjut` = aksi lanjut, `onPilih` = aksi pilih), jadi muat ulang di tengah kasus kembali ke
  *    layar yang sama.
- *  - HasilKasus: layar akhir (node hasil-investigasi). T-087: dibuka dengan kalimat Pak Hendra (sesuai pesan yang dikirim), lalu
- *    rincian skor + kartu "Kasus 2 · segera hadir" + "Main lagi" / "Selesai". Rekaman perangkat (skor terbaik + stempel) dicatat
- *    sekali di sini. "Main lagi" = lembar: latih pilihan terlemah (LatihanKasus, TIDAK mengubah skor terbaik) / ulang dari awal /
- *    tamu baru; pada skor sempurna lembar itu menampilkan laporan petugas tol yang sudah dikoreksi.
+ *  - HasilKasus: layar akhir (node hasil-investigasi). T-087: dibuka dengan kalimat nasabah (sesuai pesan yang dikirim), lalu
+ *    rincian skor + kartu kasus berikutnya + "Main lagi" / "Selesai". Rekaman perangkat (skor terbaik + stempel) dicatat sekali di
+ *    sini. "Main lagi" = lembar: latih pilihan terlemah (LatihanKasus, TIDAK mengubah skor terbaik) / ulang dari awal / tamu
+ *    baru; pada skor sempurna lembar itu menampilkan pernyataan yang sudah dikoreksi.
  *  - GerbangKasus (T-087): masuk lagi dengan kasus yang belum selesai = "Lanjutkan kasus" / "Mulai baru" (dengan konfirmasi).
  *  - IsiBukuCatatan: buku catatan (Menu) dari state.
+ *
+ * T-090 (kasus berbasis DATA): tidak ada lagi isi kasus 1 yang tertanam di sini. Yang berbeda antar kasus dibaca dari
+ * `Episode.investigasi` (cerita/tipe.ts KonfigInvestigasi): urutan kartu / kartu tepat / pernyataan KEBERATAN (kasus dan
+ * latihan), kartu yang bisa diperbesar, teks koreksi, tebakan pembuka, gambar judul, nasabah dan balasannya, tabel putusan,
+ * kasus berikutnya, arsip. Kunci teks naskah memakai `konfig.awalan` (`kunci()`), mis. `inv.keb.cap` / `inv2.keb.cap`.
+ *
  * Teks naskah (kunci teks episode) diterjemahkan lewat <PenyediaTeksInvestigasi value={tx}>; teks antarmuka komponen ada di kamus
  * aplikasi `investigasi` (Task 2), teks pembungkus di sini di teks episode (`inv.ui.*`, `inv.hasil.*`, `inv.lagi.*`, ...).
  */
@@ -19,16 +25,18 @@ import type { PlayerLook } from '@shared/types';
 import { jedaMusik, playSfx } from '../../audio/audio';
 import { t } from '../../i18n';
 import { Modal } from '../../ui/kit';
+import { cariEpisode, DAFTAR_EPISODE } from '../episode';
 import { jenisPenutur, ketukanKini } from '../hp/alur';
 import { BingkaiDashcam } from '../hp/arena/ArenaDashcam';
 import { babKini, barisTerlihat } from '../mesin';
-import { bacaDrafAktivitas, kunjunganAktivitas, simpanDrafAktivitas } from '../simpan';
-import type { Ekspresi, Episode, HasilMuat, KunciTeks, NodeCerita, NodeInvestigasi, StateCerita } from '../tipe';
+import { bacaDrafAktivitas, kunjunganAktivitas, mulaiBaru, simpanDrafAktivitas } from '../simpan';
+import type { Ekspresi, Episode, HasilMuat, KonfigInvestigasi, KunciTeks, NodeCerita, NodeInvestigasi, StateCerita } from '../tipe';
 import { PotretPikselHp } from '../ui/latar/piksel/PotretPikselHp';
-import { adaRekaman, bacaRekaman, berlanggananInvestigasi, catatHasil, catatIntipKasus2, pangkat, tamuBaru, versiInvestigasi } from './simpan';
-import { langkahTerlemah, MAKS_LANGKAH, poinKeberatan, poinLangkah, poinPesan, poinPutusan, skorKasus, type LangkahNilai, type SkorKasus } from './skor';
-import { buktiTerkumpul, hasilKasus, PESAN, pernyataanDikoreksi, pernyataanTercatat, tebakanLajur, type Bukti, type HasilKeberatan, type Pesan } from './status';
-import { BukuCatatan, PotretReaksi } from './ui/BukuCatatan';
+import { tokohPotret } from '../ui/latar/piksel/potret';
+import { adaRekaman, bacaRekaman, berlanggananInvestigasi, catatHasil, catatIntipKasus2, pangkat, STEMPEL_SENIOR, tamuBaru, TOTAL_MAKS, totalSkor, versiInvestigasi } from './simpan';
+import { langkahTerlemah, MAKS_LANGKAH, poinKeberatan, poinLangkah, poinPesan, poinPutusan, putusanTepat, skorKasus, type LangkahNilai, type SkorKasus } from './skor';
+import { buktiTerkumpul, hasilKasus, PESAN, pernyataanDikoreksi, pernyataanTercatat, tebakanAwal, type Bukti, type HasilKeberatan, type Pernyataan, type Pesan } from './status';
+import { BukuCatatan, PotretReaksi, reaksiSah, type KoreksiPernyataan } from './ui/BukuCatatan';
 import { CapKeberatan } from './ui/CapKeberatan';
 import { PenyediaTeksInvestigasi } from './ui/dasar';
 import { HasilInvestigasi } from './ui/HasilInvestigasi';
@@ -37,17 +45,45 @@ import { KoreksiCatatan } from './ui/KoreksiCatatan';
 import { LayarKeberatan } from './ui/LayarKeberatan';
 import { KILAS_BARIS, pakaiKeterangan } from './ui/LayarKeterangan';
 import { LayarPutusan } from './ui/LayarPutusan';
+import { PeriksaPerjalanan } from './ui/PeriksaPerjalanan';
+import { PeriksaPolis } from './ui/PeriksaPolis';
 import { PeriksaSim } from './ui/PeriksaSim';
+import { seniKasus } from './ui/seniKasus';
 import { PratinjauKasus2, TeaserKasus } from './ui/TeaserKasus';
-import { TebakLajur } from './ui/TebakLajur';
+import { TebakLajur, type Lajur } from './ui/TebakLajur';
 import './ui/investigasi.css';
 import './ui/alur.css';
 
 type Tx = (k: KunciTeks) => string;
 
-/** Urutan kartu di layar keberatan (kartu yang tepat tidak di tempat pertama); kartu lain mengikuti urutan terkumpul. */
-const URUTAN_KARTU: readonly Bukti['id'][] = ['rambu', 'dashcam', 'sim'];
-const urutKartu = (bukti: Bukti[]): Bukti[] => [...bukti].sort((a, b) => URUTAN_KARTU.indexOf(a.id) - URUTAN_KARTU.indexOf(b.id));
+/** Kunci teks naskah kasus: `<awalan>.<ekor>` (awalan 'inv' = kasus 1, 'inv2' = kasus 2; daftar ekor di KonfigInvestigasi). */
+const kunci = (konfig: KonfigInvestigasi, ekor: string): KunciTeks => `${konfig.awalan}.${ekor}`;
+
+/** Urutan kartu di layar keberatan = `konfig.keberatan.urutan` (kartu yang tepat tidak di tempat pertama); kartu lain di belakang. */
+function urutKartu(konfig: KonfigInvestigasi, bukti: Bukti[]): Bukti[] {
+  const ke = (b: Bukti) => { const i = konfig.keberatan.urutan.indexOf(b.id); return i < 0 ? konfig.keberatan.urutan.length : i; };
+  return [...bukti].sort((a, b) => ke(a) - ke(b));
+}
+
+/** Teks layar KEBERATAN kasus (T-090): pertanyaan kasus hanya di percobaan pertama; tanpa `layar` = teks bawaan komponen. */
+function teksKeberatan(konfig: KonfigInvestigasi, percobaan: 0 | 1 | 2, tx: Tx): { tanya?: string; petunjuk1?: string; petunjuk2?: string } {
+  const l = konfig.keberatan.layar;
+  return l ? { tanya: percobaan === 0 ? tx(l.tanya) : undefined, petunjuk1: tx(l.petunjuk1), petunjuk2: tx(l.petunjuk2) } : {};
+}
+
+/** Teks layar putusan kasus (T-090); tanpa `putusanLayar` = teks bawaan komponen (kasus 1). */
+function teksPutusan(konfig: KonfigInvestigasi, tx: Tx): { ket?: string; sebab?: Record<'layak' | 'tambahan' | 'polis', string> } {
+  const l = konfig.putusanLayar;
+  return l ? { ket: tx(l.ket), sebab: { layak: tx(l.sebab.layak), tambahan: tx(l.sebab.tambahan), polis: tx(l.sebab.polis) } } : {};
+}
+
+/** Baris koreksi di buku catatan: teks kasus (`konfig.koreksi.baris`) atau baris kamus kasus 1 ("Laporan dikoreksi: lajur 2"). */
+function koreksiBuku(ep: Episode, state: StateCerita, tx: Tx): { pernyataan: Pernyataan; koreksi: KoreksiPernyataan } | null {
+  const p = pernyataanDikoreksi(ep, state);
+  if (!p) return null;
+  const k = ep.investigasi?.koreksi;
+  return { pernyataan: p, koreksi: { id: p.id, teks: k ? tx(k.baris) : t('investigasi.koreksi.baris') } };
+}
 
 /** T-079: sesudah "Sematkan": kalimat menulis sendiri 0,9 s, pin jatuh 0,3 s, lalu terbaca sebentar; baru cerita lanjut (md). */
 const JEDA_SEMAT_MS = 2000;
@@ -74,31 +110,61 @@ export function kilasBalikKini(ep: Episode, state: StateCerita): boolean {
   return !!ucapan && ucapan.teks in KILAS_BARIS;
 }
 
-// ------------------------------------------------------------------ periksa SIM: langkah yang bisa dilanjutkan (T-087)
+// ------------------------------------------------------------------ layar "periksa": langkah yang bisa dilanjutkan (T-087, T-090)
+
+/** Jenis node yang membuka layar periksa sesudah barisnya dibaca (SIM kasus 1; garis waktu perjalanan dan polis kasus 2). */
+const JENIS_PERIKSA: readonly NodeInvestigasi['jenis'][] = ['periksa-sim', 'periksa-perjalanan', 'periksa-polis'];
+export function jenisPeriksa(inv: NodeInvestigasi | undefined): boolean {
+  return !!inv && JENIS_PERIKSA.includes(inv.jenis);
+}
 
 /**
- * Langkah periksa SIM (0..2) disimpan sebagai DRAF kunjungan node itu (cerita/simpan.ts: satu draf per episode, kunci = node +
- * langkah mesin; "mulai baru" menghapusnya). Bukan progres mesin: hanya supaya muat ulang di tengah tiga ketukan itu tidak
- * mengulangnya dari awal.
+ * Kemajuan layar periksa disimpan sebagai DRAF kunjungan node itu (cerita/simpan.ts: satu draf per episode, kunci = node +
+ * langkah mesin; "mulai baru" menghapusnya). Bukan progres mesin: hanya supaya muat ulang di tengah layar itu tidak kembali ke
+ * baris pengantarnya. Nilai: periksa SIM = langkah 1..2 (0 = belum melewati langkah pertama); garis waktu / polis (T-090) =
+ * 1 + langkah (1 = layar sudah dibuka). > 0 = pemutar HP langsung membuka layar itu lagi sesudah muat ulang.
  */
-const DRAF_SIM = 'periksaSim';
-export function langkahSimTersimpan(ep: Episode, state: StateCerita): 0 | 1 | 2 {
+const DRAF_PERIKSA = 'periksaSim';
+export function periksaTersimpan(ep: Episode, state: StateCerita): number {
   const d = bacaDrafAktivitas(ep.id, kunjunganAktivitas(state));
-  const n = d && typeof d === 'object' ? (d as Record<string, unknown>)[DRAF_SIM] : null;
-  return n === 1 || n === 2 ? n : 0;
+  const n = d && typeof d === 'object' ? (d as Record<string, unknown>)[DRAF_PERIKSA] : null;
+  return typeof n === 'number' && Number.isFinite(n) && n > 0 && n < 100 ? Math.floor(n) : 0;
 }
-function simpanLangkahSim(ep: Episode, state: StateCerita, n: 0 | 1 | 2 | null): void {
-  simpanDrafAktivitas(ep.id, kunjunganAktivitas(state), n ? { [DRAF_SIM]: n } : {});
+function simpanPeriksa(ep: Episode, state: StateCerita, n: number | null): void {
+  simpanDrafAktivitas(ep.id, kunjunganAktivitas(state), n ? { [DRAF_PERIKSA]: n } : {});
+}
+
+/**
+ * T-090 node `periksa-perjalanan` / `periksa-polis` (kasus 2): komponen Designer dipasang seperti PeriksaSim. Kontraknya hanya
+ * `{ onSelesai }`; `awal` dan `onLangkah` (cara lanjut PeriksaSim) ikut dikirim sebagai prop tambahan yang boleh diabaikan
+ * komponennya. Layar yang sudah dibuka dicatat (draf = 1), jadi muat ulang kembali ke layar ini, bukan ke baris pengantarnya.
+ */
+function LayarPeriksa({ ep, state, jenis, onLanjut }: { ep: Episode; state: StateCerita; jenis: 'periksa-perjalanan' | 'periksa-polis'; onLanjut: () => void }) {
+  const [awal] = useState(() => Math.max(0, periksaTersimpan(ep, state) - 1));
+  useEffect(() => {
+    if (periksaTersimpan(ep, state) === 0) simpanPeriksa(ep, state, 1);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+  const lanjutan: object = { awal, onLangkah: (n: number) => simpanPeriksa(ep, state, Math.max(0, Math.floor(n)) + 1) };
+  const selesai = () => { simpanPeriksa(ep, state, null); onLanjut(); };
+  return jenis === 'periksa-perjalanan' ? <PeriksaPerjalanan onSelesai={selesai} {...lanjutan} /> : <PeriksaPolis onSelesai={selesai} {...lanjutan} />;
 }
 
 // ------------------------------------------------------------------ bagian kecil bersama
 
-/** Ucapan nasabah (Pak Hendra): potret piksel + nama + peran + kalimatnya. */
+/** Potret piksel seorang pemeran (dengan seni pinjaman `Pemeran.piksel` bila ada); pemeran tanpa potret piksel = tidak digambar. */
+function PotretPemeran({ ep, id, ekspresi, ukuran }: { ep: Episode; id: string; ekspresi: Ekspresi; ukuran: number }) {
+  const tokoh = tokohPotret(ep, id);
+  return tokoh ? <PotretPikselHp tokoh={tokoh} ekspresi={ekspresi} ukuran={ukuran} label="" /> : null;
+}
+
+/** Ucapan nasabah kasus (kasus 1 Pak Hendra, kasus 2 Pak Yusuf): potret piksel + nama + peran + kalimatnya. */
 function UcapanNasabah({ ep, tx, ekspresi, teks, kecil = false }: { ep: Episode; tx: Tx; ekspresi: Ekspresi; teks: string; kecil?: boolean }) {
-  const p = ep.pemeran[ep.nasabah];
+  const id = ep.investigasi?.nasabah ?? ep.nasabah;
+  const p = ep.pemeran[id];
   return (
-    <figure className="iv-ucap" data-kecil={kecil ? '' : undefined}>
-      <PotretPikselHp tokoh="hendra" ekspresi={ekspresi} ukuran={kecil ? 48 : 64} label="" />
+    <figure className="iv-ucap" data-kecil={kecil ? '' : undefined} data-nasabah={id}>
+      <PotretPemeran ep={ep} id={id} ekspresi={ekspresi} ukuran={kecil ? 48 : 64} />
       <figcaption>
         {p ? <b>{tx(p.nama)}<small>{tx(p.peran)}</small></b> : null}
         <q>{teks}</q>
@@ -108,32 +174,55 @@ function UcapanNasabah({ ep, tx, ekspresi, teks, kecil = false }: { ep: Episode;
 }
 
 /**
- * T-078 node `cap`: cap KEBERATAN menutupi layar 1,5 s (atau diketuk), LALU layar di bawahnya tinggal: petugas tol "kaget" +
- * kalimat keberatan; "Lanjut" baru meneruskan cerita (dulu cap langsung lanjut, jadi reaksinya tidak pernah terlihat).
+ * Potret di bawah cap KEBERATAN: potret reaksi kasus (`keberatan.reaksi` = nama sel potret reaksi; kasus 1: petugas tol "kaget",
+ * kasus 2: Pak Yusuf "terbuka", tenang, bukan pose malu) atau, bila namanya tidak dikenal / tidak ada, potret piksel pembuat
+ * pernyataan yang dibantah dengan wajah serius.
  */
-function LayarCap({ kalimat, tx, onLanjut }: { kalimat: string; tx: Tx; onLanjut: () => void }) {
+function PotretCap({ ep }: { ep: Episode }) {
+  const keb = ep.investigasi?.keberatan;
+  const reaksi = reaksiSah(keb?.reaksi);
+  if (!keb || reaksi) return <PotretReaksi reaksi={reaksi ?? 'tol-kaget'} ukuran={128} />;
+  return <span className="iv-cap-potret" aria-hidden="true"><PotretPemeran ep={ep} id={keb.pernyataan} ekspresi="serius" ukuran={128} /></span>;
+}
+
+/**
+ * T-078 node `cap`: cap KEBERATAN menutupi layar 1,5 s (atau diketuk), LALU layar di bawahnya tinggal: yang dibantah + kalimat
+ * keberatan; "Lanjut" baru meneruskan cerita (dulu cap langsung lanjut, jadi reaksinya tidak pernah terlihat).
+ */
+function LayarCap({ ep, kalimat, tx, onLanjut }: { ep: Episode; kalimat: string; tx: Tx; onLanjut: () => void }) {
   const [cap, setCap] = useState(true);
   // T-085: di pukulan KEBERATAN musik konfrontasi jatuh hening; efek 'keberatan' (CapKeberatan) = pukulan + sting di lubang itu.
   useEffect(() => { jedaMusik(HENING_KEBERATAN_S, NAIK_KEBERATAN_S); }, []);
   return (
     <section className="iv-layar iv-cap-bawah" data-cap-bawah="" aria-live="polite">
       {cap ? <CapKeberatan onSelesai={() => setCap(false)} /> : null}
-      <PotretReaksi reaksi="tol-kaget" ukuran={128} />
+      <PotretCap ep={ep} />
       {kalimat ? <p className="iv-cap-kalimat">{kalimat}</p> : null}
       <button type="button" className="primary-action iv-tombol" data-cap-lanjut="" onClick={onLanjut}>{tx('inv.ui.lanjut')}</button>
     </section>
   );
 }
 
-/** "Tamu baru": dua ketukan (tombol, lalu konfirmasi sebaris). Menghapus HANYA rekaman investigasi, lalu `onMulaiUlang`. */
-function TamuBaru({ tx, onMulaiUlang }: { tx: Tx; onMulaiUlang: () => void }) {
+/**
+ * T-090 "Tamu baru" dengan lebih dari satu kasus: hapus rekaman perangkat (skor, stempel) DAN arsipkan progres cerita kasus
+ * Investigator LAIN (cerita/simpan.ts `mulaiBaru`), supaya tamu berikutnya tidak membuka kasus lain langsung di layar hasil tamu
+ * sebelumnya (yang akan mencatat stempelnya lagi). Progres kasus yang sedang terbuka dimulai ulang oleh pemanggil. Episode
+ * lain (bukan Investigator) dan profil tidak disentuh.
+ */
+export function tamuBaruSemuaKasus(kini: Episode): void {
+  tamuBaru();
+  for (const e of DAFTAR_EPISODE) if (e.investigasi && e.id !== kini.id) mulaiBaru(e);
+}
+
+/** "Tamu baru": dua ketukan (tombol, lalu konfirmasi sebaris). Menghapus HANYA data Investigator, lalu `onMulaiUlang`. */
+function TamuBaru({ ep, tx, onMulaiUlang }: { ep: Episode; tx: Tx; onMulaiUlang: () => void }) {
   const [tanya, setTanya] = useState(false);
   if (!tanya) return <p className="iv-tamu"><button type="button" className="hp-tautan" data-tamu-baru="" onClick={() => setTanya(true)}>{tx('inv.ui.tamuBaru')}</button></p>;
   return (
     <div className="iv-tamu" role="group" aria-label={tx('inv.ui.tamuBaru')}>
       <p className="iv-label">{tx('inv.ui.tamuBaruKet')}</p>
       <p>
-        <button type="button" className="hp-tautan" data-tamu-baru-ya="" onClick={() => { tamuBaru(); setTanya(false); onMulaiUlang(); }}>{tx('inv.ui.tamuBaruYa')}</button>
+        <button type="button" className="hp-tautan" data-tamu-baru-ya="" onClick={() => { tamuBaruSemuaKasus(ep); setTanya(false); onMulaiUlang(); }}>{tx('inv.ui.tamuBaruYa')}</button>
         {' · '}
         <button type="button" className="hp-tautan" onClick={() => setTanya(false)}>{tx('inv.ui.batal')}</button>
       </p>
@@ -188,8 +277,8 @@ function LayarCatat({ ep, state, id, tx, onLanjut }: { ep: Episode; state: State
 
 /**
  * Node `bukti`: kartu bukti baru + kalimat temuannya (baris node), lalu "Simpan ke buku catatan" = lanjut. T-087: boleh beberapa
- * kartu sekaligus (dashcam + rambu dalam satu halaman buku), dan `balik` = kalimat "Tebakan awalmu: lajur X" sesudah rekaman
- * diputar. Tombolnya hidup sejak awal: ketukan selama slip masih meluncur langsung melanjutkan (tidak pernah menahan tamu).
+ * kartu sekaligus (dashcam + rambu dalam satu halaman buku), dan `balik` = kalimat "Tebakan awalmu: ..." di layar kartu
+ * `konfig.tebak.balikPada`. Tombolnya hidup sejak awal: ketukan selama slip masih meluncur langsung melanjutkan.
  */
 function LayarBukti({ ep, state, bukti, keterangan, balik, tx, onLanjut }: { ep: Episode; state: StateCerita; bukti: Bukti[]; keterangan: string; balik: string; tx: Tx; onLanjut: () => void }) {
   // T-080: kartu bukti baru DIJEPIT ke halaman "Bukti" buku catatan (slip meluncur masuk, klip menjepit; T-085: bunyi 'jepit').
@@ -206,6 +295,48 @@ function LayarBukti({ ep, state, bukti, keterangan, balik, tx, onLanjut }: { ep:
       {keterangan ? <p>{keterangan}</p> : null}
       <BukuCatatan pernyataan={[]} bukti={daftar} buktiBaru={baru} halaman="bukti" tanpaPensil />
       <button type="button" className="primary-action iv-tombol" data-simpan-bukti="" onClick={() => { playSfx('kertas'); onLanjut(); }}>{tx('inv.ui.simpan')}</button>
+    </section>
+  );
+}
+
+/**
+ * T-090 node `tebak` untuk kasus ber-`bingkai: 'seni'` (kasus 2): Miss Raksa bertanya, gambar `seniKasus(kasus).tebak`, lalu
+ * daftar pilihan `konfig.tebak.pilihan` (satu ketukan = pilihan mesin; tanpa benar / salah). Kasus 1 tetap ui/TebakLajur.
+ * Ukur 360 x 640 (hitung): kepala 68..94 + gambar <= 140 + 3 pilihan 52 + 2 x 6 + keterangan 20..40 + jarak 3 x 8 = 420..466 px.
+ */
+function TebakPilihan({ konfig, tanya, ket, pilihan, tx, onPilih }: { konfig: KonfigInvestigasi; tanya: string; ket: string; pilihan: string | null; tx: Tx; onPilih: (id: string) => void }) {
+  return (
+    <section className="iv-layar iv-tebak iv-tebak-daftar" data-tebak-pilihan="" aria-labelledby="iv-tebak-tanya">
+      <div className="iv-tebak-kepala">
+        <PotretReaksi reaksi="miss-detektif" ukuran={64} />
+        <p className="iv-tebak-balon"><b>Miss Raksa</b><span id="iv-tebak-tanya" tabIndex={-1} data-cer-fokus="">{tanya}</span></p>
+      </div>
+      <img className="iv-seni-kasus" src={seniKasus(konfig.kasus).tebak} alt="" />
+      <div className="iv-daftar" role="group" aria-labelledby="iv-tebak-tanya">
+        {konfig.tebak.pilihan.map((p) => (
+          <button key={p.id} type="button" className="iv-tebak-pilih" data-tebak={p.id} aria-pressed={pilihan === p.id} onClick={() => onPilih(p.id)}>{tx(p.teks)}</button>
+        ))}
+      </div>
+      {ket ? <p className="iv-label">{ket}</p> : null}
+    </section>
+  );
+}
+
+/**
+ * T-090 node `koreksi` untuk kasus ber-`konfig.koreksi` (kasus 2): halaman "Keterangan" buku catatan pemain; kalimat lama
+ * dicoret dan baris koreksi kasus ditulis di bawahnya ("Keterangan diperbarui: ..."). Kasus 1 tetap ui/KoreksiCatatan.
+ */
+function LayarKoreksi({ konfig, pernyataan, tx, onLanjut }: { konfig: KonfigInvestigasi; pernyataan: Pernyataan | undefined; tx: Tx; onLanjut: () => void }) {
+  useEffect(() => { playSfx('pensil'); }, []);
+  const k = konfig.koreksi;
+  return (
+    <section className="iv-layar iv-koreksi" data-koreksi-catatan="umum" aria-labelledby="iv-koreksi-judul">
+      <h2 id="iv-koreksi-judul" className="iv-tanya" tabIndex={-1} data-cer-fokus="">{k ? tx(k.judul) : t('investigasi.koreksi.judul')}</h2>
+      {k ? <p className="iv-label">{tx(k.ket)}</p> : null}
+      {pernyataan && k ? (
+        <BukuCatatan pernyataan={[pernyataan]} bukti={[]} halaman="keterangan" tanpaPensil koreksi={{ id: pernyataan.id, teks: tx(k.baris), baru: true }} />
+      ) : null}
+      <button type="button" className="primary-action iv-tombol" data-koreksi-lanjut="" onClick={onLanjut}>{tx('inv.ui.lanjut')}</button>
     </section>
   );
 }
@@ -232,33 +363,40 @@ export function LayarInvestigasi({ ep, state, node, tx, onLanjut, onPilih, onMul
     case 'judul':
       isi = (
         <>
-          {/* T-078: bingkai dashcam diam (sebelum benturan: rambu + lajur) di kartu pembuka */}
-          <JudulKasus nomor={konfig.nomor} judul={konfig.judul} onMulai={onLanjut} gambar={<BingkaiDashcam besar />} tokoh={<PotretReaksi reaksi="miss-detektif" ukuran={128} />} />
-          {adaRekaman() ? <TamuBaru tx={tx} onMulaiUlang={onMulaiUlang} /> : null}
+          {/* T-078: bingkai dashcam diam (sebelum benturan: rambu + lajur) di kartu pembuka; T-090: kasus ber-`bingkai: 'seni'` = gambar seniKasus */}
+          <JudulKasus nomor={konfig.nomor} judul={konfig.judul} onMulai={onLanjut} tokoh={<PotretReaksi reaksi="miss-detektif" ukuran={128} />}
+            gambar={konfig.bingkai === 'dashcam' ? <BingkaiDashcam besar /> : <img className="iv-seni-kasus" src={seniKasus(konfig.kasus).judul} alt="" />} />
+          {adaRekaman() ? <TamuBaru ep={ep} tx={tx} onMulaiUlang={onMulaiUlang} /> : null}
         </>
       );
       break;
-    case 'tebak':
-      // T-087: tebakan lajur di bingkai pembuka (tanpa benar / salah): satu ketukan = pilihan mesin '1'..'4' (tanda tebak:<n>).
-      isi = <TebakLajur key={node.id} pilihan={tebakanLajur(state) ?? undefined} onPilih={(n) => { if (onPilih(String(n))) playSfx('konfirmasi'); }} />;
+    case 'tebak': {
+      // T-087: tebakan pembuka (tanpa benar / salah): satu ketukan = pilihan mesin (tanda tebak:<id>). T-090: pilihannya data kasus.
+      const tebakan = tebakanAwal(ep, state);
+      const pilih = (id: string) => { if (onPilih(id)) playSfx('konfirmasi'); };
+      isi = konfig.bingkai === 'dashcam'
+        ? <TebakLajur key={node.id} pilihan={tebakan ? (Number(tebakan) as Lajur) : undefined} onPilih={(n) => pilih(String(n))} />
+        : <TebakPilihan key={node.id} konfig={konfig} tanya={node.jenis === 'pilihan' ? tx(node.tanya) : ''} ket={barisPertama} pilihan={tebakan} tx={tx} onPilih={pilih} />;
       break;
+    }
     case 'catat':
       isi = <LayarCatat key={node.id} ep={ep} state={state} id={inv.pernyataan} tx={tx} onLanjut={onLanjut} />;
       break;
     case 'bukti': {
       const id = [inv.bukti, ...(inv.juga ?? [])];
-      const tebakan = id.includes('dashcam') ? tebakanLajur(state) : null;
+      const tebakan = id.includes(konfig.tebak.balikPada) ? tebakanAwal(ep, state) : null;
       isi = <LayarBukti key={node.id} ep={ep} state={state} bukti={konfig.bukti.filter((x) => id.includes(x.id))} keterangan={barisPertama}
-        balik={tebakan ? tx(`inv.tebak.balik.${tebakan}`) : ''} tx={tx} onLanjut={onLanjut} />;
+        balik={tebakan ? tx(kunci(konfig, `tebak.balik.${tebakan}`)) : ''} tx={tx} onLanjut={onLanjut} />;
       break;
     }
     case 'keberatan': {
       const pernyataan = konfig.pernyataan.find((x) => x.id === inv.pernyataan);
       // Hanya kartu yang SUDAH terkumpul yang dikirim: kartu lain tidak bisa dipilih (mesin pun menolaknya lewat `jika`).
-      const bukti = urutKartu(buktiTerkumpul(ep, state));
+      const bukti = urutKartu(konfig, buktiTerkumpul(ep, state));
       if (!pernyataan) { isi = <section className="iv-layar"><button type="button" className="primary-action iv-tombol" onClick={onLanjut}>{tx('inv.ui.lanjut')}</button></section>; break; }
       isi = (
         <LayarKeberatan key={node.id} pernyataan={pernyataan} bukti={bukti} percobaan={inv.percobaan} tepat={inv.tepat}
+          perbesar={konfig.keberatan.perbesar ?? []} {...teksKeberatan(konfig, inv.percobaan, tx)}
           onPilih={(id) => {
             // Percobaan 2 (dipandu, node dialog): hanya kartu tepat yang melanjutkan. Percobaan 0 / 1: pilihan mesin.
             if (inv.percobaan === 2) { if (id === inv.tepat) onLanjut(); return; }
@@ -268,20 +406,31 @@ export function LayarInvestigasi({ ep, state, node, tx, onLanjut, onPilih, onMul
       break;
     }
     case 'cap':
-      isi = <LayarCap key={node.id} kalimat={barisPertama} tx={tx} onLanjut={onLanjut} />;
+      isi = <LayarCap key={node.id} ep={ep} kalimat={barisPertama} tx={tx} onLanjut={onLanjut} />;
       break;
-    case 'koreksi':
+    case 'koreksi': {
       // T-087 / T-088: petugas mencoret "3" dan menulis "2" (KoreksiCatatan); "Lanjut" = lanjut, efek node memasang koreksi:<id>.
-      isi = <KoreksiCatatan key={node.id} pernyataan={konfig.pernyataan.find((x) => x.id === inv.pernyataan)} onSelesai={onLanjut} />;
+      // T-090: kasus ber-`konfig.koreksi` memakai layar umum (halaman buku catatan pemain dengan baris koreksi kasus itu).
+      const pernyataan = konfig.pernyataan.find((x) => x.id === inv.pernyataan);
+      isi = konfig.koreksi
+        ? <LayarKoreksi key={node.id} konfig={konfig} pernyataan={pernyataan} tx={tx} onLanjut={onLanjut} />
+        : <KoreksiCatatan key={node.id} pernyataan={pernyataan} onSelesai={onLanjut} />;
       break;
-    case 'periksa-sim':
+    }
+    case 'periksa-sim': {
       // T-080: periksa SIM di meja wawancara (3 ketukan); selesai = lanjut ke node kartu bukti SIM. T-087: langkahnya disimpan
       // sebagai draf kunjungan, jadi muat ulang melanjutkan dari langkah yang sama.
-      isi = <PeriksaSim key={node.id} awal={langkahSimTersimpan(ep, state)} onLangkah={(n) => simpanLangkahSim(ep, state, n)}
-        onSelesai={() => { simpanLangkahSim(ep, state, null); onLanjut(); }} />;
+      const awal = Math.min(2, periksaTersimpan(ep, state)) as 0 | 1 | 2;
+      isi = <PeriksaSim key={node.id} awal={awal} onLangkah={(n) => simpanPeriksa(ep, state, n)}
+        onSelesai={() => { simpanPeriksa(ep, state, null); onLanjut(); }} />;
+      break;
+    }
+    case 'periksa-perjalanan':
+    case 'periksa-polis':
+      isi = <LayarPeriksa key={node.id} ep={ep} state={state} jenis={inv.jenis} onLanjut={onLanjut} />;
       break;
     case 'putusan':
-      isi = <LayarPutusan key={node.id} onPilih={(p) => { if (onPilih(p)) playSfx('konfirmasi'); }} />;
+      isi = <LayarPutusan key={node.id} {...teksPutusan(konfig, tx)} onPilih={(p) => { if (onPilih(p)) playSfx('konfirmasi'); }} />;
       break;
     default:
       isi = null;
@@ -330,13 +479,10 @@ export function GerbangKasus({ ep, state, tx, onLanjut, onBaru }: { ep: Episode;
 
 // ------------------------------------------------------------------ latihan pilihan terlemah (T-087, review pilot butir 6)
 
-const EKSPRESI_PESAN: Record<Pesan, Ekspresi> = { baik: 'lega', datar: 'bingung', janji: 'senang' };
-
 /** Latihan KEBERATAN: tiga percobaan seperti di kasus (petunjuk, lalu dipandu), dengan cap bila tepat. Tidak menyentuh mesin. */
-function LatihanKeberatan({ ep, state, tx, onHasil }: { ep: Episode; state: StateCerita; tx: Tx; onHasil: (h: HasilKeberatan) => void }) {
-  const acuan = Object.values(ep.node).map((n) => n.investigasi).find((i): i is Extract<NodeInvestigasi, { jenis: 'keberatan' }> => i?.jenis === 'keberatan');
-  const pernyataan = ep.investigasi?.pernyataan.find((x) => x.id === acuan?.pernyataan);
-  const tepat = acuan?.tepat ?? 'dashcam';
+function LatihanKeberatan({ ep, konfig, state, tx, onHasil }: { ep: Episode; konfig: KonfigInvestigasi; state: StateCerita; tx: Tx; onHasil: (h: HasilKeberatan) => void }) {
+  const pernyataan = konfig.pernyataan.find((x) => x.id === konfig.keberatan.pernyataan);
+  const tepat = konfig.keberatan.tepat;
   const [percobaan, setPercobaan] = useState<0 | 1 | 2>(0);
   /** Kalimat Miss Raksa sesudah kartu yang keliru (menunggu "Lanjut"). */
   const [sela, setSela] = useState<string | null>(null);
@@ -346,8 +492,8 @@ function LatihanKeberatan({ ep, state, tx, onHasil }: { ep: Episode; state: Stat
     return (
       <section className="iv-layar iv-cap-bawah" aria-live="polite">
         <CapKeberatan onSelesai={() => onHasil(cap)} />
-        <PotretReaksi reaksi="tol-kaget" ukuran={128} />
-        <p className="iv-cap-kalimat">{tx('inv.keb.cap')}</p>
+        <PotretCap ep={ep} />
+        <p className="iv-cap-kalimat">{tx(kunci(konfig, 'keb.cap'))}</p>
       </section>
     );
   }
@@ -360,25 +506,26 @@ function LatihanKeberatan({ ep, state, tx, onHasil }: { ep: Episode; state: Stat
     );
   }
   return (
-    <LayarKeberatan key={percobaan} pernyataan={pernyataan} bukti={urutKartu(buktiTerkumpul(ep, state))} percobaan={percobaan} tepat={tepat}
+    <LayarKeberatan key={percobaan} pernyataan={pernyataan} bukti={urutKartu(konfig, buktiTerkumpul(ep, state))} percobaan={percobaan} tepat={tepat}
+      perbesar={konfig.keberatan.perbesar ?? []} {...teksKeberatan(konfig, percobaan, tx)}
       onPilih={(id) => {
         if (id === tepat) { jedaMusik(HENING_KEBERATAN_S, NAIK_KEBERATAN_S); setCap(percobaan === 0 ? 'tepat' : percobaan === 1 ? 'tepat-kedua' : 'dipandu'); return; }
         if (percobaan === 2) return;
         playSfx('keliru');
-        setSela(tx(percobaan === 0 ? `inv.keb.salah.${id}` : `inv.keb.pandu.${id}`));
+        setSela(tx(kunci(konfig, percobaan === 0 ? `keb.salah.${id}` : `keb.pandu.${id}`)));
       }} />
   );
 }
 
-/** Latihan PESAN untuk Pak Hendra: tiga pesan dari node `pesan` episode (urutan naskah), pilih satu lalu kirim. */
-function LatihanPesan({ ep, tx, onHasil }: { ep: Episode; tx: Tx; onHasil: (p: Pesan) => void }) {
+/** Latihan PESAN untuk nasabah: tiga pesan dari node `pesan` episode (urutan naskah), pilih satu lalu kirim. */
+function LatihanPesan({ ep, konfig, tx, onHasil }: { ep: Episode; konfig: KonfigInvestigasi; tx: Tx; onHasil: (p: Pesan) => void }) {
   const node = ep.node.pesan;
   const pilihan = node?.jenis === 'pilihan' ? node.pilihan.filter((x) => (PESAN as readonly string[]).includes(x.id)) : [];
   const [pilih, setPilih] = useState<Pesan | null>(null);
   return (
     <section className="iv-layar iv-latihan-pesan" data-latihan-pesan="" aria-labelledby="iv-latihan-pesan-tanya">
-      <UcapanNasabah ep={ep} tx={tx} ekspresi="cemas" teks={tx('inv.pesan.2')} kecil />
-      <h2 id="iv-latihan-pesan-tanya" className="iv-tanya" tabIndex={-1} data-cer-fokus="">{tx('inv.pesan.tanya')}</h2>
+      <UcapanNasabah ep={ep} tx={tx} ekspresi="cemas" teks={tx(kunci(konfig, 'pesan.2'))} kecil />
+      <h2 id="iv-latihan-pesan-tanya" className="iv-tanya" tabIndex={-1} data-cer-fokus="">{tx(kunci(konfig, 'pesan.tanya'))}</h2>
       <div className="iv-daftar" role="radiogroup" aria-labelledby="iv-latihan-pesan-tanya">
         {pilihan.map((x) => (
           <button key={x.id} type="button" role="radio" aria-checked={pilih === x.id} className="iv-pesan-kartu" data-pesan={x.id} onClick={() => setPilih(x.id as Pesan)}>
@@ -396,7 +543,7 @@ function LatihanPesan({ ep, tx, onHasil }: { ep: Episode; tx: Tx; onHasil: (p: P
  * LATIHAN satu langkah yang dinilai, dengan konteks kasus (buku catatan dari state akhir). Hanya tampilan: mesin cerita, skor
  * kasus dan rekaman perangkat TIDAK disentuh, jadi skor terbaik permainan penuh tidak bisa berubah dari sini.
  */
-function LatihanKasus({ ep, state, langkah, skor, tx, onSelesai }: { ep: Episode; state: StateCerita; langkah: LangkahNilai; skor: SkorKasus; tx: Tx; onSelesai: () => void }) {
+function LatihanKasus({ ep, konfig, state, langkah, skor, tx, onSelesai }: { ep: Episode; konfig: KonfigInvestigasi; state: StateCerita; langkah: LangkahNilai; skor: SkorKasus; tx: Tx; onSelesai: () => void }) {
   const [putaran, setPutaran] = useState(0);
   const [hasil, setHasil] = useState<{ poin: number; ucapan?: { ekspresi: Ekspresi; teks: string }; kalimat: string } | null>(null);
   const maks = MAKS_LANGKAH[langkah];
@@ -430,9 +577,9 @@ function LatihanKasus({ ep, state, langkah, skor, tx, onSelesai }: { ep: Episode
   return (
     <>
       <div className="iv-layar">{pita}</div>
-      {langkah === 'keberatan' ? <LatihanKeberatan key={putaran} ep={ep} state={state} tx={tx} onHasil={(h) => setHasil({ poin: poinKeberatan(h), kalimat: tx('inv.keb.cap') })} />
-        : langkah === 'putusan' ? <LayarPutusan key={putaran} onPilih={(p) => { playSfx('konfirmasi'); setHasil({ poin: poinPutusan(p), kalimat: tx(`inv.putusan.${p}.1`) }); }} />
-          : <LatihanPesan key={putaran} ep={ep} tx={tx} onHasil={(p) => setHasil({ poin: poinPesan(p), ucapan: { ekspresi: EKSPRESI_PESAN[p], teks: tx(`inv.pesan.${p}.1`) }, kalimat: p === 'baik' ? '' : tx(`inv.pesan.${p}.2`) })} />}
+      {langkah === 'keberatan' ? <LatihanKeberatan key={putaran} ep={ep} konfig={konfig} state={state} tx={tx} onHasil={(h) => setHasil({ poin: poinKeberatan(h), kalimat: tx(kunci(konfig, 'keb.cap')) })} />
+        : langkah === 'putusan' ? <LayarPutusan key={putaran} {...teksPutusan(konfig, tx)} onPilih={(p) => { playSfx('konfirmasi'); setHasil({ poin: poinPutusan(konfig.putusan, p), kalimat: tx(kunci(konfig, `putusan.${p}.1`)) }); }} />
+          : <LatihanPesan key={putaran} ep={ep} konfig={konfig} tx={tx} onHasil={(p) => setHasil({ poin: poinPesan(p), ucapan: { ekspresi: konfig.balasan[p], teks: tx(kunci(konfig, `pesan.${p}.1`)) }, kalimat: p === 'baik' ? '' : tx(kunci(konfig, `pesan.${p}.2`)) })} />}
     </>
   );
 }
@@ -441,9 +588,16 @@ function LatihanKasus({ ep, state, langkah, skor, tx, onSelesai }: { ep: Episode
 
 /**
  * Layar hasil (node hasil-investigasi). Rekaman perangkat dicatat di sini (idempoten: aman untuk muat ulang & StrictMode).
- * T-087: (1) dibuka dengan kalimat Pak Hendra menurut pesan yang dikirim; (2) rincian skor. Cap stempel mendarat hanya bila
+ * T-087: (1) dibuka dengan kalimat nasabah menurut pesan yang dikirim; (2) rincian skor. Cap stempel mendarat hanya bila
  * stempel kasus ini BELUM ada sebelum hasil ini (rekaman dibaca sekali saat layar dipasang, sebelum dicatat); "Rekor baru!" hanya
- * bila skor terbaik yang sudah ada terlampaui. Ketukan pada kartu kasus 2 dihitung di rekaman perangkat (`intipKasus2`).
+ * bila skor terbaik yang sudah ada terlampaui.
+ * T-090:
+ *  - Total semua kasus ("Total 185 / 200") + "1 kasus lagi menuju Senior" (pada dua stempel) tampil di kasus tanpa kasus
+ *    berikutnya (kasus 2) dan, di kasus 1, begitu perangkat punya dua stempel.
+ *  - Kasus ber-`konfig.berikut` (kasus 1): kartu kasus 2 = TAUTAN ke episode itu (ketukan tetap dihitung di `intipKasus2`);
+ *    sesudah kasus 2 pernah ditamatkan kartunya menjadi tautan sebaris. Episode itu tidak ada di build ini = lembar pratinjau lama.
+ *  - Kasus tanpa `berikut` (kasus 2): tombol "Arsip kasus" (garis waktu + pesan yang dikirim, baca saja) dan tulisan
+ *    "Kasus 3 · segera hadir" (`konfig.segera`, teks saja).
  */
 export function HasilKasus({ ep, state, nama, look, tx, onMainLagi }: {
   ep: Episode;
@@ -456,31 +610,32 @@ export function HasilKasus({ ep, state, nama, look, tx, onMainLagi }: {
 }) {
   useSyncExternalStore(berlanggananInvestigasi, versiInvestigasi, () => 0);
   const navigasi = useNavigate();
-  const kasus = ep.investigasi?.kasus ?? ep.id;
+  const konfig = ep.investigasi;
+  const kasus = konfig?.kasus ?? ep.id;
   const h = hasilKasus(state);
-  const total = h ? skorKasus(h).total : null;
+  const total = h && konfig ? skorKasus(h, konfig.putusan).total : null;
   /** Rekaman SEBELUM hasil ini dicatat: dasar "stempel baru" dan "rekor baru". Muat ulang di layar ini = keduanya sudah lewat. */
   const [sebelum] = useState(() => bacaRekaman());
   useEffect(() => { if (total !== null) catatHasil(kasus, total); }, [kasus, total]);
   const [tahap, setTahap] = useState<'ucapan' | 'skor'>('ucapan');
-  const [lembar, setLembar] = useState<'lagi' | 'pratinjau' | null>(null);
+  const [lembar, setLembar] = useState<'lagi' | 'pratinjau' | 'arsip' | null>(null);
   const [latihan, setLatihan] = useState<LangkahNilai | null>(null);
   /** Perayaan (cap mendarat, "Rekor baru!", bunyinya) hanya pada tampilan pertama rincian skor, bukan sepulang dari latihan. */
   const [segar, setSegar] = useState(true);
-  if (!h) {
+  if (!h || !konfig) {
     // State tanpa ketiga hasil (seharusnya tidak terjadi di jalur naskah): tetap beri jalan keluar.
     return <section className="iv-layar"><button type="button" className="primary-action iv-tombol" onClick={onMainLagi}>{tx('inv.ui.lanjut')}</button></section>;
   }
-  const skor = skorKasus(h);
+  const skor = skorKasus(h, konfig.putusan);
   if (latihan) {
-    return <PenyediaTeksInvestigasi value={tx}><LatihanKasus key={latihan} ep={ep} state={state} langkah={latihan} skor={skor} tx={tx} onSelesai={() => setLatihan(null)} /></PenyediaTeksInvestigasi>;
+    return <PenyediaTeksInvestigasi value={tx}><LatihanKasus key={latihan} ep={ep} konfig={konfig} state={state} langkah={latihan} skor={skor} tx={tx} onSelesai={() => setLatihan(null)} /></PenyediaTeksInvestigasi>;
   }
   if (tahap === 'ucapan') {
     const akhir = state.akhir ? ep.akhir[state.akhir] : undefined;
     return (
       <section className="iv-layar iv-hendra" data-hasil-ucapan={h.pesan} aria-labelledby="iv-hendra-judul">
         <h2 id="iv-hendra-judul" className="iv-tanya" tabIndex={-1} data-cer-fokus="">{akhir ? tx(akhir.judul) : t('investigasi.hasil.judul')}</h2>
-        <UcapanNasabah ep={ep} tx={tx} ekspresi={EKSPRESI_PESAN[h.pesan]} teks={tx(`inv.hasil.hendra.${h.pesan}`)} />
+        <UcapanNasabah ep={ep} tx={tx} ekspresi={konfig.balasan[h.pesan]} teks={tx(kunci(konfig, `balas.${h.pesan}`))} />
         <button type="button" className="primary-action iv-tombol" data-lihat-hasil="" onClick={() => setTahap('skor')}>{tx('inv.hasil.lihat')}</button>
       </section>
     );
@@ -490,16 +645,59 @@ export function HasilKasus({ ep, state, nama, look, tx, onMainLagi }: {
   const stempel = r.stempel.includes(kasus) ? r.stempel : [...r.stempel, kasus];
   const lama = sebelum.terbaik[kasus];
   const lemah = langkahTerlemah(skor);
-  const dikoreksi = pernyataanDikoreksi(ep, state);
+  const dikoreksi = koreksiBuku(ep, state, tx);
   const tutup = () => setLembar(null);
+  // T-090: kasus berikutnya (episode yang bisa dimainkan di build ini) dan total semua kasus.
+  const berikut = konfig.berikut ? cariEpisode(konfig.berikut) : null;
+  const berikutTamat = !!berikut?.investigasi && stempel.includes(berikut.investigasi.kasus);
+  const keBerikut = () => { catatIntipKasus2(); if (berikut) navigasi('/cerita/' + berikut.id); else setLembar('pratinjau'); };
+  const totalSemua = totalSkor({ terbaik: { ...r.terbaik, [kasus]: Math.max(r.terbaik[kasus] ?? 0, skor.total) } });
+  const tampilTotal = !konfig.berikut || stempel.length >= 2;
+  const nodePesan = ep.node.pesan;
+  const pesanTerkirim = nodePesan?.jenis === 'pilihan' ? nodePesan.pilihan.find((x) => x.id === h.pesan) : undefined;
+  const kaki = konfig.berikut ? (
+    berikutTamat
+      ? <button type="button" className="iv-berikut" data-kasus-berikut={konfig.berikut} onClick={keBerikut}><b>{t('investigasi.kasus2.judul')}</b><span aria-hidden="true">›</span></button>
+      : <TeaserKasus onBuka={keBerikut} />
+  ) : konfig.arsip || konfig.segera ? (
+    <div className="iv-hasil-arsip">
+      {konfig.arsip ? (
+        <button type="button" className="iv-berikut" data-arsip-kasus="" aria-haspopup="dialog" onClick={() => setLembar('arsip')}>
+          <b>{tx('inv.hasil.arsip')}<small>{tx('inv.hasil.arsipKet')}</small></b><span aria-hidden="true">›</span>
+        </button>
+      ) : null}
+      {konfig.segera ? <p className="iv-segera" data-kasus-segera="">{tx(konfig.segera)}</p> : null}
+    </div>
+  ) : null;
   return (
     <PenyediaTeksInvestigasi value={tx}>
       {/* T-078: Miss Raksa "bangga" bila putusannya tepat (akhir tuntas), "berpikir" bila diluruskan */}
-      <HasilInvestigasi skor={skor} nama={nama} look={look} stempel={stempel} pangkat={pangkat(stempel.length)} reaksi={h.putusan === 'layak' ? 'miss-bangga' : 'miss-berpikir'}
+      <HasilInvestigasi skor={skor} nama={nama} look={look} stempel={stempel} pangkat={pangkat(stempel.length)} reaksi={putusanTepat(konfig.putusan, h.putusan) ? 'miss-bangga' : 'miss-berpikir'}
         stempelBaru={segar && !sebelum.stempel.includes(kasus)} rekor={segar && lama !== undefined && skor.total > lama} terbaik={Math.max(r.terbaik[kasus] ?? 0, lama ?? 0)}
-        onMainLagi={() => setLembar('lagi')} onSelesai={() => navigasi('/cerita')}
-        teaser={<TeaserKasus onBuka={() => { catatIntipKasus2(); setLembar('pratinjau'); }} />} />
+        total={tampilTotal ? { skor: totalSemua, maks: TOTAL_MAKS, menuju: stempel.length === STEMPEL_SENIOR - 1 ? tx('inv.hasil.menuju') : undefined } : undefined}
+        onMainLagi={() => setLembar('lagi')} onSelesai={() => navigasi('/cerita')} teaser={kaki} />
       {lembar === 'pratinjau' ? <PratinjauKasus2 onTutup={tutup} /> : null}
+      {lembar === 'arsip' && konfig.arsip ? (
+        <Modal judul={tx('inv.hasil.arsip')} onTutup={tutup} lebar={420}>
+          {/* T-090: kenang-kenangan kasus, baca saja: garis waktu + keterangan yang diperbarui + pesan yang dikirim tamu */}
+          <div className="iv-arsip" data-arsip-kasus-isi="">
+            <section className="iv-arsip-kartu" aria-labelledby="iv-arsip-garis">
+              <h3 id="iv-arsip-garis">{tx(konfig.arsip.judul)}</h3>
+              <ol className="iv-garis">
+                {konfig.arsip.garis.map((k, i) => <li key={k} data-sorot={i === konfig.arsip?.sorot ? '' : undefined}>{tx(k)}</li>)}
+              </ol>
+            </section>
+            {dikoreksi ? <BukuCatatan pernyataan={[dikoreksi.pernyataan]} bukti={[]} halaman="keterangan" tanpaPensil koreksi={dikoreksi.koreksi} /> : null}
+            {pesanTerkirim ? (
+              <section className="iv-arsip-kartu" aria-labelledby="iv-arsip-pesan">
+                <h3 id="iv-arsip-pesan">{tx(konfig.arsip.pesan)}</h3>
+                <p className="iv-arsip-pesan" data-pesan={h.pesan}>{tx(pesanTerkirim.teks)}</p>
+              </section>
+            ) : null}
+            <button type="button" className="akh-kedua iv-tombol" data-tutup-arsip="" onClick={tutup}>{tx('inv.hasil.tutup')}</button>
+          </div>
+        </Modal>
+      ) : null}
       {lembar === 'lagi' ? (
         <Modal judul={t('investigasi.hasil.mainLagi')} onTutup={tutup} lebar={420}>
           <div className="iv-lagi" data-lembar-main-lagi="">
@@ -513,16 +711,16 @@ export function HasilKasus({ ep, state, nama, look, tx, onMainLagi }: {
               </>
             ) : (
               <>
-                {/* Skor sempurna: hadiahnya laporan petugas tol yang sudah dikoreksi (halaman "Keterangan" buku catatan). */}
+                {/* Skor sempurna: hadiahnya pernyataan yang sudah dikoreksi (halaman "Keterangan" buku catatan). */}
                 <p className="iv-lagi-sempurna" data-hadiah-sempurna="">{tx('inv.lagi.sempurna')}</p>
-                {dikoreksi ? <BukuCatatan pernyataan={[dikoreksi]} bukti={[]} halaman="keterangan" tanpaPensil koreksi={{ id: dikoreksi.id, teks: t('investigasi.koreksi.baris') }} /> : null}
+                {dikoreksi ? <BukuCatatan pernyataan={[dikoreksi.pernyataan]} bukti={[]} halaman="keterangan" tanpaPensil koreksi={dikoreksi.koreksi} /> : null}
               </>
             )}
             <button type="button" className="iv-lagi-pilih" data-ulang-awal="" onClick={() => { tutup(); onMainLagi(); }}>
               <b>{tx('inv.lagi.awal')}</b>
               <span>{tx('inv.lagi.awalKet')}</span>
             </button>
-            <TamuBaru tx={tx} onMulaiUlang={() => { tutup(); onMainLagi(); }} />
+            <TamuBaru ep={ep} tx={tx} onMulaiUlang={() => { tutup(); onMainLagi(); }} />
           </div>
         </Modal>
       ) : null}
@@ -530,13 +728,12 @@ export function HasilKasus({ ep, state, nama, look, tx, onMainLagi }: {
   );
 }
 
-/** Buku catatan (Menu): pernyataan yang sudah disemat + kartu bukti yang sudah terkumpul (+ T-087: baris "Laporan dikoreksi"). */
+/** Buku catatan (Menu): pernyataan yang sudah disemat + kartu bukti yang sudah terkumpul (+ T-087: baris koreksi). */
 export function IsiBukuCatatan({ ep, state, tx }: { ep: Episode; state: StateCerita; tx: Tx }) {
-  const dikoreksi = pernyataanDikoreksi(ep, state);
+  const dikoreksi = koreksiBuku(ep, state, tx);
   return (
     <PenyediaTeksInvestigasi value={tx}>
-      <BukuCatatan pernyataan={pernyataanTercatat(ep, state)} bukti={buktiTerkumpul(ep, state)}
-        koreksi={dikoreksi ? { id: dikoreksi.id, teks: t('investigasi.koreksi.baris') } : undefined} />
+      <BukuCatatan pernyataan={pernyataanTercatat(ep, state)} bukti={buktiTerkumpul(ep, state)} koreksi={dikoreksi?.koreksi} />
     </PenyediaTeksInvestigasi>
   );
 }

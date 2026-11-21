@@ -31,6 +31,7 @@ import latarRuang from '../../seni/piksel/ep2-ruang-wawancara-latar.png';
 import mejaDepan from '../../seni/investigasi/meja-depan.png';
 import type { Baris, Ekspresi, Episode, KunciTeks, StateCerita } from '../../tipe';
 import { komposisiLatar } from '../../ui/latar/komposisi';
+import { idPikselPemeran } from '../../ui/latar/piksel/adegan';
 import { PotretReaksi } from './BukuCatatan';
 import { KilasBalik, type Kilas } from './KilasBalik';
 import { REAKSI_BARIS } from './reaksiBaris';
@@ -38,9 +39,14 @@ import { SerahDashcam, TvDinding } from './SerahDashcam';
 import './keterangan.css';
 
 /** Saksi yang bisa didudukkan (punya atlas piksel samping). */
-const SAKSI: readonly string[] = ['darto', 'tol', 'bima'];
+const SAKSI: readonly string[] = ['darto', 'tol', 'bima', 'yusuf', 'agus'];
 /** Kalimat kunci -> panel kilas balik. */
-export const KILAS_BARIS: Readonly<Record<string, Kilas>> = { 'inv.darto.3': 'darto', 'inv.tol.3': 'tol' };
+export const KILAS_BARIS: Readonly<Record<string, Kilas>> = { 'inv.darto.3': 'darto', 'inv.tol.3': 'tol', 'inv2.yusuf.2': 'benturan', 'inv2.agus.3': 'turun' };
+/**
+ * T-091: wajah saksi per baris (tampilan saja, menimpa `ekspresi` naskah). Pak Yusuf saat meluruskan keterangannya = TERBUKA:
+ * menjelaskan dengan tenang, kedua telapak tangan terbuka (wajah + badan 'terbuka', Ekspresi cerita 'tersenyum'); bukan pose malu.
+ */
+export const EKSPRESI_BARIS: Readonly<Record<string, Ekspresi>> = { 'inv2.akui.1': 'tersenyum' };
 /** Ketukan gerak saksi per baris. */
 type Gerak = 'condong' | 'mundur' | 'geleng' | 'usap' | 'angguk';
 export const GERAK_BARIS: Readonly<Record<string, Gerak>> = {
@@ -50,6 +56,11 @@ export const GERAK_BARIS: Readonly<Record<string, Gerak>> = {
   'inv.akui.1': 'mundur',
   'inv.akui.2': 'usap',
   'inv.akui.3': 'angguk',
+  // T-091, kasus 2
+  'inv2.yusuf.3': 'angguk',
+  'inv2.agus.2': 'angguk',
+  'inv2.agus.3': 'condong',
+  'inv2.keb-buka.2': 'mundur',
 };
 
 /** true = node ini digambar LayarKeterangan (bukan panggung adegan umum). */
@@ -119,7 +130,7 @@ export function LayarKeterangan({ ep, state, tx, nama, komposer, mulaiTugas }: {
   const saksi = (ucapan && SAKSI.includes(ucapan.siapa) ? ucapan.siapa : null)
     ?? [...sudah].reverse().find((b) => SAKSI.includes(b.siapa))?.siapa
     ?? k.hadir.find((x) => SAKSI.includes(x.id))?.id ?? null;
-  const ekspresi: Ekspresi = (ucapan && ucapan.siapa === saksi ? ucapan.ekspresi : k.hadir.find((x) => x.id === saksi)?.ekspresi) ?? 'netral';
+  const ekspresi: Ekspresi = (ucapan && ucapan.siapa === saksi ? EKSPRESI_BARIS[ucapan.teks] ?? ucapan.ekspresi : k.hadir.find((x) => x.id === saksi)?.ekspresi) ?? 'netral';
   const kunci = `${state.node}:${state.baris}`;
   const kilas = ucapan ? KILAS_BARIS[ucapan.teks] : undefined;
   const gerak = ucapan && ucapan.siapa === saksi ? GERAK_BARIS[ucapan.teks] : undefined;
@@ -153,7 +164,7 @@ export function LayarKeterangan({ ep, state, tx, nama, komposer, mulaiTugas }: {
             <span className="kt-latar" aria-hidden="true" style={{ backgroundImage: `url(${latarRuang})` }} />
             {/* T-083: TV dinding menggantikan papan tulis; menyala hanya saat serah terima rekaman dashcam */}
             <TvDinding key={serah ? `tv:${kunci}` : 'tv'} nyala={serah && saksi === 'darto'} />
-            {saksi ? <SaksiDuduk key={saksi} id={saksi} ekspresi={ekspresi} bicara={bicaraSaksi} gerak={gerak} serah={serah && saksi === 'darto'} /> : null}
+            {saksi ? <SaksiDuduk key={saksi} id={idPikselPemeran(ep, saksi)} ekspresi={ekspresi} bicara={bicaraSaksi} gerak={gerak} serah={serah && saksi === 'darto'} /> : null}
             <span className="kt-meja" aria-hidden="true" style={{ backgroundImage: `url(${mejaDepan})` }} />
             {serah && saksi === 'darto' ? <SerahDashcam key={kunci} /> : null}
             {k.telepon ? (

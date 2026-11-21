@@ -21,6 +21,9 @@ import type { CSSProperties } from 'react';
 import { t } from '../../../i18n';
 import { PotretPikselHp } from '../../ui/latar/piksel/PotretPikselHp';
 import buktiUrl from '../../seni/investigasi/bukti.png';
+import bukti2Url from '../../seni/investigasi/bukti-kasus2.png';
+import reaksi2Url from '../../seni/investigasi/reaksi-kasus2.png';
+import type { IdTokohPiksel } from '../../seni/piksel';
 import klipUrl from '../../seni/investigasi/klip.png';
 import pensilUrl from '../../seni/investigasi/pensil.png';
 import reaksiUrl from '../../seni/investigasi/reaksi.png';
@@ -32,22 +35,30 @@ import './buku.css';
  * Potret reaksi 64 x 64 (seni/investigasi/reaksi.png): tokoh + tanda emosi. T-084: Miss Raksa di episode ini = INVESTIGATOR:
  * memegang kaca pembesar (di mata: 'miss-berpikir' dan 'miss-detektif'; diturunkan: 'miss-bangga') dan memakai lencana detektif.
  */
-const SEL_REAKSI = { 'tol-kaget': 0, 'tol-mengaku': 1, 'darto-lega': 2, 'miss-berpikir': 3, 'miss-bangga': 4, 'miss-detektif': 5 } as const;
+const SEL_REAKSI = {
+  'tol-kaget': 0, 'tol-mengaku': 1, 'darto-lega': 2, 'miss-berpikir': 3, 'miss-bangga': 4, 'miss-detektif': 5,
+  // T-091, kasus 2 (seni/investigasi/reaksi-kasus2.png, 256 x 64): sel 100 + n
+  'yusuf-cemas': 100, 'yusuf-terbuka': 101, 'yusuf-lega': 102, 'agus-serius': 103,
+} as const;
 export type Reaksi = keyof typeof SEL_REAKSI;
+/** T-091: nama reaksi dari data kasus (`konfig.keberatan.reaksi`, string bebas) -> Reaksi yang ada, atau undefined. */
+export const reaksiSah = (nama: string | undefined): Reaksi | undefined => (nama && nama in SEL_REAKSI ? (nama as Reaksi) : undefined);
 export function PotretReaksi({ reaksi, ukuran = 64, label = '' }: { reaksi: Reaksi; ukuran?: 48 | 64 | 128; label?: string }) {
   // T-084: Miss Raksa pada 48 px = POTONGAN 1:1 (x 12..60, y 2..50 selnya), bukan pengecilan 0,75: kaca pembesar dan matanya
   // tetap piksel utuh. Sel lain pada 48 px tetap diperkecil (tanda emosinya ada di sudut sel).
   const potong = ukuran === 48 && reaksi.startsWith('miss-');
+  const kasus2 = SEL_REAKSI[reaksi] >= 100;
+  const sel = SEL_REAKSI[reaksi] % 100, lebar = kasus2 ? 256 : 384;
   const gaya = potong
-    ? { backgroundSize: '384px 64px', backgroundPosition: `${-SEL_REAKSI[reaksi] * 64 - 12}px -2px` }
-    : { backgroundSize: `${384 * ukuran / 64}px ${ukuran}px`, backgroundPosition: `${-SEL_REAKSI[reaksi] * ukuran}px 0` };
+    ? { backgroundSize: '384px 64px', backgroundPosition: `${-sel * 64 - 12}px -2px` }
+    : { backgroundSize: `${lebar * ukuran / 64}px ${ukuran}px`, backgroundPosition: `${-sel * ukuran}px 0` };
   return (
     <span className="iv-reaksi" data-reaksi={reaksi} {...(label ? { role: 'img', 'aria-label': label } : { 'aria-hidden': true })}
-      style={{ width: ukuran, height: ukuran, backgroundImage: `url(${reaksiUrl})`, ...gaya }} />
+      style={{ width: ukuran, height: ukuran, backgroundImage: `url(${kasus2 ? reaksi2Url : reaksiUrl})`, ...gaya }} />
   );
 }
 
-const TOKOH_PIKSEL = { darto: 'darto', petugasTol: 'tol' } as const;
+const TOKOH_PIKSEL: Readonly<Record<Pernyataan['siapa'], IdTokohPiksel>> = { darto: 'darto', petugasTol: 'tol', yusuf: 'yusuf', agus: 'agus' };
 
 /** Kartu pernyataan lama (T-077): potret + nama + kalimat (+ tombol "Sematkan"). Layar semat & KEBERATAN kini memakai buku. */
 export function KartuPernyataan({ pernyataan, tersemat = false, onSemat, reaksi, sorot = false, tx }: {
@@ -71,8 +82,11 @@ export function KartuPernyataan({ pernyataan, tersemat = false, onSemat, reaksi,
   );
 }
 
-/** Potongan gambar bukti 84 x 44 di slip (dari sel 96 x 68 seni/investigasi/bukti.png). */
-const POTONG_BUKTI: Record<Bukti['id'], [number, number]> = { dashcam: [6, 0], rambu: [102, 10], sim: [198, 12] };
+/** Potongan gambar bukti 84 x 44 di slip (dari sel 96 x 68 seni/investigasi/bukti.png; T-091 kasus 2: bukti-kasus2.png). */
+const POTONG_BUKTI: Record<Bukti['id'], readonly [string, number, number]> = {
+  dashcam: [buktiUrl, 6, 0], rambu: [buktiUrl, 102, 10], sim: [buktiUrl, 198, 12],
+  'foto-interior': [bukti2Url, 6, 10], struk: [bukti2Url, 102, 14], 'polis-kasus2': [bukti2Url, 198, 22],
+};
 
 export interface PilihBukti {
   terpilih: Bukti['id'] | null;
@@ -105,11 +119,11 @@ function BarisKeterangan({ p, keadaan, sorot, teks, koreksi }: { p: Pernyataan; 
 }
 
 function SlipBukti({ b, pilih, teks, baru }: { b: Bukti; pilih?: PilihBukti; teks: Tx; baru?: boolean }) {
-  const [px, py] = POTONG_BUKTI[b.id];
+  const [atlas, px, py] = POTONG_BUKTI[b.id];
   const isi = (
     <>
       <i className="bk-klip" aria-hidden="true" style={{ backgroundImage: `url(${klipUrl})` }} />
-      <span className="bk-slip-gambar" aria-hidden="true" style={{ backgroundImage: `url(${buktiUrl})`, backgroundPosition: `${-px}px ${-py}px` }}>
+      <span className="bk-slip-gambar" aria-hidden="true" style={{ backgroundImage: `url(${atlas})`, backgroundPosition: `${-px}px ${-py}px` }}>
         {pilih?.sorot === b.id ? <i className="bk-slip-sorot" data-bukti={b.id} /> : null}
       </span>
       <span className="bk-slip-teks"><b className="bk-tulisan">{teks(b.judul)}</b></span>

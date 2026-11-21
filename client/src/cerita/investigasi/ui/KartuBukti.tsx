@@ -5,11 +5,16 @@
  * dikurangi = bingkai diam. Props rencana: { bukti, terpilih?, sorot?, onPilih? } (+ opsional tx, redup).
  */
 import buktiUrl from '../../seni/investigasi/bukti.png';
+import bukti2Url from '../../seni/investigasi/bukti-kasus2.png';
 import { t } from '../../../i18n';
-import { IkonInv, useTx, type Bukti, type Tx } from './dasar';
+import { IkonInv, ikonBukti, useTx, type Bukti, type Tx } from './dasar';
 import './investigasi.css';
 
-const SEL: Record<Bukti['id'], number> = { dashcam: 0, rambu: 1, sim: 2 };
+/** Atlas dan sel 96 x 68 tiap kartu (kasus 1: bukti.png; T-091 kasus 2: bukti-kasus2.png). */
+const SEL: Record<Bukti['id'], readonly [string, number]> = {
+  dashcam: [buktiUrl, 0], rambu: [buktiUrl, 1], sim: [buktiUrl, 2],
+  'foto-interior': [bukti2Url, 0], struk: [bukti2Url, 1], 'polis-kasus2': [bukti2Url, 2],
+};
 
 export function KartuBukti({ bukti, terpilih = false, sorot = false, onPilih, tx, redup = false }: {
   bukti: Bukti;
@@ -23,12 +28,12 @@ export function KartuBukti({ bukti, terpilih = false, sorot = false, onPilih, tx
   const teks = useTx(tx);
   const isi = (
     <>
-      <span className="iv-bukti-gambar" aria-hidden="true" style={{ backgroundImage: `url(${buktiUrl})`, backgroundPosition: `${-SEL[bukti.id] * 96}px 0` }}>
+      <span className="iv-bukti-gambar" aria-hidden="true" style={{ backgroundImage: `url(${SEL[bukti.id][0]})`, backgroundPosition: `${-SEL[bukti.id][1] * 96}px 0` }}>
         {sorot ? <i className="iv-bukti-sorot" data-bukti={bukti.id} /> : null}
       </span>
       <span className="iv-bukti-teks">
         <b>{teks(bukti.judul)}</b>
-        <small><IkonInv nama={bukti.ikon} kali={1} />{teks(bukti.sumber)}</small>
+        <small><IkonInv nama={ikonBukti(bukti)} kali={1} />{teks(bukti.sumber)}</small>
       </span>
       {onPilih ? <span className="iv-bukti-tanda" aria-hidden="true">{terpilih ? '✓' : ''}</span> : null}
     </>

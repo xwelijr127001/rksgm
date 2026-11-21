@@ -14,8 +14,10 @@ import { EPISODE_AUTO_2 } from './auto-2/episode';
 import { EPISODE_AUTO_2_DEV } from './auto-2-dev/episode';
 // T-076: Episode 1 Investigator (pilot 5 menit di atas kasus yang sama; rute pendek /cerita/investigator).
 import { EPISODE_AUTO_2_INV } from './auto-2-inv/episode';
+// T-090: Investigator kasus 2 "Malam di Jalan Melati" (rute pendek /cerita/investigator/2).
+import { EPISODE_AUTO_2_INV_2 } from './auto-2-inv-2/episode';
 
-export const DAFTAR_EPISODE: Episode[] = [EPISODE_AUTO_1, EPISODE_AUTO_2, EPISODE_AUTO_2_DEV, EPISODE_AUTO_2_INV].filter((e): e is Episode => e !== null);
+export const DAFTAR_EPISODE: Episode[] = [EPISODE_AUTO_1, EPISODE_AUTO_2, EPISODE_AUTO_2_DEV, EPISODE_AUTO_2_INV, EPISODE_AUTO_2_INV_2].filter((e): e is Episode => e !== null);
 
 export function cariEpisode(id: string | undefined): Episode | null {
   return DAFTAR_EPISODE.find((e) => e.id === id) ?? null;

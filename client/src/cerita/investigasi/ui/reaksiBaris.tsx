@@ -22,6 +22,13 @@ export const REAKSI_BARIS: Readonly<Record<string, Reaksi>> = {
   'inv.akui.3': 'darto-lega',
   'inv.putusan.layak.1': 'miss-bangga',
   'inv.akhir.tuntas.1': 'miss-bangga',
+  // T-091, kasus 2 "Malam di Jalan Melati" (kunci naskah berawalan inv2.)
+  'inv2.buka.1': 'miss-detektif',
+  'inv2.selisih.1': 'miss-berpikir',
+  'inv2.keb-buka.3': 'miss-berpikir',
+  'inv2.akui.1': 'yusuf-terbuka',
+  'inv2.putusan.2': 'miss-detektif',
+  'inv2.putusan.polis.1': 'miss-bangga',
 };
 
 export function hiasReaksi(b: Baris): ReactNode {

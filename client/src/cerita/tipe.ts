@@ -42,6 +42,12 @@ export interface Pemeran {
   /** Peran singkat di bawah nama ("Nasabah", "Layanan Klaim"). */
   peran: KunciTeks;
   potret: JenisPotret;
+  /**
+   * T-090 (opt-in; tanpa nilai = id pemeran itu sendiri): pemeran ini MEMINJAM sprite / potret piksel pemeran lain (id di
+   * PERAN_PIKSEL, ui/latar/piksel/adegan.ts). Dipakai Investigator kasus 2 sebagai tokoh sementara (yusuf -> darto, agus -> tol)
+   * sampai seninya sendiri ada. Hanya gambar: nama, peran dan naskah tetap milik pemeran ini.
+   */
+  piksel?: IdPembicara;
   /** true = berdiri di panggung (nasabah). Pemeran lain hanya tampil sebagai potret bulat di kotak dialog. */
   diPanggung?: boolean;
 }
@@ -224,18 +230,24 @@ export type MusikNode = 'inv-investigasi' | 'inv-keterangan' | 'inv-keberatan' |
 
 /** Kartu bukti (kontrak rencana Task 1 -> Task 2; `judul` & `sumber` = kunci teks episode). */
 export interface BuktiInvestigasi {
-  id: 'dashcam' | 'rambu' | 'sim';
+  /** Kasus 1: dashcam, rambu, sim. Kasus 2 (T-090): foto-interior, struk, polis-kasus2. */
+  id: 'dashcam' | 'rambu' | 'sim' | 'foto-interior' | 'struk' | 'polis-kasus2';
   judul: KunciTeks;
   sumber: KunciTeks;
-  ikon: 'rekaman' | 'foto' | 'kartu';
+  ikon: 'rekaman' | 'foto' | 'kartu' | 'struk' | 'polis';
 }
 
 /** Pernyataan saksi yang bisa dicatat ke buku catatan (kontrak rencana; `teks` = kunci teks episode). */
 export interface PernyataanInvestigasi {
   id: string;
-  siapa: 'darto' | 'petugasTol';
+  /** Kasus 1: darto, petugasTol. Kasus 2 (T-090): yusuf (nasabah), agus (saksi). */
+  siapa: 'darto' | 'petugasTol' | 'yusuf' | 'agus';
   teks: KunciTeks;
 }
+
+/** Putusan klaim dan pesan untuk nasabah (id pilihan node `putusan` / `pesan`; tanda `putusan:<id>` / `pesan:<id>`). */
+export type PutusanInvestigasi = 'layak' | 'tambahan' | 'polis';
+export type PesanInvestigasi = 'baik' | 'datar' | 'janji';
 
 /**
  * Jenis investigasi sebuah node (rencana: catat, bukti, keberatan, putusan, hasil-investigasi; + judul & cap untuk kartu judul
@@ -255,6 +267,10 @@ export interface PernyataanInvestigasi {
  *  - tebak            : (T-087) node PILIHAN (id pilihan '1'..'4'): tebakan lajur di bingkai pembuka, tanda `tebak:<n>`. Tidak
  *                       dinilai (tanpa benar / salah); diingat untuk kalimat "Tebakan awalmu" sesudah rekaman diputar.
  *  - koreksi          : (T-087) node dialog; petugas mencoret catatannya (KoreksiCatatan), efek node memasang `koreksi:<id>`.
+ *  - periksa-perjalanan: (T-090, kasus 2) node dialog; sesudah barisnya dibaca, layar garis waktu perjalanan (ui/PeriksaPerjalanan)
+ *                       diputar; selesai = lanjut ke node kartu bukti 'struk'. Tampilan saja, seperti periksa-sim.
+ *  - periksa-polis    : (T-090, kasus 2) node dialog; satu ketukan pada klausul penggunaan (ui/PeriksaPolis); selesai = lanjut ke
+ *                       node kartu bukti 'polis-kasus2'. Tampilan saja.
  * `bukti.juga` (T-087): kartu bukti lain yang ikut dijepit di layar yang sama (satu halaman buku untuk dashcam + rambu).
  */
 export type NodeInvestigasi =
@@ -263,13 +279,26 @@ export type NodeInvestigasi =
   | { jenis: 'bukti'; bukti: BuktiInvestigasi['id']; juga?: BuktiInvestigasi['id'][] }
   | { jenis: 'tebak' }
   | { jenis: 'koreksi'; pernyataan: string }
+  | { jenis: 'periksa-perjalanan' }
+  | { jenis: 'periksa-polis' }
   | { jenis: 'keberatan'; pernyataan: string; tepat: BuktiInvestigasi['id']; percobaan: 0 | 1 | 2 }
   | { jenis: 'cap' }
   | { jenis: 'periksa-sim' }
   | { jenis: 'putusan' }
   | { jenis: 'hasil-investigasi' };
 
-/** Data kasus investigasi sebuah episode (`Episode.investigasi`). */
+/**
+ * Data kasus investigasi sebuah episode (`Episode.investigasi`). T-090: SEMUA yang berbeda antar kasus ada di sini (bukan di
+ * LayarInvestigasi / skor): nasabah, tebakan pembuka, KEBERATAN (pernyataan, kartu tepat, urutan), tabel putusan, teks koreksi,
+ * kasus berikutnya. Kunci teks naskah yang dibaca layar investigasi memakai `awalan` kasus:
+ *   <awalan>.tebak.balik.<idTebakan>   kalimat "Tebakan awalmu" di layar kartu bukti `tebak.balikPada`
+ *   <awalan>.keb.cap                   kalimat di bawah cap KEBERATAN (latihan; di kasus = baris node keb-cap)
+ *   <awalan>.keb.salah.<idBukti> / <awalan>.keb.pandu.<idBukti>   Miss Raksa sesudah kartu keliru (percobaan 0 / 1)
+ *   <awalan>.putusan.<putusan>.1       penjelasan Miss Raksa atas putusan itu
+ *   <awalan>.pesan.2 / .pesan.tanya / .pesan.<pesan>.1 / .pesan.<pesan>.2   obrolan nasabah (latihan pesan)
+ *   <awalan>.balas.<pesan>             kalimat nasabah yang membuka layar hasil
+ * Teks antarmuka pembungkus (`inv.ui.*`, `inv.hasil.*`, `inv.lagi.*`, `inv.latihan.*`, `inv.gerbang.*`) sama di semua kasus.
+ */
 export interface KonfigInvestigasi {
   /** Id kasus untuk rekaman perangkat (skor terbaik & stempel), mis. 'kasus-1'. */
   kasus: string;
@@ -277,6 +306,55 @@ export interface KonfigInvestigasi {
   judul: KunciTeks;
   pernyataan: PernyataanInvestigasi[];
   bukti: BuktiInvestigasi[];
+  /** Awalan kunci teks naskah kasus ('inv' = kasus 1, 'inv2' = kasus 2); lihat daftar di atas. */
+  awalan: string;
+  /** Nasabah kasus ini (id pemeran; sama dengan `Episode.nasabah`): ucapannya membuka layar hasil. */
+  nasabah: 'hendra' | 'yusuf';
+  /** Wajah nasabah saat membalas tiap pesan (layar hasil dan latihan pesan). */
+  balasan: Record<PesanInvestigasi, Ekspresi>;
+  /**
+   * Gambar kartu judul dan layar tebakan: 'dashcam' = bingkai dashcam hidup + keping lajur (kasus 1, ui/TebakLajur);
+   * 'seni' = gambar `seniKasus(kasus)` (ui/seniKasus.ts) + daftar pilihan tebakan.
+   */
+  bingkai: 'dashcam' | 'seni';
+  /**
+   * Tebakan pembuka (tidak dinilai): id pilihan = id pilihan node `tebak`, tanda `tebak:<id>`. `balikPada` = kartu bukti yang
+   * layarnya menampilkan kalimat "Tebakan awalmu" (kasus 1: rekaman dashcam; kasus 2: struk perjalanan).
+   */
+  tebak: { pilihan: { id: string; teks: KunciTeks }[]; balikPada: BuktiInvestigasi['id'] };
+  /**
+   * KEBERATAN: pernyataan yang dibantah, kartu yang tepat, urutan kartu di layar (kartu tepat tidak pertama), pertanyaan node.
+   * `layar` = teks layar KEBERATAN kasus ini (`tanya` tampil di percobaan pertama saja; `petunjuk1` / `petunjuk2` = catatan
+   * tempel percobaan kedua / dipandu); tanpa `layar` = teks bawaan komponen (kasus 1). `perbesar` = kartu yang gambarnya
+   * bisa diperbesar. `reaksi` = potret reaksi di bawah cap ('tol-kaget'); tanpa nilai = potret pembuat pernyataan.
+   */
+  keberatan: {
+    pernyataan: string;
+    tepat: BuktiInvestigasi['id'];
+    urutan: BuktiInvestigasi['id'][];
+    tanya: KunciTeks;
+    layar?: { tanya: KunciTeks; petunjuk1: KunciTeks; petunjuk2: KunciTeks };
+    perbesar?: BuktiInvestigasi['id'][];
+    reaksi?: string;
+  };
+  /** Tabel putusan kasus ini (kasus 1: layak 30 / tambahan 15 / polis 0; kasus 2: polis 30 / tambahan 15 / layak 0). */
+  putusan: Record<PutusanInvestigasi, 30 | 15 | 0>;
+  /** Teks layar putusan kasus ini (keterangan + alasan tiap kartu); tanpa nilai = teks bawaan komponen (kasus 1). */
+  putusanLayar?: { ket: KunciTeks; sebab: Record<PutusanInvestigasi, KunciTeks> };
+  /**
+   * Koreksi pernyataan: tanpa nilai = layar buku petugas tol (ui/KoreksiCatatan) dan baris kamus "Laporan dikoreksi: lajur 2"
+   * (kasus 1). Dengan nilai = layar umum: judul, keterangan, dan baris yang ditulis di bawah pernyataan itu di buku catatan.
+   */
+  koreksi?: { judul: KunciTeks; ket: KunciTeks; baris: KunciTeks };
+  /** Id episode kasus berikutnya yang BISA dimainkan (kartu di layar hasil = tautan ke sana). */
+  berikut?: string;
+  /** Tanpa `berikut`: tulisan "Kasus N · segera hadir" di layar hasil (teks saja). */
+  segera?: KunciTeks;
+  /**
+   * Arsip kasus di layar hasil (halaman baca saja): kartu garis waktu (`garis`, satu kunci teks per baris; `sorot` = indeks baris
+   * kejadian) dan pesan yang dipilih tamu (`pesan` = judul bagiannya).
+   */
+  arsip?: { judul: KunciTeks; garis: KunciTeks[]; sorot?: number; pesan: KunciTeks };
 }
 
 export interface NodeDialog extends NodeDasar {

@@ -12,17 +12,23 @@ import './investigasi.css';
 
 const URUTAN: readonly Putusan[] = ['tambahan', 'layak', 'polis'];
 
-export function LayarPutusan({ onPilih }: { onPilih: (p: Putusan) => void }) {
+export function LayarPutusan({ onPilih, ket, sebab }: {
+  onPilih: (p: Putusan) => void;
+  /** T-090 (Fullstack, kasus berbasis data): keterangan di bawah pertanyaan (teks jadi); tanpa nilai = teks kasus 1 di kamus. */
+  ket?: string;
+  /** T-090: alasan singkat tiap kartu putusan untuk kasus ini (teks jadi); tanpa nilai = alasan kasus 1 di kamus. */
+  sebab?: Partial<Record<Putusan, string>>;
+}) {
   const [pilih, setPilih] = useState<Putusan | null>(null);
   return (
     <section className="iv-layar iv-putusan" data-layar-putusan="" aria-labelledby="iv-putusan-tanya">
       <h2 id="iv-putusan-tanya" className="iv-tanya" tabIndex={-1} data-cer-fokus="">{t('investigasi.putusan.tanya')}</h2>
-      <p className="iv-label">{t('investigasi.putusan.ket')}</p>
+      <p className="iv-label">{ket ?? t('investigasi.putusan.ket')}</p>
       <div className="iv-daftar" role="radiogroup" aria-labelledby="iv-putusan-tanya">
         {URUTAN.map((p) => (
           <button key={p} type="button" role="radio" aria-checked={pilih === p} className="iv-putusan-kartu" data-putusan={p} onClick={() => setPilih(p)}>
             <IkonInv nama={p} />
-            <span className="iv-putusan-teks"><b>{t(`investigasi.putusan.${p}`)}</b><small>{t(`investigasi.putusan.${p}.sebab`)}</small></span>
+            <span className="iv-putusan-teks"><b>{t(`investigasi.putusan.${p}`)}</b><small>{sebab?.[p] ?? t(`investigasi.putusan.${p}.sebab`)}</small></span>
             <span className="iv-bukti-tanda" aria-hidden="true">{pilih === p ? '✓' : ''}</span>
           </button>
         ))}

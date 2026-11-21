@@ -255,6 +255,8 @@ export default function App() {
             <Route path="/cerita/kenalan" element={<Navigate to="/cerita/auto-2-dev" replace />} />
             {/* T-076: short QR-able URL for the Episode 1 Investigator pilot. */}
             <Route path="/cerita/investigator" element={<Navigate to="/cerita/auto-2-inv" replace />} />
+            {/* T-090: Investigator kasus 2 "Malam di Jalan Melati" */}
+            <Route path="/cerita/investigator/2" element={<Navigate to="/cerita/auto-2-inv-2" replace />} />
             <Route path="/cerita/:episode" element={<PramuatCerita><CeritaMain /></PramuatCerita>} />
             {ProtoMeja ? <Route path="/meja" element={<ProtoMeja />} /> : null}
             {ProtoKejadian ? <Route path="/kejadian" element={<ProtoKejadian />} /> : null}

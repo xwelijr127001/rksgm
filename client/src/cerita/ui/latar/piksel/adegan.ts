@@ -42,7 +42,7 @@ export interface PeranPiksel {
 export const PERAN_PIKSEL: Readonly<Partial<Record<IdPembicara, PeranPiksel>>> = {
   missRaksa: { tokoh: 'missRaksa', tempat: 'balikMeja', pose: 'berdiri', hadap: 'kanan' },
   // D-93: seni Hendra & tokoh samping menghadap KANAN penonton; hadap 'kiri' di adegan = dicerminkan di panggung.
-  ...Object.fromEntries((['hendra', 'rudi', 'bima', 'darto', 'admin', 'tol', 'polisi'] as const).map((id) => [id, { tokoh: id, tempat: 'slot', pose: 'berdiri', hadap: 'kanan', satuArah: 'kanan' } satisfies PeranPiksel])),
+  ...Object.fromEntries((['hendra', 'rudi', 'bima', 'darto', 'admin', 'tol', 'polisi', 'yusuf', 'agus'] as const).map((id) => [id, { tokoh: id, tempat: 'slot', pose: 'berdiri', hadap: 'kanan', satuArah: 'kanan' } satisfies PeranPiksel])),
 };
 /** Slot berdiri per ruang (ruang-ep2.json `slot` 1..3). */
 export const MAKS_SLOT = 3;
@@ -74,13 +74,22 @@ export type HasilAdapter = { piksel: AdeganPiksel; alasan: null } | { piksel: nu
 
 const tolak = (alasan: string): HasilAdapter => ({ piksel: null, alasan });
 
+/**
+ * T-090: id pemeran yang seninya dipakai untuk `id` (`Pemeran.piksel`: pemeran yang meminjam sprite pemeran lain, mis.
+ * Investigator kasus 2 yusuf -> darto); tanpa pinjaman = `id` sendiri. Episode tanpa `piksel` tidak berubah.
+ */
+export function idPikselPemeran(ep: Partial<Pick<Episode, 'pemeran'>>, id: IdPembicara): IdPembicara {
+  const p = ep.pemeran && Object.prototype.hasOwnProperty.call(ep.pemeran, id) ? ep.pemeran[id] : undefined;
+  return p?.piksel ?? id;
+}
+
 /** Komposisi latar -> adegan piksel, atau alasan tetap ilustrasi. */
-export function adeganPiksel(ep: Pick<Episode, 'latar'>, k: KomposisiLatar): HasilAdapter {
+export function adeganPiksel(ep: Pick<Episode, 'latar'> & Partial<Pick<Episode, 'pemeran'>>, k: KomposisiLatar): HasilAdapter {
   const ruang = ep.latar?.lokasi[k.lokasi]?.piksel;
   if (!ruang) return tolak(`lokasi ${k.lokasi || '(kosong)'} tanpa ruang piksel`);
   const tokoh: TokohDiPiksel[] = [];
   for (const h of k.hadir) {
-    const p = PERAN_PIKSEL[h.id];
+    const p = PERAN_PIKSEL[idPikselPemeran(ep, h.id)];
     if (!p) return tolak(`pemeran ${h.id} tanpa atlas piksel`);
     if (p.tempat === 'balikMeja' && tokoh.some((x) => x.tempat === 'balikMeja')) return tolak('tempat balikMeja ganda');
     tokoh.push({ ...p, id: h.id, ekspresi: h.ekspresi, bicara: h.bicara, slot: 0, jumlahSlot: 0, cermin: false });
@@ -98,7 +107,7 @@ export function adeganPiksel(ep: Pick<Episode, 'latar'>, k: KomposisiLatar): Has
   });
   let telepon: AdeganPiksel['telepon'] = null;
   if (k.telepon) {
-    const p = PERAN_PIKSEL[k.telepon.id];
+    const p = PERAN_PIKSEL[idPikselPemeran(ep, k.telepon.id)];
     if (!p) return tolak(`telepon ${k.telepon.id} tanpa atlas piksel`);
     telepon = { id: k.telepon.id, tokoh: p.tokoh, ekspresi: k.telepon.ekspresi, bicara: k.telepon.bicara };
   }

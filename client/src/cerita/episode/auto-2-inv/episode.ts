@@ -25,7 +25,7 @@
  * pesan:<baik|datar|janji>. Dua akhir (penjaga episode mewajibkan >= 2): `tuntas` = putusan layak, `tinjau` = putusan lain
  * (diluruskan Miss Raksa; klaim tetap dijamin di kedua akhir). Status Pak Hendra (30 = Cemas) hanya berubah oleh pesan.
  */
-import type { Baris, CueLatar, Efek, Ekspresi, Episode, IdNode, Kondisi, MusikNode, NodeCerita, NodeInvestigasi } from '../../tipe';
+import type { Baris, CueLatar, Efek, Ekspresi, Episode, IdNode, KonfigInvestigasi, Kondisi, MusikNode, NodeCerita, NodeInvestigasi } from '../../tipe';
 import { LAJUR, tandaBukti, tandaCatat, tandaKeberatan, tandaKoreksi, tandaPesan, tandaPutusan, tandaTebak } from '../../investigasi/status';
 import { EPISODE_AUTO_2 } from '../auto-2/episode';
 import { EPISODE_AUTO_2_DEV } from '../auto-2-dev/episode';
@@ -42,10 +42,39 @@ const RUANG = (...hadir: string[]): CueLatar => ({ lokasi: 'wawancara', hadir, t
 const RUANG_TELEPON = (...hadir: string[]): CueLatar => ({ lokasi: 'wawancara', hadir, telepon: 'missRaksa', objek: [] });
 const TELEPON_HENDRA: CueLatar = { lokasi: 'kantor', hadir: [], telepon: 'hendra', objek: [] };
 
-/** Urutan kartu di layar KEBERATAN: kartu yang tepat tidak di urutan pertama. */
-export const URUTAN_KEBERATAN = ['rambu', 'dashcam', 'sim'] as const;
-type IdBukti = (typeof URUTAN_KEBERATAN)[number];
-const TEPAT: IdBukti = 'dashcam';
+/**
+ * T-090: data KASUS 1 (`Episode.investigasi`). Yang dulu konstanta di berkas ini / di LayarInvestigasi (urutan kartu KEBERATAN,
+ * kartu tepat, pernyataan yang dibantah, tebakan lajur, tabel putusan, nasabah) sekarang data; graf, id, tanda dan teksnya
+ * tidak berubah.
+ */
+const KASUS: KonfigInvestigasi = {
+  kasus: 'kasus-1',
+  nomor: 1,
+  judul: 'inv.kasus.judul',
+  awalan: 'inv',
+  nasabah: 'hendra',
+  balasan: { baik: 'lega', datar: 'bingung', janji: 'senang' },
+  bingkai: 'dashcam',
+  pernyataan: [
+    { id: 'darto', siapa: 'darto', teks: 'inv.pernyataan.darto' },
+    { id: 'tol', siapa: 'petugasTol', teks: 'inv.pernyataan.tol' },
+  ],
+  // Urut terkumpul (buku catatan); urutan di layar keberatan = keberatan.urutan.
+  bukti: [
+    { id: 'dashcam', judul: 'inv.bukti.dashcam.judul', sumber: 'inv.bukti.dashcam.sumber', ikon: 'rekaman' },
+    { id: 'rambu', judul: 'inv.bukti.rambu.judul', sumber: 'inv.bukti.rambu.sumber', ikon: 'foto' },
+    { id: 'sim', judul: 'inv.bukti.sim.judul', sumber: 'inv.bukti.sim.sumber', ikon: 'kartu' },
+  ],
+  tebak: { pilihan: LAJUR.map((n) => ({ id: String(n), teks: `inv.tebak.pilih.${n}` })), balikPada: 'dashcam' },
+  // Urutan kartu di layar KEBERATAN: kartu yang tepat tidak di urutan pertama.
+  keberatan: { pernyataan: 'tol', tepat: 'dashcam', urutan: ['rambu', 'dashcam', 'sim'], tanya: 'inv.keb.tanya', perbesar: ['dashcam'], reaksi: 'tol-kaget' },
+  putusan: { layak: 30, tambahan: 15, polis: 0 },
+  // T-090: kartu "Kasus 2" di layar hasil = tautan ke kasus 2 (bila episodenya ada di build ini).
+  berikut: 'auto-2-inv-2',
+};
+type IdBukti = KonfigInvestigasi['bukti'][number]['id'];
+const KEB = KASUS.keberatan;
+const TEPAT: IdBukti = KEB.tepat;
 
 const dialog = (id: IdNode, tata: CueLatar, baris: Baris[], lanjut: IdNode, opsi: { efek?: Efek; investigasi?: NodeInvestigasi } = {}): NodeCerita =>
   ({ id, bab: '', jenis: 'dialog', tata, baris, lanjut, ...(opsi.efek ? { efek: opsi.efek } : {}), ...(opsi.investigasi ? { investigasi: opsi.investigasi } : {}) });
@@ -54,9 +83,9 @@ const dialog = (id: IdNode, tata: CueLatar, baris: Baris[], lanjut: IdNode, opsi
 function keberatan(n: 0 | 1, pengantar: string, lanjutSalah: IdNode, kunciSalah: (id: IdBukti) => string): NodeCerita[] {
   const id = `keb${n}`;
   const pilihan: NodeCerita = {
-    id, bab: '', jenis: 'pilihan', tata: RUANG('tol', 'darto'), baris: [b(pengantar, 'narasi')], tanya: 'inv.keb.tanya',
-    investigasi: { jenis: 'keberatan', pernyataan: 'tol', tepat: TEPAT, percobaan: n },
-    pilihan: URUTAN_KEBERATAN.map((x) => ({
+    id, bab: '', jenis: 'pilihan', tata: RUANG('tol', 'darto'), baris: [b(pengantar, 'narasi')], tanya: KEB.tanya,
+    investigasi: { jenis: 'keberatan', pernyataan: KEB.pernyataan, tepat: TEPAT, percobaan: n },
+    pilihan: KEB.urutan.map((x) => ({
       id: x,
       teks: `inv.keb.pilih.${x}`,
       jika: tanda(tandaBukti(x)),
@@ -64,7 +93,7 @@ function keberatan(n: 0 | 1, pengantar: string, lanjutSalah: IdNode, kunciSalah:
       lanjut: x === TEPAT ? 'keb-cap' : `${id}-${x}`,
     })),
   };
-  const salah = URUTAN_KEBERATAN.filter((x) => x !== TEPAT).map((x) =>
+  const salah = KEB.urutan.filter((x) => x !== TEPAT).map((x) =>
     dialog(`${id}-${x}`, RUANG_TELEPON('tol', 'darto'), [b(kunciSalah(x), 'missRaksa', n === 0 ? 'netral' : 'serius')], lanjutSalah));
   return [pilihan, ...salah];
 }
@@ -79,7 +108,7 @@ function bangunNode(): NodeCerita[] {
     {
       id: 'tebak', bab: '', jenis: 'pilihan', tata: KANTOR, baris: [b('inv.tebak.1', 'narasi')], tanya: 'inv.tebak.tanya',
       investigasi: { jenis: 'tebak' },
-      pilihan: LAJUR.map((n) => ({ id: String(n), teks: `inv.tebak.pilih.${n}`, efek: { pasang: [tandaTebak(n)] }, lanjut: 'darto' })),
+      pilihan: KASUS.tebak.pilihan.map((p) => ({ id: p.id, teks: p.teks, efek: { pasang: [tandaTebak(p.id)] }, lanjut: 'darto' })),
     },
     dialog('darto', RUANG('darto'), [b('inv.darto.1', 'narasi'), b('inv.darto.2', 'darto', 'cemas'), b('inv.darto.3', 'darto', 'serius')], 'tol',
       { efek: { pasang: [tandaCatat('darto')] }, investigasi: { jenis: 'catat', pernyataan: 'darto' } }),
@@ -112,12 +141,12 @@ function bangunNode(): NodeCerita[] {
     ...keberatan(1, 'inv.keb.2', 'keb2', (x) => `inv.keb.pandu.${x}`),
     // Percobaan ketiga = dipandu: hanya kartu tepat yang melanjutkan (node dialog; ketukan kartu itu = lanjut).
     dialog('keb2', RUANG('tol', 'darto'), [b('inv.keb.3', 'narasi')], 'keb-cap',
-      { efek: { pasang: [tandaKeberatan('dipandu')] }, investigasi: { jenis: 'keberatan', pernyataan: 'tol', tepat: TEPAT, percobaan: 2 } }),
+      { efek: { pasang: [tandaKeberatan('dipandu')] }, investigasi: { jenis: 'keberatan', pernyataan: KEB.pernyataan, tepat: TEPAT, percobaan: 2 } }),
     dialog('keb-cap', RUANG('tol', 'darto'), [b('inv.keb.cap', 'narasi')], 'keb-akui', { investigasi: { jenis: 'cap' } }),
     dialog('keb-akui', RUANG('tol', 'darto'), [b('inv.akui.1', 'tol', 'bingung'), b('inv.akui.2', 'tol', 'netral'), b('inv.akui.3', 'darto', 'lega')], 'keb-koreksi'),
     // T-087 / T-088: petugas mencoret "3" dan menulis "2"; sejak itu buku catatan menulis "Laporan dikoreksi: lajur 2".
     dialog('keb-koreksi', RUANG('tol', 'darto'), [b('inv.koreksi.1', 'narasi')], 'putusan-buka',
-      { efek: { pasang: [tandaKoreksi('tol')] }, investigasi: { jenis: 'koreksi', pernyataan: 'tol' } }),
+      { efek: { pasang: [tandaKoreksi(KEB.pernyataan)] }, investigasi: { jenis: 'koreksi', pernyataan: KEB.pernyataan } }),
 
     // ---------------------------------------------------------------- b4: putusan, pesan untuk Pak Hendra, hasil
     dialog('putusan-buka', KANTOR, [b('inv.putusan.1', 'missRaksa', 'tersenyum'), b('inv.putusan.2', 'missRaksa', 'serius')], 'putusan'),
@@ -206,21 +235,7 @@ function bangun(asal: Episode, dev: Episode): Episode {
     bahasa: ['id', 'en', 'zh'],
     latar: asal.latar,
     tampilan: { teksBesar: true },
-    investigasi: {
-      kasus: 'kasus-1',
-      nomor: 1,
-      judul: 'inv.kasus.judul',
-      pernyataan: [
-        { id: 'darto', siapa: 'darto', teks: 'inv.pernyataan.darto' },
-        { id: 'tol', siapa: 'petugasTol', teks: 'inv.pernyataan.tol' },
-      ],
-      // Urut terkumpul (buku catatan); urutan di layar keberatan = URUTAN_KEBERATAN.
-      bukti: [
-        { id: 'dashcam', judul: 'inv.bukti.dashcam.judul', sumber: 'inv.bukti.dashcam.sumber', ikon: 'rekaman' },
-        { id: 'rambu', judul: 'inv.bukti.rambu.judul', sumber: 'inv.bukti.rambu.sumber', ikon: 'foto' },
-        { id: 'sim', judul: 'inv.bukti.sim.judul', sumber: 'inv.bukti.sim.sumber', ikon: 'kartu' },
-      ],
-    },
+    investigasi: KASUS,
   };
 }
 

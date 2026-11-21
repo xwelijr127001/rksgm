@@ -1,0 +1,271 @@
+/**
+ * T-090 INVESTIGATOR · KASUS 2 "Malam di Jalan Melati" (spec docs/superpowers/specs/2026-11-21-investigator-kasus-2-design.md;
+ * tinjauan konsep Codex di team/REVIEW.md "Investigator Kasus 2 concept review (2026-11-21)"). Episode TERPISAH (id
+ * `auto-2-inv-2`, simpanan cerita sendiri, rute pendek /cerita/investigator/2); kasus 1 (`auto-2-inv`), Episode 1 lengkap dan
+ * Episode 1 Dev tidak berubah. Kantor, ruang wawancara dan Miss Raksa dipakai ulang dari auto-2; Pak Yusuf dan Mas Agus dari
+ * ./pemeran.ts (milik Designer, T-091).
+ *
+ * Fiksi kasus: MPV pribadi, polis penggunaan PRIBADI tanpa perluasan penggunaan komersial pada tanggal kejadian. Malam hari di
+ * Jalan Melati sebuah motor menyenggol bumper depan kiri jam 21:18. Pak Yusuf mengklaim bumpernya. Tamu menemukan bahwa mobil
+ * sedang membawa penumpang berbayar, lalu menjelaskan putusan yang tidak diharapkan itu dengan hormat. ANTI-TUJUAN (spec): tidak
+ * menyebut nasabah pembohong / penipu, tidak menilai niat, tanpa merek aplikasi nyata, tanpa kalimat hukum yang belum
+ * dikonfirmasi: semua kalimat polis, dasar putusan dan jalur peninjauan bertanda `// [konfirmasi PIC]` (di sini dan di teks).
+ *
+ * Alur (struktur sama dengan kasus 1; b1-b4 = bagian di kepala layar):
+ *  b1 judul (judul) -> buka (SATU baris) -> bukti-foto (bukti 'foto-interior': foto surveyor langsung masuk buku, tanpa aktivitas
+ *     ketuk) -> tebak (tebak, PILIHAN keluarga / penumpang / belum; tidak dinilai) -> yusuf (catat) -> agus (catat) -> selisih
+ *  b2 kjalan (periksa-perjalanan: garis waktu, satu-satunya penyelidikan yang sungguhan) -> bukti-struk (bukti 'struk'; kalimat
+ *     "Tebakan awalmu") -> kpolis (periksa-polis: satu ketukan) -> bukti-polis (bukti 'polis-kasus2')
+ *  b3 keb-buka -> keb0 (keberatan 0, PILIHAN) --tepat--> keb-cap
+ *                    |--keliru--> keb0-<kartu> -> keb1 (keberatan 1, PILIHAN) --tepat--> keb-cap
+ *                                                   |--keliru--> keb1-<kartu> -> keb2 (keberatan 2 dipandu, DIALOG) -> keb-cap
+ *     keb-cap (cap) -> keb-akui (Pak Yusuf, tenang dan bermartabat) -> keb-koreksi (koreksi: "Keterangan diperbarui")
+ *  b4 putusan-buka -> putusan (putusan, PILIHAN) -> putusan-<x> -> pesan (PILIHAN di obrolan Pak Yusuf) -> pesan-<x>
+ *     -> akhir-cek -> akhir-tuntas | akhir-tinjau (hasil-investigasi; AKHIR)
+ * Kekeliruan tidak pernah menghentikan pemain (tanpa nyawa, tanpa waktu): hanya poin yang berbeda.
+ *
+ * Skor (cerita/investigasi/skor.ts) dari TANDA yang sama dengan kasus 1; tabel putusan KASUS INI: masalah pertanggungan 30,
+ * butuh bukti tambahan 15, layak dijamin 0. Dua akhir: `tuntas` = putusan "ada masalah pertanggungan", `tinjau` = putusan lain
+ * (diluruskan Miss Raksa). Status Pak Yusuf (30 = Cemas) hanya berubah oleh pesan.
+ */
+import type { Baris, CueLatar, Efek, Ekspresi, Episode, IdNode, KonfigInvestigasi, Kondisi, MusikNode, NodeCerita, NodeInvestigasi } from '../../tipe';
+import { tandaBukti, tandaCatat, tandaKeberatan, tandaKoreksi, tandaPesan, tandaPutusan, tandaTebak } from '../../investigasi/status';
+import { EPISODE_AUTO_2 } from '../auto-2/episode';
+import { PEMERAN_KASUS_2 } from './pemeran';
+import { TEKS_AUTO_2_INV_2 } from './teks';
+
+type Siapa = 'missRaksa' | 'yusuf' | 'agus' | 'narasi';
+const b = (teks: string, siapa: Siapa, ekspresi?: Ekspresi, tata?: CueLatar): Baris => ({ siapa, teks, ...(ekspresi ? { ekspresi } : {}), ...(tata ? { tata } : {}) });
+const tanda = (t: string): Kondisi => ({ tanda: t });
+
+// Tata panggung (komposisi yang sama dengan kasus 1: kantor + Miss Raksa, ruang wawancara, obrolan nasabah).
+const KANTOR: CueLatar = { lokasi: 'kantor', hadir: ['missRaksa'], telepon: null, objek: [] };
+const RUANG = (...hadir: string[]): CueLatar => ({ lokasi: 'wawancara', hadir, telepon: null, objek: [] });
+/** Miss Raksa memandu lewat telepon (sisipan wajah) saat pemain di ruang wawancara; tokoh di ruangan tetap. */
+const RUANG_TELEPON = (...hadir: string[]): CueLatar => ({ lokasi: 'wawancara', hadir, telepon: 'missRaksa', objek: [] });
+const TELEPON_YUSUF: CueLatar = { lokasi: 'kantor', hadir: [], telepon: 'yusuf', objek: [] };
+
+/**
+ * Data KASUS 2 (`Episode.investigasi`): semua yang berbeda dari kasus 1 ada di sini (lihat KonfigInvestigasi, cerita/tipe.ts).
+ * Kunci teks naskahnya berawalan `inv2`.
+ */
+const KASUS: KonfigInvestigasi = {
+  kasus: 'kasus-2',
+  nomor: 2,
+  judul: 'inv2.kasus.judul',
+  awalan: 'inv2',
+  nasabah: 'yusuf',
+  // Wajah Pak Yusuf saat membalas (./pemeran.ts: lega / senang -> lega, cemas / bingung -> cemas).
+  balasan: { baik: 'lega', datar: 'cemas', janji: 'senang' },
+  bingkai: 'seni',
+  pernyataan: [
+    { id: 'yusuf', siapa: 'yusuf', teks: 'inv2.pernyataan.yusuf' },
+    { id: 'agus', siapa: 'agus', teks: 'inv2.pernyataan.agus' },
+  ],
+  // Urut terkumpul (buku catatan): foto di pembuka, struk dari garis waktu, polis dari halaman polis.
+  bukti: [
+    { id: 'foto-interior', judul: 'inv2.bukti.foto.judul', sumber: 'inv2.bukti.foto.sumber', ikon: 'foto' },
+    { id: 'struk', judul: 'inv2.bukti.struk.judul', sumber: 'inv2.bukti.struk.sumber', ikon: 'struk' },
+    { id: 'polis-kasus2', judul: 'inv2.bukti.polis.judul', sumber: 'inv2.bukti.polis.sumber', ikon: 'polis' },
+  ],
+  tebak: {
+    pilihan: (['keluarga', 'penumpang', 'belum'] as const).map((id) => ({ id, teks: `inv2.tebak.pilih.${id}` })),
+    balikPada: 'struk',
+  },
+  // Kartu yang tepat (struk) tidak di urutan pertama. Pertanyaan kasus tampil di layar pada percobaan pertama.
+  keberatan: {
+    pernyataan: 'yusuf',
+    tepat: 'struk',
+    urutan: ['foto-interior', 'struk', 'polis-kasus2'],
+    tanya: 'inv2.keb.tanya',
+    layar: { tanya: 'inv2.keb.tanya', petunjuk1: 'inv2.keb.petunjuk1', petunjuk2: 'inv2.keb.petunjuk2' },
+    // Potret di bawah cap = sel potret reaksi Designer (T-091): Pak Yusuf menjelaskan dengan tenang, kedua telapak tangan terbuka.
+    reaksi: 'yusuf-terbuka',
+  },
+  // [konfirmasi PIC] Tabel putusan: nilai penuh untuk "ada masalah pertanggungan" HANYA karena klausul penggunaan dan status
+  // perluasan pada tanggal kejadian diperlihatkan kepada tamu (tinjauan Codex butir 1).
+  putusan: { polis: 30, tambahan: 15, layak: 0 },
+  putusanLayar: { ket: 'inv2.putusan.ket', sebab: { layak: 'inv2.putusan.layak.sebab', tambahan: 'inv2.putusan.tambahan.sebab', polis: 'inv2.putusan.polis.sebab' } },
+  koreksi: { judul: 'inv2.koreksi.judul', ket: 'inv2.koreksi.ket', baris: 'inv2.koreksi.baris' },
+  // Kasus 3 belum ada: tulisan saja di layar hasil.
+  segera: 'inv2.hasil.kasus3',
+  // Kenang-kenangan: garis waktu perjalanan + pesan yang dikirim tamu, terbaca lagi di layar hasil tanpa main ulang.
+  arsip: { judul: 'inv2.bukti.struk.judul', garis: ['inv2.garis.1', 'inv2.garis.2', 'inv2.garis.3'], sorot: 1, pesan: 'inv2.arsip.pesan' },
+};
+type IdBukti = KonfigInvestigasi['bukti'][number]['id'];
+const KEB = KASUS.keberatan;
+const TEPAT: IdBukti = KEB.tepat;
+
+const dialog = (id: IdNode, tata: CueLatar, baris: Baris[], lanjut: IdNode, opsi: { efek?: Efek; investigasi?: NodeInvestigasi } = {}): NodeCerita =>
+  ({ id, bab: '', jenis: 'dialog', tata, baris, lanjut, ...(opsi.efek ? { efek: opsi.efek } : {}), ...(opsi.investigasi ? { investigasi: opsi.investigasi } : {}) });
+
+/** Percobaan keberatan ke-n (0 / 1) = node pilihan: kartu tepat -> cap; kartu keliru -> penjelasan Miss Raksa -> percobaan berikut. */
+function keberatan(n: 0 | 1, pengantar: string, lanjutSalah: IdNode, kunciSalah: (id: IdBukti) => string): NodeCerita[] {
+  const id = `keb${n}`;
+  const pilihan: NodeCerita = {
+    id, bab: '', jenis: 'pilihan', tata: RUANG('yusuf'), baris: [b(pengantar, 'narasi')], tanya: KEB.tanya,
+    investigasi: { jenis: 'keberatan', pernyataan: KEB.pernyataan, tepat: TEPAT, percobaan: n },
+    pilihan: KEB.urutan.map((x) => ({
+      id: x,
+      teks: `inv2.keb.pilih.${x}`,
+      jika: tanda(tandaBukti(x)),
+      efek: { pasang: [x === TEPAT ? tandaKeberatan(n === 0 ? 'tepat' : 'tepat-kedua') : `keb:keliru:${n}:${x}`] },
+      lanjut: x === TEPAT ? 'keb-cap' : `${id}-${x}`,
+    })),
+  };
+  const salah = KEB.urutan.filter((x) => x !== TEPAT).map((x) =>
+    dialog(`${id}-${x}`, RUANG_TELEPON('yusuf'), [b(kunciSalah(x), 'missRaksa', n === 0 ? 'netral' : 'serius')], lanjutSalah));
+  return [pilihan, ...salah];
+}
+
+function bangunNode(): NodeCerita[] {
+  return [
+    // ---------------------------------------------------------------- b1: kartu judul, foto surveyor, tebakan, dua keterangan
+    dialog('judul', KANTOR, [b('inv2.judul.kartu', 'narasi')], 'buka', { investigasi: { jenis: 'judul' } }),
+    dialog('buka', KANTOR, [b('inv2.buka.1', 'missRaksa', 'serius')], 'bukti-foto'),
+    // Spec butir 1: foto interior surveyor DISIMPAN sebagai kartu sejak pembuka (tanpa aktivitas ketuk).
+    dialog('bukti-foto', KANTOR, [b('inv2.bukti.foto.1', 'narasi')], 'tebak',
+      { efek: { pasang: [tandaBukti('foto-interior')] }, investigasi: { jenis: 'bukti', bukti: 'foto-interior' } }),
+    // Tebakan tanpa benar / salah: ketiga pilihan hanya memasang tanda tebakannya (tebak:keluarga | penumpang | belum).
+    {
+      id: 'tebak', bab: '', jenis: 'pilihan', tata: KANTOR, baris: [b('inv2.tebak.1', 'narasi')], tanya: 'inv2.tebak.tanya',
+      investigasi: { jenis: 'tebak' },
+      pilihan: KASUS.tebak.pilihan.map((p) => ({ id: p.id, teks: p.teks, efek: { pasang: [tandaTebak(p.id)] }, lanjut: 'yusuf' })),
+    },
+    dialog('yusuf', RUANG('yusuf'), [b('inv2.yusuf.1', 'narasi'), b('inv2.yusuf.2', 'yusuf', 'cemas'), b('inv2.yusuf.3', 'yusuf', 'netral')], 'agus',
+      { efek: { pasang: [tandaCatat('yusuf')] }, investigasi: { jenis: 'catat', pernyataan: 'yusuf' } }),
+    dialog('agus', RUANG('agus'), [b('inv2.agus.1', 'narasi'), b('inv2.agus.2', 'agus', 'serius'), b('inv2.agus.3', 'agus', 'netral')], 'selisih',
+      { efek: { pasang: [tandaCatat('agus')] }, investigasi: { jenis: 'catat', pernyataan: 'agus' } }),
+    dialog('selisih', RUANG_TELEPON('agus'), [b('inv2.selisih.1', 'missRaksa', 'serius')], 'kjalan'),
+
+    // ---------------------------------------------------------------- b2: garis waktu perjalanan (kartu struk), halaman polis (kartu polis)
+    // Pak Yusuf memperlihatkan SATU struk dengan sukarela (nama dan alamat penumpang ditutup); layarnya ui/PeriksaPerjalanan.
+    dialog('kjalan', RUANG('yusuf'), [b('inv2.jalan.1', 'narasi'), b('inv2.jalan.2', 'yusuf', 'netral')], 'bukti-struk', { investigasi: { jenis: 'periksa-perjalanan' } }),
+    dialog('bukti-struk', RUANG('yusuf'), [b('inv2.bukti.struk.1', 'narasi')], 'kpolis',
+      { efek: { pasang: [tandaBukti('struk')] }, investigasi: { jenis: 'bukti', bukti: 'struk' } }),
+    // [konfirmasi PIC] Halaman polis fiktif: klausul penggunaan + status perluasan pada tanggal kejadian (ui/PeriksaPolis, satu ketukan).
+    dialog('kpolis', KANTOR, [b('inv2.polis.1', 'missRaksa', 'serius')], 'bukti-polis', { investigasi: { jenis: 'periksa-polis' } }),
+    dialog('bukti-polis', KANTOR, [b('inv2.bukti.polis.1', 'narasi')], 'keb-buka', // [konfirmasi PIC]
+      { efek: { pasang: [tandaBukti('polis-kasus2')] }, investigasi: { jenis: 'bukti', bukti: 'polis-kasus2' } }),
+
+    // ---------------------------------------------------------------- b3: KEBERATAN (kalimat Pak Yusuf vs satu catatan); tanpa menuduh
+    dialog('keb-buka', RUANG('yusuf'), [
+      b('inv2.keb-buka.1', 'narasi'),
+      b('inv2.keb-buka.2', 'yusuf', 'netral'),
+      b('inv2.keb-buka.3', 'missRaksa', 'serius', RUANG_TELEPON('yusuf')),
+    ], 'keb0'),
+    ...keberatan(0, 'inv2.keb.1', 'keb1', (x) => `inv2.keb.salah.${x}`),
+    ...keberatan(1, 'inv2.keb.2', 'keb2', (x) => `inv2.keb.pandu.${x}`),
+    // Percobaan ketiga = dipandu: hanya kartu tepat yang melanjutkan (node dialog; ketukan kartu itu = lanjut).
+    dialog('keb2', RUANG('yusuf'), [b('inv2.keb.3', 'narasi')], 'keb-cap',
+      { efek: { pasang: [tandaKeberatan('dipandu')] }, investigasi: { jenis: 'keberatan', pernyataan: KEB.pernyataan, tepat: TEPAT, percobaan: 2 } }),
+    dialog('keb-cap', RUANG('yusuf'), [b('inv2.keb.cap', 'narasi')], 'keb-akui', { investigasi: { jenis: 'cap' } }),
+    // Pak Yusuf tenang dan bermartabat ('tersenyum' = wajah TERBUKA di ./pemeran.ts: menjelaskan dengan tenang, bukan pose malu);
+    // niatnya tidak dinilai. Miss Raksa berterima kasih.
+    dialog('keb-akui', RUANG('yusuf'), [
+      b('inv2.akui.1', 'yusuf', 'tersenyum'),
+      b('inv2.akui.2', 'missRaksa', 'tersenyum', RUANG_TELEPON('yusuf')),
+    ], 'keb-koreksi'),
+    // Baris keterangannya di buku catatan mendapat tanda "Keterangan diperbarui".
+    dialog('keb-koreksi', RUANG('yusuf'), [b('inv2.koreksi.1', 'narasi')], 'putusan-buka',
+      { efek: { pasang: [tandaKoreksi(KEB.pernyataan)] }, investigasi: { jenis: 'koreksi', pernyataan: KEB.pernyataan } }),
+
+    // ---------------------------------------------------------------- b4: putusan, pesan untuk Pak Yusuf, hasil
+    dialog('putusan-buka', KANTOR, [b('inv2.putusan.1', 'missRaksa', 'tersenyum'), b('inv2.putusan.2', 'missRaksa', 'serius')], 'putusan'),
+    {
+      id: 'putusan', bab: '', jenis: 'pilihan', tata: KANTOR, baris: [b('inv2.putusan.3', 'narasi')], tanya: 'inv2.putusan.tanya',
+      investigasi: { jenis: 'putusan' },
+      pilihan: (['layak', 'tambahan', 'polis'] as const).map((x) => ({ id: x, teks: `inv2.putusan.${x}`, efek: { pasang: [tandaPutusan(x)] }, lanjut: `putusan-${x}` })),
+    },
+    // [konfirmasi PIC] Tiga penjelasan putusan (dasar putusan dan siapa yang berwenang memutuskan).
+    dialog('putusan-polis', KANTOR, [b('inv2.putusan.polis.1', 'missRaksa', 'tersenyum')], 'pesan'),
+    dialog('putusan-tambahan', KANTOR, [b('inv2.putusan.tambahan.1', 'missRaksa', 'serius')], 'pesan'),
+    dialog('putusan-layak', KANTOR, [b('inv2.putusan.layak.1', 'missRaksa', 'serius')], 'pesan'),
+    {
+      id: 'pesan', bab: '', jenis: 'pilihan', tata: TELEPON_YUSUF, baris: [b('inv2.pesan.1', 'narasi'), b('inv2.pesan.2', 'yusuf', 'cemas')], tanya: 'inv2.pesan.tanya',
+      // [konfirmasi PIC] 'baik' = mengakui, menyebut ketentuan + temuan, jalur peninjauan ulang (kanal), perluasan ke depan terpisah
+      // dari kerugian ini; 'datar' = alasan benar dan sopan tanpa jalur peninjauan; 'janji' = janji pembayaran tanpa dasar.
+      pilihan: [
+        { id: 'janji', teks: 'inv2.pesan.janji', efek: { kepercayaan: 10, alasan: 'inv2.pesan.janji.alasan', pasang: [tandaPesan('janji')] }, lanjut: 'pesan-janji' },
+        { id: 'baik', teks: 'inv2.pesan.baik', efek: { kepercayaan: 30, alasan: 'inv2.pesan.baik.alasan', pasang: [tandaPesan('baik')] }, lanjut: 'pesan-baik' },
+        { id: 'datar', teks: 'inv2.pesan.datar', efek: { pasang: [tandaPesan('datar')] }, lanjut: 'pesan-datar' },
+      ],
+    },
+    dialog('pesan-baik', TELEPON_YUSUF, [b('inv2.pesan.baik.1', 'yusuf', 'netral')], 'akhir-cek'),
+    dialog('pesan-datar', TELEPON_YUSUF, [b('inv2.pesan.datar.1', 'yusuf', 'cemas'), b('inv2.pesan.datar.2', 'narasi')], 'akhir-cek'),
+    dialog('pesan-janji', TELEPON_YUSUF, [b('inv2.pesan.janji.1', 'yusuf', 'senang'), b('inv2.pesan.janji.2', 'narasi')], 'akhir-cek'),
+    { id: 'akhir-cek', bab: '', jenis: 'cabang', cabang: [{ jika: tanda(tandaPutusan('polis')), lanjut: 'akhir-tuntas' }], lainnya: 'akhir-tinjau' },
+    ...(['tuntas', 'tinjau'] as const).map((akhir): NodeCerita => ({
+      id: `akhir-${akhir}`, bab: '', jenis: 'akhir', akhir, tata: KANTOR,
+      baris: [b(`inv2.akhir.${akhir}.1`, 'missRaksa', akhir === 'tuntas' ? 'tersenyum' : 'netral')],
+      investigasi: { jenis: 'hasil-investigasi' },
+    })),
+  ];
+}
+
+/** Bagian tiap node (kepala layar "BAGIAN n/4"). */
+function babInv2(id: IdNode): string {
+  if (['judul', 'buka', 'bukti-foto', 'tebak', 'yusuf', 'agus', 'selisih'].includes(id)) return 'b1';
+  if (['kjalan', 'bukti-struk', 'kpolis', 'bukti-polis'].includes(id)) return 'b2';
+  if (id.startsWith('keb')) return 'b3';
+  return 'b4';
+}
+
+/**
+ * Musik per FASE, sama dengan kasus 1 (trek T-085 dipakai ulang, tanpa musik baru):
+ *  Investigasi  kartu judul, pembuka, tebakan, dan pengumpulan bukti (b2);
+ *  Keterangan   dua wawancara + "kita cari catatan yang ada jamnya";
+ *  Keberatan    seluruh b3 (di cap KEBERATAN musik hening 0,4 detik);
+ *  Terungkap    b4 (putusan, pesan, hasil): jingle sekali, lalu loop tenang.
+ */
+function musikInv2(id: IdNode): MusikNode {
+  if (['yusuf', 'agus', 'selisih'].includes(id)) return 'inv-keterangan';
+  const bab = babInv2(id);
+  if (bab === 'b3') return 'inv-keberatan';
+  if (bab === 'b4') return 'inv-terungkap';
+  return 'inv-investigasi';
+}
+
+function bangun(asal: Episode): Episode {
+  return {
+    id: 'auto-2-inv-2',
+    versi: 1,
+    produk: 'AUTO',
+    jenis: 'nyata',
+    judul: 'judul',
+    ringkas: 'ringkas',
+    durasiMenit: 5,
+    mulai: 'judul',
+    pemeran: { missRaksa: asal.pemeran.missRaksa!, ...PEMERAN_KASUS_2 },
+    nasabah: KASUS.nasabah,
+    bab: ([1, 2, 3, 4] as const).map((n) => ({ id: `b${n}`, judul: `inv2.bab.${n}.judul`, tujuan: `inv2.bab.${n}.tujuan` })),
+    akhir: {
+      tuntas: { judul: 'inv2.akhir.tuntas.judul', ringkas: 'inv2.akhir.tuntas.ringkas', nada: 'baik', pelajaran: ['inv2.pelajaran.1'] },
+      tinjau: { judul: 'inv2.akhir.tinjau.judul', ringkas: 'inv2.akhir.tinjau.ringkas', nada: 'campuran', pelajaran: ['inv2.pelajaran.1'] },
+    },
+    paham: {},
+    proses: {},
+    catatan: {},
+    kepercayaanAwal: 30,
+    kepercayaanBatas: { min: 0, maks: 100 },
+    labelSuasana: 'status',
+    antarmuka: 'hp',
+    // Tanpa arena dan tanpa lampiran obrolan (lampiran auto-2 dikirim Pak Hendra, yang bukan pemeran kasus ini).
+    suasana: asal.suasana,
+    node: Object.fromEntries(bangunNode().map((n) => [n.id, { ...n, bab: babInv2(n.id), musik: musikInv2(n.id) }])),
+    // Tanpa arena: garis waktu dan halaman polis adalah layar investigasi (node dialog), bukan aktivitas mesin.
+    aktivitas: {},
+    teks: TEKS_AUTO_2_INV_2,
+    bahasa: ['id', 'en', 'zh'],
+    // Latar auto-2 (kantor, ruang wawancara); gambar kartu daftar episode = Pak Yusuf di ruang wawancara.
+    latar: asal.latar ? { ...asal.latar, sampul: { lokasi: 'wawancara', hadir: ['yusuf'] } } : undefined,
+    tampilan: { teksBesar: true },
+    investigasi: KASUS,
+  };
+}
+
+/**
+ * Investigator kasus 2. Build tanpa auto-2 (VITE_CERITA_TANPA=auto-2): vite.config ikut mengganti modul ini dengan rintisan
+ * null, jadi isi kasusnya tidak terbawa lewat episode ini.
+ */
+export const EPISODE_AUTO_2_INV_2: Episode = bangun(EPISODE_AUTO_2);

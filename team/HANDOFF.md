@@ -4381,3 +4381,122 @@ Source: `team/REVIEW.md` "Investigator pilot review (2026-11-21)" points 1, 3, 4
 - The practice for the message uses plain cards, not the chat screen.
 - `hasil.berikutnya` / `hasil.segera` in the app dictionary and `.iv-hasil-kaki` in `investigasi.css` are now unused (Designer's files, left).
 - Review point 8 (ten-guest trial) is not code. Timings (entry to first evidence tap, to stamp) are not recorded by the app; only the preview taps are.
+
+
+## T-090 (2026-11-21): Investigator KASUS 2 "Malam di Jalan Melati": data-driven cases, episode, scoring, routing (Fullstack)
+
+Spec: `docs/superpowers/specs/2026-11-21-investigator-kasus-2-design.md`; Codex map: `team/REVIEW.md` "Investigator Kasus 2 concept review (2026-11-21)" point 5. Designer worked in parallel (T-091) and has already replaced my placeholders (`pemeran.ts`, `ui/seniKasus.ts`, `ui/PeriksaPerjalanan.tsx`, `ui/PeriksaPolis.tsx`). NOT opened in a browser or on a phone (owner rule). Gate: `npm run typecheck` exit 0 (server + client), `client/dist` rebuilt = exact copy of the scratch build (built 13:36 with the Designer's files as they were then; T-091 was still changing art, so client/dist needs one more rebuild when T-091 lands). Not committed.
+
+**1. Cases are data** (`cerita/tipe.ts` `KonfigInvestigasi`, read by `investigasi/LayarInvestigasi.tsx`, `skor.ts`, `status.ts`)
+- `BuktiInvestigasi.id` += `'foto-interior' | 'struk' | 'polis-kasus2'`, `ikon` += `'struk' | 'polis'`; `PernyataanInvestigasi.siapa` += `'yusuf' | 'agus'`; node kinds += `periksa-perjalanan`, `periksa-polis`.
+- New config fields: `awalan` (text key prefix of the case script: `inv` / `inv2`), `nasabah`, `balasan` (customer face per message), `bingkai` (`'dashcam'` = live dashcam frame + lane chips; `'seni'` = `seniKasus` images + option list), `tebak { pilihan: {id, teks}[], balikPada }`, `keberatan { pernyataan, tepat, urutan, tanya, layar?, perbesar?, reaksi? }`, `putusan: Record<Putusan, 30 | 15 | 0>`, `putusanLayar?`, `koreksi?`, `berikut?` (next playable episode id), `segera?`, `arsip?`.
+- Script keys the screens build from the prefix: `<awalan>.tebak.balik.<id>`, `.keb.cap`, `.keb.salah.<bukti>`, `.keb.pandu.<bukti>`, `.putusan.<p>.1`, `.pesan.2`, `.pesan.tanya`, `.pesan.<p>.1` / `.2`, `.balas.<p>`. Wrapper UI keys (`inv.ui.*`, `inv.hasil.*`, `inv.lagi.*`, `inv.latihan.*`, `inv.gerbang.*`) are one translation shared by all cases (case 2's table takes them from case 1's files).
+- `skorKasus(h, tabel)`, `poinPutusan(tabel, p)`, `putusanTepat(tabel, p)`: the verdict table is the CASE's. `tandaTebak(id)` takes any id; `tebakanLajur` became `tebakanAwal(ep, s)` (returns the option id; case 1 still stores `tebak:1..4`).
+- LayarInvestigasi: live and practice KEBERATAN (order, correct card, statement, enlargeable cards, reaction under the stamp), correction text, hunch, title art, customer line, verdict screen texts all come from the config. No case 1 content is left in it.
+- **Case 1 plays as before**: same node ids, tanda, save version 1, flags. Checked by dumping the episode data before and after: the graph is identical; the only differences are the new config fields, three renamed text keys (`inv.hasil.hendra.*` -> `inv.balas.*`, same sentences) and five new shared labels. Visible changes in case 1, all asked for: the case 2 card on its result (new copy, now a link), and "Tamu baru" (below).
+
+**2. Episode `auto-2-inv-2`** (`episode/auto-2-inv-2/{episode,teks,teks.id,teks.en,teks.zh}.ts`), spec flow 1-7
+- b1 `judul` -> `buka` (one line) -> `bukti-foto` (card 'foto-interior' filed at the opening, no tap activity) -> `tebak` (keluarga / penumpang / belum, unscored) -> `yusuf` (pin) -> `agus` (pin) -> `selisih`
+- b2 `kjalan` (`periksa-perjalanan`) -> `bukti-struk` (card 'struk', "Tebakan awalmu: ...") -> `kpolis` (`periksa-polis`) -> `bukti-polis` (card 'polis-kasus2')
+- b3 `keb-buka` -> `keb0` / `keb1` / `keb2` (0 / 1 / guided; cards foto-interior, struk (correct), polis) -> `keb-cap` -> `keb-akui` (Yusuf's dignified line, Miss Raksa thanks him) -> `keb-koreksi` ("Keterangan diperbarui")
+- b4 `putusan-buka` -> `putusan` (polis 30 / tambahan 15 / layak 0) -> `putusan-<x>` -> `pesan` (chat with Pak Yusuf: baik 30 / datar 15 / janji 0) -> `pesan-<x>` -> `akhir-cek` -> `akhir-tuntas` (verdict polis) | `akhir-tinjau`
+- Music per phase as in case 1 (inv-investigasi / inv-keterangan / inv-keberatan / inv-terungkap). No arena, no real app brand. id / en / zh complete (135 `inv2.*` keys each). The script uses its own prefix `inv2.` so it never collides with the Designer's tables keyed by case 1 text keys (REAKSI_BARIS, GERAK_BARIS, KILAS_BARIS).
+
+**3. Saves, total, rank**
+- Same record `raksa:investigasi:v1`, case key `kasus-2`. `simpan.ts`: `KASUS_TERSEDIA`, `TOTAL_MAKS` (= 100 x cases = 200), `STEMPEL_SENIOR` (3).
+- Result (`ui/HasilInvestigasi.tsx` new prop `total`): row "Total 185 / 200" + "1 kasus lagi menuju Senior" at exactly two stamps. Case 2 always shows it. Case 1 shows it once the device has two stamps (then its case 2 card shrinks to a one-line link); before that the 96 px teaser card leaves no room for it on 360 x 640.
+- Case 2 result: "Arsip kasus" opens a read-only sheet (timeline card with 21:18 highlighted, Pak Yusuf's updated statement, the message the guest sent) and the text "Kasus 3 · segera hadir". Both stamps show on the officer card (the stamp row is the Designer's).
+- **"Tamu baru" / "Mulai baru" now also restart the OTHER investigator case** (`tamuBaruSemuaKasus` in LayarInvestigasi: clears the record and archives the other case's story progress). Without this the next guest would open the other case on the previous guest's result and be handed its stamp at once.
+
+**4. Routing**
+- `episode/index.ts` + `rintisan.ts` + `vite.config.ts` (a build without auto-2 also drops this episode); `App.tsx`: `/cerita/investigator/2` -> `/cerita/auto-2-inv-2`; `PramuatCerita.tsx` (guest without profile, inv music set); `pages/Cerita.tsx`: card after case 1, same `RAKSA_INVESTIGATOR` flag; the direct link always works.
+- Case 1 result: the case 2 card navigates to case 2 (the tap is still counted in `intipKasus2`). The preview sheet remains only as the fallback when case 2 is not in the build.
+- `i18n/kamus/investigasi.ts`: `kasus2.judul` "Kasus 2 · Jalan Melati", `kasus2.tanya` "Mobil keluarga... atau sedang antar penumpang?" (no "diam-diam"), `kasus2.buka` "Main sekarang" (id/en/zh); added `siapa.yusuf`, `siapa.agus`.
+
+**Contracts T-091 consumes (as built)**
+- `PeriksaPerjalanan { onSelesai }`, `PeriksaPolis { onSelesai }`: mounted for `periksa-perjalanan` / `periksa-polis` like PeriksaSim (last line read on the stage first, then the screen). I also pass `awal` (step to start from, 0 = start) and `onLangkah(n)`; the step is kept as the visit draft, and an opened screen reopens directly after a reload.
+- Their texts are EPISODE keys through `useTx()`: `inv2.jalan.*`, `inv2.garis.1..3`, `inv2.polis.*` (clause sentences are not to be retyped in components).
+- `seniKasus(kasus)`: I use `.judul` (title card) and `.tebak` (hunch screen) as `<img class="iv-seni-kasus">`, 292 px wide at native size, when `bingkai === 'seni'`.
+- `PEMERAN_KASUS_2 = { yusuf, agus }`; cast ids 'yusuf' / 'agus'. Faces the script asks for: yusuf netral, cemas, serius, tersenyum (= "terbuka", on `inv2.akui.1`), lega, senang; agus netral, serius.
+- `konfig.keberatan.reaksi` = reaction cell name under the stamp (`reaksiSah`): case 1 'tol-kaget', case 2 'yusuf-terbuka'.
+- Small edits in Designer files, all additive with today's behaviour as the default: `ui/LayarKeberatan.tsx` (optional `tanya`, `petunjuk1`, `petunjuk2`, `perbesar`), `ui/LayarPutusan.tsx` (optional `ket`, `sebab`), the dictionary lines above, `ui/latar/piksel/adegan.ts` + `potret.ts` (`idPikselPemeran`: optional `Pemeran.piksel` art alias; made for the placeholder cast, unused now that 'yusuf' / 'agus' have their own sprites).
+
+**[konfirmasi PIC] list** (each line carries the comment in `teks.id/en/zh.ts`; the verdict table and nodes in `episode.ts`)
+1. Use clause: `inv2.polis.klausul.1` "Penggunaan: PRIBADI.", `.klausul.2` "Tidak dijamin bila kendaraan disewakan atau menerima balas jasa, kecuali ada perluasan penggunaan komersial.", `.klausul.3` "Perluasan pada tanggal kejadian: TIDAK ADA." (wording, name of the extension, how its status appears on a policy).
+2. Finding from the policy: `inv2.polis.hasil`, `inv2.bukti.polis.1`, `inv2.bukti.polis.judul`.
+3. Verdict: the table itself (coverage problem = 30, more evidence = 15, covered = 0), the three card reasons `inv2.putusan.<p>.sebab`, the three explanations `inv2.putusan.<p>.1` (basis of the decision, who has authority to decide).
+4. Decline wording: `inv2.pesan.baik`, `inv2.pesan.datar` ("tidak dapat kami setujui").
+5. Review route and channel: "peninjauan ulang lewat Layanan Nasabah Raksa" in `inv2.pesan.baik`; also `inv2.pesan.baik.alasan`, `inv2.pesan.datar.2`, `inv2.balas.baik`.
+6. Future cover: "Bapak bisa menanyakan perluasan penggunaan komersial" in `inv2.pesan.baik`.
+7. Summary lines: `inv2.akhir.tuntas.ringkas`, `inv2.pelajaran.1`.
+
+**Checks done (no browser, no test suite)**: one-off script (scratch, not committed) with the project's own `validasiEpisode` / `jelajahiSemuaJalur`: 0 messages and no dead ends for both cases (case 1: 504 paths, case 2: 189); scripted runs: case 1 100 / 55 / 10 as before, case 2 100 = S (tuntas), 55 = B, 10 = C, "covered" + best message = 70 with the verdict as weakest step; every key the screens build from the prefix exists in id / en / zh; record after both cases: total 185 / 200, two stamps.
+
+**Open**
+- Nothing was seen on a screen. Most worth a look: case 2 title card and hunch screen, the two-case result (total row, archive sheet), the stamp screen with Pak Yusuf, the picker with two investigator cards (the one-screen picker gets one more card when the flag is on).
+- KEBERATAN retries in case 2 show the short generic heading (the 3-line case question only on the first try) to stay inside 544 px.
+- No enlargeable card in case 2 (`perbesar` is empty; the zoom sheet is the dashcam frame).
+- The stamp graphic still reads "KEBERATAN!" over a customer; the sentence under it is neutral. Tone call for the owner / PIC.
+- `inv2.pesan.baik` is about 370 characters (it must carry reason, review route and future cover); it is the longest option in the chat sheet.
+- The title card subtitle is still "Episode 1 · Investigator" for case 2 (`investigasi.judulSub`, Designer's dictionary).
+- "Mulai baru" confirm text still says "kemajuan kasus ini"; it now also restarts the other case.
+
+## T-091 (2026-11-21): Investigator KASUS 2 "Malam di Jalan Melati": cast, scene art, two tap screens (Designer)
+
+Built by the Designer in parallel with T-090; uncommitted. Owner rule: nothing was opened in a browser and no test was run. Gate: `npm run typecheck` exit 0 (server + client), `client/dist` rebuilt with Fullstack's files as they were on disk at that moment. I did not edit `episode.ts`, `teks*`, `status/skor/simpan`, `tipe.ts` or `LayarInvestigasi.tsx`.
+
+### Cast (`episode/auto-2-inv-2/pemeran.ts`, replaces the placeholder)
+`PEMERAN_KASUS_2 = { yusuf, agus }`, plus `EKSPRESI_YUSUF` and `EKSPRESI_AGUS`. Both have their OWN sprites (no `piksel` alias): ids `'yusuf'` / `'agus'` are new pixel-cast ids with their own atlas `seni/piksel/kasus2.png` + `kasus2.json` (same manifest schema, scale, palette and outline as Pak Darto and the toll officer; they are edits of the Episode 2 side-cast sprites).
+- **Pak Yusuf:** blue short-sleeved shirt, grey trousers, greying temples, tired eyes. Faces: netral, cemas, serius, terbuka, lega, each with a blink.
+- **"Terbuka":** script expression `tersenyum` gives the calm explaining face AND a second body frame with both palms open at chest height (no shame pose). Seated behind the interview table both hands stay in view.
+- **Mas Agus:** maroon rider jacket, brown hair with a fringe, helmet under his arm. Faces: netral, serius, with a blink. Seated, the helmet is in his lap and only its top shows above the table.
+- **Chat avatar:** comes from the same sprite through `tokohPotret()`; nothing extra to wire.
+- **Registration (art system, mine):** `seni/piksel/susun.ts` (`IdTokohKasus2`, `DAFTAR_TOKOH_KASUS2`), `seni/piksel/index.ts`, and one line in `ui/latar/piksel/adegan.ts` (`PERAN_PIKSEL` gains `yusuf`, `agus`).
+
+### `seniKasus(kasus)` (`ui/seniKasus.ts`, replaces the stub; contract unchanged, all values are PNG URLs)
+
+| Field | kasus-1 (existing art, unchanged) | kasus-2 (new) |
+|---|---|---|
+| `judul` | `judul.png` (fallback only; case 1 shows the live dashcam frame) | `kasus2-judul.png` 292 x 150: the family MPV on Jl. Melati at night, scuffed front-left bumper |
+| `tebak` | same as `judul` | `kasus2-interior.png` 292 x 150: surveyor's cabin photo, phone on a dashboard mount with a glowing made-up app, water bottles on the back seat |
+| `kilas` | `kilas-tol.png` | `kasus2-kilas.png` 336 x 184 (still frame) |
+| `ikonBukti` | `bukti/dashcam.png`, `rambu.png`, `sim.png` (cells of `bukti.png`) | `bukti/foto-interior.png`, `struk.png`, `polis-kasus2.png` (96 x 68) |
+| `potret` | `potret/darto.png`, `petugasTol.png` | `potret/yusuf.png`, `agus.png` (64 x 64) |
+
+The two 292 x 150 pictures are baked at 2x, so `<img class="iv-seni-kasus">` at native size is right. The app is fictional and violet: no ride-hailing name, logo or brand colour. The car has no badge.
+
+### Two tap screens (`ui/`, replace the temporary screens; hooks and props kept)
+Texts are the episode keys through `useTx()` exactly as T-090 set them (`inv2.jalan.*`, `inv2.garis.*`, `inv2.polis.*`); no clause sentence is retyped. Interface-only words are in the app dictionary (`investigasi.jalan.*`, `investigasi.polis.halaman`, id/en/zh).
+
+**`PeriksaPerjalanan { onSelesai, awal?, onLangkah? }`** (4 taps, resumes like PeriksaSim):
+1. Tap the phone: the trip receipt opens (passenger name and addresses under a mosaic; timeline 21:05 and 21:24).
+2. Tap the incident form: "Jam benturan: 21:18" lights up.
+3. Tap the place: three slots on the timeline. A wrong slot shakes and shows the script's hint; the guest tries again and is never blocked. The right slot: the "21:18" line slides in between the two stops and glows.
+4. Tap the date and plate (on either paper): both get a green ring and the "same date, same plate" badge.
+
+Height at 360 x 640 (calculated): 496 to 522 px of 544.
+
+**`PeriksaPolis { onSelesai }`**: a fictional policy page; one tap opens the use clause at 16 px, the magnifier sweeps once, and the extension line is marked. Height 492 to 518 px of 544.
+
+Reduced motion: both screens and the flashbacks show their final still.
+
+### Also in my files
+- **Flashbacks** (`KilasBalik` kinds `benturan`, `turun`): the bike comes from the left and clips the front-left bumper (`inv2.yusuf.2`); the rear door opens and a passenger walks off (`inv2.agus.3`). Wired by text key in `LayarKeterangan` (`KILAS_BARIS`), with gestures (`GERAK_BARIS`) and reaction portraits (`REAKSI_BARIS`) for `inv2.*` lines.
+- **Witness seat:** `yusuf` and `agus` sit in the interview room like Pak Darto.
+- **Reaction cells** (`reaksi-kasus2.png`, through `PotretReaksi` / `reaksiSah`): `yusuf-cemas`, `yusuf-terbuka`, `yusuf-lega`, `agus-serius`. `yusuf-terbuka` is the face only; the open hands do not fit a 64 px bust.
+- **Evidence cards and notebook slips** know the three case-2 ids; the policy card shows a plain policy-page icon instead of the red-cross verdict icon.
+- **Icons** (`ikon.png`, now 256 x 16; old cells untouched): struk, foto-interior, polis-dok, stempel-2, aplikasi.
+- **Officer card:** each earned stamp is drawn per case id: case 1 red, case 2 indigo (`KartuPetugas`, `SEL_STEMPEL`).
+- **Case-2 teaser of T-088:** the phone glow and "ONLINE" chip are violet now (they were green).
+
+### Sources and previews (`character/investigator-t091/`)
+`tokoh.mts` (cast atlas, manifest, portraits), `adegan.mts` (scenes, cards, icons), `cek.mts` (prints the manifest mapping), `pratinjau.mts`.
+- `layar-t091.png`: calculated contact sheet (not a screenshot): title card, hunch screen, both witnesses seated, the flashback, the trip screen at step 3 and done, the policy page, and a strip of cards, icons, stamps and portraits.
+- `tokoh-t091-4x.png`: both characters beside Pak Darto and the toll officer, all faces and blinks.
+
+### Open
+- Not seen in a browser; no test was run. `adegan.test.ts`, `susun.test.ts` and `seni.test.ts` read the cast lists I extended.
+- The date `14/11/2026` and plate `B 1870 RKS` on the receipt and form are fictional constants in `PeriksaPerjalanan.tsx` (the script only says "same date, same plate"). Lead / PIC may want other values.
+- The spec's glow text "21:18 = penumpang di dalam" is not a script key; the screen shows the script's `inv2.jalan.l3.hasil` instead.
+- The seated "terbuka" pose reads as open hands; a reader could also take it as a small shrug. Worth the owner's eye on a phone.
+- `seni/investigasi/potret-kasus.png` is used by the preview only.

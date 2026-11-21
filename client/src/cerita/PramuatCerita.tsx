@@ -18,7 +18,9 @@ import { t, useBahasa } from '../i18n';
 import { useProfil } from '../state/profil';
 
 /** T-064: Episode 1 Dev (auto-2-dev) shows the same case art, so it preloads the same list; guests there have no profile. */
-const EPISODE = ['auto-2', 'auto-2-dev', 'auto-2-inv']; // T-076: the Investigator pilot shows the same case art
+const EPISODE = ['auto-2', 'auto-2-dev', 'auto-2-inv', 'auto-2-inv-2']; // T-076: the Investigator pilot shows the same case art (T-090: case 2 too)
+/** Investigator cases: walk-up guests without a profile, and their own music set. */
+const EPISODE_INV = ['auto-2-inv', 'auto-2-inv-2'];
 const ITEM_MS = 8000;
 const BATAS_MS = 12000;
 const TANPA_BAR_MS = 300;
@@ -50,7 +52,7 @@ export function PramuatCerita({ children }: { children: ReactNode }) {
   useBahasa();
   const { episode } = useParams();
   const { profil } = useProfil();
-  const perlu = !!episode && EPISODE.includes(episode) && (!!profil || episode === 'auto-2-dev' || episode === 'auto-2-inv') && !sudahSiap && typeof window !== 'undefined';
+  const perlu = !!episode && EPISODE.includes(episode) && (!!profil || episode === 'auto-2-dev' || EPISODE_INV.includes(episode)) && !sudahSiap && typeof window !== 'undefined';
   const [fase, setFase] = useState<'tunggu' | 'tampil' | 'siap'>(perlu ? 'tunggu' : 'siap');
   const [maju, setMaju] = useState(0);
 
@@ -60,7 +62,7 @@ export function PramuatCerita({ children }: { children: ReactNode }) {
     const mulai = performance.now();
     const tBar = window.setTimeout(() => { if (!batal) setFase((f) => (f === 'tunggu' ? 'tampil' : f)); }, TANPA_BAR_MS);
     const hemat = hematData();
-    const inv = episode === 'auto-2-inv';
+    const inv = !!episode && EPISODE_INV.includes(episode);
     let selesai = 0;
     let total = 2; // list module + story chunk; grows when the list is known
     const satu = <T,>(p: Promise<T>) => denganBatas(p, ITEM_MS).then((v) => { selesai++; if (!batal) setMaju(Math.min(1, selesai / total)); return v; });

@@ -101,9 +101,17 @@ export function totalSkor(r: Pick<RekamanInvestigasi, 'terbaik'> = bacaRekaman()
   return Object.values(r.terbaik).reduce((a, b) => a + b, 0);
 }
 
+/**
+ * T-090: kasus yang bisa dimainkan (urut nomor). Total terbaik ditampilkan "x / (100 x jumlah ini)", mis. "185 / 200".
+ */
+export const KASUS_TERSEDIA: readonly string[] = ['kasus-1', 'kasus-2'];
+export const TOTAL_MAKS = SKOR_MAKS * KASUS_TERSEDIA.length;
+/** Stempel yang dibutuhkan untuk pangkat Senior. */
+export const STEMPEL_SENIOR = 3;
+
 /** Pangkat dari jumlah stempel: 0 muda, >= 1 investigator, >= 3 senior, >= 4 kepala. */
 export function pangkat(stempel: number): Pangkat {
-  return stempel >= 4 ? 'kepala' : stempel >= 3 ? 'senior' : stempel >= 1 ? 'investigator' : 'muda';
+  return stempel >= 4 ? 'kepala' : stempel >= STEMPEL_SENIOR ? 'senior' : stempel >= 1 ? 'investigator' : 'muda';
 }
 
 /** "Tamu baru": hapus HANYA rekaman mode investigasi di perangkat ini (penghitung uji coba `intipKasus2` bertahan). */

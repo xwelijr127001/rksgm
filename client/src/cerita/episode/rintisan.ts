@@ -6,3 +6,4 @@ export const EPISODE_AUTO_1 = null;
 export const EPISODE_AUTO_2 = null;
 export const EPISODE_AUTO_2_DEV = null;
 export const EPISODE_AUTO_2_INV = null;
+export const EPISODE_AUTO_2_INV_2 = null;

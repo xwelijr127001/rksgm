@@ -58,3 +58,43 @@
 
 /* "Sematkan" kedua kalinya: tombol tetap hidup selama tinta menulis (ketukan kedua = lanjut) */
 .iv-catat .iv-tombol[data-lewati] { background: #ffffff; color: #9a4f00; border: 2px solid #212121; }
+
+/* ==== T-090 (Fullstack): kasus berbasis data + kasus 2. Layar umum (tebakan berdaftar, koreksi, arsip) dan baris total di
+   layar hasil. Warna dan tepi mengikuti investigasi.css. Tidak ada gerak baru. */
+
+/* gambar kasus dari seniKasus(kasus) (kartu judul, layar tebakan): PNG 292 x 150 yang sudah dipanggang 2x (T-091), ditampilkan
+   pada ukuran aslinya seperti bingkai dashcam kasus 1; garis tepinya outline supaya tidak mengubah skala pikselnya */
+.iv-seni-kasus { display: block; justify-self: center; width: 292px; max-width: 100%; height: auto; outline: 2px solid #212121; background: #1b2233; image-rendering: pixelated; }
+.iv-judul-kartu > .iv-seni-kasus { margin-top: 2px; }
+
+/* tebakan pembuka berdaftar (kasus 2): tombol besar satu ketukan */
+.iv-tebak-pilih { display: flex; align-items: center; width: 100%; min-height: 52px; box-sizing: border-box; margin: 0; padding: 6px 12px; border: 2px solid #212121; border-radius: 0; background: #ffffff; color: #212121; font: inherit; font-size: 18px; line-height: 24px; font-weight: 800; text-align: left; box-shadow: 0 2px 0 #212121; cursor: pointer; }
+.iv-tebak-pilih[aria-pressed="true"] { background: #ff9000; }
+.iv-tebak-pilih:active { translate: 0 2px; box-shadow: none; }
+.iv-tebak-pilih:focus-visible { outline: 3px solid #1d6fd1; outline-offset: 2px; }
+
+/* potret pembuat pernyataan di bawah cap KEBERATAN (kasus tanpa potret reaksi) */
+.iv-cap-potret { display: block; }
+.iv-cap-potret > .tokoh-potret { display: block; border: 2px solid #212121; background: #f9eeea; box-sizing: content-box; }
+
+/* ---- layar hasil: total semua kasus, tautan kasus berikutnya, arsip */
+.iv-total { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 0 10px; min-height: 24px; box-sizing: border-box; padding: 0 6px; border: 2px solid #212121; background: #fff9f5; font-size: 14px; line-height: 20px; }
+.iv-total b { font-weight: 800; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.iv-total b span { font-size: 16px; }
+.iv-total em { font-style: normal; font-weight: 700; color: #7a3e00; }
+.iv-berikut { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px; align-items: center; width: 100%; min-height: 48px; box-sizing: border-box; margin: 0; padding: 4px 10px; border: 2px solid #212121; border-radius: 0; background: #1b2233; color: #fff9f5; font: inherit; text-align: left; box-shadow: 0 2px 0 #212121; cursor: pointer; }
+.iv-berikut:active { translate: 0 2px; box-shadow: none; }
+.iv-berikut:focus-visible { outline: 3px solid #1d6fd1; outline-offset: 2px; }
+.iv-berikut b { min-width: 0; font-size: 16px; line-height: 20px; font-weight: 800; color: #f6d25c; }
+.iv-berikut b small { display: block; font-size: 13px; line-height: 16px; font-weight: 700; color: #fff9f5; }
+.iv-berikut > span { font-size: 20px; line-height: 20px; font-weight: 800; color: #7cffb2; }
+.iv-hasil-arsip { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px; align-items: center; }
+.iv-segera { max-width: 104px; font-size: 13px; line-height: 16px; font-weight: 700; color: #5f5f5f; text-align: center; }
+.iv-arsip { display: grid; gap: 10px; color: #212121; }
+.iv-arsip :is(h3, p, ol) { margin: 0; }
+.iv-arsip-kartu { display: grid; gap: 6px; padding: 8px 10px; border: 2px solid #212121; background: #ffffff; box-shadow: 0 2px 0 #212121; }
+.iv-arsip-kartu h3 { font-size: 14px; line-height: 18px; font-weight: 800; letter-spacing: .04em; text-transform: uppercase; color: #7a3e00; }
+.iv-arsip-pesan { font-size: 16px; line-height: 22px; }
+.iv-garis { display: grid; gap: 4px; padding: 0; list-style: none; }
+.iv-garis li { padding: 2px 8px; border-left: 4px solid #bdbdbd; font-size: 16px; line-height: 22px; font-variant-numeric: tabular-nums; }
+.iv-garis li[data-sorot] { border-left-color: #ff9000; background: #fff1c2; font-weight: 800; }

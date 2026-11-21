@@ -62,13 +62,13 @@
 .iv-teaser:active { translate: 0 2px; box-shadow: 0 1px 0 #212121; }
 /* gambar 2x dipotong ke x 14..82, y 8..52 seni (136 x 88): mobil + HP menyala (63, 21 seni) */
 .iv-teaser-gambar { position: relative; display: block; width: 136px; height: 88px; background-size: 240px 112px; background-position: -28px -16px; background-repeat: no-repeat; image-rendering: pixelated; overflow: hidden; }
-.iv-teaser-gambar i, .iv-pratinjau-gambar i { position: absolute; padding: 0 4px; border: 2px solid #0a0d14; background: #7cffb2; color: #0a0d14; font: 800 11px/14px ui-monospace, Menlo, Consolas, monospace; font-style: normal; letter-spacing: .04em; animation: iv-online 1.2s steps(1) infinite; }
+.iv-teaser-gambar i, .iv-pratinjau-gambar i { position: absolute; padding: 0 4px; border: 2px solid #0a0d14; background: #c9b6ff; color: #0a0d14; font: 800 11px/14px ui-monospace, Menlo, Consolas, monospace; font-style: normal; letter-spacing: .04em; animation: iv-online 1.2s steps(1) infinite; }
 .iv-teaser-gambar i { left: 82px; top: 4px; }
-@keyframes iv-online { 50% { background: #2f8f5b; color: #eafff2; } }
+@keyframes iv-online { 50% { background: #5b46b8; color: #efe6ff; } }
 .iv-teaser-teks { min-width: 0; display: grid; gap: 2px; }
 .iv-teaser-teks b { font-size: 16px; line-height: 20px; font-weight: 800; color: #f6d25c; }
 .iv-teaser-teks span { font-size: 14px; line-height: 18px; }
-.iv-teaser-teks em { font-style: normal; font-size: 14px; line-height: 18px; font-weight: 800; color: #7cffb2; }
+.iv-teaser-teks em { font-style: normal; font-size: 14px; line-height: 18px; font-weight: 800; color: #c9b6ff; }
 .iv-pratinjau { font-size: 16px; line-height: 22px; color: #212121; }
 .iv-pratinjau-gambar { position: relative; display: block; width: 240px; height: 112px; border: 2px solid #212121; background-size: 240px 112px; background-repeat: no-repeat; image-rendering: pixelated; }
 .iv-pratinjau-gambar i { left: 112px; top: 14px; }

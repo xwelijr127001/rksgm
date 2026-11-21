@@ -13,6 +13,10 @@
  *  - "Tamu baru" dan skor terbaik tidak lagi di kaki layar ini (pindah ke lembar "Main lagi" dan ke kepala), supaya kartu teaser muat.
  * Ukur 360 x 640 (hitung; ruang isi 544 = 640 - kepala cerita 56 - bantalan .hp-main 12 + 28): kepala 80 (92 bila keping rekor /
  * terbaik tampil) + poin 3 x 24 + 2 x 4 = 80 + kartu 176 + teaser 96 + tombol 52 + jarak 4 x 8 = 516 (528) px <= 544.
+ * T-090: `total` = baris "Total 185 / 200" (jumlah skor terbaik semua kasus) + "1 kasus lagi menuju Senior", di antara rincian
+ * poin dan kartu petugas (24 px; 44 bila keduanya tidak muat sebaris). Pemanggil hanya mengirimnya bersama isi `teaser` yang
+ * PENDEK (48 px: tautan kasus berikutnya, atau arsip kasus + "Kasus 3 · segera hadir"), bukan bersama kartu penggoda 96 px:
+ * kepala 80 (92) + poin 80 + total 24 (44) + kartu 176 + baris 48 + tombol 52 + jarak 5 x 8 = 500 (512; 532) px <= 544.
  */
 import { useEffect, type ReactNode } from 'react';
 import { playSfx } from '../../../audio/audio';
@@ -28,7 +32,7 @@ import './alur.css';
 
 const SEL_NILAI: Record<SkorKasus['nilai'], number> = { S: 0, A: 1, B: 2, C: 3 };
 
-export function HasilInvestigasi({ skor, nama, look, stempel, pangkat, onMainLagi, onSelesai, reaksi, stempelBaru = true, rekor = false, terbaik, teaser }: {
+export function HasilInvestigasi({ skor, nama, look, stempel, pangkat, onMainLagi, onSelesai, reaksi, stempelBaru = true, rekor = false, terbaik, teaser, total }: {
   skor: SkorKasus;
   nama: string;
   look: PlayerLook;
@@ -46,8 +50,10 @@ export function HasilInvestigasi({ skor, nama, look, stempel, pangkat, onMainLag
   rekor?: boolean;
   /** T-087: skor terbaik di perangkat (ditampilkan hanya bila lebih tinggi dari skor ini). */
   terbaik?: number;
-  /** T-087: kartu "Kasus 2 · segera hadir" di antara kartu petugas dan baris aksi. */
+  /** T-087: kartu "Kasus 2" di antara kartu petugas dan baris aksi (T-090: atau baris pendek: tautan kasus berikutnya / arsip kasus). */
   teaser?: ReactNode;
+  /** T-090: total skor terbaik semua kasus ("Total 185 / 200") + `menuju` ("1 kasus lagi menuju Senior"). */
+  total?: { skor: number; maks: number; menuju?: string };
 }) {
   const kurang = useReducedMotion();
   const teks = useTx();
@@ -84,6 +90,12 @@ export function HasilInvestigasi({ skor, nama, look, stempel, pangkat, onMainLag
           </li>
         ))}
       </ul>
+      {total ? (
+        <p className="iv-total" data-total-kasus="">
+          <b>{teks('inv.hasil.total')} <span data-total-skor="">{total.skor}</span> / {total.maks}</b>
+          {total.menuju ? <em data-menuju-pangkat="">{total.menuju}</em> : null}
+        </p>
+      ) : null}
       <KartuPetugas nama={nama} look={look} investigasi={{ stempel, pangkat, baru: stempelBaru }} />
       {teaser}
       <div className="iv-hasil-aksi">
