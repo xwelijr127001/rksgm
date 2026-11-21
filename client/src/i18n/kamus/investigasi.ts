@@ -7,8 +7,13 @@ import type { KamusRuang } from './index';
 const kamus: KamusRuang = {
   id: {
     kasus: 'KASUS #{n}',
-    judulSub: 'Episode 1 · Investigator',
+    judulSub: 'Raksa Investigator',
     mulai: 'Mulai selidiki',
+    // T-120: sampul kasus (ui/JudulKasus.tsx)
+    sampulSapa: 'Ayo kita selidiki!',
+    sampulDurasi: '±{n} menit',
+    sampulBukti: '{n} bukti',
+    sampulTerbaik: 'Terbaik',
     buku: 'Buku catatan',
     keterangan: 'Keterangan',
     bukuInvestigator: 'Buku Catatan Investigator',
@@ -130,8 +135,13 @@ const kamus: KamusRuang = {
   },
   en: {
     kasus: 'CASE #{n}',
-    judulSub: 'Episode 1 · Investigator',
+    judulSub: 'Raksa Investigator',
     mulai: 'Start investigating',
+    // T-120: sampul kasus (ui/JudulKasus.tsx)
+    sampulSapa: 'Let’s investigate!',
+    sampulDurasi: '±{n} min',
+    sampulBukti: '{n} clues',
+    sampulTerbaik: 'Best',
     buku: 'Notebook',
     keterangan: 'Statements',
     bukuInvestigator: 'Investigator’s Notebook',
@@ -253,8 +263,13 @@ const kamus: KamusRuang = {
   },
   zh: {
     kasus: '案件 #{n}',
-    judulSub: '第 1 集 · 调查员',
+    judulSub: 'Raksa Investigator',
     mulai: '开始调查',
+    // T-120: sampul kasus (ui/JudulKasus.tsx)
+    sampulSapa: '我们来调查吧！',
+    sampulDurasi: '约 {n} 分钟',
+    sampulBukti: '{n} 份证据',
+    sampulTerbaik: '最高',
     buku: '笔记本',
     keterangan: '证词',
     bukuInvestigator: '调查员笔记本',

@@ -5758,3 +5758,61 @@ Those entries left out the 8 px (fresh: 10 px) gap between the stage and the cas
 
 ### Open
 - Not seen on a phone. Check on the owner's iPhone: stage about 224 px with the shield and whole Miss Raksa, the tab fully readable under the orange band, 20 px gaps, cream below the cards.
+
+## T-120 (2026-11-21): in-case title card redesigned as the CASE COVER, all three cases (Designer)
+
+Built by the Designer; uncommitted, not deployed. Owner rule: nothing was opened in a browser or on a phone and no test was run, so the heights are CALCULATED. Root `npm run typecheck` exit 0; `client/dist` rebuilt (build exit 0). No server file touched.
+
+Owner (iPhone, case title card): "This also need redesign". It was a plain card with "Episode 1 · Investigator" and a quarter of the screen empty below.
+
+### Files
+- `client/src/cerita/investigasi/ui/JudulKasus.tsx` (rewritten markup, same props and hooks) and the NEW `client/src/cerita/investigasi/ui/sampul.css` (classes `.iv-sampul-*`).
+- `client/src/i18n/kamus/investigasi.ts`: `judulSub` is now "Raksa Investigator" in id / en / zh; new `sampulSapa`, `sampulDurasi`, `sampulBukti`, `sampulTerbaik` (id / en / zh).
+- NOT edited: `LayarInvestigasi.tsx` (it still passes `tokoh` and `gambar`; the cover ignores `tokoh` and uses `gambar` only for a case without a hub photo), `investigasi.css`, episode files.
+- No new art: the T-117 sticker, sun disc, sparkles and sky, and the T-113 case photos.
+
+### The cover (one component for all cases)
+- **Stage** in the Raksa Cerah look: daytime sky, Miss Raksa detective sticker with sparkles and slow sun rays, and a speech bubble "Ayo kita selidiki!".
+- **Case file:** stamped tab "KASUS #N"; "Raksa Investigator" (Kasus 1 adds "· Dari cerita Episode 1"); big title; the case hook (the same three lines as the hub list); the clipped case photo at 192 x 136 (truck dashcam / MPV at night / bumper + mirror); chips "±5 menit" and "3 bukti" (Kasus 3: "4 bukti", the real count); and when the case was solved before, the case stamp on the photo and a "Terbaik 75/100" chip.
+- **Button** "Mulai selidiki": the orange pixel key (same press feel and sound) at 56 px with a blinking arrow and two sparkles. "Tamu baru" stays the small link under it (it is rendered by `LayarInvestigasi`, unchanged).
+- Reduced motion: rays, sparkles, the sticker bob and the arrow are still.
+- Data the component did not get as a prop is read from the existing hub helpers by case number: `daftarKasusHub(bacaRekaman())` gives the case config (hook, evidence list, story link), best score and stamp; the episode gives the minutes.
+
+### Calculation
+Content space at 360 x 640 = 544 px (header 56, page padding 12 + 28).
+
+| Part | px |
+|---|---|
+| stage (minimum) | 84 |
+| gap | 8 |
+| file: tab 26 + body 248 (sub 16, title 28, hook 20, photo 150, padding and border) | 274 |
+| gap | 10 |
+| button | 56 |
+| **cover, one-line title and hook** | **432** |
+| title on two lines / hook on two lines | +28 / +20 |
+| "Tamu baru" link (12 + 48) | +60 |
+
+- 360 x 640: 492 px with the link; 540 px of 544 px in the worst case (title AND hook on two lines, which happens for Kasus 2 in en). No scroll.
+- The cover has a minimum height of the viewport height minus 157 px (header 57, padding 40, link 60), at most 640 px. Spare height goes to the stage (up to 204 px, where Miss Raksa is whole and stands behind the ground band) and to the two gaps (up to 16 px); the rest stays under the button.
+
+| Viewport | Stage | Gaps | Cover ends / link ends | Empty below the link |
+|---|---|---|---|---|
+| 360 x 640 | 121 | 16 / 16 | 552 / 612 of 612 | 0 |
+| 390 x 700 | 181 | 16 / 16 | 612 / 672 of 672 | 0 |
+| 390 x 760 | 204 | 16 / 16 | 635 (+37 under the button) / 732 of 732 | 0 |
+| 390 x 844 | 204 | 16 / 16 | 635 (+74) / 769 of 816 | 47 |
+
+### Things to know
+- **"Episode 1 · Investigator" still exists in one place I may not edit:** the episode title `judul` in `client/src/cerita/episode/auto-2-inv/teks.id.ts`, `teks.en.ts` and `teks.zh.ts` (Fullstack's episode files). Wherever the player shows the episode title (for example the Menu or the episode list), it will still say that. Fullstack / Lead to change it.
+- The best score and stamp come from the SOLO record of the device. A guest playing on the event board sees their solo best there too, if they have one.
+- The hook lines are the hub-list wording (`hubInv.kaitDaftar.*`); Kasus 2 and 3 differ from the episode hooks `inv2.kait` / `inv3.kait` (noted in T-113).
+- en / zh of the four new strings are my wording ("Let's investigate!", "±5 min", "3 clues", "Best").
+- The old portrait of Miss Raksa beside the title and the old dashcam frame on this card are gone. The first investigation screen after the cover still shows the live dashcam frame.
+- If the header bar of the case screen is taller than 57 px (a part title on two lines), the minimum height is a few px too tall and the page could scroll by those few px on a 640 px screen.
+- Browsers without container queries (before iOS 16): no ground band in front of Miss Raksa; everything else works.
+
+### Previews (calculated mocks, not screenshots)
+`character/investigator-t120/layar-t120-390x760.png` and `layar-t120-360x640.png`: Kasus 1 (new), Kasus 2 (solved before: stamp + best score), Kasus 3 (new). Pixel font in capitals, estimated line breaks, photo not tilted.
+
+### Open
+- Not seen on a phone. Most worth a look: the speech bubble next to the sticker, the chip column beside the photo at 360 px (92 px wide), and the en line breaks.

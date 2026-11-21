@@ -1,6 +1,6 @@
 /** T-076 Episode 1 Investigator (pilot): NEW keys only (简体中文; same keys and numbers as teks.id.ts). */
 export const TEKS_AUTO_2_INV_ZH: Record<string, string> = {
-  judul: '第 1 集 · 调查员',
+  judul: '调查员 · 案件 1',
   ringkas: '你就是调查员。记下证人的说法，收集证据，再反驳那句说错的话。5 分钟，直接开始。',
   'inv.label': '案件 1',
   'inv.kait': '工作人员记录的是第 3 车道。真是这样吗？', // T-094: kalimat kait di hub Raksa Investigator

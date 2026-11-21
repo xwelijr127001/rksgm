@@ -5,7 +5,7 @@
  * Aturan penjaga teks (cerita/validasi.ts): kunci & angka sama di id / en / zh; tanpa parameter selain {nama}.
  */
 export const TEKS_AUTO_2_INV_ID: Record<string, string> = {
-  judul: 'Episode 1 · Investigator',
+  judul: 'Investigator · Kasus 1',
   ringkas: 'Kamu investigatornya. Catat keterangan saksi, kumpulkan bukti, lalu bantah pernyataan yang keliru. 5 menit, langsung main.',
   'inv.label': 'Kasus 1',
   'inv.kait': 'Petugas mencatat lajur 3. Benarkah?', // T-094: kalimat kait di hub Raksa Investigator

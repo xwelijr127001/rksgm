@@ -4,7 +4,7 @@
  * 面向来宾使用前必须由理赔 PIC 确认。所有姓名、修理厂和日期均为虚构（“3 日 / 14 日 / 15 日”只表示先后顺序）。
  */
 export const TEKS_AUTO_2_INV_3_ZH: Record<string, string> = {
-  judul: 'Investigator · 案件 3',
+  judul: '调查员 · 案件 3',
   ringkas: '一份维修估价单，两行：保险杠和后视镜。逐一出示证据，听取说明，再决定下一步。5 分钟。',
   'inv.label': '案件 3',
   'inv3.kait': '估价单上有两行。是同一次事故吗？',

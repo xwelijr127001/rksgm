@@ -1,0 +1,77 @@
+/* T-120 (Designer): SAMPUL KASUS (ui/JudulKasus.tsx), gaya "Raksa Cerah" seperti hub (pages/investigator.css, T-117 / T-119).
+   Palet: tinta #212121, putih, jingga #ff9000, kuning #ffe38a, jingga tua #9a4f00 (6,3 : 1 di putih), bayang #f0a030.
+   Seni panggung: 1 piksel seni = 2 px. Kelas berawalan .iv-sampul-; bagian tetap membawa .iv-judul (kait gaya "Tamu baru").
+   Tata letak = kisi: panggung 84 .. 204 px | jarak 8 .. 16 | berkas | jarak 10 .. 16 | tombol 56. Tinggi minimum bagian mengikuti
+   layar (100dvh - kepala 57 - bantalan isi 40 - "Tamu baru" 60), paling banyak 640 px: sisa tinggi mengisi panggung dan jarak
+   sampai batasnya, selebihnya tinggal di bawah tombol. Hitungan 360 x 640 di JudulKasus.tsx. */
+.iv-layar.iv-judul.iv-sampul { --s: 2; display: grid; grid-template-columns: minmax(0, 1fr); gap: 0; align-content: start; padding-top: 0; text-align: left;
+  grid-template-rows: minmax(84px, 204px) minmax(8px, 16px) auto minmax(10px, 16px) auto;
+  min-height: min(calc(100dvh - 157px - env(safe-area-inset-top) - env(safe-area-inset-bottom)), 640px); box-sizing: border-box; }
+.iv-sampul > .iv-sampul-panggung { grid-row: 1; }
+.iv-sampul > .iv-sampul-berkas { grid-row: 3; }
+.iv-sampul > .iv-sampul-mulai { grid-row: 5; }
+
+/* ---- panggung: langit siang berbingkai tinta; seni menempel bawah (gedung + pita tanah selalu tampak) */
+.iv-sampul-panggung { container: iv-sampul-panggung / size; position: relative; overflow: hidden; box-sizing: border-box; border: 2px solid #212121; image-rendering: pixelated;
+  background: var(--iv-latar) center bottom / 720px 208px no-repeat, linear-gradient(to top, #ffb347 0 20px, #ff9000 20px 24px, #fff6dc 24px 48px, #ffe9a8 208px); }
+/* pita tanah di DEPAN Miss Raksa hanya bila ia muat utuh (panggung >= 204 px) */
+.iv-sampul-pita { display: none; position: absolute; inset: auto 0 0; z-index: 2; height: 24px; pointer-events: none;
+  background: repeating-linear-gradient(90deg, #ffc46b 0 8px, #0000 8px 16px) left 0 top 10px / 100% 2px no-repeat, linear-gradient(#ff9000 0 4px, #ffb347 4px); }
+.iv-sampul-sinar { position: absolute; right: -252px; top: calc(max(4px, 100% - 200px) + 78px - 320px); width: 640px; height: 640px; pointer-events: none;
+  background: repeating-conic-gradient(rgba(255, 196, 0, .3) 0 9deg, rgba(255, 196, 0, 0) 9deg 18deg);
+  -webkit-mask-image: radial-gradient(circle, #000 0, #000 22%, #0000 68%); mask-image: radial-gradient(circle, #000 0, #000 22%, #0000 68%);
+  animation: iv-sampul-sinar 120s linear infinite; }
+/* Miss Raksa stiker 68 x 88 (2x), ditambatkan dari atas: panggung pendek memotong badannya, bukan kepala atau kaca pembesarnya */
+.iv-sampul-miss { position: absolute; right: 4px; top: max(4px, calc(100% - 200px)); width: 136px; height: 176px; }
+.iv-sampul-miss > img { position: absolute; image-rendering: pixelated; }
+.iv-sampul-cakram { left: -12px; top: -2px; width: 160px; height: 160px; }
+.iv-sampul-miss-gambar { left: 0; top: 0; width: 136px; height: 176px; animation: iv-sampul-napas 3.2s steps(1) infinite; }
+.iv-sampul-kilau { left: -32px; top: -4px; width: 200px; height: 184px; animation: iv-sampul-kelip 2.4s steps(1) infinite; }
+.iv-sampul-kilau[data-set="b"] { animation-delay: -1.2s; }
+/* balon ucapan di kiri, di tengah ruang di atas pita tanah; ekornya menunjuk ke Miss Raksa */
+.iv-layar .iv-sampul-balon { position: absolute; left: 10px; top: calc((100% - 24px) / 2); translate: 0 -50%; z-index: 3; max-width: calc(100% - 176px); box-sizing: border-box; margin: 0; padding: 6px 10px;
+  border: 2px solid #212121; background: #ffffff; box-shadow: 0 3px 0 #f0a030; font-size: 16px; line-height: 20px; font-weight: 800; color: #212121; }
+.iv-sampul-balon::after { content: ""; position: absolute; right: -10px; top: 50%; width: 8px; height: 8px; margin-top: -6px; background: #ffffff; border: 2px solid #212121; border-left: 0; border-bottom: 0; rotate: 45deg; translate: -5px 0; }
+@container iv-sampul-panggung (min-height: 200px) { .iv-sampul-pita { display: block; } }
+@keyframes iv-sampul-sinar { to { rotate: 360deg; } }
+@keyframes iv-sampul-napas { 0%, 100% { translate: 0 0; } 50% { translate: 0 2px; } }
+@keyframes iv-sampul-kelip { 0%, 100% { opacity: 1; } 50% { opacity: .15; } }
+
+/* ---- berkas: tab cap "KASUS #N" + badan putih */
+.iv-sampul-berkas { display: grid; justify-items: start; }
+.iv-layar .iv-sampul-tab { position: relative; top: 2px; z-index: 1; margin: 0; padding: 3px 14px 1px; background: #ff9000; border: 2px solid #212121; border-bottom-color: #ff9000; box-shadow: inset 0 2px 0 #ffc46b;
+  font-size: 16px; line-height: 20px; font-weight: 800; letter-spacing: .14em; color: #212121; }
+.iv-sampul-badan { justify-self: stretch; display: grid; box-sizing: border-box; padding: 8px 10px 10px; background: #ffffff; border: 2px solid #212121; box-shadow: inset 0 2px 0 #ff9000, 0 4px 0 #f0a030; }
+.iv-sampul-sub { font-size: 13px; line-height: 16px; font-weight: 800; letter-spacing: .04em; color: #9a4f00; margin-bottom: 2px !important; }
+.iv-sampul-sub > span { font-weight: 700; letter-spacing: 0; color: #5a3a24; }
+.iv-sampul-badan h2 { font-size: 24px; line-height: 28px; font-weight: 800; letter-spacing: -.01em; color: #212121; overflow-wrap: anywhere; }
+.iv-sampul-badan h2:focus { outline: none; }
+.iv-sampul-kait { margin-top: 2px !important; font-size: 16px; line-height: 20px; font-weight: 700; color: #33241a; }
+.iv-sampul-baris { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 8px; align-items: start; margin-top: 8px; }
+/* foto kasus berklip 192 x 136 (2x), sedikit miring; stempel kasus menumpang bila sudah tuntas */
+.iv-sampul-foto { position: relative; box-sizing: border-box; padding: 4px 4px 6px; background: #ffffff; border: 2px solid #212121; box-shadow: 2px 2px 0 #ffc46b; rotate: -1.5deg; }
+.iv-sampul-foto-gambar { display: block; width: 192px; height: 136px; background: #33241a; image-rendering: pixelated; }
+.iv-sampul-foto > .iv-seni-kasus, .iv-sampul-foto > .dc-pita { max-width: 192px; }
+.iv-sampul-klip { position: absolute; left: 14px; top: -12px; z-index: 2; width: 10px; height: 22px; image-rendering: pixelated; }
+.iv-sampul-cap { position: absolute; right: -8px; bottom: -6px; z-index: 2; rotate: 12deg; padding: 2px; background: #fff9f5; border: 2px solid #212121; }
+/* keping: durasi, jumlah bukti, skor terbaik */
+.iv-layar .iv-sampul-keping { display: grid; gap: 6px; justify-items: start; margin: 4px 0 0; padding: 0; list-style: none; }
+.iv-sampul-keping > li { box-sizing: border-box; max-width: 100%; padding: 1px 6px; border: 2px solid #212121; background: #ffe38a; font-size: 13px; line-height: 18px; font-weight: 800; color: #212121; font-variant-numeric: tabular-nums; }
+.iv-sampul-keping > li[data-terbaik] { display: grid; background: #212121; color: #ffe38a; font-size: 15px; line-height: 20px; }
+.iv-sampul-keping > li[data-terbaik] > small { font-size: 12px; line-height: 14px; font-weight: 700; color: #ffffff; }
+/* HP sangat sempit: keping di bawah foto, berjajar */
+@media (max-width: 339.98px) { .iv-sampul-baris { grid-template-columns: minmax(0, 1fr); justify-items: center; } .iv-layar .iv-sampul-keping { grid-auto-flow: column; } }
+
+/* ---- tombol "Mulai selidiki": kunci piksel jingga besar, panah berkedip, dua kilau (seperti tombol utama hub) */
+.iv-sampul .iv-sampul-mulai { position: relative; box-sizing: border-box; min-height: 56px; gap: 12px; font-size: 20px; letter-spacing: .02em; outline: 2px solid #212121; outline-offset: 0; }
+.iv-sampul .iv-sampul-mulai:focus-visible { outline: 3px solid #212121; outline-offset: 2px; }
+.iv-sampul-mulai::after { content: ""; flex: none; width: 0; height: 0; border-left: 10px solid #212121; border-block: 7px solid #0000; animation: iv-sampul-tunjuk 1s steps(1) infinite; }
+.iv-sampul-mulai::before { content: ""; position: absolute; inset: 8px 14px 12px; pointer-events: none; animation: iv-sampul-kelip 1.8s steps(1) infinite;
+  background: linear-gradient(#fff, #fff) left 5px top 0 / 1px 11px no-repeat, linear-gradient(#fff, #fff) left 0 top 5px / 11px 1px no-repeat,
+    linear-gradient(#fff, #fff) right 4px bottom 0 / 1px 9px no-repeat, linear-gradient(#fff, #fff) right 0 bottom 4px / 9px 1px no-repeat; }
+@keyframes iv-sampul-tunjuk { 0%, 100% { translate: 0 0; } 50% { translate: 4px 0; } }
+
+@media (prefers-reduced-motion: reduce) {
+  :root:not([data-gerak="penuh"]) :is(.iv-sampul-sinar, .iv-sampul-miss-gambar, .iv-sampul-kilau) { animation: none !important; }
+  :root:not([data-gerak="penuh"]) .iv-sampul-mulai::after, :root:not([data-gerak="penuh"]) .iv-sampul-mulai::before { animation: none !important; }
+}
