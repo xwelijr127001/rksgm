@@ -63,8 +63,19 @@ export const investigatorEventsEnabled = (): boolean => (process.env.RAKSA_INVES
 const MINUTE = 60_000;
 /** Bounded limiter state: at most this many keys per limiter (the oldest are dropped past it). */
 const MAX_KEYS = 20_000;
+/** Join attempts per minute from one trusted client IP, right or wrong code (NAT burst allowance). */
+export const JOIN_BURST_PER_IP = 2 * EVENT_LIMITS.joinsPerMinutePerBoard;
 const limiters = () => ({
-  joinIp: new RateLimiter(EVENT_LIMITS.joinsPerMinutePerIp, MINUTE, undefined, MAX_KEYS),
+  /**
+   * T-110 (Codex T-108 finding 4). A venue shares one public address, so a whole room joining at once must not queue behind
+   * its own typos. Two budgets per trusted client IP:
+   *   joinBurst  EVERY join attempt, right or wrong: a generous burst (twice the per-board budget, so for one venue the board
+   *              budget below is the bound that matters). It is also the hard bound on code guessing from one address.
+   *   joinWrong  FAILED codes only, the smaller spec budget. Once it is used up, a wrong code is answered 429 instead of 404;
+   *              a RIGHT code is still accepted, so typos never use up the venue's allowance.
+   */
+  joinBurst: new RateLimiter(JOIN_BURST_PER_IP, MINUTE, undefined, MAX_KEYS),
+  joinWrong: new RateLimiter(EVENT_LIMITS.joinsPerMinutePerIp, MINUTE, undefined, MAX_KEYS),
   joinBoard: new RateLimiter(EVENT_LIMITS.joinsPerMinutePerBoard, MINUTE, undefined, 2_000),
   decisions: new RateLimiter(EVENT_LIMITS.decisionsPerMinutePerParticipant, MINUTE, undefined, MAX_KEYS),
   hostMutations: new RateLimiter(EVENT_LIMITS.hostMutationsPerMinutePerHost, MINUTE, undefined, 2_000),
@@ -94,16 +105,14 @@ const bodyOf = (req: express.Request): Record<string, unknown> => (req.body && t
 const param = (req: express.Request, name: string): string => String(req.params[name] ?? '').slice(0, EVENT_LIMITS.maxIdLength + 1);
 const ipOf = (req: express.Request): string => String(req.ip);
 
-export function mountInvestigatorEvents(app: express.Express): boolean {
-  if (!investigatorEventsEnabled()) {
-    app.use(EVENT_API, (_req, res) => { res.status(404).json({ ok: false, error: 'not_found' }); });
-    return false;
-  }
-  const db = getDb();
-  runInvestigatorMigrations(db);
-  const lim = limiters();
+/** The event tables exist in this database (the board was switched on here at least once). */
+const eventTablesExist = (db: ReturnType<typeof getDb>): boolean => !!db.prepare("SELECT 1 FROM sqlite_master WHERE type = 'table' AND name = 'inv_events'").get();
 
-  // Housekeeping: at start (also covers downtime), every minute, and before a request when the last run is 15 s old.
+/**
+ * Retention housekeeping: at start (also covers downtime), every minute, and (through the returned function) before a
+ * request when the last run is 15 s old. T-110 (Codex T-108 finding 2): it does NOT depend on the route flag.
+ */
+function startRetention(db: ReturnType<typeof getDb>): (now: number) => void {
   let lastSweep = 0;
   const tidy = (now: number): void => {
     if (now - lastSweep < 15_000) return;
@@ -111,16 +120,45 @@ export function mountInvestigatorEvents(app: express.Express): boolean {
     const { closed, purged } = sweep(db, now);
     if (closed || purged) console.log(`[investigator] board ditutup: ${closed}, dibersihkan: ${purged}`);
   };
-  tidy(Date.now());
-  setInterval(() => { try { tidy(Date.now()); } catch (err) { console.error('[investigator] sweep:', (err as Error)?.message); } }, MINUTE).unref();
+  const aman = (): void => { try { tidy(Date.now()); } catch (err) { console.error('[investigator] sweep:', (err as Error)?.message); } };
+  aman();
+  setInterval(aman, MINUTE).unref();
+  return tidy;
+}
+
+/**
+ * MUST be called before the story router is mounted (index.ts): that router parses every /api body up to 1 MB, and this
+ * handler has to see the request first so its own small body cap applies (T-110, Codex T-108 finding 1).
+ */
+export function mountInvestigatorEvents(app: express.Express): boolean {
+  if (!investigatorEventsEnabled()) {
+    // Flag off: nothing is created and every path answers 404. But boards made while the flag was on are still closed at
+    // their midnight and purged 24 h later, so switching the board off never keeps aliases or scores longer than promised.
+    try {
+      const db = getDb();
+      if (eventTablesExist(db)) startRetention(db);
+    } catch (err) {
+      console.error('[investigator] retensi:', (err as Error)?.message);
+    }
+    app.use(EVENT_API, (_req, res) => { res.setHeader('Cache-Control', 'no-store'); res.status(404).json({ ok: false, error: 'not_found' }); });
+    return false;
+  }
+  const db = getDb();
+  runInvestigatorMigrations(db);
+  const lim = limiters();
+  const tidy = startRetention(db);
 
   const r = express.Router();
-  r.use(express.json({ limit: EVENT_LIMITS.maxBodyBytes }));
+  // Order matters: no-store and the origin check come BEFORE the body is read, then the small JSON parser.
   r.use((req, res, next) => {
     res.setHeader('Cache-Control', 'no-store');
     // Approved origins only. A request without an Origin header is not a cross-site browser request (same policy as sockets).
     const origin = req.header('origin');
     if (origin && !asalDiizinkan(origin, req.headers)) { fail(res, 403, 'forbidden'); return; }
+    next();
+  });
+  r.use(express.json({ limit: EVENT_LIMITS.maxBodyBytes }));
+  r.use((_req, _res, next) => {
     tidy(Date.now());
     next();
   });
@@ -195,11 +233,17 @@ export function mountInvestigatorEvents(app: express.Express): boolean {
 
   // ---- participants
   r.post(EVENT_ROUTES.join, handle((req, res) => {
-    // EVERY join attempt (right or wrong code) spends the per-IP budget: that is the bound on code guessing (see handoff).
-    if (!lim.joinIp.take(ipOf(req))) { fail(res, 429, 'rate_limited'); return; }
+    const ip = ipOf(req);
+    // Every attempt spends the generous burst (the bound on guessing); failed codes are counted separately.
+    if (!lim.joinBurst.take(ip)) { fail(res, 429, 'rate_limited'); return; }
     const code = normalizeCode(bodyOf(req).code, EVENT_CODE_LENGTH);
     const e = code ? openEventByCode(db, code) : undefined;
-    if (!e) { fail(res, 404, 'not_found'); return; }
+    if (!e) {
+      if (lim.joinWrong.blocked(ip)) { fail(res, 429, 'rate_limited'); return; }
+      lim.joinWrong.record(ip);
+      fail(res, 404, 'not_found');
+      return;
+    }
     if (!lim.joinBoard.take(e.id)) { fail(res, 429, 'rate_limited'); return; }
     res.json({ ok: true, ...joinEvent(db, e, Date.now()) });
   }));
@@ -276,7 +320,9 @@ export function mountInvestigatorEvents(app: express.Express): boolean {
   r.use((err: unknown, req: express.Request, res: express.Response, next: express.NextFunction) => {
     if (res.headersSent) { next(err); return; }
     const type = (err as { type?: string } | null)?.type;
-    if (type === 'entity.too.large' || type === 'entity.parse.failed') { fail(res, 400, 'bad_request'); return; }
+    // Body over EVENT_LIMITS.maxBodyBytes = 413; unreadable JSON = 400. Both in this API's own envelope.
+    if (type === 'entity.too.large') { fail(res, 413, 'bad_request'); return; }
+    if (type === 'entity.parse.failed') { fail(res, 400, 'bad_request'); return; }
     console.error(`[investigator] ${req.method} ${req.route?.path ?? '(path)'}:`, (err as Error)?.message ?? 'error');
     fail(res, 503, 'unavailable');
   });

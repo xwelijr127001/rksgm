@@ -111,6 +111,8 @@ function deleteEventData(db: Db, eventId: string): void {
 export function sweep(db: Db, now: number): { closed: number; purged: number } {
   return db.transaction(() => {
     const closed = db.prepare("UPDATE inv_events SET status = 'closed', closed_at = closes_at, purge_at = closes_at + ? WHERE status = 'open' AND closes_at <= ?").run(PURGE_MS, now).changes;
+    // T-110: a pending pairing code never outlives its board (closed by its owner or at local midnight).
+    db.prepare("DELETE FROM inv_display_codes WHERE event_id IN (SELECT id FROM inv_events WHERE status = 'closed')").run();
     const due = db.prepare("SELECT id FROM inv_events WHERE status = 'closed' AND purge_at IS NOT NULL AND purge_at <= ?").all(now) as { id: string }[];
     for (const e of due) {
       deleteEventData(db, e.id);
@@ -144,7 +146,11 @@ export function createEvent(db: Db, hostId: string, now: number): EventRow {
 }
 
 export function closeEvent(db: Db, e: EventRow, now: number): EventRow {
-  db.prepare("UPDATE inv_events SET status = 'closed', closed_at = ?, purge_at = ? WHERE id = ? AND status = 'open'").run(now, now + PURGE_MS, e.id);
+  db.transaction(() => {
+    db.prepare("UPDATE inv_events SET status = 'closed', closed_at = ?, purge_at = ? WHERE id = ? AND status = 'open'").run(now, now + PURGE_MS, e.id);
+    // T-110 (Codex T-108 finding 3): a pairing code issued just before closure can no longer be exchanged.
+    db.prepare('DELETE FROM inv_display_codes WHERE event_id = ?').run(e.id);
+  })();
   return eventById(db, e.id)!;
 }
 
@@ -210,7 +216,9 @@ export function exchangeDisplayCode(db: Db, displayCode: string, now: number): D
     if (!row) return null;
     db.prepare('DELETE FROM inv_display_codes WHERE code_hash = ?').run(kode); // one use, whatever happens next
     const e = eventById(db, row.event_id);
-    if (row.expires_at <= now || !e) return null;
+    // T-110: only an OPEN board, before its local midnight, can be paired (already-paired displays keep the final board
+    // until they are revoked or expire).
+    if (row.expires_at <= now || !e || e.status !== 'open' || e.closes_at <= now) return null;
     const credential = randomId(CREDENTIAL_DISPLAY, 32);
     const expiresAt = (e.purge_at ?? e.closes_at + PURGE_MS);
     db.prepare('INSERT INTO inv_displays (credential_hash, event_id, created_at, expires_at) VALUES (?, ?, ?, ?)').run(hashOf(credential), e.id, now, expiresAt);

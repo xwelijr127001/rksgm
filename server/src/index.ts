@@ -132,11 +132,13 @@ io.of('/').use((socket, next) => {
 
 // PRD v0.2 Story Room system: /story namespace, /api/staff|cms|host|admin|story routes, /aset-cerita files.
 const story = createStoryService(io);
-mountStoryHttp(app, story);
 // T-107: Investigator event board ("Top Investigator hari ini") at /api/investigator/events. OFF unless
 // RAKSA_INVESTIGATOR_ACARA=on: then no table is created and the path answers 404. Separate tables (prefix inv_); it never
 // touches quiz rooms, story rooms, answers or prizes.
+// T-110 (Codex T-108 finding 1): mounted BEFORE the story router, whose JSON parser reads every /api body up to 1 MB; the
+// event handler (also its disabled 404) must see the request first so its own 2 kB cap and origin check apply.
 if (mountInvestigatorEvents(app)) console.log('[investigator] papan acara aktif (RAKSA_INVESTIGATOR_ACARA=on)');
+mountStoryHttp(app, story);
 const interrupted = recoverInterruptedRooms();
 if (interrupted.length) console.log('[story] room terputus karena server dimulai ulang:', interrupted.join(', '));
 // T-028: scenarios that ship with the code (Episode 2 as a hosted room). Idempotent; a failure is logged, never fatal.

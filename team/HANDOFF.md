@@ -5138,3 +5138,114 @@ None of these changes a type or a path, so the client needs no change.
 - The staff sign-in link on the standalone host page goes to `/host`; coming back to the Investigator host page afterwards is manual.
 - `[konfirmasi PIC]`: no new policy wording. The Designer's three marked lines (`catatan`, `pilihPrivasi`, `hostTengahMalam`: "dihapus tengah malam" vs the service's purge 24 h after closure) are still open and now visible on these screens.
 - Owner trial sheet counts: pending.
+
+
+## T-110 (2026-11-21): Codex T-108 security fixes applied to the Investigator event service (Fullstack, server)
+
+Source: `team/REVIEW.md` "Investigator event service security review (2026-11-21)". All four findings applied as proposed. Gate: root `npm run typecheck` exit 0, `server/dist` and `client/dist` rebuilt (no client source changed). Not committed, not deployed. No browser, no e2e, no test suite. The flag `RAKSA_INVESTIGATOR_ACARA` is still off by default.
+
+### The four fixes (`server/src/investigator/http.ts`, `store.ts`, registration in `server/src/index.ts`)
+1. **Body cap (medium).** `mountInvestigatorEvents(app)` is now called BEFORE `mountStoryHttp` in `index.ts`, so the story router's 1 MB parser never reads an event request; the disabled 404 is mounted at the same place. Inside the event router the order is now: `Cache-Control: no-store` + origin check, THEN the 2 kB JSON parser, then housekeeping, then the routes. A body over the cap answers **413** (was 400) and unreadable JSON 400, both in this API's envelope `{ ok: false, error: 'bad_request' }`.
+2. **Retention with the flag off (medium).** With the flag off, if the table `inv_events` exists, the sweep still runs at start and every minute (boards close at their local midnight and are purged 24 h after closure). An install that never had the tables is unchanged: nothing is created, no timer runs.
+3. **Pairing code after closure (low).** `exchangeDisplayCode` refuses unless the board is open and before its local midnight; `closeEvent` and the midnight branch of `sweep` delete pending codes. A display that was already paired keeps reading the final board until it is revoked or expires.
+4. **Join budget (low).** Per trusted client IP there are now two budgets: `joinBurst` = EVERY join attempt, 600 per minute (twice the per-board budget, so for one venue behind one address the board budget is the bound that matters; it is also the hard bound on code guessing from one address), and `joinWrong` = FAILED codes only, 120 per minute; once that is used up a wrong code answers 429 instead of 404 while a right code is still accepted. Unchanged: 300 joins per minute per board, 500 participants per board. **This changes the spec's "120 joins per minute per IP" into "120 failed codes per minute per IP, 600 attempts per minute per IP"**, as Codex proposed; say if the owner wants other numbers (two constants in `http.ts`).
+- Operational notes from the review that are NOT code: nginx must be the only ingress and overwrite the forwarded headers (`TRUST_PROXY_HOPS`); the budgets are in memory and assume one Node process.
+- No type, path or reply shape changed, so the client (T-109) is untouched.
+
+### The one permitted local smoke run
+Built server (`node server/dist/server/src/index.js`) on 127.0.0.1:4777 with `RAKSA_INVESTIGATOR_ACARA=on` and `DB_FILE` in a throwaway folder in the scratch directory; two throwaway staff accounts with the host role made by the staff CLI against that database (random password, never printed). Requests by curl; base `/api/investigator/events` unless written out. Afterwards the server was stopped (the process I started; port 4777 no longer listening) and the throwaway folder deleted. Credentials, codes and the password are not shown; the server log contained none of them.
+
+```
+staff host created: exit 0
+second host created: exit 0
+01 GET  /api/config -> 200
+   features.investigatorAcara = true
+02 POST /join body 3 kB (cap 2 kB) -> 413
+   body: {"ok":false,"error":"bad_request"}
+03 POST /join Origin https://evil.example -> 403
+   body: {"ok":false,"error":"forbidden"}
+04 POST /join Origin evil + body 3 kB (origin checked before parsing) -> 403
+   body: {"ok":false,"error":"forbidden"}
+05 POST /join same-origin Origin, wrong code -> 404
+   body: {"ok":false,"error":"not_found"}
+06 POST /join malformed JSON -> 400
+   body: {"ok":false,"error":"bad_request"}
+07 POST / (create) without credential -> 401
+   body: {"ok":false,"error":"unauthorized"}
+08 POST /api/staff/login (host) -> 200
+   token received: yes
+09 POST /api/staff/login (second host) -> 200
+10 POST / (create) as host -> 200
+   status=open day=2026-11-21 code length=6 cases=3
+11 GET  /mine as host -> 200
+   participants=0 rows=0
+12 GET  /:eventId as the OTHER host (not owner) -> 403
+   body: {"ok":false,"error":"forbidden"}
+13 POST /join with the code -> 200
+   alias format ok=true credential prefix=ivp_ cases=3
+14 POST /runs kasus-1 v1 -> 200
+   status=started seq=0 stage=round:keberatan:0
+15 POST /runs kasus-1 v99 (unknown rubric) -> 200
+   status=unsupported
+16 POST /runs kasus-1 v1 again (replaces the unfinished run) -> 200
+   status=started
+17 POST decision seq 0 round:keberatan:0 rambu (a miss) + a client total -> 200
+   ack: {"ok":true,"seq":1,"nextStage":"round:keberatan:1","status":"retry"}
+18 same command again (retry) -> 200
+   ack: {"ok":true,"seq":1,"nextStage":"round:keberatan:1","status":"retry"}
+19 same command id, other choice -> 409
+   body: command_conflict
+20 decision with a stale seq -> 409
+   body: error=seq_mismatch run.seq=1 run.stage=round:keberatan:1
+21 decision seq 1 round:keberatan:1 dashcam -> 200
+   ack: {"ok":true,"seq":2,"nextStage":"verdict","status":"advanced"}
+22 decision seq 2 verdict layak -> 200
+   ack: {"ok":true,"seq":3,"nextStage":"message","status":"advanced"}
+23 decision seq 3 message baik -> 200
+   ack: {"ok":true,"seq":4,"nextStage":"done","status":"completed","score":{"bukti":25,"putusan":30,"penanganan":30,"total":85,"nilai":"A"}}
+24 GET  /me (participant) -> 200
+   rank=1 total=85 stamps=1 best={"kasus-1":85}
+25 POST /:eventId/display-code as host -> 200
+   code length=8
+26 POST /display/exchange -> 200
+   credential prefix=ivd_
+27 POST /display/exchange same code again (one use) -> 404
+   body: {"ok":false,"error":"not_found"}
+28 GET  /board with the display credential -> 200
+   participants=1 rows=[[1,85,1]] row keys=alias,rank,stamps,total status=open
+29 GET  /board with the PARTICIPANT credential -> 401
+   body: {"ok":false,"error":"unauthorized"}
+30 GET  /board without credential -> 401
+   body: {"ok":false,"error":"unauthorized"}
+31 POST /:eventId/display-code (second code, left pending) -> 200
+32 POST /:eventId/close as the OTHER host -> 403
+   body: {"ok":false,"error":"forbidden"}
+33 POST /:eventId/close as owner -> 200
+   status=closed purgeAt set=number
+34 POST /display/exchange pending code AFTER closure -> 404
+   body: {"ok":false,"error":"not_found"}
+35 GET  /board (already paired) after closure -> 200
+   status=closed rows=1
+36 POST /join with the code after closure -> 404
+   body: {"ok":false,"error":"not_found"}
+37 POST /api/staff/login with a 3 kB body (story API unaffected by the mount order) -> 200
+   ok=true
+38 GET  /api/config again (server still up) -> 200
+server stopped: exit 143
+--- server log lines mentioning investigator or errors:
+[investigator] papan acara aktif (RAKSA_INVESTIGATOR_ACARA=on)
+--- secrets in the server log: 0
+throwaway data removed: yes
+```
+
+What it shows, by finding: (1) requests 02, 04, 06 and 37: the event cap applies (413), a bad origin is refused even with an oversize body (403, so the origin is checked before the body is parsed), malformed JSON gets this API's envelope, and the story API still accepts its own larger body; (3) request 34: a code issued before closure is refused after it, while request 35 shows the already-paired display still reads the final board; (4) requests 05, 13 and 36: wrong code 404, right code 200, code of a closed board 404. Also: staff-only creation (07), owner-only view and close (12, 32), server-side score with a client "total" ignored (17, 23), idempotent retry and conflict (18, 19), stale seq with the real run state (20), display credential needed for the board and a participant credential refused there (28-30), one-use pairing code (27).
+
+### Checked without a server (compiled module on throwaway database files, deleted afterwards)
+- Finding 2: flag off + tables present + a board from three days ago and one from today -> log "board ditutup: 1, dibersihkan: 1"; the old board and its participant are gone, today's board is still open. Flag off + empty database -> 0 `inv_` tables.
+- Finding 3 at local midnight (in-memory script): a pending code cannot be exchanged after the midnight sweep; a display paired earlier still resolves.
+
+### Not covered
+- The rate limits were not driven to their thresholds (no 429 was provoked): the split join budget, the pairing and decision budgets are by code reading and typecheck.
+- The smoke run used one phone-equivalent and one board; no concurrency, no load.
+- Nothing was run behind nginx; `req.ip` was the loopback address.
+- Worth a Codex re-check: the new mount order in `index.ts` (after CORS, the security headers and the legacy path gate; before the story router) and the two join budgets.
