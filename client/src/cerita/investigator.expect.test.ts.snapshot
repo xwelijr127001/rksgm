@@ -1,0 +1,25 @@
+exports[`investigator episodes: validator and path walk 1`] = `
+{
+  "auto-2-inv": {
+    "id": "auto-2-inv",
+    "validasi": []
+  },
+  "auto-2-inv-2": {
+    "id": "auto-2-inv-2",
+    "validasi": []
+  },
+  "auto-2-inv-3": {
+    "id": "auto-2-inv-3",
+    "validasi": []
+  },
+  "auto-2-inv-3 walk": {
+    "jalur": 5292,
+    "akhir": {
+      "tinjau": 3528,
+      "tuntas": 1764
+    },
+    "masalah": [],
+    "keadaan": 78
+  }
+}
+`;

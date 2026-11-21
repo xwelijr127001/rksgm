@@ -1,0 +1,187 @@
+exports[`investigator rank and awards around thresholds 1`] = `
+{
+  "stamps=0 best=0": {
+    "rank": "muda",
+    "awards": []
+  },
+  "stamps=1 best=100": {
+    "rank": "investigator",
+    "awards": []
+  },
+  "stamps=2 best=200": {
+    "rank": "investigator",
+    "awards": [
+      "lencana-dua-kasus"
+    ]
+  },
+  "stamps=3 best=254": {
+    "rank": "senior",
+    "awards": [
+      "lencana-dua-kasus",
+      "segel-panel"
+    ]
+  },
+  "stamps=3 best=255": {
+    "rank": "kepala",
+    "awards": [
+      "lencana-dua-kasus",
+      "segel-panel",
+      "bingkai-kepala"
+    ]
+  },
+  "stamps=3 best=300": {
+    "rank": "kepala",
+    "awards": [
+      "lencana-dua-kasus",
+      "segel-panel",
+      "bingkai-kepala"
+    ]
+  }
+}
+`;
+
+exports[`investigator score table per case 1`] = `
+{
+  "kasus-1": {
+    "first | layak | baik": "100 S",
+    "first | layak | datar": "85 A",
+    "first | layak | janji": "70 B",
+    "first | tambahan | baik": "85 A",
+    "first | tambahan | datar": "70 B",
+    "first | tambahan | janji": "55 B",
+    "first | polis | baik": "70 B",
+    "first | polis | datar": "55 B",
+    "first | polis | janji": "40 C",
+    "second | layak | baik": "85 A",
+    "second | layak | datar": "70 B",
+    "second | layak | janji": "55 B",
+    "second | tambahan | baik": "70 B",
+    "second | tambahan | datar": "55 B",
+    "second | tambahan | janji": "40 C",
+    "second | polis | baik": "55 B",
+    "second | polis | datar": "40 C",
+    "second | polis | janji": "25 C",
+    "guided | layak | baik": "70 B",
+    "guided | layak | datar": "55 B",
+    "guided | layak | janji": "40 C",
+    "guided | tambahan | baik": "55 B",
+    "guided | tambahan | datar": "40 C",
+    "guided | tambahan | janji": "25 C",
+    "guided | polis | baik": "40 C",
+    "guided | polis | datar": "25 C",
+    "guided | polis | janji": "10 C"
+  },
+  "kasus-2": {
+    "first | polis | baik": "100 S",
+    "first | polis | datar": "85 A",
+    "first | polis | janji": "70 B",
+    "first | tambahan | baik": "85 A",
+    "first | tambahan | datar": "70 B",
+    "first | tambahan | janji": "55 B",
+    "first | layak | baik": "70 B",
+    "first | layak | datar": "55 B",
+    "first | layak | janji": "40 C",
+    "second | polis | baik": "85 A",
+    "second | polis | datar": "70 B",
+    "second | polis | janji": "55 B",
+    "second | tambahan | baik": "70 B",
+    "second | tambahan | datar": "55 B",
+    "second | tambahan | janji": "40 C",
+    "second | layak | baik": "55 B",
+    "second | layak | datar": "40 C",
+    "second | layak | janji": "25 C",
+    "guided | polis | baik": "70 B",
+    "guided | polis | datar": "55 B",
+    "guided | polis | janji": "40 C",
+    "guided | tambahan | baik": "55 B",
+    "guided | tambahan | datar": "40 C",
+    "guided | tambahan | janji": "25 C",
+    "guided | layak | baik": "40 C",
+    "guided | layak | datar": "25 C",
+    "guided | layak | janji": "10 C"
+  },
+  "kasus-3": {
+    "first+first | tambahan | baik": "100 S",
+    "first+first | tambahan | datar": "85 A",
+    "first+first | tambahan | janji": "70 B",
+    "first+first | layak | baik": "85 A",
+    "first+first | layak | datar": "70 B",
+    "first+first | layak | janji": "55 B",
+    "first+first | polis | baik": "70 B",
+    "first+first | polis | datar": "55 B",
+    "first+first | polis | janji": "40 C",
+    "first+second | tambahan | baik": "92 S",
+    "first+second | tambahan | datar": "77 A",
+    "first+second | tambahan | janji": "62 B",
+    "first+second | layak | baik": "77 A",
+    "first+second | layak | datar": "62 B",
+    "first+second | layak | janji": "47 C",
+    "first+second | polis | baik": "62 B",
+    "first+second | polis | datar": "47 C",
+    "first+second | polis | janji": "32 C",
+    "first+guided | tambahan | baik": "85 A",
+    "first+guided | tambahan | datar": "70 B",
+    "first+guided | tambahan | janji": "55 B",
+    "first+guided | layak | baik": "70 B",
+    "first+guided | layak | datar": "55 B",
+    "first+guided | layak | janji": "40 C",
+    "first+guided | polis | baik": "55 B",
+    "first+guided | polis | datar": "40 C",
+    "first+guided | polis | janji": "25 C",
+    "second+first | tambahan | baik": "92 S",
+    "second+first | tambahan | datar": "77 A",
+    "second+first | tambahan | janji": "62 B",
+    "second+first | layak | baik": "77 A",
+    "second+first | layak | datar": "62 B",
+    "second+first | layak | janji": "47 C",
+    "second+first | polis | baik": "62 B",
+    "second+first | polis | datar": "47 C",
+    "second+first | polis | janji": "32 C",
+    "second+second | tambahan | baik": "84 A",
+    "second+second | tambahan | datar": "69 B",
+    "second+second | tambahan | janji": "54 B",
+    "second+second | layak | baik": "69 B",
+    "second+second | layak | datar": "54 B",
+    "second+second | layak | janji": "39 C",
+    "second+second | polis | baik": "54 B",
+    "second+second | polis | datar": "39 C",
+    "second+second | polis | janji": "24 C",
+    "second+guided | tambahan | baik": "77 A",
+    "second+guided | tambahan | datar": "62 B",
+    "second+guided | tambahan | janji": "47 C",
+    "second+guided | layak | baik": "62 B",
+    "second+guided | layak | datar": "47 C",
+    "second+guided | layak | janji": "32 C",
+    "second+guided | polis | baik": "47 C",
+    "second+guided | polis | datar": "32 C",
+    "second+guided | polis | janji": "17 C",
+    "guided+first | tambahan | baik": "85 A",
+    "guided+first | tambahan | datar": "70 B",
+    "guided+first | tambahan | janji": "55 B",
+    "guided+first | layak | baik": "70 B",
+    "guided+first | layak | datar": "55 B",
+    "guided+first | layak | janji": "40 C",
+    "guided+first | polis | baik": "55 B",
+    "guided+first | polis | datar": "40 C",
+    "guided+first | polis | janji": "25 C",
+    "guided+second | tambahan | baik": "77 A",
+    "guided+second | tambahan | datar": "62 B",
+    "guided+second | tambahan | janji": "47 C",
+    "guided+second | layak | baik": "62 B",
+    "guided+second | layak | datar": "47 C",
+    "guided+second | layak | janji": "32 C",
+    "guided+second | polis | baik": "47 C",
+    "guided+second | polis | datar": "32 C",
+    "guided+second | polis | janji": "17 C",
+    "guided+guided | tambahan | baik": "70 B",
+    "guided+guided | tambahan | datar": "55 B",
+    "guided+guided | tambahan | janji": "40 C",
+    "guided+guided | layak | baik": "55 B",
+    "guided+guided | layak | datar": "40 C",
+    "guided+guided | layak | janji": "25 C",
+    "guided+guided | polis | baik": "40 C",
+    "guided+guided | polis | datar": "25 C",
+    "guided+guided | polis | janji": "10 C"
+  }
+}
+`;

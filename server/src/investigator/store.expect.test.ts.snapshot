@@ -1,0 +1,22 @@
+exports[`investigator event store session 1`] = `
+[
+  "joined: 3, participants=3",
+  "P1 seq0 dashcam -> advanced seq=1 next=verdict",
+  "P1 seq1 layak -> advanced seq=2 next=message",
+  "P1 seq2 baik -> completed seq=3 next=done score=100/S",
+  "P1 seq0 dashcam -> advanced seq=1 next=verdict",
+  "P2 seq0 rambu -> retry seq=1 next=round:keberatan:1",
+  "P2 seq0 rambu -> ERROR seq_mismatch",
+  "P2 seq1 dashcam -> advanced seq=2 next=verdict",
+  "P2 seq2 polis -> advanced seq=3 next=message",
+  "P2 seq3 baik -> completed seq=4 next=done score=55/B",
+  "P3 seq0 dashcam -> advanced seq=1 next=verdict",
+  "P3 seq1 layak -> advanced seq=2 next=message",
+  "P3 seq2 baik -> completed seq=3 next=done score=100/S",
+  "board (tie P1/P3): [{\\"rank\\":1,\\"alias\\":\\"P1\\",\\"total\\":100,\\"stamps\\":1},{\\"rank\\":1,\\"alias\\":\\"P3\\",\\"total\\":100,\\"stamps\\":1},{\\"rank\\":3,\\"alias\\":\\"P2\\",\\"total\\":55,\\"stamps\\":1}]",
+  "board (P3 hidden): [{\\"rank\\":1,\\"alias\\":\\"P1\\",\\"total\\":100,\\"stamps\\":1},{\\"rank\\":2,\\"alias\\":\\"P2\\",\\"total\\":55,\\"stamps\\":1}]",
+  "host view rows: [{\\"alias\\":\\"P1\\",\\"rank\\":1,\\"total\\":100,\\"hidden\\":false},{\\"alias\\":\\"P3\\",\\"rank\\":1,\\"total\\":100,\\"hidden\\":true},{\\"alias\\":\\"P2\\",\\"rank\\":3,\\"total\\":55,\\"hidden\\":false}]",
+  "closed: status=closed, purgeAfter=86400000 ms",
+  "pairing code after close: refused"
+]
+`;
