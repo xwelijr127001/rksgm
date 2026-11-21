@@ -554,7 +554,14 @@
   .cer-berkas-buka { grid-column: 3; min-width: 220px; }
 }
 
-/* Kartu cerita: SATU tanda ("Episode 1" / "Versi singkat" / "Demo") lalu satu durasi. */
+/* T-098: Episode 1 Dev = baris kecil opsional di bawah kartu Episode 1 penuh: teks kiri, satu aksi bergaris di kanan (turun ke
+   baris sendiri bila tidak muat, mis. en / teks besar). */
+.cer-singkat { list-style: none; display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; box-sizing: border-box; padding: 8px 12px; background: #ffffff; border: 2px solid #ffd9a8; }
+.cer-singkat-teks { flex: 1 1 150px; display: grid; gap: 1px; min-width: 0; }
+.cer-singkat-teks b { font-size: 15px; line-height: 20px; color: #212121; }
+.cer-singkat-teks small { font-size: 13px; line-height: 18px; color: #5f5f5f; }
+.cer-singkat .cer-tombol-garis { flex: 0 1 auto; min-height: 44px; box-sizing: border-box; padding: 8px 14px; border: 2px solid #9a4f00; text-align: center; }
+/* Kartu cerita: judul "Episode 1 · ..." lalu satu durasi. */
 .cer-ep .cer-ep-meta { flex-wrap: wrap; align-items: center; column-gap: 8px; row-gap: 2px; white-space: normal; overflow: visible; }
 .cer-ep-tanda { flex: none; padding: 0 6px; background: #ff9000; color: #212121; font-size: 11px; line-height: 20px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; }
 /* Status: butir "Akhir ditemukan n/m" tidak dipecah; bila tidak muat ia turun ke barisnya sendiri. */
@@ -564,13 +571,11 @@
 .cer-segera-teks b, .cer-segera-teks small { white-space: normal; overflow: visible; text-overflow: clip; }
 
 @media (max-width: 599.98px) {
-  /* Dua cara bermain: judul halaman tampil di HP (ringkas, tanpa potret); tinggi kartu alami, halaman digulir. */
-  .cer-hub[data-pemilih="dua"] { gap: 12px; }
-  .cer-hub[data-pemilih="dua"] .cer-hub-kepala { display: block; }
-  .cer-hub[data-pemilih="dua"] .cer-hub-potret { display: none; }
-  .cer-hub[data-pemilih="dua"] .cer-hub-kepala h1 { margin: 0; font-size: 22px; line-height: 28px; }
+  /* Tinggi kartu alami, halaman digulir. */
+  .cer-hub { gap: 12px; }
+  .cer-ep .cer-ep-aksi .cer-tombol-garis { width: 100%; }
   /* Aksi = baris selebar kartu di bawah teks; tiap tombol selebar baris, sasaran ketuk >= 48 px. */
   .cer-ep-aksi { display: grid; grid-template-columns: minmax(0, 1fr); gap: 8px; }
-  .cer-ep-aksi .cer-tombol-garis { width: 100%; min-height: 48px; box-sizing: border-box; }
+  .cer-ep-aksi .cer-tombol-garis { min-height: 48px; box-sizing: border-box; }
   .cer-ep-aksi .primary-action { box-sizing: border-box; }
 }

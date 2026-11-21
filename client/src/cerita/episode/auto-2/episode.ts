@@ -676,6 +676,8 @@ export const EPISODE_AUTO_2: Episode = {
   labelSuasana: 'status',
   // Mobile-first (cerita/hp): obrolan WhatsApp dengan Pak Hendra, adegan tatap muka ringkas, aktivitas di arena visual.
   antarmuka: 'hp',
+  // T-099: layar akhir menawarkan Kasus 1 Raksa Investigator (kejadian yang sama: lajur truk), hanya bila RAKSA_INVESTIGATOR on.
+  kasusTerkait: { episode: 'auto-2-inv', ajakan: 'akhir.kasus' },
   seniArena: SENI_ARENA_AUTO_2,
   lampiran: LAMPIRAN_AUTO_2,
   // Cut-in potret di obrolan (momen emosional terpilih): kecemasan awal, beban cicilan & tanggal 20, protes janji (hanya

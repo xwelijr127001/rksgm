@@ -702,6 +702,7 @@ export const TEKS_AUTO_2_ZH: Record<string, string> = {
   'akhir.kurang.2': '理赔结束了，{nama}，但整个过程中 Hendra 先生觉得孤立无援。记住，赔了款，客户不一定就满意。',
   'akhir.pelajaran.1': '定期告知进展，从一开始就给出实事求是的预期。',
   'akhir.pelajaran.2': '用数据处理异议，不做超出权限的承诺。',
+  'akhir.kasus': '在案件 1 中调查卡车所在的车道', // T-099
   'kartu.puas.judul': 'Hendra 先生满意并信任你',
   'kartu.puas.sebab': 'Hendra 先生的最终状态为 70 或以上，所以结局是“满意”：流程虽长，你的说明和及时告知让他始终保持信任。',
   'kartu.catatan.judul': '理赔办完了，但还有疏漏',

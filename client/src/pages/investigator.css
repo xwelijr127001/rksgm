@@ -36,6 +36,10 @@
 .inv-hub-baris-teks { min-width: 0; display: grid; }
 .inv-hub-baris-teks b { font-size: 15px; line-height: 20px; font-weight: 800; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .inv-hub-baris-teks small { font-size: 13px; line-height: 16px; font-weight: 700; color: #5f5f5f; font-variant-numeric: tabular-nums; }
+/* T-099: baris ketiga "Dari cerita Episode 1" (kasus yang punya cerita). 18 + 16 + 14 = 48 px isi + bantalan 2 x 2 + tepi 4 = 56 px. */
+.inv-hub-baris[data-asal] { padding-block: 2px; }
+.inv-hub-baris[data-asal] .inv-hub-baris-teks b { line-height: 18px; }
+.inv-hub-baris-teks .inv-hub-asal { font-size: 12px; line-height: 14px; color: #7a3e00; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .inv-hub-panah { font-size: 20px; line-height: 20px; font-weight: 800; color: #9a4f00; }
 .inv-hub-terkunci { display: flex; align-items: center; gap: 6px; min-height: 20px; padding: 0 10px; font-size: 14px; line-height: 20px; font-weight: 700; color: #5f5f5f; }
 .inv-hub-tamu { margin: 0; text-align: center; }

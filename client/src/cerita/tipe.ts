@@ -357,6 +357,12 @@ export interface KonfigInvestigasi {
    * kejadian) dan pesan yang dipilih tamu (`pesan` = judul bagiannya).
    */
   arsip?: { judul: KunciTeks; garis: KunciTeks[]; sorot?: number; pesan: KunciTeks };
+  /**
+   * T-099: cerita klaim yang kejadiannya sama dengan kasus ini (kasus 1 = Episode 1 "Truk Trailer di Jalan Tol"). 'episode' = id
+   * episode cerita; 'ajakan' = tautan sekunder di layar hasil ("Ikuti cerita klaim Pak Hendra"); 'asal' = baris kecil di daftar
+   * kasus hub ("Dari cerita Episode 1"). Tanpa nilai = berkas kasus yang berdiri sendiri (kasus 2): tanpa tautan cerita.
+   */
+  cerita?: { episode: string; ajakan: KunciTeks; asal: KunciTeks };
 }
 
 export interface NodeDialog extends NodeDasar {
@@ -818,6 +824,13 @@ export interface Episode {
    * layar nama. Episode lain tanpa field ini = tidak berubah.
    */
   investigasi?: KonfigInvestigasi;
+  /**
+   * T-099 (opt-in per episode): kasus Raksa Investigator yang menyelidiki kejadian episode ini ('episode' = id episode kasusnya).
+   * Layar akhir menawarkan SATU tautan sekunder 'ajakan' ("Selidiki lajur truk di Kasus 1") ke kasus itu, hanya bila
+   * RAKSA_INVESTIGATOR menyala dan kasusnya ada di build ini. Episode tanpa field ini (auto-1, Episode 1 Dev, kasus
+   * Investigator) = tidak berubah.
+   */
+  kasusTerkait?: { episode: string; ajakan: KunciTeks };
   /** Migrasi progres dari versi lama: kembalikan state baru, atau null bila tidak bisa. */
   migrasi?: Record<number, (lama: StateCerita) => StateCerita | null>;
 }

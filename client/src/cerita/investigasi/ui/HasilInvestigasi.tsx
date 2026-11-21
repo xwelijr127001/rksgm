@@ -17,6 +17,10 @@
  * poin dan kartu petugas (24 px; 44 bila keduanya tidak muat sebaris). Pemanggil hanya mengirimnya bersama isi `teaser` yang
  * PENDEK (48 px: tautan kasus berikutnya, atau arsip kasus + "Kasus 3 · segera hadir"), bukan bersama kartu penggoda 96 px:
  * kepala 80 (92) + poin 80 + total 24 (44) + kartu 176 + baris 48 + tombol 52 + jarak 5 x 8 = 500 (512; 532) px <= 544.
+ * T-099 (Fullstack, tambahan kecil): `tautan` = satu baris tautan sekunder di bawah baris aksi (kasus 1: "Ikuti cerita klaim Pak
+ * Hendra"). Barisnya 28 px dan menempel ke tombol (alur.css .iv-cerita: margin atas -8 px menghapus jarak kisi), jadi tinggi layar
+ * bertambah 28: 516 -> 544 (hasil pertama kasus 1, pas); 528 -> 556 dengan keping rekor / terbaik, 500 (512; 532) -> 528 (540; 560)
+ * sesudah kasus 2 tamat. Yang lebih dari 544 menggulir halaman beberapa px di 360 x 640; yang tergeser hanya tautan ini.
  */
 import { useEffect, type ReactNode } from 'react';
 import { playSfx } from '../../../audio/audio';
@@ -32,7 +36,7 @@ import './alur.css';
 
 const SEL_NILAI: Record<SkorKasus['nilai'], number> = { S: 0, A: 1, B: 2, C: 3 };
 
-export function HasilInvestigasi({ skor, nama, look, stempel, pangkat, onMainLagi, onSelesai, reaksi, stempelBaru = true, rekor = false, terbaik, teaser, total }: {
+export function HasilInvestigasi({ skor, nama, look, stempel, pangkat, onMainLagi, onSelesai, reaksi, stempelBaru = true, rekor = false, terbaik, teaser, total, tautan }: {
   skor: SkorKasus;
   nama: string;
   look: PlayerLook;
@@ -54,6 +58,8 @@ export function HasilInvestigasi({ skor, nama, look, stempel, pangkat, onMainLag
   teaser?: ReactNode;
   /** T-090: total skor terbaik semua kasus ("Total 185 / 200") + `menuju` ("1 kasus lagi menuju Senior"). */
   total?: { skor: number; maks: number; menuju?: string };
+  /** T-099: baris tautan sekunder di bawah baris aksi (mis. ke cerita klaim kasus ini). */
+  tautan?: ReactNode;
 }) {
   const kurang = useReducedMotion();
   const teks = useTx();
@@ -102,6 +108,7 @@ export function HasilInvestigasi({ skor, nama, look, stempel, pangkat, onMainLag
         <button type="button" className="akh-kedua iv-tombol" data-main-lagi="" aria-haspopup="dialog" onClick={onMainLagi}>{t('investigasi.hasil.mainLagi')}</button>
         <button type="button" className="primary-action iv-tombol" data-selesai-kasus="" onClick={onSelesai}>{teks('inv.hasil.selesai')}</button>
       </div>
+      {tautan}
     </section>
   );
 }

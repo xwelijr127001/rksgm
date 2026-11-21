@@ -350,3 +350,23 @@ Confirmed working folder `C:\Users\User\Desktop\rksgm-episode2`.
 4. **Fix the clipped status at its source.** The phone rule in `client/src/cerita/ui/cerita.css:479` forces one line and hides overflow. Let the status wrap, put the ending count on its own line when needed, and give actions a full-width row below the text. At 360–430 px, allow natural card height and vertical scrolling. Keep full labels, visible focus and 44 px tap targets in ID, EN and ZH, including with larger text and a completed save.
 
 5. **One Designer task.** Split the shared episode list into a labelled Investigator entry and a story list in `client/src/pages/Cerita.tsx`. Scope styles to the picker in `cerita.css`; add picker-specific ID/EN/ZH keys in `client/src/i18n/kamus/cerita.ts` and `hubInv.ts`. Reuse the palette from `pages/investigator.css`. Existing flag, destinations and progress handlers suffice.
+
+Confirmed working folder `C:\Users\User\Desktop\rksgm-episode2`.
+
+## Cerita x Investigator approach (2026-11-21)
+
+**Keep Cerita klaim primary. Give each audience a direct entrance.** The link between the games is a change of role: help someone through a claim, then examine a disputed fact yourself. Either role makes sense first. “Sudah paham prosesnya? Uji dirimu” makes a walk-up mystery sound like an exam. Tabs hide the relationship. Repeating a charcoal strip on every episode implies that every story has a matching case.
+
+**Ship three small changes.**
+
+1. In `Cerita.tsx`, restore **“Mode cerita”**. Lead with **“Cerita klaim”** and “Dampingi nasabah dari laporan awal sampai keputusan klaim.” Show **“Episode 1 · Truk Trailer di Jalan Tol”**, **“±17 menit”**, **“Mulai cerita”** or **“Lanjutkan cerita”**. Put the optional **“Versi singkat · 5 menit”** beneath the full episode; the current order puts Dev first. Follow the playable stories with one charcoal file: **“Raksa Investigator”**, “Periksa bukti dan temukan apa yang terjadi. Tiap kasus sekitar 5 menit.” Button **“Buka berkas kasus”**. Place the upcoming episode last.
+2. Connect the truck stories once, at the payoff. On the Episode 1 result offer **“Selidiki lajur truk di Kasus 1”**. On its Investigator result offer **“Ikuti cerita klaim Pak Hendra”**. In the hub, introduce Case 2 as an independent file. A concrete shared incident explains the relationship better than a tagline.
+3. Keep Landing’s primary **“Main cerita klaim”** path to `/cerita` and secondary **“Main Raksa Investigator”** link. Print one event QR: **“Truknya di lajur berapa? Selidiki dalam 5 menit.”** → `/investigator`. Reserve Dev for facilitated process demos.
+
+**Enjoyment risks.** Staff can recognise their work in the customer message and document decisions; repeated chat taps may feel like routine work. The detective answer may be obvious to an experienced adjuster. Agents and bengkel partners may enjoy weighing a witness against footage, but a score for matching a card title rewards recall. The longer story gives them customer context at a substantial booth-time cost. Investors and casual guests get a complete mystery and stamp quickly; three score bars alone give little reason to return. For infrequent players aged 50–60, advancing dialogue and distinguishing “select evidence” from “submit objection” are separate possible sticking points. Age alone predicts neither.
+
+**Trial this week.** Recruit 12 first-timers: four staff, four agents/partners, four investors/guests; include four infrequent players aged 50–60 across groups. Staff start at the picker; external guests scan the event QR. On fresh phones say, “Silakan coba seperti saat acara. Boleh berhenti kapan saja.” Stay silent about roles, lanes and buttons. Record first tap, time to meaningful choice and stamp, stalls, help, exits and voluntary Case 2 starts. Afterwards offer Dev as a comparison.
+
+Ask: “What did you expect?” “Which moment would you replay?” “Where did you hesitate?” “Which evidence settled it, and why?” “Which would you open tomorrow?”
+
+**Decision:** Build Case 3 if ≥6/8 external guests finish unaided within five minutes and explain the clue, and ≥4 voluntarily start Case 2. Fix pacing if three stall at the same step. Change the event door if ≥5 prefer Dev after trying both. Mixed results warrant another small round.

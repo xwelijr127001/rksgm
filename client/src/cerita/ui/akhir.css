@@ -509,3 +509,20 @@
 .akh-kenalan-kartu small { font-size: 14px; line-height: 20px; color: #5f5f5f; text-align: center; }
 .akh-kenalan-aksi :is(.akh-utama, .akh-kedua) { min-height: 48px; font-size: 18px; }
 .akh-kenalan-aksi .akh-kedua { display: inline-flex; align-items: center; justify-content: center; text-decoration: none; }
+
+/* ==================================================================== T-099: tautan sekunder ke kasus Raksa Investigator
+   Hanya episode ber-kasusTerkait (auto-2) dan hanya dengan RAKSA_INVESTIGATOR=on (LayarAkhir). Tautan teks, bukan tombol ketiga:
+   kedua tombol yang ada tetap tombolnya. Bentuk bergulir: baris 44 px di bawah aksi. Bilah tersemat cangkang HP: baris TEPAT
+   28 px di bawah kedua tombol (bilah 69 -> 97 px); daerah ketuknya memanjang 8 px ke bantalan bawah bilah (36 px), tanpa
+   menambah tinggi. */
+.akh-kasus { display: flex; justify-content: flex-start; margin: 0; }
+.akh-kasus-tautan {
+  position: relative; display: inline-flex; align-items: center; gap: 6px; min-height: 44px;
+  font-size: 15px; line-height: 20px; font-weight: 700; color: #9a4f00;
+  text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 3px;
+}
+.akh-kasus-tautan > svg { flex: 0 0 auto; width: 18px; height: 18px; }
+.akh-kasus-tautan:focus-visible { outline: 3px solid #1d6fd1; outline-offset: 2px; }
+.hp-akhir-aksi > .akh-kasus { justify-content: center; height: 28px; }
+.hp-akhir-aksi > .akh-kasus .akh-kasus-tautan { min-height: 0; height: 100%; padding: 0 8px; font-size: 14px; line-height: 18px; }
+.hp-akhir-aksi > .akh-kasus .akh-kasus-tautan::after { content: ''; position: absolute; inset: 0 -8px -8px; }

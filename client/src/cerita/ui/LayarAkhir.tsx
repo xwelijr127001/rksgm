@@ -18,6 +18,13 @@
  * ketuk Pelajaran = teks utuhnya. Bila layar terlalu pendek, pasAkhir.ts memilih yang mengalah. Legenda suasana, catatan
  * simulasi, status naskah: pindah ke Menu (PemainHP). Keterangan tombol ulang: hanya untuk pembaca layar (D-233).
  * Desktop / layar yang halamannya menggulir memakai bentuk lama di bawah, tidak berubah.
+ *
+ * T-099 (Codex "Cerita x Investigator approach" butir 2): episode ber-'kasusTerkait' (hanya auto-2) mendapat SATU tautan sekunder
+ * "Selidiki lajur truk di Kasus 1" -> /investigator/1, hanya bila RAKSA_INVESTIGATOR menyala. Tombol yang ada, urutan dan
+ * tekanannya tidak berubah; tautannya teks bergaris bawah di BAWAH kedua tombol. Di bilah tersemat cangkang HP barisnya 28 px
+ * (bilah 69 -> 97 px), jadi kartu satu layar mendapat 28 px lebih sedikit: di 18 layar mock T-024 sisa ruang terkecil 17 px dan
+ * grafik bisa menyusut 16 px (72 -> 56), jumlahnya 33 >= 28, jadi kalimat sebab tetap tampil; bila kelak tidak muat, aturan
+ * pasAkhir yang ada yang bekerja (tidak ada yang meluap). Tanpa bendera, atau episode lain: tidak ada yang berubah.
  */
 import './akhir.css';
 import { useEffect, useId, useRef, useState } from 'react';
@@ -27,7 +34,9 @@ import type { Bahasa } from '@shared/bahasa';
 import { TOKOH } from '@shared/brand';
 import { Arrow } from '../../components/PlayerShell';
 import { t } from '../../i18n';
+import { useAppConfig } from '../../story/appConfig';
 import { Modal } from '../../ui/kit';
+import { ruteKasusTerkait } from '../investigasi/hub';
 import { PotretNasabah } from '../seni';
 import { PotretMissRaksa } from '../seni/tokoh/PotretMissRaksa';
 import type { Ekspresi, Episode, IdAkhir, IdBab, KunciTeks, StateCerita } from '../tipe';
@@ -62,6 +71,7 @@ export function LayarAkhir({ ep, state, bahasa, namaPemain, tx, ditemukan, onUla
   /** (cangkang HP, T-024) layar terkunci: kartu satu layar tanpa gulir (hanya episode dengan ringkasan keputusan bernomor). */
   satuLayar?: boolean;
 }) {
+  const cfg = useAppConfig();
   const [dialog, setDialog] = useState<'pemilih' | 'perjalanan' | null>(null);
   const [tanyaUlang, setTanyaUlang] = useState(false);
   const idKet = useId();
@@ -98,6 +108,13 @@ export function LayarAkhir({ ep, state, bahasa, namaPemain, tx, ditemukan, onUla
 
   const pilihBab = (bab: IdBab) => { setDialog(null); onUlangBab(bab); };
   const ulangDariAwal = () => { setTanyaUlang(false); setDialog(null); onUlangEpisode(); };
+  // T-099: satu tautan sekunder ke kasus Investigator episode ini (hanya episode ber-kasusTerkait, hanya dengan benderanya).
+  const ruteKasusIni = cfg.status === 'ready' && cfg.config.investigator ? ruteKasusTerkait(ep) : null;
+  const tautKasus = ruteKasusIni && ep.kasusTerkait ? (
+    <p className="akh-kasus" data-ukur="aksi-kasus">
+      <Link className="akh-kasus-tautan" to={ruteKasusIni} data-kasus-terkait={ep.kasusTerkait.episode}>{tx(ep.kasusTerkait.ajakan)} <Arrow /></Link>
+    </p>
+  ) : null;
 
   // Bilah aksi (dipindah ke slot cangkang HP bila ada) + dialog bersama: dipakai kedua bentuk kartu.
   const blokAksi = (
@@ -131,7 +148,7 @@ export function LayarAkhir({ ep, state, bahasa, namaPemain, tx, ditemukan, onUla
       </div>
   );
   // Bentuk satu layar: aksi HANYA di slot tersemat (sebelum slot terpasang tidak digambar, supaya tidak ikut diukur).
-  const aksi = slotAksi ? createPortal(blokAksi, slotAksi) : satu ? null : blokAksi;
+  const aksi = slotAksi ? createPortal(<>{blokAksi}{tautKasus}</>, slotAksi) : satu ? null : blokAksi;
   const dialogBersama = (
     <>
       {dialog === 'pemilih' ? (
@@ -332,6 +349,8 @@ export function LayarAkhir({ ep, state, bahasa, namaPemain, tx, ditemukan, onUla
 
       {aksi}
       {baik ? null : <p id={idKet} className="akh-ket">{ulang ? t('ceritaAkhir.ulangKet') : t('cerita.ulangIsi')}</p>}
+      {/* T-099: bentuk bergulir tanpa bilah tersemat: tautan kasus di bawah aksi dan keterangannya */}
+      {slotAksi ? null : tautKasus}
 
       <div className="akh-kaki">
         {/* Episode dengan ringkasan keputusan bernomor: ringkasan di bawah kartu menggantikan tinjauan perjalanan. */}

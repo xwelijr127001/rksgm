@@ -98,3 +98,11 @@
 .iv-garis { display: grid; gap: 4px; padding: 0; list-style: none; }
 .iv-garis li { padding: 2px 8px; border-left: 4px solid #bdbdbd; font-size: 16px; line-height: 22px; font-variant-numeric: tabular-nums; }
 .iv-garis li[data-sorot] { border-left-color: #ff9000; background: #fff1c2; font-weight: 800; }
+
+/* ---- T-099: tautan sekunder ke cerita klaim di bawah baris aksi layar hasil (HasilInvestigasi `tautan`; kasus 1 saja).
+   Baris 28 px yang menempel ke tombol (margin atas -8 px = jarak kisi .iv-hasil), supaya hasil pertama kasus 1 tetap 544 px;
+   daerah ketuknya memanjang 12 px ke bantalan bawah halaman (40 px) tanpa menambah tinggi. */
+.iv-hasil > .iv-cerita { display: flex; justify-content: center; height: 28px; margin-top: -8px; }
+.iv-cerita a { position: relative; display: inline-flex; align-items: center; gap: 6px; height: 100%; padding: 0 8px; font-size: 15px; line-height: 20px; font-weight: 700; color: #9a4f00; text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 3px; }
+.iv-cerita a::after { content: ''; position: absolute; inset: 0 -8px -12px; }
+.iv-cerita a:focus-visible { outline: 3px solid #1d6fd1; outline-offset: 2px; }

@@ -72,6 +72,8 @@ const KASUS: KonfigInvestigasi = {
   putusan: { layak: 30, tambahan: 15, polis: 0 },
   // T-090: kartu "Kasus 2" di layar hasil = tautan ke kasus 2 (bila episodenya ada di build ini).
   berikut: 'auto-2-inv-2',
+  // T-099: kasus ini = kejadian Episode 1 (cerita klaim Pak Hendra); layar hasil menautkannya, hub menyebut asalnya.
+  cerita: { episode: 'auto-2', ajakan: 'inv.cerita.ikuti', asal: 'inv.cerita.asal' },
 };
 type IdBukti = KonfigInvestigasi['bukti'][number]['id'];
 const KEB = KASUS.keberatan;

@@ -696,6 +696,7 @@ export const TEKS_AUTO_2_ID: Record<string, string> = {
   'akhir.kurang.2': 'Klaimnya selesai, {nama}, tapi Pak Hendra merasa sendirian selama prosesnya. Ingat, klaim yang dibayar belum tentu membuat nasabah puas.',
   'akhir.pelajaran.1': 'Kabar rutin dan ekspektasi yang jujur sejak awal.',
   'akhir.pelajaran.2': 'Keberatan ditangani dengan data, tanpa janji yang bukan wewenangmu.',
+  'akhir.kasus': 'Selidiki lajur truk di Kasus 1', // T-099: tautan sekunder layar akhir ke Raksa Investigator
   'kartu.puas.judul': 'Pak Hendra puas dan percaya',
   'kartu.puas.sebab': 'Status akhir Pak Hendra 70 atau lebih, jadi kasus berakhir Puas: penjelasan dan kabarmu membuatnya tetap percaya walau prosesnya panjang.',
   'kartu.catatan.judul': 'Klaim beres, tapi ada yang tertinggal',

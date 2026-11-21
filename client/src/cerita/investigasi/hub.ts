@@ -8,9 +8,10 @@
  *   selain itu kasus pertama tanpa stempel -> "Buka Kasus N" ('sampul' bila perangkat masih kosong: hub menampilkan sampul kasus itu);
  *   semua kasus sudah berstempel          -> "Main lagi" (kasus dengan skor terbaik terendah; seri = nomor terkecil).
  */
-import { DAFTAR_EPISODE } from '../episode';
+import { cariEpisode, DAFTAR_EPISODE } from '../episode';
 import { muatProgres, mulaiBaru } from '../simpan';
 import type { Episode, KonfigInvestigasi } from '../tipe';
+import { ruteKasus } from './rute';
 import { adaRekaman, bacaRekaman, tamuBaru, type RekamanInvestigasi } from './simpan';
 
 export type StatusKasusHub = 'baru' | 'jalan' | 'selesai';
@@ -61,6 +62,15 @@ export function aksiUtamaHub(daftar: KasusHub[], r: RekamanInvestigasi = bacaRek
   }
   const terendah = daftar.reduce((a, b) => ((b.terbaik ?? 0) < (a.terbaik ?? 0) ? b : a));
   return { jenis: 'lagi', kasus: terendah };
+}
+
+/**
+ * T-099: alamat kasus Raksa Investigator yang ditautkan sebuah episode cerita (Episode.kasusTerkait), di bawah hub
+ * (/investigator/<n>); null bila episode itu tidak menautkan kasus atau kasusnya tidak ada di build ini.
+ */
+export function ruteKasusTerkait(ep: Episode): string | null {
+  const kasus = ep.kasusTerkait ? cariEpisode(ep.kasusTerkait.episode)?.investigasi : undefined;
+  return kasus ? ruteKasus(kasus.nomor) : null;
 }
 
 /**

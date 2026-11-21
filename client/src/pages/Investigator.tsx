@@ -18,6 +18,12 @@
  *    kepala 48 + tombol 56 + kartu 176 + total 24 + daftar 2 x 48 + 4 + terkunci 20 + tamu 44 + jarak 6 x 8 = 516 px
  *    (536 bila "1 kasus lagi menuju Senior" turun baris).
  * Teks antarmuka: kamus `hubInv`; judul dan kalimat kait kasus: teks episode (data kasus). Seni: hanya yang sudah ada.
+ *
+ * T-099 (Codex "Cerita x Investigator approach" butir 2): di daftar kasus, baris kasus yang punya cerita (`konfig.cerita`, kasus 1)
+ * membawa satu baris kecil "Dari cerita Episode 1"; kasus tanpa cerita (kasus 2) diperkenalkan sebagai berkas tersendiri: selama
+ * belum dibuka barisnya berbunyi "Berkas baru · belum dibuka", tanpa kata yang mengaitkannya ke cerita. Sampul perangkat kosong
+ * TIDAK menyebut cerita (pintu masuk langsung, bukan lanjutan). Baris tiga-tulisan itu 56 px (48 + 8): PULANG 516 -> 524 px
+ * (544 bila "1 kasus lagi menuju Senior" turun baris).
  */
 import { useState, useSyncExternalStore } from 'react';
 import { Link, Navigate, useNavigate } from 'react-router-dom';
@@ -97,7 +103,8 @@ export default function Investigator() {
   // "Main lagi" = kasus itu dari kartu judulnya (progres ceritanya diarsipkan seperti "Main lagi" di daftar episode); skor terbaik
   // dan stempel ada di rekaman Investigator, jadi tidak ikut terhapus.
   const mainLagi = () => { mulaiBaru(k.ep); nav(ruteKasus(k.nomor)); };
-  const statusBaris = (x: KasusHub) => (x.terbaik !== null ? t('hubInv.terbaik', { skor: x.terbaik, maks: SKOR_MAKS }) : t(`hubInv.status.${x.status}`));
+  const statusBaris = (x: KasusHub) => (x.terbaik !== null ? t('hubInv.terbaik', { skor: x.terbaik, maks: SKOR_MAKS })
+    : x.status === 'baru' && !x.konfig.cerita ? t('hubInv.berkasBaru') : t(`hubInv.status.${x.status}`));
   return (
     <div className="player-ui cer-layar hp-layar inv-hub" data-teks-besar="" data-hub={aksi.jenis}>
       {kepala}
@@ -125,9 +132,12 @@ export default function Investigator() {
           <ul className="inv-hub-daftar" aria-label={t('hubInv.daftar')}>
             {daftar.map((x) => (
               <li key={x.konfig.kasus}>
-                <Link className="inv-hub-baris" to={ruteKasus(x.nomor)} data-kasus={x.konfig.kasus} data-status={x.status} data-stempel={x.stempel ? '' : undefined}>
+                <Link className="inv-hub-baris" to={ruteKasus(x.nomor)} data-kasus={x.konfig.kasus} data-status={x.status} data-stempel={x.stempel ? '' : undefined} data-asal={x.konfig.cerita ? '' : undefined}>
                   <IkonInv nama={x.stempel ? stempelKasus(x.konfig.kasus) : 'stempel-kosong'} />
-                  <span className="inv-hub-baris-teks"><b>{judul(x)}</b><small>{statusBaris(x)}</small></span>
+                  <span className="inv-hub-baris-teks">
+                    <b>{judul(x)}</b><small>{statusBaris(x)}</small>
+                    {x.konfig.cerita ? <small className="inv-hub-asal" data-asal-cerita={x.konfig.cerita.episode}>{tx(x, x.konfig.cerita.asal)}</small> : null}
+                  </span>
                   <span className="inv-hub-panah" aria-hidden="true">›</span>
                 </Link>
               </li>

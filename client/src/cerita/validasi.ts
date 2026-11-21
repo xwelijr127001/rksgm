@@ -1015,6 +1015,12 @@ export function validasiEpisode(ep: Episode): string[] {
     if (k.alternatif?.[k.saran]?.nilai !== 'tepat') salah(`${tempat}: saran "${String(k.saran)}" harus alternatif bernilai tepat`);
   }
   if (ep.statusNaskah !== undefined) teks(ep.statusNaskah, 'statusNaskah');
+  // T-099: tautan cerita <-> kasus Investigator (teksnya milik episode ini; episode tujuannya boleh tidak ada di build)
+  if (ep.kasusTerkait) teks(ep.kasusTerkait.ajakan, 'kasusTerkait.ajakan');
+  if (ep.investigasi?.cerita) {
+    teks(ep.investigasi.cerita.ajakan, 'investigasi.cerita.ajakan');
+    teks(ep.investigasi.cerita.asal, 'investigasi.cerita.asal');
+  }
   if (ep.kepercayaanBatas) {
     const b = ep.kepercayaanBatas;
     if (!(b.min < b.maks) || ep.kepercayaanAwal < b.min || ep.kepercayaanAwal > b.maks) salah('kepercayaanBatas tidak sah atau kepercayaanAwal di luar batas');

@@ -4617,3 +4617,82 @@ Built by the Designer from the Codex plan in `team/REVIEW.md` ("Cerita picker pl
 - The Dev card title still reads "Episode 1 Dev · Kenalan Raksa" (episode text, not mine) next to the tag "Versi singkat".
 - Old check scripts that read the picker (`tools/cek-pemilih-t037.mjs`, `tools/cek-tag-t026.mjs`, `tools/uji-cerita.mjs`) and any test that expects the "Kasus nyata" chip, "Mulai" / "Lanjutkan" labels, the product word or the Investigator card inside the episode list will need updating; none was run.
 - `.cer-ep-jenis` / `.cer-ep-cepat` styles and the `cerita.jenis.*`, `cerita.produk.*` words are no longer used by the picker (left in place).
+
+## T-098 (2026-11-21): Cerita picker v2, Landing wording, event QR poster (Designer)
+
+Built by the Designer from the Codex plan in `team/REVIEW.md` ("Cerita x Investigator approach", changes 1 and 3); uncommitted. Change 2 (result-screen links) is Fullstack's T-099; no result screen was touched. Owner rule: nothing was opened in a browser and no test was run. Gate: `npm run typecheck` exit 0 (server + client), `client/dist` rebuilt.
+
+### 1. Picker (`pages/Cerita.tsx`; replaces the T-096 order)
+Order on the page now:
+1. **Section "Cerita klaim"** + "Dampingi nasabah dari laporan awal sampai keputusan klaim." (always shown, flag on or off).
+2. **Episode 1 full card:** title "Episode 1 · Truk Trailer di Jalan Tol", one duration "±17 menit", summary, progress, "Mulai cerita" / "Lanjutkan cerita" / "Main lagi" (+ "Lihat hasil" when finished). The orange tag chip of T-096 is gone; "Episode 1" is part of the title.
+3. **Episode 1 Dev = a small optional row under it** (only with `RAKSA_EP1_DEV=on`): "Versi singkat · 5 menit", one line below it ("Kasus yang sama, lebih ringkas." or the progress), and one outlined button: "Mulai cerita" / "Lanjutkan cerita", or "Main lagi" when finished. It no longer has a big card, portrait or a "Lihat hasil" link.
+4. (Demo card, only with `RAKSA_DEMO_CERITA=on`, titled "Demo · ...".)
+5. **One charcoal case file "Raksa Investigator"** (only with `RAKSA_INVESTIGATOR=on`; T-096 look kept): "Periksa bukti dan temukan apa yang terjadi. Tiap kasus sekitar 5 menit.", button "Buka berkas kasus" to `/investigator`. The tab now reads "Berkas kasus" (was "Game detektif solo"); the "2 kasus · ±5 menit per kasus" line is removed.
+6. **Locked row last:** "Episode 2 · Segera hadir" / "Cerita selanjutnya sedang disiapkan."
+7. Room-code link and device note in the footer.
+
+The page title is back to the story heading ("Mode Cerita" on wide screens; on phones the bar label "Mode cerita", as before T-096). "Pilih cara bermain" is gone. T-096's wrap fixes are kept (status wraps, full-width actions, 44-48 px targets, natural height); the short-version row wraps its button under the text when it does not fit.
+
+### 2. Landing (`pemain.ts`, `hubInv.ts`; `Landing.tsx` itself did not need an edit)
+- The story door's title reads **"Main cerita klaim"** (was "Mode Cerita"); it still opens `/cerita` and its button still says "Mulai".
+- The small secondary link reads **"Main Raksa Investigator"** (was "Raksa Investigator · kasus 5 menit"), still only with the flag, still to `/investigator`.
+- Layout is unchanged, so the room-code field sits where it sat.
+
+### 3. Event QR poster (`character/poster-investigator/`, not in the app)
+- `poster-a4.png` (2480 x 3508, A4 at 300 dpi), `poster-a4.pdf` (one A4 page, same picture, lossless), `poster-sosial.png` (1080 x 1350). Generator: `bangun.mts` (change `URL_QR` there and run again to re-point it).
+- Look: charcoal case file with the "RAKSA INVESTIGATOR" tab and orange edge on a warm dotted ground; headline "TRUKNYA DI LAJUR BERAPA?", sub "SELIDIKI DALAM 5 MENIT."; the case-1 title art (folder + truck in the magnifier) and Miss Raksa with her magnifier; QR on a white plate; "GAME.ARAKSA.COM/INVESTIGATOR" under it (the pixel font has capitals only).
+- QR: made by the `qrcode` package for `https://game.araksa.com/investigator`, version 4, error correction Q, charcoal on white, 4-module quiet zone. On A4 one module is 2.37 mm and the QR with its quiet zone is 97 mm wide; on the social version one module is 10 px.
+- Checked by program: every module in both PNGs matches the generated QR matrix and the quiet zone is pure white. **Not scanned with a phone** — please scan the print proof once before the print run.
+
+### Text (id/en/zh, same keys)
+- `cerita.ts`: changed `pemilih.ceritaJanji`; new `pemilih.singkat`, `pemilih.singkatKet`, `pemilih.durasi`; removed `pemilih.judulCara`.
+- `hubInv.ts`: changed `tautan`, `kartuTag`, `kartuRingkas`; removed `kartuMeta`.
+- `pemain.ts`: changed `pintuCeritaJudul`.
+- en/zh wording is mine, following the id copy of the plan.
+
+### Preview
+`character/picker-t098/layar-t098.png` (calculated mock, not a screenshot; `pratinjau.mts` beside it): the picker at 360 px with both flags on, new save and in-progress save. Calculated page height about 700-720 px.
+
+### Open
+- Nothing was seen in a browser or on a phone: picker, Landing door title (longer than before, 24 px on phones), and the poster's QR scan.
+- "Kasus yang sama, lebih ringkas." (short-version row) and the tab word "Berkas kasus" are my wording, not in the plan.
+- The Landing door's accessible name is now "Main cerita klaim Mulai".
+- Old check scripts (`tools/cek-pemilih-t037.mjs`, `tools/cek-tag-t026.mjs`, `tools/uji-cerita.mjs`, `tools/cek-beranda-t027.mjs`) and tests that expect the old labels, the Dev card, or the Investigator block above the stories will need new expectations; none was run.
+- `.cer-ep-tanda`, `.cer-ep-jenis`, `.cer-ep-cepat` styles are no longer used by the picker (left in place).
+
+
+## T-099 (2026-11-21): link the truck story and Kasus 1 at their payoffs (Fullstack)
+
+Spec: `team/REVIEW.md` "Cerita x Investigator approach (2026-11-21)" change 2. NOT opened in a browser or on a phone (owner rule). Gate: `npm run typecheck` exit 0 (server + client), `client/dist` rebuilt = exact copy of the scratch build (includes the Designer's T-098 sources as they stood at build time). Not committed. `Cerita.tsx` and `Landing.tsx` not touched. No save or episode version change.
+
+**1. Episode 1 (auto-2) end screen: one secondary link** (`cerita/ui/LayarAkhir.tsx`, `cerita/ui/akhir.css` block "T-099")
+- "Selidiki lajur truk di Kasus 1" -> `/investigator/1` (normal title card; exits go to the hub). Shown on all three endings, only when RAKSA_INVESTIGATOR is on.
+- Opt-in per episode: new field `Episode.kasusTerkait = { episode, ajakan }` (`cerita/tipe.ts`), set only on auto-2 (`{ episode: 'auto-2-inv', ajakan: 'akhir.kasus' }`). Episode 1 Dev, auto-1 and the Investigator cases build their own episode objects and do not have it. The text is episode text (`akhir.kasus`, id/en/zh). If the case episode is not in the build, no link.
+- The two existing buttons, their order and their look are unchanged. The new one is an underlined text link, not a third button.
+- **Phone shell (one-screen ending):** the link is a row of exactly 28 px UNDER the two buttons in the pinned action bar, so the bar grows 69 -> 97 px and the one-screen card gets 28 px less room. By the T-024 mock table (smallest slack 17 px, and the chart may shrink 16 px, 72 -> 56) 33 >= 28, so in all 18 measured screens the reason line stays and only the chart gives way (by up to 11 px on the tightest: 360 x 640 English). If today's texts are longer than the mock's, the existing fit rule (`pasAkhir.ts`) hides the reason line; nothing can overflow. The tap area reaches 8 px into the bar's bottom padding (36 px) without adding height.
+- **Scrolling shape (desktop, wide):** a 44 px link row under the actions and the retry note.
+- With the flag off, or in any other episode: nothing is rendered and nothing moves.
+
+**2. Kasus 1 result: secondary link to the story** (`cerita/investigasi/LayarInvestigasi.tsx` HasilKasus, `ui/HasilInvestigasi.tsx`, `ui/alur.css` block "T-099")
+- "Ikuti cerita klaim Pak Hendra" -> `/cerita/auto-2` (the ordinary story route: resume, name screen and exits as today). Not behind the flag (the story is public); no link if auto-2 is not in the build.
+- Data: new case field `KonfigInvestigasi.cerita = { episode, ajakan, asal }`, set only on case 1 (`inv.cerita.ikuti`, `inv.cerita.asal`, id/en/zh in the case 1 text files; the keys are not copied into case 2's table). Kasus 2 has no such field, so its result has no story link. The "Kasus 2" card stays the primary next step.
+- Designer file `HasilInvestigasi.tsx`, small additive edit: optional prop `tautan` rendered under the action row; header comment extended.
+- Height at 360 x 640 by calculation (room 544): the row is 28 px and sits flush under the buttons, so +28: first finish of case 1 516 -> **544 (exactly full)**; a replay with the "Rekor baru / Terbaik" chip 528 -> 556; after case 2 is done 500 (512; 532) -> 528 (540; 560). Where it passes 544 the page scrolls a few px and the only thing pushed down is this link. Tap area reaches 12 px into the page's bottom padding (40 px).
+
+**3. Hub** (`pages/Investigator.tsx`, `pages/investigator.css`, `i18n/kamus/hubInv.ts` key `berkasBaru`)
+- Kasus 1 row carries a third small line "Dari cerita Episode 1" (from the case data). That row is 56 px instead of 48, so the returning hub is 516 -> 524 px (544 if "1 kasus lagi menuju Senior" wraps).
+- Kasus 2 is introduced as its own file: while it has never been opened its row reads "Berkas baru · belum dibuka" (en "New file · not opened yet", zh "新案卷 · 尚未打开"); no wording ties it to a story. After it is played the row shows the best score as before.
+- The fresh-device cover does NOT mention the story (the review wants a direct entrance, and "dari cerita" there could read as a prerequisite).
+- Designer was editing `hubInv.ts` in T-098; my edit only adds the one key per language.
+
+**Other**
+- `cerita/validasi.ts`: the three new text keys are checked like other referenced keys. `cerita/investigasi/hub.ts`: `ruteKasusTerkait(ep)`.
+- One-off script (scratch, not committed, not the test suite): validator 0 messages for auto-1, auto-2, auto-2-inv, auto-2-inv-2; only auto-2 resolves a linked case (`/investigator/1`), only auto-2-inv names a story; the three texts exist in id/en/zh; the new case keys do not leak into other tables; `hubInv` keys equal in three languages.
+- Seen in that run, NOT from this task and not touched: the validator reports one message for auto-2-dev (`kenalan.suasana` uses the parameter {suasana}).
+
+**Open (nothing was seen on a screen)**
+- Episode 1 ending at 360 x 640 with the flag on: confirm the reason line is still visible in all three endings and three languages, and that the link row under the buttons reads as secondary.
+- Kasus 1 result at 360 x 640: first finish is exactly 544 by calculation; one px over means a 1 px scroll.
+- The 28 px link rows are small for the 50 to 60 age group even with the extended tap area; making them 36 or 44 px costs the heights above.
+- English "Investigate the truck lane in Case 1" and Chinese texts are mine, not reviewed.

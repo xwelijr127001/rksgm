@@ -703,6 +703,7 @@ export const TEKS_AUTO_2_EN: Record<string, string> = {
   'akhir.kurang.2': 'The claim is closed, {nama}, but Mr Hendra felt alone through the process. Remember, a claim that is paid does not always leave the customer satisfied.',
   'akhir.pelajaran.1': 'Regular updates and honest expectations from the start.',
   'akhir.pelajaran.2': 'Objections handled with data, with no promises beyond your authority.',
+  'akhir.kasus': 'Investigate the truck lane in Case 1', // T-099
   'kartu.puas.judul': 'Mr Hendra is satisfied and trusts you',
   'kartu.puas.sebab': 'Mr Hendra’s final status is 70 or more, so the case ends Satisfied: your explanations and updates kept his trust even though the process was long.',
   'kartu.catatan.judul': 'Claim settled, but something was missed',

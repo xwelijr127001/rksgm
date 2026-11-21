@@ -20,7 +20,7 @@
  * aplikasi `investigasi` (Task 2), teks pembungkus di sini di teks episode (`inv.ui.*`, `inv.hasil.*`, `inv.lagi.*`, ...).
  */
 import { useEffect, useRef, useState, useSyncExternalStore, type ReactNode } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import type { PlayerLook } from '@shared/types';
 import { jedaMusik, playSfx } from '../../audio/audio';
 import { t } from '../../i18n';
@@ -597,6 +597,9 @@ function LatihanKasus({ ep, konfig, state, langkah, skor, tx, onSelesai }: { ep:
  *    sesudah kasus 2 pernah ditamatkan kartunya menjadi tautan sebaris. Episode itu tidak ada di build ini = lembar pratinjau lama.
  *  - Kasus tanpa `berikut` (kasus 2): tombol "Arsip kasus" (garis waktu + pesan yang dikirim, baca saja) dan tulisan
  *    "Kasus 3 · segera hadir" (`konfig.segera`, teks saja).
+ * T-099: kasus ber-`konfig.cerita` (kasus 1) mendapat tautan sekunder "Ikuti cerita klaim Pak Hendra" -> /cerita/<episode itu>
+ *    (progres ceritanya dilanjutkan seperti biasa), di bawah baris aksi; "Kasus berikutnya" tetap yang utama. Kasus 2 (berkas
+ *    tersendiri) tidak punya tautan cerita. Episode cerita itu tidak ada di build ini = tanpa tautan.
  */
 export function HasilKasus({ ep, state, nama, look, tx, onMainLagi }: {
   ep: Episode;
@@ -670,13 +673,18 @@ export function HasilKasus({ ep, state, nama, look, tx, onMainLagi }: {
       {konfig.segera ? <p className="iv-segera" data-kasus-segera="">{tx(konfig.segera)}</p> : null}
     </div>
   ) : null;
+  // T-099: cerita klaim dari kejadian yang sama (hanya kasus yang menyebutnya, dan hanya bila episode itu ada di build ini).
+  const cerita = konfig.cerita && cariEpisode(konfig.cerita.episode) ? konfig.cerita : null;
+  const tautCerita = cerita ? (
+    <p className="iv-cerita"><Link to={'/cerita/' + cerita.episode} data-cerita-kasus={cerita.episode}>{tx(cerita.ajakan)} <span aria-hidden="true">›</span></Link></p>
+  ) : undefined;
   return (
     <PenyediaTeksInvestigasi value={tx}>
       {/* T-078: Miss Raksa "bangga" bila putusannya tepat (akhir tuntas), "berpikir" bila diluruskan */}
       <HasilInvestigasi skor={skor} nama={nama} look={look} stempel={stempel} pangkat={pangkat(stempel.length)} reaksi={putusanTepat(konfig.putusan, h.putusan) ? 'miss-bangga' : 'miss-berpikir'}
         stempelBaru={segar && !sebelum.stempel.includes(kasus)} rekor={segar && lama !== undefined && skor.total > lama} terbaik={Math.max(r.terbaik[kasus] ?? 0, lama ?? 0)}
         total={tampilTotal ? { skor: totalSemua, maks: TOTAL_MAKS, menuju: stempel.length === STEMPEL_SENIOR - 1 ? tx('inv.hasil.menuju') : undefined } : undefined}
-        onMainLagi={() => setLembar('lagi')} onSelesai={() => navigasi(rumah)} teaser={kaki} />
+        onMainLagi={() => setLembar('lagi')} onSelesai={() => navigasi(rumah)} teaser={kaki} tautan={tautCerita} />
       {lembar === 'pratinjau' ? <PratinjauKasus2 onTutup={tutup} /> : null}
       {lembar === 'arsip' && konfig.arsip ? (
         <Modal judul={tx('inv.hasil.arsip')} onTutup={tutup} lebar={420}>

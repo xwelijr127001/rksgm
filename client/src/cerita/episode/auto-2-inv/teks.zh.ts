@@ -4,6 +4,8 @@ export const TEKS_AUTO_2_INV_ZH: Record<string, string> = {
   ringkas: '你就是调查员。记下证人的说法，收集证据，再反驳那句说错的话。5 分钟，直接开始。',
   'inv.label': '案件 1',
   'inv.kait': '工作人员记录的是第 3 车道。真是这样吗？', // T-094: kalimat kait di hub Raksa Investigator
+  'inv.cerita.ikuti': '跟进 Hendra 先生的理赔故事', // T-099
+  'inv.cerita.asal': '来自第 1 集的故事',
   'inv.kasus.judul': '高速公路上的卡车',
 
   'inv.bab.1.judul': '证人说法',
