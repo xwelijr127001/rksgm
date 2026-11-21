@@ -5253,3 +5253,36 @@ What it shows, by finding: (1) requests 02, 04, 06 and 37: the event cap applies
 ## T-112 (QA): expect tests for Raksa Investigator
 Four new snapshot tests (node:test `t.assert.snapshot`, `.snapshot` file beside each; nothing hand-written; about 0.7 s each run): `server/src/investigator/rubric.expect.test.ts` (score table of kasus-1/2/3 over every outcome x verdict x message = 27 + 27 + 243 rows, plus rank/award at 0/1/2/3 stamps and best 254/255/300), `server/src/investigator/store.expect.test.ts` (in-memory SQLite: 3 joins, ranked runs with a retried commandId, a stale seq, a tie, hide, close, pairing code after close), `client/src/cerita/investigator.expect.test.ts` (validator on the 3 episodes + walk of all paths of auto-2-inv-3). Registered in `server/package.json` test and root `test:client`. Update: `cd server && npx tsx --test --test-update-snapshots <file>` (client file: `npx tsx --tsconfig client/tsconfig.json --test --test-update-snapshots <file>`); review the snapshot diff before committing.
 Looks wrong? Nothing is wrong in the values (kasus-1 best 100 S, miss then hit 85, guided 70; case 3 max 100; Kepala at exactly 255; validator [] for all three; 5292 paths, 3528 tinjau + 1764 tuntas, no problems). Notes: (1) ties finish-time equal to the millisecond are ordered by RANDOM alias (`ORDER BY total DESC, at ASC, alias ASC`), so the store test advances its fake clock between players, or the snapshot would flake; low, real play has distinct times. (2) A new commandId on an already completed run answers `run_done`, not `seq_mismatch` (run state is checked first); by design as documented. (3) The path walk counts paths to an ending; it does not list per-choice paths, I kept it to counts.
+
+## T-113 (2026-11-21): picture previews on the /investigator case list (Designer)
+
+Built by the Designer; uncommitted, not deployed. Owner rule: nothing was opened in a browser or on a phone, and no test was run. Root `npm run typecheck` exit 0; `client/dist` rebuilt (build exit 0). No server file touched.
+
+Owner: "i think it would be nice if we had a preview or something a picture". Each row of the case list was a plain kraft bar with an empty stamp square. It is now a small CASE FILE with a clipped photo.
+
+### What changed
+- `client/src/pages/Investigator.tsx` (case list of the returning-guest form only) and `client/src/pages/investigator.css`.
+- New art `client/src/cerita/seni/investigasi/hub-kasus-1.png`, `-2.png`, `-3.png` (96 x 68, shown 1 art px = 1 CSS px). Source `character/investigator-t113/bangun.mts`; crops of existing art only:
+  - Kasus 1: the dashcam evidence card (truck in lane 2, lane numbers) + viewfinder corners and a red record dot.
+  - Kasus 2: `kasus2-judul.png` at art size, cropped to the "JL. MELATI" sign and the MPV at night (the tail of the car is cut by the crop).
+  - Kasus 3: two exhibit photos side by side: the bumper end of `panel/foto-kejadian.png` and the cracked mirror of `panel/spion.png`.
+- `client/src/i18n/kamus/hubInv.ts`: 5 new keys in id / en / zh: `tagBaru`, `skorFoto`, `kaitDaftar.kasus-1` .. `kaitDaftar.kasus-3`.
+
+### The row
+- Left: the photo in a white print with a paper clip, tilted -3 deg (even rows +2 deg), 106 x 82 px.
+- On the photo: stamped case = the case stamp (red / indigo / case-3) in a tilted cream tile + best score "90/100" on a dark chip; in progress = orange tag "Sedang berjalan"; new = red-outlined tag "BARU". No lock was added: Kasus 3 opens like the others.
+- Right: title (up to 2 lines instead of one line with an ellipsis), hook (up to 2 lines), the status line as before, and "Dari cerita Episode 1" for Kasus 1. Chevron kept.
+- The whole row is still ONE link, about 100 px tall (was 48 / 56). The list is about 336 px tall for three cases (was about 176), so the returning-guest page scrolls further. All `data-` hooks of the row are unchanged; new: `data-foto-kasus` on the photo.
+- Width 360: 336 - border 4 - padding 18 - photo 106 - chevron 12 - gaps 16 = 180 px of text. "Mobil keluarga, atau antar penumpang?" and the Kasus 3 title do not fit one line at that width, so both wrap to two lines; nothing is clipped.
+- The photo and its marks are `aria-hidden`; a screen reader hears title, hook, status as text.
+
+### Things to know
+- The hook lines of the list are the Lead's wording from the brief and live in `hubInv`, because the episode hooks of Kasus 2 and 3 (`inv2.kait`, `inv3.kait`) are worded differently and episode files are not mine. So the top file card ("Buka Kasus N") still shows the episode hook, while the list shows the new one: two different sentences for Kasus 2 and 3 on the same page. Lead / Fullstack to decide whether the episode hooks should follow.
+- en / zh of the three hooks and of "New" are my wording.
+- A stamped row no longer shows the empty stamp slot for unstamped cases; the state is on the photo and in the status line.
+
+### Previews (calculated mocks, not screenshots)
+`character/investigator-t113/layar-t113.png` (360 px list, two cases: returning guest, all stamped) and `seni-t113-4x.png` (the three photos at 4x). The mock uses the pixel font in capitals and does not tilt the photos.
+
+### Open
+- Not seen in a browser or on a phone. Most worth a look: the tilt and clip at 360 px, the stamp tile over the Kasus 3 mirror, and the zh title wrap.

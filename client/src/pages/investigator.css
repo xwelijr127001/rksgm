@@ -73,19 +73,31 @@
 .inv-hub .inv-hub-pulang > .kp { width: min(300px, 100%); justify-self: center; }
 .inv-hub-daftar { display: grid; gap: 12px; margin: 6px 0 0; padding: 0; list-style: none; }
 /* tiap kasus = satu map kraft dengan tab kecil di kiri-atas; yang sudah berstempel = kertas krem */
-.inv-hub-baris { position: relative; display: grid; grid-template-columns: 32px minmax(0, 1fr) 12px; gap: 8px; align-items: center; min-height: 48px; box-sizing: border-box; padding: 4px 8px; border: 2px solid #212121; background: #f2c79e; color: #212121; text-decoration: none; box-shadow: 0 3px 0 #33241a; }
+/* T-113: berkas kasus berfoto: foto 106 px | teks | panah */
+.inv-hub-baris { position: relative; display: grid; grid-template-columns: 106px minmax(0, 1fr) 12px; gap: 8px; align-items: center; min-height: 100px; box-sizing: border-box; padding: 10px 8px 8px 10px; border: 2px solid #212121; background: #f2c79e; color: #212121; text-decoration: none; box-shadow: 0 3px 0 #33241a; }
 .inv-hub-baris::before { content: ""; position: absolute; left: -2px; top: -8px; width: 72px; height: 6px; background: #e3a877; border: 2px solid #212121; border-bottom: 0; }
 .inv-hub-baris:active { translate: 0 3px; box-shadow: none; }
 .inv-hub-baris:focus-visible { outline: 3px solid #fff9f5; outline-offset: 2px; }
 .inv-hub-baris[data-stempel] { background: #fff9f5; }
 .inv-hub-baris-teks { min-width: 0; display: grid; }
-.inv-hub-baris-teks b { font-size: 15px; line-height: 20px; font-weight: 800; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.inv-hub-baris-teks b { font-size: 15px; line-height: 18px; font-weight: 800; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; line-clamp: 2; overflow: hidden; overflow-wrap: anywhere; }
 .inv-hub-baris-teks small { font-size: 13px; line-height: 16px; font-weight: 700; color: #4a3a2c; font-variant-numeric: tabular-nums; }
 /* T-099: baris ketiga "Dari cerita Episode 1" (kasus yang punya cerita). 18 + 16 + 14 = 48 px isi + bantalan 2 x 2 + tepi 4 = 56 px. */
-.inv-hub-baris[data-asal] { padding-block: 2px; }
-.inv-hub-baris[data-asal] .inv-hub-baris-teks b { line-height: 18px; }
 .inv-hub-baris-teks .inv-hub-asal { font-size: 12px; line-height: 14px; color: #7a3e00; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .inv-hub-panah { font-size: 20px; line-height: 20px; font-weight: 800; color: #9a4f00; }
+/* T-113: foto kasus berklip (96 x 68, 1 piksel seni = 1 px), miring sedikit; tanda keadaan menumpang di atas foto */
+.inv-hub-foto { position: relative; box-sizing: border-box; width: 106px; padding: 3px 3px 7px; background: #ffffff; border: 2px solid #212121; box-shadow: 2px 2px 0 #c9935f; rotate: -3deg; }
+.inv-hub-daftar > li:nth-child(even) .inv-hub-foto { rotate: 2deg; }
+.inv-hub-foto .inv-klip { left: 12px; top: -11px; }
+.inv-hub-foto-gambar { display: block; width: 96px; height: 68px; background: #33241a; image-rendering: pixelated; }
+.inv-hub-foto-cap { position: absolute; right: -2px; top: 32px; z-index: 2; rotate: 14deg; padding: 1px; background: #fff9f5; border: 2px solid #212121; }
+.inv-hub-foto-skor { position: absolute; left: -5px; bottom: 3px; z-index: 2; padding: 0 5px; background: #212121; color: #ffd9a8; font-size: 13px; line-height: 18px; font-weight: 800; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.inv-hub-foto-tag { position: absolute; left: -5px; bottom: 2px; z-index: 2; max-width: 108px; box-sizing: border-box; padding: 0 5px; border: 2px solid #212121; font-size: 11px; line-height: 16px; font-weight: 800; letter-spacing: .02em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.inv-hub-foto-tag[data-tag="jalan"] { background: #ffb74d; color: #212121; }
+.inv-hub-foto-tag[data-tag="baru"] { rotate: -5deg; border-color: #c62828; background: #fff9f5; color: #c62828; letter-spacing: .08em; text-transform: uppercase; }
+.inv-hub-baris-teks .inv-hub-kait-baris { color: #212121; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; line-clamp: 2; overflow: hidden; margin-bottom: 2px; }
+/* HP sangat sempit: jarak lebih rapat, foto tetap */
+@media (max-width: 339.98px) { .inv-hub-baris { gap: 6px; padding-inline: 8px 6px; } }
 /* T-106: hadiah seri di hub */
 .inv-hub-hadiah { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 12px; margin: 0; font-size: 14px; line-height: 20px; font-weight: 700; color: #ffd9a8; }
 .inv-hub-hadiah > span { display: inline-flex; align-items: center; gap: 6px; }

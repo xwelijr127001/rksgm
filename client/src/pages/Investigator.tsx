@@ -31,6 +31,13 @@
  *    kartu petugas, total, dan daftar kasus sebagai MAP-MAP di meja (Kasus 2 = map kedua), terkunci, Tamu baru. Halaman digulir.
  *  Logika T-094 / T-099 dan semua kait data- tidak berubah; kunci baru hanya `hubInv.berkasTab` dan `hubInv.capBaru`.
  *
+ * T-113 (Designer; pemilik: "it would be nice if we had a preview or something a picture"): tiap baris daftar kasus = BERKAS KASUS
+ * kecil berfoto. Kiri: foto piksel 96 x 68 berklip dan sedikit miring (kasus 1 bingkai dashcam truk + lajur, kasus 2 MPV malam di
+ * Jl. Melati, kasus 3 bumper + spion retak); di atas foto: stempel kasus miring + skor terbaik "90/100" bila sudah berstempel,
+ * tag "Sedang berjalan" atau "Baru" bila belum. Kanan: judul (paling banyak 2 baris), kalimat kait (`hubInv.kaitDaftar.<kasus>`),
+ * baris status dan "Dari cerita Episode 1" seperti semula; panah tetap. Seluruh baris tetap SATU tautan (tinggi sekitar 100 px).
+ * Lebar 360: 336 isi - tepi 4 - bantalan 18 - foto 106 - panah 12 - jarak 16 = 180 px teks. Kait data- tidak berubah.
+ *
  * T-099 (Codex "Cerita x Investigator approach" butir 2): di daftar kasus, baris kasus yang punya cerita (`konfig.cerita`, kasus 1)
  * membawa satu baris kecil "Dari cerita Episode 1"; kasus tanpa cerita (kasus 2) diperkenalkan sebagai berkas tersendiri: selama
  * belum dibuka barisnya berbunyi "Berkas baru · belum dibuka", tanpa kata yang mengaitkannya ke cerita. Sampul perangkat kosong
@@ -62,11 +69,17 @@ import seniLatar from '../cerita/seni/investigasi/hub-latar.png';
 import seniLogo from '../cerita/seni/investigasi/hub-logo.png';
 import seniMiss from '../cerita/seni/investigasi/hub-miss.png';
 import seniKlip from '../cerita/seni/investigasi/klip.png';
+import fotoKasus1 from '../cerita/seni/investigasi/hub-kasus-1.png';
+import fotoKasus2 from '../cerita/seni/investigasi/hub-kasus-2.png';
+import fotoKasus3 from '../cerita/seni/investigasi/hub-kasus-3.png';
 import '../cerita/ui/cerita.css';
 import '../cerita/hp/hp.css';
 import '../cerita/investigasi/ui/investigasi.css';
 import '../cerita/investigasi/ui/alur.css';
 import './investigator.css';
+
+/** T-113: foto kecil 96 x 68 per kasus di daftar kasus (character/investigator-t113/bangun.mts); kasus lain = tanpa foto. */
+const FOTO_KASUS: Readonly<Record<string, string>> = { 'kasus-1': fotoKasus1, 'kasus-2': fotoKasus2, 'kasus-3': fotoKasus3 };
 
 export default function Investigator() {
   const { bahasa } = useBahasa();
@@ -147,6 +160,7 @@ export default function Investigator() {
   const mainLagi = () => { mulaiBaru(k.ep); nav(ruteKasus(k.nomor)); };
   const statusBaris = (x: KasusHub) => (x.terbaik !== null ? t('hubInv.terbaik', { skor: x.terbaik, maks: SKOR_MAKS })
     : x.status === 'baru' && !x.konfig.cerita ? t('hubInv.berkasBaru') : t(`hubInv.status.${x.status}`));
+  const kaitBaris = (x: KasusHub) => (FOTO_KASUS[x.konfig.kasus] ? t(`hubInv.kaitDaftar.${x.konfig.kasus}`) : tx(x, x.konfig.kait));
   return (
     <div className="player-ui cer-layar hp-layar inv-hub" data-teks-besar="" data-hub={aksi.jenis}>
       {kepala}
@@ -175,9 +189,18 @@ export default function Investigator() {
             {daftar.map((x) => (
               <li key={x.konfig.kasus}>
                 <Link className="inv-hub-baris" to={ruteKasus(x.nomor)} data-kasus={x.konfig.kasus} data-status={x.status} data-stempel={x.stempel ? '' : undefined} data-asal={x.konfig.cerita ? '' : undefined}>
-                  <IkonStempel kasus={x.konfig.kasus} terisi={x.stempel} />
+                  <span className="inv-hub-foto" aria-hidden="true" data-foto-kasus={x.konfig.kasus}>
+                    <img className="inv-klip" src={seniKlip} alt="" width={10} height={22} />
+                    {FOTO_KASUS[x.konfig.kasus] ? <img className="inv-hub-foto-gambar" src={FOTO_KASUS[x.konfig.kasus]} alt="" width={96} height={68} /> : <i className="inv-hub-foto-gambar" />}
+                    {x.stempel ? (
+                      <>
+                        <span className="inv-hub-foto-cap"><IkonStempel kasus={x.konfig.kasus} /></span>
+                        {x.terbaik !== null ? <b className="inv-hub-foto-skor">{t('hubInv.skorFoto', { skor: x.terbaik, maks: SKOR_MAKS })}</b> : null}
+                      </>
+                    ) : x.status === 'selesai' ? null : <b className="inv-hub-foto-tag" data-tag={x.status}>{t(x.status === 'jalan' ? 'hubInv.status.jalan' : 'hubInv.tagBaru')}</b>}
+                  </span>
                   <span className="inv-hub-baris-teks">
-                    <b>{judul(x)}</b><small>{statusBaris(x)}</small>
+                    <b>{judul(x)}</b><small className="inv-hub-kait-baris">{kaitBaris(x)}</small><small>{statusBaris(x)}</small>
                     {x.konfig.cerita ? <small className="inv-hub-asal" data-asal-cerita={x.konfig.cerita.episode}>{tx(x, x.konfig.cerita.asal)}</small> : null}
                   </span>
                   <span className="inv-hub-panah" aria-hidden="true">›</span>
