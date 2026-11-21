@@ -11,7 +11,7 @@ const serverTarget = process.env.VITE_SERVER_URL || 'http://localhost:4000';
 const episodeTanpaMentah = (process.env.VITE_CERITA_TANPA || '').split(',').map((s) => s.trim()).filter((s) => /^[a-z0-9-]+$/.test(s));
 // T-064 / T-076: Episode 1 Dev (auto-2-dev) dan Episode 1 Investigator (auto-2-inv) memakai ulang isi auto-2: mengeluarkan auto-2
 // ikut mengeluarkan keduanya. T-090: Investigator kasus 2 (auto-2-inv-2) memakai latar dan seni auto-2 juga.
-const episodeTanpa = [...new Set([...episodeTanpaMentah, ...(episodeTanpaMentah.includes('auto-2') ? ['auto-2-dev', 'auto-2-inv', 'auto-2-inv-2'] : [])])];
+const episodeTanpa = [...new Set([...episodeTanpaMentah, ...(episodeTanpaMentah.includes('auto-2') ? ['auto-2-dev', 'auto-2-inv', 'auto-2-inv-2', 'auto-2-inv-3'] : [])])];
 
 export default defineConfig({
   // Hosting under a path prefix behind a reverse proxy (docs/prd-v02/HOSTING.md), e.g. VITE_BASE_PATH=/game/.
