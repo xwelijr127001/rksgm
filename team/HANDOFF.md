@@ -5713,3 +5713,48 @@ Content other than the stage: returning 312 px (+56 with "Punya kode acara?", +2
 
 ### Open
 - Not seen on a phone. Most worth a look on the owner's iPhone: that the page really fills the visible height in Safari (the layout relies on `100dvh`), Miss Raksa behind the ground band, and the spacing on a tall phone.
+
+## T-119 (2026-11-21): hub header capped, case file below the stage (Designer)
+
+Built by the Designer; uncommitted, not deployed. Owner rule: nothing was opened in a browser or on a phone and no test was run, so the heights are CALCULATED. Root `npm run typecheck` exit 0; `client/dist` rebuilt (build exit 0). No server file touched.
+
+Owner, same iPhone as T-118: "Now its too much". My T-118 let the stage grow to 320 px (about 70 px of empty sky above the logo) and pushed the case block down; and the ground band I drew in front of Miss Raksa also covered the top half of the case tab, because the tab still overlapped the stage.
+
+### What changed (`client/src/pages/investigator.css`; `Investigator.tsx` only got a note)
+- **Stage cap:** 88 px to 224 px on the returning hub, 88 px to 260 px on the fresh title screen (T-118: up to 320 / 360).
+- **Case file starts BELOW the stage.** The 26 px overlap is gone, so nothing of the stage can cover the tab. The ground band is part of the stage.
+- **Gaps:** between stage, file, officer strip and case cards 8 px to 20 px (fresh: 10 px to 20 px). Free height fills the stage and the gaps up to those maximums; whatever is left stays at the very bottom as plain page background. Nothing stretches beyond that.
+- **Logo:** shield badge from a 156 px stage (plaque below that), centred above the ground band: 28 px of sky above it at 224 px.
+- **Miss Raksa:** whole and standing behind the ground band from a 204 px stage; on a shorter stage her body is cut at the bottom edge, never her head or magnifier.
+- The layout is now a grid with explicit rows (stage, gap, file, gap, strip, gap, cards, spare row, event entry) instead of the T-118 flex column with auto margins.
+
+### Table (id, state as in the owner's screenshot: returning with "Buka Kasus 3", no event link; fresh without event link)
+Space = viewport height - 59 (header) - 12 (bottom padding).
+
+| Viewport (space) | Returning: stage | logo | gaps | left at the bottom | Fresh: stage | gaps | left at the bottom |
+|---|---|---|---|---|---|---|---|
+| 360 x 640 (569) | 175 | shield | 20 | 12 | 260 | 20 | 21 |
+| 390 x 700 (629) | 224 | shield | 20 | 23 | 260 | 20 | 81 |
+| 390 x 760 (689), the owner's phone | 224 | shield | 20 | 83 | 260 | 20 | 141 |
+| 390 x 844 (773) | 224 | shield | 20 | 167 | 260 | 20 | 225 |
+| 430 x 932 (861) | 224 | shield | 20 | 255 | 260 | 20 | 313 |
+
+- Returning at 390 x 760: stage 224 + 20 + file 128 + 20 + strip 48 + 20 + cards 146 = 606 px, then 83 px of cream page at the bottom.
+- At 360 x 640 the returning stage is 175 px: shield badge, Miss Raksa cut 29 px at the bottom edge (her coat hem), head and magnifier whole.
+- **Tab text:** the tab is a normal block 8 px to 20 px under the stage; nothing overlaps it at any size.
+- **No scroll:** shortest layout = fixed content + 88 px stage + minimum gaps. Returning: 322 + 88 + 24 = 434 px; with a two-line note and a typed event code with a two-line error 568 px of 569 px at 360 x 640 (1 px to spare; in that case the stage is 88 px with the plaque logo). Fresh: 248 + 88 + 20 = 356 px; worst case (typed code with error, en hook) 494 px.
+
+### Correction to T-114 / T-118
+Those entries left out the 8 px (fresh: 10 px) gap between the stage and the case file, so their totals were 8 to 10 px too low. The worst case then was really 566 px of 569 px, so it still fitted. The sums above include every gap.
+
+### Things to know
+- On tall viewports the bottom of the page is now empty cream by design (83 px on the owner's phone on the returning hub, 141 px on the fresh screen, more on taller phones). This is the trade the card asked for: capped header, modest gaps, rest at the bottom. If the owner finds the bottom too empty, the lever is the stage cap (224 / 260 px) or larger case cards.
+- The growth of stage and gaps relies on CSS grid filling a column of the screen height; I also set a minimum height on the content from `100dvh` so the grid knows the free height. If the header bar ever wraps to two lines, that minimum is a few px too tall and the page could scroll by those few px.
+- Browsers without container queries (before iOS 16) show the plaque logo at every height and no band in front of Miss Raksa.
+- Unchanged: states, logic, links, data hooks, palette, dictionaries, sizes of the file, strip, cards and button.
+
+### Previews (calculated mocks, not screenshots)
+`character/investigator-t119/layar-t119-pulang.png` (returning hub as on the owner's screen) and `layar-t119-sampul.png` (fresh), each at the five viewports with stage, gap and bottom rest in the caption.
+
+### Open
+- Not seen on a phone. Check on the owner's iPhone: stage about 224 px with the shield and whole Miss Raksa, the tab fully readable under the orange band, 20 px gaps, cream below the cards.

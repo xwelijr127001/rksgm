@@ -31,6 +31,20 @@
  *    kartu petugas, total, dan daftar kasus sebagai MAP-MAP di meja (Kasus 2 = map kedua), terkunci, Tamu baru. Halaman digulir.
  *  Logika T-094 / T-099 dan semua kait data- tidak berubah; kunci baru hanya `hubInv.berkasTab` dan `hubInv.capBaru`.
  *
+ * T-119 (Designer; pemilik, iPhone yang sama: "Now its too much"): panggung T-118 (sampai 320 px) terlalu tinggi, dan pita tanah
+ *  menutup tab berkas. Sekarang isi = KISI: panggung | jarak | berkas | jarak | strip | jarak | kartu (| entri). Panggung 88 .. 224 px
+ *  (sampul 88 .. 260 px), jarak 8 .. 20 px (sampul 10 .. 20 px); sisa tinggi mengisi mereka sampai batas atas, selebihnya latar
+ *  krem di dasar halaman. Berkas mulai DI BAWAH panggung (tab tidak pernah tertutup). Logo: lencana perisai mulai panggung 156 px.
+ *  Miss Raksa utuh di belakang pita tanah mulai 204 px. Hitungan T-118 di bawah ini tidak berlaku lagi.
+ *  Isi tetap (id): pulang berkas 128 + strip 48 + kartu 146 = 322 (+56 tautan kode acara, +20 keterangan dua baris, +114 ketik
+ *  kode + galat, +112 ikut papan); sampul berkas 184 + tombol 64 = 248 (+58 tautan, +116 ketik kode + galat, +22 kait en).
+ *  Paling pendek: pulang 322 + 88 + 24 = 434 (terburuk 568 dari 569 di 360 x 640); sampul 248 + 88 + 20 = 356 (terburuk 494).
+ *    360 x 640 (569): pulang panggung 175, jarak 20, sisa di dasar 12 · sampul 260, jarak 20, sisa 21
+ *    390 x 700 (629): pulang 224, jarak 20, sisa 23 · sampul 260, sisa 81
+ *    390 x 760 (689): pulang 224, sisa 83 · sampul 260, sisa 141
+ *    390 x 844 (773): pulang 224, sisa 167 · sampul 260, sisa 225
+ *    430 x 932 (861): pulang 224, sisa 255 · sampul 260, sisa 313
+ *
  * T-118 (Designer; pemilik, iPhone: "Right is too compact on the top"): tinggi panggung tidak lagi dari tinggi LAYAR (aturan < 820 px
  *  memendekkan panggung di HP biasa dan menyisakan seperempat layar kosong di bawah kartu kasus). Sekarang halaman = kolom setinggi
  *  layar dan panggung mengambil SISA tinggi: paling pendek 112 px, paling tinggi 320 px (hub pulang) / 360 px (sampul); sisa
