@@ -1,0 +1,105 @@
+/* T-103 (Designer): antarmuka PANEL Investigator kasus 3 (ui/panel/*): ruang panel, babak panel (ketua, pernyataan, kartu bukti,
+   tombol tunjukkan), lembar bukti (perbesar), "Tanya lebih lanjut", lencana hadiah, bingkai kartu petugas Kepala.
+   Gaya = layar judul T-100 dan kasus 1-2: tepi tinta 2 px, sudut siku, bayangan keras, arang #212121, krem #fff9f5, jingga
+   #ff9000, kraft #f2c79e / #e3a877, dinding malam #2b2738, kayu #5a3a24. Seni piksel pada kelipatan bulat. Sasaran ketuk >= 44 px.
+   Lebar isi 328 px di HP 360. Gerak (bust yang bicara, masuknya catatan jawaban) mati bila gerak dikurangi (blok terakhir). */
+
+.pn-ikon, .pn-reaksi, .pn-lencana, .pn-kursi, .pn-kartu-gambar { display: block; flex: none; background-repeat: no-repeat; image-rendering: pixelated; }
+.pn-reaksi { box-sizing: content-box; border: 2px solid #212121; background-color: #f9eeea; }
+
+/* ---- ruang panel: seni 180 x 52 pada 2x = 360 x 104 di tengah; dinding dan meja diteruskan ke samping (layar lebar) */
+.pn-ruang {
+  position: relative; height: 104px; overflow: hidden; box-sizing: content-box; border: 2px solid #212121; image-rendering: pixelated;
+  background: var(--pn-ruang) center top / 360px 104px no-repeat,
+    linear-gradient(#2b2738 0 58px, #3a3548 58px 60px, #252131 60px 80px, #1c1418 80px 82px, #a06a41 82px 86px, #7a5132 86px 96px, #4c301d 96px 98px, #5a3a24 98px);
+}
+.pn-ruang-isi { position: absolute; top: 0; bottom: 0; left: 50%; width: 360px; margin-left: -180px; }
+/* bust 64 x 64 (1 piksel seni = 1 px), berdiri di belakang meja (tepi meja di 80 px) */
+.pn-kursi { position: absolute; top: 16px; width: 64px; height: 64px; background-image: var(--pn-tokoh); background-size: 320px 192px; }
+.pn-kursi[data-kursi="penaksir"] { left: 28px; }
+.pn-kursi[data-kursi="ketua"] { left: 148px; }
+.pn-kursi[data-kursi="pemohon"] { left: 268px; scale: -1 1; }
+.pn-kursi[data-redup] { filter: brightness(.62) saturate(.8); }
+.pn-kursi[data-bicara] { animation: pn-bicara 1.2s steps(1) infinite; }
+@keyframes pn-bicara { 0%, 100% { translate: 0 0; } 50% { translate: 0 -2px; } }
+
+/* ---- babak panel */
+.pn-ronde { gap: 8px; }
+/* ketua: gelembung krem dengan ekor ke kursi tengah */
+.pn-ketua { position: relative; display: grid; gap: 2px; padding: 5px 10px 7px; border: 2px solid #212121; background: #fff9f5; box-shadow: 0 2px 0 #212121; }
+.pn-ketua::before { content: ""; position: absolute; left: 50%; top: -9px; width: 12px; height: 12px; margin-left: -6px; box-sizing: border-box; border: 2px solid #212121; border-right: 0; border-bottom: 0; background: inherit; rotate: 45deg; }
+.pn-ketua > b { position: relative; font-size: 13px; line-height: 16px; font-weight: 800; letter-spacing: .04em; text-transform: uppercase; color: #7a3e00; }
+.pn-ronde .pn-ketua > h2 { position: relative; margin: 0; font-size: 17px; line-height: 22px; font-weight: 800; letter-spacing: -.01em; }
+.pn-ketua > p { position: relative; margin: 0; font-size: 16px; line-height: 22px; }
+/* petunjuk (percobaan 1 dan 2): catatan tempel kuning, seperti KEBERATAN kasus 1-2 */
+.pn-ketua[data-petunjuk] { background: #fff1a8; box-shadow: 2px 3px 0 rgba(42, 33, 30, .3); }
+.pn-ronde[data-percobaan="2"] .pn-ketua[data-petunjuk] { border-color: #ff9000; box-shadow: 0 0 0 2px #212121, 2px 5px 0 rgba(42, 33, 30, .3); }
+
+/* pernyataan yang diperiksa: slip kraft, kalimatnya distabilo jingga */
+.pn-pernyataan { display: grid; gap: 2px; margin: 0; padding: 5px 10px 7px; border: 2px solid #212121; background: #f2c79e; box-shadow: inset 0 2px 0 #e3a877, 0 2px 0 #33241a; }
+.pn-pernyataan figcaption { font-size: 13px; line-height: 16px; font-weight: 800; color: #5a3a24; }
+.pn-pernyataan q { font-size: 17px; line-height: 24px; font-weight: 700; color: #212121; overflow-wrap: anywhere; background: linear-gradient(#0000 0 55%, #ffb347 55% 92%, #0000 92%); -webkit-box-decoration-break: clone; box-decoration-break: clone; }
+
+/* kartu bukti: baris 52 px = [pilih: gambar 72 x 44 (potongan sel 96 x 68) + judul + sumber + centang] [perbesar 48 x 52] */
+.pn-kartu-daftar { display: grid; gap: 5px; margin: 0; padding: 0; list-style: none; }
+.pn-kartu { display: grid; grid-template-columns: minmax(0, 1fr) 48px; gap: 4px; }
+.pn-kartu-pilih { display: grid; grid-template-columns: 72px minmax(0, 1fr) 24px; gap: 8px; align-items: center; min-height: 52px; box-sizing: border-box; margin: 0; padding: 2px 6px 2px 2px; border: 2px solid #212121; border-radius: 0; background: #ffffff; color: #212121; font: inherit; text-align: left; box-shadow: 0 2px 0 #212121; cursor: pointer; }
+.pn-kartu-pilih[aria-pressed="true"] { border-color: #ff9000; background: #fff1c2; box-shadow: 0 2px 0 #9a4f00; }
+.pn-kartu-pilih:disabled { opacity: .45; cursor: default; }
+.pn-kartu-gambar { width: 72px; height: 44px; background-color: #f3e6d2; background-position: -12px -12px; background-size: 96px 68px; }
+.pn-kartu-teks { min-width: 0; display: grid; gap: 1px; }
+.pn-kartu-teks b { font-size: 15px; line-height: 19px; font-weight: 800; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden; }
+.pn-kartu-teks small { font-size: 13px; line-height: 16px; color: #5f5f5f; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.pn-kartu-tanda { width: 24px; height: 24px; box-sizing: border-box; display: grid; place-items: center; border: 2px solid #212121; background: #ffffff; font-size: 15px; font-weight: 800; line-height: 1; }
+[aria-pressed="true"] > .pn-kartu-tanda { background: #ff9000; }
+.pn-kartu-periksa { display: grid; place-items: center; min-height: 52px; margin: 0; padding: 0; border: 2px solid #212121; border-radius: 0; background: #e3a877; box-shadow: inset 0 2px 0 #f2c79e, 0 2px 0 #33241a; cursor: pointer; }
+.pn-kartu-periksa:active, .pn-kartu-pilih:not(:disabled):active { translate: 0 2px; box-shadow: none; }
+:is(.pn-kartu-pilih, .pn-kartu-periksa, .pn-tanya, .pn-jawab-tutup, .pn-foto-tombol, .pn-foto-ganti):focus-visible { outline: 3px solid #1d6fd1; outline-offset: 2px; }
+.pn-jawab:focus { outline: none; }
+
+/* ---- lembar bukti (di dalam dialog bersama) */
+.pn-lembar { display: grid; gap: 8px; justify-items: center; color: #212121; }
+.pn-lembar > * { justify-self: stretch; margin: 0; box-sizing: border-box; }
+.pn-kutip { padding: 5px 10px; border: 2px solid #212121; background: #f2c79e; font-size: 16px; line-height: 22px; }
+.pn-kutip b { display: block; font-size: 13px; line-height: 16px; font-weight: 800; color: #5a3a24; }
+.pn-foto { display: grid; gap: 6px; justify-items: center; padding: 6px 6px 8px; border: 2px solid #212121; background: #ffffff; box-shadow: 2px 3px 0 rgba(33, 33, 33, .25); }
+.pn-foto img { display: block; max-width: 100%; height: auto; image-rendering: pixelated; }
+.pn-foto-tombol { display: block; margin: 0; padding: 0; border: 2px solid #212121; border-radius: 0; background: #212121; cursor: zoom-in; }
+.pn-foto-tombol[aria-pressed="true"] { cursor: zoom-out; border-color: #ff9000; }
+.pn-foto figcaption { justify-self: stretch; font-size: 16px; line-height: 22px; font-weight: 700; }
+.pn-foto-ganti, .pn-jawab-tutup { justify-self: start; min-height: 44px; display: inline-flex; align-items: center; gap: 6px; margin: 0; padding: 0 14px; border: 2px solid #212121; border-radius: 0; background: #fff9f5; color: #212121; font: inherit; font-size: 15px; font-weight: 800; box-shadow: 0 3px 0 #212121; cursor: pointer; }
+:is(.pn-foto-ganti, .pn-jawab-tutup):active { translate: 0 2px; box-shadow: 0 1px 0 #212121; }
+/* kutipan pesan: gelembung percakapan (aplikasi umum, tanpa merek) */
+.pn-pesan { position: relative; padding: 10px 12px 12px 30px; border: 2px solid #212121; background: #f3ede3; }
+.pn-pesan::before { content: ""; position: absolute; left: 10px; top: 14px; width: 8px; height: 8px; background: #ff9000; }
+.pn-pesan p { margin: 0; padding: 8px 10px; border: 2px solid #212121; background: #ffe2b5; font-size: 17px; line-height: 24px; overflow-wrap: anywhere; }
+/* kutipan dokumen: lembar kertas bergaris dengan kepala biru tua */
+.pn-kertas { padding: 0; border: 2px solid #212121; background: #fffdf6; box-shadow: 2px 3px 0 rgba(33, 33, 33, .25); }
+.pn-kertas::before { content: ""; display: block; height: 10px; background: #3b4a66; }
+.pn-kertas p { margin: 0; padding: 8px 12px 10px; font-size: 17px; line-height: 24px; overflow-wrap: anywhere; }
+.pn-sumber { display: flex; align-items: flex-start; gap: 6px; font-size: 14px; line-height: 20px; color: #4a4a4a; }
+.pn-sumber .pn-ikon { margin-top: 2px; }
+.pn-lembar-pakai { flex: 1 1 180px; min-height: 48px; }
+.pn-lembar-tutup { min-height: 44px; }
+
+/* ---- "Tanya lebih lanjut" */
+.pn-tanya { justify-self: start; display: inline-flex; align-items: center; gap: 8px; min-height: 48px; margin: 0; padding: 4px 14px 4px 8px; border: 2px solid #212121; border-radius: 0; background: #fff9f5; color: #212121; font: inherit; text-align: left; box-shadow: 0 3px 0 #212121; cursor: pointer; }
+.pn-tanya:active { translate: 0 2px; box-shadow: 0 1px 0 #212121; }
+.pn-tanya-teks { display: grid; }
+.pn-tanya-teks b { font-size: 16px; line-height: 20px; font-weight: 800; }
+.pn-tanya-teks small { font-size: 12px; line-height: 15px; font-weight: 700; color: #7a3e00; }
+/* catatan tanya-jawab: kertas buku catatan dengan pita jingga di kiri */
+.pn-jawab { display: grid; gap: 6px; padding: 8px 10px 10px 14px; border: 2px solid #212121; border-left: 8px solid #ff9000; background: #fffdf6; color: #212121; box-shadow: 0 2px 0 #212121; animation: pn-jawab-masuk .22s ease-out both; }
+.pn-jawab > p { margin: 0; }
+.pn-jawab-tanya { display: grid; font-size: 15px; line-height: 21px; color: #26306b; }
+.pn-jawab-tanya b { font-size: 12px; line-height: 15px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; color: #7a3e00; }
+.pn-jawab-isi { font-size: 17px; line-height: 24px; }
+@keyframes pn-jawab-masuk { from { translate: 0 8px; opacity: 0; } }
+
+/* ---- bingkai kartu petugas pangkat Kepala: pasang kelas ini pada .kp-kartu. Bingkai emas 9-slice (irisan 16 px) digambar
+   10 px di luar kartu dan 6 px di dalam tepinya; ukuran dan tata letak kartu tidak berubah. */
+.pn-bingkai-kepala { border-image: url('../../../seni/investigasi/panel/bingkai-kepala.png') 16 / 16px / 10px round; image-rendering: pixelated; }
+
+@media (prefers-reduced-motion: reduce) {
+  :root:not([data-gerak="penuh"]) :is(.pn-kursi, .pn-jawab) { animation: none !important; }
+}

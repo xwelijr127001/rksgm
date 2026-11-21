@@ -1,7 +1,7 @@
 /**
  * T-094 RAKSA INVESTIGATOR: ALAMAT. Hub seri ada di `/investigator`; pemain kasus ke-n di `/investigator/<n>` (pemain cerita
  * yang sama dengan `/cerita/<idEpisode>`: id episode, simpanan cerita dan rekaman `raksa:investigasi:v1` tidak berubah).
- * Alamat lama tetap hidup: `/cerita/investigator` -> `/investigator/1`, `/cerita/investigator/2` -> `/investigator/2`, dan
+ * Alamat lama tetap hidup: `/cerita/investigator` -> `/investigator/1`, `/cerita/investigator/2` -> `/investigator/2`, `/cerita/investigator/3` -> `/investigator/3` (T-104), dan
  * `/cerita/auto-2-inv` / `/cerita/auto-2-inv-2` membuka pemain yang sama dengan jalan pulang ke `/cerita` seperti semula.
  *
  * Berkas ini SENGAJA ringan (tanpa data episode): dipakai App (rute), PramuatCerita, CeritaMain, pemutar HP dan hub.
@@ -10,7 +10,7 @@ import { useLocation } from 'react-router-dom';
 
 export const RUTE_HUB = '/investigator';
 /** Nomor kasus di alamat hub -> id episode. Menambah kasus = satu baris di sini + episodenya di episode/index.ts. */
-export const EPISODE_KASUS: Readonly<Record<string, string>> = { '1': 'auto-2-inv', '2': 'auto-2-inv-2' };
+export const EPISODE_KASUS: Readonly<Record<string, string>> = { '1': 'auto-2-inv', '2': 'auto-2-inv-2', '3': 'auto-2-inv-3' };
 
 export const ruteKasus = (nomor: number | string): string => `${RUTE_HUB}/${nomor}`;
 

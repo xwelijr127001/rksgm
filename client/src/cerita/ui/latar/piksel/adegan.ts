@@ -42,7 +42,7 @@ export interface PeranPiksel {
 export const PERAN_PIKSEL: Readonly<Partial<Record<IdPembicara, PeranPiksel>>> = {
   missRaksa: { tokoh: 'missRaksa', tempat: 'balikMeja', pose: 'berdiri', hadap: 'kanan' },
   // D-93: seni Hendra & tokoh samping menghadap KANAN penonton; hadap 'kiri' di adegan = dicerminkan di panggung.
-  ...Object.fromEntries((['hendra', 'rudi', 'bima', 'darto', 'admin', 'tol', 'polisi', 'yusuf', 'agus'] as const).map((id) => [id, { tokoh: id, tempat: 'slot', pose: 'berdiri', hadap: 'kanan', satuArah: 'kanan' } satisfies PeranPiksel])),
+  ...Object.fromEntries((['hendra', 'rudi', 'bima', 'darto', 'admin', 'tol', 'polisi', 'yusuf', 'agus', 'ketua', 'penaksir', 'pemohon'] as const).map((id) => [id, { tokoh: id, tempat: 'slot', pose: 'berdiri', hadap: 'kanan', satuArah: 'kanan' } satisfies PeranPiksel])),
 };
 /** Slot berdiri per ruang (ruang-ep2.json `slot` 1..3). */
 export const MAKS_SLOT = 3;

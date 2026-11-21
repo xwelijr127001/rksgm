@@ -39,6 +39,11 @@ export const TEKS_AUTO_2_INV_EN: Record<string, string> = {
   'inv.tol.2': 'When I arrived, the truck was already against the barrier. I noted its position straight away.',
   'inv.tol.3': 'In my note, the truck was in lane 3.',
   'inv.pernyataan.tol': 'In my note, the truck was in lane 3.',
+  'inv.ui.tekan.1': 'Before you go on, you may ask one more thing. No points, no timer.',
+  'inv.ui.tekan.pilih': 'Ask a follow-up?',
+  'inv.ui.tekan.lanjut': 'Continue without asking',
+  'inv.tekan.tol.tanya': 'Ask: did you see the truck driving in lane 3 yourself?',
+  'inv.tekan.tol.jawab': 'No. I arrived after it happened. I counted the lane from where the truck had come to rest.',
   'inv.selisih.1': 'Lane 2 or lane 3? Those accounts cannot both be right. We need evidence.',
 
   'inv.kdash.1': 'Mr Hendra’s truck has a dashcam. Mr Darto hands over the memory card.',

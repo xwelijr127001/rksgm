@@ -4731,3 +4731,237 @@ Two new words in `i18n/kamus/hubInv.ts` (id/en/zh): `berkasTab` ("KASUS #{n} · 
 - "KASUS BARU" and the en/zh of both new words are my wording.
 - Nothing was seen in a browser or on a phone. Most worth a look: the trench coat and folder on Miss Raksa at real size, the stage on the phone, and the returning state.
 - Old hub check scripts or tests that look for `.inv-hub-kepala`, the 64 px portrait, or `.inv-hub-kasus` will need new selectors (`#inv-hub-kasus` is still the case heading); none was run.
+
+
+## T-102 (2026-11-21): Investigator lengkap CARD 1 · contracts and compatible scoring (Fullstack)
+
+Plan: `docs/superpowers/plans/2026-11-21-investigator-lengkap.md` section 1. Spec: `docs/superpowers/specs/2026-11-21-investigator-lengkap-design.md`. Gate: root `npm run typecheck` exit 0 (server + client), `client/dist` rebuilt. `server/dist` NOT rebuilt (no server source touched; nothing on the server imports the new shared files yet, card 4 will). Not committed, not deployed. NOT opened in a browser or on a phone (owner rule). No screen reads the new fields yet, so nothing a player sees changes; saves and episode versions are untouched; full Episode 1 (auto-2) and Episode 1 Dev are not edited.
+
+**THE CONTRACTS ARE FROZEN FROM HERE: cards 2, 3 and 4 can start.** Read the doc comments in the files; this is the index.
+
+### A. Shared rubric: `shared/investigator/rubric.ts` (pure, no imports; phone and server run the same code)
+- `score(caseId, rubricVersion, roundOutcomes[], verdictId, messageId) -> { bukti, putusan, penanganan, total, nilai } | null`. Outcomes `'first' | 'second' | 'guided'`, one per round in manifest order. null = unknown case or version, wrong number of outcomes, or an id not allowed in that case (own-property checks, so "constructor" and the like are rejected). Never takes a total.
+- `CASE_MANIFESTS` / `manifestOf(caseId, rubricVersion?)` / `caseVersions()`. All three cases are at `rubricVersion: 1`. Changing ids or weights later = bump that case's version.
+
+| case | rounds (id: cards -> accepted) | round points | verdicts | messages |
+|---|---|---|---|---|
+| `kasus-1` | `keberatan`: rambu, dashcam, sim -> dashcam | 40 / 25 / 10 | layak 30, tambahan 15, polis 0 | baik 30, datar 15, janji 0 |
+| `kasus-2` | `keberatan`: foto-interior, struk, polis-kasus2 -> struk | 40 / 25 / 10 | polis 30, tambahan 15, layak 0 | same |
+| `kasus-3` | `kronologi`: kartu-kejadian, foto-inspeksi, penawaran -> foto-inspeksi · `pengajuan`: penawaran, pesan-pengajuan, foto-inspeksi -> pesan-pengajuan | 20 / 12 / 5 each | tambahan 30, layak 15, polis 0 | same |
+
+- Case 3 verdict ids stay the internal three. `tambahan` = the referral action, visible label "Teruskan untuk pemeriksaan" (30). `layak` slot = ask for clarification only, without recording or routing the discrepancy (15). `polis` slot = pronounce the whole claim fraudulent (0). The visible names are case text (`putusanLayar.nama`, below). All of this is `// [konfirmasi PIC]` in the manifest.
+- Why the message card is not offered in round 1: it would also answer "the mirror cracked that evening" (spec: accept it or rewrite). The photo is offered in round 2 as a miss (it shows when, not what was asked for).
+- Stage machine of one scored run (card 4 validates with it, card 6 predicts with it): stage ids `round:<roundId>:<0|1|2>`, `verdict`, `message`, `done`; `startProgress(m)`, `applyChoice(m, progress, stageId, choiceId) -> { ok, progress, status: 'advanced' | 'retry' | 'completed', score? } | { ok: false, reason: 'stage' | 'choice' | 'done' }`, `parseStage`, `roundStage`. Attempt 2 is guided: only an accepted card is valid. `RunProgress = { stage, outcomes[], verdictId, messageId }` is all the server needs to store per run (plus seq).
+- Series rules: `rankOf(stamps, bestTotal)` (0 = muda; 1-2 = investigator; 3 = senior; 3 and best total >= `KEPALA_MIN_TOTAL` 255 of `SERIES_MAX` 300 = kepala), `awardsOf(stamps, bestTotal)` with award ids `lencana-dua-kasus` (2 stamps), `segel-panel` (3 stamps), `bingkai-kepala` (Kepala). `SERIES_CASE_IDS`, `CASE_MAX`, `gradeOf`, `roundResults`, `roundPoints`, `verdictMax`, `messageMax`.
+
+### B. Event HTTP contract: `shared/investigator/event.ts` (types and constants only; card 4 implements, card 6 consumes)
+- Frozen exactly as the plan says: `Decision = { runId, seq, commandId, stageId, choiceId }`, `Ack = { seq, nextStage, status, score? }`, `PublicRow = { rank, alias, total, stamps }`.
+- Create / join / start: `CreateEventReply { event: EventInfo, cases }`, `JoinRequest { code }` -> `JoinReply { event, participantId, alias, credential, expiresAt, cases }`, `StartRunRequest { caseId, rubricVersion }` -> `StartRunReply = { status: 'started', run: RunState } | { status: 'unsupported', caseId, cases }`. `RunState` carries `caseId` and `rubricVersion` (the run creation reply includes the shared version). Unknown version = `unsupported` = ranked play off, solo exit.
+- Also: `RunState.last { commandId, ack }` for exactly-once reconciliation after a reload, `Standing` (own rank, total, stamps, best per case, `openRun`), `BoardSnapshot`, `HostEventView` / `HostRow` / `HideEntryRequest`, `DisplayCodeReply` / `DisplayExchangeRequest` / `DisplayExchangeReply`, `AliasReply`.
+- Envelope: every reply is `{ ok: true, ...payload }` or `{ ok: false, error: EventErrorCode, retryAfter?, run? }` (`ApiResult<T>`). Error codes are machine codes (list with HTTP status in the file); the client shows its own id/en/zh sentence.
+- `EVENT_API = '/api/investigator/events'` and `EVENT_ROUTES` (path templates with method, auth kind and reply type in the comments). Card 4: register the fixed paths (`/mine`, `/board`, `/me`, `/join`, `/alias`, `/runs`, `/display/exchange`) BEFORE `/:eventId`, and never issue an event id equal to one of those words.
+- Sequence rule: run starts at seq 0; `Decision.seq` = the seq the phone believes the run is at; applied only if equal to the run's seq; `Ack.seq` = that + 1 (a miss is an applied decision, status `retry`). Same `commandId` + same body = the stored Ack again; same `commandId` + different body = `command_conflict`.
+- Credentials only in `Authorization: Bearer`; `EVENT_QUERY_PARAM = 'acara'` carries the public code only. `EVENT_LIMITS` holds the spec's numbers (joins 120/min per IP and 300/min per board, decisions 30/min per participant, host mutations 20/min, 500 participants, top 10, purge 24 h) plus my proposals `pollMs 5000`, `displayCodeSeconds 120`, `maxBodyBytes 2048`, `maxIdLength 64` (card 4 may tune those four; say so in its handoff).
+
+### C. Case data types: `client/src/cerita/tipe.ts`
+- `Press = { id, questionKey, answerKey }`, optional on a statement: `PernyataanInvestigasi.press?`.
+- `Round = { id, statementId, promptKey, evidenceIds, acceptedIds, hintKeys: [afterFirstMiss, guided], correctionKey }`; `KonfigInvestigasi.panel?: { chair, rounds: Round[] }` (`chair` = pemeran id of the panel chair). `evidenceIds` is in SCREEN order (accepted card not first); as a set it must equal the manifest's `cards`.
+- A panel case STILL fills `keberatan` (= its first round) so today's readers keep compiling and working; the panel screens read `panel` only.
+- Node kinds added to `NodeInvestigasi`: `{ jenis: 'panel', round, attempt: 0 | 1 | 2 }` (attempt 0 / 1 = choice node, choice id = evidence id; attempt 2 = dialog node, guided), `{ jenis: 'panel-koreksi', round }`, `{ jenis: 'tekan', pernyataan, press }` (detour dialog node: question then answer; its node effect sets the press flag; `lanjut` returns to the statement node), and `catat` gets optional `press`: a statement with a press is a CHOICE node with the two fixed choice ids `catat` and `tekan` (`PILIH_CATAT` / `PILIH_TEKAN` in status.ts). Because the statement's effect sits on the `catat` choice, coming back from the detour reapplies nothing. Legacy node kinds, node names and flags are unchanged.
+- Evidence ids: `IdBuktiLama` (the six of cases 1-2, unchanged) + `IdBuktiPanel = 'kartu-kejadian' | 'foto-inspeksi' | 'pesan-pengajuan' | 'penawaran'` = `IdBukti`. `ikon` union unchanged (use foto / struk / polis / kartu).
+- Actors: `SaksiLama` (darto, petugasTol, yusuf, agus, unchanged) + `SaksiPanel = 'pemohon' | 'penaksir'` (ROLE ids: claimant, workshop estimator; the invented names are episode text). `KonfigInvestigasi.nasabah` also accepts `'pemohon'`. Panel chair pemeran id: `ketua`.
+- Verdict labels: `putusanLayar.nama?: Record<'layak' | 'tambahan' | 'polis', KunciTeks>` = visible name per verdict in that case. Without it the dictionary names apply (cases 1-2 unchanged). Internal ids, flags and tables keep their values.
+- Text key convention for panel misses: `<awalan>.panel.<roundId>.salah.<idBukti>` (attempt 0) and `<awalan>.panel.<roundId>.pandu.<idBukti>` (attempt 1): each explains the LIMIT of the chosen card.
+
+### D. Frozen UI props for card 3 (Designer), in `client/src/cerita/tipe.ts`
+- `PressPanelProps = { question, answer, opened, onPress, onClose }` (strings already translated; `opened` false = only the button, true = question and answer readable with a close control).
+- `PanelRoundProps = { chair: { id, name, line, hint? }, statement: { id, actor, name, text }, cards: PanelCard[], attempt: 0 | 1 | 2, onInspect(id), onPresent(id) }`, `PanelCard = { id, title, source, excerpt?, disabled? }`. `hint` is set on attempt 1 and 2; `disabled` marks the dimmed cards of the guided attempt. The component draws its own enlarged view and restores focus; `onInspect` is only a notification. `onPresent` returns the selection; the parent decides right or wrong. Components never read or change scores, flags or saves.
+- Agreed ids for `PanelAssets`: evidence `kartu-kejadian`, `foto-inspeksi`, `pesan-pengajuan`, `penawaran` (the two readable exhibits = `foto-inspeksi` and `pesan-pengajuan`); actors `pemohon`, `penaksir`, `ketua`; reactions per round id `kronologi`, `pengajuan`; awards `lencana-dua-kasus`, `segel-panel`, `bingkai-kepala`.
+
+### E. Flags and readers: `client/src/cerita/investigasi/status.ts` (additive; every existing export unchanged)
+- Flags: `panel:<roundId>:first|second|guided` (`tandaPanel`), `panel-keliru:<roundId>:<0|1>:<idBukti>` (`tandaPanelKeliru`, a miss; separate prefix so it can never be read as an outcome), `press:<statementId>:<pressId>` (`tandaTekan`). Correction stays `koreksi:<statementId>`. Unmodified legacy saves keep `keb:*`.
+- Readers: `babakPanel`, `idBabakKasus` (panel round ids, or `['keberatan']`), `hasilBabak`, `hasilSemuaBabak`, `babakBerjalan` (first unsettled round; a settled round is never offered again), `sudahTekan`, `tekananTerbuka`, `semuaPernyataanDikoreksi`, `hasilKasusLengkap(ep, state) -> { babak[], putusan, pesan } | null` (works for all cases: cases 1-2 give one round from `keb:*`). `KE_HASIL_BABAK` / `KE_HASIL_KEBERATAN` map tepat / tepat-kedua / dipandu <-> first / second / guided.
+- `hasilKasus(state)` is unchanged and still returns null for a panel case (it reads `keb:*`): card 5 switches the result screen to `hasilKasusLengkap`.
+
+### F. Local scoring adapter: `client/src/cerita/investigasi/skor.ts`
+- Unchanged signatures and results: `skorKasus(h, tabel)`, `poinKeberatan`, `poinPutusan`, `poinPesan`, `putusanTepat`, `langkahTerlemah`, `poinLangkah`, `MAKS_LANGKAH`, `nilaiDari`, `SKOR_MAKS`. Type change only: `SkorKasus` is now the shared `CaseScore`, so `bukti` (and the other two subtotals) are `number` instead of literal unions.
+- New: `skorKasusLengkap(konfig, hasilLengkap)` (calls the shared `score()`), `versiRubrik(konfig)`, `poinBabak` / `poinBabakDari`, `rincianBabak`, `titikTerlemah(konfig, hasilLengkap)` (weakest ROUND or choice; for cases 1-2 the same step as `langkahTerlemah`), `selisihManifes(konfig): string[]` (case data vs manifest; [] = they agree).
+- **Card 2:** call `selisihManifes` from the validator (or your check script) for all three cases, so a case file can never drift from the manifest the server scores with.
+
+### Edits outside my card's files (needed for typecheck 0, additive only)
+- `investigasi/ui/BukuCatatan.tsx` (2 tables) and `investigasi/ui/KartuBukti.tsx` (1 table): the tables are keyed by the evidence / actor unions, which are now wider, so I added PLACEHOLDER rows for the four case 3 cards and the two case 3 actors (they point at existing case 2 cells; marked `T-102 SEMENTARA`). Rows of cases 1-2 are untouched. **Card 5 must replace these with the Designer's `PanelAssets`**; until then a case 3 card drawn by these two old components would show case 2 art.
+
+### Checked by a one-off script (scratch, not the test suite, not committed)
+- Cases 1 and 2, all 27 result combinations each: `skorKasus` equals the pre-T-102 literal values (written out in the script), and `skorKasusLengkap` fed from saved flags (`keb:*`, `putusan:*`, `pesan:*`) gives the same object; `hasilKasus`, `poin*` and the weakest step unchanged. `selisihManifes` = [] for both shipped cases.
+- Case 3 manifest: all 441 complete paths through the stage machine finish; evidence subtotals 40, 32, 25, 24, 17, 10; totals 10 to 100; `applyChoice`'s final score equals `score()`. Guards: unknown version, wrong round count, prototype keys, wrong stage, card outside the round all rejected. Rank and award thresholds as in the spec.
+
+### Open for the next cards / owner
+- **[konfirmasi PIC]** case 3 verdict weights and what the three slots mean (above); "Panel telaah klaim" wording is card 2's text.
+- Statement ids and press ids of case 3 are NOT in the manifest (the scorer does not need them): card 2 picks them.
+- The `layak` = 15 / `polis` = 0 split for case 3 is my reading of the spec's "partial: seek clarification without recording or routing" and "zero: pronounce the whole claim fraudulent". If the owner or PIC wants another split, it is one line in the manifest plus a version bump before release (no bump needed while nothing is shipped).
+- `simpan.ts` still has `KASUS_TERSEDIA` = 2 cases and the old `pangkat(stempel)` (senior at 3, kepala at 4): card 5 moves both to `SERIES_CASE_IDS` / `rankOf`.
+
+## T-103 (2026-11-21): Investigator lengkap CARD 3 · panel + press UI and Case 3 art (Designer)
+
+Plan section 3. Built by the Designer; uncommitted, not deployed. Owner rule: nothing was opened in a browser or on a phone and no test was run. Gate: root `npm run typecheck` exit 0 (server + client), `client/dist` rebuilt (no server file touched). I only added files in `investigasi/ui/panel/**`, `cerita/seni/investigasi/panel/**` and `character/investigator-t103/`: no integration screen, no shared dictionary, no existing component or episode was edited. **Nothing imports the new components yet, so nothing a player sees has changed**; card 5 connects them. Full Episode 1, Episode 1 Dev and cases 1-2 are untouched.
+
+### Components (`client/src/cerita/investigasi/ui/panel/`, import from `./panel` = `index.ts`)
+- **`PressPanel({ question, answer, opened, onPress, onClose })`** = exactly `PressPanelProps` of T-102. Closed: one button (48 px) "Tanya lebih lanjut" + "Tanpa poin, tanpa waktu". Opened: a notebook note "Anda bertanya" + the question, the answer, and "Tutup" (44 px). No timer. Plain buttons, so keyboard and screen readers get the same control. Opening moves focus to the note; closing returns focus to the button if it is still on screen. The note slides in 8 px; reduced motion = no slide.
+- **`PanelRound({ chair, statement, cards, attempt, onInspect, onPresent })`** = exactly `PanelRoundProps`. From the top: the panel room (decorative; the maker of the statement is lit, the other two dimmed), the chair's bubble (`chair.name` + `chair.line`; on attempt 1 / 2 with `chair.hint` the bubble becomes a yellow note with the hint, and the question stays in the heading for screen readers), the statement on a kraft slip with orange highlighter, the evidence cards (single choice; each row has its own 48 x 52 "enlarge" button), and the main button "Pilih satu bukti" / "Tunjukkan bukti ini" -> `onPresent(id)`. `disabled` cards are dimmed and cannot be chosen but can still be enlarged. On attempt 2, if exactly one card is enabled it is preselected. Choice resets when `attempt`, the statement or the card list changes. The component returns the selection only; it never reads or changes scores, flags or saves.
+- **`PanelExhibit({ card, quote?, onClose, onUse? })`** (used by PanelRound; card 5 can also use it for the 0:45-1:45 "inspect" beat). The shared `Modal`: focus goes in, Escape / backdrop / "Tutup" close it, and **focus returns to the enlarge button that opened it**. Photo cards: one tap on the photo (or the button under it) switches between the whole photo and the mirror close-up. Message card: the excerpt as a chat bubble. Estimate card: the excerpt on a paper sheet. `card.excerpt` is shown as the caption, so the caption carries the same evidence as the picture; `card.source` is the source line. "Pakai bukti ini" selects the card and closes (the guest still presses the main button).
+- Also exported: `PanelRoom({ speaker?, faces?, label? })`, `PanelReaction({ reaksi, ukuran })`, `PanelAward({ id, kali })`, `PanelIcon({ nama, kali })`.
+- Styles: `panel.css`, classes `.pn-*`. Same look as the T-100 title screen and cases 1-2 (2 px ink edges, kraft, night wall, orange).
+
+### `PanelAssets` (`ui/panel/aset.ts`), indexed by the agreed ids of T-102
+| key | ids / content |
+|---|---|
+| `evidence[id]` | `foto-inspeksi`, `pesan-pengajuan`, `penawaran`, `kartu-kejadian`: `{ thumb 96 x 68, exhibit?, detail?, icon, kind }` |
+| `evidenceAtlas` | `bukti.png` 384 x 68, cells 96 x 68 in the order foto-inspeksi, pesan-pengajuan, penawaran, kartu-kejadian (same cell size as `bukti-kasus2.png`) |
+| `portrait[seat]` | `ketua`, `penaksir`, `pemohon`: 64 x 64 on cream |
+| `bust` | atlas of transparent busts 64 x 64 + faces per seat (`bustCell(seat, face)`) |
+| `reaction`, `roundReaction` | 6 reaction portraits; per round id: `kronologi` -> pemohon-cemas, `pengajuan` -> pemohon-mengaku |
+| `award` | `lencana-dua-kasus`, `segel-panel` (32 x 32 cells), `bingkai-kepala` (9-slice 48 x 48) |
+| `stamp['kasus-3']` | the amber case 3 stamp: 16 px icon cell and 32 px cell |
+| `desk`, `room`, `icon` | title / desk composite 292 x 150, panel room 180 x 52, icons 16 x 16 |
+| `sprite` | full-body atlas `kasus3.png` + `kasus3.json` (schema of `seni/piksel/susun.ts`): ketua, penaksir, pemohon |
+
+### Art (`character/investigator-t103/tokoh.mts`, `adegan.mts` -> `client/src/cerita/seni/investigasi/panel/`)
+- **Cast (edits of the existing side cast, same scale and palette):** the claimant (olive shirt, moustache and chin beard; faces netral, cemas, serius, terbuka, lega), the workshop estimator (teal work shirt, clipboard; netral, prihatin), the chair (navy shirt, glasses, lanyard; netral, prihatin). All invented.
+- **Scenes:** the desk composite (estimate with ONE LINE circled, inspection photo, phone, magnifier); the inspection photo before the incident (bumper whole, mirror already cracked, ring on the mirror); the incident photo (bumper dented, same crack); the mirror close-up with a Y-shaped crack and a chipped corner; the panel room (night office, three chairs, table, blank name tents).
+- **No text is baked into any picture** (no date, reference, name, brand or plate): dates, references and message lines come from the script through props.
+
+### For card 5 (integration)
+1. Replace the `T-102 SEMENTARA` rows in `KartuBukti.tsx` and `BukuCatatan.tsx` with `PanelAssets.evidenceAtlas` (cells) and `PanelAssets.portrait`.
+2. Register the cast: `PanelAssets.sprite` (or copy `kasus3.png` / `kasus3.json` next to `kasus2.*` in `seni/piksel/`, which is outside my card).
+3. Kepala frame: add class `pn-bingkai-kepala` to `.kp-kartu` (import `ui/panel/panel.css`). It draws 10 px outside the card and does not change the layout.
+4. Case 3 stamp for `KartuPetugas` / `stempelKasus`: `PanelAssets.stamp['kasus-3']` (my icon atlas, not `ikon.png`, which I did not edit).
+5. Button labels of these components (15 short labels, id/en/zh) live in `ui/panel/teks.ts`, because card 3 may not edit shared dictionaries. Move them to the `investigasi` dictionary if you prefer one place. They hold no policy or panel wording, so there is no `[konfirmasi PIC]` line in my files: every script sentence arrives through props.
+
+### Fit (calculated, 360 x 640, content 544 px)
+PanelRound: room 108 + chair 78 (name + 2 lines) + statement 82 (name + 2 lines) + 3 cards 166 + button 56 + gaps 32 = **522 px**; with a 3-line hint **544 px**. Longer sentences make the screen scroll (nothing is cut). All targets are 44 px or more.
+
+### Previews (calculated mocks from the real art, not screenshots)
+`character/investigator-t103/layar-t103.png` (four phone screens: round attempt 0, attempt 1 with hint, exhibit sheet, press panel + awards + Kepala frame), `seni-t103.png` (scenes, icons, awards), `tokoh-t103-4x.png` (cast). The names and sentences in the mock ("Bu Ratna", "Pak Dimas", "KD-0417") are stand-ins I wrote for the mock; the real lines are card 2's script.
+
+### Open
+- Nothing was seen in a browser or on a phone. Most worth a look when card 5 mounts it: the three busts on a real 360 px screen, the exhibit sheet inside the dialog on a small phone, and the Kepala frame on the real officer card.
+- en / zh of the 15 labels are my wording.
+- The busts in the room are shown at 1 art pixel = 1 px while the room is at 2x (as the portraits in cases 1-2).
+- The round shows no "wrong card" reaction by itself: the parent decides right or wrong, so reaction beats are the parent's (`PanelReaction`, `PanelRoom faces`).
+- When PressPanel is mounted already opened (a new node), it does not move focus by itself; the screen's own focus rule applies.
+
+## T-105 (2026-11-21): Investigator lengkap · event board VISUALS ahead of card 6 (Designer, presentational only)
+
+Built by the Designer; uncommitted, not deployed. Owner rule: nothing was opened in a browser, on a projector or on a phone, and no test was run. Gate: root `npm run typecheck` currently exits 1, and the ONLY errors are in Fullstack's in-progress card 2 folder (`episode/auto-2-inv-3/teks.ts` cannot find `./teks.en` and `./teks.zh`, which are not written yet); it exited 0 with all my files in place before that folder appeared, and none of my files has an error. Re-run it when card 2 lands. `client/dist` rebuilt (build exit 0); no server file touched. **Nothing imports the new components yet, so nothing a player, host or projector sees has changed**; card 6 mounts them and wires the data. I did not edit `Host.tsx`, `Projector.tsx`, the hub, the server, or any existing component.
+
+The brief also carried a stray line "Do plan section 1 · Fullstack · contracts…". That is T-102's work and already done by Fullstack; I did not touch it.
+
+### New files
+- `client/src/investigator-event/ui/`: `ProyektorPapan.tsx`, `HostSesiInvestigator.tsx`, `PilihPapanAcara.tsx`, `bagian.tsx` (`StempelPapan`, `KodeQr`, `LencanaPapanAcara`), `acara-inv.css` (classes `.ai-*`), `index.ts`.
+- `client/src/i18n/kamus/acaraInv.ts` (id/en/zh, same keys). **One edit outside my files:** two lines in `client/src/i18n/kamus/index.ts` to register the room `acaraInv` (a dictionary file does nothing until it is listed there).
+- Art `client/src/cerita/seni/investigasi/acara/`: `gabus.png` (cork tile), `medali.png` (rank shields 1-3), `paku.png` (push pins), `kota.png` (night window). Source: `character/investigator-t105/bangun.mts`. The logo, Miss Raksa detective and the case stamps are the existing files.
+
+All components are pure: props in, callbacks out. No fetch, no socket, no storage. Types come from `shared/investigator/event.ts` (`PublicRow`, `HostEventView`).
+
+### 1. `ProyektorPapan({ rows, participants, code, joinUrl, status })` (16:9)
+- T-100 detective office: night wall, pixel logo, cork board with pins, Miss Raksa behind the wooden desk, a night window beside her.
+- Left: the cork board with up to 10 rows: rank, alias, three stamp slots, total "/300". `rank` is shown as the server sends it, so equal totals share a rank. Ranks 1-3 get gold / silver / bronze shields and a yellow slip.
+- Right: the kraft card "Ikut main" with the QR (drawn as crisp SVG from `joinUrl`), the event code in large type, and the participant count in the header.
+- Empty: a yellow note "Papan masih kosong" on the board. Closed: a red stamp "PAPAN DITUTUP" over the board, the QR card replaced by a thank-you; the final rows stay readable.
+- Row change: a row that is new or whose rank / total / stamps changed glows orange twice (2.4 s) and carries a ▲ for 6 s. Reduced motion: no glow, the ▲ only. The comparison with the previous props is done inside the component (display state only).
+- Scale: everything is sized in `--u` = 1 % of the largest 16:9 box that fits the screen, so 1280 x 720 and 1920 x 1080 are identical. Alias 2.6 u (33 px at 720p, 50 px at 1080p), total 3 u, title 3.6 u.
+- Footer line: random aliases, no personal data, board deleted at midnight (`// [konfirmasi PIC]`).
+
+### 2. `HostSesiInvestigator({ view, joinUrl?, displayCode?, busy?, error?, onCreate, onHide, onClose, onClear, onPairDisplay, onRevokeDisplay? })`
+- A compact `.panel` block in the one-screen host look (`.btn`, `.chip`). `view: HostEventView | null`.
+- No session: one sentence + "Buat sesi Investigator".
+- Open: left = code, QR 132 px, midnight note; right = "Peringkat sementara" (all host rows, scrolls inside its own box at 164 px; each row has "Sembunyikan" / "Tampilkan" -> `onHide(participantId, hidden)`), then the controls: "Hubungkan proyektor" -> `onPairDisplay()`, the issued `displayCode` in large type with seconds left, or "Proyektor tersambung" + "Putuskan proyektor".
+- "Tutup papan" and "Hapus papan" use an **in-page confirm**: the control row becomes a red question row with "Batal" / "Ya, …". Focus moves to "Batal" and returns to the button on cancel.
+- Closed: chip "Papan ditutup", the last list stays, "Buat sesi baru" and "Hapus papan".
+- `busy` disables every control; `error` is a ready (translated) sentence from the parent.
+
+### 3. `PilihPapanAcara({ code, alias?, canReroll?, busy?, error?, onJoin, onSolo, onReroll, onStart })` + `LencanaPapanAcara({ alias, rank?, status? })`
+- Without `alias` (not joined yet): a kraft file "Ada papan acara hari ini" with the code, then two separate full-width buttons, "Ikut papan acara" (orange) and "Main sendiri" (outline), each with one sentence saying what happens; the privacy line; and "joining starts a case from the beginning, your solo save is not deleted".
+- With `alias` (after joining): a clipped NAME BADGE with the alias in 34 px, "Ganti nama samaran" while `canReroll` (afterwards a "locked" sentence), "Mulai sebagai <alias>", and a link "Main sendiri saja".
+- `LencanaPapanAcara`: the small in-run badge "Papan acara · <alias>" with the own rank, or "Mengirim…" (orange dot) / "Koneksi terputus" (red) for the network states of card 6.
+- Made for the hub shell (wooden desk, `.hp-layar`). Targets 48 px or more. Calculated height at 360 x 640: about 402 px for either state.
+
+### For card 6
+- Import from `client/src/investigator-event/ui` (index). Map `BoardSnapshot` -> `ProyektorPapan` (`rows`, `participants`, `event.code`, `event.status`) and build `joinUrl` as `/investigator?acara=CODE`.
+- Error sentences: the components show whatever string the parent passes; the dictionary has no per-error-code sentences yet (card 6's event dictionary or add keys to `acaraInv`).
+- `ProyektorPapan` is `position: fixed; inset: 0`: mount it alone when the host projects the Investigator board.
+- The alias is the React key of a board row (the public row has no id); two visible rows with the same alias would collide.
+
+### Text needing confirmation
+`// [konfirmasi PIC]` in `acaraInv.ts`: `catatan`, `pilihPrivasi`, `hostTengahMalam` (privacy and retention wording, id/en/zh). The spec says closed boards are purged within 24 hours after closure; my short lines say "dihapus tengah malam". PIC / owner to choose the exact sentence. en / zh are my wording.
+
+### Previews (calculated mocks from the real art, not screenshots)
+`character/investigator-t105/layar-t105-proyektor.png` (1280 x 720, ten rows, a tie at rank 2, one highlighted row), `layar-t105-keadaan.png` (empty and closed), `layar-t105-host-hp.png` (host block with the confirm row, no-session state, phone choice, name badge, in-run badges). Aliases and the code "RKS7Q2" are invented samples. The mock's pixel font is wider than the app font, so the title runs into the participant chip in the mock; in the CSS the title shrinks with an ellipsis instead of overlapping.
+
+### Open
+- Nothing was seen on a real projector, laptop or phone. Most worth a look when card 6 mounts it: the board from the back of a room, the title width in en, and the host block height inside the real host screen.
+- Old dictionary check (`terjemahan.test.ts`) was not run; the three languages of `acaraInv` have the same 62 keys by construction.
+
+
+## T-104 (2026-11-21): Investigator lengkap CARD 2 · authored Case 3 + "Tanya lebih lanjut" in cases 1-2 (Fullstack)
+
+Plan section 2, on top of the T-102 contracts. Gate: root `npm run typecheck` exit 0 (server + client), `client/dist` rebuilt (includes the Designer's T-103 files as they stood at build time). `server/dist` not rebuilt (no server or shared source touched). Not committed, not deployed. NOT opened in a browser or on a phone (owner rule). `LayarInvestigasi`, `simpan`, `hub`, the officer card, full Episode 1 (auto-2) and Episode 1 Dev are not edited.
+
+**DO NOT DEPLOY THIS BUILD BEFORE CARD 5.** Case 3 is registered, so the hub lists it and `/investigator/3` opens it. It plays through the file and the evidence, then reaches the first panel node (`jenis: 'panel'`), which today's `LayarInvestigasi` does not draw: the screen is empty and the guest cannot go on. Its result screen also needs card 5 (it reads `keb:*`, case 3 sets `panel:*`). Cases 1 and 2 are safe in this build (below).
+
+### 1. Case 3 "Satu Baris Terlalu Banyak" (`cerita/episode/auto-2-inv-3/`: `episode.ts`, `pemeran.ts`, `teks.ts`, `teks.{id,en,zh}.ts`)
+- Episode `auto-2-inv-3`, case `kasus-3`, number 3, text prefix `inv3`, 48 nodes, 4 parts (Berkas, Bukti, Panel, Tindak lanjut). Registered in `episode/index.ts`, `investigasi/rute.ts` (`'3'`), `episode/rintisan.ts` and `vite.config.ts` (a build without auto-2 also drops case 3); alias route `/cerita/investigator/3` in `App.tsx` (one line).
+- Invented composite, no real people, brands, addresses or dates: "tanggal 3 / 14 / 15" only order the days. Cast (role ids from T-102; names are episode text): `pemohon` Pak Gilang (claimant), `penaksir` Pak Seno (workshop estimator), `ketua` Pak Arya (claims reviewer who chairs the panel).
+- Flow: title -> opening line -> incident card (card `kartu-kejadian`) -> ungraded hunch "Apakah kedua bagian rusak pada kejadian yang sama?" -> two statements noted (`pemohon`: "Bumper dan spion itu rusak malam itu juga."; `penaksir`: "Saya hanya menulis perkiraan biaya.") -> estimate (card `penawaran`) -> pre-incident inspection photo (card `foto-inspeksi`) -> message extract shown with the claimant's consent (card `pesan-pengajuan`) -> panel.
+- Panel, two rounds in sequence, ids and cards equal to the rubric manifest (`selisihManifes` = []): round `kronologi` (statement `pemohon`; cards kartu-kejadian, foto-inspeksi, penawaran; accepted foto-inspeksi), then the claimant's reply and correction, then his second statement `pemohon-panel` ("Saya kira kedua perbaikan memang harus ditulis sebagai kerusakan baru.") is noted; round `pengajuan` (cards penawaran, pesan-pengajuan, foto-inspeksi; accepted pesan-pengajuan), then both parties reply and the claimant acknowledges asking for the old crack to be included. Each round: attempt 0 and 1 are choice nodes, each miss gets the chair's sentence about the LIMIT of that card (`inv3.panel.<round>.salah.<card>` / `.pandu.<card>`), attempt 2 is guided. Round 1 can never be replayed after round 2 starts (the graph only goes forward).
+- Flags: outcome `panel:<round>:first|second|guided` on the accepted choice / guided node; misses `panel-keliru:<round>:<n>:<card>`; corrections `koreksi:pemohon` and `koreksi:pemohon-panel` on their own `panel-koreksi` nodes (independent of the outcome flags).
+- Conclusion (the chair asks the scripted "Apa yang bisa kita simpulkan dari bukti ini?"): internal ids unchanged, visible names in `putusanLayar.nama`: `tambahan` = "Teruskan untuk pemeriksaan" (30), `layak` = "Minta klarifikasi saja" (15), `polis` = "Nyatakan seluruh klaim curang" (0). Message: `baik` 30 (the spec's full-credit example, with the reason and "Bapak bisa menambahkan keterangan"), `datar` 15, `janji` 0. Two endings (`tuntas` = referral chosen).
+- Archive copy: `arsip` = "Berkas yang sudah dikoreksi" with three dated lines + the message sent. No `berikut` / `segera` (three cases are the whole series; no locked Case 4 tile).
+- A panel case still fills `keberatan` (= round 1) and `koreksi`, as T-102 requires for today's readers.
+
+### 2. "Tanya lebih lanjut" (press), one question and one answer each, no points, no timer
+| case | statement | press id | question | where the detour sits |
+|---|---|---|---|---|
+| 1 | `tol` (toll officer) | `lihat` | did he see the lane himself? | after `tol`, before `selisih` |
+| 2 | `yusuf` | `tutup` | when was the trip closed in the app? | after `bukti-struk`, before `kpolis` |
+| 3 | `penaksir` | `kapan` | when was the inspection photo taken? | after `bukti-foto` |
+| 3 | `pemohon` | `setuju` | who agreed to the message extract being shown? | after `bukti-pesan` |
+- Shape: a choice node `<id>-tanya` with the two fixed choices `tekan` and `lanjut`, and a dialog node `<id>-tekan` whose node effect sets `press:<statement>:<pressId>`. Both go FORWARD to the same next node. The statement nodes themselves (`tol`, `yusuf`, ids, effects, resume points) are untouched, so nothing can be applied twice and nothing loops (the validator rejects loops).
+- **Contract amendment to T-102 (mine, in `cerita/tipe.ts` and `investigasi/status.ts`):** press nodes are marked with a new optional `NodeDasar.tekan = { pernyataan, press, langkah: 'tawar' | 'jawab' }` instead of an `investigasi` kind, and the `tekan` kind and `catat.press` are removed from `NodeInvestigasi`; `PILIH_CATAT` is replaced by `PILIH_LANJUT`. Reason: today's player draws an EMPTY screen for any `investigasi` kind it does not know, which would have stopped cases 1 and 2 at the witness. With the marker, today's player draws the two press nodes as an ordinary choice and an ordinary line, so cases 1-2 keep working now; card 5 reads `node.tekan` to draw `PressPanel` (`tawar` = opened false, `jawab` = opened true). `Press`, `Round`, the panel node kinds, the flags and the Designer props are unchanged. Nothing else used the removed names.
+- Shared wording for all cases is in case 1's table under `inv.ui.tekan.*` (the case 2 and 3 tables already pull `inv.ui.*`).
+
+### 3. Wired to the Designer's T-103 files (they were there)
+- Stage sprites of `ketua`, `penaksir`, `pemohon`: registered the Designer's `seni/investigasi/panel/kasus3.{png,json}` (same manifest schema as case 2) in `seni/piksel/susun.ts` (ids + lists + gaze table), `seni/piksel/index.ts` (atlas + manifest) and `ui/latar/piksel/adegan.ts` (`PERAN_PIKSEL`). Additive rows only.
+- Evidence card art: the T-102 placeholder rows in `investigasi/ui/KartuBukti.tsx` and `BukuCatatan.tsx` now point at `PanelAssets.evidence[id].thumb` (96 x 68 each, checked from the PNG headers); notebook portraits of the two case 3 actors use their own sprites. The T-102 "SEMENTARA" placeholders are gone.
+- Notebook actor labels: `investigasi.siapa.pemohon` / `.penaksir` added to `i18n/kamus/investigasi.ts` (id/en/zh, additive).
+- NOT wired (card 5, its files): `PanelRound` / `PressPanel` / `PanelExhibit` on the screens, the case 3 title art (`seniKasus('kasus-3')` falls back to case 1's picture), the interview view (`LayarKeterangan` SAKSI list: case 3 interviews use the general stage), case-specific verdict names on `LayarPutusan` (it shows the dictionary names today), and the case 3 stamp.
+
+### 4. Case 2's onward link: prepared, NOT switched on
+- The link is one line in `auto-2-inv-2/episode.ts`: replace `segera: 'inv2.hasil.kasus3'` with `berikut: 'auto-2-inv-3'` (the comment there says so). I did not switch it on because today's result screen draws `berikut` as the "Kasus 2" teaser card and hides the archive button, so Case 2's result would lose its archive and show a wrong label. Card 5 flips it together with the three-case result screen. Until then Case 2's result still says "Kasus 3 · segera hadir".
+
+### Cases 1-2 in this build
+- Old node ids, effects, episode `versi` (1) and saves unchanged; each case has two new nodes. A save sitting on an old node continues into the new ones.
+- What a player sees differently today: one extra screen in each case, an ordinary two-button choice ("Tanya: ..." / "Lanjut tanpa bertanya") and, if asked, one answer line. Scores are untouched by it.
+
+### Checked by a one-off script (scratch, not the test suite, not committed)
+- Validator: 0 messages for auto-1, auto-2, auto-2-inv, auto-2-inv-2, auto-2-inv-3 (graph reachability, no dead ends or loops, same keys and numbers in id/en/zh, no missing text); auto-2-dev still has its one older message (`kenalan.suasana` uses {suasana}; not from this task, not touched). `selisihManifes` = [] for all three cases.
+- Case 3 walked through the real engine for all 162 combinations (3 x 3 round outcomes, 3 conclusions, 3 messages, presses taken or skipped): every one reaches an end node, the score from the flags equals the rubric (totals 10 to 100), both corrections and all 4 cards and 3 statements are in the notebook, both sources are collected before the panel, and no round node is visited twice.
+- Case 2 walked with and without the press: same path otherwise, same score (100 on the best path); a state stopped on the old node `bukti-struk` continues to the end. Case 1: node `tol` unchanged, both press branches lead to `selisih` (a full engine walk of case 1 needs the dashcam activity answer; the validator's own walk covers it).
+- The three case 3 sprites resolve in the stage composer (portrait, standing, the "open hands" face).
+
+### [konfirmasi PIC] list (every such line is marked in `auto-2-inv-3/teks.{id,en,zh}.ts` and `episode.ts`)
+1. The name "Panel telaah klaim", the chair's title "Penelaah klaim · ketua panel" (`pemeran.ketua.peran`, `inv3.panel-buka.1`).
+2. What the panel may do: "menelaah bukti di berkas", "tidak menjatuhkan putusan akhir dan tidak menuduh siapa pun", each party may correct their account (`inv3.panel-buka.2`, `inv3.putusan.1`).
+3. Consent to show the message extract (`inv3.kutipan.1`, `.2`, `inv3.bukti.pesan.sumber`, `inv3.tekan.pemohon.jawab`).
+4. The right of reply wording (`inv3.kronologi.jawab.2`, `inv3.pengajuan.jawab.2`, `.5`).
+5. The three conclusions and their weights: "Teruskan untuk pemeriksaan" 30, "Minta klarifikasi saja" 15, "Nyatakan seluruh klaim curang" 0 (`inv3.putusan.tambahan` / `.layak` / `.polis` and their `.sebab`; weights in `shared/investigator/rubric.ts`).
+6. The finding sentence "foto dan pesan itu mendukung temuan bahwa baris spion sengaja ditambahkan", the channel "tim yang berwenang", the undisputed bumper "dicatat terpisah", and "Kita tidak memutuskan bayar, tolak, atau salah di sini" (`inv3.putusan.tambahan.1`, `.layak.1`, `.polis.1`).
+7. The message to the claimant, including "Bapak bisa menambahkan keterangan" (`inv3.pesan.baik`, `.datar`, `.baik.alasan`, `.datar.2`, `inv3.balas.baik`).
+8. Ending summary and lesson (`inv3.akhir.tuntas.ringkas`, `inv3.pelajaran.1`).
+9. All of the above in English and Chinese: my translations, not reviewed.
+Carried over unchanged: Case 2's PIC gate. The two new press answers in cases 1-2 state no policy or legal point.
+
+### Open for card 5 / owner
+- Card 5: draw `panel`, `panel-koreksi` and `node.tekan`; switch the result screen to `hasilKasusLengkap` / `skorKasusLengkap`; read `putusanLayar.nama`; case 3 title art and stamp; flip Case 2's `berikut`; `KASUS_TERSEDIA` and rank for three cases. Text ready for it: round names `inv3.panel.<round>.nama`, hints, correction lines.
+- Script choices of mine worth a look: the message extract is handed over with the claimant present and consenting (round 2 then quotes his own words back); the miss explanations are spoken by the chair, not by Miss Raksa on the phone; Miss Raksa opens the case, explains the conclusion and closes it.
+- Five minutes is not measured: case 3 has more reading than cases 1-2 (two rounds, two replies).

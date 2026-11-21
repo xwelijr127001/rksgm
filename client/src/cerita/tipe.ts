@@ -217,6 +217,18 @@ interface NodeDasar {
    */
   investigasi?: NodeInvestigasi;
   /**
+   * T-104 "Tanya lebih lanjut" (opsional; node tanpa field ini tidak berubah). Node simpangan SENGAJA tidak memakai jenis
+   * `investigasi`, supaya pemutar yang belum mengenalnya tetap menggambarnya sebagai node cerita biasa (kasus 1-2 tidak pernah
+   * macet):
+   *   langkah 'tawar'  node PILIHAN sesudah pernyataan itu (atau sesudah bukti yang ditanyakan) dengan DUA pilihan ber-id tetap:
+   *                    'tekan' (ke node 'jawab', tanpa efek) dan 'lanjut' (ke node berikutnya, tanpa efek)
+   *   langkah 'jawab'  node DIALOG: pertanyaan tamu lalu jawaban saksi; efek node memasang `press:<pernyataan>:<press>`;
+   *                    `lanjut` = node berikutnya yang SAMA dengan pilihan 'lanjut' (maju, tidak pernah berputar)
+   * Efek cerita pernyataan (catat:<id>) sudah terpasang sebelum simpangan dan simpangan tidak kembali ke node itu, jadi tidak
+   * ada efek yang terulang. Layar (kartu 5): 'tawar' = PressPanel opened false, 'jawab' = PressPanel opened true.
+   */
+  tekan?: { pernyataan: string; press: Press['id']; langkah: 'tawar' | 'jawab' };
+  /**
    * T-085 (opt-in; node tanpa field ini = tema menurut bagian seperti semula, hp/audioTema.ts): trek musik selama node ini
    * tampil. Hanya pemutar HP yang membacanya (hp/AudioCerita.tsx); nilainya nama trek di audio/audio.ts.
    */
@@ -228,21 +240,76 @@ export type MusikNode = 'inv-investigasi' | 'inv-keterangan' | 'inv-keberatan' |
 
 // ------------------------------------------------------------------ T-076 Episode 1 Investigator (opt-in)
 
+/** T-102: id kartu bukti kasus 1-2. Tabel seni lama (KartuBukti, BukuCatatan) berindeks tipe ini; nilainya tidak berubah. */
+export type IdBuktiLama = 'dashcam' | 'rambu' | 'sim' | 'foto-interior' | 'struk' | 'polis-kasus2';
+/**
+ * T-102: kartu bukti kasus 3 (panel; sama dengan manifes shared/investigator/rubric.ts 'kasus-3'):
+ *   kartu-kejadian   kartu kejadian parkir (dibaca di pembuka)
+ *   foto-inspeksi    foto pemeriksaan kendaraan SEBELUM kejadian, bertanggal (retak spion sudah ada)   -> babak 'kronologi'
+ *   pesan-pengajuan  kutipan pesan yang disetujui pemohon (mengakui retak lama, minta dimasukkan)       -> babak 'pengajuan'
+ *   penawaran        perkiraan biaya bengkel (hanya membuktikan harga)
+ */
+export type IdBuktiPanel = 'kartu-kejadian' | 'foto-inspeksi' | 'pesan-pengajuan' | 'penawaran';
+export type IdBukti = IdBuktiLama | IdBuktiPanel;
+
 /** Kartu bukti (kontrak rencana Task 1 -> Task 2; `judul` & `sumber` = kunci teks episode). */
 export interface BuktiInvestigasi {
-  /** Kasus 1: dashcam, rambu, sim. Kasus 2 (T-090): foto-interior, struk, polis-kasus2. */
-  id: 'dashcam' | 'rambu' | 'sim' | 'foto-interior' | 'struk' | 'polis-kasus2';
+  /** Kasus 1: dashcam, rambu, sim. Kasus 2 (T-090): foto-interior, struk, polis-kasus2. Kasus 3 (T-102): IdBuktiPanel. */
+  id: IdBukti;
   judul: KunciTeks;
   sumber: KunciTeks;
   ikon: 'rekaman' | 'foto' | 'kartu' | 'struk' | 'polis';
 }
 
+/** T-102: pembuat pernyataan kasus 1-2 (tabel potret lama berindeks tipe ini). */
+export type SaksiLama = 'darto' | 'petugasTol' | 'yusuf' | 'agus';
+/** T-102: pihak kasus 3, id PERAN (nama tokoh fiktifnya teks episode): pemohon = pengaju klaim, penaksir = penaksir biaya bengkel. */
+export type SaksiPanel = 'pemohon' | 'penaksir';
+
+/**
+ * T-102 KONTRAK BEKU ("Tanya lebih lanjut"): SATU pertanyaan tambahan dan SATU jawaban pada sebuah pernyataan. Opsional, tanpa
+ * poin, tanpa waktu, bisa dibaca ulang. `id` stabil; `questionKey` / `answerKey` = kunci teks episode (id/en/zh).
+ * Tanda sesudah dibuka: `press:<idPernyataan>:<id>` (investigasi/status.ts: tandaTekan). Bukti yang wajib tetap ada di jalur
+ * biasa: jawaban hanya memberi konteks.
+ */
+export interface Press {
+  id: string;
+  questionKey: KunciTeks;
+  answerKey: KunciTeks;
+}
+
+/**
+ * T-102 KONTRAK BEKU: satu BABAK panel (kasus 3): satu pernyataan dibantah dengan satu kartu.
+ *   id            id babak yang stabil = id babak di manifes rubrik (shared/investigator/rubric.ts); tanda hasilnya
+ *                 `panel:<id>:first|second|guided`
+ *   statementId   pernyataan (`KonfigInvestigasi.pernyataan[].id`) yang dibantah
+ *   promptKey     pertanyaan ketua panel untuk babak ini
+ *   evidenceIds   kartu yang ditawarkan, URUT LAYAR (kartu yang diterima tidak pertama); himpunannya = `cards` manifes
+ *   acceptedIds   kartu yang menyelesaikan babak = `accepted` manifes
+ *   hintKeys      [petunjuk sesudah kekeliruan pertama, petunjuk langkah dipandu]
+ *   correctionKey baris yang ditulis di bawah pernyataan itu di buku catatan sesudah pembuatnya mengoreksi (tanda
+ *                 `koreksi:<statementId>`, seperti kasus 1-2)
+ * Kalimat sesudah kartu keliru memakai kunci `<awalan>.panel.<id>.salah.<idBukti>` (percobaan 0) dan
+ * `<awalan>.panel.<id>.pandu.<idBukti>` (percobaan 1): menjelaskan BATAS kartu yang dipilih.
+ */
+export interface Round {
+  id: string;
+  statementId: string;
+  promptKey: KunciTeks;
+  evidenceIds: IdBukti[];
+  acceptedIds: IdBukti[];
+  hintKeys: [KunciTeks, KunciTeks];
+  correctionKey: KunciTeks;
+}
+
 /** Pernyataan saksi yang bisa dicatat ke buku catatan (kontrak rencana; `teks` = kunci teks episode). */
 export interface PernyataanInvestigasi {
   id: string;
-  /** Kasus 1: darto, petugasTol. Kasus 2 (T-090): yusuf (nasabah), agus (saksi). */
-  siapa: 'darto' | 'petugasTol' | 'yusuf' | 'agus';
+  /** Kasus 1: darto, petugasTol. Kasus 2 (T-090): yusuf (nasabah), agus (saksi). Kasus 3 (T-102): pemohon, penaksir. */
+  siapa: SaksiLama | SaksiPanel;
   teks: KunciTeks;
+  /** T-102: "Tanya lebih lanjut" pada pernyataan ini (opsional; tanpa nilai = pernyataan seperti semula). */
+  press?: Press;
 }
 
 /** Putusan klaim dan pesan untuk nasabah (id pilihan node `putusan` / `pesan`; tanda `putusan:<id>` / `pesan:<id>`). */
@@ -271,11 +338,20 @@ export type PesanInvestigasi = 'baik' | 'datar' | 'janji';
  *                       diputar; selesai = lanjut ke node kartu bukti 'struk'. Tampilan saja, seperti periksa-sim.
  *  - periksa-polis    : (T-090, kasus 2) node dialog; satu ketukan pada klausul penggunaan (ui/PeriksaPolis); selesai = lanjut ke
  *                       node kartu bukti 'polis-kasus2'. Tampilan saja.
+ *  - ("Tanya lebih lanjut" BUKAN jenis investigasi: lihat `NodeDasar.tekan`, T-104.)
+ *  - panel            : (T-102, kasus 3) satu percobaan satu babak panel. `attempt` 0 / 1 = node PILIHAN (id pilihan = id bukti
+ *                       dari `Round.evidenceIds`, hanya yang sudah terkumpul lewat `jika`); `attempt` 2 (dipandu) = node DIALOG:
+ *                       hanya kartu `acceptedIds` yang melanjutkan. Hasil = tanda `panel:<round>:first|second|guided`; kartu
+ *                       keliru memasang `panel-keliru:<round>:<attempt>:<idBukti>`. Babak 1 tidak pernah diulang sesudah babak 2.
+ *  - panel-koreksi    : (T-102) node dialog sesudah babak selesai: pembuat pernyataan mengoreksi keterangannya; efek node
+ *                       memasang `koreksi:<Round.statementId>`.
  * `bukti.juga` (T-087): kartu bukti lain yang ikut dijepit di layar yang sama (satu halaman buku untuk dashcam + rambu).
  */
 export type NodeInvestigasi =
   | { jenis: 'judul' }
   | { jenis: 'catat'; pernyataan: string }
+  | { jenis: 'panel'; round: Round['id']; attempt: 0 | 1 | 2 }
+  | { jenis: 'panel-koreksi'; round: Round['id'] }
   | { jenis: 'bukti'; bukti: BuktiInvestigasi['id']; juga?: BuktiInvestigasi['id'][] }
   | { jenis: 'tebak' }
   | { jenis: 'koreksi'; pernyataan: string }
@@ -311,7 +387,7 @@ export interface KonfigInvestigasi {
   /** T-094: kalimat kait kasus di hub Raksa Investigator (sampul dan baris "kasus berikutnya"), mis. "Petugas mencatat lajur 3. Benarkah?". */
   kait: KunciTeks;
   /** Nasabah kasus ini (id pemeran; sama dengan `Episode.nasabah`): ucapannya membuka layar hasil. */
-  nasabah: 'hendra' | 'yusuf';
+  nasabah: 'hendra' | 'yusuf' | 'pemohon';
   /** Wajah nasabah saat membalas tiap pesan (layar hasil dan latihan pesan). */
   balasan: Record<PesanInvestigasi, Ekspresi>;
   /**
@@ -341,8 +417,18 @@ export interface KonfigInvestigasi {
   };
   /** Tabel putusan kasus ini (kasus 1: layak 30 / tambahan 15 / polis 0; kasus 2: polis 30 / tambahan 15 / layak 0). */
   putusan: Record<PutusanInvestigasi, 30 | 15 | 0>;
-  /** Teks layar putusan kasus ini (keterangan + alasan tiap kartu); tanpa nilai = teks bawaan komponen (kasus 1). */
-  putusanLayar?: { ket: KunciTeks; sebab: Record<PutusanInvestigasi, KunciTeks> };
+  /**
+   * Teks layar putusan kasus ini (keterangan + alasan tiap kartu); tanpa nilai = teks bawaan komponen (kasus 1).
+   * T-102 `nama`: NAMA TAMPIL tiap putusan di kasus ini (kasus 3: 'tambahan' = "Teruskan untuk pemeriksaan"); id internal,
+   * tanda `putusan:<id>` dan tabel poin tidak berubah. Tanpa `nama` = nama bawaan kamus (kasus 1-2, tidak berubah).
+   */
+  putusanLayar?: { ket: KunciTeks; sebab: Record<PutusanInvestigasi, KunciTeks>; nama?: Record<PutusanInvestigasi, KunciTeks> };
+  /**
+   * T-102 (kasus 3, opsional; tanpa nilai = kasus satu KEBERATAN seperti kasus 1-2): PANEL TELAAH. `chair` = id pemeran ketua
+   * panel (`Episode.pemeran`); `rounds` = babak berurutan (lihat Round). Kasus ber-panel TETAP mengisi `keberatan` (= babak
+   * pertama: pernyataan, kartu tepat, urutan) supaya pembaca lama tetap utuh; layar panel hanya membaca `panel`.
+   */
+  panel?: { chair: string; rounds: Round[] };
   /**
    * Koreksi pernyataan: tanpa nilai = layar buku petugas tol (ui/KoreksiCatatan) dan baris kamus "Laporan dikoreksi: lajur 2"
    * (kasus 1). Dengan nilai = layar umum: judul, keterangan, dan baris yang ditulis di bawah pernyataan itu di buku catatan.
@@ -363,6 +449,53 @@ export interface KonfigInvestigasi {
    * kasus hub ("Dari cerita Episode 1"). Tanpa nilai = berkas kasus yang berdiri sendiri (kasus 2): tanpa tautan cerita.
    */
   cerita?: { episode: string; ajakan: KunciTeks; asal: KunciTeks };
+}
+
+// ------------------------------------------------------------------ T-102 KONTRAK BEKU komponen panel (kartu 3, Designer)
+// Komponen menerima TEKS YANG SUDAH DITERJEMAHKAN dan ID bukti; mengembalikan PILIHAN lewat callback. Komponen tidak pernah
+// membaca atau mengubah skor, tanda, atau simpanan (itu LayarInvestigasi, kartu 5).
+
+/**
+ * `PressPanel({question, answer, opened, onPress, onClose})`: "Tanya lebih lanjut" pada satu pernyataan.
+ * `opened` false = hanya tombolnya (label dari kamus); true = pertanyaan dan jawaban terbaca, dengan tombol tutup.
+ * `onPress` = tamu membuka (induk memilih 'tekan' di node tawar), `onClose` = tamu menutup (induk melanjutkan cerita).
+ * Tanpa waktu, tanpa poin; sama untuk papan ketik dan pembaca layar.
+ */
+export interface PressPanelProps {
+  question: string;
+  answer: string;
+  opened: boolean;
+  onPress: () => void;
+  onClose: () => void;
+}
+
+/** Satu kartu di layar babak panel. `excerpt` = kutipan persis yang relevan untuk babak ini (sama dengan isi gambar). */
+export interface PanelCard {
+  id: IdBukti;
+  title: string;
+  source: string;
+  excerpt?: string;
+  /** true = tampil pudar dan tidak bisa diajukan (langkah dipandu: hanya kartu yang diterima yang aktif). */
+  disabled?: boolean;
+}
+
+/**
+ * `PanelRound({chair, statement, cards, attempt, onInspect, onPresent})`: satu babak panel.
+ *   chair      ketua panel: id pemeran, nama, pertanyaan babak (`Round.promptKey`), dan `hint` pada attempt 1 / 2 (`hintKeys`)
+ *   statement  pernyataan yang dibantah: id, pembuat (`siapa`), nama tampil, kalimatnya
+ *   cards      kartu urut layar
+ *   attempt    0 = pertama, 1 = kedua, 2 = dipandu
+ *   onInspect  tamu memperbesar kartu itu (komponen sendiri menggambar tampilan besar dan mengembalikan fokus saat ditutup;
+ *              callback ini hanya pemberitahuan, mis. untuk bunyi)
+ *   onPresent  tamu MENGAJUKAN kartu itu; induk yang memutuskan tepat / keliru
+ */
+export interface PanelRoundProps {
+  chair: { id: string; name: string; line: string; hint?: string };
+  statement: { id: string; actor: PernyataanInvestigasi['siapa']; name: string; text: string };
+  cards: PanelCard[];
+  attempt: 0 | 1 | 2;
+  onInspect: (id: IdBukti) => void;
+  onPresent: (id: IdBukti) => void;
 }
 
 export interface NodeDialog extends NodeDasar {

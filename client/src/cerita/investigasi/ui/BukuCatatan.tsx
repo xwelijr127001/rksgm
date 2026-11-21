@@ -22,6 +22,7 @@ import { t } from '../../../i18n';
 import { PotretPikselHp } from '../../ui/latar/piksel/PotretPikselHp';
 import buktiUrl from '../../seni/investigasi/bukti.png';
 import bukti2Url from '../../seni/investigasi/bukti-kasus2.png';
+import { PanelAssets } from './panel/aset';
 import reaksi2Url from '../../seni/investigasi/reaksi-kasus2.png';
 import type { IdTokohPiksel } from '../../seni/piksel';
 import klipUrl from '../../seni/investigasi/klip.png';
@@ -58,7 +59,8 @@ export function PotretReaksi({ reaksi, ukuran = 64, label = '' }: { reaksi: Reak
   );
 }
 
-const TOKOH_PIKSEL: Readonly<Record<Pernyataan['siapa'], IdTokohPiksel>> = { darto: 'darto', petugasTol: 'tol', yusuf: 'yusuf', agus: 'agus' };
+// T-104: pihak kasus 3 memakai tokoh piksel seni T-103 (terdaftar di seni/piksel). Baris kasus 1-2 tidak berubah.
+const TOKOH_PIKSEL: Readonly<Record<Pernyataan['siapa'], IdTokohPiksel>> = { darto: 'darto', petugasTol: 'tol', yusuf: 'yusuf', agus: 'agus', pemohon: 'pemohon', penaksir: 'penaksir' };
 
 /** Kartu pernyataan lama (T-077): potret + nama + kalimat (+ tombol "Sematkan"). Layar semat & KEBERATAN kini memakai buku. */
 export function KartuPernyataan({ pernyataan, tersemat = false, onSemat, reaksi, sorot = false, tx }: {
@@ -86,6 +88,9 @@ export function KartuPernyataan({ pernyataan, tersemat = false, onSemat, reaksi,
 const POTONG_BUKTI: Record<Bukti['id'], readonly [string, number, number]> = {
   dashcam: [buktiUrl, 6, 0], rambu: [buktiUrl, 102, 10], sim: [buktiUrl, 198, 12],
   'foto-interior': [bukti2Url, 6, 10], struk: [bukti2Url, 102, 14], 'polis-kasus2': [bukti2Url, 198, 12],
+  // T-104: kartu kasus 3 = gambar kartu Designer T-103 (satu PNG 96 x 68 per kartu); potongan 84 x 44 dari tengahnya.
+  'kartu-kejadian': [PanelAssets.evidence['kartu-kejadian']!.thumb, 6, 12], 'foto-inspeksi': [PanelAssets.evidence['foto-inspeksi']!.thumb, 6, 12],
+  'pesan-pengajuan': [PanelAssets.evidence['pesan-pengajuan']!.thumb, 6, 12], penawaran: [PanelAssets.evidence.penawaran!.thumb, 6, 12],
 };
 
 export interface PilihBukti {

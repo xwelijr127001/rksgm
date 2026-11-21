@@ -262,6 +262,7 @@ export default function App() {
             {/* T-076 / T-090: the old short URLs (QR codes, bookmarks) still open the case; they now land under the hub. */}
             <Route path="/cerita/investigator" element={<Navigate to="/investigator/1" replace />} />
             <Route path="/cerita/investigator/2" element={<Navigate to="/investigator/2" replace />} />
+            <Route path="/cerita/investigator/3" element={<Navigate to="/investigator/3" replace />} />
             <Route path="/cerita/:episode" element={<PramuatCerita><CeritaMain /></PramuatCerita>} />
             {ProtoMeja ? <Route path="/meja" element={<ProtoMeja />} /> : null}
             {ProtoKejadian ? <Route path="/kejadian" element={<ProtoKejadian />} /> : null}

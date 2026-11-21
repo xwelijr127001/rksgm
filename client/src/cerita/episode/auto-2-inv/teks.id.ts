@@ -48,6 +48,12 @@ export const TEKS_AUTO_2_INV_ID: Record<string, string> = {
   'inv.tol.2': 'Waktu saya tiba, truknya sudah menempel di pembatas. Saya langsung mencatat posisinya.',
   'inv.tol.3': 'Di catatan saya, truknya di lajur 3.',
   'inv.pernyataan.tol': 'Di catatan saya, truknya di lajur 3.',
+  // T-104 "Tanya lebih lanjut" (opsional, tanpa poin). Kunci inv.ui.tekan.* dipakai semua kasus (ikut tabel pembungkus).
+  'inv.ui.tekan.1': 'Sebelum lanjut, kamu boleh bertanya satu hal lagi. Tanpa poin, tanpa waktu.',
+  'inv.ui.tekan.pilih': 'Mau bertanya lebih lanjut?',
+  'inv.ui.tekan.lanjut': 'Lanjut tanpa bertanya',
+  'inv.tekan.tol.tanya': 'Tanya: Bapak melihat sendiri truk itu melaju di lajur 3?',
+  'inv.tekan.tol.jawab': 'Tidak. Saya tiba sesudah kejadian. Lajurnya saya hitung dari posisi truk yang sudah berhenti.',
   'inv.selisih.1': 'Lajur 2 atau lajur 3? Dua keterangan itu tidak mungkin sama-sama benar. Kita butuh bukti.',
 
   // Bukti

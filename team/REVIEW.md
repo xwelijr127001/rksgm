@@ -370,3 +370,18 @@ Confirmed working folder `C:\Users\User\Desktop\rksgm-episode2`.
 Ask: “What did you expect?” “Which moment would you replay?” “Where did you hesitate?” “Which evidence settled it, and why?” “Which would you open tomorrow?”
 
 **Decision:** Build Case 3 if ≥6/8 external guests finish unaided within five minutes and explain the clue, and ≥4 voluntarily start Case 2. Fix pacing if three stall at the same step. Change the event door if ≥5 prefer Dev after trying both. Mixed results warrant another small round.
+
+Confirmed working folder `C:\Users\User\Desktop\rksgm-episode2`.
+
+## Investigator lengkap plan (2026-11-21)
+
+1. Case 3 separates an authentic bumper loss from deliberate inflation of one mirror item.
+2. Two sourced contradictions, a fictional internal panel and a right of reply lead to a referral.
+3. Optional witness questions span three cases; ordinary play still yields every decisive clue.
+4. Three stamps unlock Senior; three stamps plus 255/300 unlock Kepala without a filler case.
+5. Archives, a seal and a card frame give each result a concrete next goal.
+6. The daily event board accepts fresh opt-in runs, uses aliases and displays server-scored best totals.
+7. Reconnect, shared Wi-Fi and booth handoff are the main operational risks; scope credentials, retries and saves to the event run.
+8. Misstating legal authority or implying automatic refusal is the main content risk; PIC must confirm the public wording.
+9. Six implementation cards separate contracts, content, art, server, solo integration and event surfaces; gate on typecheck and rebuild.
+10. Owner runs the 12-person trial. Features, public content approval and observed enjoyment have separate completion evidence.

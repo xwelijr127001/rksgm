@@ -60,12 +60,15 @@ export const DAFTAR_TOKOH_SAMPING: readonly IdTokohSamping[] = ['rudi', 'bima', 
 /** T-091: pemeran Investigator kasus 2 (atlas sendiri kasus2.png / kasus2.json; character/investigator-t091/tokoh.mts). */
 export type IdTokohKasus2 = 'yusuf' | 'agus';
 export const DAFTAR_TOKOH_KASUS2: readonly IdTokohKasus2[] = ['yusuf', 'agus'];
-export type IdTokohPiksel = 'missRaksa' | 'buRina' | 'hendra' | IdTokohSamping | IdTokohKasus2;
+/** T-104: pemeran Investigator kasus 3 (seni T-103: seni/investigasi/panel/kasus3.png / kasus3.json; character/investigator-t103/tokoh.mts). */
+export type IdTokohKasus3 = 'ketua' | 'penaksir' | 'pemohon';
+export const DAFTAR_TOKOH_KASUS3: readonly IdTokohKasus3[] = ['ketua', 'penaksir', 'pemohon'];
+export type IdTokohPiksel = 'missRaksa' | 'buRina' | 'hendra' | IdTokohSamping | IdTokohKasus2 | IdTokohKasus3;
 /** Tokoh panggung Episode 1 (daftar lama, semantik tidak berubah: uji pose cerita, atlasGagal, ikon). */
 export type IdTokohPikselEp1 = 'missRaksa' | 'buRina';
 export const DAFTAR_TOKOH_PIKSEL: readonly IdTokohPikselEp1[] = ['missRaksa', 'buRina'];
 /** Semua tokoh piksel yang bisa dipasang ke penyusun (Episode 1 + Pak Hendra Episode 2). */
-export const DAFTAR_TOKOH_PIKSEL_SEMUA: readonly IdTokohPiksel[] = ['missRaksa', 'buRina', 'hendra', ...DAFTAR_TOKOH_SAMPING, ...DAFTAR_TOKOH_KASUS2];
+export const DAFTAR_TOKOH_PIKSEL_SEMUA: readonly IdTokohPiksel[] = ['missRaksa', 'buRina', 'hendra', ...DAFTAR_TOKOH_SAMPING, ...DAFTAR_TOKOH_KASUS2, ...DAFTAR_TOKOH_KASUS3];
 export type ArahTokoh = 'kiri' | 'kanan';
 /** Mata: terbuka (dasar), tertutup (kedip), atau melihat ke bawah/kartu (bawah). */
 export type MataTokoh = 'buka' | 'tutup' | 'bawah';
@@ -231,7 +234,7 @@ function pandangBawaan(id: IdTokohPiksel, pose: string): ArahPandang {
 const PANDANG_BAWAAN: Readonly<Record<IdTokohPiksel, Partial<Record<ArahPandang, { arah?: ArahTokoh; varian?: 'bawah' }>>>> = {
   missRaksa: { lawan: { arah: 'kanan' }, pemain: { arah: 'kiri' }, depan: { arah: 'kiri' }, bawah: { varian: 'bawah' } },
   buRina: { bawah: { varian: 'bawah' } },
-  hendra: {}, rudi: {}, bima: {}, darto: {}, admin: {}, tol: {}, polisi: {}, yusuf: {}, agus: {},
+  hendra: {}, rudi: {}, bima: {}, darto: {}, admin: {}, tol: {}, polisi: {}, yusuf: {}, agus: {}, ketua: {}, penaksir: {}, pemohon: {},
 };
 
 const jenisPose = (pose: string): JenisJangkar => (pose !== 'duduk-turun' && (pose.startsWith('duduk') || pose === 'telepon') ? 'pinggul' : 'kaki');

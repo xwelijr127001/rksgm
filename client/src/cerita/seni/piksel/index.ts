@@ -17,9 +17,10 @@ import jsonRina from './bu-rina.json';
 import jsonHendra from './hendra.json';
 import jsonSamping from './samping.json';
 import jsonKasus2 from './kasus2.json';
+import jsonKasus3 from '../investigasi/panel/kasus3.json';
 import jsonIkon from './ikon.json';
 import { bacaManifestIkon, ikonDari } from './ikon';
-import { buatPenyusun, DAFTAR_TOKOH_KASUS2, DAFTAR_TOKOH_SAMPING, type IdTokohPiksel, type IdTokohPikselEp1, type PotretTokoh } from './susun';
+import { buatPenyusun, DAFTAR_TOKOH_KASUS2, DAFTAR_TOKOH_KASUS3, DAFTAR_TOKOH_SAMPING, type IdTokohPiksel, type IdTokohPikselEp1, type PotretTokoh } from './susun';
 import type { Ekspresi } from '../../tipe';
 
 export * from './susun';
@@ -27,7 +28,7 @@ export { bacaManifestIkon, ikonDari, wajahIkon, type IkonTokoh, type ManifestIko
 
 let pngVite: Record<string, string> = {};
 try {
-  pngVite = import.meta.glob(['./miss-raksa.png', './bu-rina.png', './hendra.png', './samping.png', './kasus2.png', './ikon-miss-raksa.png', './ikon-bu-rina.png'], { eager: true, query: '?url', import: 'default' });
+  pngVite = import.meta.glob(['./miss-raksa.png', './bu-rina.png', './hendra.png', './samping.png', './kasus2.png', '../investigasi/panel/kasus3.png', './ikon-miss-raksa.png', './ikon-bu-rina.png'], { eager: true, query: '?url', import: 'default' });
 } catch {
   /* bukan Vite (tes node): URL berkas di bawah */
 }
@@ -39,6 +40,7 @@ export const URL_ATLAS_PIKSEL: Readonly<Record<IdTokohPiksel, string>> = {
   hendra: pngVite['./hendra.png'] ?? new URL('./hendra.png', import.meta.url).href,
   ...Object.fromEntries(DAFTAR_TOKOH_SAMPING.map((id) => [id, pngVite['./samping.png'] ?? new URL('./samping.png', import.meta.url).href])),
   ...Object.fromEntries(DAFTAR_TOKOH_KASUS2.map((id) => [id, pngVite['./kasus2.png'] ?? new URL('./kasus2.png', import.meta.url).href])),
+  ...Object.fromEntries(DAFTAR_TOKOH_KASUS3.map((id) => [id, pngVite['../investigasi/panel/kasus3.png'] ?? new URL('../investigasi/panel/kasus3.png', import.meta.url).href])),
 } as Record<IdTokohPiksel, string>;
 
 /** Penyusun dengan manifest & atlas nyata terpasang. */
@@ -50,6 +52,8 @@ export const penyusunPiksel = buatPenyusun({
   ...Object.fromEntries(DAFTAR_TOKOH_SAMPING.map((id) => [id, { json: (jsonSamping as { tokoh: Record<string, unknown> }).tokoh[id], url: URL_ATLAS_PIKSEL[id] }])),
   // T-091: pemeran Investigator kasus 2 (Pak Yusuf, Mas Agus): atlas sendiri, skema manifest yang sama.
   ...Object.fromEntries(DAFTAR_TOKOH_KASUS2.map((id) => [id, { json: (jsonKasus2 as { tokoh: Record<string, unknown> }).tokoh[id], url: URL_ATLAS_PIKSEL[id] }])),
+  // T-104: pemeran Investigator kasus 3 (ketua panel, penaksir, pemohon): atlas Designer T-103, skema manifest yang sama.
+  ...Object.fromEntries(DAFTAR_TOKOH_KASUS3.map((id) => [id, { json: (jsonKasus3 as { tokoh: Record<string, unknown> }).tokoh[id], url: URL_ATLAS_PIKSEL[id] }])),
 });
 
 /** true bila manifest & atlas tokoh ini terpasang (selain itu pakai seni SVG). */

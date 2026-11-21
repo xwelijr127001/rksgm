@@ -75,6 +75,8 @@ export const TEKS_AUTO_2_INV_2_ZH: Record<string, string> = {
   'inv2.bukti.struk.judul': '行程小票：付费乘客 21:05-21:24',
   'inv2.bukti.struk.sumber': '来源：Yusuf 先生提供的小票，乘客姓名和地址已遮住',
 
+  'inv2.tekan.yusuf.tanya': '追问：那一单是什么时候在应用里结束的？',
+  'inv2.tekan.yusuf.jawab': '21:24。车靠边停好以后，我自己在仪表台上的手机里结束的。',
   'inv2.polis.1': '还有一份记录：保单。我们读上面写的，而不是我们以为的。',
   'inv2.polis.judul': '读保单',
   'inv2.polis.tanya': '点一下车辆使用条款。',

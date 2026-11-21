@@ -25,8 +25,8 @@
  * pesan:<baik|datar|janji>. Dua akhir (penjaga episode mewajibkan >= 2): `tuntas` = putusan layak, `tinjau` = putusan lain
  * (diluruskan Miss Raksa; klaim tetap dijamin di kedua akhir). Status Pak Hendra (30 = Cemas) hanya berubah oleh pesan.
  */
-import type { Baris, CueLatar, Efek, Ekspresi, Episode, IdNode, KonfigInvestigasi, Kondisi, MusikNode, NodeCerita, NodeInvestigasi } from '../../tipe';
-import { LAJUR, tandaBukti, tandaCatat, tandaKeberatan, tandaKoreksi, tandaPesan, tandaPutusan, tandaTebak } from '../../investigasi/status';
+import type { Baris, CueLatar, Efek, Ekspresi, Episode, IdNode, KonfigInvestigasi, Kondisi, MusikNode, NodeCerita, NodeInvestigasi, Press } from '../../tipe';
+import { LAJUR, PILIH_LANJUT, PILIH_TEKAN, tandaBukti, tandaCatat, tandaKeberatan, tandaKoreksi, tandaPesan, tandaPutusan, tandaTebak, tandaTekan } from '../../investigasi/status';
 import { EPISODE_AUTO_2 } from '../auto-2/episode';
 import { EPISODE_AUTO_2_DEV } from '../auto-2-dev/episode';
 import { TEKS_AUTO_2_INV } from './teks';
@@ -47,6 +47,9 @@ const TELEPON_HENDRA: CueLatar = { lokasi: 'kantor', hadir: [], telepon: 'hendra
  * kartu tepat, pernyataan yang dibantah, tebakan lajur, tabel putusan, nasabah) sekarang data; graf, id, tanda dan teksnya
  * tidak berubah.
  */
+/** T-104 "Tanya lebih lanjut" pada keterangan petugas tol: apakah lajurnya dilihat sendiri? Tanpa poin; hanya konteks. */
+const TEKAN_TOL: Press = { id: 'lihat', questionKey: 'inv.tekan.tol.tanya', answerKey: 'inv.tekan.tol.jawab' };
+
 const KASUS: KonfigInvestigasi = {
   kasus: 'kasus-1',
   nomor: 1,
@@ -58,7 +61,7 @@ const KASUS: KonfigInvestigasi = {
   bingkai: 'dashcam',
   pernyataan: [
     { id: 'darto', siapa: 'darto', teks: 'inv.pernyataan.darto' },
-    { id: 'tol', siapa: 'petugasTol', teks: 'inv.pernyataan.tol' },
+    { id: 'tol', siapa: 'petugasTol', teks: 'inv.pernyataan.tol', press: TEKAN_TOL },
   ],
   // Urut terkumpul (buku catatan); urutan di layar keberatan = keberatan.urutan.
   bukti: [
@@ -115,8 +118,22 @@ function bangunNode(): NodeCerita[] {
     },
     dialog('darto', RUANG('darto'), [b('inv.darto.1', 'narasi'), b('inv.darto.2', 'darto', 'cemas'), b('inv.darto.3', 'darto', 'serius')], 'tol',
       { efek: { pasang: [tandaCatat('darto')] }, investigasi: { jenis: 'catat', pernyataan: 'darto' } }),
-    dialog('tol', RUANG('tol'), [b('inv.tol.1', 'narasi'), b('inv.tol.2', 'tol', 'netral'), b('inv.tol.3', 'tol', 'serius')], 'selisih',
+    dialog('tol', RUANG('tol'), [b('inv.tol.1', 'narasi'), b('inv.tol.2', 'tol', 'netral'), b('inv.tol.3', 'tol', 'serius')], 'tol-tanya',
       { efek: { pasang: [tandaCatat('tol')] }, investigasi: { jenis: 'catat', pernyataan: 'tol' } }),
+    // T-104 "Tanya lebih lanjut" (opsional, tanpa poin, NodeDasar.tekan): simpangan SESUDAH keterangan petugas tol dicatat. Node
+    // 'tol' (id, efek catat:tol, titik lanjut simpanan lama) tidak berubah; kedua cabang maju ke 'selisih', tanpa putaran.
+    {
+      id: 'tol-tanya', bab: '', jenis: 'pilihan', tata: RUANG('tol'), baris: [b('inv.ui.tekan.1', 'narasi')], tanya: 'inv.ui.tekan.pilih',
+      tekan: { pernyataan: 'tol', press: TEKAN_TOL.id, langkah: 'tawar' },
+      pilihan: [
+        { id: PILIH_TEKAN, teks: TEKAN_TOL.questionKey, lanjut: 'tol-tekan' },
+        { id: PILIH_LANJUT, teks: 'inv.ui.tekan.lanjut', lanjut: 'selisih' },
+      ],
+    },
+    {
+      ...dialog('tol-tekan', RUANG('tol'), [b(TEKAN_TOL.answerKey, 'tol', 'netral')], 'selisih', { efek: { pasang: [tandaTekan('tol', TEKAN_TOL.id)] } }),
+      tekan: { pernyataan: 'tol', press: TEKAN_TOL.id, langkah: 'jawab' },
+    },
     dialog('selisih', RUANG_TELEPON('tol'), [b('inv.selisih.1', 'missRaksa', 'serius')], 'kdash'),
 
     // ---------------------------------------------------------------- b2: tiga kartu bukti (dashcam, rambu dari bingkai rekaman, SIM)
@@ -183,7 +200,7 @@ function bangunNode(): NodeCerita[] {
 
 /** Bagian tiap node (kepala layar "BAGIAN n/4"; id b2 / b3 = musik pemeriksaan, hp/audioTema.ts). */
 function babInv(id: IdNode): string {
-  if (['judul', 'buka', 'tebak', 'darto', 'tol', 'selisih'].includes(id)) return 'b1';
+  if (['judul', 'buka', 'tebak', 'darto', 'tol', 'tol-tanya', 'tol-tekan', 'selisih'].includes(id)) return 'b1';
   if (id.startsWith('kdash') || id.startsWith('ksim') || id.startsWith('bukti-')) return 'b2';
   if (id.startsWith('keb')) return 'b3';
   return 'b4';
@@ -197,7 +214,7 @@ function babInv(id: IdNode): string {
  *  Terungkap    b4 (putusan, pesan, hasil): jingle resolusi mayor sekali, lalu loop tenang sampai kartu hasil.
  */
 function musikInv(id: IdNode): MusikNode {
-  if (['darto', 'tol', 'selisih'].includes(id)) return 'inv-keterangan';
+  if (['darto', 'tol', 'tol-tanya', 'tol-tekan', 'selisih'].includes(id)) return 'inv-keterangan';
   const bab = babInv(id);
   if (bab === 'b3') return 'inv-keberatan';
   if (bab === 'b4') return 'inv-terungkap';

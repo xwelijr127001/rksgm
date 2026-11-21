@@ -39,6 +39,11 @@ export const TEKS_AUTO_2_INV_ZH: Record<string, string> = {
   'inv.tol.2': '我到的时候，卡车已经贴在护栏上了。我马上记下了它的位置。',
   'inv.tol.3': '我的记录上，卡车在第 3 车道。',
   'inv.pernyataan.tol': '我的记录上，卡车在第 3 车道。',
+  'inv.ui.tekan.1': '继续之前，你可以再问一个问题。不计分，不计时。',
+  'inv.ui.tekan.pilih': '要继续追问吗？',
+  'inv.ui.tekan.lanjut': '不问了，继续',
+  'inv.tekan.tol.tanya': '追问：您亲眼看到卡车行驶在第 3 车道吗？',
+  'inv.tekan.tol.jawab': '没有。我是事后才到的。车道是我根据卡车停下的位置数出来的。',
   'inv.selisih.1': '第 2 车道还是第 3 车道？这两种说法不可能都对。我们需要证据。',
 
   'inv.kdash.1': 'Hendra 先生的卡车装有行车记录仪。Darto 先生交出了存储卡。',

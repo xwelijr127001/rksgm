@@ -28,8 +28,8 @@
  * butuh bukti tambahan 15, layak dijamin 0. Dua akhir: `tuntas` = putusan "ada masalah pertanggungan", `tinjau` = putusan lain
  * (diluruskan Miss Raksa). Status Pak Yusuf (30 = Cemas) hanya berubah oleh pesan.
  */
-import type { Baris, CueLatar, Efek, Ekspresi, Episode, IdNode, KonfigInvestigasi, Kondisi, MusikNode, NodeCerita, NodeInvestigasi } from '../../tipe';
-import { tandaBukti, tandaCatat, tandaKeberatan, tandaKoreksi, tandaPesan, tandaPutusan, tandaTebak } from '../../investigasi/status';
+import type { Baris, CueLatar, Efek, Ekspresi, Episode, IdNode, KonfigInvestigasi, Kondisi, MusikNode, NodeCerita, NodeInvestigasi, Press } from '../../tipe';
+import { PILIH_LANJUT, PILIH_TEKAN, tandaBukti, tandaCatat, tandaKeberatan, tandaKoreksi, tandaPesan, tandaPutusan, tandaTebak, tandaTekan } from '../../investigasi/status';
 import { EPISODE_AUTO_2 } from '../auto-2/episode';
 import { PEMERAN_KASUS_2 } from './pemeran';
 import { TEKS_AUTO_2_INV_2 } from './teks';
@@ -49,6 +49,9 @@ const TELEPON_YUSUF: CueLatar = { lokasi: 'kantor', hadir: [], telepon: 'yusuf',
  * Data KASUS 2 (`Episode.investigasi`): semua yang berbeda dari kasus 1 ada di sini (lihat KonfigInvestigasi, cerita/tipe.ts).
  * Kunci teks naskahnya berawalan `inv2`.
  */
+/** T-104 "Tanya lebih lanjut" pada keterangan Pak Yusuf: kapan perjalanan itu ditutup di aplikasi? Tanpa poin; hanya konteks. */
+const TEKAN_YUSUF: Press = { id: 'tutup', questionKey: 'inv2.tekan.yusuf.tanya', answerKey: 'inv2.tekan.yusuf.jawab' };
+
 const KASUS: KonfigInvestigasi = {
   kasus: 'kasus-2',
   nomor: 2,
@@ -60,7 +63,7 @@ const KASUS: KonfigInvestigasi = {
   balasan: { baik: 'lega', datar: 'cemas', janji: 'senang' },
   bingkai: 'seni',
   pernyataan: [
-    { id: 'yusuf', siapa: 'yusuf', teks: 'inv2.pernyataan.yusuf' },
+    { id: 'yusuf', siapa: 'yusuf', teks: 'inv2.pernyataan.yusuf', press: TEKAN_YUSUF },
     { id: 'agus', siapa: 'agus', teks: 'inv2.pernyataan.agus' },
   ],
   // Urut terkumpul (buku catatan): foto di pembuka, struk dari garis waktu, polis dari halaman polis.
@@ -88,7 +91,10 @@ const KASUS: KonfigInvestigasi = {
   putusan: { polis: 30, tambahan: 15, layak: 0 },
   putusanLayar: { ket: 'inv2.putusan.ket', sebab: { layak: 'inv2.putusan.layak.sebab', tambahan: 'inv2.putusan.tambahan.sebab', polis: 'inv2.putusan.polis.sebab' } },
   koreksi: { judul: 'inv2.koreksi.judul', ket: 'inv2.koreksi.ket', baris: 'inv2.koreksi.baris' },
-  // Kasus 3 belum ada: tulisan saja di layar hasil.
+  // T-104: kasus 3 (auto-2-inv-3) SUDAH ada. Tautan lanjut = SATU baris: ganti `segera` di bawah dengan
+  // `berikut: 'auto-2-inv-3'`. Baris itu sengaja belum dipasang: layar hasil hari ini (LayarInvestigasi, kartu 5) menggambar
+  // `berikut` sebagai kartu "Kasus 2" dan menyembunyikan tombol arsip, jadi layar hasil kasus 2 akan berubah. Kartu 5 memasangnya
+  // bersama layar hasil tiga kasus.
   segera: 'inv2.hasil.kasus3',
   // Kenang-kenangan: garis waktu perjalanan + pesan yang dikirim tamu, terbaca lagi di layar hasil tanpa main ulang.
   arsip: { judul: 'inv2.bukti.struk.judul', garis: ['inv2.garis.1', 'inv2.garis.2', 'inv2.garis.3'], sorot: 1, pesan: 'inv2.arsip.pesan' },
@@ -142,8 +148,22 @@ function bangunNode(): NodeCerita[] {
     // ---------------------------------------------------------------- b2: garis waktu perjalanan (kartu struk), halaman polis (kartu polis)
     // Pak Yusuf memperlihatkan SATU struk dengan sukarela (nama dan alamat penumpang ditutup); layarnya ui/PeriksaPerjalanan.
     dialog('kjalan', RUANG('yusuf'), [b('inv2.jalan.1', 'narasi'), b('inv2.jalan.2', 'yusuf', 'netral')], 'bukti-struk', { investigasi: { jenis: 'periksa-perjalanan' } }),
-    dialog('bukti-struk', RUANG('yusuf'), [b('inv2.bukti.struk.1', 'narasi')], 'kpolis',
+    dialog('bukti-struk', RUANG('yusuf'), [b('inv2.bukti.struk.1', 'narasi')], 'yusuf-tanya',
       { efek: { pasang: [tandaBukti('struk')] }, investigasi: { jenis: 'bukti', bukti: 'struk' } }),
+    // T-104 "Tanya lebih lanjut" (opsional, tanpa poin, NodeDasar.tekan): simpangan sesudah struk tersimpan; kedua cabang maju ke
+    // 'kpolis', tanpa putaran. Node 'yusuf' dan 'bukti-struk' (id, efek, titik lanjut simpanan lama) tidak berubah.
+    {
+      id: 'yusuf-tanya', bab: '', jenis: 'pilihan', tata: RUANG('yusuf'), baris: [b('inv.ui.tekan.1', 'narasi')], tanya: 'inv.ui.tekan.pilih',
+      tekan: { pernyataan: 'yusuf', press: TEKAN_YUSUF.id, langkah: 'tawar' },
+      pilihan: [
+        { id: PILIH_TEKAN, teks: TEKAN_YUSUF.questionKey, lanjut: 'yusuf-tekan' },
+        { id: PILIH_LANJUT, teks: 'inv.ui.tekan.lanjut', lanjut: 'kpolis' },
+      ],
+    },
+    {
+      ...dialog('yusuf-tekan', RUANG('yusuf'), [b(TEKAN_YUSUF.answerKey, 'yusuf', 'netral')], 'kpolis', { efek: { pasang: [tandaTekan('yusuf', TEKAN_YUSUF.id)] } }),
+      tekan: { pernyataan: 'yusuf', press: TEKAN_YUSUF.id, langkah: 'jawab' },
+    },
     // [konfirmasi PIC] Halaman polis fiktif: klausul penggunaan + status perluasan pada tanggal kejadian (ui/PeriksaPolis, satu ketukan).
     dialog('kpolis', KANTOR, [b('inv2.polis.1', 'missRaksa', 'serius')], 'bukti-polis', { investigasi: { jenis: 'periksa-polis' } }),
     dialog('bukti-polis', KANTOR, [b('inv2.bukti.polis.1', 'narasi')], 'keb-buka', // [konfirmasi PIC]
@@ -207,7 +227,7 @@ function bangunNode(): NodeCerita[] {
 /** Bagian tiap node (kepala layar "BAGIAN n/4"). */
 function babInv2(id: IdNode): string {
   if (['judul', 'buka', 'bukti-foto', 'tebak', 'yusuf', 'agus', 'selisih'].includes(id)) return 'b1';
-  if (['kjalan', 'bukti-struk', 'kpolis', 'bukti-polis'].includes(id)) return 'b2';
+  if (['kjalan', 'bukti-struk', 'yusuf-tanya', 'yusuf-tekan', 'kpolis', 'bukti-polis'].includes(id)) return 'b2';
   if (id.startsWith('keb')) return 'b3';
   return 'b4';
 }

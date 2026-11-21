@@ -8,12 +8,16 @@ import buktiUrl from '../../seni/investigasi/bukti.png';
 import bukti2Url from '../../seni/investigasi/bukti-kasus2.png';
 import { t } from '../../../i18n';
 import { IkonInv, ikonBukti, useTx, type Bukti, type Tx } from './dasar';
+import { PanelAssets } from './panel/aset';
 import './investigasi.css';
 
 /** Atlas dan sel 96 x 68 tiap kartu (kasus 1: bukti.png; T-091 kasus 2: bukti-kasus2.png). */
 const SEL: Record<Bukti['id'], readonly [string, number]> = {
   dashcam: [buktiUrl, 0], rambu: [buktiUrl, 1], sim: [buktiUrl, 2],
   'foto-interior': [bukti2Url, 0], struk: [bukti2Url, 1], 'polis-kasus2': [bukti2Url, 2],
+  // T-104: kartu kasus 3 = gambar kartu Designer T-103 (PanelAssets.evidence[id].thumb, satu PNG 96 x 68 per kartu = sel 0).
+  'kartu-kejadian': [PanelAssets.evidence['kartu-kejadian']!.thumb, 0], 'foto-inspeksi': [PanelAssets.evidence['foto-inspeksi']!.thumb, 0],
+  'pesan-pengajuan': [PanelAssets.evidence['pesan-pengajuan']!.thumb, 0], penawaran: [PanelAssets.evidence.penawaran!.thumb, 0],
 };
 
 export function KartuBukti({ bukti, terpilih = false, sorot = false, onPilih, tx, redup = false }: {
