@@ -58,6 +58,7 @@ import { POLA_ID_KUSTOM, idKustomBaru, validasiSoalKustom } from './soalKustom';
 import { mountUnity } from './unityServe';
 import { STORY_SCORE_POLICY } from '../../shared/story/scorePolicy';
 import { mountStoryHttp } from './story/http';
+import { investigatorEventsEnabled, mountInvestigatorEvents } from './investigator/http';
 import { createStoryService } from './story/socket';
 import { recoverInterruptedRooms } from './story/runtime/sqliteStore';
 import { ensureSeedScenarios, seedLogLine } from './story/seed/publish';
@@ -82,7 +83,8 @@ app.use(headerKeamanan);
 if (legacyTanpaPin()) console.error(`[keamanan] RAKSA_LEGACY=on tanpa PANITIA_PIN di production: fitur lama DITOLAK. Pasang PANITIA_PIN.`);
 // Small JSON limit for the legacy/public API; scenario drafts (/api/cms) are parsed by the story router (1 MB).
 const jsonKecil = express.json({ limit: '128kb' });
-app.use((req, res, next) => (req.path.startsWith('/api/cms/') ? next() : jsonKecil(req, res, next)));
+// T-107: the Investigator event board parses its own (much smaller) JSON bodies (server/src/investigator/http.ts).
+app.use((req, res, next) => (req.path.startsWith('/api/cms/') || req.path.toLowerCase().startsWith('/api/investigator/events') ? next() : jsonKecil(req, res, next)));
 
 // Legacy (pre-PRD) features are refused server-side unless RAKSA_LEGACY=on; hiding links alone is not a gate.
 // Case-insensitive like Express routing itself (otherwise "/api/Matches" would slip past the gate).
@@ -131,6 +133,10 @@ io.of('/').use((socket, next) => {
 // PRD v0.2 Story Room system: /story namespace, /api/staff|cms|host|admin|story routes, /aset-cerita files.
 const story = createStoryService(io);
 mountStoryHttp(app, story);
+// T-107: Investigator event board ("Top Investigator hari ini") at /api/investigator/events. OFF unless
+// RAKSA_INVESTIGATOR_ACARA=on: then no table is created and the path answers 404. Separate tables (prefix inv_); it never
+// touches quiz rooms, story rooms, answers or prizes.
+if (mountInvestigatorEvents(app)) console.log('[investigator] papan acara aktif (RAKSA_INVESTIGATOR_ACARA=on)');
 const interrupted = recoverInterruptedRooms();
 if (interrupted.length) console.log('[story] room terputus karena server dimulai ulang:', interrupted.join(', '));
 // T-028: scenarios that ship with the code (Episode 2 as a hosted room). Idempotent; a failure is logged, never fatal.
@@ -211,7 +217,7 @@ app.get('/api/config', (_req, res) => {
     paketBawaan: CONFIG.paketBawaan,
     /** true = membuat room & menulis bank soal butuh PIN panitia. */
     butuhPin: Boolean(CONFIG.panitiaPin),
-    features: { legacy: CONFIG.legacy, demoCerita: CONFIG.demoCerita, ep1Dev: CONFIG.ep1Dev, investigator: CONFIG.investigator },
+    features: { legacy: CONFIG.legacy, demoCerita: CONFIG.demoCerita, ep1Dev: CONFIG.ep1Dev, investigator: CONFIG.investigator, investigatorAcara: investigatorEventsEnabled() },
     story: { maxParticipants: story.manager.limits.maxParticipantsPerRoom, answerWindowMs: STORY_SCORE_POLICY.answerWindowMs, scorePolicyId: STORY_SCORE_POLICY.id },
   });
 });

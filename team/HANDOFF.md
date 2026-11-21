@@ -5020,3 +5020,73 @@ Plan section 5. Gate: root `npm run typecheck` exit 0 (server + client), `client
 - No reaction portrait is shown after a correct card (the Designer's `PanelReaction` is unused); the reply dialog follows directly.
 - The old "Kasus 2" teaser card and its preview sheet are no longer shown on case 1's result (the next-action row replaces them); the components are still in the folder. The trial counter of voluntary Case 2 taps still counts taps on that row.
 - `[konfirmasi PIC]`: no new policy or panel wording in this card. New player-facing words are award names, goal lines and button labels. The T-104 list stands.
+
+
+## T-107 (2026-11-21): Investigator lengkap CARD 4 · event service (Fullstack, server)
+
+Plan section 4. Gate: root `npm run typecheck` exit 0 (server + client), `server/dist` rebuilt (`npm -w @raksa/server run build`), `client/dist` rebuilt (no client source changed in this task). Not committed, not deployed. No test, no e2e, no browser, and **no server was started**: the storage and rule layer was run by a one-off script on an in-memory SQLite; **the HTTP layer (auth, origin check, limiters, body cap, status codes) was never exercised with a request** and is checked by typecheck and reading only.
+
+**Off by default.** `RAKSA_INVESTIGATOR_ACARA=on` switches it on. With the flag off (or unset) nothing is created in the database, no timer runs, and every path under `/api/investigator/events` answers 404 `{ ok: false, error: 'not_found' }`. Confirmed on the compiled module: flag default false, mounting adds one 404 handler and does not open the database. `/api/config` now also reports `features.investigatorAcara` (true only with the flag), for card 6.
+
+### Files
+- `server/src/investigator/migrations.ts`: schema, own bookkeeping table `inv_schema_migrations`, tables `inv_events`, `inv_participants`, `inv_runs`, `inv_commands`, `inv_best`, `inv_displays`, `inv_display_codes` (same numbered-migration convention as `story/db/migrations.ts`, same database file).
+- `server/src/investigator/store.ts`: all rules and SQL, no Express.
+- `server/src/investigator/http.ts`: router, authentication, limits.
+- `server/src/index.ts` (registration only): import + mount after the story API, the global 128 kB JSON parser skips this path (the router has its own 2 kB parser), `features.investigatorAcara`.
+- No file of the quiz rooms, story rooms, answers, prizes or staff was edited; the service reads the staff session through the existing `authenticate()` and `can(roles, 'hostRooms')` and touches no table outside `inv_*`.
+
+### Endpoints (base `/api/investigator/events`; types = `shared/investigator/event.ts`; every reply `{ ok: true, ... }` or `{ ok: false, error: <code> }`)
+| # | method + path | who may call | reply | limit |
+|---|---|---|---|---|
+| 1 | POST `/` | staff session with `hostRooms` | `{ event, cases }`; returns the host's open board if there is one | 20 / min per host |
+| 2 | GET `/mine` | staff session with `hostRooms` | host view of the open board, or `{ event: null }` | none |
+| 3 | GET `/:eventId` | owner (staff with `hostRooms` who created it) | host view (all entries, hidden flagged, participant count, display paired) | none |
+| 4 | POST `/:eventId/close` | owner | host view; board closed, purge time = now + 24 h | 20 / min per host (shared by 1, 4-8) |
+| 5 | POST `/:eventId/clear` | owner | host view; all participants, runs, commands and bests of the board deleted, board stays open | same |
+| 6 | POST `/:eventId/entries/:participantId/hide` body `{ hidden }` | owner | host view | same |
+| 7 | POST `/:eventId/display-code` | owner, board open | `{ displayCode, expiresAt }` (8 characters, 120 s, one use, replaces a pending one) | same |
+| 8 | POST `/:eventId/display/revoke` | owner | host view; every display credential of the board stops working | same |
+| 9 | POST `/display/exchange` body `{ displayCode }` | public | `{ credential, eventId, expiresAt }` | 20 attempts / min per IP |
+| 10 | GET `/board` | display credential (`ivd_...`), read-only | top 10 visible rows `{ rank, alias, total, stamps }` + participant count | 120 / min per board and IP |
+| 11 | POST `/join` body `{ code }` | public (needs the 6-character public code) | `{ event, participantId, alias, credential, expiresAt, cases }` | 120 attempts / min per IP, 300 / min per board, 500 participants per board |
+| 12 | POST `/alias` | participant credential (`ivp_...`), before the first run | `{ alias }` | 30 / min per participant (shared by 12, 14, 16) |
+| 13 | GET `/me` | participant credential | own standing: rank, total, stamps, best per case, open run | 120 / min per participant (shared by 13, 15) |
+| 14 | POST `/runs` body `{ caseId, rubricVersion }` | participant credential | `{ status: 'started', run }` or `{ status: 'unsupported', caseId, cases }` | 30 / min per participant; 60 runs per participant per board |
+| 15 | GET `/runs/:runId` | participant credential, own run only | run state incl. the last command and its acknowledgement | 120 / min per participant |
+| 16 | POST `/runs/:runId/decisions` body = `Decision` | participant credential, own run only | `Ack { seq, nextStage, status, score? }` | 30 / min per participant |
+- All credentials travel in `Authorization: Bearer`. Staff = the existing staff session token. The public join code and the pairing code are the only secrets ever placed in a body; nothing is read from the query string.
+- Every reply has `Cache-Control: no-store`. A request that carries an `Origin` header not on the approved list (`asalDiizinkan`, same list as CORS and the socket handshake) gets 403. Rate-limit keys use `req.ip`, which follows `TRUST_PROXY_HOPS` as elsewhere. 429 replies carry `Retry-After: 60`.
+- Error codes: 400 bad_request, 401 unauthorized, 403 forbidden, 404 not_found, 409 closed / full / alias_locked / stage_mismatch / seq_mismatch / invalid_choice / command_conflict / run_done / unsupported_version, 429 rate_limited, 503 unavailable. `stage_mismatch`, `seq_mismatch` and `run_done` include the real run state so the phone can resume.
+
+### Rules the server enforces
+- **Scoring is server-side only.** A decision is five ids; unknown fields (a total, a grade, stamps) are ignored. The stage and attempt come from the stored run, the transition and the score from the shared rubric (`applyChoice`, `score`). The server does not know or check which cards a phone has "collected"; it checks that the card belongs to the current round.
+- **Idempotent decisions.** `(runId, commandId)` is the primary key of `inv_commands`, stored with a SHA-256 of `[runId, seq, stageId, choiceId]` and the acknowledgement. Same command and body = the stored acknowledgement, whatever the run's seq is by then; same command id with another body = `command_conflict`. Advancing the stage, storing the command and upserting the best are one SQLite transaction.
+- **One best per participant and case** (`inv_best`, primary key participant + case); only a higher total replaces it. Board total = sum of bests; stamps = number of cases finished in this event.
+- **Ranking.** Equal totals share a rank (1, 1, 3). Hidden entries are removed BEFORE the public ranking; the host list keeps them in place and flagged. A hidden participant's own standing shows no rank.
+- **Board scope.** One open board per host (unique index); a board belongs to one Asia/Jakarta calendar day and closes at local midnight or when its owner closes it. My reading of "one host session": ownership is the staff USER who created it (so the host can log in again and still own it), not the login token.
+- **Purge.** A closed board, its runs, commands, bests, aliases and display credentials are deleted 24 h after closure. The sweep runs at start (covers downtime), every minute, and before requests.
+- **Credentials.** Participant and display credentials are 32 random bytes with a prefix; only their SHA-256 is stored. Participant credentials expire 24 h after the board's midnight at the latest and die with a clear or a purge. A run has no separate credential: it is reached with the participant credential plus its random run id (the frozen types carry no run credential).
+- **Stored personal data: none.** Alias = one of 12 invented words + three digits, unique per board. No name, contact, free text, IP address or device history is stored. Logs print counts and error messages only.
+
+### Checked by a one-off script (scratch, in-memory SQLite, not the test suite, not committed)
+Migration applies once. Jakarta day and midnight. One open board per host. Join stores only the hash; alias format; alias reroll before the first run, locked after. Case 3 run: miss = `retry`, repeat of a command = same acknowledgement and not applied twice, reused id with another body refused, wrong seq / stage / card / prototype key refused, another participant's run = not found, completion carries the server score (92), a finished run refuses decisions. A worse replay does not lower the best; a second case adds a stamp. Public board order, tie sharing a rank, the effect of hiding an entry (unhide was not run). Pairing code: only the hash stored, one use, expiry, revoke; a display credential is not a participant credential. Clear, close (join and decisions refused), close at local midnight, nothing purged one millisecond early, everything gone 24 h later. 500-participant cap with unique aliases. All 16 route patterns register in Express 5.
+
+### For Codex: security review
+1. **HTTP layer never ran.** Please read `http.ts` end to end: route order (fixed paths before `/:eventId`), every handler's auth call, that no handler answers before its auth check, status codes.
+2. **Authorisation.** `owner()` = staff session + `hostRooms` + `event.host_id === staff.id`. Is user-level ownership right, or should the board be bound to the login session? A second host cannot see or moderate another host's board (403).
+3. **Join code guessing.** 6 characters of a 32-letter alphabet. The only bound is 120 join attempts per minute per IP (right or wrong) and 300 per board. I deliberately did NOT add a "failed attempts block the IP" rule: a venue shares one public IP, so typos or stale phones would lock everyone out. Same reasoning for unknown participant credentials: a failure counter only turns further failures from 401 into 429 and never refuses a valid credential. Is that acceptable for a booth with no valuable prizes?
+4. **Pairing code.** 8 characters, 120 s, one use, one pending per board, 20 exchange attempts per minute per IP. The display credential then lives until the board is purged or revoked.
+5. **Origin policy.** Requests WITHOUT an Origin header are allowed (as for sockets). All state changes need a bearer credential in a header, so a cross-site form cannot make them; please confirm that is enough here, including for the two public POSTs (join, exchange).
+6. **Body cap.** I exempted `/api/investigator/events` from the global 128 kB JSON parser in `index.ts` so the router's 2 kB parser applies. Please check the path test (lower-cased prefix) cannot be bypassed.
+7. **Trusted proxy.** All per-IP limits rely on `req.ip` and `TRUST_PROXY_HOPS` being set correctly in production; with a wrong value every guest shares or spoofs one key.
+8. **Limiter state.** In memory, per process, capped (20 000 keys, 2 000 for per-board and per-host). A restart resets it.
+9. **Run growth.** 60 runs per participant per board, 500 participants: at most 30 000 runs and their commands per board before the purge.
+10. **Timing.** Credential lookups are by SHA-256 hash through an indexed equality query, not a constant-time compare of the secret.
+11. **Clear vs credentials.** After a clear, old participant credentials are gone (401); phones must join again. Intended?
+12. **SQLite.** Statements are prepared per call (not cached); all writes are synchronous transactions on the single connection the app already uses.
+
+### Not done / for card 6
+- Card 6 (phone, host panel, projector) consumes this; nothing in the client calls it yet, so switching the flag on shows nothing to a player.
+- The four limits I proposed in T-102 (`pollMs` 5000, `displayCodeSeconds` 120, `maxBodyBytes` 2048, `maxIdLength` 64) are used unchanged.
+- `GET /mine` returns only an OPEN board; after closing, the host reaches the final board by its id until the purge.
+- No audit-log entry is written for host actions (the story audit module is outside this card).
