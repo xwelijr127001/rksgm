@@ -106,3 +106,10 @@
 .iv-cerita a { position: relative; display: inline-flex; align-items: center; gap: 6px; height: 100%; padding: 0 8px; font-size: 15px; line-height: 20px; font-weight: 700; color: #9a4f00; text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 3px; }
 .iv-cerita a::after { content: ''; position: absolute; inset: 0 -8px -12px; }
 .iv-cerita a:focus-visible { outline: 3px solid #1d6fd1; outline-offset: 2px; }
+
+/* ---- T-106 (Investigator lengkap, kartu 5): tindakan berikutnya + arsip + hadiah di layar hasil; layar "Tanya lebih lanjut" */
+.iv-hasil-lanjut { display: grid; gap: 8px; }
+.iv-hadiah { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; margin: 0; font-size: 14px; line-height: 20px; font-weight: 800; color: #7a3e00; }
+.iv-hadiah > b { flex-basis: 100%; font-size: 13px; line-height: 16px; letter-spacing: .04em; text-transform: uppercase; }
+.iv-hadiah > span { display: inline-flex; align-items: center; gap: 6px; }
+.iv-tekan { display: grid; gap: 12px; align-content: start; }

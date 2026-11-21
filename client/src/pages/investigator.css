@@ -86,6 +86,9 @@
 .inv-hub-baris[data-asal] .inv-hub-baris-teks b { line-height: 18px; }
 .inv-hub-baris-teks .inv-hub-asal { font-size: 12px; line-height: 14px; color: #7a3e00; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .inv-hub-panah { font-size: 20px; line-height: 20px; font-weight: 800; color: #9a4f00; }
+/* T-106: hadiah seri di hub */
+.inv-hub-hadiah { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 12px; margin: 0; font-size: 14px; line-height: 20px; font-weight: 700; color: #ffd9a8; }
+.inv-hub-hadiah > span { display: inline-flex; align-items: center; gap: 6px; }
 .inv-hub-terkunci { display: flex; align-items: center; gap: 6px; min-height: 20px; padding: 0 10px; font-size: 14px; line-height: 20px; font-weight: 700; color: #ffd9a8; }
 .inv-hub-tamu { margin: 0; text-align: center; }
 .inv-hub .inv-hub-tamu .hp-tautan { min-height: 44px; color: #ffd9a8; }

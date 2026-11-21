@@ -31,6 +31,7 @@ import struk from '../../seni/investigasi/bukti/struk.png';
 import polisKasus2 from '../../seni/investigasi/bukti/polis-kasus2.png';
 import yusuf from '../../seni/investigasi/potret/yusuf.png';
 import agus from '../../seni/investigasi/potret/agus.png';
+import { PanelAssets } from './panel/aset';
 
 export interface SeniKasus {
   judul: string;
@@ -54,7 +55,15 @@ const KASUS_2: SeniKasus = {
   ikonBukti: { 'foto-interior': fotoInterior, struk, 'polis-kasus2': polisKasus2 },
   potret: { yusuf, agus },
 };
-const SENI: Readonly<Record<string, SeniKasus>> = { 'kasus-1': KASUS_1, 'kasus-2': KASUS_2 };
+/** T-106: kasus 3 "Satu Baris Terlalu Banyak": meja berkas Designer T-103 (kartu judul, layar tebakan), potret tiga kursi panel. */
+const KASUS_3: SeniKasus = {
+  judul: PanelAssets.desk,
+  kilas: PanelAssets.desk,
+  tebak: PanelAssets.desk,
+  ikonBukti: {},
+  potret: PanelAssets.portrait,
+};
+const SENI: Readonly<Record<string, SeniKasus>> = { 'kasus-1': KASUS_1, 'kasus-2': KASUS_2, 'kasus-3': KASUS_3 };
 
 export function seniKasus(kasus: string): SeniKasus {
   return SENI[kasus] ?? KASUS_1;

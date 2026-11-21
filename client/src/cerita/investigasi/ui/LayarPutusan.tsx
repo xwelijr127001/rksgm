@@ -12,23 +12,27 @@ import './investigasi.css';
 
 const URUTAN: readonly Putusan[] = ['tambahan', 'layak', 'polis'];
 
-export function LayarPutusan({ onPilih, ket, sebab }: {
+export function LayarPutusan({ onPilih, ket, sebab, nama, tanya }: {
   onPilih: (p: Putusan) => void;
   /** T-090 (Fullstack, kasus berbasis data): keterangan di bawah pertanyaan (teks jadi); tanpa nilai = teks kasus 1 di kamus. */
   ket?: string;
   /** T-090: alasan singkat tiap kartu putusan untuk kasus ini (teks jadi); tanpa nilai = alasan kasus 1 di kamus. */
   sebab?: Partial<Record<Putusan, string>>;
+  /** T-106: NAMA TAMPIL tiap putusan di kasus ini (kasus 3: 'tambahan' = "Teruskan untuk pemeriksaan"); tanpa nilai = nama kamus. */
+  nama?: Partial<Record<Putusan, string>>;
+  /** T-106: pertanyaan kasus ini; tanpa nilai = pertanyaan kamus (kasus 1-2). */
+  tanya?: string;
 }) {
   const [pilih, setPilih] = useState<Putusan | null>(null);
   return (
     <section className="iv-layar iv-putusan" data-layar-putusan="" aria-labelledby="iv-putusan-tanya">
-      <h2 id="iv-putusan-tanya" className="iv-tanya" tabIndex={-1} data-cer-fokus="">{t('investigasi.putusan.tanya')}</h2>
+      <h2 id="iv-putusan-tanya" className="iv-tanya" tabIndex={-1} data-cer-fokus="">{tanya ?? t('investigasi.putusan.tanya')}</h2>
       <p className="iv-label">{ket ?? t('investigasi.putusan.ket')}</p>
       <div className="iv-daftar" role="radiogroup" aria-labelledby="iv-putusan-tanya">
         {URUTAN.map((p) => (
           <button key={p} type="button" role="radio" aria-checked={pilih === p} className="iv-putusan-kartu" data-putusan={p} onClick={() => setPilih(p)}>
             <IkonInv nama={p} />
-            <span className="iv-putusan-teks"><b>{t(`investigasi.putusan.${p}`)}</b><small>{sebab?.[p] ?? t(`investigasi.putusan.${p}.sebab`)}</small></span>
+            <span className="iv-putusan-teks"><b>{nama?.[p] ?? t(`investigasi.putusan.${p}`)}</b><small>{sebab?.[p] ?? t(`investigasi.putusan.${p}.sebab`)}</small></span>
             <span className="iv-bukti-tanda" aria-hidden="true">{pilih === p ? '✓' : ''}</span>
           </button>
         ))}

@@ -97,10 +97,10 @@ const KASUS: KonfigInvestigasi = {
   ],
   // Urut terkumpul (buku catatan).
   bukti: [
-    { id: 'kartu-kejadian', judul: 'inv3.bukti.kejadian.judul', sumber: 'inv3.bukti.kejadian.sumber', ikon: 'kartu' },
-    { id: 'penawaran', judul: 'inv3.bukti.penawaran.judul', sumber: 'inv3.bukti.penawaran.sumber', ikon: 'polis' },
-    { id: 'foto-inspeksi', judul: 'inv3.bukti.foto.judul', sumber: 'inv3.bukti.foto.sumber', ikon: 'foto' },
-    { id: 'pesan-pengajuan', judul: 'inv3.bukti.pesan.judul', sumber: 'inv3.bukti.pesan.sumber', ikon: 'struk' },
+    { id: 'kartu-kejadian', judul: 'inv3.bukti.kejadian.judul', sumber: 'inv3.bukti.kejadian.sumber', ikon: 'kartu', kutipan: 'inv3.bukti.kejadian.1' },
+    { id: 'penawaran', judul: 'inv3.bukti.penawaran.judul', sumber: 'inv3.bukti.penawaran.sumber', ikon: 'polis', kutipan: 'inv3.bukti.penawaran.1' },
+    { id: 'foto-inspeksi', judul: 'inv3.bukti.foto.judul', sumber: 'inv3.bukti.foto.sumber', ikon: 'foto', kutipan: 'inv3.bukti.foto.1' },
+    { id: 'pesan-pengajuan', judul: 'inv3.bukti.pesan.judul', sumber: 'inv3.bukti.pesan.sumber', ikon: 'struk', kutipan: 'inv3.bukti.pesan.1' },
   ],
   tebak: {
     pilihan: (['sama', 'beda', 'belum'] as const).map((id) => ({ id, teks: `inv3.tebak.pilih.${id}` })),

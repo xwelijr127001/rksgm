@@ -33,6 +33,7 @@ import { LayarKeterangan, pakaiKeterangan } from '../investigasi/ui/LayarKeteran
 import { IkonInv } from '../investigasi/ui/dasar';
 import { niatHub, useRumahCerita } from '../investigasi/rute';
 import { buktiTerkumpul, pernyataanTercatat } from '../investigasi/status';
+import { kirimPilihanBernilai } from '../investigasi/acara';
 import { IkonAlat, selaPembicara } from '../ui/bagian';
 import { IsiCatatanKasus } from '../ui/CatatanKasus';
 import { DaftarIstilah, istilahBaris } from '../ui/KotakDialog';
@@ -136,7 +137,8 @@ function PemainHPInti({ ep, state, kendali, profil, bahasa, tx: txAsli }: {
   }, []);
   // T-080: 'periksa-sim' juga dua langkah (baris terakhir dibaca di adegan dulu, "Lanjut" membuka layar periksa SIM).
   const duaLangkah = inv?.jenis === 'catat' || jenisPeriksa(inv);
-  const layarInv = !!inv && lengkap && inv.jenis !== 'hasil-investigasi' && (!duaLangkah || sematUntuk === kunciNode);
+  // T-106: node "Tanya lebih lanjut" (`node.tekan`, tanpa jenis investigasi) juga digambar layar investigasi (PressPanel).
+  const layarInv = lengkap && (node.tekan ? true : !!inv && inv.jenis !== 'hasil-investigasi' && (!duaLangkah || sematUntuk === kunciNode));
 
   const pandang = pandangKini(ep, state);
   const tampilan: Tampilan = gerbang || layarInv ? 'investigasi'
@@ -169,17 +171,23 @@ function PemainHPInti({ ep, state, kendali, profil, bahasa, tx: txAsli }: {
   };
   // T-076: aksi layar investigasi (satu aksi mesin per layar; tanpa jeda ketuk ganda karena tombolnya milik layar itu sendiri).
   const lanjutInv = () => { if (kirim({ jenis: 'lanjut' })) aksiTerakhir.current = performance.now(); };
-  const pilihInv = (id: string): boolean => {
-    const ok = kirim({ jenis: 'pilih', node: state.node, pilihan: id });
+  // T-106: setiap pilihan lewat sambungan pilihan bernilai (investigasi/acara.ts). Main sendiri: langsung diterapkan seperti
+  // semula. Langkah dipandu (node dialog) mengirim kartu yang diterima lewat jalur yang sama; mesin menerimanya sebagai 'lanjut'.
+  const pilihInv = (id: string): boolean => kirimPilihanBernilai(ep, node, id, () => {
+    const ok = kirim(node.jenis === 'pilihan' ? { jenis: 'pilih', node: state.node, pilihan: id } : { jenis: 'lanjut' });
     if (ok) { aksiTerakhir.current = performance.now(); lupakanBalasan(); }
     return ok;
-  };
+  });
   const pilih = (id: string) => {
-    if (kirim({ jenis: 'pilih', node: state.node, pilihan: id })) {
-      aksiTerakhir.current = performance.now();
-      playSfx(pandang === 'obrolan' ? 'pesanKirim' : 'konfirmasi');
-      lupakanBalasan();
-    }
+    kirimPilihanBernilai(ep, node, id, () => {
+      const ok = kirim({ jenis: 'pilih', node: state.node, pilihan: id });
+      if (ok) {
+        aksiTerakhir.current = performance.now();
+        playSfx(pandang === 'obrolan' ? 'pesanKirim' : 'konfirmasi');
+        lupakanBalasan();
+      }
+      return ok;
+    });
   };
   const kirimAktivitas = useCallback((jawaban: MissionAnswer) => {
     if (kirim({ jenis: 'aktivitas', node: state.node, jawaban })) {

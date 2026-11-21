@@ -91,11 +91,9 @@ const KASUS: KonfigInvestigasi = {
   putusan: { polis: 30, tambahan: 15, layak: 0 },
   putusanLayar: { ket: 'inv2.putusan.ket', sebab: { layak: 'inv2.putusan.layak.sebab', tambahan: 'inv2.putusan.tambahan.sebab', polis: 'inv2.putusan.polis.sebab' } },
   koreksi: { judul: 'inv2.koreksi.judul', ket: 'inv2.koreksi.ket', baris: 'inv2.koreksi.baris' },
-  // T-104: kasus 3 (auto-2-inv-3) SUDAH ada. Tautan lanjut = SATU baris: ganti `segera` di bawah dengan
-  // `berikut: 'auto-2-inv-3'`. Baris itu sengaja belum dipasang: layar hasil hari ini (LayarInvestigasi, kartu 5) menggambar
-  // `berikut` sebagai kartu "Kasus 2" dan menyembunyikan tombol arsip, jadi layar hasil kasus 2 akan berubah. Kartu 5 memasangnya
-  // bersama layar hasil tiga kasus.
-  segera: 'inv2.hasil.kasus3',
+  // T-106: tautan lanjut ke kasus 3. Layar hasil (kartu 5) menggambar SATU tindakan berikutnya dari daftar kasus seri dan tetap
+  // menampilkan tombol arsip kasus ini.
+  berikut: 'auto-2-inv-3',
   // Kenang-kenangan: garis waktu perjalanan + pesan yang dikirim tamu, terbaca lagi di layar hasil tanpa main ulang.
   arsip: { judul: 'inv2.bukti.struk.judul', garis: ['inv2.garis.1', 'inv2.garis.2', 'inv2.garis.3'], sorot: 1, pesan: 'inv2.arsip.pesan' },
 };

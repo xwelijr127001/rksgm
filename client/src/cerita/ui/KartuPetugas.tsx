@@ -21,11 +21,18 @@ import { t, useBahasa } from '../../i18n';
 import { useLookPemain } from '../hp/lookPemain';
 import ikonInvUrl from '../seni/investigasi/ikon.png';
 import pangkatUrl from '../seni/investigasi/pangkat.png';
+import { PanelAssets } from '../investigasi/ui/panel/aset';
 import './akhir.css';
+import '../investigasi/ui/panel/panel.css';
 
 /** T-077: pangkat investigator (sel lencana di seni/investigasi/pangkat.png) dan jumlah slot stempel kasus. */
 const SEL_PANGKAT = { muda: 0, investigator: 1, senior: 2, kepala: 3 } as const;
-const SLOT_STEMPEL = 4;
+/** T-106: seri = tiga kasus. */
+const SLOT_STEMPEL = 3;
+/** T-106: gambar satu slot stempel: kasus 3 dari atlas ikon panel Designer (T-103, 'stempel-3'); undefined = slot kosong. */
+const gayaStempel = (kasus: string | undefined): { backgroundImage: string; backgroundPosition: string } => (kasus === 'kasus-3'
+  ? { backgroundImage: `url(${PanelAssets.icon.url})`, backgroundPosition: `${-16 * PanelAssets.icon.cells['stempel-3']}px 0` }
+  : { backgroundImage: `url(${ikonInvUrl})`, backgroundPosition: `${kasus ? -16 * (SEL_STEMPEL[kasus] ?? 7) : -128}px 0` });
 /** T-091: sel stempel (ikon.png, 16 px) per id kasus di `stempel`: kasus 1 merah (sel 7), kasus 2 nila (sel 14); slot kosong = sel 8. */
 const SEL_STEMPEL: Readonly<Record<string, number>> = { 'kasus-1': 7, 'kasus-2': 14 };
 export type KartuInvestigasi = { stempel: string[]; pangkat: keyof typeof SEL_PANGKAT; /** T-078: stempel terakhir baru saja didapat (dicap dengan animasi). */ baru?: boolean };
@@ -115,7 +122,8 @@ export function KartuPetugas({ nama, cap, ubahNama, varian = 'penuh', onBuka, lo
       aria-label={investigasi ? t('investigasi.kartu', { nama, pangkat: t(`investigasi.pangkat.${investigasi.pangkat}`), n: Math.min(SLOT_STEMPEL, investigasi.stempel.length), total: SLOT_STEMPEL }) : t('ceritaAkhir.kartuPetugas', { nama })}>
       {/* tali lanyard + jepit logam */}
       <span className="kp-tali" aria-hidden="true"><i /></span>
-      <div className="kp-kartu">
+      {/* T-106: pangkat Kepala = bingkai kartu petugas (seni T-103; digambar di luar kartu, tata letak tidak berubah) */}
+      <div className={investigasi?.pangkat === 'kepala' ? 'kp-kartu pn-bingkai-kepala' : 'kp-kartu'} data-bingkai={investigasi?.pangkat === 'kepala' ? 'kepala' : undefined}>
         <div className="kp-pita">
           <span className="kp-merek" aria-hidden="true"><Burung ukuran={20} />RAKSA</span>
           <span className="kp-nomor">{nomor}</span>
@@ -148,7 +156,7 @@ export function KartuPetugas({ nama, cap, ubahNama, varian = 'penuh', onBuka, lo
           {investigasi ? (
             <span className="kp-stempel" aria-hidden="true">
               {Array.from({ length: SLOT_STEMPEL }, (_, i) => (
-                <i key={i} data-isi={i < investigasi.stempel.length ? '' : undefined} data-baru={investigasi.baru && i === Math.min(SLOT_STEMPEL, investigasi.stempel.length) - 1 ? '' : undefined} style={{ backgroundImage: `url(${ikonInvUrl})`, backgroundPosition: `${i < investigasi.stempel.length ? -16 * (SEL_STEMPEL[investigasi.stempel[i]!] ?? 7) : -128}px 0` }} data-kasus={investigasi.stempel[i]} />
+                <i key={i} data-isi={i < investigasi.stempel.length ? '' : undefined} data-baru={investigasi.baru && i === Math.min(SLOT_STEMPEL, investigasi.stempel.length) - 1 ? '' : undefined} style={gayaStempel(investigasi.stempel[i])} data-kasus={investigasi.stempel[i]} />
               ))}
             </span>
           ) : <span className="kp-lulus"><Kilau className="kp-kilau-kaki" />{t('ceritaAkhir.kartuLulus')}</span>}

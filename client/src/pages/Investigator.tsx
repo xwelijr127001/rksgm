@@ -46,11 +46,14 @@ import { LOOK_BAWAAN, useProfil } from '../state/profil';
 import { useHalaman } from '../ui/halaman';
 import { Modal } from '../ui/kit';
 import { BingkaiDashcam } from '../cerita/hp/arena/ArenaDashcam';
-import { aksiUtamaHub, daftarKasusHub, tamuBaruSemuaKasus, type KasusHub } from '../cerita/investigasi/hub';
+import { EVENT_QUERY_PARAM } from '@shared/investigator/event';
+import { entriAcara } from '../cerita/investigasi/acara';
+import { aksiUtamaHub, daftarKasusHub, tamuBaruSemuaKasus, tujuanPangkat, type KasusHub } from '../cerita/investigasi/hub';
 import { RUTE_HUB, ruteKasus, stateNiat } from '../cerita/investigasi/rute';
-import { bacaRekaman, berlanggananInvestigasi, pangkat, STEMPEL_SENIOR, TOTAL_MAKS, totalSkor, versiInvestigasi } from '../cerita/investigasi/simpan';
+import { bacaRekaman, berlanggananInvestigasi, hadiahRekaman, pangkatRekaman, stempelSeri, TOTAL_MAKS, totalSkor, versiInvestigasi } from '../cerita/investigasi/simpan';
 import { SKOR_MAKS } from '../cerita/investigasi/skor';
-import { IkonInv, stempelKasus } from '../cerita/investigasi/ui/dasar';
+import { IkonStempel } from '../cerita/investigasi/ui/dasar';
+import { PanelAward } from '../cerita/investigasi/ui/panel';
 import { seniKasus } from '../cerita/investigasi/ui/seniKasus';
 import { berlanggananCerita, mulaiBaru, versiPenyimpananCerita } from '../cerita/simpan';
 import { teksCerita } from '../cerita/teks';
@@ -84,6 +87,9 @@ export default function Investigator() {
   const tx = (k: KasusHub, kunci: string) => teksCerita(k.ep, kunci, bahasa);
   const judul = (k: KasusHub) => t('hubInv.kasusJudul', { n: k.nomor, judul: tx(k, k.konfig.judul) });
   const k = aksi.kasus;
+  // T-106: titik pasang papan acara (kartu 6 mendaftarkan komponennya; tanpa pendaftar tidak ada yang tampil).
+  const Entri = entriAcara();
+  const entri = Entri ? <Entri kode={typeof window === 'undefined' ? null : new URLSearchParams(window.location.search).get(EVENT_QUERY_PARAM)} /> : null;
   const tab = (x: KasusHub) => t('hubInv.berkasTab', { n: x.nomor, judul: tx(x, x.konfig.judul) });
   // T-100: panggung layar judul (hiasan; nama seri sudah ada di h1 kepala halaman).
   const panggung = (
@@ -124,6 +130,7 @@ export default function Investigator() {
               </div>
             </div>
             <Link className="primary-action iv-tombol inv-hub-utama" to={ruteKasus(k.nomor)} state={stateNiat('lewati-judul')} data-hub-utama="buka">{t('hubInv.buka', { n: k.nomor })}</Link>
+            {entri}
           </section>
         </main>
       </div>
@@ -132,7 +139,9 @@ export default function Investigator() {
 
   const nama = profil?.nickname ?? tx(k, 'kenalan.namaBawaan');
   const look = profil?.look ?? LOOK_BAWAAN;
-  const menuju = r.stempel.length === STEMPEL_SENIOR - 1;
+  // T-106: tujuan pangkat berikutnya (N kasus lagi menuju Senior; sesudah tiga stempel: N poin lagi menuju Kepala) dan hadiah seri.
+  const tujuan = tujuanPangkat(r);
+  const hadiah = hadiahRekaman(r);
   // "Main lagi" = kasus itu dari kartu judulnya (progres ceritanya diarsipkan seperti "Main lagi" di daftar episode); skor terbaik
   // dan stempel ada di rekaman Investigator, jadi tidak ikut terhapus.
   const mainLagi = () => { mulaiBaru(k.ep); nav(ruteKasus(k.nomor)); };
@@ -157,16 +166,16 @@ export default function Investigator() {
           )}
             </div>
           </div>
-          <KartuPetugas nama={nama} look={look} investigasi={{ stempel: r.stempel, pangkat: pangkat(r.stempel.length), baru: false }} />
+          <KartuPetugas nama={nama} look={look} investigasi={{ stempel: stempelSeri(r), pangkat: pangkatRekaman(r), baru: false }} />
           <p className="iv-total" data-total-kasus="">
             <b>{t('hubInv.total')} <span data-total-skor="">{totalSkor(r)}</span> / {TOTAL_MAKS}</b>
-            {menuju ? <em data-menuju-pangkat="">{t('hubInv.menuju')}</em> : null}
+            {tujuan ? <em data-menuju-pangkat={tujuan.jenis}>{t(tujuan.jenis === 'senior' ? 'hubInv.menujuSenior' : 'hubInv.menujuKepala', { n: tujuan.kurang })}</em> : null}
           </p>
           <ul className="inv-hub-daftar" aria-label={t('hubInv.daftar')}>
             {daftar.map((x) => (
               <li key={x.konfig.kasus}>
                 <Link className="inv-hub-baris" to={ruteKasus(x.nomor)} data-kasus={x.konfig.kasus} data-status={x.status} data-stempel={x.stempel ? '' : undefined} data-asal={x.konfig.cerita ? '' : undefined}>
-                  <IkonInv nama={x.stempel ? stempelKasus(x.konfig.kasus) : 'stempel-kosong'} />
+                  <IkonStempel kasus={x.konfig.kasus} terisi={x.stempel} />
                   <span className="inv-hub-baris-teks">
                     <b>{judul(x)}</b><small>{statusBaris(x)}</small>
                     {x.konfig.cerita ? <small className="inv-hub-asal" data-asal-cerita={x.konfig.cerita.episode}>{tx(x, x.konfig.cerita.asal)}</small> : null}
@@ -175,8 +184,14 @@ export default function Investigator() {
                 </Link>
               </li>
             ))}
-            <li className="inv-hub-terkunci" data-kasus-terkunci=""><IkonInv nama="kunci" kali={1} /><span>{t('hubInv.terkunci')}</span></li>
           </ul>
+          {/* T-106: hadiah seri yang sudah diraih (lencana dua kasus, segel panel; bingkai Kepala ada di kartu petugas) */}
+          {hadiah.length ? (
+            <p className="inv-hub-hadiah" data-hadiah={hadiah.join(' ')}>
+              {hadiah.map((a) => <span key={a}>{a === 'bingkai-kepala' ? null : <PanelAward id={a} kali={1} />}{t(`investigasi.hadiah.${a}`)}</span>)}
+            </p>
+          ) : null}
+          {entri}
           <p className="iv-tamu inv-hub-tamu"><button type="button" className="hp-tautan" data-tamu-baru="" aria-haspopup="dialog" onClick={() => setTanyaTamu(true)}>{t('hubInv.tamuBaru')}</button></p>
         </section>
       </main>

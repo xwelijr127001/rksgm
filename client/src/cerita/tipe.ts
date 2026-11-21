@@ -259,6 +259,8 @@ export interface BuktiInvestigasi {
   judul: KunciTeks;
   sumber: KunciTeks;
   ikon: 'rekaman' | 'foto' | 'kartu' | 'struk' | 'polis';
+  /** T-106: kutipan PERSIS kartu ini (kunci teks): keterangan lembar "perbesar" dan kartu babak panel. Opsional (kasus 3). */
+  kutipan?: KunciTeks;
 }
 
 /** T-102: pembuat pernyataan kasus 1-2 (tabel potret lama berindeks tipe ini). */

@@ -12,14 +12,15 @@ import { createContext, useContext, type CSSProperties } from 'react';
 import { t } from '../../../i18n';
 import type { KunciTeks } from '../../tipe';
 import ikonUrl from '../../seni/investigasi/ikon.png';
+import { PanelIcon } from './panel/seni';
 
 export type { Bukti, Pernyataan, HasilKeberatan, Putusan } from '../status';
 export type { SkorKasus } from '../skor';
 export type { Pangkat } from '../simpan';
 import type { Pangkat } from '../simpan';
 export const DAFTAR_PANGKAT: readonly Pangkat[] = ['muda', 'investigator', 'senior', 'kepala'];
-/** Jumlah kasus (= slot stempel di kartu petugas): pangkat tertinggi pada 4 stempel. */
-export const JUMLAH_KASUS = 4;
+/** Jumlah kasus seri (= slot stempel di kartu petugas). T-106: tiga kasus; Kepala = tiga stempel dan total >= 255. */
+export const JUMLAH_KASUS = 3;
 
 export type Tx = (k: KunciTeks) => string;
 const KonteksTeks = createContext<Tx | null>(null);
@@ -54,4 +55,13 @@ export function IkonInv({ nama, kali = 2, className = '' }: { nama: NamaIkon; ka
     backgroundPosition: `${-SEL_IKON[nama] * 16 * kali}px 0`,
   };
   return <i className={'iv-ikon ' + className} aria-hidden="true" style={gaya} />;
+}
+
+/**
+ * T-106: ikon stempel sebuah kasus (hub, daftar kasus). Kasus 1-2 dari atlas ikon lama; kasus 3 dari atlas ikon panel Designer
+ * (T-103, 'stempel-3'); `terisi` false = slot kosong.
+ */
+export function IkonStempel({ kasus, terisi = true, kali = 2 }: { kasus: string; terisi?: boolean; kali?: 1 | 2 | 3 }) {
+  if (terisi && kasus === 'kasus-3') return <PanelIcon nama="stempel-3" kali={kali} className="iv-ikon" />;
+  return <IkonInv nama={terisi ? stempelKasus(kasus) : 'stempel-kosong'} kali={kali} />;
 }

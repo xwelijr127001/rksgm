@@ -4965,3 +4965,58 @@ Carried over unchanged: Case 2's PIC gate. The two new press answers in cases 1-
 - Card 5: draw `panel`, `panel-koreksi` and `node.tekan`; switch the result screen to `hasilKasusLengkap` / `skorKasusLengkap`; read `putusanLayar.nama`; case 3 title art and stamp; flip Case 2's `berikut`; `KASUS_TERSEDIA` and rank for three cases. Text ready for it: round names `inv3.panel.<round>.nama`, hints, correction lines.
 - Script choices of mine worth a look: the message extract is handed over with the claimant present and consenting (round 2 then quotes his own words back); the miss explanations are spoken by the chair, not by Miss Raksa on the phone; Miss Raksa opens the case, explains the conclusion and closes it.
 - Five minutes is not measured: case 3 has more reading than cases 1-2 (two rounds, two replies).
+
+
+## T-106 (2026-11-21): Investigator lengkap CARD 5 · solo integration and rewards (Fullstack)
+
+Plan section 5. Gate: root `npm run typecheck` exit 0 (server + client), `client/dist` rebuilt. `server/dist` not rebuilt (no server or shared source touched). Not committed, not deployed. NOT opened in a browser or on a phone (owner rule): **the new screens have never been seen by anyone.** Server, `pages/Host`, `pages/Projector`, full Episode 1 (auto-2) and Episode 1 Dev are not edited.
+
+### Is this build safe to deploy without cards 4 and 6?
+- **By code and by the engine walks: yes, with one condition.** Every node kind of all three cases now has a screen (the empty-screen stop at the first panel node from T-104 is gone), every outcome of case 3 reaches the result, cases 1-2 keep their node ids, saves and scores, and the event board is hidden: nothing registers the event entry or the event scorer, so the hub shows nothing about it and every choice is applied at once as before.
+- **The condition: someone must play Case 3 once on a phone before it goes live.** The panel round, the press panel, the exhibit sheet, the case 3 title art, the three-row hub and the new result rows were mounted from their contracts and type-checked, not looked at. I cannot say they look right, only that they are wired.
+
+### What was built
+**Case 3 end to end** (`investigasi/LayarInvestigasi.tsx`, `cerita/hp/PemainHP.tsx`)
+- `panel` nodes draw the Designer's `PanelRound` (frozen props): cards = that round's `evidenceIds` already collected, in screen order, each with its exact excerpt (new optional `BuktiInvestigasi.kutipan`, set on the four case 3 cards); attempt 1 and 2 pass the round's hint; the guided attempt dims the cards that are not accepted. A miss plays the low buzz and goes to the chair's sentence about that card's limit; round 1 is never offered again.
+- `panel-koreksi` nodes draw the notebook page with that round's `correctionKey`. The notebook now shows EVERY corrected statement (two in case 3).
+- "Tanya lebih lanjut" nodes (`node.tekan`) draw the Designer's `PressPanel`: the statement, the button "Tanya lebih lanjut", and "Lanjut tanpa bertanya"; after asking, question and answer are open and "Tutup" continues. This replaces the plain two-button choice of T-104 in all three cases. An opened question is written under its witness in the notebook (question + answer), so it can be reread any time.
+- Evidence screens of cards that have Designer art get one extra button "Perbesar: <judul>" that opens `PanelExhibit` (photo and close-up, message bubble, paper sheet) before the card is saved.
+- Verdict screen: case 3 shows its own question and the names "Teruskan untuk pemeriksaan" / "Minta klarifikasi saja" / "Nyatakan seluruh klaim curang" (`putusanLayar.nama`); cases 1-2 keep the dictionary names.
+- Result: all cases are scored through the shared rubric (`hasilKasusLengkap` + `skorKasusLengkap`; cases 1-2 give the same numbers as before). Practice of the weakest step: in case 3 it is ONE round (20 points) or the conclusion or the message; a round practice runs first try, second try, guided with the same sentences as the case and never changes the best score.
+- Case 3 title and hunch art = the Designer's desk picture; case 3 stamp = the Designer's amber stamp (hub list, officer card).
+
+**Rewards** (`investigasi/simpan.ts`, `investigasi/hub.ts`, `cerita/ui/KartuPetugas.tsx`, `pages/Investigator.tsx`)
+- Series = the three cases of the rubric manifest; total "x / 300"; officer card has three stamp slots.
+- Rank from DISTINCT stamps and the sum of personal bests (shared `rankOf`): 0 = Muda, 1-2 = Investigator, 3 = Senior, 3 and total >= 255 = Kepala. The old `pangkat(stampCount)` is removed; both callers use `pangkatRekaman(record)`.
+- Awards (shared `awardsOf`): two-case badge at 2 stamps, panel seal at 3, Kepala frame on the officer card (class `pn-bingkai-kepala`). A new award is announced once on the result that earns it ("Hadiah baru"), then remembered; Senior and Kepala earned in the same result show seal and frame together. The hub lists the awards already held.
+- Goal line: "N kasus lagi menuju Senior" after the first stamp, "N poin lagi menuju Kepala" after three stamps, nothing once Kepala.
+- ONE next action on every result, recomputed from the record after that result (`aksiLanjut`): the next file without a stamp (case order); if all have stamps, replay the case with the most points still to gain (ties = lowest case number); if everything is perfect, only the archive. Under it, on every result, the archive button of that case (unlocked by finishing it once). **Case 2 keeps its archive button and now links to Case 3** (`berikut: 'auto-2-inv-3'` switched on; the old "Kasus 3 · segera hadir" line is gone). Case 1 now has an archive too (corrected statement + message; it has no timeline data).
+- Archive shows the message of the BEST run. Older records without recorded choices: if the open run is not the best one, the archive shows the facts only (timeline and corrected statements).
+
+**Device record** (`raksa:investigasi:v1`, same key, same `versi: 1`)
+- Old two-case records are read as they are: scores, stamps and title stay; the total simply reads "/ 300". Unknown case ids are kept but not counted.
+- Two new OPTIONAL fields: `penjelasan` (choice ids of the best run per case: verdict, message, round outcomes) and `hadiah` (awards already announced). "Tamu baru" clears both.
+
+**Hub** (`pages/Investigator.tsx`): three case rows from the registry, the "Kasus 3 · segera hadir" lock row removed, new goal line, awards line, case 3 stamp icon. The title screen (fresh device) is unchanged apart from the event mount point.
+
+**Hooks for the event board, inert until card 6 registers something** (new `investigasi/acara.ts`)
+- Scored-choice adapter `kirimPilihanBernilai`: the phone player sends every choice through it. Solo: applied at once (as before). With a scorer registered (`pasangPenilaiAcara`): a scored choice (round card, verdict, message; stage ids = the shared rubric's, same as `Decision.stageId`) is applied only after the scorer resolves true. The guided card also goes through it.
+- Hub mount point: `pasangEntriAcara(Component)`; the hub renders it with the `?acara=` code on both hub states. Nothing is registered now.
+- Separate story save for one event run: `episodeAcara(ep, runId)` (same episode, id `<id>@acara-<runId>`, so its story save is its own and resumes by run id). Not used by anyone yet; card 6 must check the places that look an episode up by id.
+
+### Edits outside the card's listed files (additive)
+- `cerita/tipe.ts`: optional `BuktiInvestigasi.kutipan`. `episode/auto-2-inv-3/episode.ts`: the four excerpts. `episode/auto-2-inv-2/episode.ts`: the onward link. `i18n/kamus/investigasi.ts` and `hubInv.ts`: award names, goal lines, next-action labels (id/en/zh; en and zh are mine). `investigasi/ui/alur.css`, `buku.css`, `pages/investigator.css`: small blocks marked T-106.
+
+### Checked by one-off scripts (scratch, not the test suite, not committed)
+- Old two-case record: unchanged after reading, rank Investigator, total 185 / 300, goal "1 kasus lagi", two-case badge. Rank table at 0 / 1 / 2 / 3 stamps and 254 vs 255. Best run and its choices survive a worse replay and a tie; an award is stored once.
+- Next action for six record shapes (next unstamped file in case order; then most recoverable points; then archive only).
+- Adapter: solo applies at once; with a scorer the choice waits and is applied after "true", not after "false"; unscored nodes never wait. Stage ids for case 3 and case 1 nodes.
+- The T-104 engine walk still passes: validator 0 messages for cases 1-3, all 162 case 3 combinations reach a result with the rubric score.
+
+### Not done / open
+- **Nothing seen on a screen.** First things to look at: a panel round at 360 px, the exhibit sheet, the press panel on the toll officer in case 1, the case 3 result, the Kepala frame on the officer card, the hub with three rows.
+- **Heights (by reasoning, not measured):** every result now has two rows under the officer card (next action + archive) and sometimes the "Hadiah baru" line; the hub's returning state has a third case row instead of the short lock row (about +28 px on a screen that was 524 of 544) plus the awards line. Expect a short scroll at 360 x 640 in those states. Case 3 evidence screens have one more 56 px button.
+- The interview view with the seated witness (`LayarKeterangan`) is not extended to the case 3 cast: their interviews use the general stage with their sprites.
+- No reaction portrait is shown after a correct card (the Designer's `PanelReaction` is unused); the reply dialog follows directly.
+- The old "Kasus 2" teaser card and its preview sheet are no longer shown on case 1's result (the next-action row replaces them); the components are still in the folder. The trial counter of voluntary Case 2 taps still counts taps on that row.
+- `[konfirmasi PIC]`: no new policy or panel wording in this card. New player-facing words are award names, goal lines and button labels. The T-104 list stands.

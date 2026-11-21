@@ -10,8 +10,19 @@
  *   sepuluh tamu). Penghitung PERANGKAT, bukan milik satu tamu: `tamuBaru()` TIDAK mengenolkannya.
  * Semua akses dibungkus try/catch; bila localStorage diblokir / penuh, salinan di memori berlaku selama tab terbuka.
  * Isi yang rusak atau versi lain dibaca sebagai rekaman kosong (tidak melempar).
+ *
+ * T-106 (Investigator lengkap, kartu 5): seri = TIGA kasus, total / 300. Kunci dan `versi: 1` TIDAK berubah; rekaman lama (dua
+ * kasus) dibaca apa adanya dan skor, stempel serta pangkatnya bertahan. Dua field OPSIONAL baru:
+ *   penjelasan: { <idKasus>: { putusan, pesan, babak? } }   pilihan pada permainan TERBAIK kasus itu (arsip kasus menampilkan
+ *                                                           pesannya; rekaman lama tanpa field ini = arsip berisi ringkasan fakta)
+ *   hadiah: [<idHadiah>, ...]                                hadiah seri yang SUDAH diumumkan (tiap hadiah diumumkan sekali)
+ * Pangkat (rubrik bersama `rankOf`): 0 stempel Muda, 1-2 Investigator, 3 Senior, 3 stempel dan total terbaik >= 255 Kepala.
  */
+import { AWARD_IDS, awardsOf, rankOf, SENIOR_STAMPS, SERIES_CASE_IDS, SERIES_MAX, type AwardId } from '@shared/investigator/rubric';
 import { SKOR_MAKS } from './skor';
+
+/** Pilihan pada permainan terbaik sebuah kasus (id pilihan saja, tanpa teks). */
+export interface PenjelasanTerbaik { putusan: string; pesan: string; babak?: string[] }
 
 export interface RekamanInvestigasi {
   versi: 1;
@@ -19,6 +30,10 @@ export interface RekamanInvestigasi {
   stempel: string[];
   /** T-087: jumlah ketukan pratinjau kasus 2 di perangkat ini (bertahan melewati "Tamu baru"). */
   intipKasus2: number;
+  /** T-106: pilihan pada permainan terbaik tiap kasus (opsional; rekaman lama tidak punya). */
+  penjelasan?: Record<string, PenjelasanTerbaik>;
+  /** T-106: hadiah seri yang sudah diumumkan di layar hasil (opsional). */
+  hadiah?: AwardId[];
 }
 
 export type Pangkat = 'muda' | 'investigator' | 'senior' | 'kepala';
@@ -66,7 +81,23 @@ export function bersihkanRekaman(data: unknown): RekamanInvestigasi {
   }
   const stempel = Array.isArray(d.stempel) ? [...new Set(d.stempel.filter((x): x is string => typeof x === 'string' && x.length > 0))] : [];
   const intip = typeof d.intipKasus2 === 'number' && Number.isFinite(d.intipKasus2) ? Math.max(0, Math.min(1e6, Math.floor(d.intipKasus2))) : 0;
-  return { versi: 1, terbaik, stempel, intipKasus2: intip };
+  const hasil: RekamanInvestigasi = { versi: 1, terbaik, stempel, intipKasus2: intip };
+  const d2 = data as { penjelasan?: unknown; hadiah?: unknown };
+  const idSah = (x: unknown): x is string => typeof x === 'string' && x.length > 0 && x.length <= 40;
+  if (d2.penjelasan && typeof d2.penjelasan === 'object' && !Array.isArray(d2.penjelasan)) {
+    const penjelasan: Record<string, PenjelasanTerbaik> = {};
+    for (const [k, v] of Object.entries(d2.penjelasan as Record<string, unknown>)) {
+      const p = v as { putusan?: unknown; pesan?: unknown; babak?: unknown } | null;
+      if (!k || !p || typeof p !== 'object' || !idSah(p.putusan) || !idSah(p.pesan)) continue;
+      penjelasan[k] = { putusan: p.putusan, pesan: p.pesan, ...(Array.isArray(p.babak) && p.babak.length <= 8 && p.babak.every(idSah) ? { babak: p.babak as string[] } : {}) };
+    }
+    if (Object.keys(penjelasan).length) hasil.penjelasan = penjelasan;
+  }
+  if (Array.isArray(d2.hadiah)) {
+    const hadiah = AWARD_IDS.filter((a) => (d2.hadiah as unknown[]).includes(a));
+    if (hadiah.length) hasil.hadiah = hadiah;
+  }
+  return hasil;
 }
 
 export function bacaRekaman(): RekamanInvestigasi {
@@ -79,39 +110,63 @@ export function bacaRekaman(): RekamanInvestigasi {
  * Catat kasus yang selesai: skor terbaik = maks(lama, baru), stempel kasus ditambahkan sekali. Idempoten (memanggilnya dua kali
  * dengan nilai sama tidak mengubah apa pun), jadi aman dari efek ganda React StrictMode dan muat ulang di layar hasil.
  */
-export function catatHasil(kasus: string, total: number): RekamanInvestigasi {
+export function catatHasil(kasus: string, total: number, penjelasan?: PenjelasanTerbaik): RekamanInvestigasi {
   const r = bacaRekaman();
   if (!kasus) return r;
   const baru = Math.max(0, Math.min(SKOR_MAKS, Math.round(Number.isFinite(total) ? total : 0)));
   const lama = r.terbaik[kasus];
   const naik = lama === undefined || baru > lama;
   const stempelBaru = !r.stempel.includes(kasus);
-  if (!naik && !stempelBaru) return r;
+  // T-106: pilihan permainan terbaik ikut disimpan saat skor terbaik naik, atau saat skornya sama dan belum ada catatan pilihan
+  // (rekaman lama). Seri = permainan terbaik yang pertama yang tercatat.
+  const catatPilihan = !!penjelasan && (naik || (baru === lama && !r.penjelasan?.[kasus]));
+  if (!naik && !stempelBaru && !catatPilihan) return r;
   const berikut: RekamanInvestigasi = {
     ...r,
     terbaik: naik ? { ...r.terbaik, [kasus]: baru } : r.terbaik,
     stempel: stempelBaru ? [...r.stempel, kasus] : r.stempel,
+    ...(catatPilihan ? { penjelasan: { ...r.penjelasan, [kasus]: penjelasan! } } : {}),
   };
   tulisMentah(JSON.stringify(berikut));
   return berikut;
 }
 
-/** Jumlah skor terbaik semua kasus. */
+/**
+ * T-106: kasus seri (urut nomor) = manifes rubrik bersama. Total terbaik ditampilkan "x / 300". Id kasus lain di rekaman lama
+ * tetap disimpan tetapi tidak dihitung.
+ */
+export const KASUS_TERSEDIA: readonly string[] = SERIES_CASE_IDS;
+export const TOTAL_MAKS = SERIES_MAX;
+/** Stempel yang dibutuhkan untuk pangkat Senior (= semua kasus seri). */
+export const STEMPEL_SENIOR = SENIOR_STAMPS;
+
+/** Jumlah skor terbaik kasus-kasus seri. */
 export function totalSkor(r: Pick<RekamanInvestigasi, 'terbaik'> = bacaRekaman()): number {
-  return Object.values(r.terbaik).reduce((a, b) => a + b, 0);
+  return KASUS_TERSEDIA.reduce((a, k) => a + (Object.prototype.hasOwnProperty.call(r.terbaik, k) ? r.terbaik[k]! : 0), 0);
 }
 
-/**
- * T-090: kasus yang bisa dimainkan (urut nomor). Total terbaik ditampilkan "x / (100 x jumlah ini)", mis. "185 / 200".
- */
-export const KASUS_TERSEDIA: readonly string[] = ['kasus-1', 'kasus-2'];
-export const TOTAL_MAKS = SKOR_MAKS * KASUS_TERSEDIA.length;
-/** Stempel yang dibutuhkan untuk pangkat Senior. */
-export const STEMPEL_SENIOR = 3;
+/** Stempel seri yang BERBEDA, urut didapat (kartu petugas menggambarnya dalam urutan ini). */
+export function stempelSeri(r: Pick<RekamanInvestigasi, 'stempel'> = bacaRekaman()): string[] {
+  return [...new Set(r.stempel)].filter((k) => KASUS_TERSEDIA.includes(k));
+}
 
-/** Pangkat dari jumlah stempel: 0 muda, >= 1 investigator, >= 3 senior, >= 4 kepala. */
-export function pangkat(stempel: number): Pangkat {
-  return stempel >= 4 ? 'kepala' : stempel >= STEMPEL_SENIOR ? 'senior' : stempel >= 1 ? 'investigator' : 'muda';
+type Capaian = Pick<RekamanInvestigasi, 'stempel' | 'terbaik'>;
+/** Pangkat dari stempel yang berbeda dan total terbaik (rubrik bersama): Senior = 3 stempel; Kepala = 3 stempel dan >= 255 / 300. */
+export function pangkatRekaman(r: Capaian = bacaRekaman()): Pangkat {
+  return rankOf(stempelSeri(r).length, totalSkor(r));
+}
+
+/** Hadiah seri yang sudah diraih: lencana dua kasus (2 stempel), segel panel (3 stempel), bingkai Kepala. */
+export function hadiahRekaman(r: Capaian = bacaRekaman()): AwardId[] {
+  return awardsOf(stempelSeri(r).length, totalSkor(r));
+}
+
+/** Tandai hadiah sebagai sudah diumumkan (idempoten). */
+export function catatHadiah(id: readonly AwardId[]): void {
+  const r = bacaRekaman();
+  const baru = id.filter((a) => !r.hadiah?.includes(a));
+  if (!baru.length) return;
+  tulisMentah(JSON.stringify({ ...r, hadiah: AWARD_IDS.filter((a) => r.hadiah?.includes(a) || baru.includes(a)) }));
 }
 
 /** "Tamu baru": hapus HANYA rekaman mode investigasi di perangkat ini (penghitung uji coba `intipKasus2` bertahan). */

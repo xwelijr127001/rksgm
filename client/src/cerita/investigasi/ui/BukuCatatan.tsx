@@ -107,7 +107,10 @@ export interface PilihBukti {
 /** T-088: pernyataan `id` sudah DIKOREKSI: kalimat lamanya dicoret, `teks` ditulis di bawahnya (tinta merah); `baru` = dengan gerak. */
 export interface KoreksiPernyataan { id: string; teks: string; baru?: boolean }
 
-function BarisKeterangan({ p, keadaan, sorot, teks, koreksi }: { p: Pernyataan; keadaan: 'tersemat' | 'baru' | 'menunggu'; sorot: boolean; teks: Tx; koreksi?: KoreksiPernyataan }) {
+/** T-106: "Tanya lebih lanjut" yang sudah dibuka pada pernyataan `id`: pertanyaan dan jawabannya ditulis di bawah pernyataan itu. */
+export interface TanyaPernyataan { id: string; tanya: string; jawab: string }
+
+function BarisKeterangan({ p, keadaan, sorot, teks, koreksi, tanya }: { p: Pernyataan; keadaan: 'tersemat' | 'baru' | 'menunggu'; sorot: boolean; teks: Tx; koreksi?: KoreksiPernyataan; tanya?: TanyaPernyataan }) {
   return (
     <li className="bk-baris" data-pernyataan={p.id} data-keadaan={keadaan} data-sorot={sorot ? '' : undefined} data-koreksi={koreksi ? (koreksi.baru ? 'baru' : 'ada') : undefined}>
       <span className="bk-polaroid" aria-hidden="true">
@@ -118,6 +121,7 @@ function BarisKeterangan({ p, keadaan, sorot, teks, koreksi }: { p: Pernyataan; 
         <b className="bk-siapa">{t(`investigasi.siapa.${p.siapa}`)}</b>
         <q className="bk-tulisan">{teks(p.teks)}</q>
         {koreksi ? <ins className="bk-tulisan bk-koreksi">{koreksi.teks}</ins> : null}
+        {tanya ? <span className="bk-tanya" data-tanya-lanjut=""><b>{t('investigasi.tanyaLanjut')}</b><span>{tanya.tanya}</span><q className="bk-tulisan">{tanya.jawab}</q></span> : null}
       </span>
     </li>
   );
@@ -150,7 +154,7 @@ function SlipBukti({ b, pilih, teks, baru }: { b: Bukti; pilih?: PilihBukti; tek
   );
 }
 
-export function BukuCatatan({ pernyataan, bukti, tx, menunggu, pernyataanBaru, sorotPernyataan, pilihBukti, tanpaPensil = false, buktiBaru, halaman = 'semua', koreksi }: {
+export function BukuCatatan({ pernyataan, bukti, tx, menunggu, pernyataanBaru, sorotPernyataan, pilihBukti, tanpaPensil = false, buktiBaru, halaman = 'semua', koreksi, tanya }: {
   pernyataan: Pernyataan[];
   bukti: Bukti[];
   tx?: Tx;
@@ -164,9 +168,12 @@ export function BukuCatatan({ pernyataan, bukti, tx, menunggu, pernyataanBaru, s
   /** T-080: 'bukti' = hanya halaman "Bukti" (layar "Bukti baru!", supaya muat bersama kalimat temuannya). */
   halaman?: 'semua' | 'bukti' | 'keterangan';
   /** T-088: pernyataan yang sudah dikoreksi (KEBERATAN berhasil): "Laporan dikoreksi: lajur 2". */
-  koreksi?: KoreksiPernyataan;
+  koreksi?: KoreksiPernyataan | readonly KoreksiPernyataan[];
+  /** T-106: "Tanya lebih lanjut" yang sudah dibuka (satu per pernyataan). */
+  tanya?: readonly TanyaPernyataan[];
 }) {
   const teks = useTx(tx);
+  const semuaKoreksi: readonly KoreksiPernyataan[] = !koreksi ? [] : 'id' in koreksi ? [koreksi] : koreksi;
   const jumlah = pernyataan.length;
   return (
     <section className="bk" aria-label={t('investigasi.bukuInvestigator')} data-buku-catatan="" data-halaman={halaman} style={{ '--bk-pensil': `url(${pensilUrl})` } as CSSProperties}>
@@ -176,7 +183,7 @@ export function BukuCatatan({ pernyataan, bukti, tx, menunggu, pernyataanBaru, s
         <h3 className="bk-judul"><IkonInv nama="pin" kali={1} />{t('investigasi.keterangan')}<span className="iv-hitung">{jumlah}</span></h3>
         {jumlah || menunggu ? (
           <ul className="bk-daftar">
-            {pernyataan.map((p) => <BarisKeterangan key={p.id} p={p} keadaan={p.id === pernyataanBaru ? 'baru' : 'tersemat'} sorot={p.id === sorotPernyataan} teks={teks} koreksi={koreksi?.id === p.id ? koreksi : undefined} />)}
+            {pernyataan.map((p) => <BarisKeterangan key={p.id} p={p} keadaan={p.id === pernyataanBaru ? 'baru' : 'tersemat'} sorot={p.id === sorotPernyataan} teks={teks} koreksi={semuaKoreksi.find((k) => k.id === p.id)} tanya={tanya?.find((x) => x.id === p.id)} />)}
             {menunggu ? <BarisKeterangan key={`tunggu-${menunggu.id}`} p={menunggu} keadaan="menunggu" sorot={false} teks={teks} /> : null}
           </ul>
         ) : <p className="bk-kosong bk-tulisan">{t('investigasi.kosongPernyataan')}</p>}

@@ -12,7 +12,9 @@ import { cariEpisode, DAFTAR_EPISODE } from '../episode';
 import { muatProgres, mulaiBaru } from '../simpan';
 import type { Episode, KonfigInvestigasi } from '../tipe';
 import { ruteKasus } from './rute';
-import { adaRekaman, bacaRekaman, tamuBaru, type RekamanInvestigasi } from './simpan';
+import { KEPALA_MIN_TOTAL } from '@shared/investigator/rubric';
+import { adaRekaman, bacaRekaman, STEMPEL_SENIOR, stempelSeri, tamuBaru, totalSkor, type RekamanInvestigasi } from './simpan';
+import { SKOR_MAKS } from './skor';
 
 export type StatusKasusHub = 'baru' | 'jalan' | 'selesai';
 export interface KasusHub {
@@ -82,4 +84,38 @@ export function ruteKasusTerkait(ep: Episode): string | null {
 export function tamuBaruSemuaKasus(kini?: Episode): void {
   tamuBaru();
   for (const e of episodeInvestigator()) if (e.id !== kini?.id) mulaiBaru(e);
+}
+
+// ------------------------------------------------------------------ T-106: satu tindakan berikutnya, tujuan pangkat berikutnya
+
+/**
+ * SATU tindakan berikutnya yang selalu bisa dijalankan (layar hasil; dihitung ulang sesudah tiap hasil):
+ *   'buka'  berkas berikutnya yang belum berstempel (urut nomor kasus);
+ *   'lagi'  semua sudah berstempel: main lagi kasus dengan poin yang paling banyak bisa diraih kembali (100 - skor terbaik;
+ *           seri = nomor kasus terkecil);
+ *   'arsip' semua kasus sudah sempurna: buka arsip kasus ini.
+ */
+export type AksiLanjut = { jenis: 'buka'; kasus: KasusHub } | { jenis: 'lagi'; kasus: KasusHub; pulih: number } | { jenis: 'arsip' };
+export function aksiLanjut(daftar: KasusHub[]): AksiLanjut {
+  const baru = daftar.find((k) => !k.stempel);
+  if (baru) return { jenis: 'buka', kasus: baru };
+  let lagi: KasusHub | null = null;
+  let pulih = 0;
+  for (const k of daftar) {
+    const p = SKOR_MAKS - (k.terbaik ?? 0);
+    if (p > pulih) { pulih = p; lagi = k; }
+  }
+  return lagi ? { jenis: 'lagi', kasus: lagi, pulih } : { jenis: 'arsip' };
+}
+
+/**
+ * Tujuan pangkat berikutnya: 'senior' = `kurang` kasus lagi (sesudah stempel pertama); 'kepala' = `kurang` poin lagi menuju
+ * total 255 (sesudah tiga stempel); null = belum punya stempel, atau sudah Kepala.
+ */
+export function tujuanPangkat(r: Pick<RekamanInvestigasi, 'stempel' | 'terbaik'>): { jenis: 'senior' | 'kepala'; kurang: number } | null {
+  const n = stempelSeri(r).length;
+  if (n === 0) return null;
+  if (n < STEMPEL_SENIOR) return { jenis: 'senior', kurang: STEMPEL_SENIOR - n };
+  const total = totalSkor(r);
+  return total < KEPALA_MIN_TOTAL ? { jenis: 'kepala', kurang: KEPALA_MIN_TOTAL - total } : null;
 }
