@@ -1,6 +1,10 @@
 /**
  * DAFTAR EPISODE MODE CERITA (/cerita). Kontrak: docs/rancangan-mode-cerita.md bagian 4.
  *
+ * T-096 (pemilik 21 Nov, rencana Codex di team/REVIEW.md "Cerita picker plan"): dengan RAKSA_INVESTIGATOR=on judulnya "Pilih cara
+ * bermain"; BERKAS arang "Raksa Investigator" (game detektif solo) di atas, lalu bagian "Cerita klaim" berisi kartu episode hangat
+ * (satu tanda, satu durasi, status yang boleh turun baris) dan baris terkunci Episode 2. Tinggi kartu alami; halaman boleh digulir.
+ *
  * T-037 (pemilik 18 Nov): satu layar HP tanpa gulir; kasus nyata (auto-2) = Episode 1, satu-satunya kartu yang bisa dimainkan;
  * lalu baris TERKUNCI Episode 2 (segera hadir, tanpa rute); kartu demo (auto-1) hanya bila RAKSA_DEMO_CERITA=on. Tanpa kartu Join
  * Game (cukup tautan "Punya kode room?"). Thumbnail = WAJAH tokoh (atlas potret piksel). Tiap kartu
@@ -24,7 +28,7 @@ import { useProfil } from '../state/profil';
 import { cariEpisode } from '../cerita/episode';
 import { daftarKasusHub } from '../cerita/investigasi/hub';
 import { RUTE_HUB } from '../cerita/investigasi/rute';
-import { bacaRekaman, berlanggananInvestigasi, TOTAL_MAKS, totalSkor, versiInvestigasi } from '../cerita/investigasi/simpan';
+import { bacaRekaman, berlanggananInvestigasi, versiInvestigasi } from '../cerita/investigasi/simpan';
 import { LatarPanggung, TokohNasabah } from '../cerita/seni';
 import { PotretMissRaksa } from '../cerita/seni/tokoh/PotretMissRaksa';
 import { akhirDitemukan, berlanggananCerita, muatProgres, mulaiBaru, versiPenyimpananCerita } from '../cerita/simpan';
@@ -92,24 +96,38 @@ export default function Cerita() {
       label={<>{TOKOH.missRaksa.aktif ? <span className="cer-hub-potret-kecil" aria-hidden="true"><PotretMissRaksa ekspresi="tersenyum" ukuran={28} /></span> : null}{t('cerita.labelHub')}</>}
       className="cer-hub-layar"
     >
-      <main className="cer-hub">
+      <main className="cer-hub" data-pemilih={inv ? 'dua' : 'cerita'}>
         <header className="cer-hub-kepala">
           {/* Potret piksel Miss Raksa (seni panggung cerita); tokoh dinonaktifkan = tanpa potret seperti dulu. */}
           {TOKOH.missRaksa.aktif ? <span className="cer-hub-potret" aria-hidden="true"><PotretMissRaksa ekspresi="tersenyum" ukuran={56} /></span> : null}
-          <div>
-            <span className="eyebrow">{t('cerita.eyebrowHub')}</span>
-            <h1>{t('cerita.judulMode')}</h1>
-            <p>{t('cerita.hubIntro')}</p>
-          </div>
+          {/* T-096: dengan Investigator, halaman ini memilih CARA bermain (judul tampil juga di HP); tanpa itu judul cerita seperti dulu. */}
+          {inv ? (
+            <div><h1>{t('cerita.pemilih.judulCara')}</h1></div>
+          ) : (
+            <div>
+              <span className="eyebrow">{t('cerita.eyebrowHub')}</span>
+              <h1>{t('cerita.judulMode')}</h1>
+              <p>{t('cerita.hubIntro')}</p>
+            </div>
+          )}
         </header>
 
-        <ul className="cer-hub-daftar" aria-label={t('cerita.daftarEpisodeAria')}>
-          {inv ? <KartuInvestigator ep={inv} bahasa={bahasa} nama={profil.nickname} /> : null}
-          {dev ? kartu(dev) : null}
-          {nyata ? kartu(nyata) : null}
-          <BarisSegera />
-          {demo ? kartu(demo) : null}
-        </ul>
+        {inv ? <BerkasInvestigator ep={inv} /> : null}
+
+        <section className="cer-pilih-cerita" aria-labelledby={inv ? 'cer-pilih-cerita-judul' : undefined}>
+          {inv ? (
+            <div className="cer-pilih-kepala">
+              <h2 id="cer-pilih-cerita-judul">{t('cerita.pemilih.ceritaJudul')}</h2>
+              <p>{t('cerita.pemilih.ceritaJanji')}</p>
+            </div>
+          ) : null}
+          <ul className="cer-hub-daftar" aria-label={t('cerita.daftarEpisodeAria')}>
+            {dev ? kartu(dev) : null}
+            {nyata ? kartu(nyata) : null}
+            <BarisSegera />
+            {demo ? kartu(demo) : null}
+          </ul>
+        </section>
         <p className="cer-hub-kode">{kodeAwal}<Link to="/">{t('cerita.hubKodeTautan')}</Link>{kodeAkhir}</p>
         <p className="cer-hub-catatan">{t('cerita.catatanPerangkat')}</p>
       </main>
@@ -118,49 +136,30 @@ export default function Cerita() {
 }
 
 /**
- * T-094: SATU kartu "Raksa Investigator" di daftar episode (dulu satu kartu per kasus): wajah Miss Raksa investigator, sampul
- * kasus 1, stempel dan total perangkat ini, dan satu tautan ke hub /investigator. Kelas kartunya sama dengan KartuEpisode.
+ * T-096 (rencana Codex "Cerita picker plan", butir 1-2): pintu "Raksa Investigator" = BERKAS KASUS arang yang ringkas, di ATAS
+ * bagian cerita, supaya tamu melihat dua cara bermain sebelum menggulir: tab berkas "Game detektif solo", potret kaca pembesar,
+ * judul, satu janji, satu baris meta ("2 kasus · ±5 menit per kasus") dan SATU tautan ke hub /investigator. Tanpa lencana
+ * "Kasus nyata", tanpa chip durasi kedua, tanpa baris stempel / skor (pangkat, stempel dan skor tampil di hub).
  */
-function KartuInvestigator({ ep, bahasa, nama }: { ep: Episode; bahasa: Bahasa; nama: string }) {
+function BerkasInvestigator({ ep }: { ep: Episode }) {
   useSyncExternalStore(berlanggananInvestigasi, versiInvestigasi, () => 0);
-  const tx = (k: string) => teksCerita(ep, k, bahasa, { nama });
-  const r = bacaRekaman();
-  const daftar = daftarKasusHub(r);
-  const stempel = daftar.filter((k) => k.stempel).length;
-  const status = daftar.length > 0 && stempel >= daftar.length ? 'selesai' : stempel > 0 || daftar.some((k) => k.status === 'jalan') ? 'lanjut' : 'baru';
-  const ekspresi: Ekspresi = status === 'selesai' ? 'lega' : 'cemas';
+  const jumlah = daftarKasusHub(bacaRekaman()).length;
   const idJudul = 'cer-ep-investigator';
-  const ketJenis = ep.jenis ? t(`cerita.jenisKet.${ep.jenis}`) : '';
   return (
-    <li className="cer-ep" data-status={status} data-kartu-investigator="">
-      <span className="cer-ep-wajah" aria-hidden="true">
-        <span data-wajah-investigator="" style={{ display: 'block', width: 92, height: 92, imageRendering: 'pixelated', backgroundImage: `url(${potretInvestigator})`, backgroundSize: '768px 128px', backgroundPosition: '-662px -14px', backgroundRepeat: 'no-repeat' }} />
-      </span>
-      {ep.latar ? <SampulLatar ep={ep} ekspresi={ekspresi} tx={tx} /> : null}
-      <div className="cer-ep-isi">
-        <div className="cer-ep-teks">
-          {ep.jenis ? <span className="cer-ep-jenis" data-jenis={ep.jenis} title={ketJenis} aria-description={ketJenis}>{t(`cerita.jenis.${ep.jenis}`)}</span> : null}
-          <span className="cer-ep-jenis cer-ep-cepat" data-jenis="cepat">{t('cerita.durasi', { n: ep.durasiMenit })}</span>
-          <p className="cer-ep-meta">
-            <span>{t('hubInv.kartuMeta', { n: daftar.length })}</span>
-            <span aria-hidden="true">·</span>
-            <span>{t(`cerita.produk.${ep.produk}`)}</span>
-            <span aria-hidden="true">·</span>
-            <span>{t('cerita.durasi', { n: ep.durasiMenit })}</span>
-          </p>
+    <section className="cer-berkas" data-kartu-investigator="" aria-labelledby={idJudul}>
+      <p className="cer-berkas-tab">{t('hubInv.kartuTag')}</p>
+      <div className="cer-berkas-badan">
+        <span className="cer-berkas-wajah" aria-hidden="true">
+          <span data-wajah-investigator="" style={{ backgroundImage: `url(${potretInvestigator})` }} />
+        </span>
+        <div className="cer-berkas-teks">
           <h2 id={idJudul}>{t('hubInv.nama')}</h2>
-          <p className="cer-ep-ringkas">{t('hubInv.kartuRingkas')}</p>
-          <p className="cer-ep-status" data-status={status}>
-            <span className="cer-ep-status-ikon" aria-hidden="true"><Icon name={status === 'selesai' ? 'cek' : status === 'lanjut' ? 'jam' : 'bintang'} size={16} /></span>
-            <span>{t('hubInv.kartuStempel', { n: stempel, total: daftar.length })}</span>
-            {stempel > 0 ? <span className="cer-ep-akhir">{t('hubInv.total')} {totalSkor(r)} / {TOTAL_MAKS}</span> : null}
-          </p>
+          <p className="cer-berkas-janji">{t('hubInv.kartuRingkas')}</p>
+          <p className="cer-berkas-meta">{t('hubInv.kartuMeta', { n: jumlah, m: ep.durasiMenit })}</p>
         </div>
-        <div className="cer-ep-aksi">
-          <Link className="primary-action" to={RUTE_HUB} aria-describedby={idJudul}>{t('hubInv.kartuBuka')} <Arrow /></Link>
-        </div>
+        <Link className="cer-berkas-buka" to={RUTE_HUB} aria-describedby={idJudul}>{t('hubInv.kartuBuka')} <Arrow /></Link>
       </div>
-    </li>
+    </section>
   );
 }
 
@@ -352,12 +351,9 @@ function KartuEpisode({ ep, bahasa, nama, onMainLagi }: { ep: Episode; bahasa: B
   const idJudul = 'cer-ep-' + ep.id;
   const latar = ep.node[ep.mulai]?.latar ?? 'kantor';
   const ekspresi: Ekspresi = status.jenis === 'selesai' ? 'lega' : 'cemas';
-  // T-026: tag jenis (owner: "Episode 1 is only DEMO, Episode 2 is Real Case, so users can choose"). Lencana di pojok
-  // kanan-atas gambar kartu di semua ukuran (keputusan Lead: di baris meta chip tidak muat pada HP dalam id / en, dan turun
-  // baris menambah tinggi kartu; letaknya diatur cerita.css). Anak PERTAMA kartu, di luar kotak gambar yang aria-hidden:
-  // dibaca sebelum meta dan judul. Keterangan = tooltip (title) + deskripsi aksesibel yang sama; episode tanpa `jenis` =
-  // tanpa tag.
-  const ketJenis = ep.jenis ? t(`cerita.jenisKet.${ep.jenis}`) : '';
+  // T-096: SATU tanda per kartu ("Episode 1", "Versi singkat" untuk Dev, "Demo"), lalu satu durasi. Lencana "Kasus nyata", chip
+  // durasi kedua dan nama produk tidak tampil lagi di pemilih.
+  const tanda = ep.jenis === 'demo' ? t('cerita.labelDemo') : ep.tampilan?.akhirKenalan ? t('cerita.pemilih.versiSingkat') : ep.investigasi ? tx('inv.label') : t('cerita.episodeKe', { n: 1 });
   return (
     <li className="cer-ep" data-status={status.jenis}>
       {/* T-037: thumbnail = WAJAH tokoh (atlas potret piksel, aturan skala piksel bulat), di HP; sampul lama di >= 600 px. */}
@@ -379,16 +375,8 @@ function KartuEpisode({ ep, bahasa, nama, onMainLagi }: { ep: Episode; bahasa: B
       )}
       <div className="cer-ep-isi">
         <div className="cer-ep-teks">
-          {/* T-037 Fix 1 (D-341): chip jenis di BARIS SENDIRI di atas baris meta (meta tidak lagi terpotong di HP). */}
-          {ep.jenis ? <span className="cer-ep-jenis" data-jenis={ep.jenis} title={ketJenis} aria-description={ketJenis}>{t(`cerita.jenis.${ep.jenis}`)}</span> : null}
-          {/* T-064: Episode 1 Dev = "5 menit" chip next to the type chip. */}
-          {ep.tampilan?.akhirKenalan || ep.investigasi ? <span className="cer-ep-jenis cer-ep-cepat" data-jenis="cepat">{t('cerita.durasi', { n: ep.durasiMenit })}</span> : null}
         <p className="cer-ep-meta">
-          {/* Kasus nyata = Episode 1; demo tanpa nomor. */}
-          <span>{ep.jenis === 'demo' ? t('cerita.labelDemo') : ep.tampilan?.akhirKenalan ? tx('dev.label') : ep.investigasi ? tx('inv.label') : t('cerita.episodeKe', { n: 1 })}</span>
-          <span aria-hidden="true">·</span>
-          <span>{t(`cerita.produk.${ep.produk}`)}</span>
-          <span aria-hidden="true">·</span>
+          <span className="cer-ep-tanda">{tanda}</span>
           <span>{t('cerita.durasi', { n: ep.durasiMenit })}</span>
         </p>
         <h2 id={idJudul}>{tx(ep.judul)}</h2>

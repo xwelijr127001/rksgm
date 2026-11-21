@@ -476,7 +476,8 @@
   .cer-ep-meta > span:not(.cer-ep-jenis) { overflow: hidden; text-overflow: ellipsis; }
   .cer-ep-teks h2 { margin: 0; font-size: 18px; line-height: 22px; }
   .cer-ep-teks .cer-ep-ringkas { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden; margin: 0; font-size: 14px; line-height: 19px; }
-  .cer-ep-teks .cer-ep-status { flex-wrap: nowrap; gap: 6px; font-size: 13px; line-height: 18px; white-space: nowrap; overflow: hidden; }
+  /* T-096: status boleh turun baris (dulu satu baris + overflow hidden: "Akhir ditemukan" terpotong di 390 px). */
+  .cer-ep-teks .cer-ep-status { flex-wrap: wrap; gap: 3px 6px; font-size: 13px; line-height: 18px; white-space: normal; overflow: visible; }
   .cer-ep-teks .cer-ep-status-ikon { width: 18px; height: 18px; background: none; }
   .cer-ep-aksi { grid-column: 1 / -1; margin: 0; }
   .cer-ep-aksi .primary-action { width: 100%; min-height: 48px; padding-top: 8px; padding-bottom: 8px; justify-content: center; gap: 12px; }
@@ -516,3 +517,60 @@
 
 /* T-064: Episode 1 Dev card: "5 menit" chip beside the type chip (light orange, so KASUS NYATA stays the strong one). */
 .cer-ep-jenis.cer-ep-cepat { margin-left: 6px; background: #fff1e2; color: #7a3e00; box-shadow: inset 0 0 0 1px #ff9000; }
+
+/* ------------------------------------------------------------------ T-096 pemilih /cerita: dua cara bermain (Designer; rencana Codex
+   team/REVIEW.md "Cerita picker plan"). BERKAS arang "Raksa Investigator" (palet pages/investigator.css: #212121, #fff9f5, #ff9000,
+   #9a4f00) di atas bagian "Cerita klaim" yang tetap hangat (kartu putih bertepi jingga). Semua aturan di sini hanya untuk pemilih. */
+.cer-pilih-cerita { display: grid; gap: 10px; min-width: 0; }
+.cer-pilih-kepala { display: grid; gap: 2px; }
+.cer-pilih-kepala h2 { margin: 0; font-size: 20px; line-height: 26px; color: #212121; }
+.cer-pilih-kepala p { margin: 0; font-size: 14px; line-height: 20px; color: #424242; }
+
+/* Berkas kasus: tab berkas di kiri-atas, badan arang, tepi jingga di kiri dan bawah. */
+.cer-berkas { display: grid; justify-items: start; min-width: 0; }
+.cer-berkas-tab {
+  margin: 0; padding: 0 12px; background: #212121; color: #ffd9a8; border-top: 3px solid #ff9000;
+  font-size: 12px; line-height: 24px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase;
+}
+.cer-berkas-badan {
+  justify-self: stretch; display: grid; grid-template-columns: 72px minmax(0, 1fr); gap: 10px 12px; align-items: start; box-sizing: border-box;
+  padding: 12px; background: #212121; color: #fff9f5; border-left: 4px solid #ff9000; border-bottom: 4px solid #ff9000;
+}
+.cer-berkas-wajah { display: grid; place-items: center; width: 72px; height: 72px; box-sizing: border-box; background: #f9eeea; border: 2px solid #fff9f5; overflow: hidden; }
+/* Sel 'miss-detektif' atlas reaksi.png (384 x 64) pada 2x, dipotong 68 px ke wajah dan kaca pembesarnya. */
+.cer-berkas-wajah > span { display: block; width: 68px; height: 68px; image-rendering: pixelated; background-size: 768px 128px; background-position: -674px -24px; background-repeat: no-repeat; }
+.cer-berkas-teks { display: grid; gap: 3px; min-width: 0; }
+.cer-berkas-teks h2 { margin: 0; font-size: 20px; line-height: 24px; color: #fff9f5; }
+.cer-berkas-janji { margin: 0; font-size: 14px; line-height: 20px; color: #fff9f5; }
+.cer-berkas-meta { margin: 0; font-size: 13px; line-height: 18px; font-weight: 700; color: #ffd9a8; font-variant-numeric: tabular-nums; }
+.cer-berkas-buka {
+  grid-column: 1 / -1; display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 48px; box-sizing: border-box; padding: 8px 14px;
+  background: #ff9000; color: #212121; box-shadow: inset 0 -3px 0 #e07e00; font-size: 16px; line-height: 20px; font-weight: 700; text-decoration: none;
+}
+.cer-berkas-buka:hover { background: #ffa326; }
+.cer-berkas-buka:focus-visible { outline: 3px solid #fff9f5; outline-offset: -5px; }
+@media (min-width: 600px) {
+  .cer-berkas-badan { grid-template-columns: 72px minmax(0, 1fr) auto; align-items: center; padding: 14px 16px; }
+  .cer-berkas-buka { grid-column: 3; min-width: 220px; }
+}
+
+/* Kartu cerita: SATU tanda ("Episode 1" / "Versi singkat" / "Demo") lalu satu durasi. */
+.cer-ep .cer-ep-meta { flex-wrap: wrap; align-items: center; column-gap: 8px; row-gap: 2px; white-space: normal; overflow: visible; }
+.cer-ep-tanda { flex: none; padding: 0 6px; background: #ff9000; color: #212121; font-size: 11px; line-height: 20px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; }
+/* Status: butir "Akhir ditemukan n/m" tidak dipecah; bila tidak muat ia turun ke barisnya sendiri. */
+.cer-ep-status > .cer-ep-akhir { flex: none; }
+/* Baris terkunci: teksnya boleh dua baris (en / teks besar), tanpa elipsis dan tanpa batas tinggi. */
+.cer-segera-baris { max-height: none; }
+.cer-segera-teks b, .cer-segera-teks small { white-space: normal; overflow: visible; text-overflow: clip; }
+
+@media (max-width: 599.98px) {
+  /* Dua cara bermain: judul halaman tampil di HP (ringkas, tanpa potret); tinggi kartu alami, halaman digulir. */
+  .cer-hub[data-pemilih="dua"] { gap: 12px; }
+  .cer-hub[data-pemilih="dua"] .cer-hub-kepala { display: block; }
+  .cer-hub[data-pemilih="dua"] .cer-hub-potret { display: none; }
+  .cer-hub[data-pemilih="dua"] .cer-hub-kepala h1 { margin: 0; font-size: 22px; line-height: 28px; }
+  /* Aksi = baris selebar kartu di bawah teks; tiap tombol selebar baris, sasaran ketuk >= 48 px. */
+  .cer-ep-aksi { display: grid; grid-template-columns: minmax(0, 1fr); gap: 8px; }
+  .cer-ep-aksi .cer-tombol-garis { width: 100%; min-height: 48px; box-sizing: border-box; }
+  .cer-ep-aksi .primary-action { box-sizing: border-box; }
+}

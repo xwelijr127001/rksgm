@@ -4585,3 +4585,35 @@ Spec: `team/REVIEW.md` "Investigator placement review (2026-11-21)" (Codex). NOT
 - The landing link names "kasus 5 menit"; the hub name is not translated ("Raksa Investigator" in id/en/zh).
 - The hub loads the player's stylesheets (it reuses the player shell), so its first load is not light; the next step is the player anyway.
 - A device that finished case 1's story but has no stamp for it (record cleared by hand) gets "Buka Kasus 1", which opens that result and records the stamp.
+
+## T-096 (2026-11-21): Cerita picker: tell "Raksa Investigator" apart from the story episodes (Designer)
+
+Built by the Designer from the Codex plan in `team/REVIEW.md` ("Cerita picker plan", points 1-5); uncommitted. Owner rule: nothing was opened in a browser and no test was run. Gate: `npm run typecheck` exit 0 (server + client), `client/dist` rebuilt.
+
+### What the picker shows now (`pages/Cerita.tsx`)
+- **Investigator flag on:** page title "Pilih cara bermain" (now also shown on phones, compact, without the portrait). Then two clearly different blocks:
+  1. **Raksa Investigator = a charcoal case file** above the stories: file tab "Game detektif solo", the magnifier portrait, title, the promise "Cocokkan bukti dengan keterangan saksi untuk meraih poin dan stempel.", one line "2 kasus · ±5 menit per kasus" (count and minutes come from the data), and one orange link "Buka berkas kasus" to `/investigator`. No "Kasus nyata" badge, no second duration chip, no stamp or score row.
+  2. **Section "Cerita klaim"** with "Ikuti proses klaim dan pilih cara mendampingi nasabah.", then the warm white story cards and the locked row.
+- **Flag off:** the old story heading, no Investigator block and no "Cerita klaim" heading; the cards get the same clean-up below.
+- **Story cards:** one orange tag ("Episode 1", "Versi singkat" for Dev, "Demo") and one duration; the product word ("Kendaraan") and the "Kasus nyata" badge are gone. Title, summary, progress and the finished-story summary are unchanged. Buttons: "Mulai cerita" / "Lanjutkan cerita" / "Main lagi".
+- **Locked row:** "Episode 2 · Segera hadir" / "Cerita selanjutnya sedang disiapkan."; the tap feedback says "Segera hadir. Cerita selanjutnya sedang disiapkan.".
+- Room-code link and the device note stay in the footer. Destinations, flags and progress handlers are untouched; Episode 1, Dev and Investigator flows were not edited.
+
+### Clipped status chip (94.jpg), fixed at the source
+`cerita.css` phone rule (was line 479: one line + hidden overflow): the status now wraps; "Akhir ditemukan n/m" is never broken and drops to its own line when it does not fit. Actions are a full-width row under the text; on phones "Main lagi" and "Lihat hasil" are each full width and 48 px high. The locked row may grow to two lines (no ellipsis, no height cap). Card height is natural and the page scrolls.
+
+### Files
+- `client/src/pages/Cerita.tsx`: `KartuInvestigator` replaced by `BerkasInvestigator` (keeps `data-kartu-investigator`); story list wrapped in `section.cer-pilih-cerita`; `main.cer-hub[data-pemilih="dua"|"cerita"]`.
+- `client/src/cerita/ui/cerita.css`: line 479 changed; one new block "T-096" at the end (`.cer-berkas*`, `.cer-pilih-*`, `.cer-ep-tanda`, phone rules).
+- `client/src/i18n/kamus/cerita.ts` (id/en/zh): new `pemilih.judulCara`, `pemilih.ceritaJudul`, `pemilih.ceritaJanji`, `pemilih.versiSingkat`; changed `pemilih.segeraTeks`, `pemilih.segeraCatatan`, `tombolMulai`, `tombolLanjutkan`, `tombolMainLagi` (these three are used only by the picker).
+- `client/src/i18n/kamus/hubInv.ts` (id/en/zh): new `kartuTag`; changed `kartuRingkas`, `kartuMeta` (now takes `{n}` and `{m}`), `kartuBuka`; removed `kartuStempel`.
+
+### Preview
+`character/picker-t096/layar-t096.png` (calculated mock, not a screenshot; `pratinjau.mts` beside it): flag on at 360 px, a new save and a finished + in-progress save. Calculated page height about 900 px for a new save and about 1020 px with a finished Dev card, so the phone page scrolls, as the plan allows.
+
+### Open
+- Nothing was seen in a browser. Most worth a phone look: the status row at 360-430 px in id/en/zh, the charcoal file's tab and portrait crop, and the page title on phones.
+- en/zh wording is mine, following the id copy of the plan.
+- The Dev card title still reads "Episode 1 Dev · Kenalan Raksa" (episode text, not mine) next to the tag "Versi singkat".
+- Old check scripts that read the picker (`tools/cek-pemilih-t037.mjs`, `tools/cek-tag-t026.mjs`, `tools/uji-cerita.mjs`) and any test that expects the "Kasus nyata" chip, "Mulai" / "Lanjutkan" labels, the product word or the Investigator card inside the episode list will need updating; none was run.
+- `.cer-ep-jenis` / `.cer-ep-cepat` styles and the `cerita.jenis.*`, `cerita.produk.*` words are no longer used by the picker (left in place).
