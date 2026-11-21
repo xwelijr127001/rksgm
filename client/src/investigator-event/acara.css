@@ -1,14 +1,18 @@
 /* T-109 (card 6): layout of the event board CONTAINERS only (hub entry, in-run status, host wrapper, projector pairing form).
    The look of the board, the host block and the choice sheet is the Designer's acara-inv.css (T-105). */
-.ai-entri { display: grid; gap: 8px; justify-items: start; margin-top: 4px; }
-.ai-entri-kasus { display: grid; gap: 8px; width: 100%; }
-.ai-entri-main { width: 100%; min-height: 48px; }
+/* T-114 (Designer, no-scroll pass): the hub entry is one row when idle (48), two rows when joined (badge + leave 48, three case
+   buttons side by side 48 = 104) and one row + the error when a code is typed (48 + 6 + up to 52 = 106). */
+.ai-entri { display: grid; grid-template-columns: minmax(0, 1fr); gap: 8px; justify-items: start; }
+.ai-entri[data-entri-acara="ikut"] { grid-template-columns: minmax(0, 1fr) auto; align-items: center; }
+.ai-entri[data-entri-acara="ikut"] .ai-entri-keluar { grid-row: 1; grid-column: 2; }
+.ai-entri-kasus { grid-column: 1 / -1; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; width: 100%; }
+.ai-entri .ai-entri-main { width: 100%; min-height: 48px; box-sizing: border-box; padding: 4px 6px; border: 2px solid #212121; border-radius: 0; font-size: 14px; line-height: 18px; font-weight: 800; color: #212121; text-align: center; }
 .ai-entri-tanya, .ai-entri-keluar { min-height: 44px; }
-.ai-entri-kode { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 6px 8px; align-items: center; width: 100%; }
-.ai-entri-kode label { grid-column: 1 / -1; font-size: 14px; line-height: 20px; font-weight: 700; color: #ffd9a8; }
-.ai-entri-kode input { min-height: 48px; box-sizing: border-box; padding: 0 12px; border: 2px solid #212121; background: #fff9f5; color: #212121; font: inherit; font-size: 20px; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; }
+.ai-entri-kode { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 6px 8px; align-items: center; width: 100%; }
+.ai-entri-kode label { font-size: 14px; line-height: 20px; font-weight: 700; color: #ffd9a8; }
+.ai-entri-kode input { min-width: 0; min-height: 48px; box-sizing: border-box; padding: 0 10px; border: 2px solid #212121; background: #fff9f5; color: #212121; font: inherit; font-size: 20px; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; }
 .ai-entri-kode button { min-height: 48px; }
-.ai-entri-kode p { grid-column: 1 / -1; margin: 0; }
+.ai-entri-kode p { grid-column: 1 / -1; margin: 0; padding-block: 4px; }
 /* In-run status: only while a decision is being sent or the connection is lost. */
 .ai-melayang { position: fixed; top: 6px; left: 50%; transform: translateX(-50%); z-index: 40; max-width: calc(100% - 24px); pointer-events: none; }
 .ai-acara-gagal { display: grid; gap: 12px; max-width: 420px; margin: 0 auto; padding: 32px 16px; align-content: start; }

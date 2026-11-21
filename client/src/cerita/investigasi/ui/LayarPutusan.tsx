@@ -4,6 +4,8 @@
  * Props rencana: { onPilih }. T-078: alasan mengikuti laporan yang SUDAH diperbaiki (truk di lajur 2). Ukur 360 x 640 (hitung; ruang
  * isi 544): tanya 26 + keterangan 20..40 + 3 kartu (alasan 15 px, sampai 3 baris: 107) + 2 x 8 + tombol 56 + jarak 3 x 8 = 463..483
  * px <= 544 (zh: kartu 87 -> 403).
+ * T-115 (tanpa gulir): alasan singkat hanya TERBUKA pada kartu yang sedang dipilih (ui/muat.css); tiga alasan utuh sekaligus tidak
+ * muat di kasus 2 dan 3 (kasus 3: 586 px, kasus 2: 537 px). Tinggi sekarang 397..449 px (ruang isi 557); hitungan di team/HANDOFF.md "## T-115".
  */
 import { useState } from 'react';
 import { t } from '../../../i18n';

@@ -36,6 +36,10 @@ const kamus: KamusRuang = {
     'kaitDaftar.kasus-1': 'Petugas mencatat lajur 3. Benarkah?',
     'kaitDaftar.kasus-2': 'Mobil keluarga, atau antar penumpang?',
     'kaitDaftar.kasus-3': 'Satu baris di nota terlalu banyak?',
+    // T-114: hub satu layar: strip petugas (ketuk = kartu petugas), kartu kasus ringkas
+    stripJalan: 'Berjalan',
+    kartuJudul: 'Kartu petugas',
+    stripBuka: 'Buka kartu petugas. {pangkat}, total {skor} dari {maks}.',
     terkunci: 'Kasus 3 · segera hadir',
     tamuBaru: 'Tamu baru',
     tamuTanya: 'Hapus skor, stempel, dan kemajuan semua kasus Investigator di perangkat ini, lalu mulai dari awal?',
@@ -76,6 +80,10 @@ const kamus: KamusRuang = {
     'kaitDaftar.kasus-1': 'The officer wrote lane 3. Is that right?',
     'kaitDaftar.kasus-2': 'A family car, or carrying a passenger?',
     'kaitDaftar.kasus-3': 'One line too many on the invoice?',
+    // T-114: hub satu layar: strip petugas (ketuk = kartu petugas), kartu kasus ringkas
+    stripJalan: 'In progress',
+    kartuJudul: 'Officer card',
+    stripBuka: 'Open the officer card. {pangkat}, total {skor} of {maks}.',
     terkunci: 'Case 3 · coming soon',
     tamuBaru: 'New guest',
     tamuTanya: 'Clear the scores, stamps and progress of every Investigator case on this device, then start over?',
@@ -116,6 +124,10 @@ const kamus: KamusRuang = {
     'kaitDaftar.kasus-1': '工作人员记录的是第 3 车道。真是这样吗？',
     'kaitDaftar.kasus-2': '家用车，还是正在载客？',
     'kaitDaftar.kasus-3': '单据上多了一行？',
+    // T-114: hub satu layar: strip petugas (ketuk = kartu petugas), kartu kasus ringkas
+    stripJalan: '进行中',
+    kartuJudul: '调查员证',
+    stripBuka: '打开调查员证。{pangkat}，总分 {skor} / {maks}。',
     terkunci: '案件 3 · 即将推出',
     tamuBaru: '新访客',
     tamuTanya: '清除本设备上所有调查员案件的分数、印章和进度，然后从头开始？',

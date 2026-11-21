@@ -21,6 +21,10 @@
  * Hendra"). Barisnya 28 px dan menempel ke tombol (alur.css .iv-cerita: margin atas -8 px menghapus jarak kisi), jadi tinggi layar
  * bertambah 28: 516 -> 544 (hasil pertama kasus 1, pas); 528 -> 556 dengan keping rekor / terbaik, 500 (512; 532) -> 528 (540; 560)
  * sesudah kasus 2 tamat. Yang lebih dari 544 menggulir halaman beberapa px di 360 x 640; yang tergeser hanya tautan ini.
+ * T-115 (pemilik: "tanpa menggulir"; hitungan di atas tidak berlaku lagi, angka baru di team/HANDOFF.md "## T-115"): layar ini
+ * dikunci setinggi layar (pemutar HP) dan dirapatkan (ui/muat.css): keping rekor / terbaik menumpang di sudut potret reaksi (kepala
+ * tetap 80), baris poin 20 px, baris total satu baris, jarak 6 px; `onArsip` = tombol "Arsip kasus" KETIGA di baris aksi
+ * (menggantikan baris arsip 48 px di `teaser`).
  */
 import { useEffect, type ReactNode } from 'react';
 import { playSfx } from '../../../audio/audio';
@@ -36,7 +40,7 @@ import './alur.css';
 
 const SEL_NILAI: Record<SkorKasus['nilai'], number> = { S: 0, A: 1, B: 2, C: 3 };
 
-export function HasilInvestigasi({ skor, nama, look, stempel, pangkat, onMainLagi, onSelesai, reaksi, stempelBaru = true, rekor = false, terbaik, teaser, total, tautan }: {
+export function HasilInvestigasi({ skor, nama, look, stempel, pangkat, onMainLagi, onSelesai, reaksi, stempelBaru = true, rekor = false, terbaik, teaser, total, tautan, onArsip }: {
   skor: SkorKasus;
   nama: string;
   look: PlayerLook;
@@ -60,6 +64,8 @@ export function HasilInvestigasi({ skor, nama, look, stempel, pangkat, onMainLag
   total?: { skor: number; maks: number; menuju?: string };
   /** T-099: baris tautan sekunder di bawah baris aksi (mis. ke cerita klaim kasus ini). */
   tautan?: ReactNode;
+  /** T-115: tombol "Arsip kasus" di baris aksi (tiga tombol sebaris). */
+  onArsip?: () => void;
 }) {
   const kurang = useReducedMotion();
   const teks = useTx();
@@ -104,8 +110,9 @@ export function HasilInvestigasi({ skor, nama, look, stempel, pangkat, onMainLag
       ) : null}
       <KartuPetugas nama={nama} look={look} investigasi={{ stempel, pangkat, baru: stempelBaru }} />
       {teaser}
-      <div className="iv-hasil-aksi">
+      <div className="iv-hasil-aksi" data-tiga={onArsip ? '' : undefined}>
         <button type="button" className="akh-kedua iv-tombol" data-main-lagi="" aria-haspopup="dialog" onClick={onMainLagi}>{t('investigasi.hasil.mainLagi')}</button>
+        {onArsip ? <button type="button" className="akh-kedua iv-tombol" data-arsip-kasus="" aria-haspopup="dialog" onClick={onArsip}>{teks('inv.hasil.arsip')}</button> : null}
         <button type="button" className="primary-action iv-tombol" data-selesai-kasus="" onClick={onSelesai}>{teks('inv.hasil.selesai')}</button>
       </div>
       {tautan}

@@ -16,6 +16,13 @@
  * latihan), kartu yang bisa diperbesar, teks koreksi, tebakan pembuka, gambar judul, nasabah dan balasannya, tabel putusan,
  * kasus berikutnya, arsip. Kunci teks naskah memakai `konfig.awalan` (`kunci()`), mis. `inv.keb.cap` / `inv2.keb.cap`.
  *
+ * T-115 (pemilik: "semua layar tanpa menggulir"): tiap layar di sini muat di 360 x 640 dan 390 x 700 tanpa gulir (hitungan per
+ * layar: team/HANDOFF.md "## T-115"; gaya rapatnya di ui/muat.css). Yang berubah bentuk: layar semat hanya halaman "Keterangan"
+ * (halaman "Bukti" tinggal kepalanya); layar "Bukti baru!" hanya slip yang baru; putusan = alasan terbuka pada kartu yang dipilih;
+ * gerbang "Mulai baru" menyembunyikan potret selama bertanya; arsip kasus dan buku catatan (Menu) = BERHALAMAN (tab), satu
+ * pernyataan per tampilan; hasil = tiga tombol sebaris (Main lagi / Arsip kasus / Selesai); latihan pesan = daftar tiga pesan
+ * terpotong, pesan yang dipilih tampil utuh sendirian.
+ *
  * Teks naskah (kunci teks episode) diterjemahkan lewat <PenyediaTeksInvestigasi value={tx}>; teks antarmuka komponen ada di kamus
  * aplikasi `investigasi` (Task 2), teks pembungkus di sini di teks episode (`inv.ui.*`, `inv.hasil.*`, `inv.lagi.*`, ...).
  */
@@ -58,6 +65,8 @@ import { useLabelPanel } from './ui/panel/teks';
 import { TebakLajur, type Lajur } from './ui/TebakLajur';
 import './ui/investigasi.css';
 import './ui/alur.css';
+import './ui/panel/panel.css';
+import './ui/muat.css'; // T-115: HARUS terakhir (merapatkan layar-layar di atas supaya muat tanpa gulir)
 
 type Tx = (k: KunciTeks) => string;
 
@@ -278,7 +287,8 @@ function LayarCatat({ ep, state, id, tx, onLanjut }: { ep: Episode; state: State
     // kalimatnya menulis sendiri dengan tinta, pin jatuh (T-085: bunyi goresan pensil lalu klik pin), lalu cerita lanjut.
     <section className="iv-layar iv-catat" data-layar-catat="" aria-label={tx('inv.ui.sematJudul')}>
       <p className="iv-label">{tx('inv.ui.sematJudul')}</p>
-      <BukuCatatan pernyataan={[...lain, ...(tersemat ? [p] : [])]} bukti={buktiTerkumpul(ep, state)}
+      {/* T-115: halaman "Bukti" tinggal kepalanya (jumlah); slipnya ada di buku catatan (tombol buku di kepala layar). */}
+      <BukuCatatan pernyataan={[...lain, ...(tersemat ? [p] : [])]} bukti={buktiTerkumpul(ep, state)} ringkasBukti tanpaPensil
         menunggu={tersemat ? undefined : p} pernyataanBaru={tersemat ? p.id : undefined} />
       <button type="button" className="primary-action iv-tombol" data-semat="" data-lewati={tersemat && bolehLewati ? '' : undefined} disabled={tersemat && !bolehLewati} aria-live="polite"
         onClick={() => {
@@ -304,7 +314,8 @@ function LayarBukti({ ep, state, bukti, keterangan, balik, tx, onLanjut }: { ep:
   // T-106: kartu yang punya seni panel (kasus 3) bisa DIPERBESAR dengan satu ketukan sebelum disimpan (lembar PanelExhibit).
   const [besar, setBesar] = useState<Bukti | null>(null);
   const baru = bukti.map((b) => b.id);
-  const daftar = [...buktiTerkumpul(ep, state).filter((x) => !baru.includes(x.id)), ...bukti];
+  // T-115: halaman buku hanya memuat slip yang BARU (kepalanya tetap menghitung semua bukti); yang lama ada di buku catatan.
+  const jumlah = new Set([...buktiTerkumpul(ep, state).map((x) => x.id), ...baru]).size;
   return (
     <section className="iv-layar iv-bukti-baru" data-bukti-baru={baru.join(' ')} aria-labelledby="iv-bukti-baru-judul">
       <div className="iv-bukti-kepala">
@@ -313,9 +324,9 @@ function LayarBukti({ ep, state, bukti, keterangan, balik, tx, onLanjut }: { ep:
       </div>
       {balik ? <p className="iv-tempel iv-tebak-balik" data-tebak-balik="">{balik}</p> : null}
       {keterangan ? <p>{keterangan}</p> : null}
-      <BukuCatatan pernyataan={[]} bukti={daftar} buktiBaru={baru} halaman="bukti" tanpaPensil />
+      <BukuCatatan pernyataan={[]} bukti={bukti} jumlahBukti={jumlah} buktiBaru={baru} halaman="bukti" tanpaPensil />
       {bukti.filter((b) => !!evidenceArt(b.id)).map((b) => (
-        <button key={b.id} type="button" className="akh-kedua iv-tombol" data-perbesar-bukti={b.id} aria-haspopup="dialog" onClick={() => { playSfx('kertas'); setBesar(b); }}>{label('periksa', { judul: tx(b.judul) })}</button>
+        <button key={b.id} type="button" className="akh-kedua iv-tombol iv-tombol-kedua" data-perbesar-bukti={b.id} aria-haspopup="dialog" onClick={() => { playSfx('kertas'); setBesar(b); }}>{label('periksa', { judul: tx(b.judul) })}</button>
       ))}
       <button type="button" className="primary-action iv-tombol" data-simpan-bukti="" onClick={() => { playSfx('kertas'); onLanjut(); }}>{tx('inv.ui.simpan')}</button>
       {besar ? <PanelExhibit card={kartuPanel(besar, tx)} onClose={() => setBesar(null)} /> : null}
@@ -548,7 +559,7 @@ export function GerbangKasus({ ep, state, tx, onLanjut, onBaru }: { ep: Episode;
   const konfig = ep.investigasi;
   const bab = babKini(ep, state);
   return (
-    <section className="iv-layar iv-gerbang" data-gerbang-kasus="" aria-labelledby="iv-gerbang-judul">
+    <section className="iv-layar iv-gerbang" data-gerbang-kasus="" data-tanya={tanya ? '' : undefined} aria-labelledby="iv-gerbang-judul">
       <PotretReaksi reaksi="miss-detektif" ukuran={128} />
       {konfig ? <p className="iv-label">{t('investigasi.kasus', { n: konfig.nomor })} · {tx(konfig.judul)}</p> : null}
       <h2 id="iv-gerbang-judul" className="iv-tanya" tabIndex={-1} data-cer-fokus="">{tx('inv.gerbang.judul')}</h2>
@@ -615,6 +626,19 @@ function LatihanPesan({ ep, konfig, tx, onHasil }: { ep: Episode; konfig: Konfig
   const node = ep.node.pesan;
   const pilihan = node?.jenis === 'pilihan' ? node.pilihan.filter((x) => (PESAN as readonly string[]).includes(x.id)) : [];
   const [pilih, setPilih] = useState<Pesan | null>(null);
+  // T-115: pesan untuk nasabah panjang (kasus 2: +- 390 huruf), jadi tiga pesan utuh tidak muat. Daftar = tiap pesan dipotong 3
+  // baris; pesan yang diketuk tampil UTUH sendirian dengan "Ganti pesan" (kembali ke daftar) dan "Kirim pesan".
+  const terpilih = pilihan.find((x) => x.id === pilih);
+  if (terpilih) {
+    return (
+      <section className="iv-layar iv-latihan-pesan" data-latihan-pesan="lipat" aria-labelledby="iv-latihan-pesan-tanya">
+        <h2 id="iv-latihan-pesan-tanya" className="iv-tanya" tabIndex={-1} data-cer-fokus="">{tx(kunci(konfig, 'pesan.tanya'))}</h2>
+        <p className="iv-pesan-kartu" data-pesan={terpilih.id} data-utuh="" role="status"><span>{tx(terpilih.teks)}</span><span className="iv-bukti-tanda" aria-hidden="true">✓</span></p>
+        <button type="button" className="hp-tautan iv-pesan-ganti" data-ganti-pesan="" onClick={() => setPilih(null)}>{t('ceritaHp.gantiBalasan')}</button>
+        <button type="button" className="primary-action iv-tombol" data-latihan-kirim="" onClick={() => { playSfx('pesanKirim'); onHasil(terpilih.id as Pesan); }}>{tx('inv.latihan.kirim')}</button>
+      </section>
+    );
+  }
   return (
     <section className="iv-layar iv-latihan-pesan" data-latihan-pesan="" aria-labelledby="iv-latihan-pesan-tanya">
       <UcapanNasabah ep={ep} tx={tx} ekspresi="cemas" teks={tx(kunci(konfig, 'pesan.2'))} kecil />
@@ -695,7 +719,7 @@ function LatihanKasus({ ep, konfig, state, titik, tx, onSelesai }: { ep: Episode
   }
   return (
     <>
-      <div className="iv-layar">{pita}</div>
+      <div className="iv-layar iv-latihan-kepala">{pita}</div>
       {round ? <LatihanPanel key={putaran} ep={ep} konfig={konfig} state={state} round={round} tx={tx} onHasil={(h) => setHasil({ poin: poinBabak(konfig, round.id, h), kalimat: tx(kunci(konfig, `${round.id}.jawab.1`)) })} />
         : langkah === 'keberatan' ? <LatihanKeberatan key={putaran} ep={ep} konfig={konfig} state={state} tx={tx} onHasil={(h) => setHasil({ poin: poinKeberatan(h), kalimat: tx(kunci(konfig, 'keb.cap')) })} />
         : langkah === 'putusan' ? <LayarPutusan key={putaran} {...teksPutusan(konfig, tx)} onPilih={(p) => { playSfx('konfirmasi'); setHasil({ poin: poinPutusan(konfig.putusan, p), kalimat: tx(kunci(konfig, `putusan.${p}.1`)) }); }} />
@@ -749,6 +773,8 @@ export function HasilKasus({ ep, state, nama, look, tx, onMainLagi }: {
   useEffect(() => { if (total !== null && h) catatHasil(kasus, total, { putusan: h.putusan, pesan: h.pesan, babak: h.babak }); /* eslint-disable-next-line react-hooks/exhaustive-deps */ }, [kasus, total, kunciPilihan]);
   const [tahap, setTahap] = useState<'ucapan' | 'skor'>('ucapan');
   const [lembar, setLembar] = useState<'lagi' | 'arsip' | null>(null);
+  /** T-115: halaman arsip yang dibuka lebih dulu (dari lembar "Main lagi" pada skor sempurna: keterangan yang dikoreksi). */
+  const [tabArsip, setTabArsip] = useState<TabArsip | undefined>(undefined);
   const [latihan, setLatihan] = useState<TitikLatihan | null>(null);
   const [segar, setSegar] = useState(true);
   // Capaian SESUDAH hasil ini (efek pencatatan baru berjalan sesudah gambar pertama): stempel kasus ini + skor terbaiknya.
@@ -815,11 +841,10 @@ export function HasilKasus({ ep, state, nama, look, tx, onMainLagi }: {
           <b>{judulKasus(lanjut.kasus)}<small>{lanjut.jenis === 'buka' ? t('hubInv.berikutBuka') : t('hubInv.berikutLagi', { n: lanjut.pulih })}</small></b><span aria-hidden="true">›</span>
         </button>
       )}
-      <button type="button" className="iv-berikut" data-arsip-kasus="" aria-haspopup="dialog" onClick={() => setLembar('arsip')}>
-        <b>{tx('inv.hasil.arsip')}<small>{konfig.arsip ? tx('inv.hasil.arsipKet') : t('investigasi.arsipKet')}</small></b><span aria-hidden="true">›</span>
-      </button>
     </div>
   );
+  // T-115: "Arsip kasus" pindah ke baris aksi (tombol ketiga, HasilInvestigasi `onArsip`); baris 48 px-nya dilepas.
+  const bukaArsip = (tab?: TabArsip) => { setTabArsip(tab); setLembar('arsip'); };
   // T-099: cerita klaim dari kejadian yang sama (hanya kasus yang menyebutnya, dan hanya bila episode itu ada di build ini).
   const cerita = konfig.cerita && cariEpisode(konfig.cerita.episode) ? konfig.cerita : null;
   const tautCerita = cerita ? (
@@ -831,28 +856,11 @@ export function HasilKasus({ ep, state, nama, look, tx, onMainLagi }: {
       <HasilInvestigasi skor={skor} nama={nama} look={look} stempel={stempel} pangkat={pangkatRekaman(capaian)} reaksi={putusanTepat(konfig.putusan, h.putusan) ? 'miss-bangga' : 'miss-berpikir'}
         stempelBaru={segar && !sebelum.stempel.includes(kasus)} rekor={segar && lama !== undefined && skor.total > lama} terbaik={Math.max(r.terbaik[kasus] ?? 0, lama ?? 0)}
         total={tampilTotal ? { skor: totalSemua, maks: TOTAL_MAKS, menuju } : undefined}
-        onMainLagi={() => setLembar('lagi')} onSelesai={() => navigasi(rumah)} teaser={kaki} tautan={tautCerita} />
+        onMainLagi={() => setLembar('lagi')} onSelesai={() => navigasi(rumah)} teaser={kaki} tautan={tautCerita} onArsip={() => bukaArsip()} />
       {lembar === 'arsip' ? (
         <Modal judul={tx('inv.hasil.arsip')} onTutup={tutup} lebar={420}>
-          {/* T-090 / T-106: arsip kasus, baca saja: garis waktu (bila kasusnya punya) + keterangan yang dikoreksi + pesan permainan terbaik */}
-          <div className="iv-arsip" data-arsip-kasus-isi="">
-            {konfig.arsip ? (
-              <section className="iv-arsip-kartu" aria-labelledby="iv-arsip-garis">
-                <h3 id="iv-arsip-garis">{tx(konfig.arsip.judul)}</h3>
-                <ol className="iv-garis">
-                  {konfig.arsip.garis.map((k, i) => <li key={k} data-sorot={i === konfig.arsip?.sorot ? '' : undefined}>{tx(k)}</li>)}
-                </ol>
-              </section>
-            ) : null}
-            {dikoreksi ? <BukuCatatan pernyataan={dikoreksi.pernyataan} bukti={[]} halaman="keterangan" tanpaPensil koreksi={dikoreksi.koreksi} /> : null}
-            {pesanArsip ? (
-              <section className="iv-arsip-kartu" aria-labelledby="iv-arsip-pesan">
-                <h3 id="iv-arsip-pesan">{tx(konfig.arsip?.pesan ?? 'inv.lagi.langkah.pesan')}</h3>
-                <p className="iv-arsip-pesan" data-pesan={pesanArsip.id}>{tx(pesanArsip.teks)}</p>
-              </section>
-            ) : null}
-            <button type="button" className="akh-kedua iv-tombol" data-tutup-arsip="" onClick={tutup}>{tx('inv.hasil.tutup')}</button>
-          </div>
+          {/* T-090 / T-106: arsip kasus, baca saja. T-115: BERHALAMAN (tab), satu halaman per tampilan, supaya tidak menggulir */}
+          <ArsipKasus konfig={konfig} dikoreksi={dikoreksi} pesan={pesanArsip ? { id: pesanArsip.id, teks: tx(pesanArsip.teks) } : null} tx={tx} awal={tabArsip} />
         </Modal>
       ) : null}
       {lembar === 'lagi' ? (
@@ -870,7 +878,8 @@ export function HasilKasus({ ep, state, nama, look, tx, onMainLagi }: {
               <>
                 {/* Skor sempurna: hadiahnya pernyataan yang sudah dikoreksi (halaman "Keterangan" buku catatan). */}
                 <p className="iv-lagi-sempurna" data-hadiah-sempurna="">{tx('inv.lagi.sempurna')}</p>
-                {dikoreksi ? <BukuCatatan pernyataan={dikoreksi.pernyataan} bukti={[]} halaman="keterangan" tanpaPensil koreksi={dikoreksi.koreksi} /> : null}
+                {/* T-115: keterangan yang dikoreksi dibuka di arsip kasus (halaman "Keterangan"), tidak lagi dijejalkan di lembar ini */}
+                {dikoreksi ? <button type="button" className="iv-lagi-pilih" data-utama="" data-buka-koreksi="" onClick={() => bukaArsip('keterangan')}><b>{tx('inv.hasil.arsip')}</b><span>{t('investigasi.keterangan')}</span></button> : null}
               </>
             )}
             <button type="button" className="iv-lagi-pilih" data-ulang-awal="" onClick={() => { tutup(); onMainLagi(); }}>
@@ -885,14 +894,73 @@ export function HasilKasus({ ep, state, nama, look, tx, onMainLagi }: {
   );
 }
 
-/** Buku catatan (Menu): pernyataan yang sudah disemat + kartu bukti yang sudah terkumpul (+ T-087: baris koreksi). */
+type TabArsip = 'garis' | 'keterangan' | 'pesan';
+
+/**
+ * T-115: isi lembar "Arsip kasus", BERHALAMAN supaya tidak ada yang menggulir: tab "Garis waktu" (kasus yang punya), "Keterangan"
+ * (pernyataan yang dikoreksi, satu per tampilan) dan "Pesan" (pesan pada permainan terbaik). Satu halaman per tampilan; tab hanya
+ * ada untuk bagian yang memang ada. Tombol tutup = tombol lembar itu sendiri.
+ */
+function ArsipKasus({ konfig, dikoreksi, pesan, tx, awal }: {
+  konfig: KonfigInvestigasi;
+  dikoreksi: { pernyataan: Pernyataan[]; koreksi: KoreksiPernyataan[] } | null;
+  pesan: { id: string; teks: string } | null;
+  tx: Tx;
+  awal?: TabArsip;
+}) {
+  const tab: TabArsip[] = [...(konfig.arsip ? ['garis' as const] : []), ...(dikoreksi ? ['keterangan' as const] : []), ...(pesan ? ['pesan' as const] : [])];
+  const [pilih, setPilih] = useState<TabArsip | undefined>(awal);
+  const kini = pilih && tab.includes(pilih) ? pilih : tab[0];
+  const nama: Record<TabArsip, string> = { garis: t('investigasi.arsip.garis'), keterangan: t('investigasi.keterangan'), pesan: t('investigasi.arsip.pesan') };
+  return (
+    <div className="iv-arsip" data-arsip-kasus-isi="" data-halaman={kini}>
+      {tab.length > 1 ? (
+        <div className="iv-tab" role="tablist">
+          {tab.map((x) => <button key={x} type="button" role="tab" aria-selected={x === kini} className="iv-tab-tombol" data-tab-arsip={x} onClick={() => { playSfx('kertas'); setPilih(x); }}>{nama[x]}</button>)}
+        </div>
+      ) : null}
+      {kini === 'garis' && konfig.arsip ? (
+        <section className="iv-arsip-kartu" aria-labelledby="iv-arsip-garis">
+          <h3 id="iv-arsip-garis">{tx(konfig.arsip.judul)}</h3>
+          <ol className="iv-garis">
+            {konfig.arsip.garis.map((k, i) => <li key={k} data-sorot={i === konfig.arsip?.sorot ? '' : undefined}>{tx(k)}</li>)}
+          </ol>
+        </section>
+      ) : null}
+      {kini === 'keterangan' && dikoreksi ? <BukuCatatan pernyataan={dikoreksi.pernyataan} bukti={[]} halaman="keterangan" satu tanpaPensil koreksi={dikoreksi.koreksi} /> : null}
+      {kini === 'pesan' && pesan ? (
+        <section className="iv-arsip-kartu" aria-labelledby="iv-arsip-pesan">
+          <h3 id="iv-arsip-pesan">{tx(konfig.arsip?.pesan ?? 'inv.lagi.langkah.pesan')}</h3>
+          <p className="iv-arsip-pesan" data-pesan={pesan.id}>{pesan.teks}</p>
+        </section>
+      ) : null}
+    </div>
+  );
+}
+
+/**
+ * Buku catatan (Menu): pernyataan yang sudah disemat + kartu bukti yang sudah terkumpul (+ T-087: baris koreksi).
+ * T-115: BERHALAMAN supaya muat tanpa gulir di lembar: tab "Keterangan n" (satu pernyataan per tampilan, keping polaroid
+ * memilihnya; catatan "Tanya lebih lanjut" dibuka dengan satu tombol) dan tab "Bukti n" (slip bukti).
+ */
 export function IsiBukuCatatan({ ep, state, tx }: { ep: Episode; state: StateCerita; tx: Tx }) {
   const dikoreksi = koreksiBuku(ep, state, tx);
   // T-106: "Tanya lebih lanjut" yang sudah dibuka tertulis di bawah pernyataan saksinya (sumbernya), bisa dibaca ulang kapan saja.
   const tanya = tekananTerbuka(ep, state).map((x) => ({ id: x.pernyataan.id, tanya: tanpaAwalan(tx(x.press.questionKey)), jawab: tx(x.press.answerKey) }));
+  const pernyataan = pernyataanTercatat(ep, state);
+  const bukti = buktiTerkumpul(ep, state);
+  const [halaman, setHalaman] = useState<'keterangan' | 'bukti'>('keterangan');
+  const tab = (h: 'keterangan' | 'bukti', n: number) => (
+    <button type="button" role="tab" aria-selected={halaman === h} className="iv-tab-tombol" data-tab-buku={h} onClick={() => { playSfx('kertas'); setHalaman(h); }}>
+      {t(h === 'keterangan' ? 'investigasi.keterangan' : 'investigasi.bukti')}<span className="iv-hitung">{n}</span>
+    </button>
+  );
   return (
     <PenyediaTeksInvestigasi value={tx}>
-      <BukuCatatan pernyataan={pernyataanTercatat(ep, state)} bukti={buktiTerkumpul(ep, state)} koreksi={dikoreksi?.koreksi} tanya={tanya} />
+      <div className="iv-buku-lembar" data-buku-lembar={halaman}>
+        <div className="iv-tab" role="tablist">{tab('keterangan', pernyataan.length)}{tab('bukti', bukti.length)}</div>
+        <BukuCatatan pernyataan={pernyataan} bukti={bukti} halaman={halaman} satu tanpaPensil koreksi={dikoreksi?.koreksi} tanya={tanya} />
+      </div>
     </PenyediaTeksInvestigasi>
   );
 }

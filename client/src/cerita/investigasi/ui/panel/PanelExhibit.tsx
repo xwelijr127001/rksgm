@@ -41,17 +41,19 @@ export function PanelExhibit({ card, quote, onClose, onUse }: {
         {quote ? <p className="pn-kutip"><b>{quote.name}</b><q>{quote.text}</q></p> : null}
         {seni?.kind === 'foto' && seni.exhibit ? (
           <figure className="pn-foto">
+            {/* T-115: foto utuh dan foto dekat memakai KOTAK yang sama (3 : 2), dan tombol gantinya menumpang di sudut foto
+                (44 x 44, berlabel untuk pembaca layar), jadi lembar tidak bertambah tinggi dan tidak melompat. */}
             {seni.detail ? (
-              <button type="button" className="pn-foto-tombol" aria-pressed={dekat} aria-label={L(dekat ? 'utuh' : 'dekat')} onClick={() => setDekat((d) => !d)}>
-                <img src={dekat ? seni.detail : seni.exhibit} alt="" width={288} height={dekat ? 224 : 192} />
-              </button>
+              <div className="pn-foto-bingkai">
+                <button type="button" className="pn-foto-tombol" aria-pressed={dekat} aria-label={L(dekat ? 'utuh' : 'dekat')} onClick={() => setDekat((d) => !d)}>
+                  <img src={dekat ? seni.detail : seni.exhibit} alt="" width={288} height={192} />
+                </button>
+                <button type="button" className="pn-foto-ganti" data-foto-dekat={dekat ? '' : undefined} aria-label={L(dekat ? 'utuh' : 'dekat')} title={L(dekat ? 'utuh' : 'dekat')} onClick={() => setDekat((d) => !d)}>
+                  <PanelIcon nama={dekat ? 'foto-inspeksi' : 'periksa'} kali={2} />
+                </button>
+              </div>
             ) : <img src={seni.exhibit} alt="" width={288} height={192} />}
             {card.excerpt ? <figcaption>{card.excerpt}</figcaption> : null}
-            {seni.detail ? (
-              <button type="button" className="pn-foto-ganti" data-foto-dekat={dekat ? '' : undefined} onClick={() => setDekat((d) => !d)}>
-                <PanelIcon nama={dekat ? 'foto-inspeksi' : 'periksa'} />{L(dekat ? 'utuh' : 'dekat')}
-              </button>
-            ) : null}
           </figure>
         ) : seni?.kind === 'pesan' ? (
           <blockquote className="pn-pesan"><p>{card.excerpt ?? card.title}</p></blockquote>

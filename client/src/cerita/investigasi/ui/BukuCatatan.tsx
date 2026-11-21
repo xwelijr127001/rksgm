@@ -16,8 +16,16 @@
  *   tanpaPensil       tanpa baris pensil (layar yang butuh tinggi).
  * Tinggi (hitung, HP 360): halaman atas 42 + 68 per pernyataan; jilid 12; halaman bawah 42 + 58 per bukti; pensil 20; sampul 18.
  * Penuh (2 + 3) = 446 px. Diekspor juga: PotretReaksi (potret reaksi T-077) dan KartuPernyataan (kartu lama, masih dipakai uji).
+ *
+ * T-115 (pemilik: "semua layar tanpa menggulir"): buku penuh tidak lagi dipakai utuh di layar mana pun. Tiga prop baru:
+ *   satu          halaman "Keterangan" menampilkan SATU pernyataan: baris keping polaroid bernomor (48 x 56, sasaran ketuk 52 x 60)
+ *                 memilih pernyataannya; isinya selebar halaman (nama, kalimat, koreksi). Catatan "Tanya lebih lanjut" pernyataan
+ *                 itu dibuka dengan satu tombol dan MENGGANTIKAN kalimatnya (tombol yang sama mengembalikannya), jadi tinggi
+ *                 halaman tidak bertambah. Dipakai lembar buku catatan (Menu) dan arsip kasus.
+ *   ringkasBukti  halaman "Bukti" tinggal kepalanya ("BUKTI 3"): layar semat cukup memperlihatkan bahwa buktinya ada.
+ *   jumlahBukti   angka di kepala halaman "Bukti" bila yang digambar hanya sebagian (layar "Bukti baru!": slip yang baru saja).
  */
-import type { CSSProperties } from 'react';
+import { useState, type CSSProperties } from 'react';
 import { t } from '../../../i18n';
 import { PotretPikselHp } from '../../ui/latar/piksel/PotretPikselHp';
 import buktiUrl from '../../seni/investigasi/bukti.png';
@@ -127,6 +135,53 @@ function BarisKeterangan({ p, keadaan, sorot, teks, koreksi, tanya }: { p: Perny
   );
 }
 
+/**
+ * T-115: halaman "Keterangan" satu pernyataan per tampilan. Keping = tab (polaroid + nomor urut, supaya dua keterangan dari
+ * orang yang sama tetap terbedakan); panelnya = nama, kalimat (dicoret bila dikoreksi), baris koreksi. Bila pernyataan itu punya
+ * catatan "Tanya lebih lanjut", tombol di bawahnya menukar kalimat dengan catatan itu dan sebaliknya.
+ */
+function KeteranganSatu({ pernyataan, teks, koreksi, tanya }: { pernyataan: Pernyataan[]; teks: Tx; koreksi: readonly KoreksiPernyataan[]; tanya?: readonly TanyaPernyataan[] }) {
+  const [pilih, setPilih] = useState(0);
+  const [bukaTanya, setBukaTanya] = useState(false);
+  const k = Math.min(pilih, pernyataan.length - 1);
+  const p = pernyataan[k]!;
+  const kor = koreksi.find((x) => x.id === p.id);
+  const tny = tanya?.find((x) => x.id === p.id);
+  const terbuka = !!tny && bukaTanya;
+  return (
+    <div className="bk-satu" data-keterangan-satu="">
+      <div className="bk-keping" role="tablist" aria-label={t('investigasi.keterangan')}>
+        {pernyataan.map((x, i) => (
+          <button key={x.id} type="button" role="tab" aria-selected={i === k} className="bk-keping-tombol" data-keping={x.id}
+            aria-label={`${i + 1}. ${t(`investigasi.siapa.${x.siapa}`)}`} onClick={() => { setPilih(i); setBukaTanya(false); }}>
+            <span className="bk-polaroid" aria-hidden="true">
+              <PotretPikselHp tokoh={TOKOH_PIKSEL[x.siapa]} ekspresi="netral" ukuran={40} label="" />
+              <IkonInv nama="pin" kali={1} className="bk-pin" />
+            </span>
+            <i className="bk-keping-no" aria-hidden="true">{i + 1}</i>
+          </button>
+        ))}
+      </div>
+      <div className="bk-baris bk-satu-isi" role="tabpanel" data-pernyataan={p.id} data-keadaan="tersemat" data-koreksi={kor ? 'ada' : undefined}>
+        <b className="bk-siapa">{t(`investigasi.siapa.${p.siapa}`)}</b>
+        {tny && bukaTanya ? (
+          <span className="bk-tanya" data-tanya-lanjut=""><b>{t('investigasi.tanyaLanjut')}</b><span>{tny.tanya}</span><q className="bk-tulisan">{tny.jawab}</q></span>
+        ) : (
+          <>
+            <q className="bk-tulisan">{teks(p.teks)}</q>
+            {kor ? <ins className="bk-tulisan bk-koreksi">{kor.teks}</ins> : null}
+          </>
+        )}
+        {tny ? (
+          <button type="button" className="bk-tanya-tombol" data-tanya-tombol="" aria-expanded={terbuka} onClick={() => setBukaTanya((v) => !v)}>
+            {terbuka ? <><span aria-hidden="true">‹</span>{t('investigasi.keterangan')}</> : <>{t('investigasi.tanyaLanjut')}<span aria-hidden="true">›</span></>}
+          </button>
+        ) : null}
+      </div>
+    </div>
+  );
+}
+
 function SlipBukti({ b, pilih, teks, baru }: { b: Bukti; pilih?: PilihBukti; teks: Tx; baru?: boolean }) {
   const [atlas, px, py] = POTONG_BUKTI[b.id];
   const isi = (
@@ -154,7 +209,7 @@ function SlipBukti({ b, pilih, teks, baru }: { b: Bukti; pilih?: PilihBukti; tek
   );
 }
 
-export function BukuCatatan({ pernyataan, bukti, tx, menunggu, pernyataanBaru, sorotPernyataan, pilihBukti, tanpaPensil = false, buktiBaru, halaman = 'semua', koreksi, tanya }: {
+export function BukuCatatan({ pernyataan, bukti, tx, menunggu, pernyataanBaru, sorotPernyataan, pilihBukti, tanpaPensil = false, buktiBaru, halaman = 'semua', koreksi, tanya, satu = false, ringkasBukti = false, jumlahBukti }: {
   pernyataan: Pernyataan[];
   bukti: Bukti[];
   tx?: Tx;
@@ -171,17 +226,23 @@ export function BukuCatatan({ pernyataan, bukti, tx, menunggu, pernyataanBaru, s
   koreksi?: KoreksiPernyataan | readonly KoreksiPernyataan[];
   /** T-106: "Tanya lebih lanjut" yang sudah dibuka (satu per pernyataan). */
   tanya?: readonly TanyaPernyataan[];
+  /** T-115: halaman "Keterangan" satu pernyataan per tampilan (keping polaroid memilihnya). */
+  satu?: boolean;
+  /** T-115: halaman "Bukti" tinggal kepalanya (jumlah saja, tanpa slip). */
+  ringkasBukti?: boolean;
+  /** T-115: angka di kepala halaman "Bukti" bila `bukti` hanya sebagian dari yang terkumpul. */
+  jumlahBukti?: number;
 }) {
   const teks = useTx(tx);
   const semuaKoreksi: readonly KoreksiPernyataan[] = !koreksi ? [] : 'id' in koreksi ? [koreksi] : koreksi;
   const jumlah = pernyataan.length;
   return (
-    <section className="bk" aria-label={t('investigasi.bukuInvestigator')} data-buku-catatan="" data-halaman={halaman} style={{ '--bk-pensil': `url(${pensilUrl})` } as CSSProperties}>
+    <section className="bk" aria-label={t('investigasi.bukuInvestigator')} data-buku-catatan="" data-halaman={halaman} data-ringkas-bukti={ringkasBukti ? '' : undefined} style={{ '--bk-pensil': `url(${pensilUrl})` } as CSSProperties}>
       <span className="bk-elastis" aria-hidden="true" />
       {halaman === 'bukti' ? null : <>
       <div className="bk-halaman bk-atas">
         <h3 className="bk-judul"><IkonInv nama="pin" kali={1} />{t('investigasi.keterangan')}<span className="iv-hitung">{jumlah}</span></h3>
-        {jumlah || menunggu ? (
+        {satu && jumlah ? <KeteranganSatu pernyataan={pernyataan} teks={teks} koreksi={semuaKoreksi} tanya={tanya} /> : jumlah || menunggu ? (
           <ul className="bk-daftar">
             {pernyataan.map((p) => <BarisKeterangan key={p.id} p={p} keadaan={p.id === pernyataanBaru ? 'baru' : 'tersemat'} sorot={p.id === sorotPernyataan} teks={teks} koreksi={semuaKoreksi.find((k) => k.id === p.id)} tanya={tanya?.find((x) => x.id === p.id)} />)}
             {menunggu ? <BarisKeterangan key={`tunggu-${menunggu.id}`} p={menunggu} keadaan="menunggu" sorot={false} teks={teks} /> : null}
@@ -191,8 +252,8 @@ export function BukuCatatan({ pernyataan, bukti, tx, menunggu, pernyataanBaru, s
       {halaman === 'keterangan' ? null : <span className="bk-jilid" aria-hidden="true" />}
       </>}
       {halaman === 'keterangan' ? null : <div className="bk-halaman bk-bawah">
-        <h3 className="bk-judul"><IkonInv nama="foto" kali={1} />{t('investigasi.bukti')}<span className="iv-hitung">{bukti.length}</span></h3>
-        {bukti.length
+        <h3 className="bk-judul"><IkonInv nama="foto" kali={1} />{t('investigasi.bukti')}<span className="iv-hitung">{jumlahBukti ?? bukti.length}</span></h3>
+        {ringkasBukti ? null : bukti.length
           ? <ul className="bk-daftar bk-slip-daftar">{bukti.map((b) => <SlipBukti key={b.id} b={b} pilih={pilihBukti} teks={teks} baru={typeof buktiBaru === 'string' ? b.id === buktiBaru : !!buktiBaru?.includes(b.id)} />)}</ul>
           : <p className="bk-kosong bk-tulisan">{t('investigasi.kosongBukti')}</p>}
       </div>}

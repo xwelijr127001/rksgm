@@ -8,6 +8,11 @@
  * dan kartu rujukan di balik tab kuning "Catatan" (lembar berbalik ke daftar catatan polos + "Kembali ke balasan").
  * Bila lembar lebih tinggi daripada ruang yang ada, HANYA daftar pilihan (atau catatan) yang menggulir di dalam lembar;
  * pertanyaan dan tombol kirim tetap terlihat. Di tempat lain (desktop, adegan tatap muka) semuanya satu blok seperti semula.
+ *
+ * T-115 (Raksa Investigator, opt-in lewat `ringkas`; episode lain tidak berubah): pesan untuk nasabah di kasus Investigator panjang
+ * (sampai +- 390 huruf pada 18 px), jadi daftar tiga pesan utuh tidak muat di lembar dan badan lembarnya menggulir. Dengan
+ * `ringkas`: di daftar tiap pesan dipotong 3 baris; mengetuk satu pesan MELIPAT lembar menjadi pesan itu saja, utuh, dengan "Ganti
+ * balasan" (kembali ke daftar) dan tombol kirim. Tidak ada yang perlu digulir; pesan lain tetap satu ketukan jauhnya.
  */
 import { useContext, useId, useRef, useState, type KeyboardEvent, type PointerEvent } from 'react';
 import { playSfx } from '../../audio/audio';
@@ -22,7 +27,7 @@ import { LembarObrolan } from './ekor';
 /** Catatan yang sudah pernah dibuka (titik merah "belum dibaca" hilang), per dokumen, selama halaman hidup. */
 const catatanDibaca = new Set<string>();
 
-export function PilihBalasan({ ep, node, pilihan, tx, gaya, petunjuk, onKirim, awal = null, onUbahPilih, onTutup }: {
+export function PilihBalasan({ ep, node, pilihan, tx, gaya, petunjuk, onKirim, awal = null, onUbahPilih, onTutup, ringkas = false }: {
   ep: Episode;
   node: NodePilihan;
   pilihan: Pilihan[];
@@ -37,6 +42,8 @@ export function PilihBalasan({ ep, node, pilihan, tx, gaya, petunjuk, onKirim, a
   onUbahPilih?: (id: string) => void;
   /** (lembar) tutup lembar dan kembali ke tombol "Balas ..."; pilihan tetap diingat pemanggil. */
   onTutup?: () => void;
+  /** T-115 (lembar): daftar dipotong 3 baris per pesan; pesan yang diketuk tampil utuh sendirian (lihat kepala berkas). */
+  ringkas?: boolean;
 }) {
   const idJudul = useId();
   const lembar = useContext(LembarObrolan);
@@ -74,6 +81,7 @@ export function PilihBalasan({ ep, node, pilihan, tx, gaya, petunjuk, onKirim, a
       if (Number.isInteger(n) && n >= 1 && n <= pilihan.length) {
         e.preventDefault();
         setDipilih(pilihan[n - 1]!.id);
+        if (ringkas) setLipat(true);
         akar.current?.querySelectorAll<HTMLElement>('[role="radio"]')[n - 1]?.focus();
         return;
       }
@@ -84,11 +92,13 @@ export function PilihBalasan({ ep, node, pilihan, tx, gaya, petunjuk, onKirim, a
         akar.current?.querySelector<HTMLElement>('[data-kirim]')?.click();
       }
     };
+    // T-115: lembar terlipat = hanya pesan yang dipilih, utuh (`ringkas`).
+    const lipatLembar = ringkas && lipat && !!terpilih && !nota;
     // Pegangan: ketuk = tutup; geser turun >= 20 px = tutup.
     const turun = (e: PointerEvent<HTMLButtonElement>) => { geser.current = e.clientY; try { e.currentTarget.setPointerCapture(e.pointerId); } catch { /* abaikan */ } };
     const lepas = (e: PointerEvent<HTMLButtonElement>) => { const y0 = geser.current; geser.current = null; if (y0 !== null && e.clientY - y0 >= 20) onTutup?.(); };
     return (
-      <section ref={akar} className="hp-pilih hp-lembar" data-lembar="" data-gaya={gaya} data-tampil={nota ? 'nota' : 'balas'} aria-labelledby={idJudul} onKeyDown={tombol}>
+      <section ref={akar} className="hp-pilih hp-lembar" data-lembar="" data-gaya={gaya} data-tampil={nota ? 'nota' : 'balas'} data-ringkas={ringkas ? (lipatLembar ? 'lipat' : 'daftar') : undefined} aria-labelledby={idJudul} onKeyDown={tombol}>
         <div className="hp-lembar-pegangan">
           <button type="button" data-tutup-lembar="" aria-label={t('ceritaHp.tutupBalasan')} onClick={() => onTutup?.()} onPointerDown={turun} onPointerUp={lepas}><i aria-hidden="true" /></button>
         </div>
@@ -111,15 +121,21 @@ export function PilihBalasan({ ep, node, pilihan, tx, gaya, petunjuk, onKirim, a
             <div className="hp-opsi-daftar hp-lembar-badan" data-gulir-lembar="" role="radiogroup" aria-labelledby={idJudul} onKeyDown={panah}>
               {pilihan.map((p, i) => {
                 const aktif = p.id === dipilih;
+                if (lipatLembar && !aktif) return null;
                 return (
                   <button key={p.id} type="button" role="radio" aria-checked={aktif} tabIndex={aktif || (indeks < 0 && i === 0) ? 0 : -1}
-                    className={'hp-opsi' + (aktif ? ' dipilih' : dipilih ? ' lain' : '')} data-pilihan={p.id} style={{ animationDelay: `${i * 30}ms` }} onClick={() => { playSfx('ketuk'); setDipilih(p.id); }}>
+                    className={'hp-opsi' + (aktif ? ' dipilih' : dipilih ? ' lain' : '')} data-pilihan={p.id} style={{ animationDelay: `${i * 30}ms` }} onClick={() => { playSfx('ketuk'); setDipilih(p.id); if (ringkas) setLipat(true); }}>
                     <span className="hp-opsi-nomor" aria-hidden="true">{i + 1}</span>
                     <span className="hp-opsi-teks">{tx(p.teks)}</span>
                   </button>
                 );
               })}
             </div>
+            {lipatLembar ? (
+              <button type="button" className="hp-tautan hp-lembar-ganti" data-ganti-balasan="" onClick={() => { playSfx('ketuk'); setLipat(false); requestAnimationFrame(() => akar.current?.querySelector<HTMLElement>(`[data-pilihan="${terpilih!.id}"]`)?.focus({ preventScroll: true })); }}>
+                {gaya === 'obrolan' ? t('ceritaHp.gantiBalasan') : t('ceritaHp.gantiJawaban')}
+              </button>
+            ) : null}
             <TombolKirim
               label={terpilih ? t('ceritaHp.kirimBalasanN', { n: indeks + 1 }) : t('ceritaHp.pilihSatuBalasan')}
               siap={dipilih !== null}

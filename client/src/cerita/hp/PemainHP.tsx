@@ -221,6 +221,8 @@ function PemainHPInti({ ep, state, kendali, profil, bahasa, tx: txAsli }: {
     if (tanda === tandaLalu.current) return;
     tandaLalu.current = tanda;
     if (tampilan !== 'obrolan') window.scrollTo({ top: 0, behavior: 'auto' });
+    // T-115: layar Investigator yang dikunci menggulir (bila terpaksa) di dalam .hp-main: layar baru selalu mulai dari atas.
+    if (ep.investigasi && tampilan !== 'obrolan') { const m = document.querySelector<HTMLElement>('.hp-layar[data-inv] > .hp-main'); if (m) m.scrollTop = 0; }
     const id = requestAnimationFrame(() => {
       const aktif = document.activeElement;
       if (adaDialogTerbuka() || (aktif && aktif !== document.body && document.contains(aktif))) return;
@@ -256,7 +258,7 @@ function PemainHPInti({ ep, state, kendali, profil, bahasa, tx: txAsli }: {
       {pandang === 'obrolan' ? t('ceritaHp.balasNama', { nama: tx(ep.pemeran[ep.nasabah]?.nama ?? ep.nasabah) }) : t('ceritaHp.jawabPilihan')} <Arrow />
     </button>
   ) : node.jenis === 'pilihan' && lengkap ? (
-    <PilihBalasan key={kunciNode} awal={bacaBalasan()?.kunci === kunciNode ? bacaBalasan()!.pilih : null} onUbahPilih={(id) => ingatBalasan(kunciNode, id)} ep={ep} node={node as NodePilihan} pilihan={pilihanTersedia(ep, state)} tx={tx} gaya={pandang}
+    <PilihBalasan key={kunciNode} awal={bacaBalasan()?.kunci === kunciNode ? bacaBalasan()!.pilih : null} onUbahPilih={(id) => ingatBalasan(kunciNode, id)} ep={ep} node={node as NodePilihan} pilihan={pilihanTersedia(ep, state)} tx={tx} gaya={pandang} ringkas={!!ep.investigasi}
       petunjuk={!state.riwayat.some((e) => e.jenis === 'pilihan')} onKirim={pilih}
       onTutup={() => { playSfx('ketuk'); setBalasUntuk(null); requestAnimationFrame(() => document.querySelector<HTMLElement>('.hp-layar [data-balas]')?.focus({ preventScroll: true })); }} />
   ) : node.jenis === 'aktivitas' && lengkap && misi ? (
@@ -312,14 +314,17 @@ function PemainHPInti({ ep, state, kendali, profil, bahasa, tx: txAsli }: {
   // T-018 Tahap 2: cangkang layar (halaman tidak menggulir) untuk adegan beraksi-di-dialog, aktivitas, dan layar akhir.
   const cangkangLayar = useKueri(KUERI_CANGKANG_LAYAR);
   const [slotAkhir, setSlotAkhir] = useState<HTMLDivElement | null>(null);
-  // T-076: layar investigasi & hasil investigasi tidak dikunci (tingginya dihitung muat oleh komponennya; halaman boleh menggulir bila tidak).
-  const kunciLayar = (tampilan === 'akhir' && !ep.investigasi) || (tampilan === 'arena' && !pakaiMeja) || (tampilan === 'adegan' && !akibatDiMeja && !(node.jenis === 'pilihan' && lengkap));
+  // T-115 (pemilik: "semua layar Investigator tanpa menggulir"): layar investigasi dan hasil investigasi IKUT dikunci setinggi
+  // layar (dulu T-076: tidak dikunci, halaman boleh menggulir). Tinggi tiap layar dihitung muat di 360 x 640 dan 390 x 700
+  // (team/HANDOFF.md "## T-115"); bila suatu saat isinya tetap lebih tinggi (huruf sistem diperbesar), .hp-main yang menggulir di
+  // dalam layar (investigasi/ui/muat.css), jadi tidak ada yang terpotong atau tak terjangkau.
+  const kunciLayar = tampilan === 'akhir' || tampilan === 'investigasi' || (tampilan === 'arena' && !pakaiMeja) || (tampilan === 'adegan' && !akibatDiMeja && !(node.jenis === 'pilihan' && lengkap));
   // T-024: layar akhir SATU LAYAR (tanpa gulir) di cangkang, untuk episode dengan ringkasan keputusan bernomor. Legenda suasana,
   // catatan simulasi dan status naskah yang dulu di bawah kartu pindah ke Menu selama bentuk ini tampil.
   const akhirSatu = tampilan === 'akhir' && cangkangLayar && !!ep.titik?.length;
 
   return (
-    <div className="player-ui cer-layar hp-layar" data-teks-besar={ep.tampilan?.teksBesar ? '' : undefined} data-kunci={kunciLayar ? '' : undefined} data-tampilan={tampilan} data-akhir-satu={akhirSatu ? '' : undefined} data-balas-terbuka={balasTerbuka ? '' : undefined}>
+    <div className="player-ui cer-layar hp-layar" data-teks-besar={ep.tampilan?.teksBesar ? '' : undefined} data-kunci={kunciLayar ? '' : undefined} data-tampilan={tampilan} data-akhir-satu={akhirSatu ? '' : undefined} data-balas-terbuka={balasTerbuka ? '' : undefined} data-inv={ep.investigasi ? '' : undefined}>
       <header className="hp-kepala">
         <Link className="hp-kembali" to={rumah} aria-label={t('cerita.kembaliDaftar')}><Arrow back /></Link>
         <div className="hp-judul">

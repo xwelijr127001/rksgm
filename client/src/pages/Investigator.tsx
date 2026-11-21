@@ -31,6 +31,26 @@
  *    kartu petugas, total, dan daftar kasus sebagai MAP-MAP di meja (Kasus 2 = map kedua), terkunci, Tamu baru. Halaman digulir.
  *  Logika T-094 / T-099 dan semua kait data- tidak berubah; kunci baru hanya `hubInv.berkasTab` dan `hubInv.capBaru`.
  *
+ * T-117 (Designer; pemilik memilih T-116 opsi 4 "Raksa Cerah"): RUPA hub diganti, tata letak / logika / kait data- T-114 tetap.
+ *  PANGGUNG: langit siang kuning-krem dengan awan, gedung jingga lembut dan pita tanah (seni/investigasi/cerah-latar.png, menempel
+ *    bawah), sinar matahari CSS yang berputar pelan di belakang logo, logo LENCANA PERISAI "RAKSA INVESTIGATOR" (cerah-logo.png;
+ *    hub pulang di layar di bawah 820 px: pelat cerah-logo-kecil.png), Miss Raksa detektif sebagai STIKER bertepi putih
+ *    (cerah-miss.png) di depan cakram matahari, dua set kilau yang berkelip bergantian. Gerak dikurangi = semua diam.
+ *  Halaman krem, berkas putih bertab jingga, tombol jingga dengan dua kilau, strip petugas dan kartu kasus putih / kuning.
+ *  Tinggi panggung: 104 baris seni (208 px); hub pulang 80 (160 px) di bawah 820 px dan 56 (112 px) di bawah 700 px; sampul 90
+ *    (180 px) di bawah 700 px. Hitungan satu layar T-114 tetap berlaku: 360 x 640 (ruang 569): pulang 480 .. 558, sampul 474 .. 554;
+ *    390 x 700 (ruang 629): pulang 528 .. 606, sampul 502 .. 582 (panggung 208).
+ *
+ * T-114 (Designer; pemilik: "we need to make all of it no need scrolling"): KEDUA bentuk hub muat satu layar HP tanpa gulir.
+ * Ruang: 640 - kepala 59 (56 + garis jingga 3) - bantalan bawah 12 = 569 px; 700 -> 629 px. Hitungan (investigator.css):
+ *  PULANG  panggung ringkas 112 (700: 160; Miss Raksa setengah dada di belakang tepi meja) - 26 + berkas tindakan utama 128
+ *    (148 bila keterangan dua baris) + strip petugas 48 (stempel, pangkat, total; ketuk = lembar KARTU PETUGAS berisi kartu,
+ *    total, tujuan pangkat dan hadiah; "Tamu baru" di samping strip) + tiga KARTU KASUS sejajar 140 + 6 (foto T-113, nomor, stempel,
+ *    judul, satu kata keadaan / skor) + entri acara 48 (ikut papan: 104; ketik kode + galat: 106) + jarak 4 x 8
+ *    = 480 .. 558 px dari 569 (700: 528 .. 606 dari 629).
+ *  SAMPUL  panggung 180 (700 ke atas: 200) - 26 + berkas 184 + 10 + tombol 68 + 10 + entri 48 .. 106 = 474 .. 532 px dari 569.
+ * Kalimat kait per kasus (T-113) pindah ke berkas tindakan utama; "Dari cerita Episode 1" ikut di baris keterangannya.
+ *
  * T-113 (Designer; pemilik: "it would be nice if we had a preview or something a picture"): tiap baris daftar kasus = BERKAS KASUS
  * kecil berfoto. Kiri: foto piksel 96 x 68 berklip dan sedikit miring (kasus 1 bingkai dashcam truk + lajur, kasus 2 MPV malam di
  * Jl. Melati, kasus 3 bumper + spion retak); di atas foto: stempel kasus miring + skor terbaik "90/100" bila sudah berstempel,
@@ -65,9 +85,13 @@ import { seniKasus } from '../cerita/investigasi/ui/seniKasus';
 import { berlanggananCerita, mulaiBaru, versiPenyimpananCerita } from '../cerita/simpan';
 import { teksCerita } from '../cerita/teks';
 import { KartuPetugas } from '../cerita/ui/KartuPetugas';
-import seniLatar from '../cerita/seni/investigasi/hub-latar.png';
-import seniLogo from '../cerita/seni/investigasi/hub-logo.png';
-import seniMiss from '../cerita/seni/investigasi/hub-miss.png';
+import seniLatar from '../cerita/seni/investigasi/cerah-latar.png';
+import seniLogo from '../cerita/seni/investigasi/cerah-logo.png';
+import seniLogoKecil from '../cerita/seni/investigasi/cerah-logo-kecil.png';
+import seniMiss from '../cerita/seni/investigasi/cerah-miss.png';
+import seniCakram from '../cerita/seni/investigasi/cerah-cakram.png';
+import seniKilauA from '../cerita/seni/investigasi/cerah-kilau-a.png';
+import seniKilauB from '../cerita/seni/investigasi/cerah-kilau-b.png';
 import seniKlip from '../cerita/seni/investigasi/klip.png';
 import fotoKasus1 from '../cerita/seni/investigasi/hub-kasus-1.png';
 import fotoKasus2 from '../cerita/seni/investigasi/hub-kasus-2.png';
@@ -90,6 +114,7 @@ export default function Investigator() {
   useHalaman(t('hubInv.nama'));
   const nav = useNavigate();
   const [tanyaTamu, setTanyaTamu] = useState(false);
+  const [kartu, setKartu] = useState(false);
 
   const r = bacaRekaman();
   const daftar = daftarKasusHub(r);
@@ -104,12 +129,20 @@ export default function Investigator() {
   const Entri = entriAcara();
   const entri = Entri ? <Entri kode={typeof window === 'undefined' ? null : new URLSearchParams(window.location.search).get(EVENT_QUERY_PARAM)} /> : null;
   const tab = (x: KasusHub) => t('hubInv.berkasTab', { n: x.nomor, judul: tx(x, x.konfig.judul) });
-  // T-100: panggung layar judul (hiasan; nama seri sudah ada di h1 kepala halaman).
+  // T-100 / T-117: panggung layar judul "Raksa Cerah" (hiasan; nama seri sudah ada di h1 kepala halaman).
   const panggung = (
     <div className="inv-panggung" aria-hidden="true" style={{ '--inv-latar': `url(${seniLatar})` } as CSSProperties}>
       <div className="inv-panggung-isi">
-        <img className="inv-logo" src={seniLogo} alt="" width={92} height={38} />
-        <span className="inv-miss" data-miss-detektif=""><img src={seniMiss} alt="" width={64} height={88} /><i className="inv-kilau" /></span>
+        <i className="inv-sinar" />
+        <img className="inv-logo inv-logo-besar" src={seniLogo} alt="" width={96} height={72} />
+        <img className="inv-logo inv-logo-kecil" src={seniLogoKecil} alt="" width={100} height={38} />
+        <span className="inv-miss" data-miss-detektif="">
+          <img className="inv-cakram" src={seniCakram} alt="" width={80} height={80} />
+          <img className="inv-miss-gambar" src={seniMiss} alt="" width={68} height={88} />
+          <img className="inv-kilau-set" data-set="a" src={seniKilauA} alt="" width={100} height={92} />
+          <img className="inv-kilau-set" data-set="b" src={seniKilauB} alt="" width={100} height={92} />
+          <i className="inv-kilau" />
+        </span>
       </div>
     </div>
   );
@@ -160,6 +193,7 @@ export default function Investigator() {
   const mainLagi = () => { mulaiBaru(k.ep); nav(ruteKasus(k.nomor)); };
   const statusBaris = (x: KasusHub) => (x.terbaik !== null ? t('hubInv.terbaik', { skor: x.terbaik, maks: SKOR_MAKS })
     : x.status === 'baru' && !x.konfig.cerita ? t('hubInv.berkasBaru') : t(`hubInv.status.${x.status}`));
+  const namaPangkat = t(`investigasi.pangkat.${pangkatRekaman(r)}`);
   const kaitBaris = (x: KasusHub) => (FOTO_KASUS[x.konfig.kasus] ? t(`hubInv.kaitDaftar.${x.konfig.kasus}`) : tx(x, x.konfig.kait));
   return (
     <div className="player-ui cer-layar hp-layar inv-hub" data-teks-besar="" data-hub={aksi.jenis}>
@@ -170,7 +204,10 @@ export default function Investigator() {
           <div className="inv-berkas" data-ringkas="" data-berkas-kasus={k.konfig.kasus}>
             <h2 id="inv-hub-kasus" className="inv-berkas-tab">{tab(k)}</h2>
             <div className="inv-berkas-badan">
-              <p className="inv-hub-sub">{aksi.jenis === 'lagi' ? t('hubInv.lagiKet', { n: k.nomor }) : aksi.jenis === 'lanjut' ? t('hubInv.status.jalan') : tx(k, k.konfig.kait)}</p>
+              <p className="inv-hub-sub">
+                {aksi.jenis === 'lagi' ? t('hubInv.lagiKet', { n: k.nomor }) : aksi.jenis === 'lanjut' ? t('hubInv.status.jalan') : kaitBaris(k)}
+                {aksi.jenis !== 'lagi' && k.konfig.cerita ? <small className="inv-hub-asal" data-asal-cerita={k.konfig.cerita.episode}> · {tx(k, k.konfig.cerita.asal)}</small> : null}
+              </p>
           {aksi.jenis === 'lagi' ? (
             <button type="button" className="primary-action iv-tombol inv-hub-utama" data-hub-utama="lagi" onClick={mainLagi}>{t('hubInv.lagi')}</button>
           ) : aksi.jenis === 'lanjut' ? (
@@ -180,46 +217,56 @@ export default function Investigator() {
           )}
             </div>
           </div>
-          <KartuPetugas nama={nama} look={look} investigasi={{ stempel: stempelSeri(r), pangkat: pangkatRekaman(r), baru: false }} />
-          <p className="iv-total" data-total-kasus="">
-            <b>{t('hubInv.total')} <span data-total-skor="">{totalSkor(r)}</span> / {TOTAL_MAKS}</b>
-            {tujuan ? <em data-menuju-pangkat={tujuan.jenis}>{t(tujuan.jenis === 'senior' ? 'hubInv.menujuSenior' : 'hubInv.menujuKepala', { n: tujuan.kurang })}</em> : null}
-          </p>
+          <div className="inv-hub-petugas">
+            <button type="button" className="inv-hub-strip" data-kartu-buka="" aria-haspopup="dialog" aria-label={t('hubInv.stripBuka', { pangkat: namaPangkat, skor: totalSkor(r), maks: TOTAL_MAKS })} onClick={() => setKartu(true)}>
+              <span className="inv-hub-strip-stempel" aria-hidden="true">{daftar.map((x) => <IkonStempel key={x.konfig.kasus} kasus={x.konfig.kasus} terisi={x.stempel} kali={1} />)}</span>
+              <span className="inv-hub-strip-teks" aria-hidden="true">
+                <b>{namaPangkat}</b>
+                <small data-total-kasus="">{t('hubInv.total')} <span data-total-skor="">{totalSkor(r)}</span> / {TOTAL_MAKS}</small>
+              </span>
+              <span className="inv-hub-panah" aria-hidden="true">›</span>
+            </button>
+            <button type="button" className="inv-hub-tamu-tombol" data-tamu-baru="" aria-haspopup="dialog" onClick={() => setTanyaTamu(true)}>{t('hubInv.tamuBaru')}</button>
+          </div>
           <ul className="inv-hub-daftar" aria-label={t('hubInv.daftar')}>
             {daftar.map((x) => (
               <li key={x.konfig.kasus}>
-                <Link className="inv-hub-baris" to={ruteKasus(x.nomor)} data-kasus={x.konfig.kasus} data-status={x.status} data-stempel={x.stempel ? '' : undefined} data-asal={x.konfig.cerita ? '' : undefined}>
+                <Link className="inv-hub-baris" to={ruteKasus(x.nomor)} aria-label={`${judul(x)}. ${statusBaris(x)}`} data-kasus={x.konfig.kasus} data-status={x.status} data-stempel={x.stempel ? '' : undefined} data-asal={x.konfig.cerita ? '' : undefined}>
                   <span className="inv-hub-foto" aria-hidden="true" data-foto-kasus={x.konfig.kasus}>
-                    <img className="inv-klip" src={seniKlip} alt="" width={10} height={22} />
                     {FOTO_KASUS[x.konfig.kasus] ? <img className="inv-hub-foto-gambar" src={FOTO_KASUS[x.konfig.kasus]} alt="" width={96} height={68} /> : <i className="inv-hub-foto-gambar" />}
-                    {x.stempel ? (
-                      <>
-                        <span className="inv-hub-foto-cap"><IkonStempel kasus={x.konfig.kasus} /></span>
-                        {x.terbaik !== null ? <b className="inv-hub-foto-skor">{t('hubInv.skorFoto', { skor: x.terbaik, maks: SKOR_MAKS })}</b> : null}
-                      </>
-                    ) : x.status === 'selesai' ? null : <b className="inv-hub-foto-tag" data-tag={x.status}>{t(x.status === 'jalan' ? 'hubInv.status.jalan' : 'hubInv.tagBaru')}</b>}
+                    <b className="inv-hub-foto-no">{x.nomor}</b>
+                    {x.stempel ? <span className="inv-hub-foto-cap"><IkonStempel kasus={x.konfig.kasus} /></span> : null}
                   </span>
-                  <span className="inv-hub-baris-teks">
-                    <b>{judul(x)}</b><small className="inv-hub-kait-baris">{kaitBaris(x)}</small><small>{statusBaris(x)}</small>
-                    {x.konfig.cerita ? <small className="inv-hub-asal" data-asal-cerita={x.konfig.cerita.episode}>{tx(x, x.konfig.cerita.asal)}</small> : null}
-                  </span>
-                  <span className="inv-hub-panah" aria-hidden="true">›</span>
+                  <b className="inv-hub-baris-judul" aria-hidden="true">{tx(x, x.konfig.judul)}</b>
+                  <small className="inv-hub-baris-status" aria-hidden="true" data-tag={x.terbaik !== null ? 'skor' : x.status}>
+                    {x.terbaik !== null ? t('hubInv.skorFoto', { skor: x.terbaik, maks: SKOR_MAKS }) : x.status === 'jalan' ? t('hubInv.stripJalan') : x.status === 'baru' ? t('hubInv.tagBaru') : t('hubInv.status.selesai')}
+                  </small>
                 </Link>
               </li>
             ))}
           </ul>
-          {/* T-106: hadiah seri yang sudah diraih (lencana dua kasus, segel panel; bingkai Kepala ada di kartu petugas) */}
-          {hadiah.length ? (
-            <p className="inv-hub-hadiah" data-hadiah={hadiah.join(' ')}>
-              {hadiah.map((a) => <span key={a}>{a === 'bingkai-kepala' ? null : <PanelAward id={a} kali={1} />}{t(`investigasi.hadiah.${a}`)}</span>)}
-            </p>
-          ) : null}
           {entri}
-          <p className="iv-tamu inv-hub-tamu"><button type="button" className="hp-tautan" data-tamu-baru="" aria-haspopup="dialog" onClick={() => setTanyaTamu(true)}>{t('hubInv.tamuBaru')}</button></p>
         </section>
       </main>
+      {/* T-114: kartu petugas lengkap, total, tujuan pangkat dan hadiah seri di balik strip petugas */}
+      {kartu ? (
+        <Modal judul={t('hubInv.kartuJudul')} onTutup={() => setKartu(false)} lebar={420} kelas="inv-cerah" aksi={<button type="button" className="btn btn-utama" onClick={() => setKartu(false)}>{t('hubInv.batal')}</button>}>
+          <div className="inv-hub-lembar" data-kartu-lembar="">
+            <KartuPetugas nama={nama} look={look} investigasi={{ stempel: stempelSeri(r), pangkat: pangkatRekaman(r), baru: false }} />
+            <p className="iv-total">
+              <b>{t('hubInv.total')} {totalSkor(r)} / {TOTAL_MAKS}</b>
+              {tujuan ? <em data-menuju-pangkat={tujuan.jenis}>{t(tujuan.jenis === 'senior' ? 'hubInv.menujuSenior' : 'hubInv.menujuKepala', { n: tujuan.kurang })}</em> : null}
+            </p>
+            {hadiah.length ? (
+              <p className="inv-hub-hadiah" data-hadiah={hadiah.join(' ')}>
+                {hadiah.map((a) => <span key={a}>{a === 'bingkai-kepala' ? null : <PanelAward id={a} kali={1} />}{t(`investigasi.hadiah.${a}`)}</span>)}
+              </p>
+            ) : null}
+          </div>
+        </Modal>
+      ) : null}
       {tanyaTamu ? (
-        <Modal judul={t('hubInv.tamuBaru')} onTutup={() => setTanyaTamu(false)} lebar={420}
+        <Modal judul={t('hubInv.tamuBaru')} onTutup={() => setTanyaTamu(false)} lebar={420} kelas="inv-cerah"
           aksi={<>
             <button type="button" className="btn btn-netral" onClick={() => setTanyaTamu(false)}>{t('hubInv.batal')}</button>
             <button type="button" className="btn btn-utama" data-tamu-baru-ya="" onClick={() => { tamuBaruSemuaKasus(); setTanyaTamu(false); nav(RUTE_HUB, { replace: true }); }}>{t('hubInv.tamuYa')}</button>

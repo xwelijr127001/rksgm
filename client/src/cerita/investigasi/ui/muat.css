@@ -1,0 +1,147 @@
+/* T-115 (Fullstack; pemilik: "semua layar Raksa Investigator tanpa menggulir"): lapisan PERAPAT di atas investigasi.css, buku.css,
+   alur.css, tambahan.css dan panel/panel.css. Diimpor TERAKHIR oleh LayarInvestigasi.tsx. Sasaran: tiap layar Investigator muat di
+   360 x 640 dan 390 x 700 (di bawah kepala cerita) tanpa gulir halaman, pada ukuran huruf bawaan, id / en / zh. Hitungan per layar:
+   team/HANDOFF.md "## T-115". Aturan yang dipegang: teks badan tetap 18 px (label >= 13 px), sasaran ketuk >= 44 px, seni dipotong
+   atau dikecilkan utuh (tidak pernah terpotong di tengah), isi yang panjang dibagi halaman / dilipat, bukan dikecilkan.
+   Tidak ada gerak baru di berkas ini. */
+
+/* ================================================================ 1. cangkang: layar investigasi dan hasil DIKUNCI setinggi layar
+   Kueri = KUERI_CANGKANG_LAYAR (hp/cangkang.tsx). Halaman tidak bisa menggulir; ruang isi = layar - kepala cerita 61 - bantalan
+   12 + 10 = 557 px (360 x 640) / 617 px (390 x 700). Bila isinya tetap lebih tinggi (huruf sistem diperbesar, bahasa lain), .hp-main
+   yang menggulir di dalam layar: tidak ada yang terpotong atau tak terjangkau. */
+@media (max-width: 1023.98px) and (min-height: 560px) {
+  .hp-layar[data-kunci][data-inv]:is([data-tampilan="investigasi"], [data-tampilan="akhir"]) > .hp-main {
+    position: relative; display: flex; flex-direction: column; gap: 8px;
+    padding: 12px max(12px, env(safe-area-inset-right)) max(10px, env(safe-area-inset-bottom)) max(12px, env(safe-area-inset-left));
+    overflow-x: hidden; overflow-y: auto; overscroll-behavior-y: contain; -webkit-overflow-scrolling: touch;
+    -webkit-mask-image: none; mask-image: none;
+  }
+}
+
+/* ================================================================ 0. kartu judul: sedikit lebih rapat; konfirmasi "Tamu baru" tanpa margin paragraf */
+.iv-layar.iv-judul { gap: 12px; padding-top: 8px; }
+.iv-judul + .iv-tamu[role="group"] { display: grid; gap: 2px; }
+.iv-judul + .iv-tamu[role="group"] > p { margin: 0; }
+
+/* ================================================================ 2. latihan (pita + layar latihan, hasil latihan) */
+.iv-layar.iv-latihan-kepala { margin-bottom: -2px; }
+/* latihan satu babak panel: ruang panel (hiasan) mengalah untuk pita latihan */
+.iv-latihan-kepala + .pn-ronde > .pn-ruang { display: none; }
+.iv-latihan-kepala + .pn-ronde > .pn-ketua::before { display: none; }
+.iv-layar.iv-latihan-hasil { gap: 8px; padding-top: 0; }
+.iv-latihan-hasil .iv-latihan-aksi:has(> :nth-child(2)) { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+.iv-latihan-hasil .iv-latihan-aksi .iv-tombol { min-height: 52px; padding: 6px 8px; font-size: 16px; line-height: 1.2; }
+/* latihan pesan: daftar = tiap pesan dipotong 3 baris; pesan yang dipilih tampil utuh sendirian + "Ganti" */
+.iv-latihan-pesan .iv-pesan-kartu { font-size: 16px; line-height: 22px; }
+.iv-latihan-pesan button.iv-pesan-kartu > span:first-child { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 3; overflow: hidden; }
+.iv-latihan-pesan p.iv-pesan-kartu { margin: 0; cursor: default; border-color: #ff9000; background: #fff1c2; box-shadow: 0 2px 0 #9a4f00; }
+.iv-latihan-pesan p.iv-pesan-kartu > .iv-bukti-tanda { background: #ff9000; align-self: start; }
+.iv-latihan-pesan .iv-pesan-ganti { justify-self: center; min-height: 44px; }
+
+/* ================================================================ 3. layar semat: halaman "Bukti" tinggal kepalanya */
+.bk[data-ringkas-bukti] .bk-bawah { padding-bottom: 4px; }
+.bk[data-ringkas-bukti] .bk-bawah .bk-judul { margin-bottom: 0; }
+
+/* ================================================================ 4. bukti baru: tombol "Periksa ..." 48 px */
+.iv-tombol.iv-tombol-kedua { min-height: 48px; font-size: 16px; }
+
+/* ================================================================ 4b. periksa perjalanan / polis (kasus 2): jarak 6 px */
+.iv-layar.pj, .iv-layar.pp { gap: 6px; }
+.pp .pp-isi { gap: 6px; padding-bottom: 8px; }
+
+/* ================================================================ 4c. KEBERATAN (kasus 1-2): kepala halaman buku tidak diulang (layar ini
+   sudah punya pertanyaan dan label sendiri); langkah dipandu di layar pendek: hanya slip yang tepat yang tampil */
+.iv-keberatan .bk-judul { display: none; }
+@media (max-height: 679.98px) {
+  .iv-keberatan[data-percobaan="2"] .bk-slip-daftar > li:has(> .bk-slip[data-redup]) { display: none; }
+}
+
+/* ================================================================ 5. putusan: alasan terbuka pada kartu yang DIPILIH saja
+   (tiga alasan utuh sekaligus tidak muat di kasus 2 dan 3; kartu lain tetap satu ketukan jauhnya, dan putusan baru berlaku
+   sesudah "Tetapkan putusan") */
+.iv-putusan .iv-putusan-kartu { min-height: 56px; padding: 6px 10px; }
+.iv-putusan .iv-putusan-kartu:not([aria-checked="true"]) .iv-putusan-teks small { display: none; }
+
+/* ================================================================ 6. gerbang "Mulai baru": selama bertanya, potret dan kalimat pengantar mengalah */
+.iv-gerbang[data-tanya] > .iv-reaksi, .iv-gerbang[data-tanya] > p:not([class]) { display: none; }
+
+/* ================================================================ 7. hasil investigasi */
+.iv-layar.iv-hasil { gap: 6px; }
+/* keping "Rekor baru!" / "Terbaik 85" = stiker di sudut potret reaksi: kepala tetap 80 px */
+.iv-hasil .iv-hasil-kepala { position: relative; min-height: 80px; gap: 10px; } /* jarak 10: "Kepala Investigator" (153 px) muat sebaris di kolom 160 px */
+.iv-hasil .iv-rekor { position: absolute; right: -2px; bottom: 0; z-index: 1; margin: 0 !important; rotate: -3deg; box-shadow: 0 2px 0 #212121; }
+.iv-hasil .iv-poin { gap: 2px; }
+.iv-hasil .iv-poin li { height: 20px; }
+.iv-hasil .iv-total { flex-wrap: nowrap; min-height: 24px; }
+.iv-hasil .iv-total em { min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.iv-hasil .iv-hasil-lanjut { gap: 6px; }
+.iv-hasil .iv-hasil-lanjut:empty { display: none; }
+/* hadiah baru: satu baris (label + hadiah berdampingan); dua hadiah sekaligus boleh menjadi dua baris */
+.iv-hasil .iv-hadiah { gap: 2px 8px; }
+.iv-hasil .iv-hadiah > b { flex-basis: auto; }
+.iv-hasil .iv-hadiah .pn-lencana { margin: -4px 0; }
+/* saat hadiah baru diumumkan, tali kartu petugas (14 px) mengalah */
+.iv-hasil:has(.iv-hadiah) .kp-tali { display: none; }
+/* baris aksi tiga tombol: Main lagi / Arsip kasus / Selesai */
+.iv-hasil-aksi[data-tiga] { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; }
+.iv-hasil-aksi[data-tiga] .iv-tombol { padding: 4px; font-size: 15px; line-height: 18px; }
+.iv-layar.iv-hasil > .iv-cerita { margin-top: -6px; }
+
+/* ================================================================ 8. tab (arsip kasus, lembar buku catatan): satu halaman per tampilan */
+.iv-tab { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr); border: 2px solid #212121; background: #fff9f5; box-shadow: 0 2px 0 #212121; }
+.iv-tab-tombol { min-height: 44px; display: inline-flex; align-items: center; justify-content: center; gap: 4px; margin: 0; padding: 2px 4px; border: 0; border-radius: 0; background: none; color: #212121; font: inherit; font-size: 14px; line-height: 18px; font-weight: 800; text-align: center; cursor: pointer; }
+.iv-tab-tombol + .iv-tab-tombol { border-left: 2px solid #212121; }
+.iv-tab-tombol[aria-selected="true"] { background: #ff9000; }
+.iv-tab-tombol:focus-visible { outline: 3px solid #1d6fd1; outline-offset: -3px; }
+.iv-tab-tombol .iv-hitung { margin-left: 2px; }
+.iv-buku-lembar { display: grid; gap: 8px; color: #212121; }
+/* tab sudah menyebut halamannya: kepala halaman buku tidak diulang */
+.iv-buku-lembar .bk-judul { display: none; }
+.iv-arsip { gap: 8px; }
+
+/* ================================================================ 9. buku catatan: SATU pernyataan per tampilan (BukuCatatan `satu`) */
+.bk-satu { display: grid; gap: 4px; }
+.bk-keping { display: flex; flex-wrap: wrap; gap: 2px 8px; padding: 6px 0 0; }
+.bk-keping-tombol { position: relative; width: 56px; height: 62px; box-sizing: border-box; margin: 0; padding: 3px 4px; border: 0; border-radius: 0; background: none; cursor: pointer; }
+.bk-keping-tombol .bk-polaroid { rotate: none; }
+.bk-keping-tombol[aria-selected="true"] .bk-polaroid { outline: 3px solid #ff9000; outline-offset: 1px; }
+.bk-keping-tombol:not([aria-selected="true"]) .bk-polaroid { opacity: .6; }
+.bk-keping-tombol:focus-visible { outline: 3px solid #1d6fd1; outline-offset: 0; }
+.bk-keping-no { position: absolute; right: 0; bottom: 0; min-width: 16px; height: 16px; box-sizing: border-box; padding: 0 3px; background: #212121; color: #fff9f5; font-size: 12px; line-height: 16px; font-weight: 800; font-style: normal; text-align: center; }
+.bk-baris.bk-satu-isi { display: grid; grid-template-columns: minmax(0, 1fr); gap: 2px; min-height: 0; padding: 2px; }
+.bk-satu-isi .bk-tanya { margin-top: 0; }
+.bk-tanya-tombol { justify-self: start; display: inline-flex; align-items: center; gap: 6px; min-height: 44px; margin: 4px 0 0; padding: 0 12px; border: 2px solid #2a211e; border-radius: 0; background: #fff9f5; color: #212121; font: inherit; font-size: 14px; line-height: 18px; font-weight: 800; box-shadow: 0 2px 0 #2a211e; cursor: pointer; }
+.bk-tanya-tombol:active { translate: 0 2px; box-shadow: none; }
+.bk-tanya-tombol:focus-visible { outline: 3px solid #1d6fd1; outline-offset: 2px; }
+
+/* ================================================================ 10. babak panel (kasus 3)
+   Ruang panel dipotong 104 -> 72 px (dinding di atas kepala dan muka meja; ketiga bust utuh, tepi meja tetap terlihat); kartu bukti
+   52 px (judul sampai 2 baris; baris sumber ada di lembar bukti, tidak diulang di daftar); jarak 6 px. */
+.iv-layar.pn-ronde { gap: 6px; }
+.pn-ronde .pn-ruang { height: 72px; background-position: center -12px, 0 -12px; background-size: 360px 104px, 100% 104px; background-repeat: no-repeat; }
+.pn-ronde .pn-kursi { top: 4px; }
+.pn-ronde .pn-kartu-teks small { display: none; }
+/* langkah dipandu di layar pendek: hanya kartu yang diterima yang tampil (di layar >= 680 px kartu lain tetap tampil pudar) */
+@media (max-height: 679.98px) {
+  .pn-ronde[data-percobaan="2"] .pn-kartu[data-redup] { display: none; }
+}
+
+/* ================================================================ 11. lembar bukti (PanelExhibit)
+   Foto utuh dan foto dekat memakai kotak 3 : 2 yang sama; tombol gantinya (44 x 44) menumpang di sudut foto. Di layar < 700 px
+   kutipan pernyataan di atas FOTO disembunyikan (pernyataannya tetap ada di layar babak di belakang lembar). */
+.pn-foto-bingkai { position: relative; max-width: 100%; }
+.pn-foto-bingkai .pn-foto-tombol { display: block; max-width: 100%; }
+.pn-foto img { width: 288px; aspect-ratio: 3 / 2; object-fit: contain; }
+.pn-foto-bingkai .pn-foto-ganti { position: absolute; right: 6px; bottom: 6px; width: 44px; height: 44px; min-height: 0; padding: 0; justify-content: center; box-shadow: 0 2px 0 #212121; }
+@media (max-height: 699.98px) {
+  .pn-lembar[data-jenis="foto"] > .pn-kutip { display: none; }
+}
+.mdl-aksi .iv-tombol.pn-lembar-pakai { min-height: 48px; }
+
+/* ================================================================ 12. lembar balasan obrolan dengan `ringkas` (PilihBalasan; hanya kasus Investigator)
+   daftar: tiap pesan dipotong 3 baris; terlipat: hanya pesan yang dipilih, utuh, + "Ganti balasan" + tombol kirim (kepala
+   pertanyaan disembunyikan secara visual supaya pesan terpanjang, +- 14 baris pada 18 px, muat tanpa gulir). */
+.hp-lembar[data-ringkas="daftar"] .hp-opsi-teks { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 3; overflow: hidden; }
+.hp-lembar[data-ringkas="lipat"] .hp-lembar-kepala { position: absolute; width: 1px; height: 1px; min-height: 0; overflow: hidden; clip: rect(0 0 0 0); clip-path: inset(50%); white-space: nowrap; }
+.hp-lembar[data-ringkas="lipat"] .hp-opsi-daftar { margin-top: 2px; }
+.hp-lembar .hp-lembar-ganti { align-self: center; margin-top: 2px; }

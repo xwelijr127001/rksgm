@@ -1,9 +1,13 @@
-/* T-094 (Fullstack) + T-100 (Designer): hub "Raksa Investigator" (/investigator, pages/Investigator.tsx) = LAYAR JUDUL game detektif
-   piksel. Cangkang = cangkang pemutar HP (.hp-layar, kepala 56 px, .hp-main) dan komponen Investigator yang ada (.iv-layar,
-   .iv-tombol, .iv-total, kartu petugas .kp). Palet: arang #212121, krem #fff9f5, jingga #ff9000, persik #ffd9a8 (berkas pemilih
-   T-096 / T-098), dinding malam #2b2738, kayu meja #5a3a24, map kraft #e3a877 / #f2c79e.
+/* T-094 (Fullstack) + T-100 / T-114 / T-117 (Designer): hub "Raksa Investigator" (/investigator, pages/Investigator.tsx).
+   T-117 = gaya "RAKSA CERAH" (pilihan pemilik, T-116 opsi 4): siang hari kuning / jingga Raksa, sinar matahari, awan, logo lencana
+   perisai, Miss Raksa detektif sebagai stiker bertepi putih dengan kilau; halaman krem, berkas putih, tombol jingga berkilau.
+   Tata letak, ukuran dan hitungan SATU LAYAR = T-114 (tidak berubah); hanya rupa.
+   Cangkang = cangkang pemutar HP (.hp-layar, kepala 56 px + garis 3, .hp-main) dan komponen Investigator yang ada (.iv-layar,
+   .iv-tombol, .iv-total, kartu petugas .kp).
+   Palet: tinta #212121, krem halaman #fff3d6, putih #ffffff, jingga #ff9000, kuning #ffc400 / #ffe38a, jingga tua #9a4f00 (teks tautan,
+   5,4 : 1 di krem), merah cap #c62828. Semua teks di sini >= 4,5 : 1 terhadap latarnya.
    Skala seni --s: 2 (HP dan desktop biasa), 3 di layar lebar dan tinggi. 1 piksel seni = --s piksel CSS, selalu bulat. */
-.inv-hub { --s: 2; --hp-latar: #5a3a24; background-color: #5a3a24; background-image: repeating-linear-gradient(#0000 0 62px, #4c301d 62px 64px); }
+.inv-hub { --s: 2; --hp-latar: #fff3d6; background-color: #fff3d6; background-image: none; }
 .inv-hub .hp-kepala { grid-template-columns: 44px minmax(0, 1fr) auto; background: #212121; border-bottom: 3px solid #ff9000; }
 .inv-hub-kanan { display: flex; align-items: center; gap: 8px; }
 /* .player-ui h1 / h2 (player.css) memberi letter-spacing dan tebal sendiri: aturan di sini berawalan .inv-hub supaya menang. */
@@ -14,98 +18,134 @@
 /* isi di bawah panggung: satu kolom di tengah (desktop tidak melebar kosong) */
 .inv-hub .iv-layar > :not(.inv-panggung) { width: min(100%, 560px); justify-self: center; box-sizing: border-box; }
 
-/* ---- panggung: kantor detektif malam hari, selebar layar; seni di tengah, dinding dan tepi meja diteruskan ke samping */
+/* ---- panggung: langit siang selebar layar. Seni (360 x 104 piksel seni) di tengah dan menempel BAWAH: panggung yang dipendekkan
+   (--t baris) tetap memperlihatkan deretan gedung dan pita tanah jingga; di luar seni, langit dan tanah diteruskan warna rata. */
 .inv-panggung {
-  position: relative; height: calc(var(--s) * 100px); overflow: hidden; image-rendering: pixelated;
+  --t: 104; position: relative; height: calc(var(--s) * var(--t) * 1px); overflow: hidden; image-rendering: pixelated;
   margin: -12px calc(-1 * max(12px, env(safe-area-inset-right))) 0 calc(-1 * max(12px, env(safe-area-inset-left)));
-  background: var(--inv-latar) center top / calc(var(--s) * 360px) calc(var(--s) * 100px) no-repeat,
-    linear-gradient(#2b2738 0 calc(var(--s) * 72px), #3a3548 calc(var(--s) * 72px) calc(var(--s) * 73px), #221f2c calc(var(--s) * 73px) calc(var(--s) * 84px), #8a5c3a calc(var(--s) * 84px) calc(var(--s) * 86px), #6e4a2e calc(var(--s) * 86px) calc(var(--s) * 87px), #5a3a24 calc(var(--s) * 87px));
+  background: var(--inv-latar) center bottom / calc(var(--s) * 360px) calc(var(--s) * 104px) no-repeat,
+    linear-gradient(to top, #ffb347 0 calc(var(--s) * 10px), #ff9000 calc(var(--s) * 10px) calc(var(--s) * 12px), #fff6dc calc(var(--s) * 12px) calc(var(--s) * 24px), #ffe9a8 calc(var(--s) * 104px));
 }
 .inv-panggung-isi { position: absolute; inset: 0; margin: 0 auto; max-width: calc(var(--s) * 360px); }
-.inv-logo { position: absolute; left: 10px; top: 10px; width: calc(var(--s) * 92px); height: calc(var(--s) * 38px); image-rendering: pixelated; }
-/* Miss Raksa detektif: berdiri di belakang meja (16 piksel seni terbawah = tepi meja), 84 dari 88 baris tampil */
-.inv-miss { position: absolute; right: 8px; bottom: calc(var(--s) * 16px); width: calc(var(--s) * 64px); height: calc(var(--s) * 84px); overflow: hidden; }
-.inv-miss img { animation: inv-napas 3.2s steps(1) infinite; display: block; width: calc(var(--s) * 64px); height: calc(var(--s) * 88px); image-rendering: pixelated; }
-/* kilau di lensa kaca pembesar (lensa di sekitar piksel seni 37, 31) */
-.inv-kilau { position: absolute; left: calc(var(--s) * 31px); top: calc(var(--s) * 25px); width: calc(var(--s) * 5px); height: calc(var(--s) * 5px); opacity: 0; animation: inv-kilau 4s steps(1) infinite;
+/* sinar matahari di belakang logo: berputar sangat pelan (satu putaran 120 detik) */
+.inv-sinar { position: absolute; left: calc(var(--s) * 52px - 320px); top: calc(var(--s) * 36px - 320px); width: 640px; height: 640px; pointer-events: none;
+  background: repeating-conic-gradient(rgba(255, 196, 0, .3) 0 9deg, rgba(255, 196, 0, 0) 9deg 18deg);
+  -webkit-mask-image: radial-gradient(circle, #000 0, #000 22%, #0000 68%); mask-image: radial-gradient(circle, #000 0, #000 22%, #0000 68%);
+  animation: inv-sinar 120s linear infinite; }
+@keyframes inv-sinar { to { rotate: 360deg; } }
+/* logo: lencana perisai (96 x 72) di layar judul dan layar tinggi; pelat (100 x 38) di panggung pendek hub pulang */
+.inv-logo { position: absolute; left: 8px; top: calc(var(--s) * 3px); image-rendering: pixelated; }
+.inv-logo-besar { width: calc(var(--s) * 96px); height: calc(var(--s) * 72px); }
+.inv-logo-kecil { display: none; width: calc(var(--s) * 100px); height: calc(var(--s) * 38px); }
+/* Miss Raksa detektif = stiker bertepi putih (68 x 88) di depan cakram matahari, kilau di sekelilingnya. Ditambatkan dari ATAS:
+   panggung pendek memotong badannya, bukan kepalanya. */
+.inv-miss { position: absolute; right: 4px; top: calc(var(--s) * max(2, var(--t) - 86) * 1px); width: calc(var(--s) * 68px); height: calc(var(--s) * 88px); }
+.inv-miss > img { position: absolute; image-rendering: pixelated; }
+.inv-cakram { left: calc(var(--s) * -6px); top: calc(var(--s) * -1px); width: calc(var(--s) * 80px); height: calc(var(--s) * 80px); }
+.inv-miss-gambar { left: 0; top: 0; width: calc(var(--s) * 68px); height: calc(var(--s) * 88px); animation: inv-napas 3.2s steps(1) infinite; }
+.inv-kilau-set { left: calc(var(--s) * -16px); top: calc(var(--s) * -2px); width: calc(var(--s) * 100px); height: calc(var(--s) * 92px); animation: inv-kelip 2.4s steps(1) infinite; }
+.inv-kilau-set[data-set="b"] { animation-delay: -1.2s; }
+/* kilau di lensa kaca pembesar (lensa di sekitar piksel seni 39, 33 pada stiker) */
+.inv-kilau { position: absolute; left: calc(var(--s) * 33px); top: calc(var(--s) * 27px); width: calc(var(--s) * 5px); height: calc(var(--s) * 5px); opacity: 0; animation: inv-kilau 4s steps(1) infinite;
   background: linear-gradient(#fff, #fff) center / calc(var(--s) * 1px) 100% no-repeat, linear-gradient(#fff, #fff) center / 100% calc(var(--s) * 1px) no-repeat; }
 @keyframes inv-napas { 0%, 100% { translate: 0 0; } 50% { translate: 0 calc(var(--s) * 1px); } }
 @keyframes inv-kilau { 0%, 100% { opacity: 0; } 70% { opacity: 1; scale: .6; } 76% { opacity: 1; scale: 1; } 82% { opacity: 1; scale: .6; } 88% { opacity: 0; } }
-@media (min-width: 720px) {
-  /* layar lebar: logo di antara papan gabus dan Miss Raksa, supaya jendela kota terlihat */
-  .inv-logo { left: calc(var(--s) * 186px); top: calc(var(--s) * 3px); }
-  .inv-miss { right: calc(var(--s) * 20px); }
-}
+@keyframes inv-kelip { 0%, 100% { opacity: 1; } 50% { opacity: .15; } }
+@media (min-width: 720px) { .inv-miss { right: calc(var(--s) * 20px); } }
 @media (min-width: 1100px) and (min-height: 820px) { .inv-hub { --s: 3; } }
 
-/* ---- berkas kasus di meja: tab map + badan kraft; menumpang tepi meja panggung */
+/* ---- berkas kasus: tab jingga + badan putih; menumpang tepi bawah panggung */
 .inv-berkas { position: relative; z-index: 1; display: grid; justify-items: start; margin-top: -26px; }
-.inv-hub .inv-berkas-tab { position: relative; top: 2px; z-index: 1; margin: 0; padding: 3px 12px 1px; background: #e3a877; border: 2px solid #212121; border-bottom-color: #e3a877; box-shadow: inset 0 2px 0 #f2c79e; font-size: 14px; line-height: 20px; font-weight: 800; letter-spacing: .04em; color: #212121; }
-.inv-berkas-badan { justify-self: stretch; display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 10px; align-items: start; box-sizing: border-box; padding: 12px 10px 10px; background: #f2c79e; border: 2px solid #212121; box-shadow: inset 0 2px 0 #e3a877, 0 4px 0 #33241a; }
+.inv-hub .inv-berkas-tab { position: relative; top: 2px; z-index: 1; margin: 0; padding: 3px 12px 1px; background: #ff9000; border: 2px solid #212121; border-bottom-color: #ff9000; box-shadow: inset 0 2px 0 #ffc46b; font-size: 14px; line-height: 20px; font-weight: 800; letter-spacing: .04em; color: #212121; }
+.inv-berkas-badan { justify-self: stretch; display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 10px; align-items: start; box-sizing: border-box; padding: 12px 10px 10px; background: #ffffff; border: 2px solid #212121; box-shadow: inset 0 2px 0 #ff9000, 0 4px 0 #f0a030; }
 .inv-berkas[data-ringkas] .inv-berkas-badan { grid-template-columns: minmax(0, 1fr); gap: 8px; padding-top: 8px; }
 /* foto dashcam berklip, dengan cap merah */
-.inv-foto { position: relative; padding: 4px 4px 12px; background: #ffffff; border: 2px solid #212121; box-shadow: 2px 2px 0 #c9935f; }
+.inv-foto { position: relative; padding: 4px 4px 12px; background: #ffffff; border: 2px solid #212121; box-shadow: 2px 2px 0 #ffc46b; }
 .inv-foto > :is(.dc-pita, .iv-seni-kasus) { display: block; }
 .inv-foto > .iv-seni-kasus { width: 168px; height: auto; image-rendering: pixelated; }
 .inv-klip { position: absolute; left: 12px; top: -12px; z-index: 2; width: 10px; height: 22px; image-rendering: pixelated; }
 .inv-cap { position: absolute; right: -8px; bottom: -6px; z-index: 2; padding: 0 5px; rotate: -7deg; border: 2px solid #c62828; background: #fff9f5; color: #c62828; font-size: 11px; line-height: 16px; font-weight: 800; letter-spacing: .08em; white-space: nowrap; }
 .inv-berkas-teks { display: grid; gap: 8px; min-width: 0; align-content: start; }
 .inv-hub-kait { font-size: 17px; line-height: 22px; font-weight: 800; letter-spacing: -.01em; color: #212121; }
-.inv-hub-durasi { justify-self: start; padding: 1px 6px; background: #212121; color: #ffd9a8; font-size: 12px; line-height: 16px; font-weight: 700; }
+.inv-hub-durasi { justify-self: start; padding: 1px 6px; background: #ffe38a; color: #212121; font-size: 12px; line-height: 16px; font-weight: 700; }
 .inv-hub-sub { font-size: 15px; line-height: 20px; font-weight: 700; color: #33241a; }
 /* HP sangat sempit / teks panjang: foto di atas, teks di bawah */
 @media (max-width: 339.98px) { .inv-berkas:not([data-ringkas]) .inv-berkas-badan { grid-template-columns: minmax(0, 1fr); justify-items: center; } }
 
-/* ---- tombol utama = tombol game: kunci piksel jingga (gaya-game.css) yang lebih besar, panah berkedip, rasa ditekan bawaan */
+/* ---- tombol utama = tombol game: kunci piksel jingga (gaya-game.css) yang lebih besar, panah berkedip, dua kilau yang berkelip */
 /* .hp-layar .primary-action (hp.css) = 52 px / 17 px: tombol utama hub ditetapkan di sini. */
-.inv-hub .inv-hub-utama { box-sizing: border-box; min-height: 60px; gap: 12px; font-size: 20px; letter-spacing: .02em; text-decoration: none; }
+.inv-hub .inv-hub-utama { position: relative; box-sizing: border-box; min-height: 60px; gap: 12px; font-size: 20px; letter-spacing: .02em; text-decoration: none; }
 .inv-hub .inv-hub-sampul .inv-hub-utama { min-height: 64px; font-size: 22px; margin-top: 4px; outline: 2px solid #212121; outline-offset: 0; }
-.inv-hub .inv-hub-sampul .inv-hub-utama:focus-visible { outline: 3px solid #fff9f5; outline-offset: 2px; }
+.inv-hub .inv-hub-sampul .inv-hub-utama:focus-visible { outline: 3px solid #212121; outline-offset: 2px; }
 .inv-hub-utama::after { content: ""; flex: none; width: 0; height: 0; border-left: 10px solid #212121; border-block: 7px solid #0000; animation: inv-tunjuk 1s steps(1) infinite; }
+/* dua kilau putih (silang 11 px dan 9 px) di kiri-atas dan kanan-bawah muka tombol */
+.inv-hub-utama::before { content: ""; position: absolute; inset: 8px 14px 12px; pointer-events: none; animation: inv-kelip 1.8s steps(1) infinite;
+  background: linear-gradient(#fff, #fff) left 5px top 0 / 1px 11px no-repeat, linear-gradient(#fff, #fff) left 0 top 5px / 11px 1px no-repeat,
+    linear-gradient(#fff, #fff) right 4px bottom 0 / 1px 9px no-repeat, linear-gradient(#fff, #fff) right 0 bottom 4px / 9px 1px no-repeat; }
 @keyframes inv-tunjuk { 0%, 100% { translate: 0 0; } 50% { translate: 4px 0; } }
 
 /* ---- sampul (perangkat kosong) */
 /* berawalan .inv-hub: lembar gaya ini dan investigasi.css dimuat sebagai berkas terpisah, urutannya tidak dijamin */
 .inv-hub .inv-hub-sampul { gap: 10px; }
 
-/* ---- pulang (ada stempel / skor / progres): kartu petugas, total dan map-map kasus di meja yang sama */
-.inv-hub .inv-hub-pulang { gap: 10px; }
-.inv-hub .inv-hub-pulang > .kp { width: min(300px, 100%); justify-self: center; }
-.inv-hub-daftar { display: grid; gap: 12px; margin: 6px 0 0; padding: 0; list-style: none; }
-/* tiap kasus = satu map kraft dengan tab kecil di kiri-atas; yang sudah berstempel = kertas krem */
-/* T-113: berkas kasus berfoto: foto 106 px | teks | panah */
-.inv-hub-baris { position: relative; display: grid; grid-template-columns: 106px minmax(0, 1fr) 12px; gap: 8px; align-items: center; min-height: 100px; box-sizing: border-box; padding: 10px 8px 8px 10px; border: 2px solid #212121; background: #f2c79e; color: #212121; text-decoration: none; box-shadow: 0 3px 0 #33241a; }
-.inv-hub-baris::before { content: ""; position: absolute; left: -2px; top: -8px; width: 72px; height: 6px; background: #e3a877; border: 2px solid #212121; border-bottom: 0; }
+/* ---- pulang (ada stempel / skor / progres): berkas tindakan utama, strip petugas dan tiga kartu kasus; SATU layar (T-114) */
+.inv-hub .inv-hub-pulang { gap: 8px; }
+.inv-hub-pulang .inv-berkas[data-ringkas] .inv-berkas-badan { gap: 6px; padding: 8px 10px; }
+.inv-hub .inv-hub-pulang .inv-hub-utama { min-height: 56px; }
+.inv-hub-sub .inv-hub-asal { font-size: 13px; font-weight: 700; color: #9a4f00; white-space: nowrap; }
+/* strip petugas 48 px: stempel | pangkat + total | panah; di sampingnya "Tamu baru" */
+.inv-hub-petugas { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px; }
+.inv-hub-strip { display: grid; grid-template-columns: auto minmax(0, 1fr) 12px; gap: 8px; align-items: center; min-height: 48px; box-sizing: border-box; padding: 4px 8px; border: 2px solid #212121; background: #ffffff; color: #212121; font: inherit; text-align: left; cursor: pointer; box-shadow: 0 3px 0 #f0a030; }
+.inv-hub-strip:active, .inv-hub-tamu-tombol:active { translate: 0 3px; box-shadow: none; }
+.inv-hub :is(.inv-hub-strip, .inv-hub-tamu-tombol):focus-visible { outline: 3px solid #212121; outline-offset: 2px; }
+.inv-hub-strip-stempel { display: flex; gap: 2px; }
+.inv-hub-strip-teks { min-width: 0; display: grid; }
+.inv-hub-strip-teks b { font-size: 14px; line-height: 18px; font-weight: 800; }
+.inv-hub-strip-teks small { font-size: 13px; line-height: 16px; font-weight: 700; color: #5a3a24; font-variant-numeric: tabular-nums; }
+.inv-hub-tamu-tombol { min-height: 48px; box-sizing: border-box; padding: 4px 8px; border: 2px solid #212121; background: #ffe38a; color: #212121; font: inherit; font-size: 14px; line-height: 18px; font-weight: 800; cursor: pointer; box-shadow: 0 3px 0 #f0a030; }
+/* tiga kartu kasus sejajar (T-113: foto 96 x 68): tab jingga, foto + nomor + stempel, judul (2 baris tersedia), keadaan / skor.
+   tepi 4 + bantalan 8 + foto 72 + 2 + judul 32 + 2 + keadaan 20 = 140 px (+ tab 6 di atas) */
+.inv-hub-daftar { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; margin: 6px 0 0; padding: 0; list-style: none; }
+.inv-hub-daftar > li { display: grid; }
+.inv-hub-baris { position: relative; display: grid; grid-template-rows: auto minmax(32px, 1fr) auto; gap: 2px 0; justify-items: start; align-content: start; box-sizing: border-box; padding: 4px 2px; border: 2px solid #212121; background: #ffffff; color: #212121; text-decoration: none; box-shadow: 0 3px 0 #f0a030; }
+.inv-hub-baris::before { content: ""; position: absolute; left: -2px; top: -8px; width: 44px; height: 6px; background: #ff9000; border: 2px solid #212121; border-bottom: 0; }
 .inv-hub-baris:active { translate: 0 3px; box-shadow: none; }
-.inv-hub-baris:focus-visible { outline: 3px solid #fff9f5; outline-offset: 2px; }
-.inv-hub-baris[data-stempel] { background: #fff9f5; }
-.inv-hub-baris-teks { min-width: 0; display: grid; }
-.inv-hub-baris-teks b { font-size: 15px; line-height: 18px; font-weight: 800; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; line-clamp: 2; overflow: hidden; overflow-wrap: anywhere; }
-.inv-hub-baris-teks small { font-size: 13px; line-height: 16px; font-weight: 700; color: #4a3a2c; font-variant-numeric: tabular-nums; }
-/* T-099: baris ketiga "Dari cerita Episode 1" (kasus yang punya cerita). 18 + 16 + 14 = 48 px isi + bantalan 2 x 2 + tepi 4 = 56 px. */
-.inv-hub-baris-teks .inv-hub-asal { font-size: 12px; line-height: 14px; color: #7a3e00; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.inv-hub-baris:focus-visible { outline: 3px solid #212121; outline-offset: 2px; }
+.inv-hub-baris[data-stempel] { background: #fff0b8; }
+.inv-hub-foto { position: relative; justify-self: center; box-sizing: border-box; width: min(100%, 100px); border: 2px solid #212121; background: #33241a; }
+.inv-hub-foto-gambar { display: block; width: 100%; height: auto; aspect-ratio: 96 / 68; image-rendering: pixelated; }
+.inv-hub-foto-no { position: absolute; left: -2px; top: -2px; min-width: 20px; box-sizing: border-box; padding: 0 4px; background: #212121; color: #ffe38a; font-size: 15px; line-height: 20px; font-weight: 800; text-align: center; }
+.inv-hub-foto-cap { position: absolute; right: -3px; bottom: -5px; z-index: 2; rotate: 12deg; padding: 1px; background: #fff9f5; border: 2px solid #212121; }
+.inv-hub-baris-judul { padding: 0 2px; font-size: 13px; line-height: 16px; font-weight: 800; overflow-wrap: anywhere; }
+.inv-hub-baris-status { margin: 2px 2px 0; padding: 0 5px; border: 1px solid #212121; background: #ffffff; font-size: 13px; line-height: 16px; font-weight: 800; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.inv-hub-baris-status[data-tag="jalan"] { background: #ff9000; }
+.inv-hub-baris-status[data-tag="baru"] { border-color: #c62828; color: #c62828; letter-spacing: .06em; text-transform: uppercase; }
+.inv-hub-baris-status[data-tag="skor"] { background: #212121; color: #ffe38a; }
 .inv-hub-panah { font-size: 20px; line-height: 20px; font-weight: 800; color: #9a4f00; }
-/* T-113: foto kasus berklip (96 x 68, 1 piksel seni = 1 px), miring sedikit; tanda keadaan menumpang di atas foto */
-.inv-hub-foto { position: relative; box-sizing: border-box; width: 106px; padding: 3px 3px 7px; background: #ffffff; border: 2px solid #212121; box-shadow: 2px 2px 0 #c9935f; rotate: -3deg; }
-.inv-hub-daftar > li:nth-child(even) .inv-hub-foto { rotate: 2deg; }
-.inv-hub-foto .inv-klip { left: 12px; top: -11px; }
-.inv-hub-foto-gambar { display: block; width: 96px; height: 68px; background: #33241a; image-rendering: pixelated; }
-.inv-hub-foto-cap { position: absolute; right: -2px; top: 32px; z-index: 2; rotate: 14deg; padding: 1px; background: #fff9f5; border: 2px solid #212121; }
-.inv-hub-foto-skor { position: absolute; left: -5px; bottom: 3px; z-index: 2; padding: 0 5px; background: #212121; color: #ffd9a8; font-size: 13px; line-height: 18px; font-weight: 800; font-variant-numeric: tabular-nums; white-space: nowrap; }
-.inv-hub-foto-tag { position: absolute; left: -5px; bottom: 2px; z-index: 2; max-width: 108px; box-sizing: border-box; padding: 0 5px; border: 2px solid #212121; font-size: 11px; line-height: 16px; font-weight: 800; letter-spacing: .02em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.inv-hub-foto-tag[data-tag="jalan"] { background: #ffb74d; color: #212121; }
-.inv-hub-foto-tag[data-tag="baru"] { rotate: -5deg; border-color: #c62828; background: #fff9f5; color: #c62828; letter-spacing: .08em; text-transform: uppercase; }
-.inv-hub-baris-teks .inv-hub-kait-baris { color: #212121; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; line-clamp: 2; overflow: hidden; margin-bottom: 2px; }
-/* HP sangat sempit: jarak lebih rapat, foto tetap */
-@media (max-width: 339.98px) { .inv-hub-baris { gap: 6px; padding-inline: 8px 6px; } }
-/* T-106: hadiah seri di hub */
-.inv-hub-hadiah { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 12px; margin: 0; font-size: 14px; line-height: 20px; font-weight: 700; color: #ffd9a8; }
+/* lembar kartu petugas (Modal): kartu, total + tujuan pangkat, hadiah seri */
+.inv-hub-lembar { display: grid; gap: 10px; }
+.inv-hub-lembar > .kp { width: min(300px, 100%); justify-self: center; }
+.inv-hub-lembar .iv-total { margin: 0; background: #fff3d6; }
+.inv-hub-hadiah { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 12px; margin: 0; font-size: 14px; line-height: 20px; font-weight: 700; color: #33241a; }
 .inv-hub-hadiah > span { display: inline-flex; align-items: center; gap: 6px; }
-.inv-hub-terkunci { display: flex; align-items: center; gap: 6px; min-height: 20px; padding: 0 10px; font-size: 14px; line-height: 20px; font-weight: 700; color: #ffd9a8; }
-.inv-hub-tamu { margin: 0; text-align: center; }
-.inv-hub .inv-hub-tamu .hp-tautan { min-height: 44px; color: #ffd9a8; }
+/* lembar hub (kartu petugas, tamu baru): panel putih bertepi tinta dengan pita jingga, seperti berkas */
+body > .mdl-latar.inv-cerah .mdl-panel { border: 2px solid #212121; border-radius: 0; box-shadow: inset 0 4px 0 #ff9000, 0 4px 0 #f0a030; }
+/* entri papan acara (investigator-event/acara.css) di halaman krem: tautan jingga tua, label cokelat, lencana kuning */
+.inv-hub .ai-entri .hp-tautan { color: #9a4f00; }
+.inv-hub .ai-entri-kode label { color: #5a3a24; }
+.inv-hub .ai-entri .ai-lari { background: #ffe38a; }
+
+/* ---- T-114 SATU LAYAR: bantalan bawah halaman 12 px; panggung PENDEK di layar pendek (--t baris seni; hitungan di Investigator.tsx).
+   Hub pulang di bawah 820 px memakai logo pelat (lencana perisai 72 baris tidak muat di 56 / 80 baris bersama tab berkas). */
+.inv-hub .hp-main { padding-bottom: calc(12px + env(safe-area-inset-bottom)); }
+@media (max-height: 819.98px) {
+  .inv-hub-pulang .inv-panggung { --t: 80; }
+  .inv-hub-pulang .inv-logo-besar { display: none; }
+  .inv-hub-pulang .inv-logo-kecil { display: block; }
+}
+@media (max-height: 699.98px) { .inv-hub-pulang .inv-panggung { --t: 56; } .inv-hub-sampul .inv-panggung { --t: 90; } }
 
 @media (prefers-reduced-motion: reduce) {
-  :root:not([data-gerak="penuh"]) :is(.inv-miss img, .inv-kilau) { animation: none !important; }
-  :root:not([data-gerak="penuh"]) .inv-hub-utama::after { animation: none !important; }
+  :root:not([data-gerak="penuh"]) :is(.inv-miss-gambar, .inv-kilau, .inv-kilau-set, .inv-sinar) { animation: none !important; }
+  :root:not([data-gerak="penuh"]) .inv-hub-utama::after, :root:not([data-gerak="penuh"]) .inv-hub-utama::before { animation: none !important; }
 }

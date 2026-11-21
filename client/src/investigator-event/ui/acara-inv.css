@@ -119,24 +119,27 @@
 .ai-host-tanya p { flex: 1 1 220px; font-size: 14px; line-height: 20px; font-weight: 700; color: #7a1a14; }
 
 /* ================================================================== HP: pilih papan acara / main sendiri (di meja kayu hub) */
-.ai-pilih { display: grid; gap: 10px; width: min(100%, 560px); justify-self: center; box-sizing: border-box; padding: 12px 4px 0; color: #212121; }
+/* T-114: lembar ini tampil di dalam Modal (panel putih, lebar isi 294 px pada 360): teks keterangan gelap, jarak 8, berkas ringkas. */
+.ai-pilih { display: grid; gap: 8px; width: min(100%, 560px); justify-self: center; box-sizing: border-box; padding: 0 2px; color: #212121; }
 .ai-pilih :is(h2, p) { margin: 0; }
 .ai-pilih h2:focus { outline: none; }
 .ai-pilih-berkas { display: grid; justify-items: start; }
-.ai-pilih-tab { position: relative; top: 2px; z-index: 1; padding: 3px 12px 1px; background: #e3a877; border: 2px solid #212121; border-bottom-color: #e3a877; box-shadow: inset 0 2px 0 #f2c79e; font-size: 14px; line-height: 20px; font-weight: 800; letter-spacing: .06em; }
-.ai-pilih-berkas h2 { justify-self: stretch; padding: 12px; border: 2px solid #212121; background: #f2c79e; box-shadow: inset 0 2px 0 #e3a877, 0 4px 0 #33241a; font-size: 22px; line-height: 28px; font-weight: 800; letter-spacing: -.01em; }
-.ai-pilih-opsi { display: grid; gap: 4px; }
-.ai-pilih :is(.ai-pilih-utama, .ai-pilih-kedua, .ai-pilih-ganti) { width: 100%; box-sizing: border-box; min-height: 56px; font-size: 19px; font-weight: 800; justify-content: center; text-align: center; }
+/* T-117: palet Raksa Cerah (tab jingga, berkas krem) */
+.ai-pilih-tab { position: relative; top: 2px; z-index: 1; padding: 3px 12px 1px; background: #ff9000; border: 2px solid #212121; border-bottom-color: #ff9000; box-shadow: inset 0 2px 0 #ffc46b; font-size: 14px; line-height: 20px; font-weight: 800; letter-spacing: .06em; }
+.ai-pilih-berkas { margin-bottom: 3px; }
+.ai-pilih-berkas h2 { justify-self: stretch; padding: 8px 10px; border: 2px solid #212121; background: #fff3d6; box-shadow: inset 0 2px 0 #ff9000, 0 3px 0 #f0a030; font-size: 18px; line-height: 24px; font-weight: 800; letter-spacing: -.01em; }
+.ai-pilih-opsi { display: grid; gap: 2px; }
+.ai-pilih :is(.ai-pilih-utama, .ai-pilih-kedua, .ai-pilih-ganti) { width: 100%; box-sizing: border-box; min-height: 56px; font-size: 17px; line-height: 22px; font-weight: 800; justify-content: center; text-align: center; }
 .ai-pilih .ai-pilih-ganti { min-height: 48px; font-size: 16px; }
-.ai-pilih-ket { padding: 0 2px; font-size: 14px; line-height: 20px; font-weight: 700; color: #ffd9a8; }
-.ai-pilih-privasi { padding: 8px 10px; border: 2px solid #212121; background: #fff9f5; font-size: 14px; line-height: 20px; }
-.ai-pilih-galat { padding: 6px 10px; border: 2px solid #b3261e; background: #fdeaea; font-size: 14px; line-height: 20px; font-weight: 700; color: #7a1a14; }
-.ai-pilih .ai-pilih-tautan { justify-self: center; min-height: 44px; color: #ffd9a8; }
+.ai-pilih-ket { padding: 0 2px; font-size: 14px; line-height: 20px; font-weight: 700; color: #5a3a24; }
+.ai-pilih-privasi { padding: 5px 10px; border: 2px solid #212121; background: #fff9f5; font-size: 14px; line-height: 20px; }
+.ai-pilih-galat { padding: 4px 10px; border: 2px solid #b3261e; background: #fdeaea; font-size: 14px; line-height: 20px; font-weight: 700; color: #7a1a14; }
+.ai-pilih .ai-pilih-tautan { justify-self: center; min-height: 44px; color: #9a4f00; }
 /* lencana nama berjepit */
-.ai-nama { position: relative; justify-self: center; display: grid; justify-items: center; gap: 4px; width: min(100%, 280px); box-sizing: border-box; margin-top: 10px; padding: 0 12px 12px; border: 3px solid #212121; background: #fff9f5; box-shadow: 0 4px 0 #33241a; text-align: center; }
+.ai-nama { position: relative; justify-self: center; display: grid; justify-items: center; gap: 4px; width: min(100%, 280px); box-sizing: border-box; margin: 12px 0 3px; padding: 0 12px 10px; border: 3px solid #212121; background: #fff9f5; box-shadow: 0 3px 0 #33241a; text-align: center; }
 .ai-nama-klip { position: absolute; left: 50%; top: -14px; width: 10px; height: 22px; margin-left: -5px; image-rendering: pixelated; }
 .ai-nama .ai-nama-label { justify-self: stretch; margin: 0 -12px 6px; padding: 12px 12px 5px; background: #ff9000; border-bottom: 2px solid #212121; font-size: 14px; line-height: 18px; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; }
-.ai-nama-alias { font-size: 34px; line-height: 44px; font-weight: 900; letter-spacing: -.01em; overflow-wrap: anywhere; }
+.ai-nama-alias { font-size: 28px; line-height: 36px; font-weight: 900; letter-spacing: -.01em; overflow-wrap: anywhere; }
 .ai-nama-kode { padding: 1px 8px; background: #212121; color: #ffd9a8; font-size: 12px; line-height: 16px; font-weight: 700; letter-spacing: .06em; }
 
 /* lencana kecil saat bermain: "Papan acara · <alias>" */

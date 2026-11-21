@@ -14,6 +14,9 @@
  * Ukur 360 x 640 (hitung; ruang isi 544): ruang 108 + ketua 78 (nama + 2 baris) / 100 (petunjuk 3 baris) + pernyataan 82
  * (nama + 2 baris) + kartu 3 x 52 + 2 x 5 = 166 + tombol 56 + jarak 4 x 8 = 522 (percobaan 0) .. 544 px (petunjuk 3 baris).
  * Kalimat yang lebih panjang dari itu membuat layar bergulir (tidak ada yang terpotong).
+ * T-115 (Fullstack, tanpa gulir; hitungan di atas meleset: kartu berjudul dua baris + baris sumber = 63 px, bukan 52): ruang
+ * panel dipotong menjadi 72 px, baris sumber kartu tidak diulang di daftar (ada di lembar bukti), jarak 6 px, dan pada langkah
+ * dipandu di layar < 680 px hanya kartu yang diterima yang tampil (ui/muat.css). Tinggi sekarang 390..504 px (ruang isi 557).
  */
 import { useEffect, useState } from 'react';
 import type { IdBukti, PanelRoundProps } from '../../../tipe';

@@ -14,6 +14,9 @@
  * T-090 (Fullstack, kasus berbasis data; tanpa prop ini = persis seperti semula): `tanya` / `petunjuk1` / `petunjuk2` = teks
  * jadi kasus yang menggantikan teks kamus (kasus 2: pertanyaan kasus 3 baris = 78 px, dikirim HANYA di percobaan 0: 518 px);
  * `perbesar` = kartu yang gambarnya bisa diperbesar (bawaan ['dashcam']; lembar perbesarnya masih bingkai dashcam kasus 1).
+ * T-115 (tanpa gulir; angka "Ukur" di atas tidak berlaku lagi, hitungan baru di team/HANDOFF.md "## T-115"): di layar ini kepala
+ * halaman buku ("KETERANGAN 1", "BUKTI 3") tidak digambar, dan pada langkah dipandu di layar < 680 px hanya slip yang tepat yang
+ * tampil (ui/muat.css). Dengan lebar huruf aplikasi yang sebenarnya layar ini 419..508 px (ruang isi 557).
  */
 import { useEffect, useState } from 'react';
 import { t } from '../../../i18n';

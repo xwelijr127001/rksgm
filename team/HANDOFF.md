@@ -5286,3 +5286,390 @@ Owner: "i think it would be nice if we had a preview or something a picture". Ea
 
 ### Open
 - Not seen in a browser or on a phone. Most worth a look: the tilt and clip at 360 px, the stamp tile over the Kasus 3 mirror, and the zh title wrap.
+
+## T-114 (2026-11-21): Raksa Investigator NO-SCROLL pass · hub + event phone screens (Designer)
+
+Built by the Designer; uncommitted, not deployed. Owner rule: nothing was opened in a browser or on a phone, and no test was run, so every height below is CALCULATED from the CSS, not measured. Root `npm run typecheck` exit 0; `client/dist` rebuilt (build exit 0). No server file touched.
+
+Owner: "dont forget we need to make all of it no need scrolling okay".
+
+### Files
+- `client/src/pages/Investigator.tsx`, `client/src/pages/investigator.css` (hub).
+- `client/src/investigator-event/acara.css` (only the hub-entry rules `.ai-entri*`), `client/src/investigator-event/ui/acara-inv.css` (choice sheet `.ai-pilih*`, name badge `.ai-nama*`).
+- `client/src/i18n/kamus/hubInv.ts`: new `stripJalan`, `kartuJudul`, `stripBuka` (id / en / zh). `client/src/i18n/kamus/acaraInv.ts`: `keluarPapan` shortened to "Keluar papan" / "Leave board" / "退出榜单" so it fits beside the badge.
+- Not edited: `EntriAcara.tsx`, `MainAcara.tsx`, `LayarInvestigasi`, `investigasi/ui/**`.
+
+### Available height
+Header = 59 px (56 + the 3 px orange line). I cut the hub's bottom page padding from 28 to 12 px. So the content has **569 px at 360 x 640** and **629 px at 390 x 700**.
+
+### Returning hub (was about 800 px)
+- Stage: compact at short screens. It shows the top of the office art, the desk edge is redrawn under it, and Miss Raksa stands behind it from the chest up. 112 px below 700 px of viewport height, 160 px from 700, the full 200 px from 820.
+- Main action file: tab + one note line + the main button (56 px). The per-case hook of T-113 now shows here for "Buka Kasus N"; "Dari cerita Episode 1" follows on the same line.
+- Officer strip (48 px, one button): three stamp slots, rank, "Total x / 300". Tapping it opens the sheet "Kartu petugas" with the full officer card, the total, the next-rank line and the series awards. "Tamu baru" is a 48 px button beside the strip (same confirm dialog as before).
+- Three case cards side by side (140 px + 6 px tab): T-113 photo with the case number, the case stamp when done, the title (two lines reserved), and one state chip: "90/100", "Berjalan" or "Baru". Each card is one link (108 x 140 px at 360). The full title and status are in the link's `aria-label`.
+- Event entry at the bottom.
+
+| Returning hub, id | 360 x 640 (569) | 390 x 700 (629) |
+|---|---|---|
+| continue / open, one note line, "Punya kode acara?" | 480 | 528 |
+| play again, two note lines | 500 | 548 |
+| + typed event code with a two-line error | 558 | 606 |
+| + joined the event board (badge, leave, 3 case buttons) | 556 | 604 |
+
+Sum for the first row at 640: stage 112 - 26 overlap + file 128 + 8 + strip 48 + 8 + 6 + cards 140 + 8 + link 48 = 480.
+
+### Fresh title screen
+Stage 180 px below 700 px of viewport height (200 from 700).
+
+| Title screen, id | 360 x 640 (569) | 390 x 700 (629) |
+|---|---|---|
+| file + "Buka Kasus 1" + "Punya kode acara?" | 474 | 494 |
+| + typed event code with a two-line error | 532 | 552 |
+| + joined the event board | 530 | 550 |
+
+Sum at 640: stage 180 - 26 + file 184 + 10 + button 68 + 10 + link 48 = 474. In en the hook can take one more line in the file (+22): 554 worst, still inside 569.
+
+### Event entry on the hub (acara.css)
+- Idle: one link, 48 px. Typed code: label, field and "Buka" on ONE row (48 px), error under it.
+- Joined: badge and "Keluar papan" on one row (48), then the three "Main Kasus N di papan" buttons side by side (48) = 104 px (was about 244).
+
+### Choice sheet and name badge (PilihPapanAcara)
+Card 6 mounts it inside the shared dialog (white panel, 294 px of content width at 360), not on the wooden desk it was drawn for. Two consequences fixed here:
+- The peach helper text and link were on white: now dark brown / orange-brown.
+- Space inside the dialog at 360 x 640 is about 476 px (608 - panel 34 - title 28 - 8 - the dialog's own "Tutup" row 62). Tightened: file heading 18 px on one line, gaps 8, alias 28 px.
+
+| Sheet, id | height | space at 640 | space at 700 |
+|---|---|---|---|
+| choice ("Ikut papan acara" / "Main sendiri") | 415 | 476 | 536 |
+| choice + two-line error | 475 | 476 | 536 |
+| name badge ("Mulai sebagai Lensa 042") | 386 | 476 | 536 |
+| name badge + two-line error | 446 | 476 | 536 |
+
+If a sentence wraps one line more than counted (en is the longest), the dialog's own content box scrolls; the page never does and nothing is cut off.
+
+The in-run badge is a fixed overlay and takes no layout height.
+
+### What changed for the player, and what to check
+- The case rows of T-113 lost their hook line and status sentence: three hooks do not fit beside three photos on one screen. The hook is shown for the case of the main button only.
+- "Dari cerita Episode 1" (T-099) is no longer on the Kasus 1 card; it shows in the main file while Kasus 1 is the main action, and not at all otherwise.
+- The officer card, the next-rank line ("N kasus lagi menuju Senior") and the awards are one tap away instead of on the page.
+- For QA (T-112): `data-menuju-pangkat` and `data-hadiah` now exist only while the officer sheet is open (`data-kartu-buka` opens it, `data-kartu-lembar` is its content). `data-total-kasus`, `data-total-skor`, `data-tamu-baru`, `data-kasus`, `data-status`, `data-stempel`, `data-hub-utama` are still on the page. The `.iv-tamu` paragraph is gone.
+- Counted with 2 lines per case title. A title that needs 3 lines at 13 px in a 100 px card would add 16 px; the id / en / zh titles today need at most 2.
+- Width below 340 px: the photos shrink with the card (not on the integer pixel grid there).
+- Viewports shorter than 640 px (a browser with a tall toolbar) can still scroll; nothing is clipped.
+
+### Previews (calculated mocks, not screenshots)
+`character/investigator-t114/layar-t114-360x640.png` and `layar-t114-390x700.png`: A returning guest, B the worst case (play again + joined the board), C the fresh title screen. The yellow line is the bottom of the viewport. The mocks use the pixel font in capitals and the id texts; the sheet has no mock.
+
+### Open
+- Nothing was seen in a browser or on a phone. Most worth a look: the compact stage (Miss Raksa behind the desk edge), the three cards at 360 px, the en lengths in the choice sheet, and the officer sheet.
+- In-case screens are Fullstack's T-115, not covered here.
+
+## T-116 (2026-11-21): five style options for the /investigator title header (Designer, concepts only)
+
+Concept images only: **no app code, art in `client/` or dictionary was changed**, nothing built, nothing committed. Owner: "can we also improve this style. make maybe at least 5 ... so i can chose what suitable the most".
+
+### Files (all in `character/investigator-t116/`)
+- `opsi-1.png` .. `opsi-5.png`: full phone comps 390 x 700, written at 2x (780 x 1400).
+- `opsi-1-header.png` .. `opsi-5-header.png`: the header alone at 1x.
+- `opsi-semua.png`: the five comps side by side at 1x.
+- `OPSI.md`: name + two-line pitch per option. Source: `bangun.mts`.
+
+### The five
+1. **Kantor Malam**: today's night office with rain on the window, a neon-sign logo and a lamp light pool on Miss Raksa.
+2. **Sampul Berkas**: the header is a kraft folder; the logo is a red rubber stamp, Miss Raksa a paper-clipped photo; red button.
+3. **Jalan Noir**: rainy night street, wet road, a truck passing, a streetlamp spotlight on Miss Raksa, big white title; yellow button.
+4. **Raksa Cerah**: daytime yellow and orange, sun rays, shield-badge logo, Miss Raksa as a sticker with sparkles.
+5. **Arkade Retro**: starfield, grid floor, huge gradient logo with a shine, scanlines, "start" button with arrows.
+
+### Facts
+- Same content in all five: logo words, "KASUS #1 · TRUK DI TOL", the hook, "±5 MENIT · MAIN SENDIRI", "BUKA KASUS 1", "Punya kode acara?".
+- No scroll: content ends at 567 px (options 1, 2, 4) or 591 px (options 3, 5) of 688 px available at 390 x 700. Options 3 and 5 have a 232 px header, the others 208 px. 360 x 640 was not drawn; by the same sums options 3 and 5 would need the header shortened there.
+- Miss Raksa is the existing detective sprite in every option. No hat, new pose or chibi was drawn; option 4's "cute" look is a sticker outline and sparkles around the same sprite.
+- Original art, drawn by the generator; nothing copied from other games.
+- Text is the 5 x 7 pixel font; the app's font will look finer. Rain, neon, the truck and the blinking arrows are still images here.
+
+### Next
+Owner picks one (or a mix). Building it is a separate card: new stage art, colours of the file and button, and for 3 / 4 / 5 the page colour under the header.
+
+## T-117 (2026-11-21): /investigator title screen in OPTION 4 "Raksa Cerah" (Designer)
+
+Built by the Designer; uncommitted, not deployed. Owner rule: nothing was opened in a browser or on a phone and no test was run, so the heights are CALCULATED and the colours, motion and contrast are as written in the CSS, not seen. Root `npm run typecheck` exit 0; `client/dist` rebuilt (build exit 0). No server file touched.
+
+The card first said option 5 (Arkade Retro). The Lead corrected it to **option 4** while I was still reading files; no option-5 change had been written to the app, so nothing was reverted.
+
+### Files
+- `client/src/pages/Investigator.tsx` (stage markup, art imports, a class on the two hub dialogs) and `client/src/pages/investigator.css` (rewritten look; same sizes as T-114).
+- New art in `client/src/cerita/seni/investigasi/`: `cerah-latar.png` (sky, clouds, skyline, ground), `cerah-logo.png` (shield badge), `cerah-logo-kecil.png` (plaque), `cerah-miss.png` (Miss Raksa with a white sticker outline), `cerah-cakram.png` (sun disc), `cerah-kilau-a.png` / `-b.png` (sparkles). Source: `character/investigator-t117/bangun.mts`.
+- `client/src/investigator-event/ui/acara-inv.css`: two colour lines of the choice sheet (orange tab, cream heading).
+- The old `hub-latar.png`, `hub-logo.png`, `hub-miss.png` stay in the repo: the projector board (T-105) still uses the logo and Miss Raksa.
+- Not changed: layout, states, logic, links, `data-` hooks, dictionaries.
+
+### The look
+- **Header:** daytime sky from yellow to cream, clouds, a soft orange skyline and an orange ground band; sun rays turning behind the logo; the shield-badge logo "RAKSA INVESTIGATOR" with a magnifier; Miss Raksa detective as a white-outlined sticker in front of a sun disc, with sparkles.
+- **Page:** cream `#fff3d6` (the wood planks are gone). Case file: orange tab, white body, orange top line. Start button: the existing orange pixel key (same sound) with two white sparkles.
+- **Returning hub:** officer strip white, "Tamu baru" light yellow, case cards white with an orange tab (stamped cards light yellow), state chips orange / dark / red outline. The officer sheet and the "Tamu baru" dialog get a square ink frame with an orange top line.
+- **Event entry:** links in dark orange, label brown, badge light yellow. The choice sheet keeps its white dialog and gets the orange tab and cream heading.
+- The returning hub on screens under 820 px high uses the plaque logo: the shield badge (144 px) does not fit the shortened stage above the file tab.
+
+### Motion
+Sun rays: one turn in 120 s. Sparkles around Miss Raksa: two sets alternating every 1.2 s. Miss Raksa: the existing 2 px bob and lens glint. Button: blinking arrow as before, sparkles blink every 1.8 s. With "reduce motion" all of these are still.
+
+### Contrast (calculated)
+Ink `#212121` on white / cream / orange `#ff9000` / yellow `#ffe38a`: all above 7 : 1. Link colour `#9a4f00` on cream: 5.4 : 1, on white 6.3 : 1. Red `#c62828` on white: 5.6 : 1. Small brown `#5a3a24` on white: 10 : 1. Yellow `#ffe38a` on ink (number chips): 12 : 1. The focus ring changed from cream to ink, because the page is light now.
+
+### No scroll (calculated; same sums as T-114, only the stage art changed)
+Available after the 59 px header and 12 px bottom padding: 569 px at 360 x 640, 629 px at 390 x 700.
+
+| Screen, id | 360 x 640 (569) | 390 x 700 (629) |
+|---|---|---|
+| Fresh title screen + "Punya kode acara?" | 474 (stage 180) | 502 (stage 208) |
+| Fresh + typed event code with a two-line error | 532 | 560 |
+| Fresh + joined the event board | 530 | 558 |
+| Returning: continue / open, one note line | 480 (stage 112) | 528 (stage 160) |
+| Returning: play again, two note lines | 500 | 548 |
+| Returning + typed code with a two-line error | 558 | 606 |
+| Returning + joined the event board | 556 | 604 |
+
+Fresh at 640: stage 180 - 26 + file 184 + 10 + button 68 + 10 + link 48 = 474. In en the hook can take one more line (+22): 554 worst at 640, 582 at 700. Returning at 640: stage 112 - 26 + file 128 + 8 + strip 48 + 8 + 6 + cards 140 + 8 + link 48 = 480. Tap targets are unchanged: 48 px or more (case cards 108 x 140).
+
+### Things to know
+- Differences from the picked comp `opsi-4.png`: the sun rays are a smooth CSS gradient (so they can turn), not stepped pixels; the stage is 208 px only from 700 px of height (180 px at 640 for the title screen); the returning hub shows the plaque logo and Miss Raksa from the chest up.
+- The app header bar stays dark with the orange line, as in the comp.
+- In-case screens and the projector board keep their night / detective look; only the hub changed. Opening a case now goes from a bright page to the darker case screens.
+- Viewports shorter than 640 px can still scroll; nothing is clipped.
+
+### Previews (calculated mocks, not screenshots)
+`character/investigator-t117/layar-t117-360x640.png` and `layar-t117-390x700.png`: A returning guest, B the worst case (play again + joined the board), C the fresh title screen; the dark line is the bottom of the viewport. Pixel font in capitals, rays drawn still.
+
+### Open
+- Not seen in a browser or on a phone. Most worth a look: the turning rays behind the badge, the sticker outline against the sun disc, the plaque logo on the returning hub, and the jump in mood from hub to case.
+
+
+## T-115 (2026-11-21): Raksa Investigator NO-SCROLL pass · every in-case screen, cases 1-3 (Fullstack)
+
+Owner: "dont forget we need to make all of it no need scrolling okay". Gate: root `npm run typecheck` exit 0, `client/dist` rebuilt (build exit 0). No server file touched. Not committed, not deployed. **Nothing was opened in a browser or on a phone and no test was run: every height below is CALCULATED, none is measured.** `pages/Investigator.tsx` (hub, T-114) was not edited.
+
+### Result in one line
+All Investigator screens of the three cases now fit under the header at 360 x 640 and 390 x 700 in id, en and zh by calculation: 141 screen x case rows, 0 over the limit; the tightest one has 15 px to spare. Before this task several did not fit (table "Before and now" below).
+
+### How the page is kept from scrolling
+- **The screens are locked to the screen height.** The player (`hp/PemainHP.tsx`) now locks the Investigator screens and the Investigator result the same way it already locks scenes and activities (`data-kunci`): the page itself cannot scroll. Room for content = screen height - header 61 px - padding 12 + 10 = **557 px at 360 x 640, 617 px at 390 x 700** (the header is 61 px here, not 56: the notebook button in it is 48 px high).
+- **Safety net, not the plan:** if content is ever taller than that room (a phone with enlarged system text), the content area scrolls inside the locked screen. Nothing is clipped or out of reach. By the calculation this never happens at the two target sizes.
+- Below 560 px of viewport height and on desktop (1024 px and wider) nothing is locked; those behave as before.
+
+### How the heights were calculated
+One-off script (scratch folder, not in the repo, not a test): for every screen it adds up the CSS boxes and the wrapped height of the REAL texts of the three cases in id / en / zh.
+- Text width: the real advance widths of the app font (Plus Jakarta Sans, read from the shipped font file, including the bold weights). On a phone that falls back to its system font the text is narrower, so the figures are an upper bound.
+- Notebook handwriting: measured with the widest font of its stack (Segoe Print), also an upper bound. Chinese characters count as one full em.
+- Limits of the method: it is arithmetic over the CSS, not a rendering. A rule I misread would not show up. The fixed-size art blocks (licence desk, timeline, policy card, officer card) are taken at their CSS sizes.
+
+### What changed, by screen
+- **Pin a statement:** the open notebook shows the statements page; the evidence page is reduced to its heading with the count ("BUKTI 3"). Before, both pages were drawn in full: in Case 3 the third statement came with four evidence slips, 719 px.
+- **New evidence:** the notebook page shows only the slip(s) just collected (the heading still counts all of them). The older slips are in the notebook behind the header button. "Periksa ..." is 48 px high.
+- **KEBERATAN (cases 1-2):** the two page headings inside the notebook are not drawn on this screen. On the guided third attempt, on screens shorter than 680 px, only the right slip is listed (the two dimmed ones are left out).
+- **Panel rounds (Case 3):** the room strip is cropped from 104 to 72 px (all three busts whole, table edge still visible). The source line of each card is not repeated in the list (it is in the exhibit sheet). Gaps 6 px. Guided third attempt below 680 px: only the accepted card is listed. In practice mode the room strip gives way to the practice label.
+- **Exhibit sheet:** the whole photo and the close-up use one 3 : 2 box, and the switch between them is a 44 x 44 button on the photo corner (labelled for screen readers), so the sheet no longer grows or jumps. Below 700 px the quoted statement above a PHOTO is hidden (it stays on the round screen behind the sheet).
+- **Verdict:** the short reason is open only on the card the guest has selected. All three reasons at once came to 586 px in Case 3 (537 in Case 2). Tapping another card shows its reason; nothing is decided until "Tetapkan putusan".
+- **Message chat (reply sheet):** for Investigator cases only (`ringkas` on `hp/PilihBalasan.tsx`, other episodes unchanged): the list shows each message cut to three lines; tapping one folds the sheet to that message alone, in full, with "Ganti balasan" and the send button. The longest message (Case 2, about 390 letters, 15 lines at 18 px) fits with 16 px to spare.
+- **Result page 2:** "Arsip kasus" is now the third button of the action row (Main lagi / Arsip kasus / Selesai) instead of its own 48 px row. Point rows 20 px, gaps 6 px, series total on one line. The "Rekor baru!" / "Terbaik 85" chip sits as a sticker on the corner of Miss Raksa's portrait, so the header stays 80 px. While new awards are announced the card lanyard (14 px) is hidden.
+- **Archive sheet:** tabs "Garis waktu" / "Keterangan" / "Pesan", one page per view (before: one long column, 1050 px in Case 3). Its own close button is gone; the sheet's button closes it.
+- **Notebook sheet (header button and Menu):** tabs "Keterangan n" / "Bukti n". The statements tab shows ONE statement at a time; numbered polaroid chips (52 x 60 tap area) choose it. A "Tanya lebih lanjut" note opens with one button and takes the place of the sentence (the same button brings the sentence back).
+- **"Main lagi" sheet at a perfect score:** the corrected statements are no longer packed into the sheet; a button opens the archive on its statements tab.
+- **Gate "Mulai baru":** while the confirmation is open, the portrait and the intro sentence are hidden.
+- **Practice:** message practice works like the chat sheet (list cut to three lines, chosen message alone in full with "Ganti balasan"). The two buttons of the practice result are side by side.
+- **Title card:** slightly tighter; the "Tamu baru" confirmation lost its paragraph margins.
+- **Trip timeline and policy card (Case 2):** gaps 6 px.
+- Text sizes are unchanged (body 18 px; the smallest label is still 12-13 px where it was before). No tap target is under 44 px.
+
+### Before and now (the old layouts put through the same calculation; id, 360 x 640)
+The old room was 539 px (bottom padding 28 instead of 10) and past it the page scrolled; sheets scrolled inside themselves.
+| Screen | Before | Now |
+|---|---|---|
+| Pin statement no. 3 (Case 3) | 719 | 467 |
+| New evidence, Case 3 photo | 605 | 481 |
+| New evidence, Case 3 message excerpt | 559 | 377 |
+| KEBERATAN guided attempt, Case 2 | 543 (en 592) | 379 (en 428) |
+| Panel rounds, attempts 1-2 (Case 3) | 555 to 577 | 482 to 504 |
+| Panel round 2, guided attempt | 599 | 412 |
+| Verdict, Case 2 / Case 3 | 537 / 586 | 417 / 449 |
+| Result page 2, worst (record chip, total, two new awards) | 653 to 673 | 508 to 536 |
+| Archive sheet, Case 2 / Case 3 (sheet room 480) | 836 / 1050 | 386 / 372 at most per tab |
+| Notebook sheet at the end of Case 1 / 2 / 3 (sheet room 480) | 644 / 782 / 1232 | 358 / 358 / 372 at most per tab |
+| Message chat reply sheet, Case 2 / Case 3 (room 527) | 741 / 547 | list 373 / 397, chosen message 511 / 341 |
+
+### Per-screen heights (px)
+"room" = what is available (557 / 617 for screens; for sheets the dialog room, which depends on its title lines and buttons; for the reply sheet the space under the chat header). "least spare" = the smallest difference over both sizes and three languages. K1 / K2 / K3 = case.
+
+| Screen | Case | 360 x 640: id / en / zh | room | 390 x 700: id / en / zh | room | least spare | How the id figure at 360 is made up |
+|---|---|---|---|---|---|---|---|
+| 01 Title card + "Tamu baru" link | K1 | 492 / 492 / 492 | 557 | 492 / 492 / 492 | 617 | 65 | + gaps 8 + link 48 |
+| 01 Title card + "Tamu baru" link | K2 | 494 / 494 / 494 | 557 | 494 / 494 / 494 | 617 | 63 | + gaps 8 + link 48 |
+| 01 Title card + "Tamu baru" link | K3 | 494 / 494 / 494 | 557 | 494 / 494 / 494 | 617 | 63 | + gaps 8 + link 48 |
+| 01 Title card + "Tamu baru" confirm open | K1 | 534 / 534 / 514 | 557 | 534 / 534 / 514 | 617 | 23 | + gaps 8 + confirm 90 |
+| 01 Title card + "Tamu baru" confirm open | K2 | 536 / 536 / 516 | 557 | 536 / 536 / 516 | 617 | 21 | + gaps 8 + confirm 90 |
+| 01 Title card + "Tamu baru" confirm open | K3 | 536 / 536 / 516 | 557 | 536 / 536 / 516 | 617 | 21 | + gaps 8 + confirm 90 |
+| 01 Title card | K1 | 436 / 436 / 436 | 557 | 436 / 436 / 436 | 617 | 121 | padding 8 + cards 360 (ribbon 34, picture 150, heading 31 + 20 / portrait 132) + 12 + button 56 |
+| 01 Title card | K2 | 438 / 438 / 438 | 557 | 438 / 438 / 438 | 617 | 119 | padding 8 + cards 362 (ribbon 34, picture 152, heading 62 + 20 / portrait 132) + 12 + button 56 |
+| 01 Title card | K3 | 438 / 438 / 438 | 557 | 438 / 438 / 438 | 617 | 119 | padding 8 + cards 362 (ribbon 34, picture 152, heading 93 + 20 / portrait 132) + 12 + button 56 |
+| 02 Hunch (choice list) | K2 | 472 / 498 / 452 | 557 | 472 / 472 / 452 | 617 | 59 | question 90 + picture 150 + 3 choices 168 + note 40 + gaps 24 |
+| 02 Hunch (choice list) | K3 | 498 / 498 / 452 | 557 | 498 / 498 / 452 | 617 | 59 | question 116 + picture 150 + 3 choices 168 + note 40 + gaps 24 |
+| 02 Hunch (lane picker) | K1 | 330 / 352 / 310 | 557 | 330 / 330 / 310 | 617 | 205 | question 68 + frame 150 + chips 56 + note 40 + gaps 16 |
+| 03 Pin statement no. 1 | K1 | 298 / 298 / 255 | 557 | 255 / 255 / 255 | 617 | 259 | label 40 + notebook 186 (rows 92; evidence page stub 32) + button 56 + gaps 16 |
+| 03 Pin statement no. 1 | K2 | 275 / 298 / 255 | 557 | 255 / 255 / 250 | 617 | 259 | label 40 + notebook 163 (rows 69; evidence page stub 32) + button 56 + gaps 16 |
+| 03 Pin statement no. 1 | K3 | 275 / 321 / 255 | 557 | 255 / 301 / 255 | 617 | 236 | label 40 + notebook 163 (rows 69; evidence page stub 32) + button 56 + gaps 16 |
+| 03 Pin statement no. 2 | K1 | 371 / 371 / 328 | 557 | 328 / 328 / 328 | 617 | 186 | label 40 + notebook 259 (rows 92 + 69; evidence page stub 32) + button 56 + gaps 16 |
+| 03 Pin statement no. 2 | K2 | 394 / 417 / 351 | 557 | 374 / 374 / 323 | 617 | 140 | label 40 + notebook 282 (rows 69 + 115; evidence page stub 32) + button 56 + gaps 16 |
+| 03 Pin statement no. 2 | K3 | 348 / 394 / 323 | 557 | 328 / 374 / 323 | 617 | 163 | label 40 + notebook 236 (rows 69 + 69; evidence page stub 32) + button 56 + gaps 16 |
+| 03 Pin statement no. 3 | K3 | 467 / 490 / 396 | 557 | 447 / 470 / 396 | 617 | 67 | label 40 + notebook 355 (rows 69 + 69 + 115; evidence page stub 32) + button 56 + gaps 16 |
+| 04 New evidence (bukti-foto) | K2 | 321 / 321 / 296 | 557 | 321 / 296 / 271 | 617 | 236 | header 26 + finding 101 + notebook 114 + save 56 + gaps 24 |
+| 04 New evidence (bukti-foto) | K3 | 481 / 506 / 436 | 557 | 481 / 481 / 416 | 617 | 51 | header 26 + hunch note 96 + finding 101 + notebook 114 + enlarge 48 + save 56 + gaps 40 |
+| 04 New evidence (bukti-kejadian) | K3 | 402 / 402 / 352 | 557 | 402 / 377 / 352 | 617 | 155 | header 26 + finding 126 + notebook 114 + enlarge 48 + save 56 + gaps 32 |
+| 04 New evidence (bukti-penawaran) | K3 | 377 / 377 / 352 | 557 | 377 / 352 / 327 | 617 | 180 | header 26 + finding 101 + notebook 114 + enlarge 48 + save 56 + gaps 32 |
+| 04 New evidence (bukti-pesan) | K3 | 377 / 377 / 352 | 557 | 377 / 377 / 352 | 617 | 180 | header 26 + finding 101 + notebook 114 + enlarge 48 + save 56 + gaps 32 |
+| 04 New evidence (bukti-polis) | K2 | 296 / 296 / 271 | 557 | 296 / 296 / 271 | 617 | 261 | header 26 + finding 76 + notebook 114 + save 56 + gaps 24 |
+| 04 New evidence (bukti-rekaman) | K1 | 488 / 488 / 418 | 557 | 463 / 443 / 418 | 617 | 69 | header 26 + hunch note 76 + finding 126 + notebook 172 + save 56 + gaps 32 |
+| 04 New evidence (bukti-sim) | K1 | 297 / 297 / 297 | 557 | 297 / 297 / 297 | 617 | 260 | header 52 + finding 50 + notebook 114 + save 56 + gaps 24 |
+| 04 New evidence (bukti-struk) | K2 | 450 / 430 / 360 | 557 | 405 / 405 / 360 | 617 | 107 | header 26 + hunch note 96 + finding 126 + notebook 114 + save 56 + gaps 32 |
+| 05 Press: answer open (pemohon) | K3 | 365 / 432 / 341 | 557 | 365 / 432 / 341 | 617 | 125 | heading 26 + notebook 129 + answer note 186 + gaps 24 |
+| 05 Press: answer open (penaksir) | K3 | 389 / 389 / 336 | 557 | 365 / 389 / 336 | 617 | 168 | heading 26 + notebook 129 + answer note 210 + gaps 24 |
+| 05 Press: answer open (tol) | K1 | 386 / 386 / 341 | 557 | 365 / 365 / 341 | 617 | 171 | heading 26 + notebook 129 + answer note 207 + gaps 24 |
+| 05 Press: answer open (yusuf) | K2 | 365 / 388 / 341 | 557 | 365 / 365 / 336 | 617 | 169 | heading 26 + notebook 129 + answer note 186 + gaps 24 |
+| 05 Press: offer (pemohon) | K3 | 295 / 341 / 295 | 557 | 295 / 341 / 295 | 617 | 216 | heading 26 + notebook 129 + ask button 48 + continue 56 + gaps 36 |
+| 05 Press: offer (penaksir) | K3 | 295 / 295 / 290 | 557 | 295 / 295 / 290 | 617 | 262 | heading 26 + notebook 129 + ask button 48 + continue 56 + gaps 36 |
+| 05 Press: offer (tol) | K1 | 295 / 295 / 295 | 557 | 295 / 295 / 295 | 617 | 262 | heading 26 + notebook 129 + ask button 48 + continue 56 + gaps 36 |
+| 05 Press: offer (yusuf) | K2 | 295 / 318 / 295 | 557 | 295 / 295 / 290 | 617 | 239 | heading 26 + notebook 129 + ask button 48 + continue 56 + gaps 36 |
+| 06 Trip timeline | K2 | 539 / 539 / 517 | 557 | 539 / 517 / 517 | 617 | 18 | progress 20 + instruction 86 + source 107 + timeline 180 + tray 60 + button 56 + gaps 30 |
+| 06 Policy card (clause open) | K2 | 542 / 496 / 466 | 557 | 522 / 496 / 466 | 617 | 15 | progress 20 + instruction 52 + cards 324 + result line 66 + button 56 + gaps 24 |
+| 06 Licence check | K1 | 444 / 466 / 444 | 557 | 444 / 466 / 444 | 617 | 91 | progress 20 + instruction 52 + desk art 240 + result line 44 + button 56 + gaps 32 |
+| 07 KEBERATAN attempt 1 | K1 | 419 / 445 / 419 | 557 | 419 / 419 / 419 | 617 | 112 | question 26 + label 20 + notebook 293 + button 56 + gaps 24 |
+| 07 KEBERATAN attempt 1 | K2 | 471 / 494 / 445 | 557 | 471 / 445 / 440 | 617 | 63 | question 78 + label 20 + notebook 293 + button 56 + gaps 24 |
+| 07 KEBERATAN attempt 2 | K1 | 481 / 507 / 459 | 557 | 481 / 459 / 459 | 617 | 50 | question 26 + hint 82 + notebook 293 + button 56 + gaps 24 |
+| 07 KEBERATAN attempt 2 | K2 | 459 / 508 / 459 | 557 | 459 / 459 / 454 | 617 | 49 | question 26 + hint 60 + notebook 293 + button 56 + gaps 24 |
+| 07 KEBERATAN attempt 3 | K1 | 359 / 385 / 359 | 557 | 475 / 475 / 467 | 617 | 142 | question 26 + hint 76 + notebook 177 + button 56 + gaps 24 |
+| 07 KEBERATAN attempt 3 | K2 | 379 / 428 / 359 | 557 | 475 / 475 / 462 | 617 | 129 | question 26 + hint 96 + notebook 177 + button 56 + gaps 24 |
+| 08 Footage zoom (sheet) | K1 | 352 / 352 / 308 | 460 | 332 / 352 / 308 | 520 | 108 | quote 82 + frame 150 + note 40 + button 56 + gaps 24 (heading 2 rows) |
+| 09 Stamp (the screen under the stamp) | K1 | 306 / 280 / 280 | 557 | 280 / 280 / 280 | 617 | 251 | padding 16 + portrait 132 + sentence 78 + button 56 + gaps 24 |
+| 09 Stamp (the screen under the stamp) | K2 | 332 / 306 / 280 | 557 | 306 / 306 / 280 | 617 | 225 | padding 16 + portrait 132 + sentence 104 + button 56 + gaps 24 |
+| 10 Correction (officer logbook) | K1 | 518 / 518 / 475 | 557 | 495 / 495 / 475 | 617 | 39 | heading 26 + officer logbook art 188 + note 40 + notebook 176 + button 56 + gaps 32 |
+| 10 Correction (statement) | K2 | 368 / 368 / 302 | 557 | 345 / 345 / 279 | 617 | 189 | heading 26 + note 40 + notebook 222 + button 56 + gaps 24 |
+| 11 Panel round 1 attempt 1 | K3 | 482 / 482 / 458 | 557 | 482 / 482 / 458 | 617 | 75 | room 76 + chair 78 + statement 82 + cards 166 + button 56 + gaps 24 |
+| 11 Panel round 1 attempt 2 | K3 | 504 / 482 / 458 | 557 | 482 / 482 / 436 | 617 | 53 | room 76 + chair 100 + statement 82 + cards 166 + button 56 + gaps 24 |
+| 11 Panel round 1 attempt 3 | K3 | 390 / 390 / 344 | 557 | 504 / 504 / 458 | 617 | 113 | room 76 + chair 100 + statement 82 + cards 52 + button 56 + gaps 24 |
+| 11 Panel round 2 attempt 1 | K3 | 504 / 482 / 458 | 557 | 482 / 482 / 458 | 617 | 53 | room 76 + chair 100 + statement 82 + cards 166 + button 56 + gaps 24 |
+| 11 Panel round 2 attempt 2 | K3 | 482 / 482 / 458 | 557 | 482 / 482 / 458 | 617 | 75 | room 76 + chair 78 + statement 82 + cards 166 + button 56 + gaps 24 |
+| 11 Panel round 2 attempt 3 | K3 | 412 / 412 / 366 | 557 | 504 / 504 / 458 | 617 | 113 | room 76 + chair 122 + statement 82 + cards 52 + button 56 + gaps 24 |
+| 12 Right of reply: correction (round 1) | K3 | 365 / 414 / 322 | 557 | 345 / 391 / 322 | 617 | 143 | heading 26 + note 60 + notebook 199 + button 56 + gaps 24 |
+| 12 Right of reply: correction (round 2) | K3 | 434 / 414 / 322 | 557 | 414 / 391 / 322 | 617 | 123 | heading 26 + note 60 + notebook 268 + button 56 + gaps 24 |
+| 13 Exhibit sheet foto-inspeksi (opened in round 1) | K3 | 369 / 369 / 305 | 456 | 438 / 460 / 374 | 516 | 56 | photo 321 + source 40 + gaps (heading 2 rows) |
+| 13 Exhibit sheet foto-inspeksi (opened in round 2) | K3 | 369 / 369 / 305 | 456 | 438 / 460 / 374 | 516 | 56 | photo 321 + source 40 + gaps (heading 2 rows) |
+| 13 Exhibit sheet kartu-kejadian (opened in round 1) | K3 | 306 / 282 / 236 | 456 | 282 / 282 / 216 | 516 | 150 | quote 74 + paper 176 + source 40 + gaps (heading 2 rows) |
+| 13 Exhibit sheet penawaran (opened in round 1) | K3 | 262 / 258 / 192 | 456 | 238 / 238 / 192 | 516 | 194 | quote 74 + paper 152 + source 20 + gaps (heading 2 rows) |
+| 13 Exhibit sheet penawaran (opened in round 2) | K3 | 284 / 258 / 214 | 456 | 238 / 238 / 192 | 516 | 172 | quote 96 + paper 152 + source 20 + gaps (heading 2 rows) |
+| 13 Exhibit sheet pesan-pengajuan (opened in round 2) | K3 | 362 / 320 / 272 | 456 | 296 / 296 / 250 | 516 | 94 | quote 96 + message 190 + source 60 + gaps (heading 2 rows) |
+| 14 Verdict (one reason open) | K1 | 400 / 397 / 334 | 557 | 374 / 374 / 334 | 617 | 157 | question 26 + note 40 + 3 cards 238 + card gaps 16 + button 56 + gaps 24 |
+| 14 Verdict (one reason open) | K2 | 417 / 417 / 334 | 557 | 394 / 374 / 334 | 617 | 140 | question 26 + note 40 + 3 cards 255 + card gaps 16 + button 56 + gaps 24 |
+| 14 Verdict (one reason open) | K3 | 449 / 426 / 354 | 557 | 406 / 426 / 334 | 617 | 108 | question 52 + note 40 + 3 cards 261 + card gaps 16 + button 56 + gaps 24 |
+| 15 Message chat: reply sheet (list) | K1 | 349 / 373 / 332 | 527 | 349 / 349 / 332 | 587 | 154 | handle 10 + question 36 + 3 message (max 3 rows) 228 + send 56 + edges 20 |
+| 15 Message chat: reply sheet (list) | K2 | 373 / 373 / 373 | 527 | 373 / 373 / 373 | 587 | 154 | handle 10 + question 36 + 3 message (max 3 rows) 252 + send 56 + edges 20 |
+| 15 Message chat: reply sheet (list) | K3 | 397 / 397 / 373 | 527 | 397 / 397 / 349 | 587 | 130 | handle 10 + question 36 + 3 message (max 3 rows) 277 + send 56 + edges 20 |
+| 15 Message chat: reply sheet (chosen message in full) | K1 | 341 / 341 / 292 | 527 | 341 / 317 / 268 | 587 | 186 | handle 10 + longest message 210 (8 rows) + change 50 + send 56 + edges 14 |
+| 15 Message chat: reply sheet (chosen message in full) | K2 | 511 / 462 / 341 | 527 | 438 / 414 / 317 | 587 | 16 | handle 10 + longest message 381 (15 rows) + change 50 + send 56 + edges 14 |
+| 15 Message chat: reply sheet (chosen message in full) | K3 | 341 / 341 / 268 | 527 | 341 / 317 / 268 | 587 | 186 | handle 10 + longest message 210 (8 rows) + change 50 + send 56 + edges 14 |
+| 16 Practice result (evidence / round) | K1 | 308 / 308 / 300 | 557 | 308 / 300 / 280 | 617 | 249 | ribbon 22 + heading 26 + sentence 76 + points 52 + label 40 + button 52 + gaps 40 |
+| 16 Practice result (evidence / round) | K2 | 328 / 308 / 300 | 557 | 308 / 308 / 280 | 617 | 229 | ribbon 22 + heading 26 + sentence 96 + points 52 + label 40 + button 52 + gaps 40 |
+| 16 Practice result (evidence / round) | K3 | 348 / 348 / 308 | 557 | 328 / 328 / 288 | 617 | 209 | ribbon 22 + heading 26 + sentence 116 + points 52 + label 40 + button 52 + gaps 40 |
+| 16 Practice result (message) | K1 | 442 / 442 / 412 | 557 | 442 / 420 / 392 | 617 | 115 | ribbon 22 + heading 26 + utterance 126 + sentence 76 + points 52 + label 40 + button 52 + gaps 48 |
+| 16 Practice result (message) | K2 | 464 / 464 / 434 | 557 | 464 / 442 / 392 | 617 | 93 | ribbon 22 + heading 26 + utterance 148 + sentence 76 + points 52 + label 40 + button 52 + gaps 48 |
+| 16 Practice result (message) | K3 | 464 / 442 / 412 | 557 | 442 / 442 / 392 | 617 | 93 | ribbon 22 + heading 26 + utterance 148 + sentence 76 + points 52 + label 40 + button 52 + gaps 48 |
+| 16 Practice result (verdict) | K1 | 368 / 388 / 328 | 557 | 348 / 368 / 288 | 617 | 169 | ribbon 22 + heading 26 + sentence 136 + points 52 + label 40 + button 52 + gaps 40 |
+| 16 Practice result (verdict) | K2 | 388 / 388 / 328 | 557 | 388 / 388 / 308 | 617 | 169 | ribbon 22 + heading 26 + sentence 156 + points 52 + label 40 + button 52 + gaps 40 |
+| 16 Practice result (verdict) | K3 | 428 / 428 / 368 | 557 | 408 / 388 / 328 | 617 | 129 | ribbon 22 + heading 26 + sentence 196 + points 52 + label 40 + button 52 + gaps 40 |
+| 16 Practice: KEBERATAN attempt 1 | K1 | 447 / 473 / 447 | 557 | 447 / 447 / 447 | 617 | 84 | ribbon 22 + 6 + screen 419 |
+| 16 Practice: KEBERATAN attempt 1 | K2 | 499 / 522 / 473 | 557 | 499 / 473 / 468 | 617 | 35 | ribbon 22 + 6 + screen 471 |
+| 16 Practice: KEBERATAN attempt 2 | K1 | 509 / 535 / 487 | 557 | 509 / 487 / 487 | 617 | 22 | ribbon 22 + 6 + screen 481 |
+| 16 Practice: KEBERATAN attempt 2 | K2 | 487 / 536 / 487 | 557 | 487 / 487 / 482 | 617 | 21 | ribbon 22 + 6 + screen 459 |
+| 16 Practice: KEBERATAN attempt 3 | K1 | 387 / 413 / 387 | 557 | 503 / 503 / 495 | 617 | 114 | ribbon 22 + 6 + screen 359 |
+| 16 Practice: KEBERATAN attempt 3 | K2 | 407 / 456 / 387 | 557 | 503 / 503 / 490 | 617 | 101 | ribbon 22 + 6 + screen 379 |
+| 16 Practice: panel round 1 attempt 1 | K3 | 428 / 428 / 404 | 557 | 428 / 428 / 404 | 617 | 129 | ribbon 22 + 6 + screen without the room strip 400 |
+| 16 Practice: panel round 1 attempt 2 | K3 | 450 / 428 / 404 | 557 | 428 / 428 / 382 | 617 | 107 | ribbon 22 + 6 + screen without the room strip 422 |
+| 16 Practice: panel round 1 attempt 3 | K3 | 336 / 336 / 290 | 557 | 450 / 450 / 404 | 617 | 167 | ribbon 22 + 6 + screen without the room strip 308 |
+| 16 Practice: panel round 2 attempt 1 | K3 | 450 / 428 / 404 | 557 | 428 / 428 / 404 | 617 | 107 | ribbon 22 + 6 + screen without the room strip 422 |
+| 16 Practice: panel round 2 attempt 2 | K3 | 428 / 428 / 404 | 557 | 428 / 428 / 404 | 617 | 129 | ribbon 22 + 6 + screen without the room strip 400 |
+| 16 Practice: panel round 2 attempt 3 | K3 | 358 / 358 / 312 | 557 | 450 / 450 / 404 | 617 | 167 | ribbon 22 + 6 + screen without the room strip 330 |
+| 16 Practice: message (list) | K1 | 486 / 486 / 442 | 557 | 464 / 486 / 442 | 617 | 71 | ribbon 28 + utterance 126 + question 26 + 3 message 226 + button 56 + gaps 24 |
+| 16 Practice: message (list) | K2 | 486 / 464 / 464 | 557 | 464 / 464 / 464 | 617 | 71 | ribbon 28 + utterance 104 + question 26 + 3 message 248 + button 56 + gaps 24 |
+| 16 Practice: message (list) | K3 | 508 / 508 / 442 | 557 | 486 / 486 / 442 | 617 | 49 | ribbon 28 + utterance 104 + question 26 + 3 message 270 + button 56 + gaps 24 |
+| 16 Practice: message (chosen message in full) | K1 | 378 / 378 / 312 | 557 | 356 / 356 / 312 | 617 | 179 | ribbon 28 + question 26 + message 196 + change 48 + button 56 + gaps 24 |
+| 16 Practice: message (chosen message in full) | K2 | 488 / 444 / 356 | 557 | 466 / 444 / 334 | 617 | 69 | ribbon 28 + question 26 + message 306 + change 48 + button 56 + gaps 24 |
+| 16 Practice: message (chosen message in full) | K3 | 378 / 356 / 312 | 557 | 356 / 334 / 290 | 617 | 179 | ribbon 28 + question 26 + message 196 + change 48 + button 56 + gaps 24 |
+| 16 Practice: verdict | K1 | 428 / 425 / 362 | 557 | 402 / 402 / 362 | 617 | 129 | ribbon 22 + 6 + screen 400 |
+| 16 Practice: verdict | K2 | 445 / 445 / 362 | 557 | 422 / 402 / 362 | 617 | 112 | ribbon 22 + 6 + screen 417 |
+| 16 Practice: verdict | K3 | 477 / 454 / 382 | 557 | 434 / 454 / 362 | 617 | 80 | ribbon 22 + 6 + screen 449 |
+| 17 Result page 1: the customer sentence | K1 | 346 / 320 / 268 | 557 | 320 / 294 / 268 | 617 | 211 | padding 12 + heading 26 + utterance 228 + button 56 + gaps 24 |
+| 17 Result page 1: the customer sentence | K2 | 372 / 346 / 268 | 557 | 346 / 294 / 268 | 617 | 185 | padding 12 + heading 26 + utterance 254 + button 56 + gaps 24 |
+| 17 Result page 1: the customer sentence | K3 | 346 / 320 / 268 | 557 | 346 / 294 / 268 | 617 | 211 | padding 12 + heading 26 + utterance 228 + button 56 + gaps 24 |
+| 17 Result page 2: score (first result of the case) | K1 | 468 / 468 / 468 | 557 | 468 / 468 / 468 | 617 | 89 | header 80 + points 64 + officer card 172 + next action 48 + 3 button 52 + story link 28 + gaps |
+| 17 Result page 2: score (first result of the case) | K2 | 470 / 470 / 470 | 557 | 470 / 470 / 470 | 617 | 87 | header 80 + points 64 + total 24 + officer card 172 + next action 48 + 3 button 52 + gaps |
+| 17 Result page 2: score (first result of the case) | K3 | 470 / 470 / 470 | 557 | 470 / 470 / 470 | 617 | 87 | header 80 + points 64 + total 24 + officer card 172 + next action 48 + 3 button 52 + gaps |
+| 17 Result page 2: score + series total + two new awards (worst) | K1 | 536 / 536 / 514 | 557 | 536 / 536 / 514 | 617 | 21 | + total 24 + new awards 46 (two awards at once; one award = 24) - card lanyard 14 |
+| 17 Result page 2: score + series total + two new awards (worst) | K2 | 508 / 508 / 486 | 557 | 508 / 508 / 486 | 617 | 49 | + total 24 + new awards 46 (two awards at once; one award = 24) - card lanyard 14 |
+| 17 Result page 2: score + series total + two new awards (worst) | K3 | 508 / 508 / 486 | 557 | 508 / 508 / 486 | 617 | 49 | + total 24 + new awards 46 (two awards at once; one award = 24) - card lanyard 14 |
+| 18 Gate: "Mulai baru" confirm | K1 | 336 / 336 / 314 | 557 | 336 / 336 / 314 | 617 | 221 | padding 16 + label 20 + heading 26 + position chip 28 + confirm 210 + gaps 36 (portrait and sentence hidden) |
+| 18 Gate: "Mulai baru" confirm | K2 | 336 / 336 / 314 | 557 | 336 / 336 / 314 | 617 | 221 | padding 16 + label 20 + heading 26 + position chip 28 + confirm 210 + gaps 36 (portrait and sentence hidden) |
+| 18 Gate: "Mulai baru" confirm | K3 | 336 / 336 / 314 | 557 | 336 / 336 / 314 | 617 | 221 | padding 16 + label 20 + heading 26 + position chip 28 + confirm 210 + gaps 36 (portrait and sentence hidden) |
+| 18 Gate: continue / start over | K1 | 457 / 457 / 432 | 557 | 457 / 457 / 432 | 617 | 100 | padding 16 + portrait 132 + label 20 + heading 26 + sentence 50 + position chip 28 + 2 button 112 + gaps 72 |
+| 18 Gate: continue / start over | K2 | 457 / 457 / 432 | 557 | 457 / 457 / 432 | 617 | 100 | padding 16 + portrait 132 + label 20 + heading 26 + sentence 50 + position chip 28 + 2 button 112 + gaps 72 |
+| 18 Gate: continue / start over | K3 | 457 / 457 / 432 | 557 | 457 / 457 / 432 | 617 | 100 | padding 16 + portrait 132 + label 20 + heading 26 + sentence 50 + position chip 28 + 2 button 112 + gaps 72 |
+| 19 Notebook sheet: Evidence tab | K1 | 262 / 262 / 262 | 480 | 262 / 262 / 262 | 540 | 218 | tabs 48 + 8 + notebook 206 (3 slips) |
+| 19 Notebook sheet: Evidence tab | K2 | 262 / 262 / 262 | 480 | 262 / 262 / 262 | 540 | 218 | tabs 48 + 8 + notebook 206 (3 slips) |
+| 19 Notebook sheet: Evidence tab | K3 | 320 / 320 / 320 | 480 | 320 / 320 / 320 | 540 | 160 | tabs 48 + 8 + notebook 264 (4 slips) |
+| 19 Notebook sheet: Statements tab (one statement shown) | K1 | 358 / 358 / 324 | 480 | 358 / 340 / 306 | 540 | 122 | tabs 48 + 8 + notebook 302 (chips 68, tallest content 194) |
+| 19 Notebook sheet: Statements tab (one statement shown) | K2 | 358 / 358 / 330 | 480 | 353 / 330 / 307 | 540 | 122 | tabs 48 + 8 + notebook 302 (chips 68, tallest content 194) |
+| 19 Notebook sheet: Statements tab (one statement shown) | K3 | 372 / 399 / 330 | 480 | 358 / 376 / 330 | 540 | 81 | tabs 48 + 8 + notebook 316 (chips 68, tallest content 208) |
+| 20 Archive sheet: Timeline tab | K2 | 226 / 204 / 186 | 480 | 204 / 204 / 186 | 540 | 254 | tabs 56 + timeline card (3 rows 108) |
+| 20 Archive sheet: Timeline tab | K3 | 274 / 296 / 230 | 480 | 274 / 296 / 208 | 540 | 184 | tabs 56 + timeline card (3 rows 174) |
+| 20 Archive sheet: Statements tab | K1 | 280 / 257 / 257 | 480 | 257 / 257 / 234 | 540 | 200 | tabs 56 + notebook 224 |
+| 20 Archive sheet: Statements tab | K2 | 303 / 303 / 280 | 480 | 303 / 280 / 257 | 540 | 177 | tabs 56 + notebook 247 |
+| 20 Archive sheet: Statements tab | K3 | 372 / 349 / 280 | 480 | 326 / 349 / 280 | 540 | 108 | tabs 56 + notebook 316 |
+| 20 Archive sheet: Message tab | K1 | 276 / 276 / 210 | 480 | 254 / 254 / 210 | 540 | 204 | tabs 56 + message card (longest message 176) |
+| 20 Archive sheet: Message tab | K2 | 386 / 342 / 254 | 480 | 364 / 342 / 232 | 540 | 94 | tabs 56 + message card (longest message 286) |
+| 20 Archive sheet: Message tab | K3 | 276 / 254 / 210 | 480 | 254 / 232 / 188 | 540 | 204 | tabs 56 + message card (longest message 176) |
+| 21 "Main lagi" sheet (worst, new-guest confirm open) | K1 | 350 / 368 / 308 | 480 | 328 / 350 / 290 | 540 | 112 | first option 140 + replay 82 + new guest 108 (closed 48) + gaps 20 |
+| 21 "Main lagi" sheet (worst, new-guest confirm open) | K2 | 350 / 368 / 308 | 480 | 328 / 350 / 290 | 540 | 112 | first option 140 + replay 82 + new guest 108 (closed 48) + gaps 20 |
+| 21 "Main lagi" sheet (worst, new-guest confirm open) | K3 | 328 / 368 / 308 | 480 | 328 / 350 / 290 | 540 | 112 | first option 118 + replay 82 + new guest 108 (closed 48) + gaps 20 |
+| 22 Office scene (tallest beat, lowest stage shape) | K1 | 447 / 473 / 395 | 557 | 436 / 462 / 410 | 617 | 84 | putusan-tambahan#1: stage 2 : 1 + dialogue; the stage adapts by itself (T-018) |
+| 22 Office scene (tallest beat, lowest stage shape) | K2 | 473 / 473 / 395 | 557 | 488 / 488 / 410 | 617 | 84 | putusan-polis#1: stage 2 : 1 + dialogue; the stage adapts by itself (T-018) |
+| 22 Office scene (tallest beat, lowest stage shape) | K3 | 499 / 499 / 421 | 557 | 488 / 488 / 436 | 617 | 58 | putusan-tambahan#1: stage 2 : 1 + dialogue; the stage adapts by itself (T-018) |
+| 22 Statement room scene (tallest beat) | K1 | 463 / 463 / 437 | 557 | 463 / 463 / 437 | 617 | 94 | keb0-rambu#1: stage 236 + dialogue; the goal line hides itself when needed (as since T-079) |
+| 22 Statement room scene (tallest beat) | K2 | 437 / 437 / 428 | 557 | 437 / 437 / 428 | 617 | 120 | yusuf#2: stage 236 + dialogue; the goal line hides itself when needed (as since T-079) |
+| 22 Statement room scene (tallest beat) | K3 | 489 / 463 / 437 | 557 | 489 / 463 / 437 | 617 | 68 | panel-buka#2: stage 236 + dialogue; the goal line hides itself when needed (as since T-079) |
+
+Not in the table:
+- **Dashcam footage (Case 1 activity):** an already locked activity screen; I did not recalculate it. Its own note (T-067 / T-083) puts it at about 414 px plus the 18 px TV frame.
+- **Message chat thread:** a chat log scrolls by nature (older messages move up); each new beat is scrolled into view by the existing code. The reply sheet is what the guest has to read and act on, and that is in the table.
+- **Ranked event run badge:** fixed over the header, takes no height.
+- **Office and statement-room scenes** are in the table as "tallest beat". They were already locked (T-018, T-079); the office row uses my estimate of that layout, not a full model of it.
+
+### Files
+- New: `client/src/cerita/investigasi/ui/muat.css` (the whole tightening layer, imported last by `LayarInvestigasi.tsx`).
+- `client/src/cerita/hp/PemainHP.tsx`: lock for Investigator screens and result, `data-inv` on the shell, `ringkas` to the reply chooser, inner scroll reset on screen change.
+- `client/src/cerita/hp/PilihBalasan.tsx`: opt-in `ringkas` (fold in the sheet).
+- `client/src/cerita/investigasi/LayarInvestigasi.tsx`: pin screen, new-evidence screen, gate, message practice, result (archive button, paged archive `ArsipKasus`), notebook sheet with tabs.
+- `client/src/cerita/investigasi/ui/BukuCatatan.tsx`: props `satu`, `ringkasBukti`, `jumlahBukti`. `HasilInvestigasi.tsx`: `onArsip`. `panel/PanelExhibit.tsx`: photo box + corner button. Comment notes in `LayarKeberatan.tsx`, `LayarPutusan.tsx`, `panel/PanelRound.tsx`.
+- `client/src/i18n/kamus/investigasi.ts`: `arsip.garis`, `arsip.pesan` (id / en / zh; en and zh are mine).
+
+### For the Lead to decide (behaviour that changed, not only spacing)
+1. Verdict reasons are hidden until a card is selected.
+2. Guided third attempt on short screens lists only the right card (KEBERATAN and panel).
+3. Panel cards no longer show the source line in the list.
+4. The pin screen and the new-evidence screen no longer show the whole notebook.
+5. The reply sheet in Investigator cases folds to the chosen message.
+Each of these can be put back for screens tall enough, but not at 360 x 640 without scrolling.
+
+### Open / not covered
+- **Never seen on a screen.** Worth a first look on a phone: verdict (does tapping to read a reason feel right), the notebook sheet chips, the three-button result row, the reply sheet fold, the cropped panel room, the record sticker on the portrait.
+- The three tightest by calculation: policy card with the clause open (Case 2, 542 of 557), reply sheet with the long Case 2 message (511 of 527), trip timeline (539 of 557).
+- Existing tests and QA scripts were not run and not updated. Markup that moved: the archive is tabbed and has no inner close button (`data-tutup-arsip` is gone); `data-arsip-kasus` is now on the action-row button; the notebook sheet shows one statement at a time; the result screens carry `data-kunci` on the shell.
+- Phones narrower than 360 px or shorter than 640 px were not calculated.
+- `[konfirmasi PIC]`: no policy wording was changed or shortened; texts are only folded or paged.
