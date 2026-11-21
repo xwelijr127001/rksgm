@@ -162,7 +162,19 @@
    (--hp-vn-tumpang = TUMPANG_DIALOG), dengan aksi (Lanjut / tugas) di dalamnya. Tab nama hijau = siapa yang berbicara. */
 .hp-vn { --hp-vn-tumpang: 0px; }
 .hp-vn[data-tumpang] { --hp-vn-tumpang: 22px; }
-.hp-vn-bingkai { display: grid; border-radius: 18px; overflow: hidden; background: #fff5ec; box-shadow: 0 0 0 2px #ff9000, 0 2px 0 3px rgba(0, 0, 0, .06); }
+.hp-vn-bingkai { display: grid; grid-template-columns: minmax(0, 1fr); border-radius: 18px; overflow: hidden; background: #fff5ec; box-shadow: 0 0 0 2px #ff9000, 0 2px 0 3px rgba(0, 0, 0, .06); }
+/* T-092 (pemilik, HP 390: sisi kanan kartu adegan terpotong): kartu adegan dan isinya tidak pernah lebih lebar dari layarnya.
+   Tiap wadah di jalur layar -> kolom -> adegan -> bingkai -> panggung boleh menyusut (min-width 0) dan dibatasi 100 % induknya;
+   kolom grid tunggal = minmax(0, 1fr), jadi isi yang lebar (gambar panggung, kata panjang) dipotong DI DALAM bingkai, bukan
+   mendorong halaman melebar. Berlaku untuk semua episode berantarmuka HP (kasus 1 dan 2 memakai komponen yang sama). */
+.hp-layar { width: 100%; max-width: 100vw; min-width: 0; box-sizing: border-box; overflow-x: clip; }
+:root:has(.hp-layar) { overflow-x: clip; }
+.hp-layar > .hp-kepala, .hp-layar > .hp-main { min-width: 0; box-sizing: border-box; }
+.hp-layar > .hp-kepala { max-width: 100%; }
+.hp-main { grid-template-columns: minmax(0, 1fr); }
+.hp-adegan { grid-template-columns: minmax(0, 1fr); }
+.hp-main > .hp-vn, .hp-vn > .hp-vn-bingkai, .hp-vn-bingkai > * { min-width: 0; max-width: 100%; box-sizing: border-box; }
+.hp-vn-bingkai > .cer-panggung.cer-latar { contain: paint; }
 .hp-layar .hp-main .hp-vn .cer-panggung.cer-latar { border-radius: 0; aspect-ratio: 16 / 10; max-height: 50dvh; }
 .hp-layar .hp-main .hp-vn[data-panggung="tinggi"] .cer-panggung.cer-latar { aspect-ratio: 4 / 3; }
 /* Beat pendek di balik meja (kantor): panggung 1:1, bidikan dekat (bingkai.hpDekat) = tokoh memenuhi panggung. */

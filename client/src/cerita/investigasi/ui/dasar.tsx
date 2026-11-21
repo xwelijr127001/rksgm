@@ -37,8 +37,10 @@ export function useTx(tx?: Tx): Tx {
 const SEL_IKON = {
   rekaman: 0, foto: 1, kartu: 2, pin: 3, layak: 4, tambahan: 5, polis: 6, stempel: 7, 'stempel-kosong': 8, buku: 9, kunci: 10,
   struk: 11, 'foto-interior': 12, 'polis-dok': 13, 'stempel-2': 14, aplikasi: 15,
+  // T-092 (sel 16-22, character/investigator-t092/bangun.mts): percikan benturan, penumpang, bendera selesai, MPV, lencana X, lencana centang, maskot
+  benturan: 16, naik: 17, tutup: 18, mpv: 19, silang: 20, centang: 21, maskot: 22,
 } as const;
-const LEBAR_ATLAS_IKON = 256;
+const LEBAR_ATLAS_IKON = 368;
 export type NamaIkon = keyof typeof SEL_IKON;
 /** T-091: ikon sebuah kartu bukti. Kartu kasus 2 punya ikon sendiri per id (foto interior, halaman polis); lainnya = `bukti.ikon`. */
 const IKON_PER_BUKTI: Readonly<Record<string, NamaIkon>> = { 'foto-interior': 'foto-interior', struk: 'struk', 'polis-kasus2': 'polis-dok' };

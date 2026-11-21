@@ -4500,3 +4500,50 @@ Reduced motion: both screens and the flashbacks show their final still.
 - The spec's glow text "21:18 = penumpang di dalam" is not a script key; the screen shows the script's `inv2.jalan.l3.hasil` instead.
 - The seated "terbuka" pose reads as open hands; a reader could also take it as a small shrug. Worth the owner's eye on a phone.
 - `seni/investigasi/potret-kasus.png` is used by the preview only.
+
+## T-092 (2026-11-21): Kasus 2 owner fixes: clearer timeline, pixel policy card, scene frame (Designer)
+
+Built by the Designer; uncommitted. Owner rule: nothing was opened in a browser and no test was run. Gate: `npm run typecheck` exit 0 (server + client), `client/dist` rebuilt. Props and `data-` hooks of both screens are unchanged, so `LayarInvestigasi` needed no edit.
+
+### 1. Timeline (`ui/PeriksaPerjalanan.tsx`, redrawn)
+- **Hero:** one timeline track: 21:05 "Penumpang naik", an empty dashed place "Taruh 21:18 di sini", 21:24 "Perjalanan ditutup". Vertical on phones; horizontal from 600 px wide, where the column is capped at 600 px so there is no empty board.
+- **The card:** one orange chip under the track: bump icon, "21:18 Benturan · dari formulir kejadian".
+- **How to play:** tap the chip (it lifts, the empty place pulses), then tap the place; or drag the chip onto it; or tap the place straight away. A drag dropped elsewhere makes the chip shake and shows one hint line; nothing blocks.
+- **Sources:** two small labelled chips, "Struk perjalanan" and "Formulir kejadian", each with 14/11/2026 and B 1870 RKS and a tick, plus a "cocok" badge. The passenger is "Penumpang: disembunyikan" with a lock icon; the mosaic strip is gone.
+- **One instruction line**, 20 px, that changes per step; two progress dots. After placing, the line becomes the green finding "Jam 21:18 penumpang masih di dalam mobil."
+- **Gone:** the phone-shaped receipt, the blank form card, the side sticky note, the orange box around date and plate, and the "tap the receipt to open it" step.
+- **Saved step:** 0 = chip on the tray, 1 = chip lifted (an old saved step of 1 to 3 is read as 1).
+- **Height at 360 x 640 (calculated):** 516 px of 544.
+
+### 2. Policy (`ui/PeriksaPolis.tsx`, redrawn as a pixel policy card)
+- Black pixel border with stepped corners, orange Raksa header band with the Raksa owl on a shield, "Polis kendaraan (contoh fiktif)", a pixel family MPV, policy number `RKS-AUTO-0421` and plate B 1870 RKS (both fictional).
+- Two rows with icons: family car + "Penggunaan: PRIBADI.", red X badge + "Perluasan pada tanggal kejadian: TIDAK ADA.". Both are the script's own sentences (`inv2.polis.klausul.1` / `.3`), not retyped.
+- **The tap:** a magnifier waits on the rows. One tap: it sweeps once, the rows light up, the clause sentence appears below in normal 15 px text, and a red "DICATAT" stamp lands. Before the tap three faint bars hold the clause's place, so the card does not jump.
+- **Evidence card:** the policy card picture (`bukti-kasus2.png` cell 3, `bukti/polis-kasus2.png`) is the same pixel card, small.
+- **Height (calculated):** 497 px (id) to 517 px (en) of 544.
+
+### 3. Scene frame (93.png) — NOT reproduced, fixed structurally
+What the screenshot shows, measured: the WHOLE page is about 12 CSS px wider than the visible screen. The header's Menu button is cut too, not only the scene card. So the stage picture is not overflowing its card; the card and the header both run past the screen edge.
+
+I could not find the cause by reading the CSS: no rule gives the page, header or card a fixed or minimum width, and the stage canvas is `width: 100%` inside an absolutely positioned box. Without a browser I could not measure it.
+
+What I changed (`cerita/hp/hp.css`, one block marked T-092; it applies to every phone-player episode, so case 1 and case 2 alike):
+- The page root and `.hp-layar` clip horizontal overflow (`overflow-x: clip`), so no descendant can widen the page or the viewport.
+- `.hp-layar`, header, main column, scene, frame and stage may all shrink (`min-width: 0`) and are capped at 100 % of their parent.
+- The single-column grids (`.hp-main`, `.hp-adegan`, `.hp-vn-bingkai`) use `minmax(0, 1fr)`, so wide content is cut INSIDE the frame instead of pushing the layout wider.
+
+The room picture is still cropped by the camera at the sides (the "SOGOK = NO" poster is partly out of shot at this stage shape). That is the existing close-up framing, the same in case 1; I did not change the camera.
+
+### Text and art
+- **Text:** new interface words in `i18n/kamus/investigasi.ts`, id/en/zh, same keys and numbers: `jalan.1.tanya`, `jalan.2.tanya`, `jalan.salah`, `jalan.sukses`, `jalan.garis`, `jalan.naik`, `jalan.tutup`, `jalan.benturan`, `jalan.dariForm`, `jalan.taruh`, `jalan.penumpang`, `jalan.cocok`, `polis.nomor`, `polis.dicatat`. The episode text files are untouched.
+- **Art** (`character/investigator-t092/bangun.mts`): `ikon.png` is now 368 x 16 with 7 new cells (old cells untouched); `polis-mpv.png`, `polis-maskot.png`.
+- **CSS:** `ui/kasus2.css` (both screens are fluid now, no fixed coordinates).
+
+### Preview
+`character/investigator-t092/layar-t092.png`: calculated contact sheet (not a screenshot): the timeline at start, with the chip lifted, and done; the policy card before and after the tap; the timeline at 600 px wide; the new icons and evidence card.
+
+### Open
+- Nothing was seen in a browser. Most worth a phone look: the frame fix on the device that took 93.png (which model and browser was it?), dragging the chip, and the stepped corners of the policy card (`clip-path`).
+- Episode keys `inv2.jalan.l1/l2/l4.*`, `inv2.jalan.l3.sebelum/tengah/sesudah/coba`, `inv2.jalan.sama`, `inv2.jalan.tertutup`, `inv2.jalan.struk.ket`, `inv2.jalan.form.jam`, `inv2.polis.klausul.judul` are no longer shown by these screens (left in place; Fullstack's files). `inv2.jalan.l3.hasil` is still shown after placing.
+- The success sentence "Jam 21:18 penumpang masih di dalam mobil." is in my dictionary, not in the script; PIC may want to see it.
+- `seni/investigasi/sensor.png` (the mosaic) is now unused.

@@ -85,7 +85,7 @@ export function KartuPernyataan({ pernyataan, tersemat = false, onSemat, reaksi,
 /** Potongan gambar bukti 84 x 44 di slip (dari sel 96 x 68 seni/investigasi/bukti.png; T-091 kasus 2: bukti-kasus2.png). */
 const POTONG_BUKTI: Record<Bukti['id'], readonly [string, number, number]> = {
   dashcam: [buktiUrl, 6, 0], rambu: [buktiUrl, 102, 10], sim: [buktiUrl, 198, 12],
-  'foto-interior': [bukti2Url, 6, 10], struk: [bukti2Url, 102, 14], 'polis-kasus2': [bukti2Url, 198, 22],
+  'foto-interior': [bukti2Url, 6, 10], struk: [bukti2Url, 102, 14], 'polis-kasus2': [bukti2Url, 198, 12],
 };
 
 export interface PilihBukti {

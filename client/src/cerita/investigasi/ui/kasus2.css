@@ -1,91 +1,118 @@
-/* T-091 (Designer): Investigator KASUS 2 "Malam di Jalan Melati": layar struk perjalanan (PeriksaPerjalanan), halaman polis
-   (PeriksaPolis), dan dua kilas balik (KilasBalik 'benturan' / 'turun'). Seni piksel 2x; aplikasi perjalanannya FIKTIF dan
-   berwarna ungu (tanpa nama, logo, atau warna merek). Keadaan dasar tiap gerak = keadaan AKHIR, jadi gerak dikurangi (blok
-   terakhir) menyisakan bingkai diam. */
+/* T-091 / T-092 (Designer): Investigator KASUS 2 "Malam di Jalan Melati": garis waktu perjalanan (PeriksaPerjalanan), kartu polis
+   piksel (PeriksaPolis), dan dua kilas balik (KilasBalik 'benturan' / 'turun'). Aplikasi perjalanannya FIKTIF (ungu, tanpa nama,
+   logo, atau warna merek). Keadaan dasar tiap gerak = keadaan AKHIR, jadi gerak dikurangi (blok terakhir) menyisakan bingkai diam.
+   T-092 (pemilik: "jangan membingungkan" / "seperti kartu polis, 8-bit, imut"): kedua layar digambar ulang dan LENTUR (tanpa
+   koordinat tetap): HP 360 = garis waktu tegak; lebar >= 600 = garis waktu mendatar, kolom isi paling lebar 600 px. */
 
-/* ================================================================ PeriksaPerjalanan: meja 328 x 296 (isi 324 x 292) */
-.pj, .pp { gap: 8px; }
-.pj .ps-hasil, .pp .ps-hasil { min-height: 66px; }
-.pj-meja { position: relative; height: 296px; box-sizing: border-box; border: 2px solid #212121; overflow: hidden; background: #d6a064 repeating-linear-gradient(0deg, transparent 0 17px, #c78f55 17px 18px); box-shadow: 0 2px 0 #212121; }
-.pj-isi { position: absolute; left: 50%; top: 0; width: 324px; height: 292px; margin-left: -162px; }
-.pj-isi > * { position: absolute; }
+.pj, .pp { gap: 8px; width: 100%; max-width: 600px; margin-inline: auto; box-sizing: border-box; }
+.pj .iv-ikon, .pp .iv-ikon { flex: none; }
+.pp .ps-hasil { min-height: 66px; }
 
-/* ---- HP Pak Yusuf: struk perjalanan (182 x 284, layar 176 x 278 = bilah 26 + data 70 + garis waktu 180 + tepi 2) */
-.pj-hp { left: 2px; top: 4px; width: 182px; height: 284px; box-sizing: border-box; margin: 0; padding: 0; border: 3px solid #0a0d14; border-radius: 0; background: #fff9f5; color: #212121; font: inherit; font-size: 14px; line-height: 17px; text-align: left; box-shadow: 2px 3px 0 rgba(33, 33, 33, .35); display: grid; grid-template-rows: 26px 72px 180px; }
-.pj-hp p, .pj-form p { margin: 0; }
-button.pj-hp, button.pj-form { cursor: pointer; }
-.pj-hp[data-tutup] { grid-template-rows: 1fr; place-items: center; align-content: center; gap: 10px; background: #1b2233; color: #fff9f5; text-align: center; font-weight: 800; }
-.pj-hp[data-tutup] .iv-ikon { box-shadow: 0 0 0 2px #fff9f5, 0 0 0 6px #3b2a6b; }
-.pj-hp[data-tutup]:not(:disabled), .pj-form[data-tutup]:not(:disabled), .pj-cocok:not(:disabled) { outline: 3px solid #ff9000; outline-offset: 2px; animation: ps-ajak 1.2s steps(1) infinite; }
-.pj-hp-bar { display: flex; align-items: center; gap: 6px; padding: 0 6px; background: #5b46b8; color: #ffffff; font-weight: 800; white-space: nowrap; overflow: hidden; }
-.pj-hp-data { display: grid; grid-template-rows: 16px 44px; gap: 2px; padding: 4px 6px; border-bottom: 2px solid #e0e0e0; box-sizing: border-box; }
-.pj-orang { display: flex; align-items: center; gap: 6px; }
-/* penumpang: kepala + bahu piksel; nama dan alamat = mosaik (seni/investigasi/sensor.png 24 x 6, 2x) */
-.pj-orang i { flex: none; width: 12px; height: 14px; background: radial-gradient(circle at 6px 4px, #5f5f5f 0 3.5px, transparent 4px), linear-gradient(#5f5f5f, #5f5f5f) 1px 9px / 10px 5px no-repeat; }
-.pj-sensor { flex: none; height: 12px; background: var(--pj-sensor) 0 0 / 48px 12px; image-rendering: pixelated; }
-/* tanggal + pelat nomor: di struk dan di formulir, sama persis (langkah 4: tombol 44 px) */
-.pj-cocok { display: flex; align-items: center; gap: 6px; width: 100%; height: 44px; box-sizing: border-box; margin: 0; padding: 0 4px; border: 2px solid transparent; border-radius: 0; background: none; color: #212121; font: inherit; font-size: 12px; line-height: 16px; font-weight: 800; text-align: left; }
-button.pj-cocok { cursor: pointer; background: #fff5ec; border: 2px dashed #9a4f00; }
-.pj-cocok[data-cocok] { border: 2px solid #2f7d57; background: #e6f1ea; animation: pj-cocok .5s steps(2) 2 both; }
-@keyframes pj-cocok { from { border-color: #ff9000; background: #fff1c2; } }
-.pj-cocok span { display: grid; gap: 2px; justify-items: start; min-width: 0; }
-.pj-tanggal { font-variant-numeric: tabular-nums; }
+/* ================================================================ PeriksaPerjalanan */
+/* satu kalimat perintah besar; sesudah kartu ditaruh = kalimat temuan yang menyala hijau */
+.pj-tanya { min-height: 64px; box-sizing: border-box; display: flex; align-items: center; padding: 4px 0; }
+.pj-tanya[data-salah] { color: #7a3e00; }
+.pj-tanya[data-sukses] { padding: 4px 10px; border: 2px solid #2f7d57; background: #e6f1ea; color: #1f5c3f; box-shadow: 0 3px 0 #1f5c3f; animation: pj-kilau 1.2s steps(2) 2 both; }
+@keyframes pj-kilau { 50% { background: #fff1a8; border-color: #ff9000; box-shadow: 0 3px 0 #9a4f00; } }
+
+/* ---- dua sumber berlabel: struk perjalanan dan formulir kejadian; tanggal + pelat nomor sama, lencana "cocok" di antaranya */
+.pj-sumber { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 4px 6px; }
+.pj-chip { display: grid; gap: 3px; align-content: start; justify-items: start; min-width: 0; padding: 6px 8px 6px; border: 2px solid #212121; background: #fffdf6; box-shadow: 0 2px 0 #212121; font-size: 12px; line-height: 16px; font-weight: 700; color: #212121; }
+.pj-chip > b { display: flex; align-items: center; gap: 4px; margin: -6px -8px 2px; padding: 3px 8px; align-self: stretch; justify-self: stretch; font-size: 13px; line-height: 18px; font-weight: 800; }
+.pj-chip[data-struk] > b { background: #5b46b8; color: #ffffff; }
+.pj-chip[data-formulir] > b { background: #f8e3c8; color: #212121; border-bottom: 2px solid #212121; }
+.pj-tanggal { font-size: 13px; font-weight: 800; font-variant-numeric: tabular-nums; }
 .pj-tanggal::before { content: ''; display: inline-block; width: 10px; height: 10px; margin-right: 4px; vertical-align: -1px; box-sizing: border-box; border: 2px solid #212121; border-top-width: 4px; background: #ffffff; }
-.pj-pelat { padding: 0 4px; background: #212121; color: #ffffff; letter-spacing: .04em; white-space: nowrap; box-shadow: inset 0 0 0 1px #ffffff, 0 0 0 1px #212121; }
-.pj-cocok > b { margin-left: auto; color: #1f5c3f; font-size: 16px; }
+.pj-pelat { padding: 1px 5px; background: #212121; color: #ffffff; font-size: 13px; font-weight: 800; letter-spacing: .04em; white-space: nowrap; box-shadow: inset 0 0 0 1px #ffffff, 0 0 0 1px #212121; }
+.pj-chip > span { display: flex; align-items: center; gap: 6px; }
+.pj-chip > span::after { content: '✓'; color: #1f5c3f; font-size: 14px; font-weight: 800; }
+/* kaki: penumpang disembunyikan (gembok) + lencana "cocok" */
+.pj-kaki { grid-column: 1 / -1; display: flex; align-items: center; justify-content: space-between; gap: 8px; min-height: 22px; font-size: 12px; line-height: 16px; font-weight: 700; color: #5f5f5f; }
+.pj-kaki > span { display: inline-flex; align-items: center; gap: 4px; min-width: 0; }
+.pj-cocok { flex: none; padding: 1px 8px 1px 3px; border: 2px solid #212121; background: #e6f1ea; color: #1f5c3f !important; font-weight: 800; text-transform: uppercase; letter-spacing: .04em; white-space: nowrap; }
 
-/* garis waktu: baris 36 px; garis tegak di kiri, titik di tiap perhentian */
-.pj-garis { list-style: none; margin: 0; padding: 0 6px 0 24px; display: grid; grid-auto-rows: 36px; align-content: center; }
-.pj-garis li { position: relative; display: flex; align-items: center; font-weight: 700; }
-.pj-garis li:not(:last-child)::after { content: ''; position: absolute; left: -14px; top: 50%; width: 2px; height: 36px; background: #a4a4a4; }
-.pj-titik::before { content: ''; position: absolute; z-index: 1; left: -18px; top: 50%; width: 10px; height: 10px; margin-top: -5px; box-sizing: border-box; border: 2px solid #212121; background: #5b46b8; }
-.pj-titik[data-akhir]::before { background: #212121; }
-.pj-slot { width: 100%; height: 32px; box-sizing: border-box; margin: 0; padding: 0 6px; border: 2px dashed #9a4f00; border-radius: 0; background: #fff5ec; color: #7a3e00; font: inherit; font-size: 13px; line-height: 14px; font-weight: 800; text-align: left; cursor: pointer; }
+/* ---- garis waktu (tokoh utama layar): 21:05 ... [tempat kosong] ... 21:24. HP = tegak */
+.pj-garis { position: relative; list-style: none; margin: 0; padding: 10px; border: 2px solid #212121; background: #ffffff; box-shadow: 0 3px 0 #212121; display: grid; gap: 6px; }
+.pj-garis::before { content: ''; position: absolute; left: 41px; top: 30px; bottom: 30px; width: 4px; background: #212121; }
+.pj-garis > li { position: relative; display: grid; grid-template-columns: 66px minmax(0, 1fr); gap: 10px; align-items: center; }
+.pj-henti { min-height: 44px; }
+.pj-henti time { justify-self: stretch; padding: 3px 0; background: #212121; color: #ffffff; font-size: 20px; line-height: 26px; font-weight: 800; text-align: center; font-variant-numeric: tabular-nums; }
+.pj-henti > span { display: flex; align-items: center; gap: 8px; font-size: 16px; line-height: 20px; font-weight: 800; }
+/* simpul tempat kosong di garis: bulat putus-putus; terisi = jingga */
+.pj-sela::before { content: ''; justify-self: center; width: 16px; height: 16px; box-sizing: border-box; border: 3px dashed #212121; border-radius: 50%; background: #ffffff; }
+.pj-sela[data-isi]::before { border-style: solid; background: #ff9000; }
+.pj-slot { width: 100%; min-height: 56px; box-sizing: border-box; margin: 0; padding: 4px 10px; border: 3px dashed #9a4f00; border-radius: 0; background: #fff5ec; color: #7a3e00; font: inherit; font-size: 16px; line-height: 20px; font-weight: 800; text-align: center; cursor: pointer; }
+.pj-slot[data-siap] { background: #ffe1a8; outline: 3px solid #ff9000; outline-offset: 2px; animation: ps-ajak 1.2s steps(1) infinite; }
 .pj-slot:active { background: #ffd9a8; }
-.pj-slot[data-keliru] { animation: pj-geleng .3s steps(1) both; }
-@keyframes pj-geleng { 0%, 100% { translate: 0 0; } 25%, 75% { translate: -4px 0; } 50% { translate: 4px 0; } }
-.pj-kejadian { width: 100%; height: 32px; box-sizing: border-box; display: flex; align-items: center; padding: 0 6px; border: 2px solid #ff9000; background: #ffe1a8; font-weight: 800; box-shadow: 0 0 0 2px #212121; }
-.pj-kejadian::before { content: ''; position: absolute; z-index: 1; left: -18px; top: 50%; width: 10px; height: 10px; margin-top: -5px; box-sizing: border-box; border: 2px solid #212121; background: #ff9000; }
-.pj-kejadian[data-baru] { animation: pj-masuk .45s cubic-bezier(.2, 1.3, .4, 1) both; }
-@keyframes pj-masuk { from { translate: 150px 20px; rotate: 6deg; opacity: .4; } }
-.pj-slot:focus-visible, .pj-cocok:focus-visible, .pj-hp:focus-visible, .pj-form:focus-visible, .pp-klausul:focus-visible { outline: 3px solid #1d6fd1; outline-offset: 2px; animation: none; }
 
-/* ---- formulir kejadian (kertas berjepit, 132 px) */
-.pj-form { left: 190px; top: 14px; width: 132px; box-sizing: border-box; margin: 0; padding: 14px 6px 6px; border: 2px solid #212121; border-radius: 0; background: #fffdf6; color: #212121; font: inherit; font-size: 13px; line-height: 17px; text-align: left; box-shadow: 2px 3px 0 rgba(33, 33, 33, .35); display: grid; gap: 4px; rotate: 1.2deg; }
-.pj-form::before { content: ''; position: absolute; left: 50%; top: -8px; width: 10px; height: 22px; margin-left: -5px; background: var(--pj-klip) 0 0 / 10px 22px no-repeat; image-rendering: pixelated; }
-.pj-form > b { font-weight: 800; letter-spacing: .02em; text-transform: uppercase; color: #5f5f5f; }
-.pj-form[data-tutup] { min-height: 120px; align-content: center; text-align: center; background: #efe6d2 repeating-linear-gradient(0deg, transparent 0 9px, #e2d6bd 9px 10px); font-weight: 800; }
-.pj-form[data-tutup]:disabled, .pj-hp[data-tutup]:disabled { opacity: .7; cursor: default; }
-.pj-jam { padding: 3px 5px; border: 2px solid #ff9000; background: #fff1c2; font-size: 14px; line-height: 18px; font-weight: 800; }
-.pj-jam[data-baru] { animation: pj-sorot .6s steps(2) 2 both; }
-@keyframes pj-sorot { from { background: #ff9000; } }
-/* catatan tempel: aplikasinya fiktif, nama dan alamat ditutup */
-.pj-ket { left: 190px; top: 178px; width: 132px; box-sizing: border-box; padding: 4px 6px; border: 2px solid #2a211e; background: #fff1a8; color: #3b2a14; font-size: 12px; line-height: 15px; rotate: -1deg; }
-/* langkah 3: keping "21:18" dari formulir, menunjuk ke garis waktu; langkah 4: lencana "sama" */
-.pj-keping { left: 196px; top: 252px; display: inline-flex; align-items: center; gap: 6px; padding: 2px 8px; border: 2px solid #212121; background: #ff9000; color: #212121; font-size: 18px; line-height: 24px; font-weight: 800; box-shadow: 0 3px 0 #212121; animation: pj-tunjuk .8s steps(2) infinite; }
-.pj-keping::before { content: '◀'; font-size: 12px; }
-@keyframes pj-tunjuk { 50% { translate: -4px 0; } }
-.pj-sama { left: 190px; top: 244px; width: 132px; box-sizing: border-box; padding: 3px 6px; border: 2px solid #1f5c3f; background: #e6f1ea; color: #1f5c3f; font-size: 12px; line-height: 15px; font-weight: 800; animation: pj-muncul .28s cubic-bezier(.2, 1.6, .4, 1) both; }
-@keyframes pj-muncul { from { transform: scale(.4); opacity: 0; } }
+/* ---- kartu benturan "21:18" (dari formulir kejadian): satu keping jelas; diketuk = terangkat, lalu ketuk tempat kosong; bisa diseret */
+.pj-baki { display: grid; min-height: 60px; align-items: center; }
+.pj-baki > p { font-size: 16px; line-height: 22px; }
+.pj-kartu { position: relative; display: grid; grid-template-columns: 32px auto minmax(0, 1fr); gap: 8px; align-items: center; width: 100%; min-height: 56px; box-sizing: border-box; margin: 0; padding: 4px 10px; border: 2px solid #212121; border-radius: 0; background: #ff9000; color: #212121; font: inherit; text-align: left; box-shadow: 0 4px 0 #212121; }
+button.pj-kartu { cursor: grab; touch-action: none; user-select: none; -webkit-user-select: none; }
+.pj-kartu > b { font-size: 24px; line-height: 28px; font-weight: 800; font-variant-numeric: tabular-nums; }
+.pj-kartu > span { min-width: 0; font-size: 16px; line-height: 19px; font-weight: 800; }
+.pj-kartu small { display: block; font-size: 12px; line-height: 15px; font-weight: 700; }
+button.pj-kartu[aria-pressed="false"] { animation: pj-ajak-kartu 1.4s steps(2) infinite; }
+@keyframes pj-ajak-kartu { 50% { translate: 0 -3px; box-shadow: 0 7px 0 #212121; } }
+button.pj-kartu[aria-pressed="true"] { translate: 0 -4px; box-shadow: 0 8px 0 #212121, 0 0 0 3px #ffffff, 0 0 0 5px #212121; }
+button.pj-kartu[data-seret] { z-index: 5; cursor: grabbing; animation: none; box-shadow: 0 10px 0 rgba(33, 33, 33, .35); }
+button.pj-kartu[data-salah] { animation: pj-geleng .3s steps(1) both; }
+@keyframes pj-geleng { 0%, 100% { translate: 0 0; } 25%, 75% { translate: -5px 0; } 50% { translate: 5px 0; } }
+.pj-kartu[data-ditaruh] { box-shadow: 0 0 0 3px #f6d25c, 0 0 0 5px #212121; animation: pj-masuk .4s cubic-bezier(.2, 1.4, .4, 1) both; }
+.pj-kartu[data-ditaruh] small { display: none; }
+@keyframes pj-masuk { from { translate: 0 60px; rotate: 4deg; opacity: .4; } }
+.pj-slot:focus-visible, .pj-kartu:focus-visible, .pp-baris:focus-visible { outline: 3px solid #1d6fd1; outline-offset: 2px; animation: none; }
 
-/* ================================================================ PeriksaPolis: halaman 328 x 292 */
-.pp-halaman { position: relative; height: 292px; box-sizing: border-box; border: 2px solid #212121; background: #fffdf6; box-shadow: 0 2px 0 #212121; padding: 0 10px 8px; display: grid; grid-template-rows: 40px auto auto 1fr; gap: 8px; align-content: start; overflow: hidden; }
-.pp-kepala { margin: 0 -10px !important; padding: 0 10px; display: flex; align-items: center; gap: 8px; background: #27408f; color: #ffffff; font-size: 15px; line-height: 19px; font-weight: 800; }
-.pp-garis { display: grid; gap: 6px; }
-.pp-garis i { height: 6px; background: #ded6c6; }
-.pp-garis i:nth-child(2n) { width: 82%; } .pp-garis i:nth-child(3n) { width: 64%; }
-.pp-klausul { position: relative; display: grid; gap: 4px; width: 100%; min-height: 72px; box-sizing: border-box; margin: 0; padding: 8px; border: 2px dashed #9a4f00; border-radius: 0; background: #fff5ec; color: #212121; font: inherit; font-size: 16px; line-height: 21px; text-align: left; align-content: start; }
-button.pp-klausul { cursor: pointer; outline: 3px solid #ff9000; outline-offset: 2px; animation: ps-ajak 1.2s steps(1) infinite; }
-.pp-klausul > b { font-size: 14px; line-height: 18px; font-weight: 800; letter-spacing: .04em; text-transform: uppercase; color: #7a3e00; }
-.pp-klausul > small { font-size: 14px; line-height: 18px; font-weight: 700; color: #5f5f5f; }
-.pp-klausul[data-terbuka] { border: 2px solid #ff9000; background: #ffffff; box-shadow: 0 0 0 2px #212121; animation: pp-buka .4s steps(4) both; }
-@keyframes pp-buka { from { clip-path: inset(0 0 70% 0); } to { clip-path: inset(0); } }
-.pp-klausul > span { display: block; }
-.pp-klausul > span:first-of-type { font-weight: 800; }
-.pp-klausul > span[data-sorot] { padding: 1px 4px; background: #fff1c2; box-shadow: -4px 0 0 #b3261e; font-weight: 800; }
-/* kaca pembesar (seni/investigasi/kaca.png 26 x 26, 2x) menyapu klausul sekali lalu berhenti di baris perluasan */
-.pp-kaca { position: absolute; right: -6px; bottom: -8px; width: 52px; height: 52px; background: var(--pp-kaca) 0 0 / 52px 52px no-repeat; image-rendering: pixelated; pointer-events: none; animation: pp-sapu 1.1s cubic-bezier(.3, .8, .4, 1) both; }
-@keyframes pp-sapu { from { translate: -200px -120px; } }
+/* lebar >= 600 (tablet / desktop): garis waktu mendatar */
+@media (min-width: 600px) {
+  .pj-garis { grid-template-columns: minmax(0, 1fr) minmax(0, 1.3fr) minmax(0, 1fr); gap: 12px; padding: 14px; align-items: center; }
+  .pj-garis::before { left: 40px; right: 40px; top: 32px; bottom: auto; width: auto; height: 4px; }
+  .pj-garis > li { grid-template-columns: minmax(0, 1fr); gap: 8px; justify-items: center; text-align: center; }
+  .pj-henti time { justify-self: center; width: 84px; }
+  .pj-henti > span { justify-content: center; }
+  .pj-sela::before { margin-top: 5px; }
+  .pj-baki { justify-items: center; }
+  .pj-baki > .pj-kartu { max-width: 360px; }
+}
+
+/* ================================================================ PeriksaPolis: KARTU POLIS piksel (jingga Raksa + krem), sudut bertangga */
+.pp-kartu { --pp-sudut: polygon(0 8px, 4px 8px, 4px 4px, 8px 4px, 8px 0, calc(100% - 8px) 0, calc(100% - 8px) 4px, calc(100% - 4px) 4px, calc(100% - 4px) 8px, 100% 8px, 100% calc(100% - 8px), calc(100% - 4px) calc(100% - 8px), calc(100% - 4px) calc(100% - 4px), calc(100% - 8px) calc(100% - 4px), calc(100% - 8px) 100%, 8px 100%, 8px calc(100% - 4px), 4px calc(100% - 4px), 4px calc(100% - 8px), 0 calc(100% - 8px));
+  position: relative; padding: 4px; background: #212121; clip-path: var(--pp-sudut); }
+.pp-bayang { filter: drop-shadow(0 4px 0 #9a4f00); }
+.pp-isi { position: relative; display: grid; gap: 8px; padding: 0 10px 10px; background: #fff5ec repeating-linear-gradient(135deg, transparent 0 10px, rgba(255, 144, 0, .07) 10px 12px); clip-path: var(--pp-sudut); color: #212121; }
+.pp-isi p { margin: 0; }
+/* pita kepala jingga: maskot burung hantu Raksa di perisai + "Polis kendaraan (contoh fiktif)" */
+.pp-kepala { display: grid; grid-template-columns: 44px minmax(0, 1fr); gap: 8px; align-items: center; min-height: 44px; margin: 0 -10px !important; padding: 4px 10px 4px 12px; background: #ff9000; border-bottom: 4px solid #212121; font-size: 15px; line-height: 19px; font-weight: 800; letter-spacing: .02em; text-transform: uppercase; }
+.pp-maskot { width: 44px; height: 48px; margin-bottom: -14px; background: var(--pp-maskot) 0 0 / 44px 48px no-repeat; image-rendering: pixelated; }
+/* identitas: MPV keluarga + nomor polis + pelat nomor */
+.pp-identitas { display: grid; grid-template-columns: 96px minmax(0, 1fr); gap: 10px; align-items: center; }
+.pp-mpv { height: 52px; border: 2px solid #212121; background: #f8e3c8 var(--pp-mpv) center 5px / 80px 44px no-repeat; image-rendering: pixelated; }
+.pp-data { display: grid; gap: 4px; justify-items: start; font-size: 13px; line-height: 17px; font-weight: 700; }
+.pp-data small { display: block; font-size: 11px; line-height: 14px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; color: #7a3e00; }
+.pp-data b { font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 14px; font-weight: 800; }
+/* baris penggunaan = sasaran ketuk: dua baris berikon; sesudah diketuk menyala, kalimat klausul terbaca, cap "DICATAT" */
+.pp-baris { position: relative; display: grid; gap: 6px; width: 100%; box-sizing: border-box; margin: 0; padding: 8px; border: 3px dashed #9a4f00; border-radius: 0; background: #ffffff; color: #212121; font: inherit; text-align: left; }
+button.pp-baris { cursor: pointer; outline: 3px solid #ff9000; outline-offset: 2px; animation: ps-ajak 1.2s steps(1) infinite; }
+.pp-baris > span { display: grid; grid-template-columns: 32px minmax(0, 1fr); gap: 8px; align-items: center; font-size: 16px; line-height: 21px; font-weight: 800; }
+.pp-baris > small { display: flex; align-items: center; gap: 6px; font-size: 14px; line-height: 18px; font-weight: 800; color: #7a3e00; }
+/* belum dibaca: kalimat klausul = tiga baris samar (tingginya sama dengan kalimatnya, jadi kartu tidak melompat saat dibuka) */
+.pp-samar { display: grid; gap: 8px; padding-top: 8px; border-top: 2px dashed #e0c9a8; }
+.pp-samar i { height: 10px; background: #eadfce; }
+.pp-samar i:last-child { width: 62%; }
+.pp-baris > p { padding-top: 6px; border-top: 2px dashed #e0c9a8; font-size: 15px; line-height: 20px; font-weight: 500; }
+.pp-baris[data-terbuka] { border: 3px solid #ff9000; background: #fffbe6; box-shadow: 0 0 0 2px #212121; animation: pp-nyala .9s steps(2) 2 both; }
+@keyframes pp-nyala { 50% { background: #ffe1a8; } }
+.pp-baris[data-terbuka] > span[data-sorot] { color: #b71c1c; }
+/* kaca pembesar (seni/investigasi/kaca.png 26 x 26, 2x): menunggu di sudut baris; sesudah diketuk menyapu sekali lalu pergi */
+.pp-kaca { position: absolute; right: -4px; top: -14px; width: 52px; height: 52px; background: var(--pp-kaca) 0 0 / 52px 52px no-repeat; image-rendering: pixelated; pointer-events: none; }
+button.pp-baris .pp-kaca { animation: pp-intip 1.4s steps(2) infinite; }
+@keyframes pp-intip { 50% { translate: -4px 3px; } }
+.pp-baris[data-terbuka] .pp-kaca { opacity: 0; animation: pp-sapu .8s cubic-bezier(.3, .8, .4, 1) both; }
+@keyframes pp-sapu { 0% { opacity: 1; translate: 0 0; } 60% { opacity: 1; translate: -150px 34px; } 100% { opacity: 0; translate: -40px 60px; } }
+/* cap "DICATAT": tinta merah, miring, mendarat sesudah sapuan kaca */
+.pp-cap { position: absolute; right: 8px; top: -12px; z-index: 2; padding: 1px 8px; border: 3px solid #b71c1c; background: rgba(255, 249, 245, .92); color: #b71c1c; font-size: 16px; line-height: 20px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; rotate: -7deg; animation: pp-cap .9s cubic-bezier(.3, 1.5, .5, 1) both; }
+@keyframes pp-cap { 0%, 66% { opacity: 0; transform: scale(2.6) rotate(-14deg); } 67% { opacity: 1; transform: scale(2.6) rotate(-14deg); } 100% { opacity: 1; transform: none; } }
 
 /* ================================================================ kilas balik kasus 2 (film 336 x 184; lapis 96 x 40 seni -> 192 x 80) */
 .kb-melati { inset: 0; }
@@ -111,5 +138,5 @@ button.pp-klausul { cursor: pointer; outline: 3px solid #ff9000; outline-offset:
 @keyframes kb-m-sisa { 0%, 4% { opacity: 1; } 8%, 100% { opacity: 0; } }
 
 @media (prefers-reduced-motion: reduce) {
-  :root:not([data-gerak="penuh"]) :is(.pj-hp, .pj-form, .pj-cocok, .pj-slot, .pj-kejadian, .pj-jam, .pj-keping, .pj-sama, .pp-klausul, .pp-kaca, .kb-m-motor, .kb-m-percik, .kb-m-pintu, .kb-m-orang) { animation: none !important; }
+  :root:not([data-gerak="penuh"]) :is(.pj-tanya, .pj-slot, .pj-kartu, .pp-baris, .pp-kaca, .pp-cap, .kb-m-motor, .kb-m-percik, .kb-m-pintu, .kb-m-orang) { animation: none !important; }
 }

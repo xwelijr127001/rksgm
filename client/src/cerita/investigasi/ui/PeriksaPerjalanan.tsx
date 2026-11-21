@@ -1,145 +1,128 @@
 /**
- * T-091 (Designer): PERIKSA PERJALANAN (Investigator kasus 2 "Malam di Jalan Melati"; menggantikan layar sementara T-090).
- * Satu-satunya penyelidikan kasus ini: Pak Yusuf memperlihatkan SATU struk perjalanan di HP-nya (nama dan alamat penumpang
- * ditutup mosaik); di sebelahnya formulir kejadian. Empat langkah pendek, ketuk saja:
- *   1 ketuk HP            struk terbuka: garis waktu perjalanan 21:05 penumpang dijemput ... 21:24 perjalanan ditutup di aplikasi;
- *   2 ketuk formulir      formulir terbuka: "Jam benturan: 21:18" menyala;
- *   3 ketuk tempatnya     keping "21:18" menunjuk ke garis waktu; tiga tempat (sebelum / di antara / sesudah). Tempat keliru =
- *                         tempat itu bergeleng dan kalimat petunjuk muncul; tamu mencoba lagi, tidak pernah terhenti. Tempat
- *                         yang tepat: baris "21:18 · benturan" meluncur masuk di antara dua perhentian dan menyala;
- *   4 ketuk tanggal/pelat tanggal dan pelat nomor di struk dan di formulir dilingkari hijau: "Tanggal sama · pelat nomor sama".
- * Lalu "Simpan hasil pemeriksaan" -> onSelesai (cerita lanjut ke kartu bukti struk).
+ * T-091 / T-092 (Designer): PERIKSA PERJALANAN (Investigator kasus 2 "Malam di Jalan Melati"): satu-satunya penyelidikan kasus ini.
+ * T-092 (pemilik: "redesign ... not confusing"): layar digambar ulang supaya tamu 29-60 tahun paham dalam sekali lihat:
+ *   SUMBER       dua keping kecil BERLABEL, "Struk perjalanan" dan "Formulir kejadian", dengan tanggal dan pelat nomor yang sama
+ *                (centang di tiap nilai, lencana "cocok"); penumpang = "Penumpang: disembunyikan" + gembok (tanpa mosaik);
+ *   GARIS WAKTU  tokoh utama layar: 21:05 "Penumpang naik" ... [tempat kosong putus-putus] ... 21:24 "Perjalanan ditutup"
+ *                (HP: tegak; lebar >= 600: mendatar);
+ *   KARTU        "21:18 Benturan · dari formulir kejadian" (ikon percikan), satu keping jingga di bawah garis waktu.
+ * Cara main: ketuk kartu (terangkat), lalu ketuk tempat kosong; atau SERET kartu ke tempat kosong; atau langsung ketuk tempat
+ * kosong. Seretan yang dilepas di luar tempat kosong = kartu bergeleng + kalimat petunjuk; tamu tidak pernah terhenti.
+ * Sesudah ditaruh: kartu menyala di garis waktu dan kalimat perintah berganti temuan yang menyala hijau:
+ * "Jam 21:18 penumpang masih di dalam mobil." Lalu "Simpan hasil pemeriksaan" -> onSelesai.
  *
- * Kontrak (LayarInvestigasi, sama dengan PeriksaSim): `{ onSelesai, awal?, onLangkah? }`; `awal` = langkah untuk memulai sesudah
- * muat ulang (0..3, langkah sebelumnya dianggap selesai), `onLangkah(n)` dipanggil tiap pindah langkah (pemanggil menyimpannya).
- * TEKS: naskah kasus lewat `useTx()` (`inv2.jalan.*`, `inv2.garis.*`; jam dan labelnya milik naskah); kata antarmuka sendiri di
- * kamus `investigasi` (`jalan.*`). Tanggal dan pelat nomor = angka fiktif yang sama di semua bahasa (TANGGAL, PELAT).
+ * Kontrak (LayarInvestigasi, tidak berubah): `{ onSelesai, awal?, onLangkah? }`. Langkah yang disimpan: 0 = kartu di baki,
+ * 1 = kartu sudah diangkat (`awal` >= 1 dari simpanan lama juga dibaca begitu); `onLangkah(1)` dipanggil saat kartu diangkat.
+ * TEKS: judul, nama dua sumber, dan tombol simpan = kunci naskah kasus lewat `useTx()` (`inv2.jalan.*`); kata layar ini sendiri di
+ * kamus `investigasi` (`jalan.*`, id / en / zh). Jam, tanggal, dan pelat nomor = angka fiktif yang sama di semua bahasa.
  * Aplikasinya FIKTIF: ubin ungu tanpa nama, logo, atau warna merek mana pun.
- * Ukur 360 x 640 (hitung; ruang isi 544): kemajuan 20 + perintah 26..52 + meja 296 + hasil 66 + tombol 56 + jarak 4 x 8 =
- * 496..522 px. HP 182 x 284: bilah 26 + data 72 + garis waktu 180 (5 baris x 36). Gerak dikurangi: tanpa luncur / kedip.
+ * Ukur 360 x 640 (hitung; ruang isi 544): kemajuan 20 + perintah 64 + sumber 100 + garis waktu 176 + baki 60 + tombol 56 +
+ * jarak 5 x 8 = 516 px. Tata letak lentur (tanpa koordinat tetap); lebar >= 600: kolom paling lebar 600 px, garis waktu mendatar.
+ * Gerak dikurangi: tanpa ajakan / luncur / kilau; keadaan akhir langsung tampil.
  */
-import { useState, type CSSProperties } from 'react';
+import { useRef, useState, type CSSProperties, type PointerEvent as PE } from 'react';
 import { playSfx } from '../../../audio/audio';
 import { t } from '../../../i18n';
-import klip from '../../seni/investigasi/klip.png';
-import sensor from '../../seni/investigasi/sensor.png';
 import { IkonInv, useTx } from './dasar';
 import './investigasi.css';
 import './bukti-adegan.css';
 import './kasus2.css';
 
-const JUMLAH = 4;
-type Tempat = 'sebelum' | 'tengah' | 'sesudah';
-/** Tanggal dan pelat nomor yang sama di struk dan formulir (fiktif; angka saja, jadi sama di id / en / zh). */
-const TANGGAL = '14/11/2026';
-const PELAT = 'B 1870 RKS';
+/** Angka fiktif kasus 2, sama di id / en / zh (dipakai juga oleh kartu polis). */
+export const TANGGAL_KASUS2 = '14/11/2026';
+export const PELAT_KASUS2 = 'B 1870 RKS';
+const JAM = { naik: '21:05', benturan: '21:18', tutup: '21:24' } as const;
 
-/** Baris "tanggal + pelat nomor": di langkah 4 = tombol; sesudah dicocokkan berlingkar hijau. */
-function BarisCocok({ aktif, cocok, onKetuk }: { aktif: boolean; cocok: boolean; onKetuk: () => void }) {
-  const isi = (
+/** 0 = kartu di baki, 1 = kartu diangkat, 2 = kartu sudah di garis waktu. */
+type Tahap = 0 | 1 | 2;
+
+function Sumber({ jenis, nama }: { jenis: 'struk' | 'formulir'; nama: string }) {
+  return (
+    <div className="pj-chip" {...(jenis === 'struk' ? { 'data-struk': '' } : { 'data-formulir': '' })}>
+      <b><IkonInv nama={jenis === 'struk' ? 'aplikasi' : 'buku'} kali={1} />{nama}</b>
+      <span><span className="pj-tanggal"><span className="sr-only">{t('investigasi.jalan.tanggal')} </span>{TANGGAL_KASUS2}</span></span>
+      <span><span className="pj-pelat"><span className="sr-only">{t('investigasi.jalan.pelat')} </span>{PELAT_KASUS2}</span></span>
+    </div>
+  );
+}
+
+function IsiKartu() {
+  return (
     <>
-      <span>
-        <span className="pj-tanggal"><span className="sr-only">{t('investigasi.jalan.tanggal')} </span>{TANGGAL}</span>
-        <span className="pj-pelat"><span className="sr-only">{t('investigasi.jalan.pelat')} </span>{PELAT}</span>
-      </span>
-      {cocok ? <b aria-hidden="true">✓</b> : null}
+      <IkonInv nama="benturan" kali={2} />
+      <b>{JAM.benturan}</b>
+      <span>{t('investigasi.jalan.benturan')}<small>{t('investigasi.jalan.dariForm')}</small></span>
     </>
   );
-  return aktif
-    ? <button type="button" className="pj-cocok" data-cocokkan="" onClick={onKetuk}>{isi}</button>
-    : <p className="pj-cocok" data-cocok={cocok ? '' : undefined}>{isi}</p>;
 }
 
 export function PeriksaPerjalanan({ onSelesai, awal = 0, onLangkah }: { onSelesai: () => void; awal?: number; onLangkah?: (langkah: number) => void }) {
   const tx = useTx();
-  const [langkah, setLangkah] = useState(() => Math.max(0, Math.min(JUMLAH - 1, Math.floor(awal))));
-  /** Langkah kini sudah dijawab (hasilnya tampil). */
-  const [sudah, setSudah] = useState(false);
-  /** Langkah 3: tempat keliru terakhir (petunjuk tampil; boleh mencoba lagi). */
-  const [keliru, setKeliru] = useState<Tempat | null>(null);
-  const n = langkah + 1;
-  const ketuk = (l: number) => { if (langkah !== l || sudah) return; playSfx(l === 3 ? 'konfirmasi' : l === 0 ? 'kertas' : 'ketuk'); setSudah(true); };
-  const taruh = (tempat: Tempat) => {
-    if (langkah !== 2 || sudah) return;
-    if (tempat === 'tengah') { playSfx('konfirmasi'); setKeliru(null); setSudah(true); } else { playSfx('keliru'); setKeliru(tempat); }
-  };
-  const maju = () => {
-    if (!sudah) return;
-    if (langkah >= JUMLAH - 1) { onSelesai(); return; }
-    setLangkah(langkah + 1); setSudah(false); setKeliru(null);
-    onLangkah?.(langkah + 1);
-  };
-  const strukTerbuka = langkah > 0 || sudah;
-  const formTerbuka = langkah > 1 || (langkah === 1 && sudah);
-  const memilih = langkah === 2 && !sudah;
-  const ditaruh = langkah > 2 || (langkah === 2 && sudah);
-  const mencocokkan = langkah === 3 && !sudah;
-  const cocok = langkah === 3 && sudah;
-  const slot = (tempat: Tempat) => (
-    <li key={tempat}>
-      {/* `key` berganti tiap ketukan keliru supaya gelengnya diputar lagi */}
-      <button key={keliru === tempat ? 'keliru' : 'biasa'} type="button" className="pj-slot" data-tempat={tempat} data-keliru={keliru === tempat ? '' : undefined} onClick={() => taruh(tempat)}>
-        {tx(`inv2.jalan.l3.${tempat}`)}
-      </button>
-    </li>
-  );
+  const [tahap, setTahap] = useState<Tahap>(() => (awal >= 1 ? 1 : 0));
+  /** Hitungan lepasan keliru (kunci gelengan kartu; > 0 = kalimat petunjuk tampil). */
+  const [salah, setSalah] = useState(0);
+  const [geser, setGeser] = useState<{ x: number; y: number } | null>(null);
+  const slot = useRef<HTMLButtonElement>(null);
+  const seret = useRef<{ x: number; y: number; jalan: boolean } | null>(null);
+  const lewatiKlik = useRef(false);
 
+  const angkat = () => { if (tahap !== 0) return; playSfx('ketuk'); setTahap(1); onLangkah?.(1); };
+  const taruh = () => { if (tahap === 2) return; playSfx('konfirmasi'); setSalah(0); setTahap(2); };
+  const turun = (e: PE<HTMLButtonElement>) => { seret.current = { x: e.clientX, y: e.clientY, jalan: false }; };
+  const gerak = (e: PE<HTMLButtonElement>) => {
+    const s = seret.current; if (!s) return;
+    const dx = e.clientX - s.x, dy = e.clientY - s.y;
+    if (!s.jalan && Math.hypot(dx, dy) < 8) return;
+    if (!s.jalan) { s.jalan = true; try { e.currentTarget.setPointerCapture(e.pointerId); } catch { /* penunjuk sudah lepas */ } if (tahap === 0) { setTahap(1); onLangkah?.(1); } }
+    setGeser({ x: dx, y: dy });
+  };
+  const lepas = (e: PE<HTMLButtonElement>) => {
+    const s = seret.current; seret.current = null;
+    if (!s?.jalan) return;
+    lewatiKlik.current = true; setGeser(null);
+    const r = slot.current?.getBoundingClientRect();
+    const kena = !!r && e.clientX >= r.left - 16 && e.clientX <= r.right + 16 && e.clientY >= r.top - 16 && e.clientY <= r.bottom + 16;
+    if (kena) taruh(); else { playSfx('keliru'); setSalah((n) => n + 1); }
+  };
+  const klik = () => { if (lewatiKlik.current) { lewatiKlik.current = false; return; } angkat(); };
+
+  const sudah = tahap === 2;
+  const perintah = sudah ? t('investigasi.jalan.sukses') : salah ? t('investigasi.jalan.salah') : tahap === 1 ? t('investigasi.jalan.2.tanya') : t('investigasi.jalan.1.tanya');
   return (
-    <section className="iv-layar pj" data-periksa-perjalanan="" data-langkah={n} data-sudah={sudah ? '' : undefined} aria-labelledby="pj-tanya">
+    <section className="iv-layar pj" data-periksa-perjalanan="" data-tahap={tahap} data-sudah={sudah ? '' : undefined} aria-labelledby="pj-tanya">
       <p className="ps-kemajuan">
         <b>{tx('inv2.jalan.judul')}</b>
-        <span aria-hidden="true">{Array.from({ length: JUMLAH }, (_, i) => <i key={i} data-isi={i < langkah || (i === langkah && sudah) ? '' : undefined} data-kini={i === langkah ? '' : undefined} />)}</span>
-        <span className="sr-only">{t('investigasi.jalan.langkah', { n, total: JUMLAH })}</span>
+        <span aria-hidden="true">{[1, 2].map((i) => <i key={i} data-isi={tahap >= i ? '' : undefined} data-kini={tahap === i - 1 ? '' : undefined} />)}</span>
+        <span className="sr-only">{t('investigasi.jalan.langkah', { n: Math.min(2, tahap + 1), total: 2 })}</span>
       </p>
-      <h2 id="pj-tanya" className="iv-tanya" tabIndex={-1} data-cer-fokus="">{tx(`inv2.jalan.l${n}.tanya`)}</h2>
-      <div className="pj-meja">
-        <div className="pj-isi" style={{ '--pj-sensor': `url(${sensor})`, '--pj-klip': `url(${klip})` } as CSSProperties}>
-          {/* HP Pak Yusuf: struk perjalanan */}
-          {strukTerbuka ? (
-            <div className="pj-hp" data-struk="" data-terbuka="">
-              <p className="pj-hp-bar"><IkonInv nama="aplikasi" kali={1} /><b>{tx('inv2.jalan.struk')}</b></p>
-              <div className="pj-hp-data">
-                <p className="pj-orang" role="img" aria-label={t('investigasi.jalan.disamarkan')}><i /><span className="pj-sensor" style={{ width: 60 }} /><span className="pj-sensor" style={{ width: 84 }} /></p>
-                <BarisCocok aktif={mencocokkan} cocok={cocok} onKetuk={() => ketuk(3)} />
-              </div>
-              <ol className="pj-garis">
-                {memilih ? slot('sebelum') : null}
-                <li className="pj-titik">{tx('inv2.garis.1')}</li>
-                {memilih ? slot('tengah') : null}
-                {ditaruh ? <li><span className="pj-kejadian" data-kejadian="" data-baru={langkah === 2 ? '' : undefined}>{tx('inv2.garis.2')}</span></li> : null}
-                <li className="pj-titik" data-akhir="">{tx('inv2.garis.3')}</li>
-                {memilih ? slot('sesudah') : null}
-              </ol>
-            </div>
-          ) : (
-            <button type="button" className="pj-hp" data-struk="" data-tutup="" onClick={() => ketuk(0)}>
-              <IkonInv nama="aplikasi" kali={3} />
-              <span>{tx('inv2.jalan.struk')}</span>
-              <span>{tx('inv2.jalan.tertutup')}</span>
-            </button>
-          )}
-          {/* formulir kejadian */}
-          {formTerbuka ? (
-            <div className="pj-form" data-formulir="" data-terbuka="">
-              <b>{tx('inv2.jalan.form')}</b>
-              <BarisCocok aktif={mencocokkan} cocok={cocok} onKetuk={() => ketuk(3)} />
-              <p className="pj-jam" data-baru={langkah === 1 ? '' : undefined}>{tx('inv2.jalan.form.jam')}</p>
-            </div>
-          ) : (
-            <button type="button" className="pj-form" data-formulir="" data-tutup="" disabled={langkah !== 1} onClick={() => ketuk(1)}>
-              <span>{tx('inv2.jalan.form')}</span>
-              {langkah === 1 ? <span>{tx('inv2.jalan.tertutup')}</span> : null}
-            </button>
-          )}
-          {strukTerbuka ? <p className="pj-ket">{tx('inv2.jalan.struk.ket')}</p> : null}
-          {memilih ? <span className="pj-keping" role="img" aria-label={t('investigasi.jalan.jam')}>21:18</span> : null}
-          {cocok ? <p className="pj-sama">✓ {tx('inv2.jalan.sama')}</p> : null}
-        </div>
+      <h2 id="pj-tanya" className="iv-tanya pj-tanya" tabIndex={-1} data-cer-fokus="" aria-live="polite" data-sukses={sudah ? '' : undefined} data-salah={!sudah && salah ? '' : undefined}>{perintah}</h2>
+      <div className="pj-sumber">
+        <Sumber jenis="struk" nama={tx('inv2.jalan.struk')} />
+        <Sumber jenis="formulir" nama={tx('inv2.jalan.form')} />
+        <p className="pj-kaki">
+          <span><IkonInv nama="kunci" kali={1} />{t('investigasi.jalan.penumpang')}</span>
+          <span className="pj-cocok"><IkonInv nama="centang" kali={1} />{t('investigasi.jalan.cocok')}</span>
+        </p>
       </div>
-      <p className="ps-hasil" role="status">{sudah ? tx(`inv2.jalan.l${n}.hasil`) : keliru ? tx('inv2.jalan.l3.coba') : ''}</p>
-      <button type="button" className="primary-action iv-tombol" data-jalan-lanjut="" disabled={!sudah} onClick={maju}>
-        {langkah >= JUMLAH - 1 ? tx('inv2.jalan.selesai') : tx('inv.ui.lanjut')}
-      </button>
+      <ol className="pj-garis" aria-label={t('investigasi.jalan.garis')}>
+        <li className="pj-henti"><time>{JAM.naik}</time><span><IkonInv nama="naik" kali={1} />{t('investigasi.jalan.naik')}</span></li>
+        <li className="pj-sela" data-isi={sudah ? '' : undefined}>
+          {sudah
+            ? <span className="pj-kartu" data-kejadian="" data-ditaruh=""><IsiKartu /></span>
+            : <button ref={slot} type="button" className="pj-slot" data-tempat="tengah" data-siap={tahap === 1 ? '' : undefined} onClick={taruh}>{t('investigasi.jalan.taruh')}</button>}
+        </li>
+        <li className="pj-henti"><time>{JAM.tutup}</time><span><IkonInv nama="tutup" kali={1} />{t('investigasi.jalan.tutup')}</span></li>
+      </ol>
+      <div className="pj-baki">
+        {sudah ? <p>{tx('inv2.jalan.l3.hasil')}</p> : (
+          <button key={salah} type="button" className="pj-kartu" data-kartu-benturan="" aria-pressed={tahap === 1} data-seret={geser ? '' : undefined} data-salah={salah && !geser ? '' : undefined}
+            style={geser ? ({ transform: `translate(${geser.x}px, ${geser.y}px)` } as CSSProperties) : undefined}
+            onPointerDown={turun} onPointerMove={gerak} onPointerUp={lepas} onPointerCancel={() => { seret.current = null; setGeser(null); }} onClick={klik}>
+            <IsiKartu />
+          </button>
+        )}
+      </div>
+      <button type="button" className="primary-action iv-tombol" data-jalan-lanjut="" disabled={!sudah} onClick={onSelesai}>{tx('inv2.jalan.selesai')}</button>
     </section>
   );
 }
