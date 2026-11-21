@@ -5673,3 +5673,43 @@ Each of these can be put back for screens tall enough, but not at 360 x 640 with
 - Existing tests and QA scripts were not run and not updated. Markup that moved: the archive is tabbed and has no inner close button (`data-tutup-arsip` is gone); `data-arsip-kasus` is now on the action-row button; the notebook sheet shows one statement at a time; the result screens carry `data-kunci` on the shell.
 - Phones narrower than 360 px or shorter than 640 px were not calculated.
 - `[konfirmasi PIC]`: no policy wording was changed or shortened; texts are only folded or paged.
+
+## T-118 (2026-11-21): hub header sized by the space actually left (Designer)
+
+Built by the Designer; uncommitted, not deployed. Owner rule: nothing was opened in a browser or on a phone and no test was run, so the heights are CALCULATED. Root `npm run typecheck` exit 0; `client/dist` rebuilt (build exit 0). No server file touched.
+
+Owner (iPhone Safari, returning hub with 2 stamps): "Right is too compact on the top". Cause: T-114 / T-117 chose the header height and the logo from the VIEWPORT height ("under 820 px: short stage + plaque logo"). A normal phone is under 820 px, so it got the 160 px header while a quarter of the screen below the case cards stayed empty.
+
+### What changed (`client/src/pages/investigator.css`; `Investigator.tsx` only got a note, no markup or logic change)
+- The page is a full-height column (header bar, then content). Inside the content the **stage takes the height that is left**: at least 112 px, at most 320 px on the returning hub and 360 px on the fresh title screen.
+- When the stage has reached its maximum, the rest is **shared equally between the blocks** and the last block sits at the bottom of the screen. Returning: between file and officer strip, and between strip and case cards (plus above the event entry when it exists). Fresh: above the button and below it (above the event entry when it exists).
+- **Logo by real stage height** (container query on the stage, no viewport breakpoint): the shield badge from a 176 px stage, the plaque below that.
+- **Miss Raksa** now stands behind the orange ground band (the band is drawn once more in front of her). The case tab (26 px) therefore covers only the band, never her. She is whole from a 204 px stage; a shorter stage cuts her body at the band, not her head or magnifier.
+- The badge is centred in the space above the case tab; the sun rays follow it.
+- All viewport-height media rules for the stage and the logo are gone.
+
+### Calculation (id). Space = viewport height - 59 (header) - 12 (bottom padding)
+Content other than the stage: returning 312 px (+56 with "Punya kode acara?", +20 for a two-line note, +114 typed code with a two-line error, +112 joined the board); fresh 236 px (+58 with the link, +116 typed code with error, +22 for the en hook).
+
+| Viewport (space) | Returning, as in the screenshot | Returning, worst case | Fresh, no event link | Fresh, worst case |
+|---|---|---|---|---|
+| 360 x 640 (569) | stage 257, fills 569 | content 446, stage 123, fills 569 | stage 333, fills 569 | content 352, stage 217 |
+| 390 x 700 (629) | stage 317, fills 629 | stage 183 | stage 360, 33 shared | stage 277 |
+| 390 x 760 (689) | stage 320, 57 shared (28 + 29) | stage 243 | stage 360, 93 shared | stage 337 |
+| 430 x 932 (861) | stage 320, 229 shared (114 + 115) | stage 320, 95 shared | stage 360, 265 shared | stage 360, 149 shared |
+
+- No scroll: the smallest total is content + 112 px stage = 558 px (returning worst case) and 486 px (fresh worst case, en), both inside 569 px at 360 x 640. Every row above ends exactly at the bottom padding.
+- At 360 x 640 the returning hub in its worst case (play again with a two-line note + typed event code with error) has a 123 px stage: plaque logo and Miss Raksa cut at the band. In every other row the stage is 176 px or more (shield badge), and 204 px or more (whole Miss Raksa) except the worst case at 390 x 700 (183 px: shield badge, her body cut by 21 px at the band).
+- The owner's phone (about 390 x 690 visible in Safari): space 619, stage 307, shield badge, whole Miss Raksa, nothing empty below the cards.
+
+### Things to know
+- On very tall viewports (430 x 932) the stage stops at 320 / 360 px and the blocks spread out: about 115 px between file, strip and cards on the returning hub; on the fresh screen without the event link the button sits in the middle of the remaining space with about 130 px above and below it. If that looks too loose, the next step is a taller stage maximum or larger case cards, not done here.
+- Browsers without container queries (before iOS 16 / Chrome 105) show the plaque logo at every height; everything else works.
+- Viewports shorter than the content (under about 630 px in the worst case) scroll with the 112 px stage; nothing is clipped.
+- Unchanged: states, logic, links, data hooks, palette, dictionaries, the sizes of the file, strip, cards and button.
+
+### Previews (calculated mocks, not screenshots)
+`character/investigator-t118/layar-t118-pulang.png` (returning hub as in the owner's screenshot) and `layar-t118-sampul.png` (fresh title screen), each at 360 x 640, 390 x 700, 390 x 760 and 430 x 932 with the computed stage height in the caption.
+
+### Open
+- Not seen on a phone. Most worth a look on the owner's iPhone: that the page really fills the visible height in Safari (the layout relies on `100dvh`), Miss Raksa behind the ground band, and the spacing on a tall phone.

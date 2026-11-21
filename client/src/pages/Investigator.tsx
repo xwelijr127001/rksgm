@@ -31,6 +31,19 @@
  *    kartu petugas, total, dan daftar kasus sebagai MAP-MAP di meja (Kasus 2 = map kedua), terkunci, Tamu baru. Halaman digulir.
  *  Logika T-094 / T-099 dan semua kait data- tidak berubah; kunci baru hanya `hubInv.berkasTab` dan `hubInv.capBaru`.
  *
+ * T-118 (Designer; pemilik, iPhone: "Right is too compact on the top"): tinggi panggung tidak lagi dari tinggi LAYAR (aturan < 820 px
+ *  memendekkan panggung di HP biasa dan menyisakan seperempat layar kosong di bawah kartu kasus). Sekarang halaman = kolom setinggi
+ *  layar dan panggung mengambil SISA tinggi: paling pendek 112 px, paling tinggi 320 px (hub pulang) / 360 px (sampul); sisa
+ *  sesudah itu dibagi rata ke jarak antarblok, blok terakhir menempel di bawah. Logo dipilih dari tinggi panggung yang sebenarnya
+ *  (container query): lencana perisai mulai 176 px, pelat di bawahnya. Miss Raksa berdiri di belakang pita tanah (digambar ulang
+ *  di depannya), jadi tab berkas tidak menutupinya; ia utuh mulai panggung 204 px.
+ *  Isi selain panggung (id): pulang 312 px (+56 tautan kode acara, +20 keterangan dua baris, +114 ketik kode + galat, +112 ikut
+ *  papan); sampul 236 px (+58 tautan, +116 ketik kode + galat). Ruang = tinggi layar - 59 - 12.
+ *    360 x 640 (569): pulang panggung 257 (terburuk: isi 446, panggung 123) · sampul 333 (terburuk: isi 352, panggung 217)
+ *    390 x 700 (629): pulang 317 (terburuk 183) · sampul 360 + sisa 33 (terburuk 277)
+ *    390 x 760 (689): pulang 320 + sisa 57 (terburuk 243) · sampul 360 + sisa 93 (terburuk 337)
+ *    430 x 932 (861): pulang 320 + sisa 229 · sampul 360 + sisa 265
+ *
  * T-117 (Designer; pemilik memilih T-116 opsi 4 "Raksa Cerah"): RUPA hub diganti, tata letak / logika / kait data- T-114 tetap.
  *  PANGGUNG: langit siang kuning-krem dengan awan, gedung jingga lembut dan pita tanah (seni/investigasi/cerah-latar.png, menempel
  *    bawah), sinar matahari CSS yang berputar pelan di belakang logo, logo LENCANA PERISAI "RAKSA INVESTIGATOR" (cerah-logo.png;
