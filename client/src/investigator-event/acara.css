@@ -1,0 +1,26 @@
+/* T-109 (card 6): layout of the event board CONTAINERS only (hub entry, in-run status, host wrapper, projector pairing form).
+   The look of the board, the host block and the choice sheet is the Designer's acara-inv.css (T-105). */
+.ai-entri { display: grid; gap: 8px; justify-items: start; margin-top: 4px; }
+.ai-entri-kasus { display: grid; gap: 8px; width: 100%; }
+.ai-entri-main { width: 100%; min-height: 48px; }
+.ai-entri-tanya, .ai-entri-keluar { min-height: 44px; }
+.ai-entri-kode { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 6px 8px; align-items: center; width: 100%; }
+.ai-entri-kode label { grid-column: 1 / -1; font-size: 14px; line-height: 20px; font-weight: 700; color: #ffd9a8; }
+.ai-entri-kode input { min-height: 48px; box-sizing: border-box; padding: 0 12px; border: 2px solid #212121; background: #fff9f5; color: #212121; font: inherit; font-size: 20px; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; }
+.ai-entri-kode button { min-height: 48px; }
+.ai-entri-kode p { grid-column: 1 / -1; margin: 0; }
+/* In-run status: only while a decision is being sent or the connection is lost. */
+.ai-melayang { position: fixed; top: 6px; left: 50%; transform: translateX(-50%); z-index: 40; max-width: calc(100% - 24px); pointer-events: none; }
+.ai-acara-gagal { display: grid; gap: 12px; max-width: 420px; margin: 0 auto; padding: 32px 16px; align-content: start; }
+.ai-acara-gagal h1 { margin: 0; font-size: 22px; line-height: 28px; }
+.ai-acara-gagal :is(button, a) { min-height: 56px; display: inline-flex; align-items: center; justify-content: center; text-align: center; }
+.ai-host-bungkus { display: grid; gap: 6px; }
+.ai-host-layar { margin: 0; font-size: 14px; }
+.ai-host-halaman { min-height: 100vh; }
+.ai-layar-pasang { min-height: 100vh; display: grid; place-items: center; padding: 24px; box-sizing: border-box; background: #1b2233; color: #fff9f5; }
+.ai-layar-pasang form { display: grid; gap: 12px; width: min(420px, 100%); }
+.ai-layar-pasang h1 { margin: 0; font-size: 28px; line-height: 34px; }
+.ai-layar-pasang p { margin: 0; }
+.ai-layar-pasang input { min-height: 64px; box-sizing: border-box; padding: 0 16px; border: 2px solid #212121; background: #fff9f5; color: #212121; font: inherit; font-size: 32px; font-weight: 800; letter-spacing: .16em; text-transform: uppercase; }
+.ai-layar-pasang button { min-height: 56px; }
+.ai-layar-putus { position: fixed; left: 12px; bottom: 12px; z-index: 5; margin: 0; padding: 4px 10px; border: 2px solid #212121; background: #fdeaea; color: #212121; font-weight: 700; }

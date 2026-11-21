@@ -5090,3 +5090,51 @@ Migration applies once. Jakarta day and midnight. One open board per host. Join 
 - The four limits I proposed in T-102 (`pollMs` 5000, `displayCodeSeconds` 120, `maxBodyBytes` 2048, `maxIdLength` 64) are used unchanged.
 - `GET /mine` returns only an OPEN board; after closing, the host reaches the final board by its id until the purge.
 - No audit-log entry is written for host actions (the story audit module is outside this card).
+
+
+## T-109 (2026-11-21): Investigator lengkap CARD 6 · event phone, host and projector (Fullstack)
+
+Plan section 6. Gate: root `npm run typecheck` exit 0 (server + client), `client/dist` and `server/dist` rebuilt (no server source changed in this task). Not committed, not deployed. **Nothing was opened in a browser, on a phone or on a projector, and no request was ever sent to the event service: the ranked flow (join, run, decisions, board, pairing) has never run end to end.** It is wired from the frozen types and type-checked. Full Episode 1, Episode 1 Dev and the solo behaviour of cases 1-3 are unchanged while the flag is off.
+
+**Hidden by default.** Everything here shows only when `/api/config` reports `features.investigatorAcara` (server `RAKSA_INVESTIGATOR_ACARA=on`). With the flag off the hub entry draws nothing, the host block draws nothing, the ranked route goes to solo play, the standalone host page is empty and the projector page shows one sentence.
+
+**Keep the flag off for now:** Codex (T-108, `team/REVIEW.md` "Investigator event service security review") says "fix first". Its four findings are all on the server; none is client-side. They are listed below and NOT applied (the brief asked for a list).
+
+### What was built (`client/src/investigator-event/`)
+- `api.ts`: one fetch helper for the contract; credentials only in `Authorization`; network failure, timeout (8 s) or an unreadable reply = `unavailable`; one translated sentence per error code.
+- `sesi.ts`: the phone's event session in localStorage (`raksa:investigator:acara:v1`): credential, alias, and per case the run id, last acknowledged seq and the pending command. Cleared on expiry, when the server no longer knows the credential, on "Keluar dari papan acara" and on "Tamu baru". Separate from story saves and from the solo record.
+- `EntriAcara.tsx` + `pasang.ts`: the hub entry (registered through card 5's mount point). `/investigator?acara=KODE` or a typed code opens the Designer's `PilihPapanAcara` as a sheet: "Ikut papan acara" (POST join, then the name badge with "Ganti nama samaran" until the first run and "Mulai sebagai <alias>") or "Main sendiri" (nothing sent; asked once per tab for that code). Once joined, the hub shows the badge with the own rank, one button per case to play it on the board, and "Keluar dari papan acara". The normal case rows stay solo.
+- `MainAcara.tsx`, route `/investigator/acara/<n>`: case n as a ranked run. Same story player as solo, but with the run's own story save (`episodeAcara`), so it starts from the beginning and the solo save is untouched; every scored choice is POSTed first and applied only after the acknowledgement (card 5's scorer hook). The server scores; the phone sends ids only.
+- `HostAcara.tsx`: `BlokHostAcara` wires the Designer's `HostSesiInvestigator` (create, code + QR `/investigator?acara=KODE`, count, ranked preview, hide / show, close, clear, pair projector with the one-use code and its countdown, revoke). Uses this tab's staff session; without one it shows a sentence and a link to the staff sign-in. Mounted in the event host screen (`pages/Host.tsx`, both before and after a quiz room exists) and on its own page `/investigator/acara/host`. Refreshes every 5 s while the tab is visible.
+- `LayarAcara.tsx`: the projector. Pairing form (8-character code) -> read-only display credential in this tab's sessionStorage -> polls the board every 5 s -> Designer's `ProyektorPapan` (top ten, ranks as the server sends them, so ties share a rank). Routes `/investigator/acara/layar` and `/acara/layar?papan=investigator`. The host chooses what is projected by which address the projector has open; the quiz screen `/acara/layar` is unchanged. Polling, not a socket (the plan allows either; the service has no socket).
+
+### How a ranked run behaves
+- **Entering a case:** a stored unfinished run is resumed only if the server agrees (same seq, or it already acknowledged the command that was pending on the phone); otherwise a new run and a new save start.
+- **One decision counts once:** the command is stored before it is sent and its id is reused on every retry; if the acknowledgement survived a reload, tapping the same choice returns the stored acknowledgement.
+- **Failure never stops the game:** network loss or a refusal opens a sheet: "Coba lagi" (same command, network cases only) or "Lanjut tanpa peringkat" (the rest of that run is played unranked, nothing more is sent). While sending or disconnected, the Designer's small status pill shows at the top.
+- **Solo fallback at the door:** no session, flag off, a case or rubric version the server does not rank, or an ended session -> the solo route of that case. If the service cannot be reached at the start: "Coba lagi" or "Main sendiri".
+- **Replay:** "Ulang dari awal" after a finished ranked run starts a new ranked run at the first scored step. Practice of the weakest step never submits.
+- **Next case** from a ranked result stays on the board (`/investigator/acara/<n>`).
+- The local result screen still records the local best in the solo record (the plan allows merging an earned best); the board total comes only from the server.
+
+### Edits outside `investigator-event/` (small, each marked T-109)
+- `App.tsx`: three routes + the registration import. `story/appConfig.ts`: `investigatorAcara` flag. `pages/Host.tsx`: mounts the block (2 places). `pages/Projector.tsx`: the `?papan=investigator` switch (the quiz screen component is unchanged, only renamed inside the file). `pages/CeritaMain.tsx`: `SesiCerita` exported. `i18n/kamus/acaraInv.ts`: 27 new keys per language (error sentences, phone, host, projector; en and zh are mine). Card 5 files: `investigasi/acara.ts` ("Tamu baru" listeners), `investigasi/hub.ts` (calls them), `investigasi/LayarInvestigasi.tsx` (next case stays on the board in event mode).
+
+### Checked by a one-off script (scratch, not the test suite)
+Phone session store (write, change, expiry), command id format accepted by the server pattern and unique, "Tamu baru" listener, client path building against the frozen route templates, and the `acaraInv` dictionary: 89 keys, same keys and same parameters in id / en / zh.
+
+### Codex T-108 findings: SERVER fixes for the Lead (not applied)
+1. **Medium · body cap ineffective.** The story router (`story/http.ts`, mounted at `/api` before the event router in `index.ts`) parses JSON up to 1 MB for every `/api` path, so the event router's 2 kB parser never sees the stream. Fix: in `index.ts` call `mountInvestigatorEvents(app)` BEFORE `mountStoryHttp(app, story)` (including the disabled 404), and in `investigator/http.ts` move the `no-store` + origin check middleware ABOVE `express.json`. My T-107 exemption of the global 128 kB parser stays as it is.
+2. **Medium · flag off stops the purge.** `mountInvestigatorEvents` returns before scheduling the sweep when the flag is off. Fix: when the flag is off but the table `inv_events` already exists, still run `sweep` at start and on the timer; keep creating nothing on an install that never had the tables.
+3. **Low · pairing code outlives closure.** In `store.ts` `exchangeDisplayCode`: refuse when the event is not open (status closed or past `closes_at`), and delete pending codes in `closeEvent` and in the midnight branch of `sweep`. Already-paired displays keep showing the final board until revoke or expiry (as reviewed).
+4. **Low · join budget is one queue per IP.** In `http.ts` join: give successful joins a generous per-IP burst and count FAILED codes in a separate, smaller per-IP budget (wrong codes then cannot use up the venue's allowance); keep 300 per minute per board and the 500 cap. Operational: nginx must be the only ingress and overwrite forwarded headers; budgets assume one Node process.
+None of these changes a type or a path, so the client needs no change.
+
+### Not done / open
+- **Never run.** First things to try with the flag on, on a test server: host creates a board, a phone joins by QR, plays case 1 ranked, the board shows the row; airplane mode mid-case (sheet appears, "Coba lagi" after reconnect counts once); reload mid-case; projector pairing; host clear while a phone is joined.
+- The in-run status pill is fixed at the top centre and only appears while sending or disconnected; its position over the player header was not seen.
+- The hub entry adds height under the hub content (a link when not joined; badge + three buttons + link when joined). The choice sheet is a dialog.
+- Each ranked run leaves one story save entry in the device's story storage; they are not cleaned up.
+- The staff sign-in link on the standalone host page goes to `/host`; coming back to the Investigator host page afterwards is manual.
+- `[konfirmasi PIC]`: no new policy wording. The Designer's three marked lines (`catatan`, `pilihPrivasi`, `hostTengahMalam`: "dihapus tengah malam" vs the service's purge 24 h after closure) are still open and now visible on these screens.
+- Owner trial sheet counts: pending.

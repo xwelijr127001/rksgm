@@ -21,6 +21,7 @@ import { PramuatCerita } from './cerita/PramuatCerita';
 import { useHalaman } from './ui/halaman';
 import { t, useBahasa } from './i18n';
 import { bootstrapHost, bootstrapPlayer, initConnection, useGame } from './state/store';
+import './investigator-event/pasang';
 import { ROUTER_BASENAME } from './story/base';
 import { useAppConfig } from './story/appConfig';
 // Before the router mounts: its popstate listener comes first, so unsaved work can hold a back/forward move (LeaveGuard).
@@ -49,6 +50,10 @@ const CeritaMain = lazy(() => import('./pages/CeritaMain'));
 // T-094: "Raksa Investigator" hub (own name and QR destination; the story player stays underneath).
 const Investigator = lazy(() => import('./pages/Investigator'));
 const Host = lazy(() => import('./pages/Host'));
+// T-109: Investigator event board (phone run, host page, projector). Hidden unless features.investigatorAcara.
+const AcaraMain = lazy(() => import('./investigator-event/MainAcara'));
+const AcaraHost = lazy(() => import('./investigator-event/HostAcara'));
+const AcaraLayar = lazy(() => import('./investigator-event/LayarAcara'));
 const Projector = lazy(() => import('./pages/Projector'));
 // PROTOTIPE meja kasus K11 (D-68): halaman lompat /meja hanya ada di build VITE_MEJA_KASUS=1.
 const ProtoMeja = MEJA_KASUS ? lazy(() => import('./pages/ProtoMeja')) : null;
@@ -259,6 +264,10 @@ export default function App() {
                 saves as /cerita/auto-2-inv and /cerita/auto-2-inv-2, with the hub as the way back). */}
             <Route path="/investigator" element={<Investigator />} />
             <Route path="/investigator/:kasus" element={<PramuatCerita><CeritaMain /></PramuatCerita>} />
+            {/* T-109: event board. /investigator/acara/<n> = case n played ON the board; host page; projector screen. */}
+            <Route path="/investigator/acara/host" element={<AcaraHost />} />
+            <Route path="/investigator/acara/layar" element={<AcaraLayar />} />
+            <Route path="/investigator/acara/:kasus" element={<PramuatCerita><AcaraMain /></PramuatCerita>} />
             {/* T-076 / T-090: the old short URLs (QR codes, bookmarks) still open the case; they now land under the hub. */}
             <Route path="/cerita/investigator" element={<Navigate to="/investigator/1" replace />} />
             <Route path="/cerita/investigator/2" element={<Navigate to="/investigator/2" replace />} />

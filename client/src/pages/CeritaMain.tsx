@@ -116,7 +116,8 @@ export default function CeritaMain() {
   return <SesiCerita key={ep.id} ep={ep} profilAwal={profil} />;
 }
 
-function SesiCerita({ ep, profilAwal }: { ep: Episode; profilAwal: Profil }) {
+/** T-109: diekspor untuk rute papan acara (investigator-event/MainAcara), yang memberi episode ber-simpanan terpisah. */
+export function SesiCerita({ ep, profilAwal }: { ep: Episode; profilAwal: Profil }) {
   const { bahasa } = useBahasa();
   // Dibaca sekali: tampilan & nama tidak berubah di tengah episode (look stabil untuk adegan 2D).
   const [profil] = useState(profilAwal);

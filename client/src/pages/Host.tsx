@@ -48,6 +48,7 @@ import {
   TombolKonfirmasi,
 } from '../ui/kit';
 import './host/host.css';
+import { BlokHostAcara } from '../investigator-event/HostAcara';
 
 function jalankan(action: HostAction, extra?: Record<string, unknown>) {
   void actions.hostAction(action, extra);
@@ -882,6 +883,8 @@ export default function Host() {
             {/* Judul halaman untuk pembaca layar; secara visual header (Merek + "Layar Host") sudah jelas. */}
             <h1 className="sr-only">{t('host.judulMasuk')}</h1>
             <MulaiHost />
+            {/* T-109: papan acara Investigator (terpisah dari room kuis; hanya bila server menyalakannya) */}
+            <BlokHostAcara />
           </>
         ) : (
           <>
@@ -901,6 +904,9 @@ export default function Host() {
                 <PanelTab room={room} unduh={(j) => void unduhEkspor(j)} eksporGagal={eksporGagal} />
               </div>
             </div>
+
+            {/* T-109: papan acara Investigator (terpisah dari room kuis; hanya bila server menyalakannya) */}
+            <BlokHostAcara />
 
             {/* Laci "Daftar soal": playlist 10 kasus + soal buatan panitia (AturSoal apa adanya, langsung terbuka). */}
             {laciSoal ? (

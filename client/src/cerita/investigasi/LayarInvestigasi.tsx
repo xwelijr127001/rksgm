@@ -34,6 +34,7 @@ import { teksCerita } from '../teks';
 import type { Ekspresi, Episode, HasilMuat, KonfigInvestigasi, KunciTeks, NodeCerita, NodeInvestigasi, PanelCard, Round, StateCerita } from '../tipe';
 import { PotretPikselHp } from '../ui/latar/piksel/PotretPikselHp';
 import { tokohPotret } from '../ui/latar/piksel/potret';
+import { modeAcara } from './acara';
 import { aksiLanjut, daftarKasusHub, tamuBaruSemuaKasus, tujuanPangkat, type KasusHub } from './hub';
 import { RUTE_HUB, ruteKasus, useRumahCerita } from './rute';
 import { adaRekaman, bacaRekaman, berlanggananInvestigasi, catatHadiah, catatHasil, catatIntipKasus2, hadiahRekaman, pangkatRekaman, stempelSeri, TOTAL_MAKS, totalSkor, versiInvestigasi } from './simpan';
@@ -786,6 +787,8 @@ export function HasilKasus({ ep, state, nama, look, tx, onMainLagi }: {
   const judulKasus = (k: KasusHub): string => t('hubInv.kasusJudul', { n: k.nomor, judul: teksCerita(k.ep, k.konfig.judul, bahasa) });
   const keKasus = (k: KasusHub, dariAwal: boolean) => {
     if (k.konfig.kasus === 'kasus-2') catatIntipKasus2(); // T-087: penghitung minat sukarela (uji coba), seperti kartu "Kasus 2" dulu
+    // T-109: sedang main di papan acara = kasus berikutnya juga di papan (run baru dari awal; simpanan main sendiri tidak disentuh).
+    if (modeAcara()) { navigasi('/investigator/acara/' + k.nomor); return; }
     if (dariAwal) mulaiBaru(k.ep);
     navigasi(rumah === RUTE_HUB ? ruteKasus(k.nomor) : '/cerita/' + k.ep.id);
   };

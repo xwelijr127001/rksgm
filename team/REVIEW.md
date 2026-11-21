@@ -385,3 +385,21 @@ Confirmed working folder `C:\Users\User\Desktop\rksgm-episode2`.
 8. Misstating legal authority or implying automatic refusal is the main content risk; PIC must confirm the public wording.
 9. Six implementation cards separate contracts, content, art, server, solo integration and event surfaces; gate on typecheck and rebuild.
 10. Owner runs the 12-person trial. Features, public content approval and observed enjoyment have separate completion evidence.
+
+Confirmed working folder `C:\Users\User\Desktop\rksgm-episode2`.
+
+## Investigator event service security review (2026-11-21)
+
+**Verdict: fix first.** Keep the event flag off pending the parser-order and retention fixes. Static review found two medium findings and two low findings. HTTP behaviour remains unverified.
+
+1. **Medium — the 2 KiB body cap is ineffective.** `server/src/index.ts:135` mounts Story before Investigator. Story’s router parses JSON up to 1 MiB for all of `/api` (`server/src/story/http.ts:146,441`). The event parser receives an already-consumed stream. Large public requests therefore consume resources before event origin and admission checks; malformed JSON can also receive the wrong error envelope. Mount the entire event handler, including its disabled 404, before Story. Set no-store and check origin before parsing in `investigator/http.ts:118`.
+
+2. **Medium — disabling the flag suspends retention.** `server/src/investigator/http.ts:98` returns before scheduling the purge. If operations disables the board after a pilot and leaves the server running, past aliases, decisions, scores and credential hashes survive beyond the promised closure-plus-24-hours window. Run the existing sweep independently of route enablement when the event tables already exist; preserve the empty-install behaviour. The enabled sweep correctly handles downtime and dependent rows (`store.ts:111`).
+
+3. **Low — an outstanding pairing code survives manual closure.** `server/src/investigator/store.ts:146,213`. During its remaining 120-second lifetime it can issue a fresh display credential for a closed event, even though the owner can only issue codes while open. Reject exchange at closure or midnight; keep already-paired final-score displays subject to owner revocation and expiry.
+
+4. **Low — shared Wi-Fi makes admission one queue.** `server/src/investigator/http.ts:199` counts successful joins and typos in one 120/minute IP bucket. A simultaneous venue arrival can delay valid guests. The 300/minute board budget applies only to recognised codes. Six random base-32 characters provide 30 bits; this public invitation is suitable for a low-stakes booth. Separate a generous NAT burst allowance from failed-code accounting; retain the board budget and 500-person cap. Keep nginx as the sole ingress, overwriting forwarded headers. In-memory budgets assume one Node process.
+
+**Access and data.** Create/mine require a current staff bearer with hostRooms; view, close, clear, hide, pair and revoke also require matching staff owner. User-level ownership supports staff re-login. Join and exchange are public. Alias, standing, run creation, resume and decisions derive identity from the participant bearer; run lookup binds participant ID. Board reads require a separate display bearer. Credentials use 32 random bytes and indexed SHA-256 hashes; clear invalidates participants and revoke invalidates displays and pending codes. No event endpoint uses cookie authentication. Approved-origin checks complement explicit bearer headers; absent Origin grants no staff authority. Aliases are generated, SQL values bound, and normal logs omit credentials. (`http.ts:137–274`, `store.ts:65,156,221,295`.)
+
+**Scores and HTTP confidence.** Sequence, stage, allowed choice and attempt are server-owned. Decisions, digest-bound retry acknowledgements and best-score updates share a transaction. Practice and device totals have no import endpoint; only choices on a ranked run score. This establishes consistent booth scoring, not independent play. Fixed routes precede owner parameters. No obvious handler registration exception surfaced; Fullstack’s storage exercise did not exercise Express requests. (`store.ts:352–391`, `shared/investigator/rubric.ts:245`.)

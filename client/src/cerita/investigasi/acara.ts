@@ -74,3 +74,10 @@ export function episodeAcara(ep: Episode, runId: string): Episode {
 }
 /** Id episode asal dari id run acara (atau id itu sendiri). */
 export const idEpisodeAsal = (id: string): string => id.split(PEMISAH_ACARA)[0]!;
+
+// ------------------------------------------------------------------ "Tamu baru" (T-109)
+
+const pendengarTamu = new Set<() => void>();
+/** Kartu 6: dipanggil saat hub menjalankan "Tamu baru" (sesi papan acara di perangkat ini ikut diakhiri). */
+export function saatTamuBaru(f: () => void): () => void { pendengarTamu.add(f); return () => { pendengarTamu.delete(f); }; }
+export function kabariTamuBaru(): void { pendengarTamu.forEach((f) => { try { f(); } catch { /* pendengar tidak boleh menggagalkan "Tamu baru" */ } }); }

@@ -12,6 +12,7 @@
 
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
+import LayarAcara from '../investigator-event/LayarAcara';
 import type { Phase } from '@shared/types';
 import { Avatar } from '../art/Avatar';
 import { CityMap } from '../art/CityMap';
@@ -131,7 +132,16 @@ function potong<T>(daftar: readonly T[], maks: number): { tampil: T[]; sisa: num
   return { tampil: daftar.slice(0, maks), sisa: Math.max(0, daftar.length - maks) };
 }
 
+/**
+ * T-109: host memilih layar yang diproyeksikan lewat alamatnya: /acara/layar = layar kuis seperti semula;
+ * /acara/layar?papan=investigator = papan acara Raksa Investigator (dipasangkan dengan kode sekali pakai, baca saja).
+ */
 export default function Projector() {
+  const [params] = useSearchParams();
+  return params.get('papan') === 'investigator' ? <LayarAcara /> : <LayarKuis />;
+}
+
+function LayarKuis() {
   const { room, status } = useGame();
   const { bahasa } = useBahasa();
   // Judul tab "Layar Acara – RAKSA GAME" (bukan <h1>: h1 hanya ada di gerbang kode).

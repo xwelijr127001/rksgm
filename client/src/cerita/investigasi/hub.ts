@@ -11,6 +11,7 @@
 import { cariEpisode, DAFTAR_EPISODE } from '../episode';
 import { muatProgres, mulaiBaru } from '../simpan';
 import type { Episode, KonfigInvestigasi } from '../tipe';
+import { kabariTamuBaru } from './acara';
 import { ruteKasus } from './rute';
 import { KEPALA_MIN_TOTAL } from '@shared/investigator/rubric';
 import { adaRekaman, bacaRekaman, STEMPEL_SENIOR, stempelSeri, tamuBaru, totalSkor, type RekamanInvestigasi } from './simpan';
@@ -83,6 +84,7 @@ export function ruteKasusTerkait(ep: Episode): string | null {
  */
 export function tamuBaruSemuaKasus(kini?: Episode): void {
   tamuBaru();
+  kabariTamuBaru(); // T-109: sesi papan acara di perangkat ini ikut berakhir
   for (const e of episodeInvestigator()) if (e.id !== kini?.id) mulaiBaru(e);
 }
 
