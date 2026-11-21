@@ -403,3 +403,16 @@ Confirmed working folder `C:\Users\User\Desktop\rksgm-episode2`.
 **Access and data.** Create/mine require a current staff bearer with hostRooms; view, close, clear, hide, pair and revoke also require matching staff owner. User-level ownership supports staff re-login. Join and exchange are public. Alias, standing, run creation, resume and decisions derive identity from the participant bearer; run lookup binds participant ID. Board reads require a separate display bearer. Credentials use 32 random bytes and indexed SHA-256 hashes; clear invalidates participants and revoke invalidates displays and pending codes. No event endpoint uses cookie authentication. Approved-origin checks complement explicit bearer headers; absent Origin grants no staff authority. Aliases are generated, SQL values bound, and normal logs omit credentials. (`http.ts:137–274`, `store.ts:65,156,221,295`.)
 
 **Scores and HTTP confidence.** Sequence, stage, allowed choice and attempt are server-owned. Decisions, digest-bound retry acknowledgements and best-score updates share a transaction. Practice and device totals have no import endpoint; only choices on a ranked run score. This establishes consistent booth scoring, not independent play. Fixed routes precede owner parameters. No obvious handler registration exception surfaced; Fullstack’s storage exercise did not exercise Express requests. (`store.ts:352–391`, `shared/investigator/rubric.ts:245`.)
+
+Confirmed working folder `C:\Users\User\Desktop\rksgm-episode2`.
+
+## Investigator event fixes re-check (2026-11-21)
+
+**Verdict: Yes. OK to enable `RAKSA_INVESTIGATOR_ACARA=on` for a supervised pilot** on the stated single Node process behind nginx with one trusted proxy hop.
+
+1. **Body cap — yes.** The event mount precedes Story and is scoped to its own prefix. Origin and no-store checks precede the 2 KiB parser (`server/src/index.ts:140`, `server/src/investigator/http.ts:154`). T-110 recorded 413 for oversized event JSON, 403 for an unapproved origin even with an oversized body, and 200 for a 3 KiB staff login. The owner and projector credential boundaries also held in the recorded requests.
+2. **Retention — yes.** With the flag off, existing event tables start the same immediate and once-per-minute sweep; a fresh installation skips the event timer (`server/src/investigator/http.ts:125`, `:139`). This disabled-mode branch was verified by inspection.
+3. **Pairing — yes.** Manual and midnight closure remove pending codes. Exchange independently checks board status and deadline (`server/src/investigator/store.ts:115`, `:152`, `:221`). Smoke requests 34–35 confirm a pending code failed while an already-paired display could read final scores.
+4. **Venue joins — yes.** The effective lookup ceiling is 600 attempts/minute/IP. After 120 wrong codes, further misses return 429 while valid codes can still join within the burst and 300/minute board budgets (`server/src/investigator/http.ts:238`, `:247`). This departure from the original 120-total limit is acceptable for shared booth Wi-Fi and a public invitation code.
+
+No new release blocker found. I reviewed Fullstack’s 38 recorded requests and the source; the smoke run did not exercise limiter saturation.
