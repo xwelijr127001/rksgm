@@ -4696,3 +4696,38 @@ Spec: `team/REVIEW.md` "Cerita x Investigator approach (2026-11-21)" change 2. N
 - Kasus 1 result at 360 x 640: first finish is exactly 544 by calculation; one px over means a 1 px scroll.
 - The 28 px link rows are small for the 50 to 60 age group even with the extended tap area; making them 36 or 44 px costs the heights above.
 - English "Investigate the truck lane in Case 1" and Chinese texts are mine, not reviewed.
+
+## T-100 (2026-11-21): /investigator hub = a pixel detective game title screen with detective Miss Raksa (Designer)
+
+Built by the Designer; uncommitted. Owner rule: nothing was opened in a browser and no test was run. Gate: `npm run typecheck` exit 0 (server + client), `client/dist` rebuilt. T-094 logic, all states, the T-099 lines and every `data-` hook are unchanged.
+
+### What the hub looks like now (`pages/Investigator.tsx`, `pages/investigator.css` rewritten)
+- **Stage (both states, full width, 200 px, decorative):** a detective office at night: window with city lights and a moon, cork board with photos, notes and red string, desk lamp with a warm cone, bookshelf, certificate, clock, filing cabinet, and the desk edge. The wall and desk continue to the sides on wide screens, so there is no empty grid.
+- **Logo:** pixel wordmark "RAKSA INVESTIGATOR" with a magnifier, gold / orange on a charcoal file tab (184 x 76 px).
+- **Miss Raksa, detective, half body (128 x 168 px, was a 64 px square):** the T-084 magnifier pose untouched above the shoulders (same face, bun, badge), plus a trench coat over the yellow uniform, a belt and a case folder under her arm. Idle motion: she moves 2 px every 1.6 s and the magnifier glints every 4 s; reduced motion = still.
+- **Page:** dark header with an orange line; the rest of the page is the wooden desk.
+- **Fresh device:** a kraft CASE FILE on the desk: tab "KASUS #1 · Truk di Tol", the dashcam frame as a clipped photo with a red stamp "KASUS BARU", the hook line "Petugas mencatat lajur 3. Benarkah?" and the tag "±5 menit · Main sendiri"; then the game button "Buka Kasus 1" (the existing orange pixel key, larger, with a blinking arrow; press feel and sound are the existing ones).
+- **Returning:** the same stage; a compact file for the case the main action points to (tab + one line + the main button inside it); then the officer card, the total, and the case list as kraft folders with small tabs (stamped = cream paper; Kasus 2 is the second folder), "Kasus 3" locked, "Tamu baru".
+- **Wide screens:** content is one centred column (max 560 px); the logo moves between the board and Miss Raksa so the window shows. Art scale becomes 3x at 1100 x 820 and larger.
+
+### Fit (calculated)
+- Phone 360 x 640, fresh: button bottom at 498 px of 640. Returning: main button bottom at 370 px; the whole page is about 800 px, so it scrolls (officer card and list are below the fold).
+- 390 x 700 has more room than that.
+
+### Art (`character/investigator-t100/bangun.mts` -> `client/src/cerita/seni/investigasi/`)
+`hub-latar.png` (360 x 100), `hub-miss.png` (64 x 88), `hub-logo.png` (92 x 38), shown at 2x. Source look: `character/investigator-t100/seni-t100.png`.
+
+### Text
+Two new words in `i18n/kamus/hubInv.ts` (id/en/zh): `berkasTab` ("KASUS #{n} · {judul}") and `capBaru` ("KASUS BARU"). All other keys unchanged.
+
+### Previews (calculated mocks from the real art, not screenshots)
+`character/investigator-t100/layar-t100-hp.png` (phone: fresh, returning; the pink line is the 640 px fold) and `layar-t100-desktop.png` (1024 wide: fresh, returning). The dashcam photo and officer card in the mocks are simplified drawings of the existing components.
+
+### Differences from the brief / open
+- **Headset:** the T-084 magnifier pose has no headset drawn; I did not add one.
+- **No blink:** the idle motion is the small bob and the magnifier glint only.
+- **Hook line** is on the case file, not in a speech bubble (the brief allowed either).
+- On a phone the window with city lights is outside the visible middle of the scene (the cork board and lamp show); it appears from about 600 px wide.
+- "KASUS BARU" and the en/zh of both new words are my wording.
+- Nothing was seen in a browser or on a phone. Most worth a look: the trench coat and folder on Miss Raksa at real size, the stage on the phone, and the returning state.
+- Old hub check scripts or tests that look for `.inv-hub-kepala`, the 64 px portrait, or `.inv-hub-kasus` will need new selectors (`#inv-hub-kasus` is still the case heading); none was run.

@@ -19,13 +19,25 @@
  *    (536 bila "1 kasus lagi menuju Senior" turun baris).
  * Teks antarmuka: kamus `hubInv`; judul dan kalimat kait kasus: teks episode (data kasus). Seni: hanya yang sudah ada.
  *
+ * T-100 (Designer; pemilik: "add miss raksa as a detective ... so its looks legit game"): hub = LAYAR JUDUL game detektif piksel.
+ *  PANGGUNG (kedua bentuk, selebar layar, 200 px; hiasan, aria-hidden): kantor detektif malam hari (seni/investigasi/hub-latar.png:
+ *    jendela kota, papan gabus berbenang merah, lampu meja), logo piksel "RAKSA INVESTIGATOR", dan Miss Raksa DETEKTIF setengah
+ *    badan (hub-miss.png: pose kaca pembesar T-084 + mantel di atas seragam kuning + map kasus), 128 x 168 px. Gerak diam halus:
+ *    ia naik-turun 2 px dan kaca pembesarnya berkilau; gerak dikurangi = diam.
+ *  SAMPUL: di meja kayu, BERKAS KASUS: tab map "KASUS #1 · Truk di Tol", bingkai dashcam sebagai FOTO berklip dengan cap merah
+ *    "KASUS BARU", kalimat kait kasus dan tag "±5 menit · Main sendiri"; lalu tombol game "Buka Kasus 1".
+ *    panggung 200 - 18 (berkas menumpang tepi meja) + berkas ~190 + 12 + tombol 64 = ~450 px dari 584 (360 x 640).
+ *  PULANG: panggung yang sama, berkas ringkas kasus yang dituju + tombol utama (di atas lipatan: 200 - 18 + ~130 = ~312 px), lalu
+ *    kartu petugas, total, dan daftar kasus sebagai MAP-MAP di meja (Kasus 2 = map kedua), terkunci, Tamu baru. Halaman digulir.
+ *  Logika T-094 / T-099 dan semua kait data- tidak berubah; kunci baru hanya `hubInv.berkasTab` dan `hubInv.capBaru`.
+ *
  * T-099 (Codex "Cerita x Investigator approach" butir 2): di daftar kasus, baris kasus yang punya cerita (`konfig.cerita`, kasus 1)
  * membawa satu baris kecil "Dari cerita Episode 1"; kasus tanpa cerita (kasus 2) diperkenalkan sebagai berkas tersendiri: selama
  * belum dibuka barisnya berbunyi "Berkas baru · belum dibuka", tanpa kata yang mengaitkannya ke cerita. Sampul perangkat kosong
  * TIDAK menyebut cerita (pintu masuk langsung, bukan lanjutan). Baris tiga-tulisan itu 56 px (48 + 8): PULANG 516 -> 524 px
  * (544 bila "1 kasus lagi menuju Senior" turun baris).
  */
-import { useState, useSyncExternalStore } from 'react';
+import { useState, useSyncExternalStore, type CSSProperties } from 'react';
 import { Link, Navigate, useNavigate } from 'react-router-dom';
 import { PilihBahasa } from '../components/PilihBahasa';
 import { Arrow, SoundButton } from '../components/PlayerShell';
@@ -38,12 +50,15 @@ import { aksiUtamaHub, daftarKasusHub, tamuBaruSemuaKasus, type KasusHub } from 
 import { RUTE_HUB, ruteKasus, stateNiat } from '../cerita/investigasi/rute';
 import { bacaRekaman, berlanggananInvestigasi, pangkat, STEMPEL_SENIOR, TOTAL_MAKS, totalSkor, versiInvestigasi } from '../cerita/investigasi/simpan';
 import { SKOR_MAKS } from '../cerita/investigasi/skor';
-import { PotretReaksi } from '../cerita/investigasi/ui/BukuCatatan';
 import { IkonInv, stempelKasus } from '../cerita/investigasi/ui/dasar';
 import { seniKasus } from '../cerita/investigasi/ui/seniKasus';
 import { berlanggananCerita, mulaiBaru, versiPenyimpananCerita } from '../cerita/simpan';
 import { teksCerita } from '../cerita/teks';
 import { KartuPetugas } from '../cerita/ui/KartuPetugas';
+import seniLatar from '../cerita/seni/investigasi/hub-latar.png';
+import seniLogo from '../cerita/seni/investigasi/hub-logo.png';
+import seniMiss from '../cerita/seni/investigasi/hub-miss.png';
+import seniKlip from '../cerita/seni/investigasi/klip.png';
 import '../cerita/ui/cerita.css';
 import '../cerita/hp/hp.css';
 import '../cerita/investigasi/ui/investigasi.css';
@@ -69,6 +84,16 @@ export default function Investigator() {
   const tx = (k: KasusHub, kunci: string) => teksCerita(k.ep, kunci, bahasa);
   const judul = (k: KasusHub) => t('hubInv.kasusJudul', { n: k.nomor, judul: tx(k, k.konfig.judul) });
   const k = aksi.kasus;
+  const tab = (x: KasusHub) => t('hubInv.berkasTab', { n: x.nomor, judul: tx(x, x.konfig.judul) });
+  // T-100: panggung layar judul (hiasan; nama seri sudah ada di h1 kepala halaman).
+  const panggung = (
+    <div className="inv-panggung" aria-hidden="true" style={{ '--inv-latar': `url(${seniLatar})` } as CSSProperties}>
+      <div className="inv-panggung-isi">
+        <img className="inv-logo" src={seniLogo} alt="" width={92} height={38} />
+        <span className="inv-miss" data-miss-detektif=""><img src={seniMiss} alt="" width={64} height={88} /><i className="inv-kilau" /></span>
+      </div>
+    </div>
+  );
   const kepala = (
     <header className="hp-kepala">
       <Link className="hp-kembali" to="/" aria-label={t('hubInv.kembali')}><Arrow back /></Link>
@@ -83,13 +108,21 @@ export default function Investigator() {
         {kepala}
         <main className="hp-main">
           <section className="iv-layar inv-hub-sampul" aria-labelledby="inv-hub-kasus">
-            <div className="inv-hub-kepala">
-              <PotretReaksi reaksi="miss-detektif" ukuran={64} />
-              <h2 id="inv-hub-kasus" className="inv-hub-kasus">{judul(k)}</h2>
+            {panggung}
+            <div className="inv-berkas" data-berkas-kasus={k.konfig.kasus}>
+              <h2 id="inv-hub-kasus" className="inv-berkas-tab">{tab(k)}</h2>
+              <div className="inv-berkas-badan">
+                <div className="inv-foto">
+                  <img className="inv-klip" src={seniKlip} alt="" aria-hidden="true" width={10} height={22} />
+                  {k.konfig.bingkai === 'dashcam' ? <BingkaiDashcam /> : <img className="iv-seni-kasus" src={seniKasus(k.konfig.kasus).judul} alt="" />}
+                  <b className="inv-cap" aria-hidden="true">{t('hubInv.capBaru')}</b>
+                </div>
+                <div className="inv-berkas-teks">
+                  <p className="inv-hub-kait">{tx(k, k.konfig.kait)}</p>
+                  <p className="inv-hub-durasi">{t('hubInv.durasi', { n: k.ep.durasiMenit })}</p>
+                </div>
+              </div>
             </div>
-            {k.konfig.bingkai === 'dashcam' ? <BingkaiDashcam besar /> : <img className="iv-seni-kasus" src={seniKasus(k.konfig.kasus).judul} alt="" />}
-            <p className="inv-hub-kait">{tx(k, k.konfig.kait)}</p>
-            <p className="iv-label inv-hub-durasi">{t('hubInv.durasi', { n: k.ep.durasiMenit })}</p>
             <Link className="primary-action iv-tombol inv-hub-utama" to={ruteKasus(k.nomor)} state={stateNiat('lewati-judul')} data-hub-utama="buka">{t('hubInv.buka', { n: k.nomor })}</Link>
           </section>
         </main>
@@ -110,13 +143,11 @@ export default function Investigator() {
       {kepala}
       <main className="hp-main">
         <section className="iv-layar inv-hub-pulang" aria-labelledby="inv-hub-kasus">
-          <div className="inv-hub-kepala" data-kecil="">
-            <PotretReaksi reaksi="miss-detektif" ukuran={48} />
-            <div>
-              <h2 id="inv-hub-kasus" className="inv-hub-kasus">{judul(k)}</h2>
+          {panggung}
+          <div className="inv-berkas" data-ringkas="" data-berkas-kasus={k.konfig.kasus}>
+            <h2 id="inv-hub-kasus" className="inv-berkas-tab">{tab(k)}</h2>
+            <div className="inv-berkas-badan">
               <p className="inv-hub-sub">{aksi.jenis === 'lagi' ? t('hubInv.lagiKet', { n: k.nomor }) : aksi.jenis === 'lanjut' ? t('hubInv.status.jalan') : tx(k, k.konfig.kait)}</p>
-            </div>
-          </div>
           {aksi.jenis === 'lagi' ? (
             <button type="button" className="primary-action iv-tombol inv-hub-utama" data-hub-utama="lagi" onClick={mainLagi}>{t('hubInv.lagi')}</button>
           ) : aksi.jenis === 'lanjut' ? (
@@ -124,6 +155,8 @@ export default function Investigator() {
           ) : (
             <Link className="primary-action iv-tombol inv-hub-utama" to={ruteKasus(k.nomor)} data-hub-utama="buka">{t('hubInv.buka', { n: k.nomor })}</Link>
           )}
+            </div>
+          </div>
           <KartuPetugas nama={nama} look={look} investigasi={{ stempel: r.stempel, pangkat: pangkat(r.stempel.length), baru: false }} />
           <p className="iv-total" data-total-kasus="">
             <b>{t('hubInv.total')} <span data-total-skor="">{totalSkor(r)}</span> / {TOTAL_MAKS}</b>
