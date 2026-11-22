@@ -32,6 +32,7 @@ import polisKasus2 from '../../seni/investigasi/bukti/polis-kasus2.png';
 import yusuf from '../../seni/investigasi/potret/yusuf.png';
 import agus from '../../seni/investigasi/potret/agus.png';
 import { PanelAssets } from './panel/aset';
+import { SENI_R2 } from './seniR2';
 
 export interface SeniKasus {
   judul: string;
@@ -56,10 +57,17 @@ const KASUS_2: SeniKasus = {
   potret: { yusuf, agus },
 };
 /** T-106: kasus 3 "Satu Baris Terlalu Banyak": meja berkas Designer T-103 (kartu judul, layar tebakan), potret tiga kursi panel. */
+/**
+ * T-132 (audit jawaban dini): gambar meja lama (PanelAssets.desk) melingkari SATU baris perkiraan biaya dengan merah dan menaruh
+ * kaca pembesar di atasnya, padahal tebakan pembukanya bertanya "apakah kedua bagian rusak pada kejadian yang sama?". Gambar
+ * kasus (hub, layar tebakan) kini perkiraan biaya babak 2 yang NETRAL (dua baris bernomor, tidak ada yang ditandai; seni T-128),
+ * dipotong ke bingkai 292 : 150 oleh .iv-seni-kasus. Berkas meja.png tidak dihapus.
+ */
+const NETRAL_3 = SENI_R2['k3-penawaran'].exhibit;
 const KASUS_3: SeniKasus = {
-  judul: PanelAssets.desk,
-  kilas: PanelAssets.desk,
-  tebak: PanelAssets.desk,
+  judul: NETRAL_3,
+  kilas: NETRAL_3,
+  tebak: NETRAL_3,
   ikonBukti: {},
   potret: PanelAssets.portrait,
 };

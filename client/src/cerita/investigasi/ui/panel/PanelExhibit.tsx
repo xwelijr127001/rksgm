@@ -9,6 +9,10 @@
  *   id kartu tanpa seni panel: hanya kutipan dan sumbernya.
  * `quote` = pernyataan yang sedang diperiksa (tampil di atas, supaya bisa dibandingkan). `onUse` = tombol "Pakai bukti ini".
  * Semua kalimat datang dari props (sudah diterjemahkan); komponen ini tidak menyimpan apa pun.
+ * T-132 (babak 2): kartu ber-`art` (seni T-128) = gambar besarnya (288 x 192: foto bercap tanggal, kartu kejadian berkalender,
+ * perkiraan biaya dua baris) + keterangan, untuk SEMUA jenis kartu itu; tanpa tombol "lihat dari dekat" (potongan dekat spion
+ * menunjuk barang yang ditanyakan; cetakan sudut di foto barunya sudah memuatnya). `art.overlay` = cincin penunjuk di atas
+ * gambar, hanya dikirim pemanggil sesudah temuannya ada.
  * T-125: label "Sumber" punya SATU pemilik = teks kartu (`card.source` di semua kasus sudah berbunyi "Sumber: ..." / "Source: ..." /
  * "来源：..."). Dulu komponen ini menambah labelnya sekali lagi ("Sumber: Sumber: ..."). Sekarang `labelSumber` hanya MEMISAH
  * label yang sudah ada supaya bisa ditebalkan; label kamus dipakai hanya bila teksnya datang tanpa label.
@@ -47,9 +51,17 @@ export function PanelExhibit({ card, quote, onClose, onUse }: {
           <button type="button" className="btn btn-netral pn-lembar-tutup" data-bukti-tutup="" onClick={() => onClose()}>{L('tutup')}</button>
         </>
       )}>
-      <div className="pn-lembar" data-lembar-bukti={card.id} data-jenis={seni?.kind}>
+      <div className="pn-lembar" data-lembar-bukti={card.id} data-jenis={card.art ? 'foto' : seni?.kind}>
         {quote ? <p className="pn-kutip"><b>{quote.name}</b><q>{quote.text}</q></p> : null}
-        {seni?.kind === 'foto' && seni.exhibit ? (
+        {card.art ? (
+          <figure className="pn-foto" data-seni-r2="">
+            <div className="pn-foto-bingkai" data-lapis={card.art.overlay ? '' : undefined}>
+              <img src={card.art.exhibit} alt="" width={288} height={192} />
+              {card.art.overlay ? <img className="pn-foto-lapis" src={card.art.overlay} alt="" width={288} height={192} /> : null}
+            </div>
+            {card.excerpt ? <figcaption>{card.excerpt}</figcaption> : null}
+          </figure>
+        ) : seni?.kind === 'foto' && seni.exhibit ? (
           <figure className="pn-foto">
             {/* T-115: foto utuh dan foto dekat memakai KOTAK yang sama (3 : 2), dan tombol gantinya menumpang di sudut foto
                 (44 x 44, berlabel untuk pembaca layar), jadi lembar tidak bertambah tinggi dan tidak melompat. */}

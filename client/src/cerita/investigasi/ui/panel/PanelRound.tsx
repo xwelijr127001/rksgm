@@ -60,7 +60,8 @@ export function PanelRound({ chair, statement, cards, attempt, onInspect, onPres
           return (
             <li key={c.id} className="pn-kartu" data-kartu={c.id} data-terpilih={terpilih ? '' : undefined} data-redup={c.disabled ? '' : undefined}>
               <button type="button" className="pn-kartu-pilih" aria-pressed={terpilih} disabled={c.disabled} aria-label={L('bukti', { judul: c.title })} onClick={() => setPilih(c.id)}>
-                <span className="pn-kartu-gambar" aria-hidden="true" style={seni ? { backgroundImage: `url(${seni.thumb})` } : undefined} />
+                {/* T-132: kartu ber-seni babak 2 (`art`) memakai gambar kartu yang NETRAL (mis. perkiraan biaya tanpa cincin merah) */}
+                <span className="pn-kartu-gambar" aria-hidden="true" data-seni-r2={c.art ? '' : undefined} style={c.art ? { backgroundImage: `url(${c.art.thumb})` } : seni ? { backgroundImage: `url(${seni.thumb})` } : undefined} />
                 <span className="pn-kartu-teks"><b>{c.title}</b><small>{c.source}</small></span>
                 <span className="pn-kartu-tanda" aria-hidden="true">{terpilih ? '✓' : ''}</span>
               </button>

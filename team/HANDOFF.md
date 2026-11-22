@@ -6517,3 +6517,131 @@ My estimate: 30 to 45 seconds longer on a first clean run, about 5.5 minutes; ea
 - Tests and QA scripts that read Kasus 2 were not run or edited. Likely to need updating: anything that walks `kjalan` (old timeline hooks), `kpolis` (old clause tap), expects `yusuf-tanya` with two options, the old card titles, the old message texts, or `data-zum-pakai=""`; and anything asserting `dashcam.tepat` in Kasus 1.
 - Ranked event runs use the same screens; the formative steps add no server call, but I could not exercise a run.
 - Kasus 3 (slice 3) can reuse all of this; its panel rounds still need their own pairing wiring, and `CINCIN_K3_FOTO` is not used yet.
+
+## T-132 (2026-11-22): round 2 slice 3 = Kasus 3 "Dua Baris di Bengkel" (Fullstack)
+
+Built by Fullstack; uncommitted, not deployed. Owner rule: nothing was opened in a browser or on a phone and no test was run, so every height is CALCULATED and none of the new interactions has been seen running. Root `npm run typecheck` exit 0; `client/dist` rebuilt (build exit 0, copy identical to the build). No server file touched. Static check by script (not the test suite): the project validator returns no finding for the three Investigator episodes and `auto-2` (the one `auto-2-dev` finding about `{suasana}` is old); all 3969 paths of Kasus 3, 567 of Kasus 2 and 1512 of Kasus 1 reach an ending.
+
+Unchanged, as the release boundary requires: the two panel rounds (`kronologi`, `pengajuan`) with their card ids, accepted cards and attempt order, verdict ids `tambahan` / `layak` / `polis`, message ids `baik` / `datar` / `janji`, score marks, the shared rubric (not edited; 20 / 12 / 5 per round, 30 / 15 / 0, 30 / 15 / 0), episode version 1. Everything new is FORMATIVE: no points, never through the ranked decision bridge.
+
+Art: the Designer's T-128 / T-129 files are wired: `k3-foto-inspeksi-03`, `k3-kartu-kejadian-14`, `k3-penawaran` (cards and big pictures) and the ring overlay `CINCIN_K3_FOTO`. I looked at the PNG files to write the texts; I did not see them on a screen.
+
+### 1. What changed in Kasus 3
+| Step | Before | Now |
+|---|---|---|
+| Card titles | "Foto pemeriksaan tanggal 3: retak spion sudah ada", "Kutipan pesan tanggal 15: retak lama diminta masuk", ... | "Kartu kejadian", "Perkiraan biaya", "Foto pemeriksaan", "Kutipan pesan" |
+| Estimate | text added "it does not say when each damage happened"; its card had a red ring on one line | price only: "two lines, bumper and mirror, each with its price"; neutral card and big picture |
+| Asking for the photo | "any record from BEFORE the incident?" / "it had a routine service here" | "any other photo of this car?" / "the date is printed in the corner" |
+| Photo | narrator: "photo from the 3rd, the crack is already visible" | NEW reading on the stamped photo (pairs it with the incident card): "Retak spion terlihat di foto ini. Kapan fotonya diambil?" Hari kejadian / Sebelum kejadian / Sesudah kejadian. First miss points to the stamp and to the calendar on the incident card; second miss shows the reasoning (03 before 14) |
+| Estimator's question | "Kapan foto pemeriksaan ini diambil?" | not offered to a player who has done the reading (it is the reading now) |
+| Message extract | asked for, read and questioned BEFORE the panel | reserved for round 2: asked for in the panel, after round 1 and after Mr Gilang's objection. Consent is still asked first, same two lines |
+| Between the rounds | chair asks, Mr Gilang: "I thought both had to be written as new damage" | Mr Gilang first: "Perkiraan itu disusun bengkel, Pak. Perkiraan biaya saja tidak menunjukkan apa yang saya minta." Then his statement is pinned, the player asks his consent, the extract arrives |
+| Follow-up to Mr Gilang | one question | two, pick one: "Siapa yang menyetujui kutipan pesan ini?" (useful, earns the curiosity mark) or "Siapa yang menentukan harga di perkiraan itu?" (polite, nothing new) |
+| Round 2 answer | he admits | players with the mark get one extra line (he himself allowed the extract) before he admits |
+| Message | best = longest (234 characters) | `baik` is the short respectful referral (172); `datar` is correct but cold, no right to add a statement (198); `janji` is the long blanket rejection of both lines that calls itself final (261) |
+
+The two conclusions stay separate: prior damage (reading, then round 1) and requested inclusion (round 2). Each is its own line on the "Temuan" tab: tentative until Mr Gilang corrects the statement of that round, established afterwards.
+
+### 2. Plumbing added (small, optional, reusable)
+- `BuktiInvestigasi.lapis`: pointer overlay for a card's big picture, drawn only once that card's finding exists. `PilihFormatif` tells its exhibit when the reading is answered.
+- `PanelCard.art` (optional): round-2 card and big picture for the panel list and the exhibit sheet, plus the overlay. Without it the old panel art is used.
+- `KonfigInvestigasi.temuanBabak`: a finding born from one panel round (appears when the round is done, established when its statement is corrected).
+- The follow-up builder of this case accepts several questions per statement (same ids as Kasus 1 and 2: `tekan`, `tekan-<id>`).
+
+### 3. Decisions the brief does not spell out (Lead to confirm)
+1. **The message extract moved into the panel for new runs.** Before, the player had read "that crack is an old one, please just put it in" before round 1, which answers both rounds and makes Mr Gilang's objection pointless. Now: round 1 with three cards, his objection, consent, extract, optional question, round 2. Side effect: the round 2 card arrives just before it is asked for, so that scored pick is easier than before; ids and points are the same.
+2. **Zero-point message `janji` is now the blanket rejection, not a promise.** Three options kept (the rubric has no fourth id, as in T-130 decision 1). The plan asks for the long blanket rejection at zero; the old unfounded promise is gone from this case. Both announce an outcome the Investigator has no authority for. Because it is a rejection, Mr Gilang's status now drops by 10 on that option (it rose by 10) and his reply face is worried. Status is display only, not scored.
+3. **The chronology step is a reading with three answers under the stamped photo, not a two-card selection.** The incident card is not on that screen; the pointer names both sources and the notebook holds the card. A two-card selection inside the scored panel pick would have made it unclear which card is the scored one.
+4. **Estimator's question is skipped for new runs** by a branch node (`penaksir-cek`). The old nodes are unchanged and still serve older saves.
+5. **Ring overlay**: on the reading once it is answered (correct or guided), and on the photo's enlarged sheet whenever the photo's finding exists. Never before.
+6. **"Look closer" is gone for the three cards with round-2 art.** The mirror close-up pointed at the disputed item; the new photo carries the crack in its corner print.
+7. **Case picture swapped.** `meja.png` rings ONE estimate line in red under a magnifier while the opening guess asks whether both parts were damaged in the same incident. The guess screen and the hub cover state now show the neutral T-128 estimate, cropped to the same 292 : 150 box by CSS. The Designer may prefer a redrawn desk; it is one constant in `ui/seniKasus.ts`.
+8. **Two lines taken out of the graph** to pay for the new ones: Mr Seno repeating his statement at the panel opening (`inv3.panel-buka.3`) and the chair's "both sides have explained" (`inv3.putusan.1`). Keys stay.
+
+### 4. Saves of players who are mid-case
+- All 48 old node ids exist, are reachable and reach an ending. Eight nodes were added: `baca-foto`, `penaksir-cek`, `panel-pesan-cek`, `panel-izin`, `panel-bukti-pesan`, `pemohon-panel-tanya`, `pemohon-panel-tekan`, `pemohon-panel-tekan-harga`.
+- A save before the photo takes the new flow. A save already past the photo (no `tafsir:urutan` mark) keeps the OLD chain unchanged: estimator's question, consent, extract and Mr Gilang's question before the panel; at the panel the branch sees it already holds the extract and goes straight to round 2 (consent is not asked twice). Checked by following the graph from `bukti-foto` and from `panel-kira`.
+- Such a save shows no reading line on the photo slip and no "tafsiranmu" recap; the finding appears once Mr Gilang corrects his statement.
+- The old mark `press:pemohon:setuju` now counts as the curiosity mark. Rejected reading options persist across a reload (T-130 plumbing).
+- No text key was removed.
+
+### 5. Calculation (id / en / zh). Room: 557 px at 360 x 640 and 617 px at 390 x 700; dialogs 480 / 540 (476 / 536 with the wider button row); chat sheet 527 / 587
+| Screen | 360 x 640 | Room | 390 x 700 | Room | Least spare |
+|---|---|---|---|---|---|
+| Photo reading: choosing | 390 / 416 / 390 | 557 | 390 / 390 / 390 | 617 | 141 |
+| Photo reading: after the first miss | 416 / 462 / 396 | 557 | 416 / 416 / 396 | 617 | 95 |
+| Photo reading: correct (ring on the photo) + Lanjut | 460 / 506 / 460 | 557 | 460 / 460 / 460 | 617 | 51 |
+| Photo reading: guided + Lanjut | 500 / 526 / 480 | 557 | 500 / 500 / 480 | 617 | 31 |
+| Follow-up at the panel: offer with two questions | 425 / 402 / 375 | 557 | 425 / 400 / 375 | 617 | 132 |
+| Follow-up at the panel: useful answer (curiosity mark) | 433 / 431 / 363 | 557 | 433 / 431 / 363 | 617 | 124 |
+| Follow-up at the panel: answer to the second question | 400 / 356 / 333 | 557 | 400 / 356 / 333 | 617 | 157 |
+| Old chain: Mr Gilang's question, offer / answer with mark | 295 / 341 / 295 and 387 / 454 / 363 | 557 | 295 / 341 / 295 and 387 / 454 / 363 | 617 | 103 |
+| Old chain: estimator's question, offer / answer | 295 / 295 / 290 and 381 / 381 / 328 | 557 | 295 / 295 / 290 and 357 / 381 / 328 | 617 | 176 |
+| New evidence: incident card | 402 / 402 / 352 | 557 | 402 / 377 / 352 | 617 | 155 |
+| New evidence: estimate | 352 / 327 / 327 | 557 | 352 / 327 / 327 | 617 | 205 |
+| New evidence: photo (with the hunch recap) | 436 / 456 / 411 | 557 | 436 / 436 / 411 | 617 | 101 |
+| New evidence: message extract (panel and old chain) | 377 / 377 / 352 | 557 | 377 / 377 / 352 | 617 | 180 |
+| Panel round 1, attempts 1 / 2 / 3 (id at 360) | 482 / 504 / 390 | 557 | 482 / 482 / 504 | 617 | 53 |
+| Panel round 2, attempts 1 / 2 / 3 (id at 360) | 504 / 482 / 412 | 557 | 482 / 482 / 504 | 617 | 53 |
+| Exhibit sheet: incident card (new picture) | 391 / 369 / 327 | 476 | 460 / 460 / 374 | 536 | 76 |
+| Exhibit sheet: photo (new picture, with or without ring) | 369 / 369 / 305 | 476 | 438 / 438 / 374 | 536 | 98 |
+| Exhibit sheet: estimate (new picture) | 305 / 325 / 283 | 476 | 396 / 374 / 352 | 536 | 140 |
+| Exhibit sheet: message extract | 362 / 320 / 272 | 476 | 296 / 296 / 250 | 536 | 114 |
+| Notebook sheet: Keterangan tab (worst) | 426 / 403 / 352 | 480 | 386 / 403 / 334 | 540 | 54 |
+| Notebook sheet: Bukti tab (four slips with finding lines) | 324 / 324 / 324 | 480 | 324 / 324 / 324 | 540 | 156 |
+| Notebook sheet: Temuan tab (two findings) | 324 / 346 / 262 | 480 | 284 / 302 / 240 | 540 | 134 |
+| Chat reply sheet: list (3 lines per message) | 397 / 397 / 397 | 527 | 397 / 397 / 397 | 587 | 130 |
+| Chat reply sheet: chosen message in full | 365 / 365 / 292 | 527 | 341 / 341 / 268 | 587 | 162 |
+| Message practice: list | 508 / 508 / 486 | 557 | 508 / 486 / 486 | 617 | 49 |
+| Message practice: chosen message in full | 378 / 378 / 312 | 557 | 356 / 378 / 312 | 617 | 179 |
+
+- My script has 35 rows x 6 = 210 values, 0 over the room (the table above folds the three attempts of a round and the old-chain rows). Tightest: guided photo reading, 526 of 557 px (en at 360 x 640).
+- The full T-115 model (144 screen rows over the three cases: scene beats, guess screen, verdict, corrections, result, archive, practice) was rerun with the new texts and nodes: 0 over. So were the T-126 "Rincian nilai", T-127 and T-130 calculations.
+- Panel card titles are one line in all three languages (checked). Slips: widest title 143 px and finding 138 px in a 158 px column (id, widest handwriting fallback).
+- The enlarged sheets of the incident card and the estimate now have the photo layout (picture 274 x 183 px at 360, caption, source); on screens under 700 px high the quoted statement above a picture is hidden, as it already was for the photo.
+- The case picture box is unchanged (292 x 150 on the guess screen, 168 px wide on the hub), so those screens keep their heights.
+- Not recalculated: desktop (the new screens use the same centred Investigator column and one primary button).
+
+### 6. Play time (estimate from tap and character counts, not played)
+| | Before | Now |
+|---|---|---|
+| Dialog taps on a clean run | 32 | 31 (32 with the curiosity line) |
+| Screens on that run | 19 | 19 (the reading replaces the estimator's offer) |
+| Taps on those screens | baseline | one more (the reading is pick + Lanjut) |
+| Text read on that run (id) | 4587 characters | 4900 (+313, of which +217 are the three reply options) |
+| Real decisions | 4 scored | 4 scored + 1 reading + a choice of question |
+
+My estimate: 15 to 25 seconds longer on a first clean run; each formative miss adds roughly 10 seconds, at most two. If that is too much, the cheapest cut is the length of the zero-point reply (261 characters), which the plan asks to be long.
+Correction to my T-130 note: the single intro line of a reading node is not shown as a dialog line (the screen replaces it), so Kasus 2 is about 49 taps, not 51.
+
+### 7. Audit for early answers (Kasus 3)
+- Fixed in text: all four card titles; chapter 2 goal ("the photo from before the incident"); the two lines that ask for the photo; the narrator's line on the photo; the estimate's "does not say when"; the three "Tebakan awalmu" lines (they said "the photo from the 3rd shows ..."); the message extract read before round 1.
+- Fixed in art use: red ring on the estimate card in the panel list and notebook; yellow ring on the incident card; the mirror close-up button; the desk picture on the guess screen and hub cover state (decision 7).
+- Checked and left: hub hook and list hook (neutral since T-125); case cover photo (`hub-kasus-3.png`: the car and the cracked mirror, both are claimed damage, no date); panel control labels (`panel/teks.ts`, all generic); round names "Babak 1 · kapan retaknya ada" / "Babak 2 · apa yang diminta" (shown only in practice and score details, after the case); the hint and guided texts of attempts 2 and 3 (they name the answer by design); the source line of the photo (shown from the photo card onward, after the reading).
+- By script, reading the id texts in play order: nothing before the reading says "before the incident", "already there" or the day of the photo; nothing before round 1 quotes the message or says that anything was asked for; nothing before round 2 says "on purpose" or "reject".
+- Alt text: the reading's picture describes what is visible (bay, stamp 03 bottom left, corner print with a branching crack). Enlarged sheets keep an empty alt with the caption as text; the photo's caption is now the observable version (`inv3.bukti.foto.kutipan`).
+- Left for the Designer: `panel/meja.png`, `panel/bukti-penawaran.png`, `panel/bukti-kartu-kejadian.png`, `panel/foto-kejadian.png` and `panel/spion.png` are no longer shown in Kasus 3 play; `hub-kasus-3.png` is unchanged.
+
+### 8. New or changed `// [konfirmasi PIC]` lines (`episode/auto-2-inv-3/teks.id.ts`, same keys in en and zh), 10 lines
+- `inv3.tafsir.urutan.alasan`, `.benar`, `.temuan`: wording of prior damage (crack there before the parking incident).
+- `inv3.temuan.pengajuan`: wording of the request (he asked for the old crack to be included; a request, not intent).
+- `inv3.pengajuan.jawab.jeli`: he himself allowed the extract to be used.
+- `inv3.pesan.baik`, `inv3.pesan.datar`, `inv3.pesan.janji`: the referral, the cold version, the blanket rejection.
+- `inv3.pesan.janji.alasan`, `inv3.pesan.janji.2`: rejecting a claim is not the Investigator's to decide; only the mirror line was shown to be a problem.
+Existing marked lines reused unchanged: the consent lines `inv3.kutipan.1` / `.2` (now also spoken in the panel), `inv3.tekan.pemohon.jawab`. Reworded and still marked: `inv3.pesan.baik.alasan`. en / zh wording of all new strings is mine.
+
+### 9. Files
+- Types and state: `client/src/cerita/tipe.ts`, `client/src/cerita/investigasi/status.ts`.
+- UI: `investigasi/LayarInvestigasi.tsx`, `ui/PilihFormatif.tsx`, `ui/panel/PanelRound.tsx`, `ui/panel/PanelExhibit.tsx`, `ui/seniKasus.ts`, `ui/ronde2.css`, `ui/alur.css` (one rule: the case picture keeps its 292 : 150 box for any image).
+- Case: `episode/auto-2-inv-3/episode.ts`, `teks.id.ts`, `teks.en.ts`, `teks.zh.ts`.
+- Not edited: `skor.ts`, `simpan.ts`, `acara.ts`, the shared rubric, Kasus 1 and 2, the dictionaries, the Designer's art, `seniR2.ts`, `panel/aset.ts`, `panel/teks.ts`, any test or QA script.
+- Outside the repo (run from `client/` with `npx tsx`): calculation `C:\Users\User\AppData\Local\Temp\claude\ec29f026d20d029c\0c4fe0f7-0adb-4cb1-b49a-10019af309f5\scratchpad\t132\hitung.mts`, static check `C:\Users\User\AppData\Local\Temp\claude\ec29f026d20d029c\0c4fe0f7-0adb-4cb1-b49a-10019af309f5\scratchpad\t132\periksa.mts`.
+
+### 10. Hooks for QA
+`[data-pilih-formatif="urutan"]` with `[data-opsi="saat|sebelum|sesudah"]`; `[data-seni-r2="k3-foto-inspeksi-03"][data-lapis="k3-cincin"]` (ring on the reading); `.pn-foto[data-seni-r2]` and `.pn-foto-lapis` (enlarged sheet); `.pn-kartu-gambar[data-seni-r2]`; `[data-tanya-lanjut="setuju|harga"]`; `[data-bukti-baru="pesan-pengajuan"]` now appears at node `panel-bukti-pesan`.
+
+### 11. Open
+- Not seen in a browser or on a phone. Most worth a look: the reading on the stamped photo (is "03" readable at phone size), the ring landing on the mirror, the enlarged sheets with the new pictures, the cropped estimate on the guess screen and hub, the consent beat inside the panel room, the list of three replies.
+- Tests and QA scripts that read Kasus 3 were not run or edited. `client/src/cerita/investigator.expect.test.ts` and its snapshot will differ: node order (extract inside the panel, estimator's question skipped), card titles, message texts, Mr Gilang's status after `janji`. Anything that taps `[data-foto-dekat]` on these cards, or expects the estimate card art, needs updating.
+- Ranked event runs use the same screens; the formative steps add no server call, but I could not exercise a run.
+- With this slice all three cases are on the round-2 plumbing. The old three-tap licence check, timeline, clause card and (for Kasus 3 play) several old panel art files are now unused code and art; removing them is a separate clean-up.

@@ -27,7 +27,7 @@ export const TEKS_AUTO_2_INV_3_ID: Record<string, string> = {
   'inv3.bab.1.judul': 'Berkas',
   'inv3.bab.1.tujuan': 'Baca kartu kejadian, lalu catat dua keterangan.',
   'inv3.bab.2.judul': 'Bukti',
-  'inv3.bab.2.tujuan': 'Periksa foto sebelum kejadian dan kutipan pesan pengajuan.',
+  'inv3.bab.2.tujuan': 'Pasangkan foto bengkel dengan kartu kejadian, lalu urutkan tanggalnya.',
   'inv3.bab.3.judul': 'Panel',
   'inv3.bab.3.tujuan': 'Tunjukkan bukti yang menjawab tiap keterangan, satu per satu.',
   'inv3.bab.4.judul': 'Tindak lanjut',
@@ -37,16 +37,16 @@ export const TEKS_AUTO_2_INV_3_ID: Record<string, string> = {
   'inv3.judul.kartu': 'Kasus #3 · Dua Baris di Bengkel',
   'inv3.buka.1': 'Kasus baru, Investigator. Tanggal 14, mobil Pak Gilang tertabrak di area parkir. Perkiraan biaya bengkelnya berisi dua baris: bumper dan spion. Mulai dari kartu kejadiannya.',
   'inv3.bukti.kejadian.1': 'Kartu kejadian tanggal 14: sebuah mobil mundur dan mengenai bumper. Petugas parkir menguatkan benturan itu. Di kolom kerusakan tertulis: bumper penyok, spion retak.',
-  'inv3.bukti.kejadian.judul': 'Kartu kejadian: benturan bumper di area parkir',
+  'inv3.bukti.kejadian.judul': 'Kartu kejadian',
   'inv3.bukti.kejadian.sumber': 'Sumber: laporan kejadian tanggal 14, dikuatkan petugas parkir',
   'inv3.tebak.1': 'Tidak ada benar atau salah. Tebakanmu kita cek lagi sesudah buktinya terkumpul.',
   'inv3.tebak.tanya': 'Apakah kedua bagian rusak pada kejadian yang sama?',
   'inv3.tebak.pilih.sama': 'Ya, kejadian yang sama',
   'inv3.tebak.pilih.beda': 'Tidak, beda kejadian',
   'inv3.tebak.pilih.belum': 'Belum tahu',
-  'inv3.tebak.balik.sama': 'Tebakan awalmu: kejadian yang sama. Foto tanggal 3 menunjukkan retak spion sudah ada. Tidak apa-apa: sekarang kamu punya buktinya.',
-  'inv3.tebak.balik.beda': 'Tebakan awalmu: beda kejadian. Sekarang ada foto tanggal 3, jadi itu bukan lagi dugaan.',
-  'inv3.tebak.balik.belum': 'Tebakan awalmu: belum tahu. Sikap yang baik. Sekarang foto tanggal 3 yang menjawab.',
+  'inv3.tebak.balik.sama': 'Tebakan awalmu: kejadian yang sama. Tafsiranmu dari dua catatan: retak spion sudah ada sebelum kejadian parkir.',
+  'inv3.tebak.balik.beda': 'Tebakan awalmu: beda kejadian. Tafsiranmu dari dua catatan: retak spion sudah ada sebelum kejadian parkir.',
+  'inv3.tebak.balik.belum': 'Tebakan awalmu: belum tahu. Sikap yang baik. Sekarang dua catatannya kamu baca sendiri.',
 
   // Keterangan (pernyataan yang dicatat)
   'inv3.pemohon.1': 'Ruang wawancara. Pak Gilang, pemilik mobil, membawa perkiraan biaya dari bengkel.',
@@ -57,17 +57,32 @@ export const TEKS_AUTO_2_INV_3_ID: Record<string, string> = {
   'inv3.penaksir.2': 'Mobilnya masuk sehari sesudah kejadian. Saya periksa, lalu saya susun perkiraannya.',
   'inv3.penaksir.3': 'Saya hanya menulis perkiraan biaya.',
   'inv3.pernyataan.penaksir': 'Saya hanya menulis perkiraan biaya.',
-  'inv3.bukti.penawaran.1': 'Perkiraan biaya bengkel: dua baris, bumper dan spion, masing-masing dengan harganya. Tidak tertulis kapan tiap kerusakan terjadi.',
-  'inv3.bukti.penawaran.judul': 'Perkiraan biaya: dua baris, bumper dan spion',
+  'inv3.bukti.penawaran.1': 'Perkiraan biaya bengkel: dua baris, bumper dan spion, masing-masing dengan harganya.',
+  'inv3.bukti.penawaran.judul': 'Perkiraan biaya',
   'inv3.bukti.penawaran.sumber': 'Sumber: bengkel, disusun Pak Seno',
   'inv3.selisih.1': 'Benturan bumpernya dikuatkan petugas parkir. Spionnya belum. Kita tidak menduga dan tidak menuduh: kita cari catatan yang bertanggal.',
 
   // Bukti 1: foto pemeriksaan sebelum kejadian
-  'inv3.foto.1': 'Kamu bertanya baik-baik: apakah bengkel punya catatan mobil ini dari sebelum kejadian?',
-  'inv3.foto.2': 'Ada. Mobil ini pernah servis berkala di sini. Ini foto pemeriksaannya.',
-  'inv3.bukti.foto.1': 'Foto pemeriksaan kendaraan tanggal 3: nomor rangkanya sama dengan mobil Pak Gilang, dan retak bercabang di sudut kaca spion sudah terlihat.',
-  'inv3.bukti.foto.judul': 'Foto pemeriksaan tanggal 3: retak spion sudah ada',
+  'inv3.foto.1': 'Kamu bertanya baik-baik: apakah bengkel punya foto lain dari mobil ini?',
+  'inv3.foto.2': 'Ada. Ini dari lembar pemeriksaan kami. Tanggalnya tercetak di sudut fotonya.',
+  'inv3.bukti.foto.1': 'Foto pemeriksaan masuk ke buku catatanmu. Nomor rangkanya sama dengan mobil Pak Gilang.',
+  // T-132: keterangan gambar besar foto = yang TERLIHAT di lembarnya (cap, nomor rangka, cetakan sudut), tanpa kesimpulannya
+  'inv3.bukti.foto.kutipan': 'Lembar pemeriksaan bengkel, cap tanggal 03. Nomor rangka sama dengan mobil Pak Gilang. Di cetakan sudut: kaca spion retak bercabang.',
+  'inv3.bukti.foto.judul': 'Foto pemeriksaan',
   'inv3.bukti.foto.sumber': 'Sumber: lembar servis berkala bengkel, nomor rangka sama',
+  // T-132 (babak 2) TAFSIR urutan: foto bercap tanggal dipasangkan dengan kartu kejadian (formatif, tanpa poin)
+  'inv3.baca.foto.1': 'Kamu menaruh foto itu di samping kartu kejadian.',
+  'inv3.tafsir.urutan.tanya': 'Retak spion terlihat di foto ini. Kapan fotonya diambil?',
+  'inv3.tafsir.urutan.gambar': 'Foto sebuah mobil di ruang bengkel. Cap tanggal di sudut kiri bawah: 03. Cetakan kecil di sudut kanan atas memperlihatkan kaca spion dengan retak bercabang.',
+  'inv3.tafsir.urutan.pilih.saat': 'Hari kejadian',
+  'inv3.tafsir.urutan.pilih.sebelum': 'Sebelum kejadian',
+  'inv3.tafsir.urutan.pilih.sesudah': 'Sesudah kejadian',
+  'inv3.tafsir.urutan.salah.saat': 'Dua catatan itu tidak bertanggal sama. Bandingkan cap di sudut foto ini dengan kalender di kartu kejadian.',
+  'inv3.tafsir.urutan.salah.sesudah': 'Urutannya belum pas. Bandingkan cap di sudut foto ini dengan kalender di kartu kejadian.',
+  'inv3.tafsir.urutan.alasan': 'Cap foto ini 03; kartu kejadian bertanggal 14. Tanggal 3 lebih dulu: retak spion itu sudah ada sebelum kejadian parkir.', // [konfirmasi PIC] rumusan kerusakan lama
+  'inv3.tafsir.urutan.benar': 'Cap foto 03, kartu kejadian 14: retak spion itu sudah ada sebelum kejadian parkir.', // [konfirmasi PIC] rumusan kerusakan lama
+  'inv3.tafsir.urutan.temuan': 'Foto pemeriksaan bercap 03, kartu kejadian bertanggal 14: retak spion sudah ada sebelum kejadian parkir.', // [konfirmasi PIC] rumusan kerusakan lama
+  'inv3.tafsir.urutan.ringkas': 'sebelum kejadian',
   'inv3.tekan.penaksir.tanya': 'Tanya: Kapan foto pemeriksaan ini diambil?',
   'inv3.tekan.penaksir.jawab': 'Tanggal 3, waktu servis berkala. Tanggal dan nomor rangkanya tercetak otomatis di lembar pemeriksaan.',
 
@@ -75,10 +90,13 @@ export const TEKS_AUTO_2_INV_3_ID: Record<string, string> = {
   'inv3.kutipan.1': 'Di berkas bengkel ada pesan pengajuan dari Pak Gilang. Kamu meminta izinnya dulu sebelum membacanya.', // [konfirmasi PIC] persetujuan memperlihatkan bukti
   'inv3.kutipan.2': 'Silakan. Kutipan itu boleh diperlihatkan.', // [konfirmasi PIC]
   'inv3.bukti.pesan.1': 'Kutipan pesan Pak Gilang kepada bengkel, tanggal 15: “Retak spion itu sudah lama. Tolong masukkan saja sebagai kerusakan kejadian ini.”',
-  'inv3.bukti.pesan.judul': 'Kutipan pesan tanggal 15: retak lama diminta masuk',
+  'inv3.bukti.pesan.judul': 'Kutipan pesan',
   'inv3.bukti.pesan.sumber': 'Sumber: pesan Pak Gilang kepada bengkel, diperlihatkan dengan persetujuannya', // [konfirmasi PIC]
   'inv3.tekan.pemohon.tanya': 'Tanya: Siapa yang menyetujui kutipan pesan ini?',
   'inv3.tekan.pemohon.jawab': 'Saya sendiri. Pesan itu dari nomor saya, dan saya mengizinkan kutipannya dipakai untuk telaah ini.', // [konfirmasi PIC]
+  // T-132: pertanyaan kedua (sopan, tidak membuka hal baru); pertanyaan pertama = yang berguna (tanda jeli)
+  'inv3.tekan.pemohon.harga.tanya': 'Tanya: Siapa yang menentukan harga di perkiraan itu?',
+  'inv3.tekan.pemohon.harga.jawab': 'Pak Seno, penaksir bengkelnya. Angkanya saya terima apa adanya.',
 
   // Panel telaah (simulasi telaah bukti; bukan sidang)
   'inv3.panel-buka.1': 'Panel telaah klaim. Pak Arya memimpin; Pak Seno dan Pak Gilang hadir, dan keduanya boleh menjelaskan.', // [konfirmasi PIC] nama panel
@@ -112,6 +130,8 @@ export const TEKS_AUTO_2_INV_3_ID: Record<string, string> = {
 
   // Keterangan kedua (niat masih terbuka sesudah babak 1)
   'inv3.kira.1': 'Lalu mengapa retak lama itu ada di perkiraan biaya kejadian ini?',
+  // T-132 (rencana butir "3 · Workshop"): keberatan wajar Pak Gilang sebelum kutipan pesannya diajukan
+  'inv3.kira.tapi': 'Perkiraan itu disusun bengkel, Pak. Perkiraan biaya saja tidak menunjukkan apa yang saya minta.',
   'inv3.kira.2': 'Saya kira kedua perbaikan memang harus ditulis sebagai kerusakan baru.',
   'inv3.pernyataan.pemohon-panel': 'Saya kira kedua perbaikan memang harus ditulis sebagai kerusakan baru.',
 
@@ -130,10 +150,14 @@ export const TEKS_AUTO_2_INV_3_ID: Record<string, string> = {
   'inv3.panel.pengajuan.koreksi': 'Keterangan dikoreksi: retak lama diminta masuk sebagai kerusakan kejadian ini',
   'inv3.pengajuan.jawab.1': 'Di kutipan pesan tanggal 15, Pak Gilang menulis bahwa retak spion itu sudah lama dan meminta agar dimasukkan sebagai kerusakan kejadian ini.',
   'inv3.pengajuan.jawab.2': 'Pak Gilang, Pak Seno, silakan menanggapi.', // [konfirmasi PIC] hak menanggapi
+  'inv3.pengajuan.jawab.jeli': 'Kamu ingat jawabannya tadi: ia sendiri yang mengizinkan kutipan itu dipakai.', // [konfirmasi PIC] persetujuan memperlihatkan bukti; hanya untuk pemain bertanda jeli
   'inv3.pengajuan.jawab.3': 'Ya, itu pesan saya. Saya tahu retaknya sudah lama, dan saya yang meminta itu dimasukkan. Saya ingin memperbaikinya sekalian.',
   'inv3.pengajuan.jawab.4': 'Saya menulisnya sesuai permintaan. Seharusnya baris itu saya tandai.',
   'inv3.pengajuan.jawab.5': 'Terima kasih sudah menjelaskan. Keterangan Bapak berdua kami catat apa adanya.', // [konfirmasi PIC]
   'inv3.pengajuan.koreksi.1': 'Pak Gilang mengoreksi keterangannya sekali lagi. Kamu memperbaruinya di buku catatanmu.',
+  // T-132: kesimpulan kedua sebagai baris sendiri di halaman "Temuan" (tafsiran sesudah babak 2, temuan sesudah dikoreksi)
+  'inv3.temuan.pengajuan': 'Kutipan pesan tanggal 15: Pak Gilang meminta retak lama itu dimasukkan sebagai kerusakan kejadian ini.', // [konfirmasi PIC] rumusan permintaan (bukan niat)
+  'inv3.temuan.pengajuan.ringkas': 'diminta dimasukkan',
 
   // Kesimpulan (tabel kasus ini: teruskan untuk pemeriksaan 30, minta klarifikasi saja 15, nyatakan seluruh klaim curang 0)
   'inv3.putusan.1': 'Kedua pihak sudah menjelaskan dan mengoreksi keterangannya.', // [konfirmasi PIC]
@@ -152,19 +176,19 @@ export const TEKS_AUTO_2_INV_3_ID: Record<string, string> = {
   'inv3.putusan.polis.1': 'Belum tepat. Yang terbukti hanya soal baris spion; benturan bumpernya dikuatkan petugas parkir. Kita tidak menyatakan seseorang curang: temuan itu diteruskan kepada tim yang berwenang, dan bumper dicatat terpisah.', // [konfirmasi PIC]
 
   // Pesan untuk Pak Gilang (30: hormat + temuan dan alasan + langkah berikutnya + hak menambahkan keterangan; 15: isi benar saja; 0: janji tanpa dasar)
-  'inv3.pesan.1': 'Terakhir, kabari Pak Gilang. Sampaikan temuannya, alasannya, dan langkah berikutnya dengan hormat.',
+  'inv3.pesan.1': 'Terakhir, kabari Pak Gilang. Sampaikan langkah berikutnya dengan hormat.',
   'inv3.pesan.2': 'Jadi bagaimana kelanjutan klaim saya?',
   'inv3.pesan.tanya': 'Pesan mana yang kamu kirim?',
-  'inv3.pesan.baik': 'Terima kasih sudah menjelaskan, Pak Gilang. Saya akan mencatat kerusakan bumper dan meminta tim berwenang menelaah bagian spion, karena foto tanggal 3 dan pesan Bapak menunjukkan retaknya sudah lama. Bapak bisa menambahkan keterangan.', // [konfirmasi PIC] langkah berikutnya + hak menambahkan keterangan
-  'inv3.pesan.datar': 'Bagian spion kami teruskan untuk diperiksa karena retaknya sudah ada sebelum kejadian. Bumper dicatat terpisah.', // [konfirmasi PIC]
-  'inv3.pesan.janji': 'Tenang Pak, bumper dan spionnya saya usahakan tetap diganti semuanya.',
-  'inv3.pesan.baik.alasan': 'Pak Gilang tahu temuannya, alasannya, dan bahwa ia boleh menambahkan keterangan.', // [konfirmasi PIC]
-  'inv3.pesan.janji.alasan': 'Pak Gilang lega sekarang, tetapi janji itu tidak punya dasar.',
+  'inv3.pesan.baik': 'Terima kasih sudah menjelaskan, Pak Gilang. Baris spion kami teruskan kepada tim yang berwenang untuk ditelaah; bumper dicatat terpisah. Bapak boleh menambahkan keterangan.', // [konfirmasi PIC] rujukan: langkah berikutnya + hak menambahkan keterangan
+  'inv3.pesan.datar': 'Retak spion sudah ada sebelum kejadian parkir, sesuai foto pemeriksaan dan kutipan pesan. Baris spion diteruskan kepada tim yang berwenang untuk diperiksa. Kerusakan bumper dicatat terpisah. Sekian.', // [konfirmasi PIC] isi benar, tanpa hak menambahkan keterangan
+  'inv3.pesan.janji': 'Pak Gilang, foto pemeriksaan dan pesan Bapak sendiri membuktikan retak spion itu sudah lama dan sengaja dimasukkan. Karena itu seluruh klaim ini, bumper maupun spion, kami tolak dan tidak akan diproses lagi. Keputusan ini final dan tidak dapat ditinjau kembali.', // [konfirmasi PIC] penolakan menyeluruh tanpa wewenang (pilihan bernilai 0)
+  'inv3.pesan.baik.alasan': 'Pak Gilang tahu langkah berikutnya, dan bahwa ia boleh menambahkan keterangan.', // [konfirmasi PIC]
+  'inv3.pesan.janji.alasan': 'Kerusakan bumper yang terbukti ikut ditolak, dan menolak klaim bukan wewenangmu.', // [konfirmasi PIC] wewenang
   'inv3.pesan.baik.1': 'Saya mengerti. Terima kasih sudah menjelaskannya baik-baik. Saya akan menambahkan keterangan saya.',
   'inv3.pesan.datar.1': 'Begitu... Lalu apa yang bisa saya lakukan sekarang?',
   'inv3.pesan.datar.2': 'Isinya benar, tetapi Pak Gilang tidak tahu ia boleh menambahkan keterangan.', // [konfirmasi PIC]
-  'inv3.pesan.janji.1': 'Wah, syukurlah! Jadi dua-duanya diganti, ya.',
-  'inv3.pesan.janji.2': 'Temuannya tidak berubah. Janji tanpa dasar akan mengecewakan Pak Gilang dua kali.',
+  'inv3.pesan.janji.1': 'Bumper juga ditolak? Padahal petugas parkir sendiri menguatkan benturannya.',
+  'inv3.pesan.janji.2': 'Yang terbukti hanya soal baris spion. Menolak seluruh klaim, apalagi menyebutnya final, bukan wewenang kita di sini.', // [konfirmasi PIC] wewenang; yang terbukti hanya baris spion
 
   // Akhir
   'inv3.akhir.tuntas.1': 'Kasus selesai, Investigator. Kamu menunjukkan buktinya satu per satu, memberi kesempatan menjelaskan, lalu meneruskan temuannya ke tempat yang tepat.',
@@ -178,7 +202,7 @@ export const TEKS_AUTO_2_INV_3_ID: Record<string, string> = {
   // Layar hasil: kalimat Pak Gilang menurut pesan yang dikirim, arsip (berkas yang sudah dikoreksi)
   'inv3.balas.baik': 'Terima kasih sudah menjelaskan dengan baik, Investigator. Saya tahu apa yang diperiksa, dan saya akan menambahkan keterangan saya.', // [konfirmasi PIC]
   'inv3.balas.datar': 'Alasannya saya mengerti. Tapi saya masih tidak tahu apa yang bisa saya lakukan.',
-  'inv3.balas.janji': 'Dua-duanya diganti, kan? Saya sudah bilang ke bengkel. Semoga benar begitu.',
+  'inv3.balas.janji': 'Bumper saya ikut ditolak, padahal ada saksinya. Saya tidak tahu harus bertanya ke mana lagi.',
   'inv3.arsip.judul': 'Berkas yang sudah dikoreksi',
   'inv3.garis.1': 'Tanggal 3 · foto pemeriksaan: retak spion sudah ada',
   'inv3.garis.2': 'Tanggal 14 · kejadian parkir: bumper penyok, dikuatkan petugas parkir',

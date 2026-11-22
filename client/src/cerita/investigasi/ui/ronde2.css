@@ -96,3 +96,13 @@
 .pf[data-susun="kolom"] .pf-pilih { justify-items: start; padding: 6px 10px; font-size: 16px; line-height: 21px; text-align: left; }
 .pf-tempel[data-berhadiah] { grid-template-columns: 100px minmax(0, 1fr); align-items: start; }
 .pf-tempel[data-berhadiah] > .r2-slip { border: 2px solid #212121; box-sizing: content-box; margin: 2px 0; }
+
+/* ==================================================================== T-132 (irisan kasus 3): penunjuk temuan + seni babak 2 di panel
+   - .r2-lapis / .pn-foto-lapis: lapisan tembus pandang 288 x 192 di atas gambar bukti (cincin spion, seni T-129); hanya dipasang
+     sesudah temuan kartu itu ada. Menumpang persis di atas gambarnya (ikut mengecil di lembar yang lebih sempit dari 288 px).
+   - kartu daftar panel ber-seni babak 2: potongan 72 x 44 mulai x = 6 (bukan 12), supaya cap tanggal dan kalendernya utuh */
+.r2-lapis { position: absolute; left: 0; top: 0; pointer-events: none; animation: r2-muncul .2s steps(3) both; }
+.pn-foto[data-seni-r2] .pn-foto-bingkai { border: 2px solid #212121; background: #212121; }
+.pn-foto .pn-foto-lapis { position: absolute; left: 0; top: 0; width: 100%; height: 100%; pointer-events: none; }
+.pn-kartu-gambar[data-seni-r2] { background-position: -6px -12px; }
+@media (prefers-reduced-motion: reduce) { .r2-lapis { animation: none; } }

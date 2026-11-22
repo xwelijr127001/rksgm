@@ -37,9 +37,32 @@
  * kasus 1-2. Skor = rubrik bersama (babak 20 / 12 / 5; putusan 'tambahan' = "Teruskan untuk pemeriksaan" 30, 'layak' = minta
  * klarifikasi saja 15, 'polis' = nyatakan seluruh klaim curang 0; pesan 30 / 15 / 0). Id kartu, babak, putusan dan pesan sama
  * dengan manifes 'kasus-3' (investigasi/skor.ts selisihManifes = []).
+ *
+ * T-132 BABAK 2 (masukan Pak Peterson, rencana docs/superpowers/plans/2026-11-22-peterson-feedback.md "3 · Workshop"), di atas
+ * sambungan bersama T-127 / T-130. Semua tambahan FORMATIF: tanpa poin, bukan pilihan bernilai, tanpa tanda yang dibaca skor. Yang
+ * TIDAK berubah: id node lama, dua babak panel beserta id kartu, kartu yang diterima dan urutan percobaannya, id putusan dan pesan,
+ * tanda skor, versi.
+ *  b1 judul kartu NETRAL (nama sumbernya); seni kartu = seni babak 2 (kartu kejadian berkalender 14, perkiraan biaya dua baris
+ *     tanpa cincin merah); perkiraan biaya hanya memberi harga
+ *  b2 kfoto (dua baris, tidak lagi menyebut "sebelum kejadian") -> baca-foto (BARU, tafsir 'urutan': foto bercap 03 dipasangkan
+ *     dengan kartu kejadian bertanggal 14; kapan foto itu diambil?) -> bukti-foto -> penaksir-cek (BARU, cabang): pemain yang
+ *     SUDAH membaca urutannya langsung ke panel-buka. KUTIPAN PESAN TIDAK LAGI DIBACA SEBELUM PANEL (rencana: "the consented
+ *     message extract is reserved for round 2"): dulu pemain sudah membaca "retak itu sudah lama, tolong masukkan" sebelum babak 1.
+ *  b3 panel-buka tiga baris -> babak 'kronologi' (kartu kejadian / foto / perkiraan biaya) -> hak jawab -> koreksi ->
+ *     panel-kira: Pak Gilang berkeberatan dengan wajar ("perkiraan biaya saja tidak menunjukkan apa yang saya minta"), lalu
+ *     keterangan keduanya dicatat -> panel-pesan-cek (BARU, cabang) -> panel-izin (BARU: persetujuannya diminta, di depan panel)
+ *     -> panel-bukti-pesan (BARU: kartu 'pesan-pengajuan') -> pemohon-panel-tanya (BARU: PILIHAN dua pertanyaan, 'tekan' =
+ *     siapa yang menyetujui kutipan pesan: BERGUNA, tanda jeli | 'tekan-harga' = siapa yang menentukan harga: sopan, tidak
+ *     membuka hal baru) -> babak 'pengajuan'. Dua kesimpulan tetap terpisah: kerusakan lama, lalu permintaan memasukkannya.
+ *  RANTAI LAMA (hanya simpanan dari sebelum T-132; id, isi dan sambungannya tidak berubah): penaksir-tanya [-> penaksir-tekan]
+ *     -> kpesan -> bukti-pesan -> pemohon-tanya [-> pemohon-tekan] -> panel-buka. Simpanan itu sudah memegang kartu pesannya, jadi
+ *     panel-pesan-cek langsung meneruskannya ke babak 'pengajuan'.
+ *  b4 putusan-buka satu baris; pesan: tiga pesan ditulis ulang (id dan nilai sama, lihat komentar node 'pesan')
+ * Simpanan di tengah kasus: semua node lama masih ada dan terjangkau; node baru hanya DISISIPKAN. Simpanan yang sudah melewati
+ * 'kfoto' tidak punya tanda `tafsir:urutan`: slip fotonya tanpa baris tafsir sampai Pak Gilang mengoreksi keterangannya.
  */
 import type { Baris, CueLatar, Efek, Ekspresi, Episode, IdNode, KonfigInvestigasi, Kondisi, MusikNode, NodeCerita, NodeInvestigasi, Round } from '../../tipe';
-import { PILIH_LANJUT, PILIH_TEKAN, tandaBukti, tandaCatat, tandaKoreksi, tandaPanel, tandaPanelKeliru, tandaPesan, tandaPutusan, tandaTebak, tandaTekan } from '../../investigasi/status';
+import { PILIH_LANJUT, pilihTekan, semuaPress, tandaBukti, tandaCatat, tandaKoreksi, tandaPanel, tandaPanelKeliru, tandaPesan, tandaPutusan, tandaTafsir, tandaTebak, tandaTekan } from '../../investigasi/status';
 import { EPISODE_AUTO_2 } from '../auto-2/episode';
 import { PEMERAN_KASUS_3 } from './pemeran';
 import { TEKS_AUTO_2_INV_3 } from './teks';
@@ -85,23 +108,49 @@ const KASUS: KonfigInvestigasi = {
   awalan: 'inv3',
   kait: 'inv3.kait',
   nasabah: 'pemohon',
-  // Wajah Pak Gilang saat membalas (seni T-103: lega / senang -> lega, cemas -> cemas).
-  balasan: { baik: 'lega', datar: 'cemas', janji: 'senang' },
+  // Wajah Pak Gilang saat membalas (seni T-103: lega / senang -> lega, cemas -> cemas). T-132: pesan bernilai 0 kini penolakan
+  // menyeluruh (bukan lagi janji penggantian), jadi balasannya cemas.
+  balasan: { baik: 'lega', datar: 'cemas', janji: 'cemas' },
   bingkai: 'seni',
   pernyataan: [
-    // "Tanya lebih lanjut" (kontrak beku `Press`): satu pertanyaan dan satu jawaban per pernyataan, tanpa poin.
-    { id: 'pemohon', siapa: 'pemohon', teks: 'inv3.pernyataan.pemohon', press: { id: 'setuju', questionKey: 'inv3.tekan.pemohon.tanya', answerKey: 'inv3.tekan.pemohon.jawab' } },
+    // "Tanya lebih lanjut" (kontrak `Press`), tanpa poin.
+    // RANTAI LAMA (simpanan dari sebelum T-132): satu pertanyaan per kunjungan, id dan tanda lama. 'setuju' kini BERGUNA, jadi
+    // simpanan lama yang pernah membukanya ikut mendapat tanda jeli.
+    { id: 'pemohon', siapa: 'pemohon', teks: 'inv3.pernyataan.pemohon', press: { id: 'setuju', questionKey: 'inv3.tekan.pemohon.tanya', answerKey: 'inv3.tekan.pemohon.jawab', berguna: true } },
     { id: 'penaksir', siapa: 'penaksir', teks: 'inv3.pernyataan.penaksir', press: { id: 'kapan', questionKey: 'inv3.tekan.penaksir.tanya', answerKey: 'inv3.tekan.penaksir.jawab' } },
     // Keterangan kedua Pak Gilang, diucapkan di panel sesudah babak 1 (dibantah di babak 2).
-    { id: 'pemohon-panel', siapa: 'pemohon', teks: 'inv3.pernyataan.pemohon-panel' },
+    // T-132: kunjungan baru (di panel, sesudah kutipan pesannya diperlihatkan) = DUA pertanyaan, pilih satu:
+    //  - 'setuju': "Siapa yang menyetujui kutipan pesan ini?" = BERGUNA (soal sumbernya: pesan itu dari nomornya sendiri dan ia
+    //    sendiri yang mengizinkannya dipakai) -> tanda jeli (`press:pemohon-panel:setuju`).
+    //  - 'harga': "Siapa yang menentukan harga di perkiraan itu?" = dijawab dengan sopan, tidak membuka hal baru.
+    {
+      id: 'pemohon-panel', siapa: 'pemohon', teks: 'inv3.pernyataan.pemohon-panel',
+      press: { id: 'setuju', questionKey: 'inv3.tekan.pemohon.tanya', answerKey: 'inv3.tekan.pemohon.jawab', berguna: true },
+      pressLain: [{ id: 'harga', questionKey: 'inv3.tekan.pemohon.harga.tanya', answerKey: 'inv3.tekan.pemohon.harga.jawab' }],
+    },
   ],
-  // Urut terkumpul (buku catatan).
+  // Urut terkumpul (buku catatan). T-132: judul kartu NETRAL; tiga kartu memakai seni babak 2 (T-128 / T-129). `kutipan` foto =
+  // apa yang TERLIHAT di lembarnya (cap tanggal, nomor rangka, cetakan sudut), bukan kesimpulannya. `lapis` = cincin di sekeliling
+  // spion, baru digambar sesudah temuannya ada. Kutipan pesan tidak punya seni babak 2: gambar kartunya tetap.
   bukti: [
-    { id: 'kartu-kejadian', judul: 'inv3.bukti.kejadian.judul', sumber: 'inv3.bukti.kejadian.sumber', ikon: 'kartu', kutipan: 'inv3.bukti.kejadian.1' },
-    { id: 'penawaran', judul: 'inv3.bukti.penawaran.judul', sumber: 'inv3.bukti.penawaran.sumber', ikon: 'polis', kutipan: 'inv3.bukti.penawaran.1' },
-    { id: 'foto-inspeksi', judul: 'inv3.bukti.foto.judul', sumber: 'inv3.bukti.foto.sumber', ikon: 'foto', kutipan: 'inv3.bukti.foto.1' },
+    { id: 'kartu-kejadian', judul: 'inv3.bukti.kejadian.judul', sumber: 'inv3.bukti.kejadian.sumber', ikon: 'kartu', kutipan: 'inv3.bukti.kejadian.1', seni: 'k3-kartu-kejadian-14' },
+    { id: 'penawaran', judul: 'inv3.bukti.penawaran.judul', sumber: 'inv3.bukti.penawaran.sumber', ikon: 'polis', kutipan: 'inv3.bukti.penawaran.1', seni: 'k3-penawaran' },
+    { id: 'foto-inspeksi', judul: 'inv3.bukti.foto.judul', sumber: 'inv3.bukti.foto.sumber', ikon: 'foto', kutipan: 'inv3.bukti.foto.kutipan', seni: 'k3-foto-inspeksi-03', lapis: 'k3-cincin' },
     { id: 'pesan-pengajuan', judul: 'inv3.bukti.pesan.judul', sumber: 'inv3.bukti.pesan.sumber', ikon: 'struk', kutipan: 'inv3.bukti.pesan.1' },
   ],
+  // T-132 TAFSIR 'urutan' (formatif): foto pemeriksaan bercap 03 dipasangkan dengan kartu kejadian bertanggal 14. Pilihan pertama =
+  // apa yang dikatakan pemohon ("malam itu juga"); yang tepat = sebelum kejadian. Tafsiran pemain sampai Pak Gilang mengoreksi
+  // keterangannya di babak 1; sesudah itu temuan.
+  tafsir: [
+    {
+      id: 'urutan', bukti: 'foto-inspeksi', tampilan: 'bingkai', seni: 'k3-foto-inspeksi-03', seniKet: 'inv3.tafsir.urutan.gambar', tanya: 'inv3.tafsir.urutan.tanya', tepat: 'sebelum',
+      opsi: (['saat', 'sebelum', 'sesudah'] as const).map((x) => ({ id: x, teks: `inv3.tafsir.urutan.pilih.${x}` })),
+      temuan: 'inv3.tafsir.urutan.temuan', ringkas: 'inv3.tafsir.urutan.ringkas', mapanSaat: tandaKoreksi(BABAK[0]!.statementId),
+    },
+  ],
+  // T-132: kesimpulan KEDUA (permintaan memasukkan retak lama) lahir dari babak 2: tafsiran sesudah kutipan pesannya diajukan,
+  // temuan sesudah Pak Gilang mengoreksi keterangan keduanya. Dua kesimpulan itu tetap dua baris terpisah di halaman "Temuan".
+  temuanBabak: [{ round: 'pengajuan', bukti: 'pesan-pengajuan', temuan: 'inv3.temuan.pengajuan', ringkas: 'inv3.temuan.pengajuan.ringkas' }],
   tebak: {
     pilihan: (['sama', 'beda', 'belum'] as const).map((id) => ({ id, teks: `inv3.tebak.pilih.${id}` })),
     balikPada: 'foto-inspeksi',
@@ -136,25 +185,28 @@ const dialog = (id: IdNode, tata: CueLatar, baris: Baris[], lanjut: IdNode, opsi
   ({ id, bab: '', jenis: 'dialog', tata, baris, lanjut, ...(opsi.efek ? { efek: opsi.efek } : {}), ...(opsi.investigasi ? { investigasi: opsi.investigasi } : {}) });
 
 /**
- * "Tanya lebih lanjut" pada satu pernyataan (NodeDasar.tekan): node tawar (PILIHAN 'tekan' / 'lanjut') + node jawab (DIALOG,
- * memasang press:<pernyataan>:<id>). Keduanya maju ke `lanjut`: tidak ada efek cerita yang terulang, tidak ada putaran.
+ * "Tanya lebih lanjut" pada satu pernyataan (NodeDasar.tekan): node tawar (PILIHAN) + satu node jawab per pertanyaan (DIALOG,
+ * memasang press:<pernyataan>:<id>). Semuanya maju ke `lanjut`: tidak ada efek cerita yang terulang, tidak ada putaran.
+ * T-132: pernyataan ber-`pressLain` = beberapa pertanyaan, pilih satu. Pertanyaan pertama tetap pilihan 'tekan' dan node
+ * `<pernyataan>-tekan` (id lama); yang lain pilihan 'tekan-<id>' dan node `<pernyataan>-tekan-<id>`.
  */
 function tanyaLanjut(idPernyataan: string, tata: CueLatar, ekspresi: Ekspresi, lanjut: IdNode): NodeCerita[] {
   const p = KASUS.pernyataan.find((x) => x.id === idPernyataan)!;
-  const press = p.press!;
+  const pertama = p.press!;
+  const idJawab = (idPress: string): IdNode => (idPress === pertama.id ? `${idPernyataan}-tekan` : `${idPernyataan}-tekan-${idPress}`);
   return [
     {
       id: `${idPernyataan}-tanya`, bab: '', jenis: 'pilihan', tata, baris: [b('inv.ui.tekan.1', 'narasi')], tanya: 'inv.ui.tekan.pilih',
-      tekan: { pernyataan: p.id, press: press.id, langkah: 'tawar' },
+      tekan: { pernyataan: p.id, press: pertama.id, langkah: 'tawar' },
       pilihan: [
-        { id: PILIH_TEKAN, teks: press.questionKey, lanjut: `${idPernyataan}-tekan` },
+        ...semuaPress(p).map((x) => ({ id: pilihTekan(p, x.id), teks: x.questionKey, lanjut: idJawab(x.id) })),
         { id: PILIH_LANJUT, teks: 'inv.ui.tekan.lanjut', lanjut },
       ],
     },
-    {
-      ...dialog(`${idPernyataan}-tekan`, tata, [b(press.answerKey, p.siapa as Siapa, ekspresi)], lanjut, { efek: { pasang: [tandaTekan(p.id, press.id)] } }),
-      tekan: { pernyataan: p.id, press: press.id, langkah: 'jawab' },
-    },
+    ...semuaPress(p).map((x): NodeCerita => ({
+      ...dialog(idJawab(x.id), tata, [b(x.answerKey, p.siapa as Siapa, ekspresi)], lanjut, { efek: { pasang: [tandaTekan(p.id, x.id)] } }),
+      tekan: { pernyataan: p.id, press: x.id, langkah: 'jawab' },
+    })),
   ];
 }
 
@@ -219,9 +271,18 @@ function bangunNode(): NodeCerita[] {
     dialog('selisih', KANTOR, [b('inv3.selisih.1', 'missRaksa', 'serius')], 'kfoto'),
 
     // ---------------------------------------------------------------- b2: dua sumber terbaca sebelum panel (foto, kutipan pesan)
-    dialog('kfoto', RUANG('penaksir'), [b('inv3.foto.1', 'narasi'), b('inv3.foto.2', 'penaksir', 'netral')], 'bukti-foto'),
-    dialog('bukti-foto', RUANG('penaksir'), [b('inv3.bukti.foto.1', 'narasi')], 'penaksir-tanya',
+    dialog('kfoto', RUANG('penaksir'), [b('inv3.foto.1', 'narasi'), b('inv3.foto.2', 'penaksir', 'netral')], 'baca-foto'),
+    // T-132 TAFSIR 'urutan' (formatif, node BARU yang disisipkan): pemain memasangkan foto bercap tanggal dengan kartu kejadian.
+    // Simpanan lama di 'kfoto' lewat sini; yang sudah di 'bukti-foto' tidak.
+    dialog('baca-foto', RUANG('penaksir'), [b('inv3.baca.foto.1', 'narasi')], 'bukti-foto',
+      { efek: { pasang: [tandaTafsir('urutan')] }, investigasi: { jenis: 'tafsir', tafsir: 'urutan' } }),
+    dialog('bukti-foto', RUANG('penaksir'), [b('inv3.bukti.foto.1', 'narasi')], 'penaksir-cek',
       { efek: { pasang: [tandaBukti('foto-inspeksi')] }, investigasi: { jenis: 'bukti', bukti: 'foto-inspeksi' } }),
+    // T-132: pemain yang sudah membaca urutannya sendiri ('baca-foto') langsung ke panel: pertanyaan lama untuk Pak Seno ("Kapan
+    // foto pemeriksaan ini diambil?") sudah ia jawab sendiri, dan kutipan pesannya baru dibaca di panel, sesudah babak 1.
+    // Simpanan lama yang melewati 'kfoto' sebelum T-132 (tanpa tanda tafsir itu) meneruskan RANTAI LAMA di bawah ini, tanpa perubahan.
+    { id: 'penaksir-cek', bab: '', jenis: 'cabang', cabang: [{ jika: tanda(tandaTafsir('urutan')), lanjut: 'panel-buka' }], lainnya: 'penaksir-tanya' },
+    // ---- RANTAI LAMA (hanya simpanan dari sebelum T-132): pertanyaan Pak Seno, persetujuan, kutipan pesan, pertanyaan Pak Gilang
     ...tanyaLanjut('penaksir', RUANG('penaksir'), 'netral', 'kpesan'),
     // [konfirmasi PIC] persetujuan pemohon sebelum kutipan pesannya diperlihatkan.
     dialog('kpesan', RUANG('pemohon'), [b('inv3.kutipan.1', 'narasi'), b('inv3.kutipan.2', 'pemohon', 'netral')], 'bukti-pesan'),
@@ -231,10 +292,11 @@ function bangunNode(): NodeCerita[] {
 
     // ---------------------------------------------------------------- b3: PANEL TELAAH, dua babak berurutan
     // [konfirmasi PIC] nama panel, wewenangnya, dan hak tiap pihak untuk menjelaskan / mengoreksi.
+    // T-132: kalimat Pak Seno yang mengulang keterangannya ('inv3.panel-buka.3') dilepas dari graf untuk menjaga panjang kasus;
+    // kuncinya tetap ada (riwayat simpanan lama).
     dialog('panel-buka', PANEL, [
       b('inv3.panel-buka.1', 'narasi'),
       b('inv3.panel-buka.2', 'ketua', 'serius'),
-      b('inv3.panel-buka.3', 'penaksir', 'netral'),
       b('inv3.panel-buka.4', 'ketua', 'netral'),
     ], 'panel-kronologi-0'),
     ...babakPanel(kronologi, 'panel-kronologi-jawab'),
@@ -247,13 +309,26 @@ function bangunNode(): NodeCerita[] {
     dialog('panel-kronologi-koreksi', PANEL, [b('inv3.kronologi.koreksi.1', 'narasi')], 'panel-kira',
       { efek: { pasang: [tandaKoreksi(kronologi.statementId)] }, investigasi: { jenis: 'panel-koreksi', round: kronologi.id } }),
     // Keterangan kedua (niat masih terbuka sesudah babak 1): dicatat, lalu dibantah di babak 2.
-    dialog('panel-kira', PANEL, [b('inv3.kira.1', 'ketua', 'netral'), b('inv3.kira.2', 'pemohon', 'cemas')], 'panel-pengajuan-0',
+    // T-132 (rencana: "An estimate alone doesn't show what I asked for"): SEBELUM kutipan pesannya diajukan, Pak Gilang berkeberatan
+    // dengan wajar: perkiraan biaya disusun bengkel dan tidak menunjukkan apa yang ia minta. Itu benar; yang menunjukkannya adalah
+    // kata-katanya sendiri (babak 2). Tanpa putaran tanya-jawab baru, tanpa menuduh.
+    dialog('panel-kira', PANEL, [b('inv3.kira.1', 'ketua', 'netral'), b('inv3.kira.tapi', 'pemohon', 'netral'), b('inv3.kira.2', 'pemohon', 'cemas')], 'panel-pesan-cek',
       { efek: { pasang: [tandaCatat('pemohon-panel')] }, investigasi: { jenis: 'catat', pernyataan: 'pemohon-panel' } }),
+    // T-132: kutipan pesan baru diminta DI SINI, sesudah keberatan Pak Gilang. Simpanan lama yang sudah memegang kartunya (rantai
+    // lama, dibaca sebelum panel) langsung ke babak 2: persetujuannya tidak diminta dua kali.
+    { id: 'panel-pesan-cek', bab: '', jenis: 'cabang', cabang: [{ jika: tanda(tandaBukti('pesan-pengajuan')), lanjut: 'panel-pengajuan-0' }], lainnya: 'panel-izin' },
+    // [konfirmasi PIC] persetujuan pemohon sebelum kutipan pesannya diperlihatkan (kalimat yang sama dengan 'kpesan'), kini di depan panel.
+    dialog('panel-izin', PANEL, [b('inv3.kutipan.1', 'narasi'), b('inv3.kutipan.2', 'pemohon', 'netral')], 'panel-bukti-pesan'),
+    dialog('panel-bukti-pesan', PANEL, [b('inv3.bukti.pesan.1', 'narasi')], 'pemohon-panel-tanya',
+      { efek: { pasang: [tandaBukti('pesan-pengajuan')] }, investigasi: { jenis: 'bukti', bukti: 'pesan-pengajuan' } }),
+    ...tanyaLanjut('pemohon-panel', PANEL, 'netral', 'panel-pengajuan-0'),
     ...babakPanel(pengajuan, 'panel-pengajuan-jawab'),
     // Hak jawab kedua pihak; 'tersenyum' = wajah TERBUKA pemohon (menjelaskan dengan tenang, seni T-103).
     dialog('panel-pengajuan-jawab', PANEL, [
       b('inv3.pengajuan.jawab.1', 'narasi'),
       b('inv3.pengajuan.jawab.2', 'ketua', 'netral'), // [konfirmasi PIC]
+      // T-132: hanya untuk pemain bertanda jeli (tadi menanyakan siapa yang menyetujui kutipan itu; rantai lama atau baru). [konfirmasi PIC]
+      { ...b('inv3.pengajuan.jawab.jeli', 'narasi'), jika: { salahSatu: [tanda(tandaTekan('pemohon-panel', 'setuju')), tanda(tandaTekan('pemohon', 'setuju'))] } },
       b('inv3.pengajuan.jawab.3', 'pemohon', 'tersenyum'),
       b('inv3.pengajuan.jawab.4', 'penaksir', 'cemas'),
       b('inv3.pengajuan.jawab.5', 'ketua', 'netral'), // [konfirmasi PIC]
@@ -263,7 +338,8 @@ function bangunNode(): NodeCerita[] {
 
     // ---------------------------------------------------------------- b4: kesimpulan, pesan untuk Pak Gilang, hasil
     // Pertanyaan ketua yang dinaskahkan spec: "Apa yang bisa kita simpulkan dari bukti ini?"
-    dialog('putusan-buka', PANEL, [b('inv3.putusan.1', 'ketua', 'netral'), b('inv3.putusan.2', 'ketua', 'serius')], 'putusan'), // [konfirmasi PIC]
+    // T-132: satu baris (kalimat penegasan 'inv3.putusan.1' dilepas dari graf untuk menjaga panjang kasus; kuncinya tetap ada).
+    dialog('putusan-buka', PANEL, [b('inv3.putusan.2', 'ketua', 'serius')], 'putusan'), // [konfirmasi PIC]
     {
       id: 'putusan', bab: '', jenis: 'pilihan', tata: PANEL, baris: [b('inv3.putusan.3', 'narasi')], tanya: 'inv3.putusan.tanya',
       investigasi: { jenis: 'putusan' },
@@ -276,17 +352,23 @@ function bangunNode(): NodeCerita[] {
     dialog('putusan-polis', KANTOR, [b('inv3.putusan.polis.1', 'missRaksa', 'serius')], 'pesan'),
     {
       id: 'pesan', bab: '', jenis: 'pilihan', tata: TELEPON_PEMOHON, baris: [b('inv3.pesan.1', 'narasi'), b('inv3.pesan.2', 'pemohon', 'cemas')], tanya: 'inv3.pesan.tanya',
-      // [konfirmasi PIC] 'baik' = berterima kasih, menyebut temuan + alasan, langkah berikutnya, dan hak menambahkan keterangan;
-      // 'datar' = isi benar tanpa hormat dan tanpa hak itu; 'janji' = janji penggantian tanpa dasar.
+      // [konfirmasi PIC] 'baik' = berterima kasih, langkah berikutnya, dan hak menambahkan keterangan; 'datar' = isi benar tanpa
+      // hormat dan tanpa hak itu; 'janji' = hasil yang diumumkan tanpa dasar dan tanpa wewenang.
+      // T-132 (rencana: "Short respectful referral earns full credit; a long blanket rejection of both items earns zero"): TIGA
+      // pilihan, id dan nilai tidak berubah (rubrik bersama hanya mengenal baik / datar / janji). Yang berubah hanya kalimatnya:
+      // 'baik' = rujukan singkat yang hormat (paling pendek); 'datar' = benar tetapi dingin, tanpa hak menambahkan keterangan;
+      // 'janji' (0) = penolakan menyeluruh atas KEDUA baris, paling panjang, menyebut dirinya final. Dulu pesan 0 itu janji
+      // penggantian; keduanya mengumumkan hasil yang bukan wewenang Investigator. Karena isinya kini penolakan, kepercayaan Pak
+      // Gilang turun (dulu naik) dan wajah balasannya cemas.
       pilihan: [
-        { id: 'janji', teks: 'inv3.pesan.janji', efek: { kepercayaan: 10, alasan: 'inv3.pesan.janji.alasan', pasang: [tandaPesan('janji')] }, lanjut: 'pesan-janji' },
+        { id: 'janji', teks: 'inv3.pesan.janji', efek: { kepercayaan: -10, alasan: 'inv3.pesan.janji.alasan', pasang: [tandaPesan('janji')] }, lanjut: 'pesan-janji' },
         { id: 'baik', teks: 'inv3.pesan.baik', efek: { kepercayaan: 30, alasan: 'inv3.pesan.baik.alasan', pasang: [tandaPesan('baik')] }, lanjut: 'pesan-baik' },
         { id: 'datar', teks: 'inv3.pesan.datar', efek: { pasang: [tandaPesan('datar')] }, lanjut: 'pesan-datar' },
       ],
     },
     dialog('pesan-baik', TELEPON_PEMOHON, [b('inv3.pesan.baik.1', 'pemohon', 'lega')], 'akhir-cek'),
     dialog('pesan-datar', TELEPON_PEMOHON, [b('inv3.pesan.datar.1', 'pemohon', 'cemas'), b('inv3.pesan.datar.2', 'narasi')], 'akhir-cek'),
-    dialog('pesan-janji', TELEPON_PEMOHON, [b('inv3.pesan.janji.1', 'pemohon', 'senang'), b('inv3.pesan.janji.2', 'narasi')], 'akhir-cek'),
+    dialog('pesan-janji', TELEPON_PEMOHON, [b('inv3.pesan.janji.1', 'pemohon', 'cemas'), b('inv3.pesan.janji.2', 'narasi')], 'akhir-cek'),
     { id: 'akhir-cek', bab: '', jenis: 'cabang', cabang: [{ jika: tanda(tandaPutusan('tambahan')), lanjut: 'akhir-tuntas' }], lainnya: 'akhir-tinjau' },
     ...(['tuntas', 'tinjau'] as const).map((akhir): NodeCerita => ({
       id: `akhir-${akhir}`, bab: '', jenis: 'akhir', akhir, tata: KANTOR,
@@ -299,7 +381,7 @@ function bangunNode(): NodeCerita[] {
 /** Bagian tiap node (kepala layar "BAGIAN n/4"). */
 function babInv3(id: IdNode): string {
   if (['judul', 'buka', 'bukti-kejadian', 'tebak', 'pemohon', 'penaksir', 'bukti-penawaran', 'selisih'].includes(id)) return 'b1';
-  if (id.startsWith('panel')) return 'b3';
+  if (id.startsWith('panel') || id.startsWith('pemohon-panel')) return 'b3';
   if (id.startsWith('putusan') || id.startsWith('pesan') || id.startsWith('akhir')) return 'b4';
   return 'b2';
 }

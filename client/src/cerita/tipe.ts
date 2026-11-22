@@ -266,6 +266,12 @@ export interface BuktiInvestigasi {
    * 288 x 192. Tanpa nilai = seni lama kartu itu. Gambar babak 2 NETRAL (tanpa nomor lajur, tanpa centang): tafsirnya dari pemain.
    */
   seni?: string;
+  /**
+   * T-132 (babak 2, kasus 3): lapisan penunjuk di atas gambar besar kartu ini (id di LAPIS_R2, LayarInvestigasi.tsx; 'k3-cincin' =
+   * cincin jingga di sekeliling spion, seni T-129). HANYA digambar sesudah temuan kartu itu ada: tafsirnya sudah dibuat pemain
+   * (atau dipandu), atau pernyataannya sudah dikoreksi. Sebelum itu gambarnya netral.
+   */
+  lapis?: string;
 }
 
 /** T-102: pembuat pernyataan kasus 1-2 (tabel potret lama berindeks tipe ini). */
@@ -496,6 +502,12 @@ export interface KonfigInvestigasi {
   };
   /** T-127 (babak 2): pilihan formatif kasus ini (lihat TafsirInvestigasi). Tanpa nilai = kasus tanpa tafsir. */
   tafsir?: TafsirInvestigasi[];
+  /**
+   * T-132 (babak 2, kasus ber-panel): temuan yang lahir dari SATU babak panel (bukan dari layar tafsir). Muncul di halaman "Temuan"
+   * begitu babak itu selesai (tanda `panel:<round>:*`), sebagai TAFSIRAN sampai pernyataan babak itu dikoreksi pembuatnya
+   * (`koreksi:<statementId>`), lalu sebagai temuan yang terbukti. `ringkas` = baris di slip kartu `bukti`. Tanpa poin.
+   */
+  temuanBabak?: { round: string; bukti?: IdBukti; temuan: KunciTeks; ringkas?: KunciTeks }[];
   /** Tabel putusan kasus ini (kasus 1: layak 30 / tambahan 15 / polis 0; kasus 2: polis 30 / tambahan 15 / layak 0). */
   putusan: Record<PutusanInvestigasi, 30 | 15 | 0>;
   /**
@@ -563,6 +575,12 @@ export interface PanelCard {
   excerpt?: string;
   /** true = tampil pudar dan tidak bisa diajukan (langkah dipandu: hanya kartu yang diterima yang aktif). */
   disabled?: boolean;
+  /**
+   * T-132 (opsional; tanpa nilai = seni panel lama menurut id kartu): seni babak 2 kartu ini (T-128), URL gambar. `thumb` 96 x 68
+   * untuk daftar kartu, `exhibit` 288 x 192 untuk lembar "perbesar" (foto + keterangan, tanpa tombol "lihat dari dekat"),
+   * `overlay` = lapisan penunjuk 288 x 192 di atas `exhibit` (hanya dikirim sesudah temuannya ada).
+   */
+  art?: { thumb: string; exhibit: string; overlay?: string };
 }
 
 /**

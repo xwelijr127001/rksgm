@@ -64,7 +64,8 @@
 
 /* gambar kasus dari seniKasus(kasus) (kartu judul, layar tebakan): PNG 292 x 150 yang sudah dipanggang 2x (T-091), ditampilkan
    pada ukuran aslinya seperti bingkai dashcam kasus 1; garis tepinya outline supaya tidak mengubah skala pikselnya */
-.iv-seni-kasus { display: block; justify-self: center; width: 292px; max-width: 100%; height: auto; outline: 2px solid #212121; background: #1b2233; image-rendering: pixelated; }
+/* T-132: bingkainya tetap 292 : 150 untuk gambar apa pun (gambar kasus 3 kini seni bukti 288 x 192 yang netral, dipotong atas-bawah) */
+.iv-seni-kasus { display: block; justify-self: center; width: 292px; max-width: 100%; height: auto; aspect-ratio: 292 / 150; object-fit: cover; outline: 2px solid #212121; background: #1b2233; image-rendering: pixelated; }
 .iv-judul-kartu > .iv-seni-kasus { margin-top: 2px; }
 
 /* tebakan pembuka berdaftar (kasus 2): tombol besar satu ketukan */

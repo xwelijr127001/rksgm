@@ -37,8 +37,11 @@ export function PilihFormatif({ id, tanya, gambar, opsi, tepat, hampir = [], sal
   /** Id tafsir (kait data- untuk QA). */
   id: string;
   tanya: string;
-  /** Gambar buktinya; `jelas` true = dengan bantuan penjelasan (mis. nomor lajur), hanya sesudah keliru kedua. */
-  gambar?: (jelas: boolean) => ReactNode;
+  /**
+   * Gambar buktinya; `jelas` true = dengan bantuan penjelasan (mis. nomor lajur), hanya sesudah keliru kedua. T-132: `selesai`
+   * true = bacaan ini sudah dijawab (tepat atau dipandu): saat itulah penunjuk temuan (cincin kasus 3) boleh digambar.
+   */
+  gambar?: (jelas: boolean, selesai: boolean) => ReactNode;
   opsi: OpsiFormatif[];
   tepat: string;
   hampir?: readonly string[];
@@ -83,7 +86,7 @@ export function PilihFormatif({ id, tanya, gambar, opsi, tepat, hampir = [], sal
   return (
     <section className="iv-layar pf" data-pilih-formatif={id} data-keadaan={keadaan} data-susun={susun} aria-labelledby="pf-tanya">
       <h2 id="pf-tanya" className="iv-tanya" tabIndex={-1} data-cer-fokus="">{tanya}</h2>
-      {gambar ? <div className="pf-gambar" data-tunjuk={keadaan === 'keliru' || keadaan === 'hampir' ? '' : undefined}>{gambar(dipandu)}</div> : null}
+      {gambar ? <div className="pf-gambar" data-tunjuk={keadaan === 'keliru' || keadaan === 'hampir' ? '' : undefined}>{gambar(dipandu, selesai)}</div> : null}
       <div className="pf-opsi" role="group" aria-labelledby="pf-tanya" data-jumlah={opsi.length} data-bergambar={opsi.some((o) => o.gambar) ? '' : undefined}>
         {opsi.map((o) => {
           const jawab = selesai && o.id === tepat;

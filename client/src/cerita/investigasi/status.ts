@@ -195,8 +195,8 @@ function temuanTafsir(x: TafsirInvestigasi, s: Tanda): Temuan | null {
 }
 
 /**
- * Semua temuan kasus ini, urut naskah: tafsir (TafsirInvestigasi) lalu temuan berpasangan KEBERATAN (sesudah babaknya selesai;
- * mapan sesudah pernyataannya dikoreksi). TAFSIRAN (mapan false) dan TEMUAN (mapan true) digambar terpisah oleh pemanggil.
+ * Semua temuan kasus ini, urut naskah: tafsir (TafsirInvestigasi), temuan berpasangan KEBERATAN (sesudah babaknya selesai;
+ * mapan sesudah pernyataannya dikoreksi), lalu (T-132) temuan babak panel (`temuanBabak`). TAFSIRAN (mapan false) dan TEMUAN (mapan true) digambar terpisah oleh pemanggil.
  */
 export function temuanKasus(ep: Pick<Episode, 'investigasi'>, s: Tanda): Temuan[] {
   const k = ep.investigasi;
@@ -205,6 +205,11 @@ export function temuanKasus(ep: Pick<Episode, 'investigasi'>, s: Tanda): Temuan[
   for (const x of k.tafsir ?? []) { const t = temuanTafsir(x, s); if (t) hasil.push(t); }
   const pas = k.keberatan.pasangan;
   if (pas && hasilKeberatan(s)) hasil.push({ id: 'pasangan', teks: pas.temuan, mapan: punya(s, tandaKoreksi(k.keberatan.pernyataan)) });
+  // T-132: temuan per babak panel: ada sesudah babaknya selesai, mapan sesudah pernyataan babak itu dikoreksi pembuatnya.
+  for (const x of k.temuanBabak ?? []) {
+    const r = k.panel?.rounds.find((y) => y.id === x.round);
+    if (r && hasilBabak(ep, s, r.id)) hasil.push({ id: `babak:${r.id}`, teks: x.temuan, ringkas: x.ringkas, bukti: x.bukti, mapan: punya(s, tandaKoreksi(r.statementId)) });
+  }
   return hasil;
 }
 

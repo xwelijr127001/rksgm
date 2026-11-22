@@ -76,7 +76,7 @@ import { PeriksaPerjalanan } from './ui/PeriksaPerjalanan';
 import { PeriksaPolis } from './ui/PeriksaPolis';
 import { PeriksaSim } from './ui/PeriksaSim';
 import { PilihFormatif } from './ui/PilihFormatif';
-import { SENI_R2, SLIP_WAKTU_K2, type IdSeniR2 } from './ui/seniR2';
+import { CINCIN_K3_FOTO, SENI_R2, SLIP_WAKTU_K2, type IdSeniR2 } from './ui/seniR2';
 import { seniKasus } from './ui/seniKasus';
 import { SeniTolNetral } from './ui/SeniTolNetral';
 import { evidenceArt, PanelAward, PanelExhibit, PanelRound, PressPanel } from './ui/panel';
@@ -128,9 +128,21 @@ function koreksiBuku(ep: Episode, state: StateCerita, tx: Tx): { pernyataan: Per
   return { pernyataan: daftar, koreksi: daftar.map((p) => ({ id: p.id, teks: baris(p) })) };
 }
 
-/** T-106: kartu bukti untuk komponen panel Designer (teks sudah diterjemahkan; `kutipan` = kutipan persis kartu itu). */
-function kartuPanel(b: Bukti, tx: Tx, redup = false): PanelCard {
-  return { id: b.id, title: tx(b.judul), source: tx(b.sumber), ...(b.kutipan ? { excerpt: tx(b.kutipan) } : {}), ...(redup ? { disabled: true } : {}) };
+/** T-132: lapisan penunjuk di atas gambar bukti babak 2 (`BuktiInvestigasi.lapis`); hanya digambar sesudah temuannya ada. */
+const LAPIS_R2: Readonly<Record<string, string>> = { 'k3-cincin': CINCIN_K3_FOTO };
+
+/**
+ * T-106: kartu bukti untuk komponen panel Designer (teks sudah diterjemahkan; `kutipan` = kutipan persis kartu itu).
+ * T-132: kartu ber-`seni` membawa gambar babak 2-nya (kartu dan gambar besar yang netral); `bertemuan` = temuan kartu itu sudah ada
+ * (tafsir dibuat / dipandu, atau pernyataannya dikoreksi): baru saat itu lapisan penunjuknya (`lapis`) ikut dikirim.
+ */
+function kartuPanel(b: Bukti, tx: Tx, redup = false, bertemuan = false): PanelCard {
+  const g = b.seni && b.seni in SENI_R2 ? SENI_R2[b.seni as IdSeniR2] : null;
+  const lapis = bertemuan && b.lapis ? LAPIS_R2[b.lapis] : undefined;
+  return {
+    id: b.id, title: tx(b.judul), source: tx(b.sumber), ...(b.kutipan ? { excerpt: tx(b.kutipan) } : {}), ...(redup ? { disabled: true } : {}),
+    ...(g ? { art: { thumb: g.thumb, exhibit: g.exhibit, ...(lapis ? { overlay: lapis } : {}) } } : {}),
+  };
 }
 /** Teks pilihan "Tanya: ..." tanpa awalannya (PressPanel dan buku catatan menulis pertanyaannya saja). */
 const tanpaAwalan = (s: string): string => s.replace(/^[^:：]{1,16}[:：]\s*/, '');
@@ -151,12 +163,14 @@ function slipTemuan(ep: Episode, state: StateCerita, tx: Tx): Record<string, Tem
  * T-130 (tinjauan Codex): `alt` = uraian yang TERLIHAT di gambar itu (hubungan letak, isian kotak; `seniKet` kasusnya), tanpa
  * kesimpulannya, supaya pemain pembaca layar bisa menafsirkan sendiri. Tanpa uraian = judul kartu yang netral.
  */
-function GambarR2({ seni, alt, lajur }: { seni: string; alt: string; lajur?: readonly (readonly [number, number])[] }) {
+function GambarR2({ seni, alt, lajur, lapis }: { seni: string; alt: string; lajur?: readonly (readonly [number, number])[]; /** T-132: id LAPIS_R2 (penunjuk temuan). */ lapis?: string }) {
   const g = seni in SENI_R2 ? SENI_R2[seni as IdSeniR2] : null;
   if (!g) return null;
+  const urlLapis = lapis ? LAPIS_R2[lapis] : undefined;
   return (
-    <span className="r2-bingkai" data-seni-r2={seni}>
+    <span className="r2-bingkai" data-seni-r2={seni} data-lapis={urlLapis ? lapis : undefined}>
       <img src={g.exhibit} width={288} height={192} alt={alt} />
+      {urlLapis ? <img className="r2-lapis" src={urlLapis} width={288} height={192} alt="" /> : null}
       {lajur?.map(([a, b], i) => <i key={i} className="r2-lajur" aria-hidden="true" style={{ left: (a + b) / 2 }}>{i + 1}</i>)}
     </span>
   );
@@ -250,7 +264,7 @@ function LayarTafsir({ ep, konfig, state, tafsir, periksa, tx, onLanjut }: { ep:
   const hadiah = tafsir.hadiah && tafsir.hadiah in SENI_R2 ? <img className="r2-slip" src={SENI_R2[tafsir.hadiah as IdSeniR2].thumb} width={96} height={68} alt="" /> : undefined;
   return (
     <PilihFormatif id={tafsir.id} tanya={tx(tafsir.tanya)} awal={awal} susun={tafsir.tampilan === 'daftar' ? 'kolom' : 'baris'} hadiah={hadiah}
-      gambar={seni ? (jelas) => <GambarR2 seni={seni} alt={alt} lajur={jelas ? tafsir.lajur : undefined} /> : undefined}
+      gambar={seni ? (jelas, selesai) => <GambarR2 seni={seni} alt={alt} lajur={jelas ? tafsir.lajur : undefined} lapis={selesai ? kartu?.lapis : undefined} /> : undefined}
       opsi={tafsir.opsi.map((o) => ({ id: o.id, teks: tx(o.teks), gambar: slip(o.seni), ...(o.ket ? { ket: tx(o.ket) } : {}) }))} tepat={tafsir.tepat} hampir={tafsir.hampir}
       salah={(id) => k(`salah.${id}`)} alasan={k('alasan')} benar={k('benar')} lanjut={tx('inv.ui.lanjut')}
       onCoba={(gugur) => simpanTafsir(ep, state, gugur, periksa)} onSelesai={() => { simpanTafsir(ep, state, null, periksa); onLanjut(); }} />
@@ -424,7 +438,7 @@ function LayarBukti({ ep, state, bukti, keterangan, balik, tx, onLanjut }: { ep:
         <button key={b.id} type="button" className="akh-kedua iv-tombol iv-tombol-kedua" data-perbesar-bukti={b.id} aria-haspopup="dialog" onClick={() => { playSfx('kertas'); setBesar(b); }}>{label('periksa', { judul: tx(b.judul) })}</button>
       ))}
       <button type="button" className="primary-action iv-tombol" data-simpan-bukti="" onClick={() => { playSfx('kertas'); onLanjut(); }}>{tx('inv.ui.simpan')}</button>
-      {besar ? <PanelExhibit card={kartuPanel(besar, tx)} onClose={() => setBesar(null)} /> : null}
+      {besar ? <PanelExhibit card={kartuPanel(besar, tx, false, !!temuan[besar.id])} onClose={() => setBesar(null)} /> : null}
     </section>
   );
 }
@@ -484,9 +498,11 @@ function BabakPanel({ ep, konfig, state, round, attempt, tx, onPresent }: {
   const idKetua = konfig.panel?.chair ?? '';
   const nama = (id: string): string => (Object.prototype.hasOwnProperty.call(ep.pemeran, id) ? tx(ep.pemeran[id]!.nama) : id);
   const punya = buktiTerkumpul(ep, state).map((b) => b.id);
+  // T-132: penunjuk di gambar besar (cincin spion) hanya untuk kartu yang temuannya sudah ada di buku catatan pemain.
+  const temuan = slipTemuan(ep, state, tx);
   const cards = round.evidenceIds.filter((id) => punya.includes(id)).flatMap((id) => {
     const b = konfig.bukti.find((x) => x.id === id);
-    return b ? [kartuPanel(b, tx, attempt === 2 && !round.acceptedIds.includes(id))] : [];
+    return b ? [kartuPanel(b, tx, attempt === 2 && !round.acceptedIds.includes(id), !!temuan[id])] : [];
   });
   return (
     <PanelRound key={`${round.id}-${attempt}`} attempt={attempt}
