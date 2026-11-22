@@ -18,6 +18,7 @@
  * Ukur (hitung, sampul.css): ruang isi 360 x 640 = 544 px. Panggung 84 + 8 + berkas (tab 26 + badan 248; +28 judul dua baris,
  * +20 kait dua baris) + 10 + tombol 56 = 432 .. 480 px; dengan tautan "Tamu baru" (12 + 48) 492 .. 540 px. Layar lebih tinggi:
  * tinggi minimum bagian = min(100dvh - 157 px, 640 px); sisanya mengisi panggung (sampai 204 px) dan jarak (sampai 16 px).
+ * T-122: tata letak = kolom lentur dengan dua sela (`.iv-sampul-sela`), bukan kisi minmax (yang memakai batas atasnya di layar pendek).
  */
 import type { CSSProperties, ReactNode } from 'react';
 import { t } from '../../../i18n';
@@ -61,6 +62,8 @@ export function JudulKasus({ nomor, judul, onMulai, tx, gambar }: { nomor: numbe
         </span>
         <i className="iv-sampul-pita" aria-hidden="true" />
       </div>
+      {/* T-122: sela lentur (sampul.css): 8 .. 16 px dan 10 .. 16 px */}
+      <i className="iv-sampul-sela" aria-hidden="true" />
       <div className="iv-sampul-berkas">
         <p className="iv-sampul-tab">{t('investigasi.kasus', { n: nomor })}</p>
         <div className="iv-sampul-badan">
@@ -81,6 +84,7 @@ export function JudulKasus({ nomor, judul, onMulai, tx, gambar }: { nomor: numbe
           </div>
         </div>
       </div>
+      <i className="iv-sampul-sela" data-dua="" aria-hidden="true" />
       <button type="button" className="primary-action iv-tombol iv-sampul-mulai" data-mulai-kasus="" onClick={onMulai}>{t('investigasi.mulai')}</button>
     </section>
   );

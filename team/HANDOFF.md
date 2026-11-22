@@ -5890,3 +5890,55 @@ While building this I realised that the hub (T-119) and the case cover (T-120) u
 
 ### Open
 - Not seen on a phone. Most worth a look on the owner's iPhone: the frame clear of the total strip and of the ribbon, the two reward chips, the header on one line, the 2x sticker on the tall stage.
+
+## T-122 (2026-11-22): hub (T-119) and case cover (T-120) no longer over-tall on short screens (Designer)
+
+Built by the Designer; uncommitted, not deployed. Owner rule: nothing was opened in a browser or on a phone and no test was run, so the heights are CALCULATED and the defect itself was never observed, only reasoned. Root `npm run typecheck` exit 0; `client/dist` rebuilt (build exit 0). No server file touched.
+
+### Cause
+Both screens were a CSS grid with rows such as `minmax(84px, 204px)` and automatic height. In that case a browser sizes each such row at its MAXIMUM; the `min-height` I set does not hold the rows down. So the stage and the gaps were always at their largest: about 606 px in a 569 px space on the returning hub and about 626 px in 544 px on the cover at 360 x 640. On tall phones the maximum is what was approved, so nothing looked wrong there.
+
+### Fix (presentation only)
+- Both layouts are now a flex column. The stage and small spacer elements start at their MINIMUM and grow, with equal weight, only when the screen has free height, up to the same maximums as before. This is the behaviour the T-119 and T-120 tables already described.
+- `client/src/pages/investigator.css`: `.inv-hub .iv-layar` flex column; stage 88 to 224 px (fresh: to 260 px); spacers `.inv-sela` 8 to 20 px (fresh 10 to 20 px), last spacer 0 to 12 px above the event entry.
+- `client/src/pages/Investigator.tsx`: only the spacer elements `<i class="inv-sela" aria-hidden>` added (3 on the fresh screen, 4 on the returning hub).
+- `client/src/cerita/investigasi/ui/sampul.css` + `JudulKasus.tsx`: flex column; stage 84 to 204 px; two spacers `.iv-sampul-sela` (8 to 16 px, 10 to 16 px).
+- Unchanged: every size, colour, text, link, data hook, state and the look at each maximum.
+
+### Calculation: hub (id). Space = viewport height - 59 (header) - 12 (bottom padding)
+Returning hub ("Buka Kasus 3", no event link): file 128 + strip 48 + cards 146 = 322 fixed; smallest = 322 + stage 88 + gaps 24 = 434. Fresh: 248 fixed; smallest = 248 + 88 + 20 = 356.
+
+| Viewport (space) | Returning: stage / gaps / bottom rest | Fresh: stage / gaps / bottom rest |
+|---|---|---|
+| 360 x 640 (569) | 175 / 20 / 12 | 260 / 20 / 21 |
+| 390 x 700 (629) | 224 / 20 / 23 | 260 / 20 / 81 |
+| 390 x 760 (689) | 224 / 20 / 83 | 260 / 20 / 141 |
+| 390 x 844 (773) | 224 / 20 / 167 | 260 / 20 / 225 |
+| 430 x 932 (861) | 224 / 20 / 255 | 260 / 20 / 313 |
+
+- Fullest returning state (two-line note, typed event code with a two-line error): 568 px of 569 px at 360 x 640; the stage is then 88 px and the gaps 8 px. Fullest fresh state: 494 px.
+- These are the T-119 numbers; what changed is that the layout now really produces them.
+
+### Calculation: case cover (id). Space at 360 x 640 = 544 px
+Cover = stage 84 + 8 + file 274 + 10 + button 56 = 432 (480 with a two-line title and a two-line hook); "Tamu baru" link 60 under it.
+
+| Viewport | Stage | Gaps | Cover + link ends | Empty below the link |
+|---|---|---|---|---|
+| 360 x 640 | 121 | 16 / 16 | 543 of 544 | 0 |
+| 390 x 700 | 181 | 16 / 16 | fills | 0 |
+| 390 x 760 | 204 | 16 / 16 | fills (37 px between button and link) | 0 |
+| 430 x 932 | 204 | 16 / 16 | 37 px between button and link | 135 |
+
+- Same for all three covers; the best-score chip and the stamp (Kasus 2 in the preview) sit beside / on the photo and add no height.
+- Fullest cover (Kasus 2 in en, title and hook on two lines): 480 + 60 = 540 px of 544 px; the stage is then 84 px.
+
+### Things to know
+- **Not confirmed in a browser.** The cause is from how CSS grid sizes such rows; the new layout is the standard flex behaviour. A look at 360 x 640 by QA would settle both.
+- **Tall phones keep the T-119 trade:** the hub leaves plain cream at the bottom (167 px at 390 x 844, 255 px at 430 x 932 on the returning hub; more on the fresh screen). That was the owner's choice in T-119 ("Now its too much": capped stage, rest at the bottom). At 430 x 932 it is more than a quarter of the screen; I did not change it here because the card says to keep the look. The lever is the stage cap or bigger case cards.
+- The result screen (T-121) was built as a flex column from the start and is not affected.
+
+### Previews (calculated mocks, not screenshots)
+`character/investigator-t122/hub-t122-pulang.png`, `hub-t122-sampul.png` (five viewports each) and `sampul-t122-360x640.png`, `-390x700.png`, `-390x760.png`, `-430x932.png` (Kasus 1 new, Kasus 2 with best score, Kasus 3 new). Made with copies of the T-119 / T-120 mock scripts (`hub.mts`, `sampul.mts`), so they show the same pictures as before: the mocks always drew the intended layout.
+
+### Open
+- Not seen on a phone or in a browser.

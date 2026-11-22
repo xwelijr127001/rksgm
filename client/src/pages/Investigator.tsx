@@ -188,6 +188,8 @@ export default function Investigator() {
         <main className="hp-main">
           <section className="iv-layar inv-hub-sampul" aria-labelledby="inv-hub-kasus">
             {panggung}
+            {/* T-122: sela lentur (investigator.css): 10 .. 20 px, yang terakhir 0 .. 12 px */}
+            <i className="inv-sela" aria-hidden="true" />
             <div className="inv-berkas" data-berkas-kasus={k.konfig.kasus}>
               <h2 id="inv-hub-kasus" className="inv-berkas-tab">{tab(k)}</h2>
               <div className="inv-berkas-badan">
@@ -202,7 +204,9 @@ export default function Investigator() {
                 </div>
               </div>
             </div>
+            <i className="inv-sela" aria-hidden="true" />
             <Link className="primary-action iv-tombol inv-hub-utama" to={ruteKasus(k.nomor)} state={stateNiat('lewati-judul')} data-hub-utama="buka">{t('hubInv.buka', { n: k.nomor })}</Link>
+            <i className="inv-sela" data-kecil="" aria-hidden="true" />
             {entri}
           </section>
         </main>
@@ -228,6 +232,8 @@ export default function Investigator() {
       <main className="hp-main">
         <section className="iv-layar inv-hub-pulang" aria-labelledby="inv-hub-kasus">
           {panggung}
+          {/* T-122: sela lentur (investigator.css): 8 .. 20 px, yang terakhir 0 .. 12 px */}
+          <i className="inv-sela" aria-hidden="true" />
           <div className="inv-berkas" data-ringkas="" data-berkas-kasus={k.konfig.kasus}>
             <h2 id="inv-hub-kasus" className="inv-berkas-tab">{tab(k)}</h2>
             <div className="inv-berkas-badan">
@@ -244,6 +250,7 @@ export default function Investigator() {
           )}
             </div>
           </div>
+          <i className="inv-sela" aria-hidden="true" />
           <div className="inv-hub-petugas">
             <button type="button" className="inv-hub-strip" data-kartu-buka="" aria-haspopup="dialog" aria-label={t('hubInv.stripBuka', { pangkat: namaPangkat, skor: totalSkor(r), maks: TOTAL_MAKS })} onClick={() => setKartu(true)}>
               <span className="inv-hub-strip-stempel" aria-hidden="true">{daftar.map((x) => <IkonStempel key={x.konfig.kasus} kasus={x.konfig.kasus} terisi={x.stempel} kali={1} />)}</span>
@@ -255,6 +262,7 @@ export default function Investigator() {
             </button>
             <button type="button" className="inv-hub-tamu-tombol" data-tamu-baru="" aria-haspopup="dialog" onClick={() => setTanyaTamu(true)}>{t('hubInv.tamuBaru')}</button>
           </div>
+          <i className="inv-sela" aria-hidden="true" />
           <ul className="inv-hub-daftar" aria-label={t('hubInv.daftar')}>
             {daftar.map((x) => (
               <li key={x.konfig.kasus}>
@@ -272,6 +280,7 @@ export default function Investigator() {
               </li>
             ))}
           </ul>
+          <i className="inv-sela" data-kecil="" aria-hidden="true" />
           {entri}
         </section>
       </main>

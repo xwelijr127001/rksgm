@@ -1,15 +1,17 @@
 /* T-120 (Designer): SAMPUL KASUS (ui/JudulKasus.tsx), gaya "Raksa Cerah" seperti hub (pages/investigator.css, T-117 / T-119).
    Palet: tinta #212121, putih, jingga #ff9000, kuning #ffe38a, jingga tua #9a4f00 (6,3 : 1 di putih), bayang #f0a030.
    Seni panggung: 1 piksel seni = 2 px. Kelas berawalan .iv-sampul-; bagian tetap membawa .iv-judul (kait gaya "Tamu baru").
-   Tata letak = kisi: panggung 84 .. 204 px | jarak 8 .. 16 | berkas | jarak 10 .. 16 | tombol 56. Tinggi minimum bagian mengikuti
-   layar (100dvh - kepala 57 - bantalan isi 40 - "Tamu baru" 60), paling banyak 640 px: sisa tinggi mengisi panggung dan jarak
-   sampai batasnya, selebihnya tinggal di bawah tombol. Hitungan 360 x 640 di JudulKasus.tsx. */
-.iv-layar.iv-judul.iv-sampul { --s: 2; display: grid; grid-template-columns: minmax(0, 1fr); gap: 0; align-content: start; padding-top: 0; text-align: left;
-  grid-template-rows: minmax(84px, 204px) minmax(8px, 16px) auto minmax(10px, 16px) auto;
+   Tata letak = KOLOM LENTUR: panggung 84 .. 204 px | sela 8 .. 16 | berkas | sela 10 .. 16 | tombol 56. Tinggi minimum bagian
+   mengikuti layar (100dvh - kepala 57 - bantalan isi 40 - "Tamu baru" 60), paling banyak 640 px: sisa tinggi mengisi panggung dan
+   sela (bobot sama) sampai batasnya, selebihnya tinggal di bawah tombol. Hitungan 360 x 640 di JudulKasus.tsx.
+   T-122: dulu KISI dengan baris minmax(bawah, atas); pada kisi bertinggi otomatis baris itu memakai batas ATAS-nya (gulir di layar
+   pendek). Kolom lentur berangkat dari batas bawah dan hanya mengembang bila ada sisa tinggi. */
+.iv-layar.iv-judul.iv-sampul { --s: 2; display: flex; flex-direction: column; gap: 0; padding-top: 0; text-align: left;
   min-height: min(calc(100dvh - 157px - env(safe-area-inset-top) - env(safe-area-inset-bottom)), 640px); box-sizing: border-box; }
-.iv-sampul > .iv-sampul-panggung { grid-row: 1; }
-.iv-sampul > .iv-sampul-berkas { grid-row: 3; }
-.iv-sampul > .iv-sampul-mulai { grid-row: 5; }
+.iv-sampul > * { flex: none; }
+.iv-sampul > .iv-sampul-panggung { flex: 1 1 84px; min-height: 84px; max-height: 204px; }
+.iv-sampul > .iv-sampul-sela { display: block; flex: 1 1 8px; min-height: 8px; max-height: 16px; }
+.iv-sampul > .iv-sampul-sela[data-dua] { flex-basis: 10px; min-height: 10px; }
 
 /* ---- panggung: langit siang berbingkai tinta; seni menempel bawah (gedung + pita tanah selalu tampak) */
 .iv-sampul-panggung { container: iv-sampul-panggung / size; position: relative; overflow: hidden; box-sizing: border-box; border: 2px solid #212121; image-rendering: pixelated;

@@ -14,26 +14,30 @@
 .inv-hub .inv-hub-nama { margin: 0; letter-spacing: -.01em; }
 .inv-hub .inv-hub-nama:focus { outline: none; }
 .inv-hub .inv-hub-nama b { font-size: 18px; font-weight: 800; color: #fff9f5; }
-/* T-118 / T-119 KOLOM SETINGGI LAYAR: halaman = kolom lentur setinggi layar (kepala, lalu isi). Isi = kisi satu kolom dengan baris:
-     panggung | jarak | berkas | jarak | (strip petugas | jarak | kartu kasus)  atau  (tombol) | jarak | entri acara
-   Panggung dan jarak punya batas bawah dan atas: sisa tinggi layar mengisi mereka sampai batas atasnya (panggung 224 px di hub
-   pulang, 260 px di sampul; jarak 20 px), sisanya tinggal di DASAR halaman sebagai latar krem. Jadi kepala tidak pernah meregang
-   dan blok tidak pernah berjauhan. Layar yang lebih pendek dari isi (panggung 88 px, jarak 8 / 10 px) = gulir. */
+/* T-118 / T-119 / T-122 KOLOM SETINGGI LAYAR: halaman = kolom lentur setinggi layar (kepala, lalu isi). Isi = KOLOM LENTUR:
+     panggung | sela | berkas | sela | (strip petugas | sela | kartu kasus)  atau  (tombol) | sela kecil | entri acara
+   Panggung dan sela (`<i class="inv-sela">`, Investigator.tsx) punya batas bawah dan atas dan bobot lentur yang sama: sisa tinggi
+   layar mengisi mereka sampai batas atasnya (panggung 224 px di hub pulang, 260 px di sampul; sela 20 px), sisanya tinggal di DASAR
+   halaman sebagai latar krem. Layar yang lebih pendek dari isi (panggung 88 px, sela 8 / 10 px) = gulir.
+   T-122: dulu (T-119) ini KISI dengan baris minmax(bawah, atas). Pada kisi yang tingginya otomatis, baris seperti itu memakai batas
+   ATAS-nya, jadi di layar pendek isi lebih tinggi dari layar (gulir). Kolom lentur memakai batas BAWAH sebagai dasar dan hanya
+   mengembang bila memang ada sisa tinggi (min-height di bawah). */
 .inv-hub { display: flex; flex-direction: column; }
 .inv-hub > .hp-main { flex: 1 1 auto; grid-template-rows: 1fr; }
-/* min-height = tinggi layar - kepala 59 - bantalan isi 24 (+ inset aman): kisi tahu sisa tingginya juga bila tinggi induk tak tentu */
-.inv-hub .iv-layar { display: grid; grid-template-columns: minmax(0, 1fr); gap: 0; align-content: start; padding: 0; min-height: calc(100dvh - 83px - max(0px, env(safe-area-inset-top) - 6px) - env(safe-area-inset-bottom)); box-sizing: border-box; }
-/* baris panggung = tinggi panggung - 12 px (panggung naik 12 px ke bantalan atas isi): 76 .. 212 px = panggung 88 .. 224 px */
-.inv-hub .inv-hub-pulang { grid-template-rows: minmax(calc(var(--s) * 44px - 12px), calc(var(--s) * 112px - 12px)) minmax(8px, 20px) auto minmax(8px, 20px) auto minmax(8px, 20px) auto minmax(0, 12px) auto; }
-.inv-hub .inv-hub-sampul { grid-template-rows: minmax(calc(var(--s) * 44px - 12px), calc(var(--s) * 130px - 12px)) minmax(10px, 20px) auto minmax(10px, 20px) auto minmax(0, 12px) auto; }
-.inv-hub .iv-layar > .inv-panggung { grid-row: 1; }
-.inv-hub .iv-layar > .inv-berkas { grid-row: 3; }
-.inv-hub .inv-hub-pulang > .inv-hub-petugas, .inv-hub .inv-hub-sampul > .inv-hub-utama { grid-row: 5; }
-.inv-hub .inv-hub-pulang > .inv-hub-daftar { grid-row: 7; }
-.inv-hub .inv-hub-pulang > .ai-entri { grid-row: 9; margin-top: 8px; }
-.inv-hub .inv-hub-sampul > .ai-entri { grid-row: 7; margin-top: 10px; }
+/* min-height = tinggi layar - kepala 59 - bantalan isi 24 (+ inset aman): kolom tahu sisa tingginya juga bila tinggi induk tak tentu */
+.inv-hub .iv-layar { display: flex; flex-direction: column; gap: 0; padding: 0; min-height: calc(100dvh - 83px - max(0px, env(safe-area-inset-top) - 6px) - env(safe-area-inset-bottom)); box-sizing: border-box; }
+.inv-hub .iv-layar > * { flex: none; }
+/* panggung 88 .. 224 px (sampul: .. 260 px); ia naik 12 px ke bantalan atas isi (margin atas -12 px, ikut dihitung kolom) */
+.inv-hub .iv-layar > .inv-panggung { flex: 1 1 calc(var(--s) * 44px); min-height: calc(var(--s) * 44px); max-height: calc(var(--s) * 112px); }
+.inv-hub .inv-hub-sampul > .inv-panggung { max-height: calc(var(--s) * 130px); }
+/* sela 8 .. 20 px (sampul 10 .. 20 px); sela kecil 0 .. 12 px di atas entri acara */
+.inv-hub .iv-layar > .inv-sela { display: block; flex: 1 1 8px; min-height: 8px; max-height: 20px; }
+.inv-hub .inv-hub-sampul > .inv-sela { flex-basis: 10px; min-height: 10px; }
+.inv-hub .iv-layar > .inv-sela[data-kecil] { flex-basis: 0px; min-height: 0; max-height: 12px; }
+.inv-hub .inv-hub-pulang > .ai-entri { margin-top: 8px; }
+.inv-hub .inv-hub-sampul > .ai-entri { margin-top: 10px; }
 /* isi di bawah panggung: satu kolom di tengah (desktop tidak melebar kosong) */
-.inv-hub .iv-layar > :not(.inv-panggung) { width: min(100%, 560px); justify-self: center; box-sizing: border-box; }
+.inv-hub .iv-layar > :not(.inv-panggung, .inv-sela) { width: min(100%, 560px); align-self: center; box-sizing: border-box; }
 
 /* ---- panggung: langit siang selebar layar. Seni (360 x 104 piksel seni) di tengah dan menempel BAWAH: panggung yang dipendekkan
    (--t baris) tetap memperlihatkan deretan gedung dan pita tanah jingga; di luar seni, langit dan tanah diteruskan warna rata. */
