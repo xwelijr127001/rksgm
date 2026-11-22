@@ -714,3 +714,16 @@ html:has(.lp-pemuat) { overflow: hidden; }
   .lp-halaman .lp-inv { margin: 4px 0 0; text-align: center; font-size: 14px; line-height: 1.3; }
   .lp-halaman.lp-ada-inv .lp-kota-bingkai { height: min(30vw,190px); height: clamp(104px, calc(100svh - 561px), 190px); }
 }
+
+/* ==================================================================== T-135: Miss Raksa utuh di hero HP yang pendek
+   Laporan pemilik (iPhone Safari, bilah alat tampil): bingkai hero 104..135 px memotong kepala, karena slot sprite terpaku di
+   100% - 136 px (kepala di atas tepi bingkai bila bingkai < 136 px). Kini kepala tidak pernah lebih tinggi dari 4 px di bawah
+   tepi atas, dan meja layanan turun (paling banyak 22 px, di 104 px) supaya badan sampai tangan menyapa (baris seni 0..88)
+   tetap terlihat. Tanpa skala: 1 piksel seni tetap piksel perangkat bulat. Bingkai >= 140 px sama seperti dulu. Raki (tokoh
+   nonaktif) mengecil mengikuti ruang di atas meja. Hanya HP (<= 700 px); tablet dan desktop tidak berubah. */
+@media (max-width: 700px) {
+  .lp-halaman .lp-kota-bingkai-miss .lp-kota-slot { top: max(4px, calc(100% - 136px)); }
+  .lp-halaman .lp-kota-bingkai-miss .lp-meja { bottom: min(0px, calc(100% - 126px)); }
+  .lp-halaman .lp-kota-slot-raki { top: 4px; bottom: 27px; align-items: flex-end; }
+  .lp-halaman .lp-kota-slot-raki svg { width: auto; height: min(88px, 100%); }
+}

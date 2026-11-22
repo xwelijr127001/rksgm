@@ -72,7 +72,8 @@ export function WelcomeArt() {
   return <figure className="lp-kota">
     {/* T-004 D-21..D-25: adegan kecil "Miss Raksa menyapa dari meja layanan klaim". Dekorasi (aria-hidden): nama & jabatan
         dibacakan dari balon sapaan di bawah bingkai. Lapisan: latar piksel -> sprite -> meja (menutupi kaki, N-1). */}
-    <div className="lp-kota-bingkai" aria-hidden="true">
+    {/* T-135: .lp-kota-bingkai-miss = aturan HP "kepala selalu utuh" (player.css) hanya untuk sprite Miss Raksa. */}
+    <div className={miss ? 'lp-kota-bingkai lp-kota-bingkai-miss' : 'lp-kota-bingkai'} aria-hidden="true">
       <LatarHero />
       {miss
         ? <div className="lp-kota-slot"><SpriteTokoh tokoh="missRaksa" tinggi={120} /></div>

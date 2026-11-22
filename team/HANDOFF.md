@@ -6687,3 +6687,16 @@ Scripts outside the repo (run from `client/` with `npx tsx`): `C:\Users\User\App
 ### Open
 - Not seen in a browser or on a phone: the card beside the question, and an old finished Kasus 3 run reopened on the result screen.
 - `investigator.expect.test.ts` and its snapshot were not run; the Kasus 3 `janji` path now ends through `pesan-tolak` and sets one more mark.
+
+## T-135 (2026-11-22): landing hero no longer crops Miss Raksa's head on short phones (Designer)
+Uncommitted, not deployed. Not opened in a browser or on a phone; no test run. Root `npm run typecheck` exit 0; `client/dist` rebuilt (build exit 0).
+
+- **Cause (confirmed):** the sprite slot was fixed at `top: calc(100% - 136px)`, so any hero frame under 136 px pushed the head above the frame. With the Investigator link the phone frame is 104..190 px.
+- **Fix (phones <= 700 px only, `client/src/player.css` last block + one class in `client/src/art/WelcomeArt.tsx`):**
+  - sprite slot `top: max(4px, calc(100% - 136px))`: the head is never higher than 4 px below the frame top;
+  - the service desk sinks `min(0px, calc(100% - 126px))` (22 px at 104, 14 px at 112, 0 from 126 px), so art rows 0..88 (head to the greeting hands) stay above it;
+  - no scaling: the sprite keeps its whole-device-pixel size (Lead suggested scaling; at 104 px that needs 0.63x, which breaks the pixel grid on dpr 2 phones);
+  - Raki variant: slot `top 4 / bottom 27`, the SVG is `min(88px, 100%)` tall, so it shrinks instead of being cropped (whole from 119 px up as before).
+- Frame heights are untouched, so page height and the no-scroll layout are exactly as before. Frames >= 140 px, tablet and desktop render as before.
+- **Limits:** at 104..~118 px the standing frame's clasped hands (art rows ~94..102) are behind the desk; the greeting frame's hands are always visible. At 104 px the desk is a 12 px ledge. The Raki variant is not in the preview (SVG), calculated only.
+- Preview (real sprite + scene data, 2x; red = before, green = after; standing and greeting frame): `character/investigator-t135/hero-t135.png`, generator `pratinjau.mts`.
