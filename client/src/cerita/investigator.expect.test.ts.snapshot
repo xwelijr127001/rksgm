@@ -13,13 +13,13 @@ exports[`investigator episodes: validator and path walk 1`] = `
     "validasi": []
   },
   "auto-2-inv-3 walk": {
-    "jalur": 5292,
+    "jalur": 3969,
     "akhir": {
-      "tinjau": 3528,
-      "tuntas": 1764
+      "tinjau": 2646,
+      "tuntas": 1323
     },
     "masalah": [],
-    "keadaan": 78
+    "keadaan": 116
   }
 }
 `;

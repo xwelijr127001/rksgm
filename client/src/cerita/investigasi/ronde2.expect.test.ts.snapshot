@@ -1,0 +1,304 @@
+exports[`message wording id by ragam (case 3 janji) 1`] = `
+{
+  "catatanLama": {
+    "id": "janji",
+    "ekspresi": "senang"
+  },
+  "ragamBaru": {
+    "id": "tolak",
+    "ekspresi": "cemas",
+    "ragam": "tolak"
+  },
+  "stateLama": {
+    "id": "janji",
+    "ekspresi": "senang"
+  },
+  "stateBaru": {
+    "id": "tolak",
+    "ekspresi": "cemas",
+    "ragam": "tolak"
+  },
+  "baikTidakBerubah": {
+    "id": "baik",
+    "ekspresi": "lega"
+  }
+}
+`;
+
+exports[`path walk of cases 1 and 2 1`] = `
+{
+  "kasus-1": {
+    "jalur": 1512,
+    "akhir": {
+      "tuntas": 504,
+      "tinjau": 1008
+    },
+    "masalah": [],
+    "keadaan": 111
+  },
+  "kasus-2": {
+    "jalur": 567,
+    "akhir": {
+      "tinjau": 378,
+      "tuntas": 189
+    },
+    "masalah": [],
+    "keadaan": 105
+  }
+}
+`;
+
+exports[`score table: perfect, all guided, with every formative mark 1`] = `
+{
+  "kasus-1": {
+    "perfect": {
+      "babak": [
+        "first"
+      ],
+      "skor": {
+        "bukti": 40,
+        "putusan": 30,
+        "penanganan": 30,
+        "total": 100,
+        "nilai": "S"
+      },
+      "rincian": [
+        {
+          "id": "keberatan",
+          "hasil": "first",
+          "poin": 40,
+          "maks": 40
+        }
+      ],
+      "terlemah": null
+    },
+    "guided": {
+      "babak": [
+        "guided"
+      ],
+      "skor": {
+        "bukti": 10,
+        "putusan": 30,
+        "penanganan": 30,
+        "total": 70,
+        "nilai": "B"
+      },
+      "rincian": [
+        {
+          "id": "keberatan",
+          "hasil": "guided",
+          "poin": 10,
+          "maks": 40
+        }
+      ],
+      "terlemah": {
+        "langkah": "keberatan",
+        "babak": "keberatan",
+        "poin": 10,
+        "maks": 40
+      }
+    },
+    "perfectDenganTandaFormatif": {
+      "babak": [
+        "first"
+      ],
+      "skor": {
+        "bukti": 40,
+        "putusan": 30,
+        "penanganan": 30,
+        "total": 100,
+        "nilai": "S"
+      },
+      "rincian": [
+        {
+          "id": "keberatan",
+          "hasil": "first",
+          "poin": 40,
+          "maks": 40
+        }
+      ],
+      "terlemah": null
+    },
+    "formatifTandaTidakMengubah": true,
+    "jumlahTandaFormatif": 6,
+    "hasilKeberatan": 3
+  },
+  "kasus-2": {
+    "perfect": {
+      "babak": [
+        "first"
+      ],
+      "skor": {
+        "bukti": 40,
+        "putusan": 30,
+        "penanganan": 30,
+        "total": 100,
+        "nilai": "S"
+      },
+      "rincian": [
+        {
+          "id": "keberatan",
+          "hasil": "first",
+          "poin": 40,
+          "maks": 40
+        }
+      ],
+      "terlemah": null
+    },
+    "guided": {
+      "babak": [
+        "guided"
+      ],
+      "skor": {
+        "bukti": 10,
+        "putusan": 30,
+        "penanganan": 30,
+        "total": 70,
+        "nilai": "B"
+      },
+      "rincian": [
+        {
+          "id": "keberatan",
+          "hasil": "guided",
+          "poin": 10,
+          "maks": 40
+        }
+      ],
+      "terlemah": {
+        "langkah": "keberatan",
+        "babak": "keberatan",
+        "poin": 10,
+        "maks": 40
+      }
+    },
+    "perfectDenganTandaFormatif": {
+      "babak": [
+        "first"
+      ],
+      "skor": {
+        "bukti": 40,
+        "putusan": 30,
+        "penanganan": 30,
+        "total": 100,
+        "nilai": "S"
+      },
+      "rincian": [
+        {
+          "id": "keberatan",
+          "hasil": "first",
+          "poin": 40,
+          "maks": 40
+        }
+      ],
+      "terlemah": null
+    },
+    "formatifTandaTidakMengubah": true,
+    "jumlahTandaFormatif": 8,
+    "hasilKeberatan": 3
+  },
+  "kasus-3": {
+    "perfect": {
+      "babak": [
+        "first",
+        "first"
+      ],
+      "skor": {
+        "bukti": 40,
+        "putusan": 30,
+        "penanganan": 30,
+        "total": 100,
+        "nilai": "S"
+      },
+      "rincian": [
+        {
+          "id": "kronologi",
+          "hasil": "first",
+          "poin": 20,
+          "maks": 20
+        },
+        {
+          "id": "pengajuan",
+          "hasil": "first",
+          "poin": 20,
+          "maks": 20
+        }
+      ],
+      "terlemah": null
+    },
+    "guided": {
+      "babak": [
+        "guided",
+        "guided"
+      ],
+      "skor": {
+        "bukti": 10,
+        "putusan": 30,
+        "penanganan": 30,
+        "total": 70,
+        "nilai": "B"
+      },
+      "rincian": [
+        {
+          "id": "kronologi",
+          "hasil": "guided",
+          "poin": 5,
+          "maks": 20
+        },
+        {
+          "id": "pengajuan",
+          "hasil": "guided",
+          "poin": 5,
+          "maks": 20
+        }
+      ],
+      "terlemah": {
+        "langkah": "keberatan",
+        "babak": "kronologi",
+        "poin": 5,
+        "maks": 20
+      }
+    },
+    "perfectDenganTandaFormatif": {
+      "babak": [
+        "first",
+        "first"
+      ],
+      "skor": {
+        "bukti": 40,
+        "putusan": 30,
+        "penanganan": 30,
+        "total": 100,
+        "nilai": "S"
+      },
+      "rincian": [
+        {
+          "id": "kronologi",
+          "hasil": "first",
+          "poin": 20,
+          "maks": 20
+        },
+        {
+          "id": "pengajuan",
+          "hasil": "first",
+          "poin": 20,
+          "maks": 20
+        }
+      ],
+      "terlemah": null
+    },
+    "formatifTandaTidakMengubah": true,
+    "jumlahTandaFormatif": 12,
+    "hasilKeberatan": 3
+  },
+  "seri": {
+    "totalSempurna": 300,
+    "TOTAL_MAKS": 300,
+    "KASUS_TERSEDIA": [
+      "kasus-1",
+      "kasus-2",
+      "kasus-3"
+    ],
+    "pangkatSempurna": "kepala"
+  }
+}
+`;
