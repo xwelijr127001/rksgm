@@ -1,5 +1,5 @@
 /**
- * T-104 Investigator KASUS 3 "Satu Baris Terlalu Banyak": HANYA kunci BARU (bahasa Indonesia). Tabel episode = TEKS_AUTO_2
+ * T-104 Investigator KASUS 3 "Dua Baris di Bengkel" (sampai T-125: "Satu Baris Terlalu Banyak"): HANYA kunci BARU (bahasa Indonesia). Tabel episode = TEKS_AUTO_2
  * + teks antarmuka pembungkus kasus 1 (`inv.ui.*`, `inv.hasil.*`, `inv.lagi.*`, `inv.latihan.*`, `inv.gerbang.*`) + kunci ini
  * (lihat ./teks.ts). Naskah kasus ini berawalan `inv3.` (KonfigInvestigasi.awalan).
  * Aturan penjaga teks (cerita/validasi.ts): kunci & angka sama di id / en / zh; tanpa parameter selain {nama}.
@@ -15,7 +15,7 @@ export const TEKS_AUTO_2_INV_3_ID: Record<string, string> = {
   ringkas: 'Satu perkiraan biaya, dua baris: bumper dan spion. Tunjukkan buktinya satu per satu, dengarkan penjelasannya, lalu tentukan langkah berikutnya. 5 menit.',
   'inv.label': 'Kasus 3',
   'inv3.kait': 'Dua baris di perkiraan biaya. Satu kejadian?',
-  'inv3.kasus.judul': 'Satu Baris Terlalu Banyak',
+  'inv3.kasus.judul': 'Dua Baris di Bengkel', // T-125: judul netral (judul lama "Satu Baris Terlalu Banyak" menjawab pertanyaan pembuka)
   'pemeran.pemohon.nama': 'Pak Gilang',
   'pemeran.pemohon.peran': 'Pemohon klaim · pemilik mobil',
   'pemeran.penaksir.nama': 'Pak Seno',
@@ -34,7 +34,7 @@ export const TEKS_AUTO_2_INV_3_ID: Record<string, string> = {
   'inv3.bab.4.tujuan': 'Simpulkan temuannya, lalu jelaskan langkah berikutnya dengan hormat.',
 
   // Pembuka: kartu kejadian langsung masuk buku, lalu tebakan yang tidak dinilai
-  'inv3.judul.kartu': 'Kasus #3 · Satu Baris Terlalu Banyak',
+  'inv3.judul.kartu': 'Kasus #3 · Dua Baris di Bengkel',
   'inv3.buka.1': 'Kasus baru, Investigator. Tanggal 14, mobil Pak Gilang tertabrak di area parkir. Perkiraan biaya bengkelnya berisi dua baris: bumper dan spion. Mulai dari kartu kejadiannya.',
   'inv3.bukti.kejadian.1': 'Kartu kejadian tanggal 14: sebuah mobil mundur dan mengenai bumper. Petugas parkir menguatkan benturan itu. Di kolom kerusakan tertulis: bumper penyok, spion retak.',
   'inv3.bukti.kejadian.judul': 'Kartu kejadian: benturan bumper di area parkir',
@@ -68,7 +68,7 @@ export const TEKS_AUTO_2_INV_3_ID: Record<string, string> = {
   'inv3.bukti.foto.1': 'Foto pemeriksaan kendaraan tanggal 3: nomor rangkanya sama dengan mobil Pak Gilang, dan retak bercabang di sudut kaca spion sudah terlihat.',
   'inv3.bukti.foto.judul': 'Foto pemeriksaan tanggal 3: retak spion sudah ada',
   'inv3.bukti.foto.sumber': 'Sumber: lembar servis berkala bengkel, nomor rangka sama',
-  'inv3.tekan.penaksir.tanya': 'Tanya: kapan foto pemeriksaan ini diambil?',
+  'inv3.tekan.penaksir.tanya': 'Tanya: Kapan foto pemeriksaan ini diambil?',
   'inv3.tekan.penaksir.jawab': 'Tanggal 3, waktu servis berkala. Tanggal dan nomor rangkanya tercetak otomatis di lembar pemeriksaan.',
 
   // Bukti 2: kutipan pesan pengajuan, diperlihatkan dengan persetujuan pemohon
@@ -77,7 +77,7 @@ export const TEKS_AUTO_2_INV_3_ID: Record<string, string> = {
   'inv3.bukti.pesan.1': 'Kutipan pesan Pak Gilang kepada bengkel, tanggal 15: “Retak spion itu sudah lama. Tolong masukkan saja sebagai kerusakan kejadian ini.”',
   'inv3.bukti.pesan.judul': 'Kutipan pesan tanggal 15: retak lama diminta masuk',
   'inv3.bukti.pesan.sumber': 'Sumber: pesan Pak Gilang kepada bengkel, diperlihatkan dengan persetujuannya', // [konfirmasi PIC]
-  'inv3.tekan.pemohon.tanya': 'Tanya: siapa yang menyetujui kutipan pesan ini?',
+  'inv3.tekan.pemohon.tanya': 'Tanya: Siapa yang menyetujui kutipan pesan ini?',
   'inv3.tekan.pemohon.jawab': 'Saya sendiri. Pesan itu dari nomor saya, dan saya mengizinkan kutipannya dipakai untuk telaah ini.', // [konfirmasi PIC]
 
   // Panel telaah (simulasi telaah bukti; bukan sidang)

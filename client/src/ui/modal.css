@@ -86,3 +86,10 @@ body > .mdl-latar {
     padding-bottom: max(16px, env(safe-area-inset-bottom));
   }
 }
+
+/* T-125 LINGKUP HURUF GAME (Modal `huruf`, ui/kit.tsx `hurufModalDari`): dialog yang dibuka dari Raksa Investigator memakai huruf
+   game, bukan huruf sistem. Deklarasi font: cerita/lokasi/seni/font.css (sudah dimuat oleh layar HP). Hanya lapisan bertanda ini
+   yang berubah; huruf body dan dialog mode lain tetap. Tulisan tangan buku catatan (.bk-tulisan) dan huruf mono tidak tersentuh:
+   aturan kedua hanya untuk judul dan kontrol, yang oleh player.css diberi huruf sendiri. */
+body > .mdl-latar[data-huruf="game"] { font-family: 'Plus Jakarta Sans', system-ui, -apple-system, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', 'Noto Sans SC', sans-serif; -webkit-font-smoothing: antialiased; }
+body > .mdl-latar[data-huruf="game"] :is(h1, h2, h3, h4, button, input, select, textarea, summary, .primary-action, .btn) { font-family: inherit; }

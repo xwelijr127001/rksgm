@@ -31,11 +31,13 @@ const kamus: KamusRuang = {
     berkasBaru: 'Berkas baru · belum dibuka',
     terbaik: 'Terbaik {skor} / {maks}',
     // T-113: daftar kasus bergambar: tag di foto dan kalimat kait satu baris per kasus (kasus lain = kait dari teks episode)
+    // T-125: teks pengganti gambar netral kasus 1 (SeniTolNetral): tanpa kendaraan, tanpa lajur yang disebut
+    fotoTol: 'Kamera jalan tol: empat lajur, belum ada kendaraan',
     tagBaru: 'Baru',
     skorFoto: '{skor}/{maks}',
     'kaitDaftar.kasus-1': 'Petugas mencatat lajur 3. Benarkah?',
     'kaitDaftar.kasus-2': 'Mobil keluarga, atau antar penumpang?',
-    'kaitDaftar.kasus-3': 'Satu baris di nota terlalu banyak?',
+    'kaitDaftar.kasus-3': 'Dua baris di perkiraan biaya. Satu kejadian?', // T-125: netral, sama dengan kait episode
     // T-114: hub satu layar: strip petugas (ketuk = kartu petugas), kartu kasus ringkas
     stripJalan: 'Berjalan',
     kartuJudul: 'Kartu petugas',
@@ -75,11 +77,12 @@ const kamus: KamusRuang = {
     berkasBaru: 'New file · not opened yet',
     terbaik: 'Best {skor} / {maks}',
     // T-113: daftar kasus bergambar: tag di foto dan kalimat kait satu baris per kasus (kasus lain = kait dari teks episode)
+    fotoTol: 'Toll road camera: four lanes, no vehicle yet',
     tagBaru: 'New',
     skorFoto: '{skor}/{maks}',
     'kaitDaftar.kasus-1': 'The officer wrote lane 3. Is that right?',
     'kaitDaftar.kasus-2': 'A family car, or carrying a passenger?',
-    'kaitDaftar.kasus-3': 'One line too many on the invoice?',
+    'kaitDaftar.kasus-3': 'Two lines on the estimate. One incident?',
     // T-114: hub satu layar: strip petugas (ketuk = kartu petugas), kartu kasus ringkas
     stripJalan: 'In progress',
     kartuJudul: 'Officer card',
@@ -119,11 +122,12 @@ const kamus: KamusRuang = {
     berkasBaru: '新案卷 · 尚未打开',
     terbaik: '最高 {skor} / {maks}',
     // T-113: daftar kasus bergambar: tag di foto dan kalimat kait satu baris per kasus (kasus lain = kait dari teks episode)
+    fotoTol: '收费公路摄像头：四条车道，还没有车辆',
     tagBaru: '新',
     skorFoto: '{skor}/{maks}',
     'kaitDaftar.kasus-1': '工作人员记录的是第 3 车道。真是这样吗？',
     'kaitDaftar.kasus-2': '家用车，还是正在载客？',
-    'kaitDaftar.kasus-3': '单据上多了一行？',
+    'kaitDaftar.kasus-3': '估价单上有两行。是同一次事故吗？',
     // T-114: hub satu layar: strip petugas (ketuk = kartu petugas), kartu kasus ringkas
     stripJalan: '进行中',
     kartuJudul: '调查员证',

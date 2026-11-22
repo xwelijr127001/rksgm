@@ -416,3 +416,13 @@ Confirmed working folder `C:\Users\User\Desktop\rksgm-episode2`.
 4. **Venue joins — yes.** The effective lookup ceiling is 600 attempts/minute/IP. After 120 wrong codes, further misses return 429 while valid codes can still join within the burst and 300/minute board budgets (`server/src/investigator/http.ts:238`, `:247`). This departure from the original 120-total limit is acceptable for shared booth Wi-Fi and a public invitation code.
 
 No new release blocker found. I reviewed Fullstack’s 38 recorded requests and the source; the smoke run did not exercise limiter saturation.
+
+Confirmed working folder `C:\Users\User\Desktop\rksgm-episode2`.
+
+## Peterson feedback plan (2026-11-22)
+
+Approve two rounds, with direct weakest-step practice moved into round 1. Peterson’s screenshot shows stage navigation and a five-answer submission competing on the same screen. Split only the full truck episode’s K03 presentation into reading and replying; retain the original decision and consequences. Audit the compact sheet separately from the desktop inline branch. At phone sizes, long text needs pagination, including inside dialogs.
+
+Round 1 also removes premature visual clues and explains actual score losses. The existing result already shows category scores. The officer number is derived from name and day; clarify that before changing persistence.
+
+Round 2 should replace confirmation taps with one real inference per case. A mid-file decision can correctly request the missing endorsement while the final decision still uses the complete file. Keep the new deductions formative, cosmetic marks separate from stamps, and practice separate from ranked runs. This protects old saves and the 300-point series. Policy, privacy and referral language require PIC confirmation. Desktop-scripted feedback identifies real issues; five-minute pacing and enjoyment still need unaided guest observation.

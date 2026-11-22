@@ -9,6 +9,9 @@
  *   id kartu tanpa seni panel: hanya kutipan dan sumbernya.
  * `quote` = pernyataan yang sedang diperiksa (tampil di atas, supaya bisa dibandingkan). `onUse` = tombol "Pakai bukti ini".
  * Semua kalimat datang dari props (sudah diterjemahkan); komponen ini tidak menyimpan apa pun.
+ * T-125: label "Sumber" punya SATU pemilik = teks kartu (`card.source` di semua kasus sudah berbunyi "Sumber: ..." / "Source: ..." /
+ * "来源：..."). Dulu komponen ini menambah labelnya sekali lagi ("Sumber: Sumber: ..."). Sekarang `labelSumber` hanya MEMISAH
+ * label yang sudah ada supaya bisa ditebalkan; label kamus dipakai hanya bila teksnya datang tanpa label.
  */
 import { useState } from 'react';
 import { Modal } from '../../../../ui/kit';
@@ -17,6 +20,12 @@ import { evidenceArt } from './aset';
 import { PanelIcon } from './seni';
 import { useLabelPanel } from './teks';
 import './panel.css';
+
+/** Pisah "Label: isi" (titik dua Latin atau lebar-penuh) dari teks sumber yang sudah diterjemahkan. */
+function labelSumber(sumber: string, bawaan: string): { label: string; isi: string } {
+  const m = /^\s*([^:：]{1,24})([:：])\s*(.+)$/s.exec(sumber);
+  return m ? { label: m[1]! + m[2]!, isi: m[3]! } : { label: bawaan + ':', isi: sumber.trim() };
+}
 
 export function PanelExhibit({ card, quote, onClose, onUse }: {
   card: PanelCard;
@@ -29,6 +38,7 @@ export function PanelExhibit({ card, quote, onClose, onUse }: {
   const seni = evidenceArt(card.id);
   const [dekat, setDekat] = useState(false);
   const bisaPakai = !!onUse && !card.disabled;
+  const sumber = labelSumber(card.source, L('sumber'));
   return (
     <Modal judul={card.title} onTutup={() => onClose()} lebar={420}
       aksi={(
@@ -60,7 +70,7 @@ export function PanelExhibit({ card, quote, onClose, onUse }: {
         ) : seni?.kind === 'kertas' ? (
           <blockquote className="pn-kertas"><p>{card.excerpt ?? card.title}</p></blockquote>
         ) : card.excerpt ? <blockquote className="pn-kertas"><p>{card.excerpt}</p></blockquote> : null}
-        <p className="pn-sumber">{seni ? <PanelIcon nama={seni.icon} /> : null}<span><b>{L('sumber')}:</b> {card.source}</span></p>
+        <p className="pn-sumber">{seni ? <PanelIcon nama={seni.icon} /> : null}<span data-sumber-bukti=""><b>{sumber.label}</b> {sumber.isi}</span></p>
       </div>
     </Modal>
   );

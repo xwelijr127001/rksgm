@@ -4,6 +4,7 @@
  * Tidak memuat jawaban: hanya keadaan kasus yang juga diketahui petugas di cerita.
  * Dokumen ber-`skema` (bukti ruas jalan) menampilkan tiruan rambu + diagram lajur (BuktiLajur) sebagai ganti baris yang
  * dipakainya, dengan tombol "Perbesar bukti" (lembar bukti di dialog, ukuran besar).
+ * T-124: `BacaTahapan` (di bawah) = dokumen bertahap yang sama sebagai langkah baca tersendiri, untuk keputusan dua langkah.
  */
 import { useState } from 'react';
 import { t } from '../../i18n';
@@ -19,10 +20,7 @@ export function KartuDokumen({ dokumen, id, tx }: { dokumen: DokumenCerita; id: 
   return (
     <section className="cer-dok" data-dokumen={id} aria-labelledby={idJudul}>
       <h3 id={idJudul} className="cer-dok-judul">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true" focusable="false">
-          <path d="M7 3.5h7l4 4V20a.5.5 0 0 1-.5.5h-10A.5.5 0 0 1 7 20Z" fill="#fffdf6" stroke="currentColor" strokeWidth="1.7" strokeLinejoin="round" />
-          <path d="M14 3.5V8h4M9.5 12h6M9.5 15h6M9.5 18h4" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" />
-        </svg>
+        <IkonDokumen />
         <span>{tx(dokumen.judul)}</span>
       </h3>
       {dokumen.skema ? (
@@ -56,6 +54,69 @@ export function KartuDokumen({ dokumen, id, tx }: { dokumen: DokumenCerita; id: 
           <BuktiLajur dokumen={dokumen} skema={dokumen.skema} tx={tx} besar />
         </Modal>
       ) : null}
+    </section>
+  );
+}
+
+function IkonDokumen() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true" focusable="false">
+      <path d="M7 3.5h7l4 4V20a.5.5 0 0 1-.5.5h-10A.5.5 0 0 1 7 20Z" fill="#fffdf6" stroke="currentColor" strokeWidth="1.7" strokeLinejoin="round" />
+      <path d="M14 3.5V8h4M9.5 12h6M9.5 15h6M9.5 18h4" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" />
+    </svg>
+  );
+}
+
+/**
+ * T-124 BACA TAHAPAN: dokumen bertahap sebagai LANGKAH BACA tersendiri (langkah 1 keputusan dua langkah, hp/PilihBalasan.tsx;
+ * gaya di hp/duaLangkah.css). Isinya sama dengan kartu tahapan di atas (judul, tahap, penjelasan urutan, catatan = baris naskah
+ * apa adanya), tetapi TANPA tombol Sebelumnya/Berikutnya di dalam kartu: tahap aktif dipegang pemanggil (`tahap`, `onTahap`),
+ * yang menaruh tombol geser di SATU baris aksi bersama tombol utamanya. Di sini hanya penanda posisi yang bisa diketuk
+ * (tablist; panah kiri/kanan, Home, End) dan kartu tahap aktif. Kartu tahap lain ikut digambar tak terlihat di sel yang sama
+ * (`data-ukur`), jadi tinggi kartu = tahap terpanjang dan baris aksi di bawahnya tidak melompat saat tahap berganti.
+ */
+export function BacaTahapan({ dokumen, id, tx, tahap, onTahap }: { dokumen: DokumenCerita; id: string; tx: (k: KunciTeks) => string; tahap: number; onTahap: (i: number) => void }) {
+  const idJudul = `cer-baca-${id}`;
+  const idPanel = `cer-baca-panel-${id}`;
+  const baris = dokumen.baris;
+  const n = baris.length;
+  const aktif = Math.min(Math.max(tahap, 0), n - 1);
+  const label = (i: number) => tx(baris[i]!.label).replace(/^\d+\.\s*/, '');
+  const panah = (e: React.KeyboardEvent<HTMLDivElement>) => {
+    const i = e.key === 'ArrowRight' ? (aktif + 1) % n : e.key === 'ArrowLeft' ? (aktif - 1 + n) % n : e.key === 'Home' ? 0 : e.key === 'End' ? n - 1 : -1;
+    if (i < 0 || e.altKey || e.ctrlKey || e.metaKey) return;
+    e.preventDefault();
+    onTahap(i);
+    e.currentTarget.querySelectorAll<HTMLElement>('[role="tab"]')[i]?.focus();
+  };
+  const isi = (i: number) => (
+    <>
+      <p className="hp-dl-ke">{t('ceritaHp.tahapKe', { n: i + 1, total: n })}</p>
+      <p className="hp-dl-nama">{label(i)}</p>
+      {baris[i]!.nilai ? <p className="hp-dl-isi">{tx(baris[i]!.nilai!)}</p> : null}
+    </>
+  );
+  return (
+    <section className="cer-dok hp-dl-baca" data-dokumen={id} data-jenis={dokumen.tahapan} aria-labelledby={idJudul}>
+      <h3 id={idJudul} className="cer-dok-judul">
+        <IkonDokumen />
+        <span>{tx(dokumen.judul)}</span>
+      </h3>
+      <div className="hp-dl-peta" role="tablist" aria-labelledby={idJudul} onKeyDown={panah}>
+        {baris.map((_, i) => (
+          <button key={i} id={`${idPanel}-t${i}`} type="button" role="tab" aria-selected={i === aktif} aria-controls={idPanel} tabIndex={i === aktif ? 0 : -1}
+            className="hp-dl-titik" data-tahap={i + 1} data-lewat={i < aktif ? '' : undefined} onClick={() => onTahap(i)}>
+            <span className="hp-dl-no">{i + 1}</span>
+            <span className="hp-dl-label">{label(i)}</span>
+          </button>
+        ))}
+      </div>
+      <div className="hp-dl-tumpuk">
+        {baris.map((_, i) => (i === aktif ? null : <div key={i} className="hp-dl-kartu" data-ukur="" aria-hidden="true">{isi(i)}</div>))}
+        <div id={idPanel} className="hp-dl-kartu" role="tabpanel" aria-labelledby={`${idPanel}-t${aktif}`} aria-live="polite" data-tahap-aktif={aktif + 1}>{isi(aktif)}</div>
+      </div>
+      {dokumen.tahapan === 'paralel' ? <p className="hp-dl-urutan">{t('ceritaHp.urutanPenjelasan')}</p> : null}
+      {dokumen.catatan ? <p className="cer-dok-catatan">{tx(dokumen.catatan)}</p> : null}
     </section>
   );
 }

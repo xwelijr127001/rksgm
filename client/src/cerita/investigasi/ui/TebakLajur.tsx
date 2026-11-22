@@ -6,10 +6,12 @@
  *
  * Props: { onPilih(lajur: 1 | 2 | 3 | 4), pilihan? } (\`pilihan\` = keping yang sudah dipilih, mis. saat layar ini dibuka lagi).
  * Ukur 360 x 640 (hitung): tanya 68 + bingkai 150 + keping 52 + keterangan 20..40 + jarak 3 x 8 = 314..334 px.
+ * T-125 (ulasan Pak Peterson: gambar tebakan sudah memperlihatkan truk di lajur 2): bingkai dashcam diganti gambar NETRAL
+ * (SeniTolNetral: jalan tol empat lajur yang kosong, ukuran dan pusat lajur sama, "?" di tengah jalan). Tinggi layar tidak berubah.
  */
 import { t } from '../../../i18n';
-import { BingkaiDashcam } from '../../hp/arena/ArenaDashcam';
 import { PotretReaksi } from './BukuCatatan';
+import { SeniTolNetral } from './SeniTolNetral';
 import './investigasi.css';
 import './tambahan.css';
 
@@ -25,7 +27,7 @@ export function TebakLajur({ onPilih, pilihan }: { onPilih: (lajur: Lajur) => vo
         <p className="iv-tebak-balon"><b>Miss Raksa</b><span id="iv-tebak-tanya" tabIndex={-1} data-cer-fokus="">{t('investigasi.tebak.tanya')}</span></p>
       </div>
       <div className="iv-tebak-jalan">
-        <BingkaiDashcam besar potong="lajur" tanya />
+        <SeniTolNetral besar tanya />
         <div className="iv-tebak-keping" role="group" aria-labelledby="iv-tebak-tanya">
           {PUSAT.map((x, i) => (
             <button key={i} type="button" className="iv-keping" data-lajur={i + 1} aria-pressed={pilihan === i + 1} aria-label={t('investigasi.tebak.lajur', { n: i + 1 })}

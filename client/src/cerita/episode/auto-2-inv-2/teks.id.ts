@@ -88,7 +88,7 @@ export const TEKS_AUTO_2_INV_2_ID: Record<string, string> = {
 
   // Bukti 2: polis (layar ui/PeriksaPolis membaca kunci inv2.polis.* lewat useTx)
   // T-104 "Tanya lebih lanjut" (opsional, tanpa poin): kapan perjalanan itu ditutup
-  'inv2.tekan.yusuf.tanya': 'Tanya: kapan perjalanan itu ditutup di aplikasi?',
+  'inv2.tekan.yusuf.tanya': 'Tanya: Kapan perjalanan itu ditutup di aplikasi?',
   'inv2.tekan.yusuf.jawab': 'Jam 21:24. Saya sendiri yang menutupnya dari HP di dasbor, sesudah mobil menepi.',
   'inv2.polis.1': 'Satu catatan lagi: polisnya. Kita baca apa yang tertulis, bukan apa yang kita kira.',
   'inv2.polis.judul': 'Baca polisnya',

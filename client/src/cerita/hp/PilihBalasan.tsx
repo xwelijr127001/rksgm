@@ -13,19 +13,44 @@
  * (sampai +- 390 huruf pada 18 px), jadi daftar tiga pesan utuh tidak muat di lembar dan badan lembarnya menggulir. Dengan
  * `ringkas`: di daftar tiap pesan dipotong 3 baris; mengetuk satu pesan MELIPAT lembar menjadi pesan itu saja, utuh, dengan "Ganti
  * balasan" (kembali ke daftar) dan tombol kirim. Tidak ada yang perlu digulir; pesan lain tetap satu ketukan jauhnya.
+ *
+ * T-124 (masukan Pak Peterson 22 Nov 2026, butir 1-2; HANYA `DUA_LANGKAH` di bawah = episode `auto-2`, node `k03`, dokumen
+ * `proses`; keputusan lain, Episode 1 Dev dan kasus Investigator tidak berubah): kartu tahapan dan lima balasan dulu tampil
+ * bersamaan, jadi "Tahap berikutnya" dan "Kirim balasan" berebut perhatian. Sekarang DUA LANGKAH, tampilan saja:
+ *   1. BACA  "Pelajari tahapan klaim": kartu proses mulai di tahap 1 dari 4; satu baris aksi = Sebelumnya + SATU tombol utama
+ *      ("Tahap berikutnya", di tahap terakhir "Lanjut ke balasan"). Penjelasan "urutan penjelasan, bukan jadwal" dan catatan
+ *      dokumen selalu terlihat.
+ *   2. BALAS pertanyaan naskah + lima radio + "Lihat tahapan" (kembali ke langkah 1) + SATU tombol kirim.
+ * "Lihat tahapan" TIDAK melepas balasan yang sedang dipilih. Sesudah langkah 2 pernah dicapai, langkah 1 adalah TINJAUAN: tombol
+ * utamanya "Kembali ke balasan" di tahap mana pun, dan tahap digeser dengan dua tombol panah (atau penanda 1-4).
+ * Naskah, lima pilihan, nilai kepercayaan dan node lanjutannya tidak disentuh: hanya `onKirim` (sekali) yang menyentuh mesin.
+ * Ingatan: langkah & tahap diingat selama KUNJUNGAN halaman ini (`kunjungan`, tidak disimpan) dan dilupakan saat balasan
+ * terkirim; sesudah muat ulang, balasan tersimpan yang masih sah (`awal`) membuka langkah 2, selain itu langkah 1 dari tahap 1.
+ * Fokus pindah ke judul langkah yang baru (cincin fokus terlihat bagi pengguna keyboard); panah kiri/kanan hanya bekerja di dalam
+ * penanda tahap, panah atas/bawah hanya di dalam daftar balasan.
  */
-import { useContext, useId, useRef, useState, type KeyboardEvent, type PointerEvent } from 'react';
+import { useContext, useEffect, useId, useRef, useState, type KeyboardEvent, type PointerEvent } from 'react';
 import { playSfx } from '../../audio/audio';
+import { Arrow } from '../../components/PlayerShell';
 import { t } from '../../i18n';
 import { URL_IKON_PIKSEL } from '../seni/piksel';
 import type { DokumenCerita, Episode, KunciTeks, NodePilihan, Pilihan } from '../tipe';
-import { KartuDokumen } from '../ui/KartuDokumen';
+import { BacaTahapan, KartuDokumen } from '../ui/KartuDokumen';
 import { TombolKirim } from './bagianHp';
 import { PotretSaya } from './lookPemain';
 import { LembarObrolan } from './ekor';
+import './duaLangkah.css';
 
 /** Catatan yang sudah pernah dibuka (titik merah "belum dibaca" hilang), per dokumen, selama halaman hidup. */
 const catatanDibaca = new Set<string>();
+
+/** T-124: satu-satunya keputusan yang tampil dua langkah (baca tahapan, lalu balas). Lihat kepala berkas. */
+const DUA_LANGKAH = { episode: 'auto-2', node: 'k03', dokumen: 'proses' } as const;
+type Langkah = 'baca' | 'balas';
+/** T-124: langkah & tahap yang sedang dibuka, per keputusan, selama kunjungan halaman ini (dilupakan saat balasan terkirim). */
+const kunjungan = new Map<string, { langkah: Langkah; tahap: number; sudahBalas: boolean }>();
+/** T-124: jeda sesudah langkah berganti; selama itu baris aksi tidak menerima ketukan (ketuk ganda tidak ikut mengirim). */
+const JEDA_LANGKAH_MS = 400;
 
 export function PilihBalasan({ ep, node, pilihan, tx, gaya, petunjuk, onKirim, awal = null, onUbahPilih, onTutup, ringkas = false }: {
   ep: Episode;
@@ -67,6 +92,66 @@ export function PilihBalasan({ ep, node, pilihan, tx, gaya, petunjuk, onKirim, a
     (e.currentTarget.querySelectorAll<HTMLElement>('[role="radio"]')[i])?.focus();
   };
 
+  // ---- T-124: keputusan dua langkah (hanya DUA_LANGKAH; di tempat lain `duaLangkah` false dan tidak ada yang berubah)
+  const duaLangkah = ep.id === DUA_LANGKAH.episode && node.id === DUA_LANGKAH.node && node.dokumen === DUA_LANGKAH.dokumen && !!dok?.tahapan && !dok.skema && dok.baris.length >= 2;
+  const kunciKunjungan = `${ep.id}:${node.id}`;
+  const jumlahTahap = dok?.baris.length ?? 0;
+  const [langkah, setLangkah] = useState<Langkah>(() => (!duaLangkah || sah ? 'balas' : kunjungan.get(kunciKunjungan)?.langkah ?? 'baca'));
+  const [tahap, setTahap] = useState(() => (duaLangkah ? Math.min(Math.max(kunjungan.get(kunciKunjungan)?.tahap ?? 0, 0), Math.max(jumlahTahap - 1, 0)) : 0));
+  /** Langkah balas sudah pernah dicapai (kunjungan ini, atau ada balasan tersimpan): langkah baca = tinjauan. */
+  const [sudahBalas, setSudahBalas] = useState(() => duaLangkah && (!!sah || !!kunjungan.get(kunciKunjungan)?.sudahBalas));
+  const [jeda, setJeda] = useState(false);
+  const pewaktuJeda = useRef<number | null>(null);
+  useEffect(() => () => { if (pewaktuJeda.current !== null) window.clearTimeout(pewaktuJeda.current); }, []);
+  const membaca = duaLangkah && langkah === 'baca';
+  const tahapTerakhir = tahap >= jumlahTahap - 1;
+  const catat = (l: Langkah, th: number, sb: boolean) => { if (duaLangkah) kunjungan.set(kunciKunjungan, { langkah: l, tahap: th, sudahBalas: sb }); };
+  const keTahap = (i: number) => {
+    if (i < 0 || i >= jumlahTahap || i === tahap) return;
+    setTahap(i);
+    catat(langkah, i, sudahBalas);
+  };
+  const keLangkah = (l: Langkah) => {
+    const sb = sudahBalas || l === 'balas';
+    const th = l === 'baca' ? 0 : tahap; // tinjauan selalu mulai dari tahap 1
+    setLangkah(l); setSudahBalas(sb); setTahap(th);
+    catat(l, th, sb);
+    setJeda(true);
+    if (pewaktuJeda.current !== null) window.clearTimeout(pewaktuJeda.current);
+    pewaktuJeda.current = window.setTimeout(() => { pewaktuJeda.current = null; setJeda(false); }, JEDA_LANGKAH_MS);
+    // Fokus ke judul langkah yang baru. Di lembar tanpa menggulir; di blok biasa (desktop) judul boleh digulir ke dalam layar.
+    requestAnimationFrame(() => akar.current?.querySelector<HTMLElement>('[data-hp-fokus]')?.focus({ preventScroll: lembar }));
+  };
+  const kirim = () => {
+    if (!dipilih) return;
+    kunjungan.delete(kunciKunjungan);
+    onKirim(dipilih);
+  };
+  /** Baris aksi langkah baca: Sebelumnya (+ Berikutnya saat tinjauan) + satu tombol utama. */
+  const kakiBaca = membaca ? (
+    <div className="hp-dl-kaki" data-kaki="baca" data-jeda={jeda ? '' : undefined}>
+      <button type="button" className="hp-lembar-kembali hp-dl-kedua" data-ikon="" data-tahap-sebelum="" aria-disabled={tahap === 0 ? true : undefined}
+        onClick={() => { if (tahap > 0) { playSfx('ketuk'); keTahap(tahap - 1); } }}>
+        <Arrow back /><span className="hp-dl-teks">{t('ceritaHp.tahapSebelum')}</span>
+      </button>
+      {sudahBalas ? (
+        <button type="button" className="hp-lembar-kembali hp-dl-kedua" data-ikon="" data-tahap-berikut="" aria-disabled={tahapTerakhir ? true : undefined}
+          onClick={() => { if (!tahapTerakhir) { playSfx('ketuk'); keTahap(tahap + 1); } }}>
+          <span className="hp-dl-teks">{t('ceritaHp.tahapBerikut')}</span><Arrow />
+        </button>
+      ) : null}
+      <button type="button" className="primary-action hp-dl-utama" data-ke-balasan={sudahBalas || tahapTerakhir ? '' : undefined} data-tahap-maju={sudahBalas || tahapTerakhir ? undefined : ''}
+        onClick={() => { playSfx('ketuk'); if (sudahBalas || tahapTerakhir) keLangkah('balas'); else keTahap(tahap + 1); }}>
+        <span>{sudahBalas ? t('ceritaHp.kembaliBalasan') : tahapTerakhir ? t('ceritaHp.lanjutKeBalasan') : t('ceritaHp.tahapBerikut')}</span> <Arrow />
+      </button>
+    </div>
+  ) : null;
+  const tombolLihat = duaLangkah ? (
+    <button type="button" className="hp-lembar-kembali hp-dl-kedua" data-lihat-tahapan="" onClick={() => { playSfx('ketuk'); keLangkah('baca'); }}>
+      <Arrow back /><span>{t('ceritaHp.lihatTahapan')}</span>
+    </button>
+  ) : null;
+
   if (lembar) {
     const bukaNota = (buka: boolean) => {
       setNota(buka);
@@ -76,7 +161,7 @@ export function PilihBalasan({ ep, node, pilihan, tx, gaya, petunjuk, onKirim, a
     const tombol = (e: KeyboardEvent<HTMLElement>) => {
       if (e.altKey || e.ctrlKey || e.metaKey) return;
       if (e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); if (nota) bukaNota(false); else onTutup?.(); return; }
-      if (nota) return;
+      if (nota || membaca) return; // T-124: angka & Enter hanya untuk balasan, bukan saat membaca tahapan
       const n = Number(e.key);
       if (Number.isInteger(n) && n >= 1 && n <= pilihan.length) {
         e.preventDefault();
@@ -86,8 +171,10 @@ export function PilihBalasan({ ep, node, pilihan, tx, gaya, petunjuk, onKirim, a
         return;
       }
       // Enter pada baris yang SUDAH terpilih (atau pada pertanyaan) = kirim; pada baris lain = memilihnya (klik bawaan).
+      // T-124: di keputusan dua langkah fokus pindah ke pertanyaan setiap kali langkah berganti, jadi Enter pada pertanyaan
+      // TIDAK mengirim di sana (Enter yang ditekan dua kali tidak boleh mengirim balasan).
       const el = e.target instanceof HTMLElement ? e.target : null;
-      if (e.key === 'Enter' && dipilih && el && (el.matches('[data-hp-fokus]') || el.getAttribute('data-pilihan') === dipilih)) {
+      if (e.key === 'Enter' && dipilih && el && ((el.matches('[data-hp-fokus]') && !duaLangkah) || el.getAttribute('data-pilihan') === dipilih)) {
         e.preventDefault();
         akar.current?.querySelector<HTMLElement>('[data-kirim]')?.click();
       }
@@ -98,20 +185,26 @@ export function PilihBalasan({ ep, node, pilihan, tx, gaya, petunjuk, onKirim, a
     const turun = (e: PointerEvent<HTMLButtonElement>) => { geser.current = e.clientY; try { e.currentTarget.setPointerCapture(e.pointerId); } catch { /* abaikan */ } };
     const lepas = (e: PointerEvent<HTMLButtonElement>) => { const y0 = geser.current; geser.current = null; if (y0 !== null && e.clientY - y0 >= 20) onTutup?.(); };
     return (
-      <section ref={akar} className="hp-pilih hp-lembar" data-lembar="" data-gaya={gaya} data-tampil={nota ? 'nota' : 'balas'} data-ringkas={ringkas ? (lipatLembar ? 'lipat' : 'daftar') : undefined} aria-labelledby={idJudul} onKeyDown={tombol}>
+      <section ref={akar} className="hp-pilih hp-lembar" data-lembar="" data-gaya={gaya} data-tampil={nota ? 'nota' : 'balas'} data-ringkas={ringkas ? (lipatLembar ? 'lipat' : 'daftar') : undefined}
+        data-dua-langkah={duaLangkah ? '' : undefined} data-langkah={duaLangkah ? langkah : undefined} aria-labelledby={idJudul} onKeyDown={tombol}>
         <div className="hp-lembar-pegangan">
           <button type="button" data-tutup-lembar="" aria-label={t('ceritaHp.tutupBalasan')} onClick={() => onTutup?.()} onPointerDown={turun} onPointerUp={lepas}><i aria-hidden="true" /></button>
         </div>
         <div className="hp-lembar-kepala">
           <span className="hp-lembar-mr" aria-hidden="true" style={{ backgroundImage: `url(${URL_IKON_PIKSEL.missRaksa})` }} />
-          <h2 id={idJudul} className="hp-tanya" tabIndex={-1} data-hp-fokus="">{tx(node.tanya)}</h2>
+          <h2 id={idJudul} className="hp-tanya" tabIndex={-1} data-hp-fokus="">{membaca ? t('ceritaHp.pelajariTahapan') : tx(node.tanya)}</h2>
         </div>
-        {dok ? (
+        {dok && !duaLangkah ? (
           <button type="button" className="hp-lembar-catatan" data-catatan="" data-dibaca={dibaca ? '' : undefined} aria-pressed={nota} onClick={() => bukaNota(!nota)}>
             <span aria-hidden="true">▤</span> {t('ceritaHp.catatan')}{dibaca ? null : <span className="sr-only"> ({t('ceritaHp.catatanBaru')})</span>}
           </button>
         ) : null}
-        {nota && dok ? (
+        {membaca && dok ? (
+          <>
+            <div className="hp-lembar-badan" data-gulir-lembar=""><BacaTahapan dokumen={dok} id={node.dokumen!} tx={tx} tahap={tahap} onTahap={keTahap} /></div>
+            {kakiBaca}
+          </>
+        ) : nota && dok ? (
           <>
             <div className="hp-lembar-badan" data-gulir-lembar=""><NotaDokumen dokumen={dok} id={node.dokumen!} tx={tx} /></div>
             <button type="button" className="hp-lembar-kembali" data-kembali-balasan="" onClick={() => bukaNota(false)}><span aria-hidden="true">←</span> {t('ceritaHp.kembaliBalasan')}</button>
@@ -136,12 +229,65 @@ export function PilihBalasan({ ep, node, pilihan, tx, gaya, petunjuk, onKirim, a
                 {gaya === 'obrolan' ? t('ceritaHp.gantiBalasan') : t('ceritaHp.gantiJawaban')}
               </button>
             ) : null}
-            <TombolKirim
-              label={terpilih ? t('ceritaHp.kirimBalasanN', { n: indeks + 1 }) : t('ceritaHp.pilihSatuBalasan')}
-              siap={dipilih !== null}
-              onKirim={() => { if (dipilih) onKirim(dipilih); }}
-              potret={<PotretSaya ukuran={32} />}
-            />
+            {duaLangkah ? (
+              // T-124: "Lihat tahapan" dan kirim di satu baris aksi (tanpa potret: lebarnya dipakai tombol kirim).
+              <div className="hp-dl-kaki" data-kaki="balas" data-jeda={jeda ? '' : undefined}>
+                {tombolLihat}
+                <TombolKirim
+                  label={terpilih ? t('ceritaHp.kirimBalasanN', { n: indeks + 1 }) : t('ceritaHp.pilihSatuBalasan')}
+                  siap={dipilih !== null}
+                  onKirim={kirim}
+                />
+              </div>
+            ) : (
+              <TombolKirim
+                label={terpilih ? t('ceritaHp.kirimBalasanN', { n: indeks + 1 }) : t('ceritaHp.pilihSatuBalasan')}
+                siap={dipilih !== null}
+                onKirim={() => { if (dipilih) onKirim(dipilih); }}
+                potret={<PotretSaya ukuran={32} />}
+              />
+            )}
+          </>
+        )}
+      </section>
+    );
+  }
+
+  if (duaLangkah && dok) {
+    // T-124: blok biasa (desktop >= 1024 px, layar sangat pendek) dalam dua langkah. Daftar balasan TIDAK dilipat menjadi
+    // pratinjau di sini: lima radio tetap terlihat, yang dipilih bertanda, dan satu tombol kirim di samping "Lihat tahapan".
+    return (
+      <section ref={akar} className="hp-pilih" data-gaya={gaya} data-dua-langkah="" data-langkah={langkah} aria-labelledby={idJudul}>
+        <h2 id={idJudul} className="hp-tanya" tabIndex={-1} data-hp-fokus="">{membaca ? t('ceritaHp.pelajariTahapan') : tx(node.tanya)}</h2>
+        {membaca ? (
+          <>
+            <BacaTahapan dokumen={dok} id={node.dokumen!} tx={tx} tahap={tahap} onTahap={keTahap} />
+            {kakiBaca}
+          </>
+        ) : (
+          <>
+            {petunjuk ? <p className="hp-petunjuk">{t('ceritaHp.pilihPetunjuk')}</p> : null}
+            <div className="hp-opsi-daftar" role="radiogroup" aria-labelledby={idJudul} onKeyDown={panah}>
+              {pilihan.map((p, i) => {
+                const aktif = p.id === dipilih;
+                return (
+                  <button key={p.id} type="button" role="radio" aria-checked={aktif} tabIndex={aktif || (indeks < 0 && i === 0) ? 0 : -1}
+                    className={'hp-opsi' + (aktif ? ' dipilih' : '')} data-pilihan={p.id} onClick={() => setDipilih(p.id)}>
+                    <span className="hp-opsi-tanda" aria-hidden="true">{aktif ? <i /> : null}</span>
+                    <span className="hp-opsi-teks">{tx(p.teks)}</span>
+                  </button>
+                );
+              })}
+            </div>
+            <div className="hp-dl-kaki" data-kaki="balas" data-jeda={jeda ? '' : undefined}>
+              {tombolLihat}
+              <TombolKirim
+                label={gaya === 'obrolan' ? t('ceritaHp.kirimBalasan') : t('ceritaHp.kirimJawaban')}
+                siap={dipilih !== null}
+                onKirim={kirim}
+                alasanBelum={dipilih ? null : gaya === 'obrolan' ? t('ceritaHp.belumBalasan') : t('ceritaHp.belumJawaban')}
+              />
+            </div>
           </>
         )}
       </section>

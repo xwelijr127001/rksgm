@@ -20,7 +20,7 @@ export const TEKS_AUTO_2_INV_ZH: Record<string, string> = {
   'inv.judul.kartu': '案件 #1 · 高速公路上的卡车',
   'inv.buka.1': '欢迎你，调查员。Hendra 先生的卡车在高速公路上撞上了护栏。司机说他在第 2 车道；收费站人员记录的是第 3 车道，那是禁止卡车行驶的车道。',
   // T-087: tebakan lajur di bingkai pembuka (tidak dinilai) dan kalimat "Tebakan awalmu" sesudah rekaman diputar
-  'inv.tebak.1': '看看行车记录仪录像的开头画面。',
+  'inv.tebak.1': '这就是那条收费公路：四条车道。播放录像之前，先猜一猜。', // T-125：中性画面，没有卡车
   'inv.tebak.tanya': '卡车在第几车道？',
   'inv.tebak.pilih.1': '第 1 车道',
   'inv.tebak.pilih.2': '第 2 车道',
@@ -32,7 +32,7 @@ export const TEKS_AUTO_2_INV_ZH: Record<string, string> = {
   'inv.tebak.balik.4': '你最初的猜测：第 4 车道。录像显示是第 2 车道。没关系：现在你有证据了。',
 
   'inv.darto.1': '问询室。卡车司机 Darto 先生已经在等了。',
-  'inv.darto.2': '那天早上我像平常一样开车。突然有一辆小汽车从右边切了进来。',
+  'inv.darto.2': '那天下午我像平常一样开车。突然有一辆小汽车从右边切了进来。',
   'inv.darto.3': '我在第 2 车道。我向左急打方向，才没有撞上它。',
   'inv.pernyataan.darto': '我在第 2 车道。一辆小汽车突然切了进来。',
   'inv.tol.1': '接下来是事故后赶到现场的收费站人员。',

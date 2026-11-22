@@ -1,5 +1,5 @@
 /**
- * T-104 Investigator 案件 3「多出来的一行」：仅新增键（简体中文）。键和数字与 ./teks.id.ts 一致。
+ * T-104 Investigator 案件 3「修理厂的两行」（T-125 之前为「多出来的一行」）：仅新增键（简体中文）。键和数字与 ./teks.id.ts 一致。
  * [konfirmasi PIC]：带此标记的每一行涉及评审小组的名称或权限、出示证据的同意、无争议项目（保险杠）的处理、核查渠道或补充说明的权利，
  * 面向来宾使用前必须由理赔 PIC 确认。所有姓名、修理厂和日期均为虚构（“3 日 / 14 日 / 15 日”只表示先后顺序）。
  */
@@ -8,7 +8,7 @@ export const TEKS_AUTO_2_INV_3_ZH: Record<string, string> = {
   ringkas: '一份维修估价单，两行：保险杠和后视镜。逐一出示证据，听取说明，再决定下一步。5 分钟。',
   'inv.label': '案件 3',
   'inv3.kait': '估价单上有两行。是同一次事故吗？',
-  'inv3.kasus.judul': '多出来的一行',
+  'inv3.kasus.judul': '修理厂的两行', // T-125：中性标题（旧标题回答了开场的问题）
   'pemeran.pemohon.nama': 'Gilang 先生',
   'pemeran.pemohon.peran': '理赔申请人 · 车主',
   'pemeran.penaksir.nama': 'Seno 先生',
@@ -25,7 +25,7 @@ export const TEKS_AUTO_2_INV_3_ZH: Record<string, string> = {
   'inv3.bab.4.judul': '后续处理',
   'inv3.bab.4.tujuan': '总结发现，再有礼貌地说明下一步。',
 
-  'inv3.judul.kartu': '案件 #3 · 多出来的一行',
+  'inv3.judul.kartu': '案件 #3 · 修理厂的两行',
   'inv3.buka.1': '新案件，调查员。14 日，Gilang 先生的车在停车场被撞。修理厂的估价单上有两行：保险杠和后视镜。先看事故卡。',
   'inv3.bukti.kejadian.1': '14 日事故卡：一辆车倒车时撞到保险杠。停车场管理员证实了这次碰撞。损坏一栏写着：保险杠凹陷，后视镜破裂。',
   'inv3.bukti.kejadian.judul': '事故卡：停车场内保险杠被撞',

@@ -28,7 +28,7 @@ export const TEKS_AUTO_2_INV_ID: Record<string, string> = {
   'inv.judul.kartu': 'Kasus #1 · Truk di Tol',
   'inv.buka.1': 'Selamat datang, Investigator. Truk Pak Hendra menabrak pembatas tol. Pengemudinya bilang ia di lajur 2; petugas tol mencatat lajur 3, yang terlarang untuk truk.',
   // T-087: tebakan lajur di bingkai pembuka (tidak dinilai) dan kalimat "Tebakan awalmu" sesudah rekaman diputar
-  'inv.tebak.1': 'Lihat bingkai awal rekaman dashcam.',
+  'inv.tebak.1': 'Ini jalan tolnya: empat lajur. Sebelum rekamannya diputar, tebak dulu.', // T-125: gambar netral, tanpa truk
   'inv.tebak.tanya': 'Truk di lajur berapa?',
   'inv.tebak.pilih.1': 'Lajur 1',
   'inv.tebak.pilih.2': 'Lajur 2',
@@ -41,7 +41,7 @@ export const TEKS_AUTO_2_INV_ID: Record<string, string> = {
 
   // Keterangan (pernyataan yang dicatat)
   'inv.darto.1': 'Ruang wawancara. Pak Darto, pengemudi truknya, sudah menunggu.',
-  'inv.darto.2': 'Pagi itu saya jalan seperti biasa. Tiba-tiba ada mobil kecil memotong dari kanan.',
+  'inv.darto.2': 'Siang itu saya jalan seperti biasa. Tiba-tiba ada mobil kecil memotong dari kanan.',
   'inv.darto.3': 'Saya di lajur 2. Saya banting setir ke kiri supaya tidak menabraknya.',
   'inv.pernyataan.darto': 'Saya di lajur 2. Mobil kecil tiba-tiba memotong.',
   'inv.tol.1': 'Berikutnya petugas tol yang datang ke lokasi sesudah kejadian.',

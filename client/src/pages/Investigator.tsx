@@ -99,7 +99,7 @@ import { t, useBahasa } from '../i18n';
 import { LOOK_BAWAAN, useProfil } from '../state/profil';
 import { useHalaman } from '../ui/halaman';
 import { Modal } from '../ui/kit';
-import { BingkaiDashcam } from '../cerita/hp/arena/ArenaDashcam';
+import { SeniTolNetral } from '../cerita/investigasi/ui/SeniTolNetral';
 import { EVENT_QUERY_PARAM } from '@shared/investigator/event';
 import { entriAcara } from '../cerita/investigasi/acara';
 import { aksiUtamaHub, daftarKasusHub, tamuBaruSemuaKasus, tujuanPangkat, type KasusHub } from '../cerita/investigasi/hub';
@@ -195,7 +195,8 @@ export default function Investigator() {
               <div className="inv-berkas-badan">
                 <div className="inv-foto">
                   <img className="inv-klip" src={seniKlip} alt="" aria-hidden="true" width={10} height={22} />
-                  {k.konfig.bingkai === 'dashcam' ? <BingkaiDashcam /> : <img className="iv-seni-kasus" src={seniKasus(k.konfig.kasus).judul} alt="" />}
+                  {/* T-125: kasus dashcam (kasus 1) = gambar netral tanpa truk, bukan bingkai rekaman (bocoran lajur) */}
+                  {k.konfig.bingkai === 'dashcam' ? <SeniTolNetral /> : <img className="iv-seni-kasus" src={seniKasus(k.konfig.kasus).judul} alt="" />}
                   <b className="inv-cap" aria-hidden="true">{t('hubInv.capBaru')}</b>
                 </div>
                 <div className="inv-berkas-teks">

@@ -76,7 +76,7 @@ export const TEKS_AUTO_2_INV_2_EN: Record<string, string> = {
   'inv2.bukti.struk.judul': 'Trip receipt: paying passenger 21:05-21:24',
   'inv2.bukti.struk.sumber': 'Source: receipt from Mr Yusuf, passenger’s name and addresses hidden',
 
-  'inv2.tekan.yusuf.tanya': 'Ask: when was that trip closed in the app?',
+  'inv2.tekan.yusuf.tanya': 'Ask: When was that trip closed in the app?',
   'inv2.tekan.yusuf.jawab': 'At 21:24. I closed it myself on the phone on the dashboard, after I had pulled over.',
   'inv2.polis.1': 'One more record: the policy. We read what is written, not what we assume.',
   'inv2.polis.judul': 'Read the policy',

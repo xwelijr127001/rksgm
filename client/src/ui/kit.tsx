@@ -238,6 +238,22 @@ export function Disclaimer() {
  */
 export type SebabTutup = 'escape' | 'latar' | 'tombol';
 
+/**
+ * T-125: LINGKUP HURUF dialog. Dialog dipasang di <body> (portal), di luar .hp-layar, jadi tanpa ini ia memakai huruf sistem
+ * (Segoe UI / Arial) dan tampak seperti aplikasi lain. 'game' = huruf game (Plus Jakarta Sans, ui/modal.css
+ * `.mdl-latar[data-huruf="game"]`). Otomatis untuk pemanggil Raksa Investigator: pembuka dialog berada di layar kasus
+ * (.hp-layar[data-inv]), di hub (.inv-hub), atau di dalam dialog lain yang sudah berhuruf game. Layar lain tidak berubah (bukan
+ * perubahan huruf body). Prop `huruf` pada Modal menimpa deteksi ini ('game' memaksa, 'bawaan' mematikan).
+ */
+export type HurufModal = 'game' | 'bawaan';
+const PEMILIH_HURUF_GAME = '.hp-layar[data-inv], .inv-hub, .mdl-latar[data-huruf="game"]';
+export function hurufModalDari(asal: HTMLElement | null): HurufModal {
+  if (typeof document === 'undefined') return 'bawaan';
+  if (asal && asal !== document.body && asal.closest('#root, .mdl-latar')) return asal.closest(PEMILIH_HURUF_GAME) ? 'game' : 'bawaan';
+  // Tanpa pembuka yang jelas (fokus di body): lihat layar yang sedang tampil.
+  return document.querySelector('#root .hp-layar[data-inv], #root .inv-hub') ? 'game' : 'bawaan';
+}
+
 export function Modal({
   judul,
   children,
@@ -247,6 +263,7 @@ export function Modal({
   lebar,
   gaya,
   kelas,
+  huruf,
 }: {
   judul: string;
   children?: ReactNode;
@@ -259,6 +276,8 @@ export function Modal({
   gaya?: 'lembar';
   /** Kelas tambahan pada lapisan (.mdl-latar), mis. 'hp-menu-piksel' untuk Menu cerita piksel (T-041). */
   kelas?: string;
+  /** T-125: lingkup huruf (lihat `hurufModalDari`). Tanpa nilai = otomatis menurut pembuka dialog. */
+  huruf?: HurufModal;
 }) {
   useBahasa();
   const idJudul = useId();
@@ -270,6 +289,7 @@ export function Modal({
   const bisaGulir = useBisaGulir(isiRef);
   // Gaya pemain (player.css) bergantung pada leluhur .player-ui: bawa kelas tema halaman ke portal.
   const [konteks] = useState(() => kelasKonteks(typeof document === 'undefined' ? null : (document.activeElement as HTMLElement | null)));
+  const [hurufAsal] = useState(() => hurufModalDari(typeof document === 'undefined' ? null : (document.activeElement as HTMLElement | null)));
   useLapisanDialog(latarRef, { onEscape: () => onTutup('escape'), kembaliKe, fokusAwal: () => judulRef.current });
 
   if (typeof document === 'undefined') return null;
@@ -278,6 +298,7 @@ export function Modal({
       ref={latarRef}
       className={'mdl-latar' + (konteks ? ` ${konteks}` : '') + (kelas ? ` ${kelas}` : '')}
       data-gaya={gaya}
+      data-huruf={(huruf ?? hurufAsal) === 'game' ? 'game' : undefined}
       onPointerDown={(e) => {
         tekanDiLatar.current = e.target === e.currentTarget;
       }}

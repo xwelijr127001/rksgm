@@ -5942,3 +5942,141 @@ Cover = stage 84 + 8 + file 274 + 10 + button 56 = 432 (480 with a two-line titl
 
 ### Open
 - Not seen on a phone or in a browser.
+
+## T-125 (2026-11-22): Peterson round 1, card B: spoiler-free Kasus 1 art, Kasus 3 title, small bugs, fonts (Designer)
+
+Built by the Designer; uncommitted, not deployed. Owner rule: nothing was opened in a browser or on a phone and no test was run. Root `npm run typecheck` exit 0; `client/dist` rebuilt (build exit 0). Card A (Fullstack) was editing at the same time: one typecheck run failed on `cerita/ui/KartuDokumen.tsx` (`IkonDokumen` not found, card A's file, mid-edit) and passed on the next run; the dist I rebuilt contains whatever card A had on disk at that moment, so the Lead should rebuild once all cards are in. No server file touched; scoring, saves, stamps, ranks untouched.
+
+Plan: `docs/superpowers/plans/2026-11-22-peterson-feedback.md`, items 4 to 8, 10, 11.
+
+### Item 10: one spoiler-free picture for Kasus 1
+- New original pixel art (`character/investigator-t125/bangun.mts`): an EMPTY four-lane toll road from above under a gantry with one camera in the middle (between lanes 2 and 3). No vehicle, no time stamp, no lane marked.
+- Files in `client/src/cerita/seni/investigasi/`: `tol-netral-besar.png` (144 x 73), `tol-netral.png` (82 x 52), and `hub-kasus-1.png` (96 x 68) REPLACED (it was a crop of the dashcam evidence card with the truck in lane 2).
+- Where it shows now: hub case list, hub fresh file photo (`pages/Investigator.tsx`), case cover (`JudulKasus` already uses `hub-kasus-1.png`), and the "which lane?" screen (`UI/TebakLajur.tsx`: same 292 x 150 size and the same lane centres, so the four lane buttons still sit under their lanes; the "?" is in the middle of the road).
+- NOT changed: the dashcam replay, the dashcam evidence card, the objection zoom and the notebook slip. They still show the numbered footage with the truck ("zoom proof").
+- `character/investigator-t113/bangun.mts` now takes photo 1 from the new generator, so re-running it cannot bring the old crop back.
+- **For card C:** `UI/SeniTolNetral.tsx` exports `<SeniTolNetral />` (168 x 108) and `<SeniTolNetral besar />` (292 x 150, optional `tanya`). It is a drop-in for `<BingkaiDashcam />` / `<BingkaiDashcam besar />` anywhere BEFORE the footage is examined. `LayarInvestigasi.tsx` line 452 still passes `<BingkaiDashcam besar />` as `gambar` to the cover; the cover ignores it for Kasus 1 to 3 today, but card C should swap it so no path can show the truck early.
+- Pre-hunch wording audit: `inv.tebak.1` said "Lihat bingkai awal rekaman dashcam", which no longer matches the picture; now "Ini jalan tolnya: empat lajur. Sebelum rekamannya diputar, tebak dulu." (id / en / zh). `inv.buka.1` states both claims (lane 2 vs lane 3) and is fine.
+- **For card C (their file `i18n/kamus/investigasi.ts`):** `tebak.tanya` in English is "Which lane is the truck in?"; with an empty road "Which lane was the truck in?" reads better. id and zh are fine.
+
+### Item 11: Kasus 3 title
+- `inv3.kasus.judul` and `inv3.judul.kartu`: "Dua Baris di Bengkel" / "Two Lines at the Workshop" / "修理厂的两行". IDs, routes and stamps unchanged.
+- Also fixed, same spoiler: the hub list hook `hubInv.kaitDaftar.kasus-3` was "Satu baris di nota terlalu banyak?"; it is now the episode's neutral hook "Dua baris di perkiraan biaya. Satu kejadian?" (id / en / zh). The hub, the case cover and the result bar read the title from the episode text, so they follow.
+- The old title remains only in code comments of files I do not own (`episode.ts`, `pemeran.ts`, `episode/index.ts`, `panel/aset.ts`, `seniKasus.ts`, `shared/investigator/rubric.ts`). I found no displayed string with it on the event board.
+
+### Item 4: follow-up questions
+- E2 / E3 (id, en) now carry complete capitalised questions after the lead-in: "Tanya: Kapan perjalanan itu ditutup di aplikasi?", "Tanya: Kapan foto pemeriksaan ini diambil?", "Tanya: Siapa yang menyetujui kutipan pesan ini?". The Kasus 1 English one had the same fault and is fixed too. zh has no case.
+- The lead-in is still removed by `tanpaAwalan` in `LayarInvestigasi.tsx` (card C's file); no change needed there.
+
+### Item 5: doubled "Sumber:"
+- Every `*.sumber` text already starts with its label. `UI/panel/PanelExhibit.tsx` no longer adds a second one: it splits the existing label off to make it bold, and uses the dictionary label only if a text ever comes without one. Works for ":" and the full-width "：". The card list does not show the source line (unchanged).
+
+### Item 6: game font in pop-ups
+- `ui/kit.tsx`: `Modal` sets `data-huruf="game"` on its layer when the opener is inside an Investigator case screen (`.hp-layar[data-inv]`), the hub (`.inv-hub`) or another dialog that already has it. New optional prop `huruf` ('game' / 'bawaan') overrides. `ui/modal.css`: that layer uses Plus Jakarta Sans (already loaded) with CJK fallbacks.
+- No body font change; dialogs of the full Episode 1 and other modes are untouched. **Card C needs no wiring**: zoom, notebook, case archive, Menu and "Main lagi" all open from those screens.
+
+### Item 7: notebook handwriting font
+- Patrick Hand, SIL Open Font License 1.1. Downloaded with the Lead's approval from `https://registry.npmjs.org/@fontsource/patrick-hand/-/patrick-hand-5.3.0.tgz` (checksum matched the registry). Kept: `client/src/cerita/seni/huruf/PatrickHand-latin.woff2` (23.9 KB, unmodified) and `PatrickHand-LICENSE.txt`. No `package.json` change.
+- `UI/buku.css`: `@font-face` with the Latin unicode range; used only by notebook quotes (`.bk-tulisan`) and the statement quote in the objection zoom (`.iv-zum-kutip q`). Characters outside Latin fall to the game sans / CJK sans, never serif. In Chinese the whole quote uses the game sans.
+- The font has one weight (400) and is narrower than the old system faces, so no quote gets longer.
+
+### Item 8: "Pagi itu"
+- `inv.darto.2`: "Siang itu ..." / "That afternoon ..." / "那天下午...", matching the 14:32 stamp. `UI/SerahDashcam.tsx` untouched. "Ia menunggu sejak pagi" about Pak Hendra is a different day's wait and stays.
+
+### Fit
+- No screen changed height except: the Kasus 3 cover hook is now two lines at 360 px (+20 px; stage 100 px instead of 120 px, still 612 of 612 px with the link). The hub file note for Kasus 3 may take two lines; the hub's fullest state already counted a two-line note (568 of 569 px).
+- "Which lane?" at 360 x 640: content ends at 383 of 630 px, unchanged.
+
+### Things to know
+- Nothing was seen in a browser: the font rendering, the dialog font and the new art at real size are unverified. The pixel-font mocks cannot show typefaces.
+- [konfirmasi PIC]: no policy or legal wording line was changed. Existing markers are untouched.
+- en / zh wording of the new and changed strings is mine.
+
+### Previews (calculated mocks, not screenshots) in `character/investigator-t125/`
+`seni-t125-4x.png` (the three stills at 4x), `hub-t125-pulang.png`, `hub-t125-sampul.png`, `sampul-t125-360x640.png`, `sampul-t125-390x700.png`, `layar-t125-tebak.png`, `layar-t125-lembar.png` (evidence pop-up with one "Sumber:" label; notebook quote).
+
+### Open
+- Not seen on a phone or desktop. Card C: swap the cover's `gambar`, consider the English `tebak.tanya`.
+
+## T-124 (2026-11-22): Peterson round 1, card A: two-step read/reply on auto-2 k03 + mixed-screen audit (Fullstack)
+
+Built by Fullstack; uncommitted, not deployed. Owner rule: nothing was opened in a browser or on a phone and no test was run, so every height below is CALCULATED (real texts, real advance widths of the app font), not measured, and the interaction itself has not been seen running. Root `npm run typecheck` exit 0; `client/dist` rebuilt (build exit 0). No server file touched.
+
+### What changed (presentation only)
+Only one decision is affected: episode `auto-2` (the full truck episode), node `k03`, document `proses`. The switch is the constant `DUA_LANGKAH` in `client/src/cerita/hp/PilihBalasan.tsx`. Every other decision, Episode 1 Dev, the Investigator cases and old Episode 1 render exactly as before.
+
+- **Step 1, "Pelajari tahapan klaim".** The process card opens on stage 1 of 4. One action row: a previous button and ONE primary button, "Tahap berikutnya", which on stage 4 reads "Lanjut ke balasan". The four numbered markers show the position and can be tapped. "Urutan penjelasan, bukan jadwal: ..." and the document's own note stay visible on every stage. The stage card keeps the height of the longest stage, so the buttons do not move between stages.
+- **Step 2, "Apa yang kamu jelaskan sekarang?".** The five authored replies as radios, "Lihat tahapan" (back to step 1) and one send button, side by side in one action row.
+- **Back keeps the tentative reply.** "Lihat tahapan" never clears the selected reply. Nothing reaches the engine until the send button: one `pilih` action, once.
+- **Both containers.** The phone reply sheet (chat shell) and the plain block (desktop >= 1024 px) use the same two steps. On the phone the yellow "Catatan" tab is not shown at this node any more, because the document is now step 1.
+- **Authored content untouched.** Five choices, their order, trust deltas, consequence nodes and all texts in `auto-2/episode.ts` and `teks.*.ts` are unchanged. Scoring, saves and `raksa:investigasi:v1` are not involved.
+
+### Memory and restore
+- Step and stage are remembered for this page visit only (a module-level map, never stored) and forgotten when the reply is sent. Closing and reopening the sheet returns to where the player was.
+- After a reload, a saved tentative reply that is still valid (the existing session draft) opens step 2 with that reply selected. A save without a draft opens step 1 at stage 1.
+
+### Keyboard and focus
+- Left / right arrows, Home and End work only inside the stage markers; up / down arrows only inside the reply list. No arrow handler outside those two controls.
+- Each step change moves focus to the new step heading. The heading now shows the 3 px focus ring for keyboard users (headings had no ring before); scoped to this decision.
+- The previous button uses `aria-disabled` on stage 1, so it keeps focus instead of dropping it.
+- On the phone sheet, number keys and Enter act on replies only in step 2.
+
+### Decisions I made that the card does not spell out (Lead to confirm)
+1. **Review mode.** Once step 2 has been reached, step 1 is a review: it opens on stage 1, the primary button reads "Kembali ke balasan" on every stage, and stages move with two arrow buttons or the markers. Without this, a player who looks back once would have to page through all four stages again. The first read follows the card exactly.
+2. **No fold-to-preview in step 2 on desktop.** Other desktop decisions fold the list into a preview after a tap. Here the five radios stay visible with the chosen one marked, as the card describes.
+3. **Double-tap guard.** For 400 ms after a step change the action row ignores taps, and at this node Enter on the question no longer sends. Otherwise a double tap on "Kembali ke balasan" would land on the send button in the same spot and send the tentative reply.
+4. **Desktop column 600 px**, centred: about 70 characters per line in id and 76 in en.
+5. **Phone: icon-only previous / next** (48 x 48 px, labelled for screen readers) and "Lihat tahapan" without an arrow, so the primary label fits on one line.
+
+### Calculation: phone reply sheet
+Room = viewport height - 57 (story header) - 8 - 44 (slim chat header). Sheet inner width 340 px at 360, 370 px at 390. Script: `hitung.mts` (see Files).
+
+| Viewport | Language | Room | Step 1 | Spare | Step 2 | Spare | Reply lines (5 replies) | Send button, needed of available width |
+|---|---|---|---|---|---|---|---|---|
+| 360 x 640 | id | 531 | 451 | 80 | 505 | 26 | 3, 3, 4, 3, 2 | 173 of 211 |
+| 360 x 640 | en | 531 | 451 | 80 | 467 | 64 | 2, 3, 3, 3, 2 | 170 of 220 |
+| 360 x 640 | zh | 531 | 411 | 120 | 390 | 141 | 1, 2, 2, 2, 1 | 148 of 250 |
+| 390 x 700 | id | 591 | 434 | 157 | 467 | 124 | 2, 3, 3, 3, 2 | 173 of 241 |
+| 390 x 700 | en | 591 | 451 | 140 | 448 | 143 | 2, 3, 3, 2, 2 | 170 of 250 |
+| 390 x 700 | zh | 591 | 393 | 198 | 390 | 201 | 1, 2, 2, 2, 1 | 148 of 280 |
+
+- 12 rows, 0 over the room. All five replies are shown in full; nothing is clamped, hidden or paginated, and no inner scroll is needed.
+- Tightest: step 2 in id at 360 x 640, 26 px spare. One reply wrapping one line more (19 px) would still fit. Rerun with every text column 6 px narrower: still 0 over.
+- Step 1 action row: primary label needs 192 px (id), 221 px (en), 120 px (zh) of 286 px; in review mode 206 / 171 / 120 px of 232 px.
+- Tap targets: stage markers 75 x 44 px, action-row buttons 48 px high, reply rows 44 px or more.
+- If the content were ever taller (system text enlarged), only the sheet body scrolls, as in every other reply sheet; nothing is cut off.
+
+### Calculation: desktop (>= 1024 px)
+The page there is the normal scrolling chat page, so there is no room limit; the numbers show what the change does. In the 600 px column: step 1 about 454 px, step 2 about 502 px (id) / 479 px (en). Before, card and replies together were roughly 800 px (Pak Peterson's screenshot).
+
+### Mixed-screen audit
+"Mixed" = a document with its own controls on the same screen as a submit. Traced: sheet and plain branches of `PilihBalasan`, `pages/CeritaMain.tsx`, `cerita/hp/bagianHp.tsx`, `LayarKeberatan.tsx`, `panel/PanelRound.tsx`.
+
+| Screen | Problem | Recommendation |
+|---|---|---|
+| auto-2 `k03`, document `proses` (desktop block) | Stage previous / next sat above five radios and the send button | Fixed here (two steps) |
+| auto-2 `k06` and Episode 1 Dev `k06`, document `linimasa` (desktop block only) | Same pattern: 3-stage navigator above the replies and the send button | **Actionable.** Show the three stages as a plain numbered list beside the replies, with no stage buttons. The three time estimates are short and are the evidence for the reply, so keep side by side; no extra page. Not changed here: the card limits the switch to `k03` |
+| auto-2 `k06` on the phone sheet | None: the document is behind the "Catatan" tab as a plain list | Keep |
+| auto-2 `k13` (`surat`), `k14` (`banding`), Dev `k14` | None: four / three plain rows, no controls of their own | Keep side by side: the letter and the objection are what the reply is about |
+| Old Episode 1 player (`pages/CeritaMain.tsx`) | None today: no Episode 1 node has a document, so the card-above-choices branch is never reached | Keep; Episode 1 unchanged |
+| Activity fact cards (`KartuFakta` in `bagianHp.tsx`: jalur, selisih, bundel) | None: plain tables, no navigation; no activity uses a staged document | Keep side by side |
+| Investigator KEBERATAN (`LayarKeberatan.tsx`) | None: slips are selected, zoom opens in a dialog, one "KEBERATAN!" button | Keep side by side: the slips are the evidence being presented |
+| Investigator panel round (`PanelRound.tsx` + `PanelExhibit.tsx`) | None: "Pakai bukti ini" in the exhibit dialog only selects; presenting stays one button on the round | Keep side by side |
+
+Not traced further: the result, verdict and message steps have no document beside the decision.
+
+### Files
+- `client/src/cerita/hp/PilihBalasan.tsx`: the two steps in both branches; header comment describes the behaviour.
+- `client/src/cerita/ui/KartuDokumen.tsx`: new export `BacaTahapan` (staged document as a reading step); the document icon moved into a small shared component, same output.
+- `client/src/cerita/hp/duaLangkah.css`: NEW opt-in stylesheet; every rule is scoped to `.hp-pilih[data-dua-langkah]`.
+- `client/src/i18n/kamus/ceritaHp.ts`: three new keys in id / en / zh: `pelajariTahapan`, `lanjutKeBalasan`, `lihatTahapan`. They are interface labels, not policy or legal wording, so no `// [konfirmasi PIC]`.
+- Outside the repo: calculation `C:\Users\User\AppData\Local\Temp\claude\ec29f026d20d029c\0c4fe0f7-0adb-4cb1-b49a-10019af309f5\scratchpad\t124\hitung.mts` (run from `client/` with `npx tsx`).
+
+### Hooks for QA
+`[data-dua-langkah]` and `[data-langkah="baca"|"balas"]` on the decision; `[data-tahap-aktif]` on the stage card; `[data-tahap-maju]` (next stage) or `[data-ke-balasan]` (to the replies) on the primary button of step 1; `[data-tahap-sebelum]`, `[data-tahap-berikut]`; `[data-lihat-tahapan]`; the send button keeps `[data-kirim]`. At `k03` there is no `[data-catatan]` any more.
+
+### Open
+- Not seen in a browser, on a phone or on a desktop. Most worth a look: the first read through the four stages, "Lihat tahapan" and back with a reply selected, and keyboard-only completion on desktop.
+- Existing tests and QA scripts were not run or updated. Any script that walks auto-2 through `k03` must now pass step 1 first, and one that expects the "Catatan" tab at `k03` will not find it.
+- `k06` (see audit) is the one remaining mixed screen; it needs a Lead decision because it also touches Episode 1 Dev.
+- The 0.4 s tap guard and review mode are my additions; say if either should go.

@@ -1,10 +1,21 @@
 /* T-079 (Designer): BUKU CATATAN INVESTIGATOR (BukuCatatan.tsx): buku kulit cokelat terbuka, dijilid di atas, dua halaman bertumpuk
    selebar layar. Tinggi (HP 360): halaman atas 42 + 68 per pernyataan; jilid 12; halaman bawah 42 + 58 per bukti; pensil 20;
-   sampul 18 -> penuh (2 pernyataan + 3 bukti) 446 px. Tulisan tangan 16-18 px (fon tulisan sistem), judul & nama memakai fon biasa.
+   sampul 18 -> penuh (2 pernyataan + 3 bukti) 446 px. Tulisan tangan 16-18 px (T-125: fon Patrick Hand yang dibundel), judul & nama memakai fon biasa.
    Gerak (kalimat menulis sendiri, pin jatuh, pendar) mati bila gerak dikurangi. */
 
+/* T-125 HURUF TULISAN TANGAN yang dibundel (ulasan Pak Peterson: tumpukan huruf sistem lama jatuh ke serif di Linux / Android).
+   Patrick Hand, SIL Open Font License 1.1 (boleh dibundel dan disebar; lisensi: cerita/seni/huruf/PatrickHand-LICENSE.txt), subset
+   Latin, berkas tidak diubah (dari @fontsource/patrick-hand 5.3.0). Hanya satu tebal (400). unicode-range = subset Latin: huruf di
+   luar itu (Mandarin, tanda yang tidak ada) otomatis memakai huruf game / sans CJK berikutnya di tumpukan, bukan serif.
+   Lingkup: HANYA kutipan pendek buku catatan (.bk-tulisan) dan kutipan pernyataan di zum KEBERATAN (.iv-zum-kutip q). Dalam bahasa
+   Mandarin seluruh kutipan memakai huruf game (nama Latin di dalam kalimat tidak berganti gaya). */
+@font-face {
+  font-family: 'Patrick Hand'; font-style: normal; font-weight: 400; font-display: swap;
+  src: url('../../seni/huruf/PatrickHand-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
 .bk {
-  --bk-tulis: 'Bradley Hand', 'Segoe Print', 'Chalkboard SE', casual, 'Comic Sans MS', 'Comic Neue', cursive;
+  --bk-tulis: 'Patrick Hand', 'Plus Jakarta Sans', system-ui, -apple-system, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', 'Noto Sans SC', sans-serif;
   position: relative; display: block; box-sizing: border-box; width: 100%; margin: 0; padding: 6px 18px 6px 6px; border: 3px solid #2a211e;
   background: #6b4226; color: #212121; font-size: 16px; line-height: 1.3; text-align: left;
   box-shadow: inset 0 0 0 2px #8a5a36, 0 3px 0 #2a211e, 4px 9px 14px rgba(33, 33, 33, .25);
@@ -24,6 +35,10 @@
 .bk-judul .iv-hitung { margin-left: 2px; }
 .bk-daftar { display: grid; gap: 4px; }
 .bk-tulisan { font-family: var(--bk-tulis); font-weight: 400; color: #26306b; }
+/* kutipan pernyataan di zum KEBERATAN (tambahan.css memakai tumpukan huruf sistem lama): huruf yang sama */
+.iv-zum .iv-zum-kutip q { font-family: 'Patrick Hand', 'Plus Jakarta Sans', system-ui, -apple-system, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', 'Noto Sans SC', sans-serif; font-weight: 400; }
+:lang(zh) .bk { --bk-tulis: 'Plus Jakarta Sans', system-ui, -apple-system, 'PingFang SC', 'Microsoft YaHei', 'Noto Sans SC', sans-serif; }
+:lang(zh) .iv-zum .iv-zum-kutip q { font-family: 'Plus Jakarta Sans', system-ui, -apple-system, 'PingFang SC', 'Microsoft YaHei', 'Noto Sans SC', sans-serif; }
 .bk-kosong { font-size: 16px; line-height: 26px; color: #9a917f; }
 
 /* ---- halaman atas: pernyataan = polaroid + pin + kalimat tulisan tangan */

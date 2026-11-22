@@ -20,7 +20,7 @@ export const TEKS_AUTO_2_INV_EN: Record<string, string> = {
   'inv.judul.kartu': 'Case #1 · Truck on the Toll Road',
   'inv.buka.1': 'Welcome, Investigator. Mr Hendra’s truck hit the toll-road barrier. The driver says he was in lane 2; the toll officer wrote lane 3, which trucks may not use.',
   // T-087: tebakan lajur di bingkai pembuka (tidak dinilai) dan kalimat "Tebakan awalmu" sesudah rekaman diputar
-  'inv.tebak.1': 'Look at the opening frame of the dashcam footage.',
+  'inv.tebak.1': 'This is the toll road: four lanes. Before the footage plays, take a guess.', // T-125: neutral picture, no truck
   'inv.tebak.tanya': 'Which lane is the truck in?',
   'inv.tebak.pilih.1': 'Lane 1',
   'inv.tebak.pilih.2': 'Lane 2',
@@ -32,7 +32,7 @@ export const TEKS_AUTO_2_INV_EN: Record<string, string> = {
   'inv.tebak.balik.4': 'Your first guess: lane 4. The footage shows lane 2. No problem: now you have the proof.',
 
   'inv.darto.1': 'The interview room. Mr Darto, the truck driver, is already waiting.',
-  'inv.darto.2': 'That morning I was driving as usual. Suddenly a small car cut in from the right.',
+  'inv.darto.2': 'That afternoon I was driving as usual. Suddenly a small car cut in from the right.',
   'inv.darto.3': 'I was in lane 2. I swerved left so I would not hit it.',
   'inv.pernyataan.darto': 'I was in lane 2. A small car suddenly cut in.',
   'inv.tol.1': 'Next is the toll officer who came to the scene after the accident.',
@@ -42,7 +42,7 @@ export const TEKS_AUTO_2_INV_EN: Record<string, string> = {
   'inv.ui.tekan.1': 'Before you go on, you may ask one more thing. No points, no timer.',
   'inv.ui.tekan.pilih': 'Ask a follow-up?',
   'inv.ui.tekan.lanjut': 'Continue without asking',
-  'inv.tekan.tol.tanya': 'Ask: did you see the truck driving in lane 3 yourself?',
+  'inv.tekan.tol.tanya': 'Ask: Did you see the truck driving in lane 3 yourself?',
   'inv.tekan.tol.jawab': 'No. I arrived after it happened. I counted the lane from where the truck had come to rest.',
   'inv.selisih.1': 'Lane 2 or lane 3? Those accounts cannot both be right. We need evidence.',
 

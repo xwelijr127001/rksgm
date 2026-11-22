@@ -1,5 +1,5 @@
 /**
- * T-104 Investigator CASE 3 "One Line Too Many": new keys only (English). Same keys and numbers as ./teks.id.ts.
+ * T-104 Investigator CASE 3 "Two Lines at the Workshop" (until T-125: "One Line Too Many"): new keys only (English). Same keys and numbers as ./teks.id.ts.
  * [konfirmasi PIC]: every line so marked carries the panel's name or authority, consent to show evidence, handling of the
  * undisputed item (bumper), the review channel, or the right to add a statement, and MUST be confirmed by the claims PIC
  * before it is shown to guests. All names, the workshop and the dates are invented ("the 3rd / 14th / 15th" only order the days).
@@ -9,7 +9,7 @@ export const TEKS_AUTO_2_INV_3_EN: Record<string, string> = {
   ringkas: 'One repair estimate, two lines: bumper and mirror. Present the evidence one piece at a time, hear the explanation, then decide the next step. 5 minutes.',
   'inv.label': 'Case 3',
   'inv3.kait': 'Two lines on the estimate. One incident?',
-  'inv3.kasus.judul': 'One Line Too Many',
+  'inv3.kasus.judul': 'Two Lines at the Workshop', // T-125: neutral title (the old one answered the opening question)
   'pemeran.pemohon.nama': 'Mr Gilang',
   'pemeran.pemohon.peran': 'Claimant · car owner',
   'pemeran.penaksir.nama': 'Mr Seno',
@@ -26,7 +26,7 @@ export const TEKS_AUTO_2_INV_3_EN: Record<string, string> = {
   'inv3.bab.4.judul': 'Next step',
   'inv3.bab.4.tujuan': 'Sum up the finding, then explain the next step with respect.',
 
-  'inv3.judul.kartu': 'Case #3 · One Line Too Many',
+  'inv3.judul.kartu': 'Case #3 · Two Lines at the Workshop',
   'inv3.buka.1': 'A new case, Investigator. On the 14th, Mr Gilang’s car was hit in a parking area. The workshop estimate has two lines: bumper and mirror. Start with the incident card.',
   'inv3.bukti.kejadian.1': 'Incident card for the 14th: a car reversed into the bumper. The parking attendant confirms the impact. Under damage it says: bumper dented, mirror cracked.',
   'inv3.bukti.kejadian.judul': 'Incident card: bumper impact in the parking area',
@@ -58,7 +58,7 @@ export const TEKS_AUTO_2_INV_3_EN: Record<string, string> = {
   'inv3.bukti.foto.1': 'Vehicle inspection photo from the 3rd: the chassis number matches Mr Gilang’s car, and the branching crack in the corner of the mirror glass is already visible.',
   'inv3.bukti.foto.judul': 'Inspection photo from the 3rd: mirror crack already there',
   'inv3.bukti.foto.sumber': 'Source: the workshop’s routine service sheet, same chassis number',
-  'inv3.tekan.penaksir.tanya': 'Ask: when was this inspection photo taken?',
+  'inv3.tekan.penaksir.tanya': 'Ask: When was this inspection photo taken?',
   'inv3.tekan.penaksir.jawab': 'On the 3rd, during the routine service. The date and the chassis number are printed on the inspection sheet automatically.',
 
   'inv3.kutipan.1': 'The workshop file holds a message from Mr Gilang about the estimate. You ask his permission before reading it.', // [konfirmasi PIC]
@@ -66,7 +66,7 @@ export const TEKS_AUTO_2_INV_3_EN: Record<string, string> = {
   'inv3.bukti.pesan.1': 'Extract of Mr Gilang’s message to the workshop, on the 15th: “That mirror crack is an old one. Please just put it in as damage from this incident.”',
   'inv3.bukti.pesan.judul': 'Message extract from the 15th: old crack asked to be included',
   'inv3.bukti.pesan.sumber': 'Source: Mr Gilang’s message to the workshop, shown with his consent', // [konfirmasi PIC]
-  'inv3.tekan.pemohon.tanya': 'Ask: who agreed to this message extract being shown?',
+  'inv3.tekan.pemohon.tanya': 'Ask: Who agreed to this message extract being shown?',
   'inv3.tekan.pemohon.jawab': 'I did. The message came from my number, and I allowed the extract to be used for this review.', // [konfirmasi PIC]
 
   'inv3.panel-buka.1': 'The claim review panel. Mr Arya chairs it; Mr Seno and Mr Gilang are present, and both may explain.', // [konfirmasi PIC]
