@@ -331,6 +331,10 @@ function PemainHPInti({ ep, state, kendali, profil, bahasa, tx: txAsli }: {
           <h1 className="sr-only">{tx(ep.judul)}</h1>
           {bab && tampilan !== 'akhir' ? (
             <p className="hp-judul-teks"><span className="hp-bagian">{t('cerita.bagian', { n: bab.nomor, total: bab.jumlah })}</span><b>{tx(bab.bab.judul)}</b></p>
+          ) : ep.investigasi ? (
+            // T-121 (Designer, hanya tampilan): judul episode "Investigator · Kasus 3" patah dua baris di samping buku + Menu;
+            // di sini label kecil "INVESTIGATOR" + "Kasus 3" (satu baris, hasil.css). Judul lengkapnya tetap di <h1> di atas.
+            <p className="hp-judul-teks" data-judul-kasus-pendek=""><span className="hp-bagian">{t('investigasi.kepalaLabel')}</span><b>{t('investigasi.kepalaKasus', { n: ep.investigasi.nomor })}</b></p>
           ) : <p className="hp-judul-teks"><span className="hp-bagian">{t('cerita.akhirLabel')}</span><b>{tx(ep.judul)}</b></p>}
         </div>
         {ep.investigasi ? (

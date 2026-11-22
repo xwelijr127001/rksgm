@@ -14,6 +14,9 @@ const kamus: KamusRuang = {
     sampulDurasi: '±{n} menit',
     sampulBukti: '{n} bukti',
     sampulTerbaik: 'Terbaik',
+    // T-121: kepala layar hasil kasus (hp/PemainHP.tsx): label kecil + nomor kasus
+    kepalaLabel: 'Investigator',
+    kepalaKasus: 'Kasus {n}',
     buku: 'Buku catatan',
     keterangan: 'Keterangan',
     bukuInvestigator: 'Buku Catatan Investigator',
@@ -142,6 +145,9 @@ const kamus: KamusRuang = {
     sampulDurasi: '±{n} min',
     sampulBukti: '{n} clues',
     sampulTerbaik: 'Best',
+    // T-121: kepala layar hasil kasus (hp/PemainHP.tsx): label kecil + nomor kasus
+    kepalaLabel: 'Investigator',
+    kepalaKasus: 'Case {n}',
     buku: 'Notebook',
     keterangan: 'Statements',
     bukuInvestigator: 'Investigator’s Notebook',
@@ -270,6 +276,9 @@ const kamus: KamusRuang = {
     sampulDurasi: '约 {n} 分钟',
     sampulBukti: '{n} 份证据',
     sampulTerbaik: '最高',
+    // T-121: kepala layar hasil kasus (hp/PemainHP.tsx): label kecil + nomor kasus
+    kepalaLabel: 'Investigator',
+    kepalaKasus: '案件 {n}',
     buku: '笔记本',
     keterangan: '证词',
     bukuInvestigator: '调查员笔记本',

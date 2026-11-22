@@ -5816,3 +5816,77 @@ Content space at 360 x 640 = 544 px (header 56, page padding 12 + 28).
 
 ### Open
 - Not seen on a phone. Most worth a look: the speech bubble next to the sticker, the chip column beside the photo at 360 px (92 px wide), and the en line breaks.
+
+## T-121 (2026-11-22): case result screen redesigned as "KASUS SELESAI" in the Raksa Cerah look, all three cases (Designer)
+
+Built by the Designer; uncommitted, not deployed. Owner rule: nothing was opened in a browser or on a phone and no test was run, so the heights are CALCULATED. Root `npm run typecheck` exit 0; `client/dist` rebuilt (build exit 0). No server file touched.
+
+Owner (iPhone, Kasus 3 result, `character/investigator-t120/owner-hasil-kasus3.jpg`): "This still need to adjust".
+
+### Files
+- `client/src/cerita/investigasi/ui/HasilInvestigasi.tsx`: new markup, SAME props, effects, sounds and data hooks (`data-hasil-investigasi`, `data-nilai`, `data-rekor`, `data-total-kasus`, `data-total-skor`, `data-menuju-pangkat`, `data-main-lagi`, `data-arsip-kasus`, `data-selesai-kasus`, `#iv-hasil-judul`).
+- NEW `client/src/cerita/investigasi/ui/hasil.css` (all result-screen rules). `ui/muat.css` section 7 is now only a note that points there.
+- `client/src/cerita/hp/PemainHP.tsx`: ONE presentational branch in the header (see "Header"). Not my file by habit; the card asked for the header fix and it cannot be done in CSS alone. Fullstack / Lead: please look at that one hunk.
+- `client/src/i18n/kamus/investigasi.ts`: `kepalaLabel` ("Investigator"), `kepalaKasus` ("Kasus {n}" / "Case {n}" / "案件 {n}").
+- NOT edited: `LayarInvestigasi.tsx`, `KartuPetugas.tsx`, scoring, saves, rewards. No new art (T-117 sky, existing grade badge, reaction portraits, award icons).
+
+### The five problems
+1. **Card over the Total box:** the Kepala frame is drawn 10 px OUTSIDE the card; the old 6 px gap could not hold it. The card now has its own block and 10 px margin above and below when it has the frame. The lanyard is hidden on this screen.
+2. **HADIAH BARU:** a yellow ribbon with an ink flag "HADIAH BARU" on the left and one white chip per reward. A chip never breaks its name; a chip that does not fit moves to the next row. The 32 px award icon sits inside the ribbon.
+3. **Header:** on the result screen of an Investigator case the header now shows the small label "INVESTIGATOR" and "Kasus 3", each on one line (ellipsis as a last resort). The full episode title stays in the hidden `<h1>`. Notebook and Menu buttons are untouched.
+4. **Empty quarter:** the screen is a flex column as tall as the locked screen. The stage (84 to 280 px) and the four gaps (6 to 20 px) share the free height 6 : 1; bar rows (20 to 28 px), next-case bar and buttons (48 to 56 px) grow between a 640 px and a 720 px tall screen. If everything is at its maximum, the rest is spread evenly between the blocks.
+5. **Look:** plain cream page as on the hub (no grid paper), sky stage with sun rays, ink borders, orange shadow lines.
+
+### The screen, top to bottom
+- **Stage:** grade badge (80 px), orange stamp banner "KASUS SELESAI", score "62 / 100", rank, and the Miss Raksa reaction portrait as a sticker with sparkles ("Rekor baru!" / "Terbaik 85" chip in the bottom right corner). From 150 px: banner on its own row and bigger score. From 200 px: skyline and ground band. On phones 422 px or wider, from 200 px: reaction sticker at 2x.
+- **Score card (white):** Bukti / Putusan / Penanganan nasabah as segmented pixel bars; the series total ("Total 262 / 300" + "... menuju ...") is an ink strip at the foot of the card.
+- **Officer card**, then **reward ribbon** (only when new), **next-case bar** (ink, yellow title on one line, orange arrow chip), **Main lagi / Arsip kasus / Selesai** as pixel keys (same classes, so the same sounds), and the story link for Kasus 1.
+- Reduced motion: rays, sparkles and the bar fill are still. The stamp animation on the card is unchanged.
+
+### Calculation (id)
+Content space = viewport height - 61 (header) - 12 - 10. Officer card taken as 162 px (182 px with the frame).
+
+| Part at 360 x 640 | A: first time + rewards | B: played again | C: Kasus 1, no total |
+|---|---|---|---|
+| stage (minimum) | 84 | 84 | 84 |
+| four gaps (minimum) | 24 | 24 | 24 |
+| score card (3 x 20 + 4 + 12, total strip 24) | 100 | 100 | 76 |
+| officer card | 182 | 182 | 162 |
+| reward ribbon + gap | 64 + 6 | 0 | 0 |
+| next-case bar | 48 | 48 | 48 |
+| buttons | 48 | 48 | 48 |
+| story link | 0 | 0 | 24 |
+| **smallest height** | **556** | **486** | **466** |
+| space | 557 | 557 | 557 |
+
+A = Kasus 3 first time with new stamp, two rewards (two chip rows), Kepala frame, total. B = Kasus 3 again, no reward, Kepala frame, total. C = Kasus 1 first time, no total, story link.
+
+| Viewport (space) | A: stage / gap | B: stage / gap | C: stage / gap | Left over (spread) |
+|---|---|---|---|---|
+| 360 x 640 (557) | 84 / 6 | 126 / 13 | 138 / 15 | 0 |
+| 390 x 700 (617) | 100 / 8 | 144 / 16 | 153 / 17 | 0 |
+| 390 x 760 (677) | 130 / 13 | 179 / 20 | 193 / 20 | 0 |
+| 390 x 844 (761) | 189 / 20 | 263 / 20 | 277 / 20 | 0 |
+| 430 x 932 (849) | 277 / 20 | 280 / 20 | 280 / 20 | A 0, B 71, C 85 |
+
+- No scroll at 360 x 640 and 390 x 700 in A, B and C. A has 1 px to spare at 360 x 640.
+- The screen is filled at every size; only B and C at 430 x 932 have 71 / 85 px left, spread over the eight gaps (about 9 to 11 px each).
+- Worst case I found: Kasus 1 played again by a Kepala with a new frame reward: 554 px of 557 px.
+
+### Things to know
+- **The case number is in the header ("Kasus 3"), not in the banner.** `HasilInvestigasi` does not get the case number as a prop, and I did not add one because the caller is `LayarInvestigasi`. If the banner should read "KASUS #3 SELESAI", Fullstack passes the number and I add it.
+- **Three rewards at once** (only when older rewards were never announced) need three chip rows: 26 px more than A, so the page scrolls inside the screen by about 25 px at 360 x 640.
+- **Two reward names do not fit on one row** at 360 to 430 px wide by my estimate; I counted two rows everywhere. If they do fit at 430 px, the ribbon is 26 px shorter and the stage takes that height.
+- The rank line "Kepala Investigator" is 14 px (not 15 px) on 360 px phones so it stays on one line next to the sticker; "Rekor baru!" / "Terbaik" chip is 12 px on a short stage.
+- The plain cream page and the header rule use `:has()` / a data attribute; the stage switches use container queries; the growth uses `100dvh`. Older iOS (before 16) keeps the grid paper, the compact stage and the 640 px sizes; nothing breaks.
+- The page of the "Pak ... says" step before the score and the practice screens are unchanged.
+- en / zh of the two new header strings are mine.
+
+### Suspected defect in my T-119 and T-120 layouts (NOT changed here)
+While building this I realised that the hub (T-119) and the case cover (T-120) use CSS grid rows like `minmax(84px, 204px)` on a grid with automatic height. In that situation browsers size such rows at their MAXIMUM, not their minimum; my `min-height` does not hold them down. On the owner's tall phone that gives exactly the approved look. On short screens it likely means: cover about 626 px in a 544 px space at 360 x 640 (scrolls about 80 px), hub about 606 px in 569 px (scrolls about 37 px). I could not confirm this without a browser. The fix is small (the same flex column as on this screen, in `sampul.css` and `pages/investigator.css`); it needs its own card because it touches two approved screens.
+
+### Previews (calculated mocks, not screenshots)
+`character/investigator-t121/layar-t121-360x640.png`, `layar-t121-390x760.png`, `layar-t121-430x932.png`: states A, B, C side by side. Pixel font in capitals (widths differ from the app font), stickers not tilted, avatar and frame are stand-ins.
+
+### Open
+- Not seen on a phone. Most worth a look on the owner's iPhone: the frame clear of the total strip and of the ribbon, the two reward chips, the header on one line, the 2x sticker on the tall stage.

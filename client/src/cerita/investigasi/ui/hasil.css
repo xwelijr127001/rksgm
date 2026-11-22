@@ -1,0 +1,129 @@
+/* T-121 (Designer): layar "KASUS SELESAI" (ui/HasilInvestigasi.tsx), gaya "Raksa Cerah" seperti hub (pages/investigator.css) dan
+   sampul kasus (sampul.css). Menggantikan bagian 7 ui/muat.css (T-115). Diimpor oleh HasilInvestigasi.tsx SESUDAH investigasi.css
+   dan alur.css; pemilih di sini berawalan .iv-layar.iv-hasil supaya menang dari keduanya.
+   Palet: tinta #212121, putih, krem #fff3d6, jingga #ff9000, kuning #ffe38a, cokelat #5a3a24 / #33241a, bayang #f0a030.
+   Semua teks di atas langit / gedung panggung = tinta (>= 8 : 1); kuning di tinta 13 : 1.
+   Tata letak = KOLOM LENTUR setinggi layar (cangkang terkunci, muat.css bagian 1): panggung (84 .. 280 px, bobot 6) dan empat sela
+   (6 .. 20 px, bobot 1) membagi sisa tinggi; baris batang, bilah dan tombol membesar dengan tinggi layar (--r, --b, --j); bila
+   semuanya sudah di batasnya, sisanya tersebar rata di antara bagian. Kolom lentur (bukan kisi minmax): tinggi isi terkecilnya
+   memang jumlah nilai terkecil, jadi di layar pendek tidak ada yang mengembang. Hitungan: team/HANDOFF.md "## T-121". */
+
+/* ---- halaman: krem polos seperti hub (tanpa :has = tetap kertas kotak-kotak) */
+.hp-layar[data-inv]:has(> .hp-main > [data-hasil-investigasi]) { background: #fff3d6 !important; }
+/* ---- kepala: "INVESTIGATOR" / "Kasus 3" satu baris di samping buku + Menu */
+.hp-layar[data-inv] .hp-judul-teks[data-judul-kasus-pendek] > :is(.hp-bagian, b) { display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+.hp-layar[data-kunci][data-inv] > .hp-main > .iv-layar.iv-hasil { flex: 1 0 auto; }
+.iv-layar.iv-hasil { display: flex; flex-direction: column; justify-content: space-between; gap: 0; --r: 20px; --b: 48px; --j: 6px; }
+/* --r tinggi baris batang, --b tinggi bilah + tombol, --j jarak di dalam blok lanjut: membesar dari layar 640 px ke 720 px */
+@supports (height: 100dvh) {
+  .iv-layar.iv-hasil { --r: clamp(20px, calc(20px + (100dvh - 640px) * .1), 28px); --b: clamp(48px, calc(48px + (100dvh - 640px) * .1), 56px); --j: clamp(6px, calc(6px + (100dvh - 640px) * .05), 10px); }
+}
+.iv-layar.iv-hasil > * { flex: none; }
+.iv-layar.iv-hasil > .iv-hasil-sela { display: block; flex: 1 1 6px; min-height: 6px; max-height: 20px; }
+.iv-layar.iv-hasil > .iv-hasil-lanjut:empty, .iv-layar.iv-hasil > .iv-hasil-lanjut:empty + .iv-hasil-sela, .iv-layar.iv-hasil > .iv-hasil-sela + .iv-hasil-sela { display: none; }
+
+/* ================================================================ panggung: langit, lencana nilai, pita cap, skor, pangkat, stiker reaksi */
+.iv-layar.iv-hasil > .iv-hasil-panggung { flex: 6 1 84px; min-height: 84px; max-height: 280px; container: iv-hasil-panggung / size; position: relative; overflow: hidden;
+  box-sizing: border-box; border: 2px solid #212121; background: linear-gradient(to top, #ffe9a8, #fff6dc); }
+.iv-hasil-panggung-isi { position: absolute; inset: 0; box-sizing: border-box; display: grid; grid-template-columns: 80px minmax(0, 1fr) auto;
+  grid-template-areas: "nilai judul miss" "nilai angka miss" "nilai pangkat miss"; align-content: center; align-items: center; column-gap: 8px; padding: 0 6px; image-rendering: pixelated; }
+.iv-hasil-sinar { position: absolute; right: -280px; top: 50%; width: 640px; height: 640px; margin-top: -320px; pointer-events: none;
+  background: repeating-conic-gradient(rgba(255, 196, 0, .3) 0 9deg, rgba(255, 196, 0, 0) 9deg 18deg);
+  -webkit-mask-image: radial-gradient(circle, #000 0, #000 22%, #0000 68%); mask-image: radial-gradient(circle, #000 0, #000 22%, #0000 68%);
+  animation: iv-hasil-sinar 120s linear infinite; }
+.iv-hasil-panggung-isi > .iv-nilai { grid-area: nilai; position: relative; }
+.iv-hasil-panggung-isi > h2 { grid-area: judul; justify-self: start; position: relative; margin: 0 0 2px 2px; padding: 1px 6px; background: #ff9000; border: 2px solid #212121; box-shadow: inset 0 2px 0 #ffc46b;
+  font-size: 13px; line-height: 16px; font-weight: 800; letter-spacing: .02em; text-transform: uppercase; white-space: nowrap; color: #212121; rotate: -2deg; }
+.iv-hasil-panggung-isi > .iv-hasil-angka { grid-area: angka; position: relative; line-height: 36px; white-space: nowrap; color: #212121; }
+.iv-layar.iv-hasil .iv-hasil-angka b { font-size: 34px; line-height: 36px; font-weight: 800; font-variant-numeric: tabular-nums; }
+.iv-layar.iv-hasil .iv-hasil-angka span { font-size: 16px; font-weight: 800; color: #33241a; }
+.iv-hasil-panggung-isi > .iv-hasil-pangkat { grid-area: pangkat; position: relative; min-width: 0; font-size: 15px; line-height: 18px; font-weight: 800; color: #212121; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+/* stiker reaksi Miss Raksa (bangga / berpikir): potret 64 px bertepi tinta di kertas kuning, sedikit miring, dua kilau */
+.iv-hasil-miss { grid-area: miss; position: relative; display: block; width: 68px; height: 68px; rotate: 3deg; }
+.iv-hasil-miss > .iv-reaksi { background-color: #ffe38a; box-shadow: 3px 3px 0 #f0a030; }
+.iv-hasil-miss::before, .iv-hasil-miss::after { content: ""; position: absolute; z-index: 1; width: 13px; height: 13px; pointer-events: none;
+  background: linear-gradient(#ff9000, #ff9000) center / 3px 100% no-repeat, linear-gradient(#ff9000, #ff9000) center / 100% 3px no-repeat, linear-gradient(#ffe38a, #ffe38a) center / 7px 7px no-repeat;
+  animation: iv-hasil-kelip 2.4s steps(1) infinite; }
+.iv-hasil-miss::before { left: -9px; top: -5px; }
+.iv-hasil-miss::after { right: -5px; bottom: 12px; width: 9px; height: 9px; background-size: 3px 100%, 100% 3px, 3px 3px; animation-delay: -1.2s; }
+/* keping "Rekor baru!" / "Terbaik 85" = stiker di sudut kanan bawah panggung */
+.iv-layar.iv-hasil .iv-rekor { position: absolute; right: 4px; bottom: 4px; z-index: 2; margin: 0 !important; padding: 0 4px; font-size: 12px; rotate: -3deg; box-shadow: 0 2px 0 #212121; }
+.iv-layar.iv-hasil .iv-rekor[data-rekor="lama"] { background: #ffffff; color: #5a3a24; }
+/* panggung sempit (HP 360): pangkat terpanjang "Kepala Investigator" tetap sebaris */
+@container iv-hasil-panggung (max-width: 349.98px) { .iv-hasil-panggung-isi > .iv-hasil-pangkat { font-size: 14px; } }
+/* panggung tinggi: pita cap naik ke baris sendiri, skor lebih besar */
+@container iv-hasil-panggung (min-height: 150px) {
+  .iv-hasil-panggung-isi { grid-template-areas: "judul judul miss" "nilai angka miss" "nilai pangkat miss"; }
+  .iv-hasil-panggung-isi > h2 { margin-bottom: 8px; font-size: 15px; line-height: 18px; padding: 1px 8px; }
+  .iv-hasil-panggung-isi > .iv-hasil-angka { align-self: end; line-height: 46px; }
+  .iv-layar.iv-hasil .iv-hasil-angka b { font-size: 44px; line-height: 46px; }
+  .iv-hasil-panggung-isi > .iv-hasil-pangkat { align-self: start; white-space: normal; overflow: visible; }
+  .iv-layar.iv-hasil .iv-rekor { padding: 0 6px; font-size: 13px; }
+}
+/* panggung >= 200 px: gedung + pita tanah (seni menempel bawah); isinya naik ke langit di atas gedung */
+@container iv-hasil-panggung (min-height: 200px) {
+  .iv-hasil-panggung-isi { align-content: start; padding-top: 8px; padding-bottom: 26px; background: var(--iv-latar) center bottom / 720px 208px no-repeat; }
+  .iv-hasil-sinar { top: 76px; }
+  .iv-layar.iv-hasil .iv-rekor { bottom: 30px; }
+}
+/* panggung >= 200 px DAN lebar (HP >= 422 px): stiker reaksi 2x (seni 64 px, kelipatan bulat) */
+@container iv-hasil-panggung (min-height: 200px) and (min-width: 390px) {
+  .iv-hasil-miss { width: 136px; height: 136px; }
+  .iv-hasil-miss > .iv-reaksi { transform-origin: 0 0; scale: 2; }
+}
+@keyframes iv-hasil-sinar { to { rotate: 360deg; } }
+@keyframes iv-hasil-kelip { 0%, 100% { opacity: 1; } 50% { opacity: .15; } }
+
+/* ================================================================ rincian: tiga batang piksel + pita total seri */
+.iv-hasil-rinci { background: #ffffff; border: 2px solid #212121; box-shadow: inset 0 2px 0 #ff9000, 0 3px 0 #f0a030; }
+.iv-layar.iv-hasil .iv-poin { gap: 2px; padding: 5px 8px 3px; }
+.iv-layar.iv-hasil .iv-poin li { grid-template-columns: minmax(0, 1fr) clamp(76px, calc(28vw - 28px), 150px) 58px; gap: 8px; height: var(--r); }
+.iv-layar.iv-hasil .iv-poin-batang { height: 14px; border: 2px solid #212121; background: #fff3d6; overflow: hidden; }
+.iv-layar.iv-hasil .iv-poin-batang i { background: repeating-linear-gradient(90deg, #0000 0 6px, rgba(33, 33, 33, .2) 6px 8px), linear-gradient(#ffc46b 0 2px, #ff9000 2px); animation: iv-hasil-isi .6s steps(8) both; }
+.iv-layar.iv-hasil .iv-poin-angka { color: #5a3a24; }
+@keyframes iv-hasil-isi { from { clip-path: inset(0 100% 0 0); } to { clip-path: inset(0); } }
+/* total seri = baris sendiri di kaki kartu (pita tinta); "... menuju ..." di kanannya, satu baris */
+.iv-layar.iv-hasil .iv-total { display: flex; flex-wrap: nowrap; align-items: center; justify-content: space-between; gap: 0 10px; min-height: 24px; box-sizing: border-box; margin: 0; padding: 0 8px;
+  border: 0; border-top: 2px solid #212121; background: #212121; color: #ffe38a; font-size: 14px; line-height: 20px; }
+.iv-layar.iv-hasil .iv-total em { min-width: 0; font-size: 13px; color: #ffffff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+/* ================================================================ kartu petugas: ruang sendiri. Tali disembunyikan; bingkai Kepala (border-image, digambar
+   10 px di LUAR kartu, panel/panel.css) mendapat margin 10 px supaya tidak menimpa baris total di atas / hadiah di bawahnya */
+.iv-hasil-kartu { display: grid; justify-items: center; }
+.iv-layar.iv-hasil .kp-tali { display: none; }
+.iv-layar.iv-hasil .kp[data-investigasi="kepala"] { margin-block: 10px; }
+
+/* ================================================================ lanjut (`teaser` dari pemanggil): pita hadiah + bilah kasus berikutnya */
+.iv-layar.iv-hasil > .iv-hasil-lanjut { display: grid; gap: var(--j); }
+/* HADIAH BARU: pita kuning; labelnya bendera tinta di kiri; tiap hadiah = keping putih, namanya SATU baris utuh (keping yang tidak
+   muat pindah ke baris berikutnya). Lencana 32 px menumpang di kepingnya tanpa keluar dari pita. */
+.iv-layar.iv-hasil .iv-hadiah { position: relative; display: flex; flex-wrap: wrap; align-items: center; gap: 4px 6px; min-height: 38px; box-sizing: border-box; margin: 0; padding: 6px 6px 6px 82px;
+  border: 2px solid #212121; background: #ffe38a; font-size: 13px; line-height: 18px; font-weight: 800; color: #212121; }
+.iv-layar.iv-hasil .iv-hadiah > b { position: absolute; left: 0; top: 0; bottom: 0; width: 76px; box-sizing: border-box; display: grid; place-items: center; padding: 0 12px 0 4px; flex-basis: auto;
+  background: #212121; color: #ffe38a; font-size: 12px; line-height: 14px; letter-spacing: .04em; text-transform: uppercase; text-align: center;
+  clip-path: polygon(0 0, calc(100% - 8px) 0, 100% 50%, calc(100% - 8px) 100%, 0 100%); }
+.iv-layar.iv-hasil .iv-hadiah > span { display: inline-flex; align-items: center; gap: 4px; box-sizing: border-box; max-width: 100%; min-height: 22px; padding: 0 5px; border: 2px solid #212121; background: #ffffff; white-space: nowrap; }
+.iv-layar.iv-hasil .iv-hadiah .pn-lencana { margin: -7px 0 -7px -4px; }
+/* bilah kasus berikutnya: tinta, judul kuning satu baris, panah di keping jingga */
+.iv-layar.iv-hasil .iv-berikut { min-height: var(--b); padding: 3px 8px 3px 10px; background: #212121; border: 2px solid #212121; box-shadow: 0 3px 0 #f0a030; color: #ffffff; }
+.iv-layar.iv-hasil .iv-berikut:active { box-shadow: none; }
+.iv-layar.iv-hasil .iv-berikut b { display: block; font-size: 15px; color: #ffe38a; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.iv-layar.iv-hasil .iv-berikut b small { color: #ffffff; overflow: hidden; text-overflow: ellipsis; }
+.iv-layar.iv-hasil .iv-berikut > span { display: grid; place-items: center; width: 28px; height: 28px; padding-bottom: 2px; box-sizing: border-box; background: #ff9000; color: #212121; }
+@media (max-width: 379.98px) { .iv-layar.iv-hasil .iv-berikut b { font-size: 14px; } }
+@media (min-width: 420px) { .iv-layar.iv-hasil .iv-berikut b { font-size: 16px; } }
+
+/* ================================================================ aksi: Main lagi / Arsip kasus / Selesai (kunci piksel gaya-game.css; bunyinya tidak diubah) */
+.iv-layar.iv-hasil .iv-hasil-aksi { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; }
+.iv-layar.iv-hasil .iv-hasil-aksi[data-tiga] { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.iv-layar.iv-hasil .iv-hasil-aksi .iv-tombol { min-height: var(--b); padding: 4px 4px 8px; font-size: 15px; line-height: 18px; }
+@media (min-width: 420px) { .iv-layar.iv-hasil .iv-hasil-aksi .iv-tombol { font-size: 17px; line-height: 20px; } }
+/* tautan cerita klaim (kasus 1): 28 px di bawah tombol; di layar pendek menempel (daerah ketuknya tetap 28 + 12 px) */
+.iv-layar.iv-hasil > .iv-cerita { height: 28px; margin-top: 2px; }
+@media (max-height: 679.98px) { .iv-layar.iv-hasil > .iv-cerita { margin-top: -4px; } }
+
+@media (prefers-reduced-motion: reduce) {
+  :root:not([data-gerak="penuh"]) :is(.iv-hasil-sinar, .iv-poin-batang i) { animation: none !important; }
+  :root:not([data-gerak="penuh"]) .iv-hasil-miss::before, :root:not([data-gerak="penuh"]) .iv-hasil-miss::after { animation: none !important; }
+}

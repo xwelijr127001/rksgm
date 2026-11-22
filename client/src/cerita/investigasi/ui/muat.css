@@ -65,27 +65,9 @@
 /* ================================================================ 6. gerbang "Mulai baru": selama bertanya, potret dan kalimat pengantar mengalah */
 .iv-gerbang[data-tanya] > .iv-reaksi, .iv-gerbang[data-tanya] > p:not([class]) { display: none; }
 
-/* ================================================================ 7. hasil investigasi */
-.iv-layar.iv-hasil { gap: 6px; }
-/* keping "Rekor baru!" / "Terbaik 85" = stiker di sudut potret reaksi: kepala tetap 80 px */
-.iv-hasil .iv-hasil-kepala { position: relative; min-height: 80px; gap: 10px; } /* jarak 10: "Kepala Investigator" (153 px) muat sebaris di kolom 160 px */
-.iv-hasil .iv-rekor { position: absolute; right: -2px; bottom: 0; z-index: 1; margin: 0 !important; rotate: -3deg; box-shadow: 0 2px 0 #212121; }
-.iv-hasil .iv-poin { gap: 2px; }
-.iv-hasil .iv-poin li { height: 20px; }
-.iv-hasil .iv-total { flex-wrap: nowrap; min-height: 24px; }
-.iv-hasil .iv-total em { min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.iv-hasil .iv-hasil-lanjut { gap: 6px; }
-.iv-hasil .iv-hasil-lanjut:empty { display: none; }
-/* hadiah baru: satu baris (label + hadiah berdampingan); dua hadiah sekaligus boleh menjadi dua baris */
-.iv-hasil .iv-hadiah { gap: 2px 8px; }
-.iv-hasil .iv-hadiah > b { flex-basis: auto; }
-.iv-hasil .iv-hadiah .pn-lencana { margin: -4px 0; }
-/* saat hadiah baru diumumkan, tali kartu petugas (14 px) mengalah */
-.iv-hasil:has(.iv-hadiah) .kp-tali { display: none; }
-/* baris aksi tiga tombol: Main lagi / Arsip kasus / Selesai */
-.iv-hasil-aksi[data-tiga] { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; }
-.iv-hasil-aksi[data-tiga] .iv-tombol { padding: 4px; font-size: 15px; line-height: 18px; }
-.iv-layar.iv-hasil > .iv-cerita { margin-top: -6px; }
+/* ================================================================ 7. hasil investigasi
+   T-121 (Designer): aturan perapat layar hasil PINDAH ke ui/hasil.css (layar "KASUS SELESAI" bergaya Raksa Cerah; tata letak
+   lentur yang mengisi layar). Berkas ini diimpor sesudah hasil.css: jangan menambah aturan .iv-hasil di sini. */
 
 /* ================================================================ 8. tab (arsip kasus, lembar buku catatan): satu halaman per tampilan */
 .iv-tab { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr); border: 2px solid #212121; background: #fff9f5; box-shadow: 0 2px 0 #212121; }
