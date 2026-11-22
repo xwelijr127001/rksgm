@@ -23,7 +23,7 @@
  * Tipe kontrak (rencana "Interfaces", dipakai komponen Task 2): Bukti, Pernyataan, HasilKeberatan.
  */
 import { LEGACY_ROUND_ID, ROUND_OUTCOMES, type RoundOutcome } from '@shared/investigator/rubric';
-import type { BuktiInvestigasi, Episode, KunciTeks, PernyataanInvestigasi, PesanInvestigasi, Press, PutusanInvestigasi, Round, StateCerita, TafsirInvestigasi } from '../tipe';
+import type { BuktiInvestigasi, Ekspresi, Episode, KonfigInvestigasi, KunciTeks, PernyataanInvestigasi, PesanInvestigasi, Press, PutusanInvestigasi, Round, StateCerita, TafsirInvestigasi } from '../tipe';
 
 export type Bukti = BuktiInvestigasi;
 export type Pernyataan = PernyataanInvestigasi;
@@ -71,6 +71,22 @@ export function putusanDipilih(s: Tanda): Putusan | null {
 export function pesanDipilih(s: Tanda): Pesan | null {
   return PESAN.find((p) => punya(s, tandaPesan(p))) ?? null;
 }
+
+/**
+ * T-134: NASKAH yang dipakai untuk MENAMPILKAN sebuah pesan yang sudah dipilih (kalimat pesan, reaksi, kalimat nasabah, wajah).
+ * `id` = id naskah (`<awalan>.pesan.<id>`, `.pesan.<id>.1` / `.2`, `<awalan>.balas.<id>`); `ragam` = id ragam bila pilihan itu
+ * memang ragam baru (disimpan di rekaman perangkat supaya arsip permainan terbaik tahu naskahnya). `bertanda(tanda)` menjawab
+ * apakah pilihan itu membawa tanda ragamnya: dari state cerita (`punyaRagam`), dari rekaman (`ragamRekaman`), atau selalu true
+ * (latihan: selalu naskah yang berlaku sekarang). Kasus tanpa `pesanRagam` = naskah id pesannya sendiri, seperti semula.
+ */
+export function naskahPesan(k: Pick<KonfigInvestigasi, 'balasan' | 'pesanRagam'>, pesan: Pesan, bertanda: (tanda: string, idRagam: string) => boolean): { id: string; ekspresi: Ekspresi; ragam?: string } {
+  const r = k.pesanRagam?.[pesan];
+  return r && bertanda(r.tanda, r.id) ? { id: r.id, ekspresi: r.ekspresi, ragam: r.id } : { id: pesan, ekspresi: k.balasan[pesan] };
+}
+/** Tanda ragam dibaca dari state cerita (permainan ini). */
+export const punyaRagam = (s: Tanda) => (tanda: string): boolean => punya(s, tanda);
+/** Tanda ragam dibaca dari rekaman perangkat (`penjelasan[kasus].ragam` = id ragam; rekaman lama tanpa field itu = naskah lama). */
+export const ragamRekaman = (ragam: string | undefined) => (_tanda: string, idRagam: string): boolean => ragam === idRagam;
 
 /**
  * T-087 / T-090: tebakan pembuka = id pilihan `konfig.tebak.pilihan` yang tandanya terpasang (null = belum menebak, mis.

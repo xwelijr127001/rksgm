@@ -354,6 +354,9 @@ export interface PernyataanInvestigasi {
  *   bukti      kartu yang menerima temuannya; tanpa nilai (T-130) = temuan tanpa kartu (hanya di halaman "Temuan")
  *   opsi[].seni / .ket  (T-130) pilihan bergambar (slip waktu, ui/seniR2.ts SLIP_WAKTU_K2) + keterangan gambarnya
  *   hadiah     (T-130) gambar kecil (sel 96 x 68 `SENI_R2`) di catatan sesudah selesai: dokumen yang baru diminta
+ *   samping    (T-134) kartu bukti KEDUA yang dipasangkan dengan gambar ini: gambar kartunya (sel 96 x 68 `SENI_R2` dari
+ *              `BuktiInvestigasi.seni` kartu itu) tampil di samping pertanyaan, dengan `sampingKet` sebagai teks altnya (apa
+ *              yang TERLIHAT di kartu itu). Kasus 3: kartu kejadian berkalender 14 di samping foto bercap 03.
  *   opsi       pilihan urut layar; `tepat` = id yang benar; `hampir` = pilihan yang berhati-hati tetapi belum membaca sumbernya
  *              (umpan baliknya "sebagian", bukan "keliru")
  *   mapanSaat  tanda yang menjadikan tafsir ini TEMUAN MAPAN (mis. 'koreksi:tol': saksinya mengoreksi catatannya). Tanpa nilai =
@@ -379,6 +382,8 @@ export interface TafsirInvestigasi {
   temuan?: KunciTeks;
   ringkas?: KunciTeks;
   hadiah?: string;
+  samping?: IdBukti;
+  sampingKet?: KunciTeks;
   mapanSaat?: string;
 }
 
@@ -502,6 +507,16 @@ export interface KonfigInvestigasi {
   };
   /** T-127 (babak 2): pilihan formatif kasus ini (lihat TafsirInvestigasi). Tanpa nilai = kasus tanpa tafsir. */
   tafsir?: TafsirInvestigasi[];
+  /**
+   * T-134 RAGAM NASKAH PESAN (opsional; tanpa nilai = satu naskah per id pesan, seperti semula). Untuk kasus yang KALIMAT sebuah
+   * pesan bernilai diganti sesudah kasusnya rilis (kasus 3, T-132: 'janji' dulu janji penggantian, kini penolakan menyeluruh; id
+   * dan nilainya tetap). Pilihan node `pesan` itu memasang `tanda`; pilihan yang membawa tanda itu ditampilkan dengan naskah
+   * ber-id `id`: `<awalan>.pesan.<id>` (kalimat pesannya), `.pesan.<id>.1` / `.2` (reaksi dan sebabnya), `<awalan>.balas.<id>`
+   * (kalimat nasabah di layar hasil) dan wajah `ekspresi`. Pilihan TANPA tanda (permainan dan rekaman dari sebelum penggantian)
+   * tetap memakai naskah id pesannya sendiri dan wajah `balasan[id]`, jadi riwayat lama tidak berubah makna. Tanpa poin: skor
+   * hanya membaca `pesan:<id>`.
+   */
+  pesanRagam?: Partial<Record<PesanInvestigasi, { tanda: string; id: string; ekspresi: Ekspresi }>>;
   /**
    * T-132 (babak 2, kasus ber-panel): temuan yang lahir dari SATU babak panel (bukan dari layar tafsir). Muncul di halaman "Temuan"
    * begitu babak itu selesai (tanda `panel:<round>:*`), sebagai TAFSIRAN sampai pernyataan babak itu dikoreksi pembuatnya

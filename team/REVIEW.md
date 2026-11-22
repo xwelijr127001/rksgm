@@ -437,3 +437,15 @@ Confirmed working folder `C:\Users\User\Desktop\rksgm-episode2`.
 2. **Shared zoom can select the wrong scored ID.** `LayarKeberatan.tsx:109,118` discards the opened card ID and selects `dashcam`. Carry the ID through zoom, render its exhibit and select that same card before enabling Case 2/3 zoom.
 3. **Resume.** Existing node IDs survive. Older SIM drafts reopen with zero misses. New drafts retain the miss count but lose the rejected option and hint; repeating that option after reload triggers guidance. Persist rejected IDs and restore feedback, accepting numeric legacy drafts (`PilihFormatif.tsx:49`). Gate the hunch recap on the interpretation flag so downstream legacy saves never receive an unearned “your finding” (`LayarInvestigasi.tsx:576`).
 4. **T-127 decisions 1–7:** approve integrated pairing, answer buttons, revised sightline, case-only number removal, neutral zoom, shorter licence check and per-run curiosity marks. Decisions 4–5 need the rendering fixes above. Static review only.
+
+Confirmed working folder `C:\Users\User\Desktop\rksgm-episode2`.
+
+## Round 2 final review (2026-11-22)
+
+**Verdict: fix historical attribution.** The numeric boundary holds: Cases 2–3 retain scored IDs, rubric, 40/30/30, /300, bests and stamps. Formative answers advance locally (`LayarInvestigasi.tsx:270`); neither commit changes ranked stages or practice scoring.
+
+**T-131:** (1) Yes: neutral replay feedback/captions and unnumbered summary (`ArenaDashcam.tsx:132,261`). (2) Yes: observable exhibit alt and zoom descriptions (`LayarInvestigasi.tsx:261,558`). (3) Yes: zoom selects the opened ID (`LayarKeberatan.tsx:122`). (4) Mostly: new drafts restore rejected IDs/hints and recap requires the interpretation flag (`PilihFormatif.tsx:66–70`, `LayarInvestigasi.tsx:612`). One legacy numeric miss plus another miss persists only the newly rejected ID; reload drops guided state. Preserve total misses alongside IDs (`PilihFormatif.tsx:79–81`). Low priority.
+
+**Saves and decisions.** Approve all six T-130 choices: three message IDs, compact notebook, retained nodes, Agus’s clarification, shorter lead-in and unchanged final verdict. Approve T-132 #1: consent immediately before disclosure gives the second round a purpose, though the newest card cues the answer. `auto-2-inv-3/episode.ts:284,319` routes old photo saves through the estimator and existing extract holders past duplicate consent.
+
+**Fix now:** T-132 #2 works for new plays only. Reusing `janji` changes an old payment promise into a blanket rejection in historical replies/archives (`episode.ts:364`, `LayarInvestigasi.tsx:1206`). Mark new selections and retain legacy wording/reaction for unmarked records; keep zero points. Accept #4–8. Accept #3 with polish: show day 14 beside the day-03 photo as the narration promises. The dates provide evidence; card recency remains the main shortcut. Static review of both commits.

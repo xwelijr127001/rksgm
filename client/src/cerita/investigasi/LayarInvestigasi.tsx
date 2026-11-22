@@ -62,7 +62,7 @@ import { aksiLanjut, daftarKasusHub, tamuBaruSemuaKasus, tujuanPangkat, type Kas
 import { RUTE_HUB, ruteKasus, useRumahCerita } from './rute';
 import { adaRekaman, bacaRekaman, berlanggananInvestigasi, catatHadiah, catatHasil, catatIntipKasus2, hadiahRekaman, pangkatRekaman, stempelSeri, TOTAL_MAKS, totalSkor, versiInvestigasi } from './simpan';
 import { MAKS_LANGKAH, poinBabak, poinKeberatan, poinPesan, poinPutusan, putusanTepat, rincianBabak, skorKasus, skorKasusLengkap, titikTerlemah, type SkorKasus, type TitikLatihan } from './skor';
-import { buktiTerkumpul, hasilKasus, hasilKasusLengkap, PESAN, PILIH_LANJUT, pernyataanTercatat, pilihTekan, semuaPernyataanDikoreksi, semuaPress, tafsirDibuat, tebakanAwal, tekananTerbuka, temuanKasus, type Bukti, type HasilBabak, type HasilKeberatan, type HasilLengkap, type Pernyataan, type Pesan, type Putusan } from './status';
+import { buktiTerkumpul, hasilKasus, hasilKasusLengkap, PESAN, PILIH_LANJUT, pernyataanTercatat, pilihTekan, naskahPesan, punyaRagam, ragamRekaman, semuaPernyataanDikoreksi, semuaPress, tafsirDibuat, tebakanAwal, tekananTerbuka, temuanKasus, type Bukti, type HasilBabak, type HasilKeberatan, type HasilLengkap, type Pernyataan, type Pesan, type Putusan } from './status';
 import { BukuCatatan, PotretReaksi, reaksiSah, type KoreksiPernyataan, type TemuanSlip } from './ui/BukuCatatan';
 import { CapKeberatan } from './ui/CapKeberatan';
 import { PenyediaTeksInvestigasi } from './ui/dasar';
@@ -75,7 +75,7 @@ import { LayarPutusan } from './ui/LayarPutusan';
 import { PeriksaPerjalanan } from './ui/PeriksaPerjalanan';
 import { PeriksaPolis } from './ui/PeriksaPolis';
 import { PeriksaSim } from './ui/PeriksaSim';
-import { PilihFormatif } from './ui/PilihFormatif';
+import { PilihFormatif, type DrafFormatif } from './ui/PilihFormatif';
 import { CINCIN_K3_FOTO, SENI_R2, SLIP_WAKTU_K2, type IdSeniR2 } from './ui/seniR2';
 import { seniKasus } from './ui/seniKasus';
 import { SeniTolNetral } from './ui/SeniTolNetral';
@@ -235,14 +235,22 @@ const DRAF_TAFSIR = 'tafsir';
  * T-130 (tinjauan Codex): draf = DAFTAR id pilihan yang sudah ditolak (urut), supaya muat ulang memulihkan pilihan yang padam dan
  * penunjuknya. Draf T-127 berupa ANGKA (jumlah kekeliruan saja) tetap dibaca apa adanya.
  */
-function tafsirTersimpan(ep: Episode, state: StateCerita): number | string[] {
+/**
+ * T-134 (tinjauan akhir Codex): JUMLAH kekeliruan disimpan di samping id-nya (kunci `tafsirJumlah`). Draf lama berupa angka (satu
+ * kekeliruan tanpa id) + satu kekeliruan baru dulu hanya menyimpan id yang baru, jadi muat ulang kehilangan keadaan dipandu.
+ * Dibaca: angka lama = jumlahnya; larik T-130 tanpa jumlah = banyaknya id; selain itu yang terbesar dari keduanya.
+ */
+const DRAF_TAFSIR_JUMLAH = 'tafsirJumlah';
+function tafsirTersimpan(ep: Episode, state: StateCerita): DrafFormatif {
   const d = bacaDrafAktivitas(ep.id, kunjunganAktivitas(state));
-  const n = d && typeof d === 'object' ? (d as Record<string, unknown>)[DRAF_TAFSIR] : null;
-  if (Array.isArray(n)) return n.filter((x): x is string => typeof x === 'string' && x.length <= 40).slice(0, 2);
-  return typeof n === 'number' && Number.isFinite(n) ? Math.max(0, Math.min(2, Math.floor(n))) : 0;
+  const o = d && typeof d === 'object' ? (d as Record<string, unknown>) : {};
+  const n = o[DRAF_TAFSIR]; const j = o[DRAF_TAFSIR_JUMLAH];
+  const angka = (x: unknown): number => (typeof x === 'number' && Number.isFinite(x) ? Math.max(0, Math.min(2, Math.floor(x))) : 0);
+  const gugur = Array.isArray(n) ? n.filter((x): x is string => typeof x === 'string' && x.length <= 40).slice(0, 2) : [];
+  return { gugur, jumlah: Math.max(gugur.length, angka(j), Array.isArray(n) ? 0 : angka(n)) };
 }
-function simpanTafsir(ep: Episode, state: StateCerita, gugur: number | string[] | null, periksa: boolean): void {
-  simpanDrafAktivitas(ep.id, kunjunganAktivitas(state), gugur === null ? {} : { ...(periksa ? { [DRAF_PERIKSA]: 1 } : {}), [DRAF_TAFSIR]: gugur });
+function simpanTafsir(ep: Episode, state: StateCerita, draf: DrafFormatif | null, periksa: boolean): void {
+  simpanDrafAktivitas(ep.id, kunjunganAktivitas(state), draf === null ? {} : { ...(periksa ? { [DRAF_PERIKSA]: 1 } : {}), [DRAF_TAFSIR]: [...draf.gugur], [DRAF_TAFSIR_JUMLAH]: draf.jumlah });
 }
 
 /**
@@ -262,12 +270,16 @@ function LayarTafsir({ ep, konfig, state, tafsir, periksa, tx, onLanjut }: { ep:
   // Pilihan bergambar: slip waktu kasus 2 (96 x 68); gambarnya hiasan, nama aksesnya = teks + keterangan pilihan itu.
   const slip = (id: string | undefined) => (id && id in SLIP_WAKTU_K2 ? <img className="r2-slip" src={SLIP_WAKTU_K2[id as keyof typeof SLIP_WAKTU_K2]} width={96} height={68} alt="" /> : undefined);
   const hadiah = tafsir.hadiah && tafsir.hadiah in SENI_R2 ? <img className="r2-slip" src={SENI_R2[tafsir.hadiah as IdSeniR2].thumb} width={96} height={68} alt="" /> : undefined;
+  // T-134: kartu kedua yang dipasangkan dengan gambar ini (kasus 3: kartu kejadian berkalender 14), di samping pertanyaannya.
+  const kartuSamping = tafsir.samping ? konfig.bukti.find((x) => x.id === tafsir.samping) : undefined;
+  const samping = kartuSamping?.seni && kartuSamping.seni in SENI_R2
+    ? <img className="r2-slip" data-kartu-samping={kartuSamping.id} src={SENI_R2[kartuSamping.seni as IdSeniR2].thumb} width={96} height={68} alt={tafsir.sampingKet ? tx(tafsir.sampingKet) : tx(kartuSamping.judul)} /> : undefined;
   return (
-    <PilihFormatif id={tafsir.id} tanya={tx(tafsir.tanya)} awal={awal} susun={tafsir.tampilan === 'daftar' ? 'kolom' : 'baris'} hadiah={hadiah}
+    <PilihFormatif id={tafsir.id} tanya={tx(tafsir.tanya)} awal={awal} susun={tafsir.tampilan === 'daftar' ? 'kolom' : 'baris'} hadiah={hadiah} samping={samping}
       gambar={seni ? (jelas, selesai) => <GambarR2 seni={seni} alt={alt} lajur={jelas ? tafsir.lajur : undefined} lapis={selesai ? kartu?.lapis : undefined} /> : undefined}
       opsi={tafsir.opsi.map((o) => ({ id: o.id, teks: tx(o.teks), gambar: slip(o.seni), ...(o.ket ? { ket: tx(o.ket) } : {}) }))} tepat={tafsir.tepat} hampir={tafsir.hampir}
       salah={(id) => k(`salah.${id}`)} alasan={k('alasan')} benar={k('benar')} lanjut={tx('inv.ui.lanjut')}
-      onCoba={(gugur) => simpanTafsir(ep, state, gugur, periksa)} onSelesai={() => { simpanTafsir(ep, state, null, periksa); onLanjut(); }} />
+      onCoba={(gugur, jumlah) => simpanTafsir(ep, state, { gugur, jumlah }, periksa)} onSelesai={() => { simpanTafsir(ep, state, null, periksa); onLanjut(); }} />
   );
 }
 
@@ -884,7 +896,7 @@ function LatihanKasus({ ep, konfig, state, titik, tx, onSelesai }: { ep: Episode
       {round ? <LatihanPanel key={putaran} ep={ep} konfig={konfig} state={state} round={round} tx={tx} onHasil={(h) => setHasil({ poin: poinBabak(konfig, round.id, h), kalimat: tx(kunci(konfig, `${round.id}.jawab.1`)) })} />
         : langkah === 'keberatan' ? <LatihanKeberatan key={putaran} ep={ep} konfig={konfig} state={state} tx={tx} onHasil={(h) => setHasil({ poin: poinKeberatan(h), kalimat: tx(kunci(konfig, 'keb.cap')) })} />
         : langkah === 'putusan' ? <LayarPutusan key={putaran} {...teksPutusan(konfig, tx)} onPilih={(p) => { playSfx('konfirmasi'); setHasil({ poin: poinPutusan(konfig.putusan, p), kalimat: tx(kunci(konfig, `putusan.${p}.1`)) }); }} />
-          : <LatihanPesan key={putaran} ep={ep} konfig={konfig} tx={tx} onHasil={(p) => setHasil({ poin: poinPesan(p), ucapan: { ekspresi: konfig.balasan[p], teks: tx(kunci(konfig, `pesan.${p}.1`)) }, kalimat: p === 'baik' ? '' : tx(kunci(konfig, `pesan.${p}.2`)) })} />}
+          : <LatihanPesan key={putaran} ep={ep} konfig={konfig} tx={tx} onHasil={(p) => { const n = naskahPesan(konfig, p, () => true); setHasil({ poin: poinPesan(p), ucapan: { ekspresi: n.ekspresi, teks: tx(kunci(konfig, `pesan.${n.id}.1`)) }, kalimat: p === 'baik' ? '' : tx(kunci(konfig, `pesan.${n.id}.2`)) }); }} />}
     </>
   );
 }
@@ -930,8 +942,10 @@ export function HasilKasus({ ep, state, nama, look, tx, onMainLagi }: {
   const total = skor ? skor.total : null;
   const [sebelum] = useState(() => bacaRekaman());
   const kunciPilihan = h ? `${h.putusan}|${h.pesan}|${h.babak.join(',')}` : '';
-  // Skor terbaik + stempel + pilihan permainan terbaik (untuk arsip). Idempoten.
-  useEffect(() => { if (total !== null && h) catatHasil(kasus, total, { putusan: h.putusan, pesan: h.pesan, babak: h.babak }); /* eslint-disable-next-line react-hooks/exhaustive-deps */ }, [kasus, total, kunciPilihan]);
+  // T-134: naskah pesan permainan INI (kasus ber-`pesanRagam`: pilihan lama tanpa tanda = naskah lama; id dan nilainya sama).
+  const naskah = h && konfig ? naskahPesan(konfig, h.pesan, punyaRagam(state)) : null;
+  // Skor terbaik + stempel + pilihan permainan terbaik (untuk arsip; `ragam` ikut supaya arsipnya memakai naskah yang sama). Idempoten.
+  useEffect(() => { if (total !== null && h) catatHasil(kasus, total, { putusan: h.putusan, pesan: h.pesan, babak: h.babak, ...(naskah?.ragam ? { ragam: naskah.ragam } : {}) }); /* eslint-disable-next-line react-hooks/exhaustive-deps */ }, [kasus, total, kunciPilihan]);
   const [tahap, setTahap] = useState<'ucapan' | 'skor'>('ucapan');
   const [lembar, setLembar] = useState<'lagi' | 'arsip' | 'rincian' | null>(null);
   /** T-115: halaman arsip yang dibuka lebih dulu (dari lembar "Main lagi" pada skor sempurna: keterangan yang dikoreksi). */
@@ -945,7 +959,7 @@ export function HasilKasus({ ep, state, nama, look, tx, onMainLagi }: {
   const hadiahBaru = total === null ? [] : hadiahRekaman(capaian).filter((a) => !sebelum.hadiah?.includes(a));
   const kunciHadiah = hadiahBaru.join(',');
   useEffect(() => { if (kunciHadiah) catatHadiah(hadiahBaru); /* eslint-disable-next-line react-hooks/exhaustive-deps */ }, [kunciHadiah]);
-  if (!h || !konfig || !skor) {
+  if (!h || !konfig || !skor || !naskah) {
     // State tanpa ketiga hasil (seharusnya tidak terjadi di jalur naskah): tetap beri jalan keluar.
     return <section className="iv-layar"><button type="button" className="primary-action iv-tombol" onClick={onMainLagi}>{tx('inv.ui.lanjut')}</button></section>;
   }
@@ -957,7 +971,7 @@ export function HasilKasus({ ep, state, nama, look, tx, onMainLagi }: {
     return (
       <section className="iv-layar iv-hendra" data-hasil-ucapan={h.pesan} aria-labelledby="iv-hendra-judul">
         <h2 id="iv-hendra-judul" className="iv-tanya" tabIndex={-1} data-cer-fokus="">{akhir ? tx(akhir.judul) : t('investigasi.hasil.judul')}</h2>
-        <UcapanNasabah ep={ep} tx={tx} ekspresi={konfig.balasan[h.pesan]} teks={tx(kunci(konfig, `balas.${h.pesan}`))} />
+        <UcapanNasabah ep={ep} tx={tx} ekspresi={naskah.ekspresi} teks={tx(kunci(konfig, `balas.${naskah.id}`))} />
         <button type="button" className="primary-action iv-tombol" data-lihat-hasil="" onClick={() => setTahap('skor')}>{tx('inv.hasil.lihat')}</button>
       </section>
     );
@@ -985,9 +999,15 @@ export function HasilKasus({ ep, state, nama, look, tx, onMainLagi }: {
   const menuju = tujuan ? t(tujuan.jenis === 'senior' ? 'hubInv.menujuSenior' : 'hubInv.menujuKepala', { n: tujuan.kurang }) : undefined;
   // Arsip kasus (terbuka sejak kasus ini pernah diselesaikan): pesan pada permainan TERBAIK. Rekaman lama tanpa catatan pilihan,
   // bila permainan ini bukan yang terbaik: ringkasan fakta saja (garis waktu + keterangan yang dikoreksi).
+  // T-134: kalimat pesan arsip = naskah pilihan ITU. Permainan ini: tanda ragam di state; permainan terbaik yang tersimpan: field
+  // `ragam` rekamannya (rekaman lama tanpa field itu = naskah lama, mis. janji penggantian kasus 3 sebelum T-132).
   const nodePesan = ep.node.pesan;
-  const idPesanArsip = skor.total >= (r.terbaik[kasus] ?? 0) ? h.pesan : r.penjelasan?.[kasus]?.pesan;
-  const pesanArsip = nodePesan?.jenis === 'pilihan' && idPesanArsip ? nodePesan.pilihan.find((x) => x.id === idPesanArsip) : undefined;
+  const iniTerbaik = skor.total >= (r.terbaik[kasus] ?? 0);
+  const idPesanArsip = iniTerbaik ? h.pesan : r.penjelasan?.[kasus]?.pesan;
+  const pilihanArsip = nodePesan?.jenis === 'pilihan' && idPesanArsip ? nodePesan.pilihan.find((x) => x.id === idPesanArsip) : undefined;
+  const naskahArsip = pilihanArsip ? (iniTerbaik ? naskah : naskahPesan(konfig, pilihanArsip.id as Pesan, ragamRekaman(r.penjelasan?.[kasus]?.ragam))) : null;
+  // Kasus ber-ragam: kalimatnya dari kunci naskah (`pesan.<id naskah>`); kasus lain: teks pilihan node seperti semula.
+  const pesanArsip = pilihanArsip && naskahArsip ? { id: pilihanArsip.id, teks: konfig.pesanRagam?.[pilihanArsip.id as Pesan] ? kunci(konfig, `pesan.${naskahArsip.id}`) : pilihanArsip.teks } : undefined;
   const kaki = (
     <div className="iv-hasil-lanjut">
       {hadiahBaru.length ? (
@@ -1030,7 +1050,7 @@ export function HasilKasus({ ep, state, nama, look, tx, onMainLagi }: {
         onRincian={() => { playSfx('kertas'); setLembar('rincian'); }} />
       {lembar === 'rincian' ? (
         <Modal judul={t('investigasi.rincian.judul')} onTutup={tutup} lebar={420}>
-          <RincianNilai konfig={konfig} h={h} skor={skor} tx={tx} awal={tabRincian} terbaik={infoTerbaik}
+          <RincianNilai konfig={konfig} h={h} skor={skor} tx={tx} awal={tabRincian} terbaik={infoTerbaik} idNaskahPesan={naskah.id}
             onLatih={(titik) => { tutup(); setSegar(false); setLatihan(titik); }} />
         </Modal>
       ) : null}
@@ -1087,7 +1107,9 @@ type TabRincian = 'bukti' | 'putusan' | 'penanganan';
  * bila pilihan permainan terbaik itu tidak tersimpan (rekaman lama), hanya totalnya ("Skor terbaik kasus ini: 85"), tanpa alasan.
  * Latihan (LatihanKasus) tidak menyentuh mesin, skor kasus, maupun rekaman perangkat.
  */
-function RincianNilai({ konfig, h, skor, tx, awal, terbaik, onLatih }: {
+function RincianNilai({ konfig, h, skor, tx, awal, terbaik, onLatih, idNaskahPesan }: {
+  /** T-134: id naskah pesan permainan ini (kasus ber-`pesanRagam`; tanpa nilai = id pesannya sendiri). */
+  idNaskahPesan?: string;
   konfig: KonfigInvestigasi;
   h: HasilLengkap;
   skor: SkorKasus;
@@ -1155,7 +1177,7 @@ function RincianNilai({ konfig, h, skor, tx, awal, terbaik, onLatih }: {
           </>
         ) : (
           <>
-            <p className="iv-rincian-sebab" data-pesan={h.pesan}>{h.pesan === 'baik' ? t('investigasi.rincian.pesan.baik') : tx(kunci(konfig, `pesan.${h.pesan}.2`))}</p>
+            <p className="iv-rincian-sebab" data-pesan={h.pesan}>{h.pesan === 'baik' ? t('investigasi.rincian.pesan.baik') : tx(kunci(konfig, `pesan.${idNaskahPesan ?? h.pesan}.2`))}</p>
             {hilang > 0 ? tombolLatih({ langkah: 'pesan', poin, maks }) : null}
           </>
         )}

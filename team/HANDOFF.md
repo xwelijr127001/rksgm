@@ -6645,3 +6645,45 @@ Existing marked lines reused unchanged: the consent lines `inv3.kutipan.1` / `.2
 - Tests and QA scripts that read Kasus 3 were not run or edited. `client/src/cerita/investigator.expect.test.ts` and its snapshot will differ: node order (extract inside the panel, estimator's question skipped), card titles, message texts, Mr Gilang's status after `janji`. Anything that taps `[data-foto-dekat]` on these cards, or expects the estimate card art, needs updating.
 - Ranked event runs use the same screens; the formative steps add no server call, but I could not exercise a run.
 - With this slice all three cases are on the round-2 plumbing. The old three-tap licence check, timeline, clause card and (for Kasus 3 play) several old panel art files are now unused code and art; removing them is a separate clean-up.
+
+## T-134 (2026-11-22): Codex T-133 follow-ups: Kasus 3 historical message, draft misses, day 14 beside the photo (Fullstack)
+
+Built by Fullstack; uncommitted, not deployed. Owner rule: nothing was opened in a browser or on a phone and no test was run. Root `npm run typecheck` exit 0; `client/dist` rebuilt (build exit 0, copy identical to the build). No server file touched. Static check by script (not the test suite): validator clean for the three Investigator episodes and `auto-2`; all 3969 / 567 / 1512 paths of Kasus 3 / 2 / 1 reach an ending; all 48 old Kasus 3 node ids still exist and are reachable.
+
+Unchanged: scored ids, points (the `janji` message is 0 in both wordings), rubric, record key `raksa:investigasi:v1`, stamps, grades, bests.
+
+### 1. Kasus 3 `janji`: old records keep the promise, new selections are marked
+- **Text keys.** The five `janji` keys (`inv3.pesan.janji`, `.janji.alasan`, `.janji.1`, `.janji.2`, `inv3.balas.janji`) have their wording from before T-132 back (the unfounded promise, taken from commit 10b5999, id / en / zh). The blanket rejection written in T-132 moved unchanged to new keys: `inv3.pesan.tolak`, `.tolak.alasan`, `.tolak.1`, `.tolak.2`, `inv3.balas.tolak` (with its PIC markers). The story history stores text keys, so an old run's history reads as the promise again without any migration.
+- **Marker.** The `janji` option of node `pesan` now shows the `tolak` text and sets a second mark `ragam:pesan:tolak` next to `pesan:janji`. Scoring reads only `pesan:janji`.
+- **Graph.** `pesan` -> `pesan-janji-cek` (new branch) -> `pesan-tolak` (new: worried reaction, rejection lines) when the mark is there, else the old `pesan-janji` (happy reaction, promise lines; only a save from before T-132 can be standing there).
+- **Display.** New optional `KonfigInvestigasi.pesanRagam` + `status.ts naskahPesan()` pick the script for a saved choice. Marked: rejection wording, worried face. Unmarked: promise wording, happy face (`balasan.janji` is `senang` again). Used by the result screen (customer line and face), "Rincian nilai" (reason line), the archive message, and practice (always the wording in force now).
+- **Device record.** The best-run entry gets an optional `ragam: "tolak"`; the reader keeps it, an older build ignores it. A record without it is shown with the promise wording. Version and key unchanged.
+- Checked by script: unmarked state and unmarked record resolve to `janji` / `senang`, marked ones to `tolak` / `cemas`; choosing the option in the engine lands on `pesan-tolak` with both marks and status 20; the scored result still reads `pesan: janji`; Kasus 1 and 2 are untouched (no `pesanRagam`).
+- **One gap to know:** a guest who chose the rejection between the T-132 deploy and this fix has no mark and will be shown the promise wording (and the happy face) for that run. I see no way to tell those runs from older ones. Zero points either way.
+
+### 2. Reading draft keeps the miss count
+`PilihFormatif` now reports `onCoba(gugur, jumlah)` and accepts `awal = { gugur, jumlah }`; the visit draft stores `tafsirJumlah` next to the rejected ids. Read back as the largest of: stored count, number of ids, legacy numeric draft. So a T-127 numeric draft (one miss, no id) plus one new miss reloads as two misses = guided. A T-130 draft with ids only still works.
+
+### 3. Incident card beside the photo question (Kasus 3 reading)
+The incident card's picture (calendar 14, 96 x 68 in a 2 px frame) sits to the right of the question, above the stamped photo. New optional `TafsirInvestigasi.samping` / `sampingKet`; alt text `inv3.tafsir.urutan.samping` says what is on the card. English question shortened to "The mirror crack shows here. When was this photo taken?" so it stays three lines beside the card.
+
+| Screen (id / en / zh) | 360 x 640 | Room | 390 x 700 | Room |
+|---|---|---|---|---|
+| Question row (card 72 px or the question) | 78 / 78 / 78 | | 78 / 78 / 78 | |
+| Photo reading: choosing | 416 / 416 / 416 | 557 | 416 / 416 / 416 | 617 |
+| Photo reading: after the first miss | 442 / 462 / 422 | 557 | 442 / 442 / 422 | 617 |
+| Photo reading: correct + Lanjut | 486 / 506 / 486 | 557 | 486 / 486 / 486 | 617 |
+| Photo reading: guided + Lanjut | 526 / 526 / 506 | 557 | 526 / 526 / 506 | 617 |
+
+0 over; least spare 31 px (the same as before, the row grew by 26 px in id and zh only). No other screen changed shape. The full T-115 model and the T-126 score-details model were rerun: 0 over. The rejection texts under the new keys are the same strings that were calculated in T-132.
+
+### Files
+`client/src/cerita/tipe.ts`, `investigasi/status.ts`, `investigasi/simpan.ts`, `investigasi/LayarInvestigasi.tsx`, `investigasi/ui/PilihFormatif.tsx`, `investigasi/ui/ronde2.css`, `episode/auto-2-inv-3/episode.ts`, `teks.id.ts`, `teks.en.ts`, `teks.zh.ts`. No new `[konfirmasi PIC]` line: the marked rejection lines moved with their markers; the restored promise lines are as they were before T-132.
+Scripts outside the repo (run from `client/` with `npx tsx`): `C:\Users\User\AppData\Local\Temp\claude\ec29f026d20d029c\0c4fe0f7-0adb-4cb1-b49a-10019af309f5\scratchpad\t134\periksa.mts` (script choice, engine probe, record reader), `C:\Users\User\AppData\Local\Temp\claude\ec29f026d20d029c\0c4fe0f7-0adb-4cb1-b49a-10019af309f5\scratchpad\t134\hitung.mts` (fit).
+
+### Hooks for QA
+`[data-kartu-samping="kartu-kejadian"]` inside `.pf-kepala[data-bersamping]`; node ids `pesan-janji-cek`, `pesan-tolak`; mark `ragam:pesan:tolak`; record field `penjelasan["kasus-3"].ragam`.
+
+### Open
+- Not seen in a browser or on a phone: the card beside the question, and an old finished Kasus 3 run reopened on the result screen.
+- `investigator.expect.test.ts` and its snapshot were not run; the Kasus 3 `janji` path now ends through `pesan-tolak` and sets one more mark.

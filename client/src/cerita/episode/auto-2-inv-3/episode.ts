@@ -77,6 +77,12 @@ const RUANG = (...hadir: string[]): CueLatar => ({ lokasi: 'wawancara', hadir, t
 const PANEL: CueLatar = RUANG('penaksir', 'ketua', 'pemohon');
 const TELEPON_PEMOHON: CueLatar = { lokasi: 'kantor', hadir: [], telepon: 'pemohon', objek: [] };
 
+/**
+ * T-134: tanda pada pilihan pesan 'janji' yang dibuat SESUDAH kalimatnya diganti menjadi penolakan menyeluruh (T-132). Bukan tanda
+ * skor (skor membaca pesan:janji); hanya memilih naskah tampilan (KonfigInvestigasi.pesanRagam).
+ */
+const TANDA_TOLAK = 'ragam:pesan:tolak';
+
 /** Dua babak panel (kontrak beku T-102 `Round`); id, kartu dan kartu yang diterima = manifes rubrik 'kasus-3'. */
 const BABAK: Round[] = [
   {
@@ -108,9 +114,13 @@ const KASUS: KonfigInvestigasi = {
   awalan: 'inv3',
   kait: 'inv3.kait',
   nasabah: 'pemohon',
-  // Wajah Pak Gilang saat membalas (seni T-103: lega / senang -> lega, cemas -> cemas). T-132: pesan bernilai 0 kini penolakan
-  // menyeluruh (bukan lagi janji penggantian), jadi balasannya cemas.
-  balasan: { baik: 'lega', datar: 'cemas', janji: 'cemas' },
+  // Wajah Pak Gilang saat membalas (seni T-103: lega / senang -> lega, cemas -> cemas).
+  balasan: { baik: 'lega', datar: 'cemas', janji: 'senang' },
+  // T-134 (tinjauan akhir Codex): id 'janji' (nilai 0) dulu JANJI PENGGANTIAN; sejak T-132 kalimatnya PENOLAKAN MENYELURUH. Supaya
+  // permainan dan rekaman lama tidak berubah makna, pilihan baru memasang tanda TANDA_TOLAK dan ditampilkan dengan naskah 'tolak'
+  // (inv3.pesan.tolak*, inv3.balas.tolak, wajah cemas); pilihan TANPA tanda itu tetap janji penggantian (inv3.pesan.janji*,
+  // inv3.balas.janji, wajah senang di atas). Nilainya 0 di kedua naskah; skor hanya membaca pesan:janji.
+  pesanRagam: { janji: { tanda: TANDA_TOLAK, id: 'tolak', ekspresi: 'cemas' } },
   bingkai: 'seni',
   pernyataan: [
     // "Tanya lebih lanjut" (kontrak `Press`), tanpa poin.
@@ -142,8 +152,10 @@ const KASUS: KonfigInvestigasi = {
   // apa yang dikatakan pemohon ("malam itu juga"); yang tepat = sebelum kejadian. Tafsiran pemain sampai Pak Gilang mengoreksi
   // keterangannya di babak 1; sesudah itu temuan.
   tafsir: [
+    // T-134: kartu kejadian (kalender 14) tampil di samping pertanyaannya, seperti yang dijanjikan narasi 'baca-foto'.
     {
       id: 'urutan', bukti: 'foto-inspeksi', tampilan: 'bingkai', seni: 'k3-foto-inspeksi-03', seniKet: 'inv3.tafsir.urutan.gambar', tanya: 'inv3.tafsir.urutan.tanya', tepat: 'sebelum',
+      samping: 'kartu-kejadian', sampingKet: 'inv3.tafsir.urutan.samping',
       opsi: (['saat', 'sebelum', 'sesudah'] as const).map((x) => ({ id: x, teks: `inv3.tafsir.urutan.pilih.${x}` })),
       temuan: 'inv3.tafsir.urutan.temuan', ringkas: 'inv3.tafsir.urutan.ringkas', mapanSaat: tandaKoreksi(BABAK[0]!.statementId),
     },
@@ -360,15 +372,22 @@ function bangunNode(): NodeCerita[] {
       // 'janji' (0) = penolakan menyeluruh atas KEDUA baris, paling panjang, menyebut dirinya final. Dulu pesan 0 itu janji
       // penggantian; keduanya mengumumkan hasil yang bukan wewenang Investigator. Karena isinya kini penolakan, kepercayaan Pak
       // Gilang turun (dulu naik) dan wajah balasannya cemas.
+      // T-134: penolakan itu punya KUNCI TEKS SENDIRI (inv3.pesan.tolak*) dan node reaksi sendiri ('pesan-tolak'); kunci dan node
+      // lama (inv3.pesan.janji*, 'pesan-janji') kembali berisi janji penggantian, jadi riwayat, arsip dan layar hasil permainan lama
+      // tetap menampilkan apa yang dulu dipilih. Pilihan baru memasang TANDA_TOLAK.
       pilihan: [
-        { id: 'janji', teks: 'inv3.pesan.janji', efek: { kepercayaan: -10, alasan: 'inv3.pesan.janji.alasan', pasang: [tandaPesan('janji')] }, lanjut: 'pesan-janji' },
+        { id: 'janji', teks: 'inv3.pesan.tolak', efek: { kepercayaan: -10, alasan: 'inv3.pesan.tolak.alasan', pasang: [tandaPesan('janji'), TANDA_TOLAK] }, lanjut: 'pesan-janji-cek' },
         { id: 'baik', teks: 'inv3.pesan.baik', efek: { kepercayaan: 30, alasan: 'inv3.pesan.baik.alasan', pasang: [tandaPesan('baik')] }, lanjut: 'pesan-baik' },
         { id: 'datar', teks: 'inv3.pesan.datar', efek: { pasang: [tandaPesan('datar')] }, lanjut: 'pesan-datar' },
       ],
     },
     dialog('pesan-baik', TELEPON_PEMOHON, [b('inv3.pesan.baik.1', 'pemohon', 'lega')], 'akhir-cek'),
     dialog('pesan-datar', TELEPON_PEMOHON, [b('inv3.pesan.datar.1', 'pemohon', 'cemas'), b('inv3.pesan.datar.2', 'narasi')], 'akhir-cek'),
-    dialog('pesan-janji', TELEPON_PEMOHON, [b('inv3.pesan.janji.1', 'pemohon', 'cemas'), b('inv3.pesan.janji.2', 'narasi')], 'akhir-cek'),
+    // T-134: pilihan 'janji' yang baru selalu membawa TANDA_TOLAK -> 'pesan-tolak'. 'pesan-janji' = reaksi atas janji penggantian
+    // (naskah lama, wajah senang): hanya untuk simpanan dari sebelum T-132 yang berdiri di node itu.
+    { id: 'pesan-janji-cek', bab: '', jenis: 'cabang', cabang: [{ jika: tanda(TANDA_TOLAK), lanjut: 'pesan-tolak' }], lainnya: 'pesan-janji' },
+    dialog('pesan-tolak', TELEPON_PEMOHON, [b('inv3.pesan.tolak.1', 'pemohon', 'cemas'), b('inv3.pesan.tolak.2', 'narasi')], 'akhir-cek'),
+    dialog('pesan-janji', TELEPON_PEMOHON, [b('inv3.pesan.janji.1', 'pemohon', 'senang'), b('inv3.pesan.janji.2', 'narasi')], 'akhir-cek'),
     { id: 'akhir-cek', bab: '', jenis: 'cabang', cabang: [{ jika: tanda(tandaPutusan('tambahan')), lanjut: 'akhir-tuntas' }], lainnya: 'akhir-tinjau' },
     ...(['tuntas', 'tinjau'] as const).map((akhir): NodeCerita => ({
       id: `akhir-${akhir}`, bab: '', jenis: 'akhir', akhir, tata: KANTOR,

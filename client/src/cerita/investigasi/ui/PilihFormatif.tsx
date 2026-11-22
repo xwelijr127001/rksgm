@@ -22,6 +22,12 @@
  *  - `gambar` opsional (pilihan tanpa bukti bergambar, mis. "dokumen apa yang kurang?"); `susun: 'kolom'` = pilihan bertumpuk
  *    selebar layar untuk kalimat panjang; `opsi[].gambar` = pilihan bergambar (slip waktu 96 x 68) dengan `ket` sebagai
  *    keterangan untuk pembaca layar; `hadiah` = gambar kecil di catatan sesudah selesai (dokumen yang diminta "datang").
+ *
+ * T-134 (tinjauan akhir Codex):
+ *  - Draf = id yang ditolak DAN jumlah kekeliruan (`awal` berbentuk { gugur, jumlah }; `onCoba(gugur, jumlah)`). Dulu, draf lama
+ *    berupa angka (satu kekeliruan tanpa id) ditambah satu kekeliruan baru hanya menyimpan id yang baru, jadi muat ulang kembali
+ *    ke "satu kekeliruan" dan keadaan dipandu hilang. Sekarang jumlahnya ikut disimpan dan yang dipakai = yang terbesar.
+ *  - `samping` = kartu kedua di samping pertanyaan (kasus 3: kartu kejadian berkalender 14 di samping foto bercap 03).
  */
 import { useRef, useState, type ReactNode } from 'react';
 import { playSfx } from '../../../audio/audio';
@@ -33,7 +39,10 @@ import './ronde2.css';
 export type HasilFormatif = 'first' | 'second' | 'guided';
 export interface OpsiFormatif { id: string; teks: string; /** Gambar pilihan (slip); `teks` lalu menjadi nama aksesnya. */ gambar?: ReactNode; /** Keterangan gambar untuk pembaca layar. */ ket?: string }
 
-export function PilihFormatif({ id, tanya, gambar, opsi, tepat, hampir = [], salah, alasan, benar, lanjut, awal = 0, onCoba, onSelesai, susun = 'baris', hadiah }: {
+/** Draf yang dipulihkan: id pilihan yang sudah ditolak (urut) dan jumlah kekeliruan (bisa lebih besar dari jumlah id: draf lama). */
+export interface DrafFormatif { gugur: readonly string[]; jumlah: number }
+
+export function PilihFormatif({ id, tanya, gambar, opsi, tepat, hampir = [], salah, alasan, benar, lanjut, awal = 0, onCoba, onSelesai, susun = 'baris', hadiah, samping }: {
   /** Id tafsir (kait data- untuk QA). */
   id: string;
   tanya: string;
@@ -53,18 +62,28 @@ export function PilihFormatif({ id, tanya, gambar, opsi, tepat, hampir = [], sal
   benar: string;
   /** Label tombol lanjut. */
   lanjut: string;
-  /** Pilihan yang sudah ditolak sebelum muat ulang (urut); angka = draf lama (hanya jumlahnya). */
-  awal?: number | readonly string[];
-  onCoba?: (gugur: string[]) => void;
+  /** Draf sebelum muat ulang: id yang ditolak + jumlah kekeliruan. Angka = draf lama (hanya jumlahnya); larik = hanya id-nya. */
+  awal?: number | readonly string[] | DrafFormatif;
+  /** Tiap kekeliruan: id yang sudah ditolak dan JUMLAH kekeliruan sejauh ini (untuk disimpan sebagai draf kunjungan). */
+  onCoba?: (gugur: string[], jumlah: number) => void;
   onSelesai: (hasil: HasilFormatif) => void;
   /** 'baris' = pilihan sebaris (bawaan); 'kolom' = bertumpuk selebar layar (kalimat panjang). */
   susun?: 'baris' | 'kolom';
   /** Gambar kecil di catatan sesudah selesai. */
   hadiah?: ReactNode;
+  /** T-134: kartu kedua (gambar 96 x 68) di samping pertanyaan. */
+  samping?: ReactNode;
 }) {
   // Draf: hanya id yang memang pilihan keliru layar ini, paling banyak dua, tanpa ganda.
-  const [awalGugur] = useState<string[]>(() => (Array.isArray(awal) ? [...new Set(awal as readonly string[])].filter((x) => x !== tepat && opsi.some((o) => o.id === x)).slice(0, 2) : []));
-  const [keliru, setKeliru] = useState(() => (typeof awal === 'number' ? Math.max(0, Math.min(2, Math.floor(awal))) : awalGugur.length));
+  const [awalGugur] = useState<string[]>(() => {
+    const ids: readonly string[] = typeof awal === 'number' ? [] : Array.isArray(awal) ? (awal as readonly string[]) : (awal as DrafFormatif).gugur;
+    return [...new Set(ids)].filter((x) => x !== tepat && opsi.some((o) => o.id === x)).slice(0, 2);
+  });
+  // Jumlah kekeliruan = yang terbesar dari jumlah tersimpan dan banyaknya id (draf lama: angka saja; draf T-130: id saja).
+  const [keliru, setKeliru] = useState(() => {
+    const n = typeof awal === 'number' ? awal : Array.isArray(awal) ? 0 : (awal as DrafFormatif).jumlah;
+    return Math.max(awalGugur.length, Number.isFinite(n) ? Math.max(0, Math.min(2, Math.floor(n))) : 0);
+  });
   /** Pilihan yang sudah dicoba dan keliru (dipadamkan). */
   const [gugur, setGugur] = useState<string[]>(awalGugur);
   const [terakhir, setTerakhir] = useState<string | null>(awalGugur.length ? awalGugur[awalGugur.length - 1]! : null);
@@ -78,14 +97,19 @@ export function PilihFormatif({ id, tanya, gambar, opsi, tepat, hampir = [], sal
     playSfx('keliru');
     const baru = [...gugur, x];
     setKeliru(keliru + 1); setGugur(baru); setTerakhir(x);
-    onCoba?.(baru);
+    onCoba?.(baru, keliru + 1);
   };
   const hasil: HasilFormatif = dipandu ? 'guided' : keliru === 1 ? 'second' : 'first';
   // Draf lama berupa angka: pilihan yang keliru tadi tidak diketahui, jadi layarnya netral (hasil tetap 'second').
   const keadaan = benarDipilih ? 'tepat' : dipandu ? 'dipandu' : keliru === 1 && terakhir ? (hampir.includes(terakhir) ? 'hampir' : 'keliru') : 'awal';
   return (
     <section className="iv-layar pf" data-pilih-formatif={id} data-keadaan={keadaan} data-susun={susun} aria-labelledby="pf-tanya">
-      <h2 id="pf-tanya" className="iv-tanya" tabIndex={-1} data-cer-fokus="">{tanya}</h2>
+      {samping ? (
+        <div className="pf-kepala" data-bersamping="">
+          <h2 id="pf-tanya" className="iv-tanya" tabIndex={-1} data-cer-fokus="">{tanya}</h2>
+          <span className="pf-samping">{samping}</span>
+        </div>
+      ) : <h2 id="pf-tanya" className="iv-tanya" tabIndex={-1} data-cer-fokus="">{tanya}</h2>}
       {gambar ? <div className="pf-gambar" data-tunjuk={keadaan === 'keliru' || keadaan === 'hampir' ? '' : undefined}>{gambar(dipandu, selesai)}</div> : null}
       <div className="pf-opsi" role="group" aria-labelledby="pf-tanya" data-jumlah={opsi.length} data-bergambar={opsi.some((o) => o.gambar) ? '' : undefined}>
         {opsi.map((o) => {

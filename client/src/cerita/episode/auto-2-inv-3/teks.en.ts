@@ -60,8 +60,9 @@ export const TEKS_AUTO_2_INV_3_EN: Record<string, string> = {
   'inv3.bukti.foto.judul': 'Inspection photo',
   'inv3.bukti.foto.sumber': 'Source: the workshop’s routine service sheet, same chassis number',
   'inv3.baca.foto.1': 'You put the photo next to the incident card.',
-  'inv3.tafsir.urutan.tanya': 'The mirror crack shows in this photo. When was the photo taken?',
+  'inv3.tafsir.urutan.tanya': 'The mirror crack shows here. When was this photo taken?',
   'inv3.tafsir.urutan.gambar': 'A photo of a car in a workshop bay. Date stamp in the bottom-left corner: 03. A small print in the top-right corner shows the mirror glass with a branching crack.',
+  'inv3.tafsir.urutan.samping': 'Incident card: a calendar leaf reading 14 and a sketch of cars in parking bays.',
   'inv3.tafsir.urutan.pilih.saat': 'Incident day',
   'inv3.tafsir.urutan.pilih.sebelum': 'Before the incident',
   'inv3.tafsir.urutan.pilih.sesudah': 'After the incident',
@@ -159,14 +160,18 @@ export const TEKS_AUTO_2_INV_3_EN: Record<string, string> = {
   'inv3.pesan.tanya': 'Which message do you send?',
   'inv3.pesan.baik': 'Thank you for explaining, Mr Gilang. We are passing the mirror line to the authorised team for review; the bumper is recorded separately. You may add a statement.', // [konfirmasi PIC] rujukan: langkah berikutnya + hak menambahkan keterangan
   'inv3.pesan.datar': 'The mirror crack was there before the parking incident, as the inspection photo and the message extract show. The mirror line is passed to the authorised team for examination. The bumper damage is recorded separately. That is all.', // [konfirmasi PIC] isi benar, tanpa hak menambahkan keterangan
-  'inv3.pesan.janji': 'Mr Gilang, the inspection photo and your own message prove that the mirror crack was old and was put in on purpose. We therefore reject this whole claim, bumper and mirror alike, and it will not be processed any further. This decision is final and cannot be reviewed.', // [konfirmasi PIC] penolakan menyeluruh tanpa wewenang (pilihan bernilai 0)
+  'inv3.pesan.janji': 'Don’t worry, sir, I will do my best to get both the bumper and the mirror replaced.',
+  'inv3.pesan.tolak': 'Mr Gilang, the inspection photo and your own message prove that the mirror crack was old and was put in on purpose. We therefore reject this whole claim, bumper and mirror alike, and it will not be processed any further. This decision is final and cannot be reviewed.', // [konfirmasi PIC] penolakan menyeluruh tanpa wewenang (pilihan bernilai 0)
   'inv3.pesan.baik.alasan': 'Mr Gilang knows the next step, and that he may add a statement.', // [konfirmasi PIC]
-  'inv3.pesan.janji.alasan': 'The proven bumper damage is rejected too, and rejecting a claim is not yours to decide.', // [konfirmasi PIC] wewenang
+  'inv3.pesan.janji.alasan': 'Mr Gilang is relieved for now, but that promise has no basis.',
+  'inv3.pesan.tolak.alasan': 'The proven bumper damage is rejected too, and rejecting a claim is not yours to decide.', // [konfirmasi PIC] wewenang
   'inv3.pesan.baik.1': 'I understand. Thank you for explaining it properly. I will add my statement.',
   'inv3.pesan.datar.1': 'I see... So what can I do now?',
   'inv3.pesan.datar.2': 'The content is right, but Mr Gilang does not know he may add a statement.', // [konfirmasi PIC]
-  'inv3.pesan.janji.1': 'The bumper is rejected too? But the parking attendant himself confirmed the impact.',
-  'inv3.pesan.janji.2': 'Only the mirror line was shown to be a problem. Rejecting the whole claim, let alone calling it final, is not ours to decide here.', // [konfirmasi PIC] wewenang; yang terbukti hanya baris spion
+  'inv3.pesan.janji.1': 'Oh, thank goodness! So both will be replaced, then.',
+  'inv3.pesan.tolak.1': 'The bumper is rejected too? But the parking attendant himself confirmed the impact.',
+  'inv3.pesan.janji.2': 'The finding has not changed. A promise with no basis will let Mr Gilang down twice.',
+  'inv3.pesan.tolak.2': 'Only the mirror line was shown to be a problem. Rejecting the whole claim, let alone calling it final, is not ours to decide here.', // [konfirmasi PIC] wewenang; yang terbukti hanya baris spion
 
   'inv3.akhir.tuntas.1': 'Case closed, Investigator. You presented the evidence one piece at a time, gave them the chance to explain, then passed the finding to the right place.',
   'inv3.akhir.tinjau.1': 'Case closed. You found the evidence yourself; we set the next step straight together.',
@@ -178,7 +183,8 @@ export const TEKS_AUTO_2_INV_3_EN: Record<string, string> = {
 
   'inv3.balas.baik': 'Thank you for explaining it so well, Investigator. I know what is being examined, and I will add my statement.', // [konfirmasi PIC]
   'inv3.balas.datar': 'I understand the reason. But I still do not know what I can do.',
-  'inv3.balas.janji': 'My bumper is rejected too, although there was a witness. I do not know where else to ask.',
+  'inv3.balas.janji': 'Both will be replaced, right? I have already told the workshop. I hope that is true.',
+  'inv3.balas.tolak': 'My bumper is rejected too, although there was a witness. I do not know where else to ask.',
   'inv3.arsip.judul': 'The corrected file',
   'inv3.garis.1': 'The 3rd · inspection photo: mirror crack already there',
   'inv3.garis.2': 'The 14th · parking incident: bumper dented, confirmed by the parking attendant',

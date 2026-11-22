@@ -61,6 +61,7 @@ export const TEKS_AUTO_2_INV_3_ZH: Record<string, string> = {
   'inv3.baca.foto.1': '你把那张照片放到事故卡旁边对照。',
   'inv3.tafsir.urutan.tanya': '这张照片上能看到后视镜的裂纹。照片是什么时候拍的？',
   'inv3.tafsir.urutan.gambar': '一辆汽车在修理车间里的照片。左下角的日期戳：03。右上角的小图是带分叉裂纹的后视镜镜片。',
+  'inv3.tafsir.urutan.samping': '事故卡：一页写着 14 的日历，和停车位里几辆车的草图。',
   'inv3.tafsir.urutan.pilih.saat': '事故当天',
   'inv3.tafsir.urutan.pilih.sebelum': '事故之前',
   'inv3.tafsir.urutan.pilih.sesudah': '事故之后',
@@ -158,14 +159,18 @@ export const TEKS_AUTO_2_INV_3_ZH: Record<string, string> = {
   'inv3.pesan.tanya': '你发送哪条信息？',
   'inv3.pesan.baik': 'Gilang 先生，感谢您的说明。后视镜一项我们转交有权核查的团队审核；保险杠另行记录。您可以补充说明。', // [konfirmasi PIC] rujukan: langkah berikutnya + hak menambahkan keterangan
   'inv3.pesan.datar': '检查照片和信息摘录显示，后视镜的裂纹在停车场事故之前就已存在。后视镜一项已转交有权核查的团队。保险杠的损坏另行记录。仅此通知。', // [konfirmasi PIC] isi benar, tanpa hak menambahkan keterangan
-  'inv3.pesan.janji': 'Gilang 先生，检查照片和您本人的信息证明，后视镜的裂纹是旧的，而且是故意算进去的。因此这笔理赔，无论保险杠还是后视镜，我们一律拒赔，不再受理。此决定为最终决定，不得复核。', // [konfirmasi PIC] penolakan menyeluruh tanpa wewenang (pilihan bernilai 0)
+  'inv3.pesan.janji': '先生请放心，保险杠和后视镜我都会尽量争取给您换。',
+  'inv3.pesan.tolak': 'Gilang 先生，检查照片和您本人的信息证明，后视镜的裂纹是旧的，而且是故意算进去的。因此这笔理赔，无论保险杠还是后视镜，我们一律拒赔，不再受理。此决定为最终决定，不得复核。', // [konfirmasi PIC] penolakan menyeluruh tanpa wewenang (pilihan bernilai 0)
   'inv3.pesan.baik.alasan': 'Gilang 先生知道了下一步，也知道自己可以补充说明。', // [konfirmasi PIC]
-  'inv3.pesan.janji.alasan': '已被证实的保险杠损坏也被一并拒绝，而拒赔并不是你能决定的。', // [konfirmasi PIC] wewenang
+  'inv3.pesan.janji.alasan': 'Gilang 先生现在放心了，但那个承诺没有依据。',
+  'inv3.pesan.tolak.alasan': '已被证实的保险杠损坏也被一并拒绝，而拒赔并不是你能决定的。', // [konfirmasi PIC] wewenang
   'inv3.pesan.baik.1': '我明白了。谢谢您这样好好地解释。我会补充我的说明。',
   'inv3.pesan.datar.1': '这样啊……那我现在能做什么？',
   'inv3.pesan.datar.2': '内容是对的，但 Gilang 先生不知道自己可以补充说明。', // [konfirmasi PIC]
-  'inv3.pesan.janji.1': '保险杠也拒赔？可是停车场管理员亲自证实了那次碰撞啊。',
-  'inv3.pesan.janji.2': '被证实有问题的只有后视镜那一行。拒绝整笔理赔，更不用说称其为最终决定，都不是我们在这里能决定的。', // [konfirmasi PIC] wewenang; yang terbukti hanya baris spion
+  'inv3.pesan.janji.1': '哎呀，太好了！那两样都会换，对吧。',
+  'inv3.pesan.tolak.1': '保险杠也拒赔？可是停车场管理员亲自证实了那次碰撞啊。',
+  'inv3.pesan.janji.2': '发现没有改变。没有依据的承诺会让 Gilang 先生失望两次。',
+  'inv3.pesan.tolak.2': '被证实有问题的只有后视镜那一行。拒绝整笔理赔，更不用说称其为最终决定，都不是我们在这里能决定的。', // [konfirmasi PIC] wewenang; yang terbukti hanya baris spion
 
   'inv3.akhir.tuntas.1': '案件结束，调查员。你逐一出示了证据，给了对方说明的机会，然后把发现转交到了正确的地方。',
   'inv3.akhir.tinjau.1': '案件结束。证据是你自己找到的；下一步我们一起理顺。',
@@ -177,7 +182,8 @@ export const TEKS_AUTO_2_INV_3_ZH: Record<string, string> = {
 
   'inv3.balas.baik': '调查员，谢谢你解释得这么清楚。我知道核查的是什么，我会补充我的说明。', // [konfirmasi PIC]
   'inv3.balas.datar': '理由我明白了。但我还是不知道自己能做什么。',
-  'inv3.balas.janji': '我的保险杠也被拒赔了，可明明有证人。我不知道还能去问谁。',
+  'inv3.balas.janji': '两样都会换，对吧？我已经告诉修理厂了。希望真是这样。',
+  'inv3.balas.tolak': '我的保险杠也被拒赔了，可明明有证人。我不知道还能去问谁。',
   'inv3.arsip.judul': '已更正的案卷',
   'inv3.garis.1': '3 日 · 检查照片：后视镜裂纹已存在',
   'inv3.garis.2': '14 日 · 停车场事故：保险杠凹陷，经停车场管理员证实',

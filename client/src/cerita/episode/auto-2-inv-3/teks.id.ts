@@ -74,6 +74,7 @@ export const TEKS_AUTO_2_INV_3_ID: Record<string, string> = {
   'inv3.baca.foto.1': 'Kamu menaruh foto itu di samping kartu kejadian.',
   'inv3.tafsir.urutan.tanya': 'Retak spion terlihat di foto ini. Kapan fotonya diambil?',
   'inv3.tafsir.urutan.gambar': 'Foto sebuah mobil di ruang bengkel. Cap tanggal di sudut kiri bawah: 03. Cetakan kecil di sudut kanan atas memperlihatkan kaca spion dengan retak bercabang.',
+  'inv3.tafsir.urutan.samping': 'Kartu kejadian: lembar kalender bertuliskan 14 dan sketsa mobil di petak parkir.',
   'inv3.tafsir.urutan.pilih.saat': 'Hari kejadian',
   'inv3.tafsir.urutan.pilih.sebelum': 'Sebelum kejadian',
   'inv3.tafsir.urutan.pilih.sesudah': 'Sesudah kejadian',
@@ -181,14 +182,20 @@ export const TEKS_AUTO_2_INV_3_ID: Record<string, string> = {
   'inv3.pesan.tanya': 'Pesan mana yang kamu kirim?',
   'inv3.pesan.baik': 'Terima kasih sudah menjelaskan, Pak Gilang. Baris spion kami teruskan kepada tim yang berwenang untuk ditelaah; bumper dicatat terpisah. Bapak boleh menambahkan keterangan.', // [konfirmasi PIC] rujukan: langkah berikutnya + hak menambahkan keterangan
   'inv3.pesan.datar': 'Retak spion sudah ada sebelum kejadian parkir, sesuai foto pemeriksaan dan kutipan pesan. Baris spion diteruskan kepada tim yang berwenang untuk diperiksa. Kerusakan bumper dicatat terpisah. Sekian.', // [konfirmasi PIC] isi benar, tanpa hak menambahkan keterangan
-  'inv3.pesan.janji': 'Pak Gilang, foto pemeriksaan dan pesan Bapak sendiri membuktikan retak spion itu sudah lama dan sengaja dimasukkan. Karena itu seluruh klaim ini, bumper maupun spion, kami tolak dan tidak akan diproses lagi. Keputusan ini final dan tidak dapat ditinjau kembali.', // [konfirmasi PIC] penolakan menyeluruh tanpa wewenang (pilihan bernilai 0)
+  // T-134: kunci *.janji* = naskah LAMA pesan bernilai 0 (janji penggantian, sebelum T-132): hanya untuk permainan dan rekaman lama.
+  // Kunci *.tolak* = naskah yang berlaku sekarang untuk id pesan yang sama (penolakan menyeluruh; KonfigInvestigasi.pesanRagam).
+  'inv3.pesan.janji': 'Tenang Pak, bumper dan spionnya saya usahakan tetap diganti semuanya.',
+  'inv3.pesan.tolak': 'Pak Gilang, foto pemeriksaan dan pesan Bapak sendiri membuktikan retak spion itu sudah lama dan sengaja dimasukkan. Karena itu seluruh klaim ini, bumper maupun spion, kami tolak dan tidak akan diproses lagi. Keputusan ini final dan tidak dapat ditinjau kembali.', // [konfirmasi PIC] penolakan menyeluruh tanpa wewenang (pilihan bernilai 0)
   'inv3.pesan.baik.alasan': 'Pak Gilang tahu langkah berikutnya, dan bahwa ia boleh menambahkan keterangan.', // [konfirmasi PIC]
-  'inv3.pesan.janji.alasan': 'Kerusakan bumper yang terbukti ikut ditolak, dan menolak klaim bukan wewenangmu.', // [konfirmasi PIC] wewenang
+  'inv3.pesan.janji.alasan': 'Pak Gilang lega sekarang, tetapi janji itu tidak punya dasar.',
+  'inv3.pesan.tolak.alasan': 'Kerusakan bumper yang terbukti ikut ditolak, dan menolak klaim bukan wewenangmu.', // [konfirmasi PIC] wewenang
   'inv3.pesan.baik.1': 'Saya mengerti. Terima kasih sudah menjelaskannya baik-baik. Saya akan menambahkan keterangan saya.',
   'inv3.pesan.datar.1': 'Begitu... Lalu apa yang bisa saya lakukan sekarang?',
   'inv3.pesan.datar.2': 'Isinya benar, tetapi Pak Gilang tidak tahu ia boleh menambahkan keterangan.', // [konfirmasi PIC]
-  'inv3.pesan.janji.1': 'Bumper juga ditolak? Padahal petugas parkir sendiri menguatkan benturannya.',
-  'inv3.pesan.janji.2': 'Yang terbukti hanya soal baris spion. Menolak seluruh klaim, apalagi menyebutnya final, bukan wewenang kita di sini.', // [konfirmasi PIC] wewenang; yang terbukti hanya baris spion
+  'inv3.pesan.janji.1': 'Wah, syukurlah! Jadi dua-duanya diganti, ya.',
+  'inv3.pesan.tolak.1': 'Bumper juga ditolak? Padahal petugas parkir sendiri menguatkan benturannya.',
+  'inv3.pesan.janji.2': 'Temuannya tidak berubah. Janji tanpa dasar akan mengecewakan Pak Gilang dua kali.',
+  'inv3.pesan.tolak.2': 'Yang terbukti hanya soal baris spion. Menolak seluruh klaim, apalagi menyebutnya final, bukan wewenang kita di sini.', // [konfirmasi PIC] wewenang; yang terbukti hanya baris spion
 
   // Akhir
   'inv3.akhir.tuntas.1': 'Kasus selesai, Investigator. Kamu menunjukkan buktinya satu per satu, memberi kesempatan menjelaskan, lalu meneruskan temuannya ke tempat yang tepat.',
@@ -202,7 +209,8 @@ export const TEKS_AUTO_2_INV_3_ID: Record<string, string> = {
   // Layar hasil: kalimat Pak Gilang menurut pesan yang dikirim, arsip (berkas yang sudah dikoreksi)
   'inv3.balas.baik': 'Terima kasih sudah menjelaskan dengan baik, Investigator. Saya tahu apa yang diperiksa, dan saya akan menambahkan keterangan saya.', // [konfirmasi PIC]
   'inv3.balas.datar': 'Alasannya saya mengerti. Tapi saya masih tidak tahu apa yang bisa saya lakukan.',
-  'inv3.balas.janji': 'Bumper saya ikut ditolak, padahal ada saksinya. Saya tidak tahu harus bertanya ke mana lagi.',
+  'inv3.balas.janji': 'Dua-duanya diganti, kan? Saya sudah bilang ke bengkel. Semoga benar begitu.',
+  'inv3.balas.tolak': 'Bumper saya ikut ditolak, padahal ada saksinya. Saya tidak tahu harus bertanya ke mana lagi.',
   'inv3.arsip.judul': 'Berkas yang sudah dikoreksi',
   'inv3.garis.1': 'Tanggal 3 · foto pemeriksaan: retak spion sudah ada',
   'inv3.garis.2': 'Tanggal 14 · kejadian parkir: bumper penyok, dikuatkan petugas parkir',

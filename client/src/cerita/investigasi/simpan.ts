@@ -22,7 +22,12 @@ import { AWARD_IDS, awardsOf, rankOf, SENIOR_STAMPS, SERIES_CASE_IDS, SERIES_MAX
 import { SKOR_MAKS } from './skor';
 
 /** Pilihan pada permainan terbaik sebuah kasus (id pilihan saja, tanpa teks). */
-export interface PenjelasanTerbaik { putusan: string; pesan: string; babak?: string[] }
+/**
+ * T-134: `ragam` (opsional) = id ragam naskah pesan itu (KonfigInvestigasi.pesanRagam) bila pilihannya dibuat SESUDAH kalimat pesan
+ * itu diganti. Rekaman tanpa field ini (semua rekaman lama) = naskah lama pesan itu. Bentuk rekaman v1 tidak berubah: pembaca
+ * lama mengabaikan field ini.
+ */
+export interface PenjelasanTerbaik { putusan: string; pesan: string; babak?: string[]; ragam?: string }
 
 export interface RekamanInvestigasi {
   versi: 1;
@@ -89,7 +94,8 @@ export function bersihkanRekaman(data: unknown): RekamanInvestigasi {
     for (const [k, v] of Object.entries(d2.penjelasan as Record<string, unknown>)) {
       const p = v as { putusan?: unknown; pesan?: unknown; babak?: unknown } | null;
       if (!k || !p || typeof p !== 'object' || !idSah(p.putusan) || !idSah(p.pesan)) continue;
-      penjelasan[k] = { putusan: p.putusan, pesan: p.pesan, ...(Array.isArray(p.babak) && p.babak.length <= 8 && p.babak.every(idSah) ? { babak: p.babak as string[] } : {}) };
+      const ragam = (p as { ragam?: unknown }).ragam;
+      penjelasan[k] = { putusan: p.putusan, pesan: p.pesan, ...(Array.isArray(p.babak) && p.babak.length <= 8 && p.babak.every(idSah) ? { babak: p.babak as string[] } : {}), ...(idSah(ragam) ? { ragam } : {}) };
     }
     if (Object.keys(penjelasan).length) hasil.penjelasan = penjelasan;
   }
