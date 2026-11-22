@@ -38,6 +38,12 @@
  *   AKSI      Main lagi / Arsip kasus / Selesai: kunci piksel 48 .. 56 px.
  * Tata letak = kolom lentur: panggung dan empat sela (`.iv-hasil-sela`, 6 .. 20 px) membagi sisa tinggi layar; sisanya (bila
  * semua sudah di batasnya) tersebar rata di antara bagian. Hitungan 360 x 640: team/HANDOFF.md "## T-121".
+ * T-126 (masukan Pak Peterson butir 19, 20, 9; hitungan: team/HANDOFF.md "## T-126"):
+ *  - `onRincian` = kartu rincian menjadi PEMBUKA lembar "Rincian nilai" (ke mana poinnya pergi + "Latih bagian ini"; lembarnya milik
+ *    pemanggil). Tombolnya keping jingga "Rincian nilai >" di KAKI kartu (pita tinta, di kanan "Total ..."); daerah ketuknya seluruh
+ *    kartu. Kaki kartu kini selalu ada: tanpa total = keping saja (24 px); total + "... menuju ..." = dua baris (44 px, "menuju"
+ *    pindah ke baris kedua); total tanpa "menuju" (Kepala) = satu baris seperti semula, jadi keadaan terpadat tidak bertambah tinggi.
+ *  - kartu petugas diberi label "Kartu hari ini" di kiri nomornya (nomor hiasan yang berganti tiap hari).
  */
 import { useEffect, type CSSProperties, type ReactNode } from 'react';
 import { playSfx } from '../../../audio/audio';
@@ -55,7 +61,7 @@ import './hasil.css';
 
 const SEL_NILAI: Record<SkorKasus['nilai'], number> = { S: 0, A: 1, B: 2, C: 3 };
 
-export function HasilInvestigasi({ skor, nama, look, stempel, pangkat, onMainLagi, onSelesai, reaksi, stempelBaru = true, rekor = false, terbaik, teaser, total, tautan, onArsip }: {
+export function HasilInvestigasi({ skor, nama, look, stempel, pangkat, onMainLagi, onSelesai, reaksi, stempelBaru = true, rekor = false, terbaik, teaser, total, tautan, onArsip, onRincian }: {
   skor: SkorKasus;
   nama: string;
   look: PlayerLook;
@@ -81,6 +87,8 @@ export function HasilInvestigasi({ skor, nama, look, stempel, pangkat, onMainLag
   tautan?: ReactNode;
   /** T-115: tombol "Arsip kasus" di baris aksi (tiga tombol sebaris). */
   onArsip?: () => void;
+  /** T-126: buka lembar "Rincian nilai" (kartu rincian = pembukanya). Tanpa nilai = kartu rincian seperti semula. */
+  onRincian?: () => void;
 }) {
   const kurang = useReducedMotion();
   const teks = useTx();
@@ -110,7 +118,7 @@ export function HasilInvestigasi({ skor, nama, look, stempel, pangkat, onMainLag
         </div>
       </div>
       <i className="iv-hasil-sela" aria-hidden="true" />
-      <div className="iv-hasil-rinci">
+      <div className="iv-hasil-rinci" data-bisa-buka={onRincian ? '' : undefined}>
         <ul className="iv-poin">
           {bagian.map(([kunci, n, maks]) => (
             <li key={kunci}>
@@ -120,16 +128,18 @@ export function HasilInvestigasi({ skor, nama, look, stempel, pangkat, onMainLag
             </li>
           ))}
         </ul>
-        {total ? (
-          <p className="iv-total" data-total-kasus="">
-            <b>{teks('inv.hasil.total')} <span data-total-skor="">{total.skor}</span> / {total.maks}</b>
-            {total.menuju ? <em data-menuju-pangkat="">{total.menuju}</em> : null}
-          </p>
+        {total || onRincian ? (
+          <div className="iv-total" data-total-kasus={total ? '' : undefined} data-kaki-rinci="">
+            {total ? <b>{teks('inv.hasil.total')} <span data-total-skor="">{total.skor}</span> / {total.maks}</b> : <span />}
+            {/* T-126: satu-satunya kontrol di kartu ini; ::after-nya menutup seluruh kartu (daerah ketuk >= 76 px tinggi) */}
+            {onRincian ? <button type="button" className="iv-rincian-buka" data-rincian-nilai="" aria-haspopup="dialog" onClick={onRincian}>{t('investigasi.rincian.judul')} <span aria-hidden="true">›</span></button> : null}
+            {total?.menuju ? <em data-menuju-pangkat="">{total.menuju}</em> : null}
+          </div>
         ) : null}
       </div>
       <i className="iv-hasil-sela" aria-hidden="true" />
       <div className="iv-hasil-kartu">
-        <KartuPetugas nama={nama} look={look} investigasi={{ stempel, pangkat, baru: stempelBaru }} />
+        <KartuPetugas nama={nama} look={look} investigasi={{ stempel, pangkat, baru: stempelBaru }} labelNomor={{ teks: t('investigasi.kartuHarian'), ket: t('investigasi.kartuHarianKet') }} />
       </div>
       <i className="iv-hasil-sela" aria-hidden="true" />
       {teaser}

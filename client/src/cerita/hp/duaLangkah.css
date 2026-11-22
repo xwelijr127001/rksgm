@@ -76,3 +76,22 @@
   .hp-pilih[data-dua-langkah] .hp-dl-kedua[data-ikon] .hp-dl-teks { position: static; width: auto; height: auto; margin: 0; overflow: visible; clip: auto; }
   .hp-pilih[data-dua-langkah] .hp-dl-kaki > :is(.hp-kirim, .hp-dl-utama) { flex: 1 1 220px; }
 }
+
+/* ==================================================================== T-126 DAFTAR TAHAPAN POLOS di samping balasan
+   (ui/KartuDokumen.tsx DaftarTahapan; hp/PilihBalasan.tsx memasang [data-dok-daftar] HANYA untuk k06 `linimasa` di auto-2 dan
+   Episode 1 Dev, dan hanya di blok biasa: lembar balasan HP tidak memakainya). Tanpa tombol di dalam kartu. */
+.hp-dl-daftar { display: grid; gap: 8px; align-content: start; }
+.hp-dl-daftar > * { margin: 0; min-width: 0; }
+.hp-dl-daftar .cer-dok-judul { line-height: 20px; }
+.hp-dl-daftar-isi { list-style: none; padding: 0; display: grid; gap: 8px; }
+.hp-dl-daftar-isi > li { display: grid; grid-template-columns: 28px minmax(0, 1fr); gap: 10px; align-items: start; }
+.hp-dl-daftar-isi .hp-dl-no { background: #212121; color: #fff; }
+.hp-dl-daftar-teks { display: grid; gap: 1px; min-width: 0; }
+.hp-dl-daftar-teks > b { font-size: 16px; line-height: 22px; font-weight: 800; color: #212121; }
+.hp-dl-daftar-teks > span { font-size: 16px; line-height: 22px; color: #212121; }
+.hp-dl-daftar .cer-dok-catatan { margin: 0; padding-top: 8px; border-top: 1px dashed #e0e0e0; font-size: 13.5px; line-height: 18px; }
+.hp-dl-dua-kolom, .hp-dl-kolom-balas { display: grid; gap: 10px; min-width: 0; align-content: start; }
+/* Desktop: dua kolom (catatan 5 : balasan 8); catatan tetap terlihat saat daftar balasan lebih panjang. */
+@media (min-width: 1024px) {
+  .hp-pilih[data-dok-daftar] .hp-dl-dua-kolom { grid-template-columns: minmax(0, 5fr) minmax(0, 8fr); column-gap: 16px; align-items: start; }
+}

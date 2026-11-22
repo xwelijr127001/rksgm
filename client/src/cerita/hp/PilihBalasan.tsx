@@ -28,6 +28,11 @@
  * terkirim; sesudah muat ulang, balasan tersimpan yang masih sah (`awal`) membuka langkah 2, selain itu langkah 1 dari tahap 1.
  * Fokus pindah ke judul langkah yang baru (cincin fokus terlihat bagi pengguna keyboard); panah kiri/kanan hanya bekerja di dalam
  * penanda tahap, panah atas/bawah hanya di dalam daftar balasan.
+ *
+ * T-126 (keputusan Lead atas audit T-124; HANYA `DAFTAR_POLOS` di bawah = k06 `linimasa` di auto-2 dan Episode 1 Dev, dan HANYA di
+ * blok biasa / desktop; lembar balasan HP tidak berubah): tiga tahap perkiraan waktu tampil sebagai daftar bernomor POLOS di
+ * SAMPING balasan (dua kolom mulai 1024 px), tanpa tombol tahap; satu-satunya tombol utama = kirim. Pilihan, pratinjau "Ganti
+ * balasan" dan pengiriman berjalan persis seperti keputusan blok biasa lainnya.
  */
 import { useContext, useEffect, useId, useRef, useState, type KeyboardEvent, type PointerEvent } from 'react';
 import { playSfx } from '../../audio/audio';
@@ -35,7 +40,7 @@ import { Arrow } from '../../components/PlayerShell';
 import { t } from '../../i18n';
 import { URL_IKON_PIKSEL } from '../seni/piksel';
 import type { DokumenCerita, Episode, KunciTeks, NodePilihan, Pilihan } from '../tipe';
-import { BacaTahapan, KartuDokumen } from '../ui/KartuDokumen';
+import { BacaTahapan, DaftarTahapan, KartuDokumen } from '../ui/KartuDokumen';
 import { TombolKirim } from './bagianHp';
 import { PotretSaya } from './lookPemain';
 import { LembarObrolan } from './ekor';
@@ -46,6 +51,11 @@ const catatanDibaca = new Set<string>();
 
 /** T-124: satu-satunya keputusan yang tampil dua langkah (baca tahapan, lalu balas). Lihat kepala berkas. */
 const DUA_LANGKAH = { episode: 'auto-2', node: 'k03', dokumen: 'proses' } as const;
+/** T-126: keputusan yang dokumen bertahapnya tampil sebagai daftar polos di samping balasan (blok biasa / desktop saja). */
+const DAFTAR_POLOS: readonly { episode: string; node: string; dokumen: string }[] = [
+  { episode: 'auto-2', node: 'k06', dokumen: 'linimasa' },
+  { episode: 'auto-2-dev', node: 'k06', dokumen: 'linimasa' },
+];
 type Langkah = 'baca' | 'balas';
 /** T-124: langkah & tahap yang sedang dibuka, per keputusan, selama kunjungan halaman ini (dilupakan saat balasan terkirim). */
 const kunjungan = new Map<string, { langkah: Langkah; tahap: number; sudahBalas: boolean }>();
@@ -294,10 +304,10 @@ export function PilihBalasan({ ep, node, pilihan, tx, gaya, petunjuk, onKirim, a
     );
   }
 
-  return (
-    <section className="hp-pilih" data-gaya={gaya} aria-labelledby={idJudul}>
-      <h2 id={idJudul} className="hp-tanya" tabIndex={-1} data-hp-fokus="">{tx(node.tanya)}</h2>
-      {dok ? <KartuDokumen dokumen={dok} id={node.dokumen!} tx={tx} /> : null}
+  // T-126: k06 `linimasa`: daftar tahap polos di kolom kiri, balasan di kolom kanan (lihat kepala berkas).
+  const dokDaftar = !!dok?.tahapan && !dok.skema && DAFTAR_POLOS.some((x) => x.episode === ep.id && x.node === node.id && x.dokumen === node.dokumen);
+  const isiBalas = (
+    <>
       {petunjuk && !lipat ? <p className="hp-petunjuk">{t('ceritaHp.pilihPetunjuk')}</p> : null}
       {/* Prototipe Claude Design: sesudah memilih dengan ketukan, daftar dilipat menjadi PRATINJAU kalimat lengkap (naskah) + Ganti;
           panah keyboard tetap memilih di dalam daftar tanpa melipatnya. */}
@@ -336,6 +346,22 @@ export function PilihBalasan({ ep, node, pilihan, tx, gaya, petunjuk, onKirim, a
         onKirim={() => { if (dipilih) onKirim(dipilih); }}
         alasanBelum={dipilih ? null : gaya === 'obrolan' ? t('ceritaHp.belumBalasan') : t('ceritaHp.belumJawaban')}
       />
+    </>
+  );
+  return (
+    <section className="hp-pilih" data-gaya={gaya} data-dok-daftar={dokDaftar ? '' : undefined} aria-labelledby={idJudul}>
+      <h2 id={idJudul} className="hp-tanya" tabIndex={-1} data-hp-fokus="">{tx(node.tanya)}</h2>
+      {dokDaftar && dok ? (
+        <div className="hp-dl-dua-kolom">
+          <DaftarTahapan dokumen={dok} id={node.dokumen!} tx={tx} />
+          <div className="hp-dl-kolom-balas">{isiBalas}</div>
+        </div>
+      ) : (
+        <>
+          {dok ? <KartuDokumen dokumen={dok} id={node.dokumen!} tx={tx} /> : null}
+          {isiBalas}
+        </>
+      )}
     </section>
   );
 }

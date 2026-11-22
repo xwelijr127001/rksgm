@@ -23,6 +23,13 @@
  * pernyataan per tampilan; hasil = tiga tombol sebaris (Main lagi / Arsip kasus / Selesai); latihan pesan = daftar tiga pesan
  * terpotong, pesan yang dipilih tampil utuh sendirian.
  *
+ * T-126 (masukan Pak Peterson, kartu C; hitungan: team/HANDOFF.md "## T-126"):
+ *  - butir 19 + 20: lembar "Rincian nilai" di layar hasil (RincianNilai): tiga halaman (Bukti / Putusan / Penanganan nasabah), tiap
+ *    halaman = poin didapat / maksimum, alasan pengurangannya dari FAKTA yang tersimpan (hasil tiap babak, putusan, pesan; tidak
+ *    pernah menebak ketukan dari totalnya), dan "Latih bagian ini" tepat di samping penjelasannya (latihan tidak mengubah skor
+ *    terbaik). Halaman pertama = bagian terlemah. Lembar "Main lagi" (latih pilihan terlemah / ulang dari awal) tidak berubah.
+ *  - butir 10: gambar sampul kasus 1 = SeniTolNetral (jalan tol kosong), bukan bingkai dashcam bertruk.
+ *
  * Teks naskah (kunci teks episode) diterjemahkan lewat <PenyediaTeksInvestigasi value={tx}>; teks antarmuka komponen ada di kamus
  * aplikasi `investigasi` (Task 2), teks pembungkus di sini di teks episode (`inv.ui.*`, `inv.hasil.*`, `inv.lagi.*`, ...).
  */
@@ -34,7 +41,6 @@ import { t, useBahasa } from '../../i18n';
 import { Modal } from '../../ui/kit';
 import { cariEpisode } from '../episode';
 import { jenisPenutur, ketukanKini } from '../hp/alur';
-import { BingkaiDashcam } from '../hp/arena/ArenaDashcam';
 import { babKini, barisTerlihat } from '../mesin';
 import { bacaDrafAktivitas, kunjunganAktivitas, mulaiBaru, simpanDrafAktivitas } from '../simpan';
 import { teksCerita } from '../teks';
@@ -45,8 +51,8 @@ import { modeAcara } from './acara';
 import { aksiLanjut, daftarKasusHub, tamuBaruSemuaKasus, tujuanPangkat, type KasusHub } from './hub';
 import { RUTE_HUB, ruteKasus, useRumahCerita } from './rute';
 import { adaRekaman, bacaRekaman, berlanggananInvestigasi, catatHadiah, catatHasil, catatIntipKasus2, hadiahRekaman, pangkatRekaman, stempelSeri, TOTAL_MAKS, totalSkor, versiInvestigasi } from './simpan';
-import { poinBabak, poinKeberatan, poinPesan, poinPutusan, putusanTepat, skorKasus, skorKasusLengkap, titikTerlemah, type TitikLatihan } from './skor';
-import { buktiTerkumpul, hasilKasus, hasilKasusLengkap, PESAN, PILIH_LANJUT, PILIH_TEKAN, pernyataanTercatat, semuaPernyataanDikoreksi, tebakanAwal, tekananTerbuka, type Bukti, type HasilBabak, type HasilKeberatan, type Pernyataan, type Pesan, type Putusan } from './status';
+import { MAKS_LANGKAH, poinBabak, poinKeberatan, poinPesan, poinPutusan, putusanTepat, rincianBabak, skorKasus, skorKasusLengkap, titikTerlemah, type SkorKasus, type TitikLatihan } from './skor';
+import { buktiTerkumpul, hasilKasus, hasilKasusLengkap, PESAN, PILIH_LANJUT, PILIH_TEKAN, pernyataanTercatat, semuaPernyataanDikoreksi, tebakanAwal, tekananTerbuka, type Bukti, type HasilBabak, type HasilKeberatan, type HasilLengkap, type Pernyataan, type Pesan, type Putusan } from './status';
 import { BukuCatatan, PotretReaksi, reaksiSah, type KoreksiPernyataan } from './ui/BukuCatatan';
 import { CapKeberatan } from './ui/CapKeberatan';
 import { PenyediaTeksInvestigasi } from './ui/dasar';
@@ -60,6 +66,7 @@ import { PeriksaPerjalanan } from './ui/PeriksaPerjalanan';
 import { PeriksaPolis } from './ui/PeriksaPolis';
 import { PeriksaSim } from './ui/PeriksaSim';
 import { seniKasus } from './ui/seniKasus';
+import { SeniTolNetral } from './ui/SeniTolNetral';
 import { evidenceArt, PanelAward, PanelExhibit, PanelRound, PressPanel } from './ui/panel';
 import { useLabelPanel } from './ui/panel/teks';
 import { TebakLajur, type Lajur } from './ui/TebakLajur';
@@ -447,9 +454,11 @@ export function LayarInvestigasi({ ep, state, node, tx, onLanjut, onPilih, onMul
     case 'judul':
       isi = (
         <>
-          {/* T-078: bingkai dashcam diam (sebelum benturan: rambu + lajur) di kartu pembuka; T-090: kasus ber-`bingkai: 'seni'` = gambar seniKasus */}
+          {/* T-078: bingkai dashcam diam di kartu pembuka; T-090: kasus ber-`bingkai: 'seni'` = gambar seniKasus. T-126 (butir 10):
+              kasus 1 = SeniTolNetral (jalan tol KOSONG, T-125), supaya tidak ada jalur yang memperlihatkan truk di lajur 2 sebelum
+              rekamannya diperiksa. Rekaman bertruk tetap hanya di penyelidikan (ArenaDashcam, kartu bukti, zum KEBERATAN). */}
           <JudulKasus nomor={konfig.nomor} judul={konfig.judul} onMulai={onLanjut} tokoh={<PotretReaksi reaksi="miss-detektif" ukuran={128} />}
-            gambar={konfig.bingkai === 'dashcam' ? <BingkaiDashcam besar /> : <img className="iv-seni-kasus" src={seniKasus(konfig.kasus).judul} alt="" />} />
+            gambar={konfig.bingkai === 'dashcam' ? <SeniTolNetral besar /> : <img className="iv-seni-kasus" src={seniKasus(konfig.kasus).judul} alt="" />} />
           {adaRekaman() ? <TamuBaru ep={ep} tx={tx} onMulaiUlang={onMulaiUlang} /> : null}
         </>
       );
@@ -772,7 +781,7 @@ export function HasilKasus({ ep, state, nama, look, tx, onMainLagi }: {
   // Skor terbaik + stempel + pilihan permainan terbaik (untuk arsip). Idempoten.
   useEffect(() => { if (total !== null && h) catatHasil(kasus, total, { putusan: h.putusan, pesan: h.pesan, babak: h.babak }); /* eslint-disable-next-line react-hooks/exhaustive-deps */ }, [kasus, total, kunciPilihan]);
   const [tahap, setTahap] = useState<'ucapan' | 'skor'>('ucapan');
-  const [lembar, setLembar] = useState<'lagi' | 'arsip' | null>(null);
+  const [lembar, setLembar] = useState<'lagi' | 'arsip' | 'rincian' | null>(null);
   /** T-115: halaman arsip yang dibuka lebih dulu (dari lembar "Main lagi" pada skor sempurna: keterangan yang dikoreksi). */
   const [tabArsip, setTabArsip] = useState<TabArsip | undefined>(undefined);
   const [latihan, setLatihan] = useState<TitikLatihan | null>(null);
@@ -843,6 +852,15 @@ export function HasilKasus({ ep, state, nama, look, tx, onMainLagi }: {
       )}
     </div>
   );
+  // T-126: lembar "Rincian nilai". Halaman pertama = bagian terlemah (di situ pengurangan dan latihannya). Skor terbaik perangkat
+  // yang LEBIH tinggi dari permainan ini ikut disebut; rinciannya hanya bila pilihan permainan terbaik itu tersimpan lengkap dan
+  // jumlahnya memang skor terbaik itu (rekaman lama: totalnya saja).
+  const tabRincian: TabRincian = lemah?.langkah === 'putusan' ? 'putusan' : lemah?.langkah === 'pesan' ? 'penanganan' : 'bukti';
+  const terbaikKini = Math.max(r.terbaik[kasus] ?? 0, lama ?? 0);
+  const pilihanTerbaik = r.penjelasan?.[kasus];
+  const rinciTerbaik = terbaikKini > skor.total && pilihanTerbaik?.babak
+    ? skorKasusLengkap(konfig, { babak: pilihanTerbaik.babak as HasilBabak[], putusan: pilihanTerbaik.putusan as Putusan, pesan: pilihanTerbaik.pesan as Pesan }) : null;
+  const infoTerbaik = terbaikKini > skor.total ? { total: terbaikKini, rinci: rinciTerbaik && rinciTerbaik.total === terbaikKini ? rinciTerbaik : null } : null;
   // T-115: "Arsip kasus" pindah ke baris aksi (tombol ketiga, HasilInvestigasi `onArsip`); baris 48 px-nya dilepas.
   const bukaArsip = (tab?: TabArsip) => { setTabArsip(tab); setLembar('arsip'); };
   // T-099: cerita klaim dari kejadian yang sama (hanya kasus yang menyebutnya, dan hanya bila episode itu ada di build ini).
@@ -856,7 +874,14 @@ export function HasilKasus({ ep, state, nama, look, tx, onMainLagi }: {
       <HasilInvestigasi skor={skor} nama={nama} look={look} stempel={stempel} pangkat={pangkatRekaman(capaian)} reaksi={putusanTepat(konfig.putusan, h.putusan) ? 'miss-bangga' : 'miss-berpikir'}
         stempelBaru={segar && !sebelum.stempel.includes(kasus)} rekor={segar && lama !== undefined && skor.total > lama} terbaik={Math.max(r.terbaik[kasus] ?? 0, lama ?? 0)}
         total={tampilTotal ? { skor: totalSemua, maks: TOTAL_MAKS, menuju } : undefined}
-        onMainLagi={() => setLembar('lagi')} onSelesai={() => navigasi(rumah)} teaser={kaki} tautan={tautCerita} onArsip={() => bukaArsip()} />
+        onMainLagi={() => setLembar('lagi')} onSelesai={() => navigasi(rumah)} teaser={kaki} tautan={tautCerita} onArsip={() => bukaArsip()}
+        onRincian={() => { playSfx('kertas'); setLembar('rincian'); }} />
+      {lembar === 'rincian' ? (
+        <Modal judul={t('investigasi.rincian.judul')} onTutup={tutup} lebar={420}>
+          <RincianNilai konfig={konfig} h={h} skor={skor} tx={tx} awal={tabRincian} terbaik={infoTerbaik}
+            onLatih={(titik) => { tutup(); setSegar(false); setLatihan(titik); }} />
+        </Modal>
+      ) : null}
       {lembar === 'arsip' ? (
         <Modal judul={tx('inv.hasil.arsip')} onTutup={tutup} lebar={420}>
           {/* T-090 / T-106: arsip kasus, baca saja. T-115: BERHALAMAN (tab), satu halaman per tampilan, supaya tidak menggulir */}
@@ -891,6 +916,101 @@ export function HasilKasus({ ep, state, nama, look, tx, onMainLagi }: {
         </Modal>
       ) : null}
     </PenyediaTeksInvestigasi>
+  );
+}
+
+type TabRincian = 'bukti' | 'putusan' | 'penanganan';
+
+/**
+ * T-126: isi lembar "Rincian nilai" (butir 19 + 20 masukan Pak Peterson). BERHALAMAN seperti arsip kasus: satu bagian nilai per
+ * tampilan, supaya lembar tidak menggulir. Tiap halaman: poin didapat / maksimum, "n poin hilang" atau "Nilai penuh", ALASANNYA,
+ * dan "Latih bagian ini" bila ada poin yang hilang.
+ * Alasan hanya dari fakta yang tersimpan di state kasus (`h`):
+ *   Bukti       hasil tiap babak (percobaan pertama / kedua / dipandu) + nilai ketiga hasil itu menurut rubrik; kasus ber-panel =
+ *               satu blok per babak, masing-masing dengan latihannya sendiri. Kartu keliru yang diketuk TIDAK disebut (kasus 1-2
+ *               tidak menyimpannya), jadi tidak ada yang ditebak dari total.
+ *   Putusan     nama putusan yang dipilih + kalimat Miss Raksa untuk putusan itu (naskah kasus, `putusan.<id>.1`).
+ *   Penanganan  kalimat naskah untuk pesan yang dikirim (`pesan.<id>.2`); pesan terbaik = satu kalimat kamus.
+ * `terbaik` = skor terbaik perangkat yang lebih tinggi dari permainan ini: satu baris per halaman ("Di permainan terbaikmu: 40 / 40");
+ * bila pilihan permainan terbaik itu tidak tersimpan (rekaman lama), hanya totalnya ("Skor terbaik kasus ini: 85"), tanpa alasan.
+ * Latihan (LatihanKasus) tidak menyentuh mesin, skor kasus, maupun rekaman perangkat.
+ */
+function RincianNilai({ konfig, h, skor, tx, awal, terbaik, onLatih }: {
+  konfig: KonfigInvestigasi;
+  h: HasilLengkap;
+  skor: SkorKasus;
+  tx: Tx;
+  awal: TabRincian;
+  terbaik: { total: number; rinci: SkorKasus | null } | null;
+  onLatih: (titik: TitikLatihan) => void;
+}) {
+  const [kini, setKini] = useState<TabRincian>(awal);
+  const nilai: Record<TabRincian, { poin: number; maks: number }> = {
+    bukti: { poin: skor.bukti, maks: MAKS_LANGKAH.keberatan },
+    putusan: { poin: skor.putusan, maks: MAKS_LANGKAH.putusan },
+    penanganan: { poin: skor.penanganan, maks: MAKS_LANGKAH.pesan },
+  };
+  const namaTab: Record<TabRincian, string> = { bukti: t('investigasi.hasil.bukti'), putusan: t('investigasi.hasil.putusan'), penanganan: t('investigasi.rincian.tab.penanganan') };
+  const babak = rincianBabak(konfig, h.babak);
+  /** Babak dengan poin hilang terbanyak (seri = yang lebih awal): tombol latihannya yang utama bila dua babak sama-sama kurang. */
+  let babakLemah: string | null = null;
+  let hilangLemah = 0;
+  for (const x of babak) if (x.maks - x.poin > hilangLemah) { hilangLemah = x.maks - x.poin; babakLemah = x.id; }
+  const namaPutusan = konfig.putusanLayar?.nama ? tx(konfig.putusanLayar.nama[h.putusan]) : t(`investigasi.putusan.${h.putusan}`);
+  const tombolLatih = (titik: TitikLatihan, utama = true) => (
+    <button type="button" className={(utama ? 'primary-action' : 'akh-kedua') + ' iv-tombol'} data-latih-bagian={titik.langkah} data-latih-babak={titik.langkah === 'keberatan' ? titik.babak : undefined}
+      onClick={() => { playSfx('konfirmasi'); onLatih(titik); }}>{t('investigasi.rincian.latih')}</button>
+  );
+  const { poin, maks } = nilai[kini];
+  const hilang = maks - poin;
+  /** Kasus ber-panel dengan nilai yang sama di tiap babak: nilainya ditulis SEKALI di kaki halaman, bukan di tiap babak. */
+  const skala = (id: string) => ({ a: poinBabak(konfig, id, 'first'), b: poinBabak(konfig, id, 'second'), c: poinBabak(konfig, id, 'guided') });
+  const skalaSama = babak.length > 1 && babak.every((x) => JSON.stringify(skala(x.id)) === JSON.stringify(skala(babak[0]!.id)));
+  const terbaikBagian = terbaik?.rinci ? { bukti: terbaik.rinci.bukti, putusan: terbaik.rinci.putusan, penanganan: terbaik.rinci.penanganan }[kini] : null;
+  return (
+    <div className="iv-rincian" data-rincian-nilai-isi="" data-halaman={kini}>
+      <div className="iv-tab" role="tablist">
+        {(['bukti', 'putusan', 'penanganan'] as const).map((x) => (
+          <button key={x} type="button" role="tab" id={`iv-rincian-tab-${x}`} aria-selected={x === kini} aria-controls="iv-rincian-panel" className="iv-tab-tombol" data-tab-rincian={x}
+            data-kurang={nilai[x].poin < nilai[x].maks ? '' : undefined} onClick={() => { playSfx('kertas'); setKini(x); }}>
+            <span>{namaTab[x]}</span><small>{nilai[x].poin} / {nilai[x].maks}</small>
+          </button>
+        ))}
+      </div>
+      <section id="iv-rincian-panel" className="iv-rincian-kartu" role="tabpanel" aria-labelledby={`iv-rincian-tab-${kini}`}>
+        <p className="iv-rincian-kepala"><b>{t(`investigasi.hasil.${kini}`)}</b><span className="iv-rincian-angka"><b>{poin}</b> / {maks}</span></p>
+        <p className="iv-rincian-status" data-status={hilang > 0 ? 'kurang' : 'penuh'}>{hilang > 0 ? t('investigasi.rincian.hilang', { n: hilang }) : t('investigasi.rincian.penuh')}</p>
+        {terbaik ? (
+          <p className="iv-rincian-terbaik" data-terbaik-rincian={terbaikBagian !== null ? 'rinci' : 'total'}>
+            {terbaikBagian !== null ? t('investigasi.rincian.terbaikBagian', { n: terbaikBagian, maks }) : t('investigasi.rincian.terbaik', { n: terbaik.total })}
+          </p>
+        ) : null}
+        {kini === 'bukti' ? babak.map((x) => (
+          <div key={x.id} className="iv-rincian-babak" data-babak={x.id} data-hasil={x.hasil}>
+            {/* kasus ber-panel: nama babak, lalu SATU baris hasil + poin babak itu; kasus satu babak: kalimat utuh */}
+            {konfig.panel ? <p className="iv-rincian-nama"><b>{tx(kunci(konfig, `panel.${x.id}.nama`))}</b></p> : null}
+            {konfig.panel
+              ? <p className="iv-rincian-sebab" data-baris-babak=""><span>{t(`investigasi.rincian.babak.${x.hasil}`)}</span><b>{x.poin} / {x.maks}</b></p>
+              : <p className="iv-rincian-sebab">{t(`investigasi.rincian.bukti.${x.hasil}`)}</p>}
+            {skalaSama ? null : <p className="iv-rincian-skala">{t('investigasi.rincian.bukti.skala', skala(x.id))}</p>}
+            {x.poin < x.maks ? tombolLatih({ langkah: 'keberatan', babak: x.id, poin: x.poin, maks: x.maks }, x.id === babakLemah) : null}
+          </div>
+        )) : kini === 'putusan' ? (
+          <>
+            <p className="iv-rincian-nama" data-putusan={h.putusan}><b>{t('investigasi.rincian.putusan.pilih', { nama: namaPutusan })}</b></p>
+            <p className="iv-rincian-sebab">{tx(kunci(konfig, `putusan.${h.putusan}.1`))}</p>
+            {hilang > 0 ? tombolLatih({ langkah: 'putusan', poin, maks }) : null}
+          </>
+        ) : (
+          <>
+            <p className="iv-rincian-sebab" data-pesan={h.pesan}>{h.pesan === 'baik' ? t('investigasi.rincian.pesan.baik') : tx(kunci(konfig, `pesan.${h.pesan}.2`))}</p>
+            {hilang > 0 ? tombolLatih({ langkah: 'pesan', poin, maks }) : null}
+          </>
+        )}
+      </section>
+      {kini === 'bukti' && skalaSama ? <p className="iv-rincian-skala">{t('investigasi.rincian.bukti.skalaBabak', skala(babak[0]!.id))}</p> : null}
+      {hilang > 0 ? <p className="iv-rincian-ket">{t('investigasi.rincian.latihKet')}</p> : null}
+    </div>
   );
 }
 

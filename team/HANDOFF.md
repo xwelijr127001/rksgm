@@ -6080,3 +6080,115 @@ Not traced further: the result, verdict and message steps have no document besid
 - Existing tests and QA scripts were not run or updated. Any script that walks auto-2 through `k03` must now pass step 1 first, and one that expects the "Catatan" tab at `k03` will not find it.
 - `k06` (see audit) is the one remaining mixed screen; it needs a Lead decision because it also touches Episode 1 Dev.
 - The 0.4 s tap guard and review mode are my additions; say if either should go.
+
+## T-126 (2026-11-22): Peterson round 1, card C: score details + direct practice + card number label + neutral cover, and the k06 desktop list (Fullstack)
+
+Built by Fullstack; uncommitted, not deployed. Owner rule: nothing was opened in a browser or on a phone and no test was run, so every height below is CALCULATED (real texts, real advance widths of the app font) and none of this has been seen running. Root `npm run typecheck` exit 0; `client/dist` rebuilt (build exit 0) and it contains cards A, B and C. No server file touched. Scoring, the rubric, saves (`raksa:investigasi:v1`), stamps, ranks, 40 / 30 / 30 and the 300 total are untouched: card C only reads them.
+
+### Item 19: where the points went ("Rincian nilai")
+- **Opener.** The white score card on the result screen (the three bars) now opens a sheet "Rincian nilai". The visible control is an orange chip "Rincian nilai ›" at the right end of the ink strip at the foot of the card; the tap area is the whole card. The strip is now always there (before: only when a series total was shown).
+- **Sheet, three pages** (tabs "Bukti 25 / 40", "Putusan 30 / 30", "Nasabah 15 / 30"). It opens on the weakest part. Each page shows earned / maximum, "15 poin hilang" or "Nilai penuh", and the reason:
+  - **Bukti:** which attempt found the right evidence (first, second, or guided) and what each attempt is worth ("Percobaan pertama 40, kedua 25, dipandu 10 poin."). Kasus 3 shows each panel round on its own line with its own points (20 / 12 / 5).
+  - **Putusan:** the verdict the player chose, by name, and Miss Raksa's authored line for that verdict.
+  - **Penanganan nasabah:** the authored line for the message class that was sent; for the best message one short dictionary line.
+- **Only saved facts.** Everything comes from the marks already stored in the case state (round outcomes, verdict, message). The wrong card that was tapped is never named, because cases 1 and 2 do not store it; nothing is inferred from the total.
+- **Best score.** When this run scored below the device's best, each page adds one line: "Di permainan terbaikmu: 40 / 40". If the record is old and holds only the best total, the line is "Skor terbaik kasus ini: 85" and no reasons are given for that run.
+- **Perfect score:** three pages with "Nilai penuh", no practice button. The "Main lagi" sheet and the archive path from it are unchanged.
+
+### Item 20: practise directly
+- Each page with lost points has "Latih bagian ini" right under its reason, with "Latihan tidak mengubah skor terbaik." below. Kasus 3: one button per panel round that lost points (the weaker round is the orange one).
+- It starts the practice that already existed (`LatihanKasus`): no engine action, no change to the case score or the device record, no ranked call.
+- Full replay stays in "Main lagi" ("Ulang dari awal"), next to the older "Coba lagi pilihan terlemahmu", which I left as it was.
+
+### Item 9: card number
+- The officer card on the result screen now reads "Kartu hari ini RKS-6506" ("Today's card" / "今日卡号"). The number is unchanged: still derived from name and local date, no device identifier collected.
+- The fuller sentence "Nomor kartu ini hiasan dan berganti setiap hari." is the hover title and is read by screen readers. On a phone only the short label is visible; say if the sentence should be visible too (it would need a line somewhere).
+- Opt-in prop `labelNomor` on `KartuPetugas`; the hub card and the full Episode 1 card are unchanged.
+
+### Item 10 wiring and the English question
+- `LayarInvestigasi.tsx`: the Kasus 1 cover now gets `<SeniTolNetral besar />` (the Designer's empty toll road) as `gambar`; the import of `BingkaiDashcam` is gone from this file. The numbered footage is still used only in the investigation itself.
+- `investigasi.ts`: English `tebak.tanya` is "Which lane was the truck in?".
+- The dialog game font from T-125 needed no wiring; the new sheet opens from the result screen, so it gets it automatically.
+
+### Add-on: k06 `linimasa` on the desktop block
+- auto-2 `k06` and Episode 1 Dev `k06`, desktop block only (the constant `DAFTAR_POLOS` in `PilihBalasan.tsx`): the three stages are a plain numbered list (label, time estimate, the document's note) with no stage buttons. From 1024 px it sits in a left column beside the replies (5 : 8); the only primary button is send. Selecting, the preview with "Ganti balasan" and sending work as on every other desktop decision.
+- The phone reply sheet at `k06` is unchanged (document behind the "Catatan" tab).
+- Review mode and the 0.4 s tap guard from T-124 are kept as they were.
+- Width on desktop, by calculation: list column about 285 px, reply column about 455 px (about 48 characters per reply line in id). That is narrower than the 65 to 75 character measure; the alternative is list above replies in one 600 px column. Say which you prefer.
+
+### Calculation: result screen at 360 x 640 (space 557 px, as in T-121)
+The strip is 24 px with one row and 44 px when the rank-target line ("1 kasus lagi menuju Senior") is shown; that line now has its own row and is no longer cut off. A Kepala has no target line, so the fullest T-121 states did not grow.
+
+| State | Strip | Smallest height | Spare |
+|---|---|---|---|
+| Kasus 1 first time: no total, story link | 24 | 490 | 67 |
+| Kasus 1 again, 2+ stamps, rank target line, story link | 44 | 510 | 47 |
+| Kasus 2 first time: total + target, one reward row | 44 | 530 | 27 |
+| Kasus 3 first time, Senior: total + target, one reward row | 44 | 530 | 27 |
+| Kasus 3 first time, Senior, two reward rows (old record) | 44 | 556 | 1 |
+| Kasus 3 first time, Kepala: total, frame, two reward rows (T-121 state A) | 24 | 556 | 1 |
+| Kasus 1 again, Kepala, new frame reward, story link (T-121 worst) | 24 | 554 | 3 |
+
+- At 390 x 700 the space is 617 px; every state has 60 px more.
+- Three rewards announced at once still overflow by about 25 px, as the Designer already noted in T-121; unchanged.
+- Widths at 360: strip "Total 300 / 300" + chip = 219 px (id), 228 px (en), 197 px (zh) of 314 px. Card label 72 / 76 / 48 px in about 98 px of free ribbon.
+
+### Calculation: "Rincian nilai" sheet
+Room for the sheet content: 480 px at 360 x 640, 540 px at 390 x 700 (one-line title, 44 px close button). Each cell is the range over every outcome of that page, with the best-score line counted in.
+
+| Viewport | Language | Case | Room | Bukti page | Putusan page | Penanganan page |
+|---|---|---|---|---|---|---|
+| 360 x 640 | id | K1 | 480 | 248 to 328 | 278 to 404 | 230 to 312 |
+| 360 x 640 | id | K2 | 480 | 248 to 328 | 364 to 404 | 230 to 312 |
+| 360 x 640 | id | K3 | 480 | 358 to 448 | 386 to 468 | 230 to 312 |
+| 360 x 640 | en | K1 | 480 | 230 to 310 | 278 to 426 | 208 to 312 |
+| 360 x 640 | en | K2 | 480 | 230 to 310 | 364 to 404 | 208 to 312 |
+| 360 x 640 | en | K3 | 480 | 314 to 448 | 388 to 446 | 208 to 312 |
+| 360 x 640 | zh | K1 | 480 | 226 to 328 | 256 to 360 | 208 to 290 |
+| 360 x 640 | zh | K2 | 480 | 226 to 328 | 278 to 360 | 208 to 290 |
+| 360 x 640 | zh | K3 | 480 | 314 to 448 | 322 to 382 | 208 to 290 |
+| 390 x 700 | id | K1 | 540 | 248 to 328 | 278 to 382 | 208 to 312 |
+| 390 x 700 | id | K2 | 540 | 248 to 328 | 364 to 382 | 208 to 312 |
+| 390 x 700 | id | K3 | 540 | 314 to 448 | 364 to 446 | 208 to 312 |
+| 390 x 700 | en | K1 | 540 | 230 to 310 | 278 to 404 | 208 to 312 |
+| 390 x 700 | en | K2 | 540 | 230 to 310 | 364 to 382 | 208 to 312 |
+| 390 x 700 | en | K3 | 540 | 314 to 448 | 344 to 424 | 208 to 312 |
+| 390 x 700 | zh | K1 | 540 | 208 to 288 | 256 to 338 | 208 to 290 |
+| 390 x 700 | zh | K2 | 540 | 208 to 288 | 278 to 360 | 208 to 290 |
+| 390 x 700 | zh | K3 | 540 | 296 to 430 | 300 to 360 | 208 to 290 |
+
+- 54 pages x all outcomes, 0 over the room. Tightest: Kasus 3, verdict "polis", id, 360 x 640: 468 of 480 px (12 px spare). Rerun with every text column 6 px narrower: still 0 over.
+- That tightest page is long because of the authored Miss Raksa line (about 215 characters). If a PIC edit makes it longer, the sheet body scrolls inside the dialog; nothing is cut off.
+- Tap targets: tabs 48 px, practice buttons 48 px, close button 44 px.
+
+### Policy / legal wording
+No new policy or legal sentence was written. The verdict and message reasons are the existing authored lines, read by key (`putusan.<id>.1`, `pesan.<id>.2`); their `// [konfirmasi PIC]` markers stay where they are in the episode texts. New dictionary strings are interface labels and attempt descriptions. en / zh wording of the new strings is mine.
+
+### Files
+- `client/src/cerita/investigasi/LayarInvestigasi.tsx`: `RincianNilai` (new), sheet wiring in `HasilKasus`, neutral cover art.
+- `client/src/cerita/investigasi/ui/HasilInvestigasi.tsx`: new optional prop `onRincian`; foot strip of the score card; card label.
+- `client/src/cerita/investigasi/ui/hasil.css`: strip and opener, card label, the sheet.
+- `client/src/cerita/ui/KartuPetugas.tsx`: optional prop `labelNomor`.
+- `client/src/i18n/kamus/investigasi.ts`: 20 new keys (`rincian.*`, `kartuHarian`, `kartuHarianKet`) in id / en / zh; English `tebak.tanya`.
+- Add-on (card A files): `client/src/cerita/hp/PilihBalasan.tsx`, `client/src/cerita/ui/KartuDokumen.tsx` (new export `DaftarTahapan`), `client/src/cerita/hp/duaLangkah.css`.
+- Not edited: `status.ts`, `skor.ts`, `simpan.ts`, the shared rubric, episode texts, `pages/Investigator.tsx`.
+- Outside the repo: calculation `C:\Users\User\AppData\Local\Temp\claude\ec29f026d20d029c\0c4fe0f7-0adb-4cb1-b49a-10019af309f5\scratchpad\t126\hitung.mts` (run from `client/` with `npx tsx`).
+
+### Markup that moved (for QA)
+- Result screen: `.iv-total` is now a `div` (was `p`) and is present on every result; `[data-total-kasus]`, `[data-total-skor]`, `[data-menuju-pangkat]` keep their meaning and are present only when a total is shown. New: `[data-rincian-nilai]` (opener), `[data-rincian-nilai-isi]` with `[data-halaman]`, `[data-tab-rincian="bukti|putusan|penanganan"]`, `[data-latih-bagian]` (+ `[data-latih-babak]`), `[data-terbaik-rincian="rinci|total"]`, `[data-nomor-harian]` on the card.
+- Kasus 1 cover: `[data-seni-netral="kasus-1"]` instead of the dashcam frame.
+- Desktop `k06`: `.hp-pilih[data-dok-daftar]`, list `.hp-dl-daftar`; no `.cer-tahap` there any more.
+
+### QA scripts that walk k03 / k06 (not run, not edited)
+- `tools/cek-gulir-t018.mjs`, step 7: runs `cekLembar` on every chat decision from the prepared states (`balas-k01`, `balas-k03`, `balas-k06`, `balas-k13`, `balas-k14`) in id / en / zh at three phone sizes, and takes the photo `k03-390x645-en`. **Needs updating for `k03`**: the sheet now opens on step 1, so there are no reply rows and no `[data-catatan]` tab until "Lanjut ke balasan" on stage 4. Its `k06` phone cases are still valid. Its desktop case uses `k14` and is not affected.
+- `tools/cerita/state-obrolan-t018.mts` builds those states through the engine; no change needed.
+- `client/src/cerita/hp/hp.test.ts` and `client/src/cerita/episode/auto-2/episode.test.ts` drive `k03` / `k06` through engine actions, not through the screen; not affected.
+- `tools/cek-kartu-t024.mjs` mentions `k03` only as a token on the ending summary; not affected.
+- `tools/cek-palet-t029.mjs` and `tools/cek-bahasa-t014.mjs` open the reply list at `k01`; not affected.
+- I found no script under `tools/` that opens `k06` on desktop or in Episode 1 Dev, and none that reads the result-screen hooks above. QA scripts kept outside the repo were not checked.
+
+### Open
+- Not seen in a browser, on a phone or on a desktop. Most worth a look: the chip on the ink strip and tapping the card, the three pages after a weak run of Kasus 3, practice from the sheet and back, the card ribbon with the label, `k06` in two columns on desktop.
+- Two states of the result screen have 1 px spare at 360 x 640 by calculation.
+- The visible card label says "today's card", not "decorative"; the word is only in the hover title and for screen readers.
+- `k06` two columns versus one 600 px column: Lead's choice (see above).

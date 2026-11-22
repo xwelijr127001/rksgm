@@ -5,6 +5,7 @@
  * Dokumen ber-`skema` (bukti ruas jalan) menampilkan tiruan rambu + diagram lajur (BuktiLajur) sebagai ganti baris yang
  * dipakainya, dengan tombol "Perbesar bukti" (lembar bukti di dialog, ukuran besar).
  * T-124: `BacaTahapan` (di bawah) = dokumen bertahap yang sama sebagai langkah baca tersendiri, untuk keputusan dua langkah.
+ * T-126: `DaftarTahapan` (di bawah) = dokumen bertahap sebagai daftar bernomor polos tanpa tombol, di samping balasan.
  */
 import { useState } from 'react';
 import { t } from '../../i18n';
@@ -115,6 +116,34 @@ export function BacaTahapan({ dokumen, id, tx, tahap, onTahap }: { dokumen: Doku
         {baris.map((_, i) => (i === aktif ? null : <div key={i} className="hp-dl-kartu" data-ukur="" aria-hidden="true">{isi(i)}</div>))}
         <div id={idPanel} className="hp-dl-kartu" role="tabpanel" aria-labelledby={`${idPanel}-t${aktif}`} aria-live="polite" data-tahap-aktif={aktif + 1}>{isi(aktif)}</div>
       </div>
+      {dokumen.tahapan === 'paralel' ? <p className="hp-dl-urutan">{t('ceritaHp.urutanPenjelasan')}</p> : null}
+      {dokumen.catatan ? <p className="cer-dok-catatan">{tx(dokumen.catatan)}</p> : null}
+    </section>
+  );
+}
+
+/**
+ * T-126 DAFTAR TAHAPAN: dokumen bertahap sebagai daftar bernomor POLOS (label tebal, nilai di bawahnya), TANPA penjelajah tahap dan
+ * tanpa tombol: untuk keputusan yang tahapannya pendek dan menjadi bahan balasannya (auto-2 / Episode 1 Dev k06 `linimasa` di blok
+ * desktop, hp/PilihBalasan.tsx), supaya satu-satunya tombol di layar itu tombol kirim. Isi = baris naskah apa adanya (awalan nomor
+ * "1. " di label dilepas), penjelasan urutan untuk dokumen 'paralel', dan catatan dokumen. Gaya: hp/duaLangkah.css.
+ */
+export function DaftarTahapan({ dokumen, id, tx }: { dokumen: DokumenCerita; id: string; tx: (k: KunciTeks) => string }) {
+  const idJudul = `cer-daftar-${id}`;
+  return (
+    <section className="cer-dok hp-dl-daftar" data-dokumen={id} data-jenis={dokumen.tahapan} aria-labelledby={idJudul}>
+      <h3 id={idJudul} className="cer-dok-judul">
+        <IkonDokumen />
+        <span>{tx(dokumen.judul)}</span>
+      </h3>
+      <ol className="hp-dl-daftar-isi">
+        {dokumen.baris.map((b, i) => (
+          <li key={i}>
+            <span className="hp-dl-no" aria-hidden="true">{i + 1}</span>
+            <span className="hp-dl-daftar-teks"><b>{tx(b.label).replace(/^d+.s*/, '')}</b>{b.nilai ? <span>{tx(b.nilai)}</span> : null}</span>
+          </li>
+        ))}
+      </ol>
       {dokumen.tahapan === 'paralel' ? <p className="hp-dl-urutan">{t('ceritaHp.urutanPenjelasan')}</p> : null}
       {dokumen.catatan ? <p className="cer-dok-catatan">{tx(dokumen.catatan)}</p> : null}
     </section>

@@ -13,6 +13,9 @@
  * T-077 (Episode 1 Investigator, opt-in, kartu lain tidak berubah): `investigasi={{ stempel, pangkat }}` mengganti jabatan dengan
  * pangkat investigator + lencana pangkat piksel 24 px, dan teks kaki dengan BARIS STEMPEL kasus (4 slot, terisi = jumlah stempel).
  * `look` = karakter dikirim langsung (layar hasil investigasi), menimpa konteks pemutar HP.
+ * T-126 (masukan Pak Peterson butir 9, opt-in, kartu lain tidak berubah): `labelNomor` menulis label kecil di kiri nomor
+ * ("Kartu hari ini RKS-6506"). Nomornya memang HIASAN: dihitung dari nama + tanggal lokal (nomorPetugas), jadi berganti tiap hari
+ * dan tiap kali nama diganti; tidak ada pengenal perangkat yang dikumpulkan. Gaya labelnya di investigasi/ui/hasil.css.
  */
 import { useMemo } from 'react';
 import type { PlayerLook } from '@shared/types';
@@ -77,7 +80,7 @@ export function nomorPetugas(nama: string, tanggal: string): string {
 export type CapKartu = { teks: string; nada: 'baik' | 'campuran' | 'buruk' };
 export type UbahNamaKartu = { id: string; nilai: string; label: string; placeholder: string; onUbah: (nilai: string) => void };
 
-export function KartuPetugas({ nama, cap, ubahNama, varian = 'penuh', onBuka, look: lookProp, investigasi }: {
+export function KartuPetugas({ nama, cap, ubahNama, varian = 'penuh', onBuka, look: lookProp, investigasi, labelNomor }: {
   nama: string;
   /** Cap hasil (judul akhir + nada) di kaki kartu. */
   cap?: CapKartu;
@@ -90,6 +93,8 @@ export function KartuPetugas({ nama, cap, ubahNama, varian = 'penuh', onBuka, lo
   look?: PlayerLook;
   /** T-077: kartu investigator: pangkat + baris stempel kasus. */
   investigasi?: KartuInvestigasi;
+  /** T-126: label kecil di kiri nomor kartu (`teks`) + keterangan lengkapnya (`ket`: judul melayang dan pembaca layar). */
+  labelNomor?: { teks: string; ket: string };
 }) {
   const lookKonteks = useLookPemain();
   const look = lookProp ?? lookKonteks;
@@ -126,7 +131,13 @@ export function KartuPetugas({ nama, cap, ubahNama, varian = 'penuh', onBuka, lo
       <div className={investigasi?.pangkat === 'kepala' ? 'kp-kartu pn-bingkai-kepala' : 'kp-kartu'} data-bingkai={investigasi?.pangkat === 'kepala' ? 'kepala' : undefined}>
         <div className="kp-pita">
           <span className="kp-merek" aria-hidden="true"><Burung ukuran={20} />RAKSA</span>
-          <span className="kp-nomor">{nomor}</span>
+          {labelNomor ? (
+            <span className="kp-nomor-grup" data-nomor-harian="" title={labelNomor.ket}>
+              <small className="kp-nomor-label">{labelNomor.teks}</small>
+              <span className="kp-nomor">{nomor}</span>
+              <span className="sr-only">. {labelNomor.ket}</span>
+            </span>
+          ) : <span className="kp-nomor">{nomor}</span>}
         </div>
         <div className="kp-badan">
           <span className="kp-foto" aria-hidden="true">

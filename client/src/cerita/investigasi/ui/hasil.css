@@ -84,15 +84,33 @@
 .iv-layar.iv-hasil .iv-poin-angka { color: #5a3a24; }
 @keyframes iv-hasil-isi { from { clip-path: inset(0 100% 0 0); } to { clip-path: inset(0); } }
 /* total seri = baris sendiri di kaki kartu (pita tinta); "... menuju ..." di kanannya, satu baris */
-.iv-layar.iv-hasil .iv-total { display: flex; flex-wrap: nowrap; align-items: center; justify-content: space-between; gap: 0 10px; min-height: 24px; box-sizing: border-box; margin: 0; padding: 0 8px;
+.iv-layar.iv-hasil .iv-total { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 0 10px; min-height: 24px; box-sizing: border-box; margin: 0; padding: 0 2px 2px 8px;
   border: 0; border-top: 2px solid #212121; background: #212121; color: #ffe38a; font-size: 14px; line-height: 20px; }
-.iv-layar.iv-hasil .iv-total em { min-width: 0; font-size: 13px; color: #ffffff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.iv-layar.iv-hasil .iv-total:not(:has(.iv-rincian-buka)) { padding-right: 8px; }
+/* T-126: "... menuju ..." = baris kedua pita (20 px), utuh; dulu berbagi baris dengan total dan bisa terpotong */
+.iv-layar.iv-hasil .iv-total em { grid-column: 1 / -1; min-width: 0; padding: 2px 6px 0 0; font-size: 13px; line-height: 18px; color: #ffffff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+/* T-126 pembuka "Rincian nilai": keping jingga 20 px di kanan pita; ::after-nya menutup SELURUH kartu rincian, jadi daerah
+   ketuknya kartu itu (>= 76 px tinggi, selebar layar). Cincin fokus digambar di sekeliling kartu. */
+.iv-layar.iv-hasil .iv-hasil-rinci[data-bisa-buka] { position: relative; cursor: pointer; }
+.iv-layar.iv-hasil .iv-rincian-buka { grid-column: 2; display: inline-flex; align-items: center; gap: 4px; height: 20px; margin: 0; padding: 0 6px 0 8px; border: 0; border-radius: 0;
+  background: #ff9000; color: #212121; font: inherit; font-size: 13px; line-height: 20px; font-weight: 800; white-space: nowrap; cursor: pointer; -webkit-tap-highlight-color: transparent; }
+.iv-layar.iv-hasil .iv-rincian-buka > span { font-size: 16px; line-height: 18px; }
+.iv-layar.iv-hasil .iv-rincian-buka::after { content: ""; position: absolute; inset: 0; }
+.iv-layar.iv-hasil .iv-hasil-rinci:active:has(.iv-rincian-buka) { translate: 0 2px; box-shadow: inset 0 2px 0 #ff9000, 0 1px 0 #f0a030; }
+@supports selector(:has(a)) {
+  .iv-layar.iv-hasil .iv-rincian-buka:focus-visible { outline: none; }
+  .iv-layar.iv-hasil .iv-hasil-rinci:has(.iv-rincian-buka:focus-visible) { outline: 3px solid #212121; outline-offset: 2px; }
+}
 
 /* ================================================================ kartu petugas: ruang sendiri. Tali disembunyikan; bingkai Kepala (border-image, digambar
    10 px di LUAR kartu, panel/panel.css) mendapat margin 10 px supaya tidak menimpa baris total di atas / hadiah di bawahnya */
 .iv-hasil-kartu { display: grid; justify-items: center; }
 .iv-layar.iv-hasil .kp-tali { display: none; }
 .iv-layar.iv-hasil .kp[data-investigasi="kepala"] { margin-block: 10px; }
+/* T-126: label "Kartu hari ini" di kiri nomor kartu (KartuPetugas `labelNomor`): 12 px, satu baris, di pita jingga yang sama.
+   Lebar: merek 91 + jarak 8 + label <= 76 + 5 + nomor +- 76 = 256 dari 278 px. */
+.iv-layar.iv-hasil .kp-nomor-grup { position: relative; display: inline-flex; align-items: center; gap: 5px; min-width: 0; }
+.iv-layar.iv-hasil .kp-nomor-label { font-size: 12px; line-height: 14px; font-weight: 800; color: #212121; white-space: nowrap; }
 
 /* ================================================================ lanjut (`teaser` dari pemanggil): pita hadiah + bilah kasus berikutnya */
 .iv-layar.iv-hasil > .iv-hasil-lanjut { display: grid; gap: var(--j); }
@@ -127,3 +145,30 @@
   :root:not([data-gerak="penuh"]) :is(.iv-hasil-sinar, .iv-poin-batang i) { animation: none !important; }
   :root:not([data-gerak="penuh"]) .iv-hasil-miss::before, :root:not([data-gerak="penuh"]) .iv-hasil-miss::after { animation: none !important; }
 }
+
+/* ================================================================ T-126 lembar "Rincian nilai" (Modal; isinya LayarInvestigasi.tsx RincianNilai).
+   Di portal, jadi TANPA awalan .iv-layar.iv-hasil. BERHALAMAN (tab .iv-tab dari muat.css): satu bagian nilai per tampilan, supaya
+   lembar tidak menggulir di 360 x 640 (hitungan: team/HANDOFF.md "## T-126"). Tab = nama pendek + "25 / 40". */
+.iv-rincian { display: grid; gap: 8px; color: #212121; }
+.iv-rincian p { margin: 0; }
+.iv-rincian .iv-tab-tombol { flex-direction: column; gap: 0; min-height: 48px; }
+.iv-rincian .iv-tab-tombol small { font-size: 13px; line-height: 16px; font-weight: 700; font-variant-numeric: tabular-nums; color: #5a3a24; }
+.iv-rincian .iv-tab-tombol[aria-selected="true"] small { color: #212121; }
+.iv-rincian-kartu { display: grid; gap: 6px; padding: 8px 10px 10px; border: 2px solid #212121; background: #ffffff; box-shadow: 0 2px 0 #212121; }
+.iv-rincian-kepala { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.iv-rincian-kepala > b { min-width: 0; font-size: 14px; line-height: 18px; font-weight: 800; letter-spacing: .04em; text-transform: uppercase; color: #7a3e00; }
+.iv-rincian-angka { flex: none; font-size: 14px; line-height: 24px; font-weight: 800; color: #5a3a24; white-space: nowrap; font-variant-numeric: tabular-nums; }
+.iv-rincian-angka b { font-size: 22px; color: #212121; }
+.iv-rincian-status { justify-self: start; padding: 0 6px; border: 2px solid #212121; background: #ffe38a; font-size: 14px; line-height: 18px; font-weight: 800; }
+.iv-rincian-status[data-status="penuh"] { border-color: #1f5c3f; background: #e6f1ea; color: #1f5c3f; }
+.iv-rincian-babak { display: grid; gap: 4px; }
+.iv-rincian-babak + .iv-rincian-babak { padding-top: 6px; border-top: 2px dashed #e0c9a8; }
+.iv-rincian-nama { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; font-size: 15px; line-height: 20px; font-weight: 800; }
+.iv-rincian-sebab { font-size: 16px; line-height: 22px; }
+.iv-rincian-sebab[data-baris-babak] { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; }
+.iv-rincian-sebab[data-baris-babak] > span { min-width: 0; }
+.iv-rincian-sebab[data-baris-babak] > b { flex: none; font-size: 15px; font-weight: 800; white-space: nowrap; font-variant-numeric: tabular-nums; color: #5a3a24; }
+.iv-rincian-skala { font-size: 14px; line-height: 18px; color: #5f5f5f; }
+.iv-rincian .iv-tombol { box-sizing: border-box; height: 48px; min-height: 48px; margin-top: 2px; padding: 0 12px 3px; font-size: 16px; line-height: 20px; }
+.iv-rincian-ket { font-size: 14px; line-height: 18px; color: #5f5f5f; }
+.iv-rincian-terbaik { font-size: 14px; line-height: 18px; font-weight: 700; }
