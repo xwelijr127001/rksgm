@@ -177,6 +177,8 @@ export function tandaJeli(ep: Pick<Episode, 'investigasi'>, s: Tanda): { pernyat
 // ------------------------------------------------------------------ T-127 (babak 2): tafsir dan temuan
 
 export const tandaTafsir = (id: string): string => `tafsir:${id}`;
+/** T-130: tafsir itu memang DIBUAT pemain di simpanan ini (bukan hanya mapan lewat tanda lain di simpanan lama). */
+export const tafsirDibuat = (s: Tanda, id: string): boolean => punya(s, tandaTafsir(id));
 
 /**
  * Satu baris halaman "Temuan": `teks` = kalimat lengkap, `ringkas` = versi slip bukti (hanya tafsir), `bukti` = kartu yang
@@ -186,6 +188,7 @@ export interface Temuan { id: string; teks: KunciTeks; ringkas?: KunciTeks; bukt
 
 /** Tafsir sebuah kasus yang sudah dibuat pemain ATAU sudah mapan lewat tandanya (simpanan lama tanpa `tafsir:<id>`). */
 function temuanTafsir(x: TafsirInvestigasi, s: Tanda): Temuan | null {
+  if (!x.temuan) return null;
   const dibuat = punya(s, tandaTafsir(x.id));
   const mapan = x.mapanSaat ? punya(s, x.mapanSaat) : dibuat;
   return dibuat || mapan ? { id: `tafsir:${x.id}`, teks: x.temuan, ringkas: x.ringkas, bukti: x.bukti, mapan } : null;

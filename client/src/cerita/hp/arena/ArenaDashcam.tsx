@@ -97,7 +97,7 @@ const PUSAT_LAJUR = [97, 163, 229, 295];
  * T-088 (hanya dengan `besar`): potong 'lajur' = x 44-336 (KEEMPAT lajur utuh, tanpa rambu; nomor lajur 1-4); sorotTruk = bingkai
  * jingga berkedip di sekeliling truk; tanya = tanda "?" berdenyut di atas truk (tebakan pembuka).
  */
-export function BingkaiDashcam({ besar = false, potong = 'rambu', sorotTruk = false, tanya = false }: { besar?: boolean; potong?: 'rambu' | 'lajur'; sorotTruk?: boolean; tanya?: boolean }) {
+export function BingkaiDashcam({ besar = false, potong = 'rambu', sorotTruk = false, tanya = false, tanpaNomor = false }: { besar?: boolean; potong?: 'rambu' | 'lajur'; sorotTruk?: boolean; tanya?: boolean; /** T-130: tanpa nomor lajur (varian `tanpaNomor`). */ tanpaNomor?: boolean }) {
   const geser = besar && potong === 'lajur' ? 44 : 0;
   return (
     <figure className="dc-pita" data-besar={besar ? '' : undefined} data-potong={besar ? potong : undefined} aria-label={t('dashcam.judul')} style={{ '--ubin': `url(${ubin})`, '--rambu': `url(${rambu})` } as CSSProperties}>
@@ -107,7 +107,7 @@ export function BingkaiDashcam({ besar = false, potong = 'rambu', sorotTruk = fa
         {(['truk', 'mobil'] as const).map((k) => <img key={k} className="dc-pita-kend" src={POSE[k][0]!.src} alt="" aria-hidden="true" style={posisi(POSE[k][0]!)} />)}
       </div>
       {/* nomor lajur terbaca (14 px) di pusat tiap lajur: angka piksel di latar hanya 2,5 px pada skala 1/2 */}
-      {PUSAT_LAJUR.filter((x) => !besar || x - geser < 280).map((x, i) => <span key={i} className="dc-pita-lajur" aria-hidden="true" style={{ left: besar ? x - geser : x / 2 }}>{i + 1}</span>)}
+      {tanpaNomor ? null : PUSAT_LAJUR.filter((x) => !besar || x - geser < 280).map((x, i) => <span key={i} className="dc-pita-lajur" aria-hidden="true" style={{ left: besar ? x - geser : x / 2 }}>{i + 1}</span>)}
       {besar && sorotTruk ? <i className="dc-pita-sorot" aria-hidden="true" style={{ left: 139 - geser }} /> : null}
       {besar && tanya ? <i className="dc-pita-tanya" aria-hidden="true" style={{ left: 149 - geser }}>?</i> : null}
     </figure>
@@ -127,6 +127,9 @@ export function ArenaPolaDashcam({ ep, konfig, jawaban, ubah, tx, labelKirim, on
   const simpul = konfig.simpul;
   const [fase, setFase] = useState<'rekaman' | 'tanya'>('rekaman');
   const [ulang, setUlang] = useState(false);
+  // T-130 (tinjauan Codex): varian `tanpaNomor` memakai kalimat yang TIDAK menyebut nomor lajur di SEMUA jalur: umpan balik ketukan,
+  // keterangan bingkai diam (gerak dikurangi), dan pita ringkas. Tanpa bendera itu = kunci kamus seperti semula.
+  const nt = (kunci: string): string => (konfig.tanpaNomor ? `${kunci}.netral` : kunci);
   const pilihSimpul = simpul ? (typeof jawaban[simpul.langkah] === 'string' ? (jawaban[simpul.langkah] as string) : null) : null;
   const instruksiRef = useRef<HTMLParagraphElement>(null);
   const putarRef = useRef<HTMLButtonElement>(null);
@@ -166,14 +169,14 @@ export function ArenaPolaDashcam({ ep, konfig, jawaban, ubah, tx, labelKirim, on
     setDiketuk(id);
     if (id === konfig.tepat) {
       playSfx('konfirmasi');
-      setPesan({ kunci: 'dashcam.tepat', jenis: 'tepat' });
+      setPesan({ kunci: nt('dashcam.tepat'), jenis: 'tepat' });
       selesai(salah ? konfig.ragu : konfig.bersih);
       return;
     }
     playSfx('batal');
-    if (salah >= 1) { setPesan({ kunci: 'dashcam.jelaskan', jenis: 'jelaskan' }); selesai(konfig.ragu); return; }
+    if (salah >= 1) { setPesan({ kunci: nt('dashcam.jelaskan'), jenis: 'jelaskan' }); selesai(konfig.ragu); return; }
     setSalah(1);
-    setPesan({ kunci: `dashcam.ragu.${id}`, jenis: 'ragu' });
+    setPesan({ kunci: nt(`dashcam.ragu.${id}`), jenis: 'ragu' });
     if (lewatKeyboard.current) fokus.current = 'putar';
   };
 
@@ -234,7 +237,7 @@ export function ArenaPolaDashcam({ ep, konfig, jawaban, ubah, tx, labelKirim, on
       {/* T-080 / T-083 (Episode 1 Investigator): rekaman diputar di LAYAR TV dinding ruang wawancara (bingkai + dagu TV, investigasi/ui/bukti-adegan.css) */}
       {ep.investigasi ? <span className="dc-laptop-dek" aria-hidden="true" /> : null}
       {/* T-069: keterangan bingkai diam (gerak dikurangi) DI BAWAH adegan: tidak menutupi mobil, rambu, atau tombol */}
-      {bingkai > 0 && main ? <p className="dc-keterangan">{t('dashcam.bingkai', { n: bingkai })}: {t(`dashcam.bingkai.${bingkai}`)}</p> : null}
+      {bingkai > 0 && main ? <p className="dc-keterangan">{t('dashcam.bingkai', { n: bingkai })}: {t(bingkai < 3 ? nt(`dashcam.bingkai.${bingkai}`) : `dashcam.bingkai.${bingkai}`)}</p> : null}
       {/* T-067: tulisan dua rambu dalam bahasa aktif (di rambu piksel tetap bahasa Indonesia, 5 px: dibaca di sini) */}
       <ul className="dc-rambu" aria-label={t('dashcam.rambu.judul')}>
         <li data-rambu="merah">{t('dashcam.rambu.1')}</li>
@@ -255,7 +258,7 @@ export function ArenaPolaDashcam({ ep, konfig, jawaban, ubah, tx, labelKirim, on
             dan chip "Rambu" yang bisa dibuka (tulisan rambu dalam bahasa aktif). Lima kesimpulan di bawahnya, tanpa gulir (dashcam.css).
           */}
           <div className="dc-pita-baris">
-            <BingkaiDashcam />
+            <BingkaiDashcam tanpaNomor={konfig.tanpaNomor} />
             <div className="dc-pita-kanan">
               <p className="dc-tanya-ringkas"><span className="dc-ucap-potret" aria-hidden="true"><PotretHp ep={ep} id={simpul.penanya} nama="" /></span><b>{penanya}</b> {tx(simpul.tanya)}</p>
               <details className="dc-rambu-chip">

@@ -82,3 +82,17 @@
 
 /* lembar umpan balik keterangan (KEBERATAN berpasangan): catatan Miss Raksa di dalam dialog */
 .iv-pasang-catatan { margin: 0; }
+
+/* ==================================================================== T-130 (irisan kasus 2): pilihan bergambar, pilihan bertumpuk, hadiah
+   - pilihan BERGAMBAR (slip waktu 96 x 68): tiga sebaris, 104 px lebar di layar 360 (isi 328 px); yang ditolak dipudarkan,
+     yang tepat bertepi hijau dengan centang di sudut
+   - susun 'kolom': pilihan berupa kalimat, bertumpuk selebar layar (52 px+), rata kiri
+   - catatan ber-hadiah: gambar kecil dokumen (96 x 68) di kiri kalimatnya, menggantikan potret Miss Raksa */
+.r2-slip { display: block; width: 96px; height: 68px; image-rendering: pixelated; }
+.pf-opsi[data-bergambar] .pf-pilih { position: relative; min-height: 76px; padding: 2px; }
+.pf-opsi[data-bergambar] .pf-pilih[data-gugur] { opacity: .45; text-decoration: none; }
+.pf-opsi[data-bergambar] .pf-centang { position: absolute; right: -2px; top: -2px; width: 22px; height: 22px; display: grid; place-items: center; background: #1f5c3f; color: #ffffff; font-size: 14px; line-height: 1; font-weight: 800; }
+.pf[data-susun="kolom"] .pf-opsi { grid-template-columns: minmax(0, 1fr); }
+.pf[data-susun="kolom"] .pf-pilih { justify-items: start; padding: 6px 10px; font-size: 16px; line-height: 21px; text-align: left; }
+.pf-tempel[data-berhadiah] { grid-template-columns: 100px minmax(0, 1fr); align-items: start; }
+.pf-tempel[data-berhadiah] > .r2-slip { border: 2px solid #212121; box-sizing: content-box; margin: 2px 0; }

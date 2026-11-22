@@ -26,24 +26,24 @@ export const TEKS_AUTO_2_INV_2_ID: Record<string, string> = {
   'inv2.bab.2.judul': 'Bukti',
   'inv2.bab.2.tujuan': 'Cocokkan jam benturan dengan struk perjalanan, lalu baca polisnya.',
   'inv2.bab.3.judul': 'Keberatan',
-  'inv2.bab.3.tujuan': 'Tunjukkan catatan yang menjawab: apa yang terjadi jam 21:18?',
+  'inv2.bab.3.tujuan': 'Tunjukkan catatan yang menjawab keterangan Pak Yusuf.',
   'inv2.bab.4.judul': 'Putusan',
   'inv2.bab.4.tujuan': 'Putuskan klaimnya, lalu jelaskan kepada Pak Yusuf dengan hormat.',
 
   // Pembuka: foto interior langsung masuk buku (tanpa aktivitas ketuk), lalu tebakan yang tidak dinilai
   'inv2.judul.kartu': 'Kasus #2 · Malam di Jalan Melati',
-  'inv2.buka.1': 'Kasus baru, Investigator. Malam hari di Jalan Melati, sebuah motor menyenggol bumper depan kiri mobil Pak Yusuf jam 21:18. Ini foto kabin dari surveyor kita.',
+  'inv2.buka.1': 'Kasus baru, Investigator. Malam hari di Jalan Melati, sebuah motor menyenggol bumper depan kiri mobil Pak Yusuf. Ini foto kabin dari surveyor kita.',
   'inv2.bukti.foto.1': 'Foto kabin dari surveyor: HP terpasang di dudukan dasbor dengan sebuah aplikasi menyala, dan botol air minum di jok belakang.',
-  'inv2.bukti.foto.judul': 'Foto interior: HP di dasbor, botol di jok belakang',
+  'inv2.bukti.foto.judul': 'Foto kabin',
   'inv2.bukti.foto.sumber': 'Sumber: foto surveyor Raksa',
   'inv2.tebak.1': 'Tidak ada benar atau salah. Tebakanmu kita cek lagi sesudah catatannya terkumpul.',
   'inv2.tebak.tanya': 'Malam itu mobil ini dipakai untuk apa?',
   'inv2.tebak.pilih.keluarga': 'Antar keluarga',
   'inv2.tebak.pilih.penumpang': 'Antar penumpang',
   'inv2.tebak.pilih.belum': 'Belum tahu',
-  'inv2.tebak.balik.keluarga': 'Tebakan awalmu: antar keluarga. Struk mencatat penumpang berbayar. Tidak apa-apa: sekarang kamu punya catatannya.',
-  'inv2.tebak.balik.penumpang': 'Tebakan awalmu: antar penumpang. Sekarang ada catatannya, jadi itu bukan lagi dugaan.',
-  'inv2.tebak.balik.belum': 'Tebakan awalmu: belum tahu. Sikap yang baik. Sekarang catatannya yang menjawab.',
+  'inv2.tebak.balik.keluarga': 'Tebakan awalmu: antar keluarga. Tafsiranmu dari catatan: benturan terjadi di tengah sebuah perjalanan di aplikasi.',
+  'inv2.tebak.balik.penumpang': 'Tebakan awalmu: antar penumpang. Tafsiranmu dari catatan: benturan terjadi di tengah sebuah perjalanan di aplikasi.',
+  'inv2.tebak.balik.belum': 'Tebakan awalmu: belum tahu. Sikap yang baik. Sekarang catatannya kamu baca sendiri.',
 
   // Keterangan (pernyataan yang dicatat)
   'inv2.yusuf.1': 'Ruang wawancara. Pak Yusuf, pemilik mobil, datang sepulang kerja.',
@@ -82,15 +82,18 @@ export const TEKS_AUTO_2_INV_2_ID: Record<string, string> = {
   'inv2.jalan.l4.tanya': 'Ketuk tanggal dan pelat nomor untuk mencocokkannya.',
   'inv2.jalan.l4.hasil': 'Tanggal dan pelat nomor di struk sama dengan formulir kejadian.',
   'inv2.jalan.selesai': 'Simpan hasil pemeriksaan',
-  'inv2.bukti.struk.1': 'Struk dan formulir kejadian cocok: tanggal sama, pelat nomor sama. Penumpang dijemput 21:05, benturan 21:18, perjalanan ditutup di aplikasi 21:24.',
-  'inv2.bukti.struk.judul': 'Struk perjalanan: penumpang berbayar 21:05-21:24',
+  'inv2.bukti.struk.1': 'Struk perjalanan masuk ke buku catatanmu. Tanggal dan pelat nomornya sama dengan formulir kejadian.',
+  'inv2.bukti.struk.judul': 'Struk perjalanan',
   'inv2.bukti.struk.sumber': 'Sumber: struk dari Pak Yusuf, nama dan alamat penumpang ditutup',
 
   // Bukti 2: polis (layar ui/PeriksaPolis membaca kunci inv2.polis.* lewat useTx)
   // T-104 "Tanya lebih lanjut" (opsional, tanpa poin): kapan perjalanan itu ditutup
   'inv2.tekan.yusuf.tanya': 'Tanya: Kapan perjalanan itu ditutup di aplikasi?',
   'inv2.tekan.yusuf.jawab': 'Jam 21:24. Saya sendiri yang menutupnya dari HP di dasbor, sesudah mobil menepi.',
-  'inv2.polis.1': 'Satu catatan lagi: polisnya. Kita baca apa yang tertulis, bukan apa yang kita kira.',
+  // T-130: pertanyaan kedua (sopan, tidak membuka hal baru); pertanyaan pertama = yang berguna (tanda jeli)
+  'inv2.tekan.yusuf.dudukan.tanya': 'Tanya: Kenapa HP itu terpasang di dasbor?',
+  'inv2.tekan.yusuf.dudukan.jawab': 'Untuk peta, supaya saya tidak salah jalan. Banyak pengemudi memasangnya begitu.',
+  'inv2.polis.1': 'Dokumennya sudah datang: kutipan polis dan status perluasannya. Kita baca apa yang tertulis, bukan apa yang kita kira.', // [konfirmasi PIC]
   'inv2.polis.judul': 'Baca polisnya',
   'inv2.polis.tanya': 'Ketuk klausul penggunaan kendaraan.',
   'inv2.polis.kepala': 'Polis kendaraan (contoh fiktif)',
@@ -102,17 +105,65 @@ export const TEKS_AUTO_2_INV_2_ID: Record<string, string> = {
   'inv2.polis.hasil': 'Polis ini untuk penggunaan pribadi. Pada tanggal kejadian tidak ada perluasan penggunaan komersial.', // [konfirmasi PIC]
   'inv2.polis.selesai': 'Simpan hasil pemeriksaan',
   'inv2.bukti.polis.1': 'Polis Pak Yusuf: penggunaan pribadi. Perluasan penggunaan komersial pada tanggal kejadian: tidak ada.', // [konfirmasi PIC]
-  'inv2.bukti.polis.judul': 'Polis: penggunaan pribadi, tanpa perluasan', // [konfirmasi PIC]
-  'inv2.bukti.polis.sumber': 'Sumber: polis kendaraan Pak Yusuf',
+  'inv2.bukti.polis.judul': 'Kutipan polis',
+  'inv2.bukti.polis.sumber': 'Sumber: kutipan polis kendaraan Pak Yusuf',
+  // T-130 (babak 2) TAFSIR: pemain membaca buktinya sendiri (formatif, tanpa poin). jam = formulir kejadian + tiga slip; struk = letak jam itu pada perjalanan; dokumen = dokumen yang masih kurang; klausul = klausul yang menentukan
+  'inv2.tafsir.jam.tanya': 'Formulir kejadian. Slip mana yang memuat jam benturan?',
+  'inv2.tafsir.jam.gambar': 'Formulir kejadian: kotak jam bertuliskan 21:18, dan sketsa sebuah mobil yang bersentuhan dengan sebuah motor.',
+  'inv2.tafsir.jam.pilih.2105': '21:05',
+  'inv2.tafsir.jam.pilih.2118': '21:18',
+  'inv2.tafsir.jam.pilih.2124': '21:24',
+  'inv2.tafsir.jam.ket.2105': 'seseorang melangkah ke pintu mobil',
+  'inv2.tafsir.jam.ket.2118': 'sebuah mobil dan sebuah motor bersentuhan',
+  'inv2.tafsir.jam.ket.2124': 'sebuah HP dengan bilah perjalanan ditutup',
+  'inv2.tafsir.jam.salah.2105': 'Slip 21:05 bergambar orang naik ke mobil. Lihat kotak jam di formulir kejadian.',
+  'inv2.tafsir.jam.salah.2124': 'Slip 21:24 bergambar perjalanan ditutup di aplikasi. Lihat kotak jam di formulir kejadian.',
+  'inv2.tafsir.jam.alasan': 'Kotak jam di formulir kejadian bertuliskan 21:18, dan sketsanya memperlihatkan benturan. Slip 21:18 adalah jam benturan.',
+  'inv2.tafsir.jam.benar': 'Formulir kejadian mencatat benturan jam 21:18.',
+  'inv2.baca.struk.1': 'Kamu menaruh jam benturan di samping struk perjalanan.',
+  'inv2.tafsir.struk.tanya': 'Benturan jam 21:18. Di mana jam itu pada perjalanan di struk ini?',
+  'inv2.tafsir.struk.gambar': 'Struk perjalanan: satu garis rute dengan dua jam, 21:05 di awal dan 21:24 di akhir. Nama dan kedua alamat ditutup balok hitam.',
+  'inv2.tafsir.struk.salah.sebelum': 'Bandingkan jamnya dengan angka di struk: 21:18 lebih lambat dari 21:05.',
+  'inv2.tafsir.struk.salah.sesudah': 'Bandingkan jamnya dengan angka di struk: 21:18 lebih awal dari 21:24.',
+  'inv2.tafsir.struk.alasan': 'Struk: 21:05 di awal, 21:24 di akhir. Jam 21:18 ada di antaranya: benturan terjadi di tengah perjalanan itu.',
+  'inv2.tafsir.struk.benar': '21:18 ada di antara 21:05 dan 21:24: benturan terjadi di tengah perjalanan di struk itu.',
+  'inv2.tafsir.struk.temuan': 'Struk perjalanan: benturan 21:18 terjadi di antara 21:05 dan 21:24, di tengah perjalanan itu.',
+  'inv2.tafsir.struk.ringkas': 'di tengah perjalanan',
+  'inv2.kurang.1': 'Sebelum polisnya dibaca, Miss Raksa bertanya: apa putusanmu kalau diminta sekarang?',
+  'inv2.tafsir.dokumen.tanya': 'Belum bisa diputuskan: perlu bukti tambahan. Dokumen apa yang masih kurang?', // [konfirmasi PIC]
+  'inv2.tafsir.dokumen.pilih.identitas': 'Nama dan alamat penumpang',
+  'inv2.tafsir.dokumen.pilih.perluasan': 'Status perluasan penggunaan pada tanggal kejadian', // [konfirmasi PIC]
+  'inv2.tafsir.dokumen.pilih.foto': 'Foto bumper yang kedua',
+  'inv2.tafsir.dokumen.salah.identitas': 'Siapa penumpangnya tidak mengubah isi polis, dan datanya sengaja ditutup. Dokumen apa yang menentukan dijamin atau tidaknya?', // [konfirmasi PIC]
+  'inv2.tafsir.dokumen.salah.foto': 'Kerusakan bumpernya tidak diragukan. Yang belum kamu baca adalah apa yang tertulis di polisnya pada tanggal itu.',
+  'inv2.tafsir.dokumen.alasan': 'Struk sudah menjawab apa yang terjadi. Yang belum ada: isi polisnya, dan apakah pada tanggal kejadian ada perluasan penggunaan. Tanpa itu kita belum boleh memutuskan.', // [konfirmasi PIC]
+  'inv2.tafsir.dokumen.benar': 'Itu yang kurang: isi polisnya dan status perluasan penggunaan pada tanggal kejadian. Dokumennya kita minta dulu.', // [konfirmasi PIC]
+  'inv2.tafsir.klausul.tanya': 'Klausul mana yang menentukan untuk kasus ini?',
+  'inv2.tafsir.klausul.gambar': 'Kutipan polis dengan tiga klausul bernomor: klausul 1 bergambar mobil dan rumah, klausul 2 bergambar peta, klausul 3 bergambar orang di belakang kemudi.',
+  'inv2.tafsir.klausul.pilih.1': '1 · Penggunaan', // [konfirmasi PIC]
+  'inv2.tafsir.klausul.pilih.2': '2 · Wilayah', // [konfirmasi PIC]
+  'inv2.tafsir.klausul.pilih.3': '3 · Pengemudi', // [konfirmasi PIC]
+  'inv2.tafsir.klausul.salah.2': 'Tempat kejadiannya tidak dipersoalkan di berkas ini. Apa yang berbeda dari mobil ini malam itu?', // [konfirmasi PIC]
+  'inv2.tafsir.klausul.salah.3': 'Pak Yusuf sendiri yang mengemudi, dan itu tidak dipersoalkan. Apa yang berbeda dari mobil ini malam itu?', // [konfirmasi PIC]
+  'inv2.tafsir.klausul.alasan': 'Wilayah dan pengemudi tidak dipersoalkan. Yang berbeda malam itu pemakaian mobilnya: klausul 1, penggunaan.', // [konfirmasi PIC]
+  'inv2.tafsir.klausul.benar': 'Klausul 1 mengatur penggunaan kendaraan, dan pemakaian mobil itulah yang berbeda malam itu.', // [konfirmasi PIC]
+  'inv2.tafsir.klausul.temuan': 'Kutipan polis, klausul 1: penggunaan pribadi. Perluasan penggunaan komersial pada tanggal kejadian: tidak ada.', // [konfirmasi PIC]
+  'inv2.tafsir.klausul.ringkas': 'penggunaan pribadi', // [konfirmasi PIC]
 
   // Keberatan (terhadap kalimat Pak Yusuf; tanpa menuduh)
   'inv2.keb-buka.1': 'Tiga catatan sudah ada di buku catatanmu. Kamu menemui Pak Yusuf sekali lagi.',
   'inv2.keb-buka.2': 'Seperti yang saya bilang, malam itu saya cuma antar keluarga pulang.',
   'inv2.keb-buka.3': 'Ingat, kita tidak menuduh. Tunjukkan satu catatan yang menjawab: apa yang terjadi jam 21:18?',
-  'inv2.keb.1': 'Pilih satu catatan untuk ditunjukkan kepada Pak Yusuf.',
+  'inv2.keb.1': 'Pilih dua catatan yang tidak cocok: satu keterangan dan satu bukti.',
   'inv2.keb.2': 'Coba lagi. Cari catatan yang ada jamnya.',
   'inv2.keb.3': 'Tunjukkan struk perjalanan kepada Pak Yusuf.',
-  'inv2.keb.tanya': 'Catatan mana yang menunjukkan mobil sedang membawa penumpang berbayar jam 21:18?',
+  'inv2.keb.tanya': 'Catatan mana yang menjawab keterangan Pak Yusuf?',
+  // T-130 (babak 2) TEMUAN BERPASANGAN di percobaan pertama KEBERATAN: satu keterangan + satu bukti
+  'inv2.pasang.tanya': 'Catatan mana yang tidak cocok?',
+  'inv2.pasang.ket': 'Pilih satu keterangan dan satu bukti.',
+  'inv2.pasang.salah.agus': 'Keterangan Mas Agus tidak berbeda dari catatan di bukumu. Cari keterangan yang berbeda dari catatanmu.',
+  'inv2.pasang.alasan': 'Pak Yusuf berkata malam itu ia hanya mengantar keluarga. Keterangan itu yang perlu dicocokkan dengan catatanmu.',
+  'inv2.pasang.temuan': 'Keterangan "cuma antar keluarga" tidak cocok dengan struk perjalanan: benturan 21:18 terjadi di antara 21:05 dan 21:24.',
   'inv2.keb.petunjuk1': 'Belum tepat. Catatan mana yang ada jamnya? Lihat yang disorot.',
   'inv2.keb.petunjuk2': 'Benturan terjadi jam 21:18. Struk mencatat penumpang berbayar dari 21:05 sampai 21:24. Pakai struk itu.',
   'inv2.keb.pilih.foto-interior': 'Tunjukkan foto interior',
@@ -123,7 +174,11 @@ export const TEKS_AUTO_2_INV_2_ID: Record<string, string> = {
   'inv2.keb.pandu.foto-interior': 'Foto itu hanya petunjuk, bukan catatan jam. Mari kita lihat bersama.',
   'inv2.keb.pandu.polis-kasus2': 'Polis hanya aturannya, bukan kejadian malam itu. Mari kita lihat bersama.',
   'inv2.keb.cap': 'Struk perjalanan mencatat penumpang berbayar dari 21:05 sampai 21:24. Benturan terjadi jam 21:18.',
-  'inv2.akui.1': 'Saya sedang mengantar penumpang. Saya kira penggunaan itu sudah termasuk.',
+  // T-130 (butir 18): keberatan wajar Pak Yusuf sebelum ia meluruskan keterangannya; inv2.akui.tutup hanya untuk pemain bertanda jeli
+  'inv2.akui.tapi': 'Tapi struk itu hanya mencatat kapan saya menutup aplikasinya. Penumpangnya bisa saja sudah turun sebelum itu.',
+  'inv2.akui.tutup': 'Kamu ingat jawabannya tadi: perjalanan itu ia tutup sesudah mobil menepi.',
+  'inv2.akui.agus': 'Kamu menunjukkan satu catatan lagi, keterangan Mas Agus: penumpang itu turun sesudah benturan.',
+  'inv2.akui.1': 'Benar. Penumpangnya turun sesudah benturan. Saya memang sedang mengantar penumpang; saya kira penggunaan itu sudah termasuk.',
   'inv2.akui.2': 'Terima kasih sudah terbuka, Pak.',
   'inv2.koreksi.1': 'Kamu memperbarui keterangan Pak Yusuf di buku catatanmu.',
   'inv2.koreksi.judul': 'Keterangan diperbarui',
@@ -150,16 +205,16 @@ export const TEKS_AUTO_2_INV_2_ID: Record<string, string> = {
   'inv2.pesan.1': 'Terakhir, kabari Pak Yusuf. Ini bukan kabar yang ia harapkan, jadi cara menyampaikannya penting.',
   'inv2.pesan.2': 'Jadi bagaimana klaim bumper saya?',
   'inv2.pesan.tanya': 'Pesan mana yang kamu kirim?',
-  'inv2.pesan.baik': 'Pak Yusuf, terima kasih sudah terbuka, dan maaf kabarnya kurang enak. Polis Bapak untuk penggunaan pribadi, sedangkan struk mencatat penumpang berbayar saat benturan, tanpa perluasan penggunaan komersial. Karena itu klaim bumper ini tidak dapat kami setujui. Bapak dapat meminta peninjauan ulang lewat Layanan Nasabah Raksa. Untuk ke depan, Bapak bisa menanyakan perluasan penggunaan komersial.', // [konfirmasi PIC] kalimat penolakan, jalur peninjauan ulang (kanal), pilihan perluasan ke depan
-  'inv2.pesan.datar': 'Mohon maaf, Pak. Klaim tidak dapat kami setujui: polis Bapak untuk penggunaan pribadi, sedangkan saat benturan mobil membawa penumpang berbayar.', // [konfirmasi PIC] kalimat penolakan
-  'inv2.pesan.janji': 'Tenang Pak, saya usahakan tetap cair minggu ini.',
+  'inv2.pesan.baik': 'Pak Yusuf, maaf kabarnya kurang enak. Polis Bapak untuk penggunaan pribadi, dan saat benturan mobil sedang membawa penumpang berbayar, tanpa perluasan. Karena itu klaim bumper ini tidak dapat kami setujui. Bapak boleh meminta peninjauan ulang lewat Layanan Nasabah Raksa.', // [konfirmasi PIC] kalimat penolakan, jalur peninjauan ulang (kanal), pilihan perluasan ke depan
+  'inv2.pesan.datar': 'Dengan hormat. Merujuk pada ketentuan penggunaan kendaraan dalam polis serta hasil verifikasi dokumen pendukung, objek pertanggungan pada saat kejadian digunakan di luar penggunaan yang dipertanggungkan tanpa perluasan jaminan, sehingga klaim atas kerugian dimaksud tidak dapat diproses lebih lanjut. Demikian disampaikan.', // [konfirmasi PIC] kalimat penolakan
+  'inv2.pesan.janji': 'Tenang, Pak, saya usahakan tetap cair minggu ini. Nama dan nomor penumpang itu juga saya kirimkan, supaya Bapak bisa mengurusnya dengan dia.', // [konfirmasi PIC] janji tanpa dasar + data penumpang (privasi)
   'inv2.pesan.baik.alasan': 'Pak Yusuf tahu hasilnya, alasannya, dan jalur peninjauan ulangnya.', // [konfirmasi PIC] jalur peninjauan ulang
   'inv2.pesan.janji.alasan': 'Pak Yusuf lega sekarang, tetapi janji itu tidak punya dasar.',
   'inv2.pesan.baik.1': 'Saya kecewa, tapi saya mengerti alasannya. Terima kasih sudah menjelaskan dan memberi tahu jalurnya.',
-  'inv2.pesan.datar.1': 'Begitu... Lalu saya harus bagaimana? Tidak ada lagi yang bisa saya lakukan?',
-  'inv2.pesan.datar.2': 'Alasanmu benar dan sopan, tetapi Pak Yusuf tidak tahu ia boleh meminta peninjauan ulang.', // [konfirmasi PIC] hak meminta peninjauan ulang
+  'inv2.pesan.datar.1': 'Maaf, saya kurang paham bahasanya. Jadi ditolak? Lalu saya harus bagaimana?',
+  'inv2.pesan.datar.2': 'Isinya benar, tetapi bahasanya sulit dipahami, dan Pak Yusuf tidak tahu ia boleh meminta peninjauan ulang.', // [konfirmasi PIC] hak meminta peninjauan ulang
   'inv2.pesan.janji.1': 'Wah, syukurlah! Saya tunggu minggu ini, ya.',
-  'inv2.pesan.janji.2': 'Temuannya tidak berubah. Janji tanpa dasar akan mengecewakan Pak Yusuf dua kali.',
+  'inv2.pesan.janji.2': 'Temuannya tidak berubah, dan data penumpang tidak boleh dibagikan. Janji tanpa dasar akan mengecewakan Pak Yusuf dua kali.', // [konfirmasi PIC] data penumpang tidak dibagikan (privasi)
 
   // Akhir
   'inv2.akhir.tuntas.1': 'Kasus selesai, Investigator. Kamu adil ke dua arah: menemukan faktanya tanpa menuduh, lalu menjelaskannya dengan hormat.',
@@ -172,7 +227,7 @@ export const TEKS_AUTO_2_INV_2_ID: Record<string, string> = {
 
   // Layar hasil: kalimat Pak Yusuf menurut pesan yang dikirim, arsip, kasus 3
   'inv2.balas.baik': 'Terima kasih sudah jujur kepada saya, Investigator. Saya tahu ke mana meminta peninjauan ulang, dan saya akan menanyakan perluasan itu.', // [konfirmasi PIC] jalur peninjauan ulang
-  'inv2.balas.datar': 'Alasannya saya mengerti. Tapi saya masih tidak tahu apakah ada yang bisa saya lakukan.',
+  'inv2.balas.datar': 'Suratnya saya baca dua kali. Intinya ditolak, tapi saya masih tidak tahu apakah ada yang bisa saya lakukan.',
   'inv2.balas.janji': 'Minggu ini cair, kan? Saya sudah bilang ke bengkel. Semoga benar begitu.',
   'inv2.arsip.pesan': 'Pesanmu untuk Pak Yusuf',
   'inv2.hasil.kasus3': 'Kasus 3 · segera hadir',

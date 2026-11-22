@@ -426,3 +426,14 @@ Approve two rounds, with direct weakest-step practice moved into round 1. Peters
 Round 1 also removes premature visual clues and explains actual score losses. The existing result already shows category scores. The officer number is derived from name and day; clarify that before changing persistence.
 
 Round 2 should replace confirmation taps with one real inference per case. A mid-file decision can correctly request the missing endorsement while the final decision still uses the complete file. Keep the new deductions formative, cosmetic marks separate from stamps, and practice separate from ranked runs. This protects old saves and the 300-point series. Policy, privacy and referral language require PIC confirmation. Desktop-scripted feedback identifies real issues; five-minute pacing and enjoyment still need unaided guest observation.
+
+Confirmed working folder `C:\Users\User\Desktop\rksgm-episode2`.
+
+## Round 2 slice 1 review (2026-11-22)
+
+**Compatibility: yes, at c761b33. Verdict: fix before reuse.** Scored IDs, rubric, 40/30/30, /300 and device records are preserved. The formative pick advances locally; only the existing evidence choice reaches scoring. Practice retains its separate callback (`LayarInvestigasi.tsx:244,593,735`; `acara.ts:6`).
+
+1. **Case 1 still reveals the answer.** The neutral frame asks for an actual lane count, but live success feedback uses global `dashcam.tepat`, reduced-motion captions name the lanes, and the summary thumbnail redraws lane numbers (`ArenaDashcam.tsx:169,237,258`; `kamus/dashcam.ts:16,26`). Apply the Investigator variant to all three paths. The formative image’s alt is only its title (`LayarInvestigasi.tsx:241`); provide observable spatial relationships or document fields so nonvisual players can deduce too.
+2. **Shared zoom can select the wrong scored ID.** `LayarKeberatan.tsx:109,118` discards the opened card ID and selects `dashcam`. Carry the ID through zoom, render its exhibit and select that same card before enabling Case 2/3 zoom.
+3. **Resume.** Existing node IDs survive. Older SIM drafts reopen with zero misses. New drafts retain the miss count but lose the rejected option and hint; repeating that option after reload triggers guidance. Persist rejected IDs and restore feedback, accepting numeric legacy drafts (`PilihFormatif.tsx:49`). Gate the hunch recap on the interpretation flag so downstream legacy saves never receive an unearned “your finding” (`LayarInvestigasi.tsx:576`).
+4. **T-127 decisions 1–7:** approve integrated pairing, answer buttons, revised sightline, case-only number removal, neutral zoom, shorter licence check and per-run curiosity marks. Decisions 4–5 need the rendering fixes above. Static review only.

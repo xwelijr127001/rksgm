@@ -99,13 +99,13 @@ const KASUS: KonfigInvestigasi = {
   // 'sim': catatan SIM vs catatan kendaraan; SIM Pak Darto tetap sah (pilihan keliru hanya salah baca), mapan begitu dibaca.
   tafsir: [
     {
-      id: 'lajur', bukti: 'dashcam', tampilan: 'bingkai', seni: 'k1-bingkai-1432', lajur: [[24, 90], [90, 156], [156, 222], [222, 288]],
+      id: 'lajur', bukti: 'dashcam', tampilan: 'bingkai', seni: 'k1-bingkai-1432', seniKet: 'inv.tafsir.lajur.gambar', lajur: [[24, 90], [90, 156], [156, 222], [222, 288]],
       tanya: 'inv.tafsir.lajur.tanya', tepat: '2', hampir: ['kabur'],
       opsi: [{ id: '2', teks: 'inv.tafsir.lajur.pilih.2' }, { id: '3', teks: 'inv.tafsir.lajur.pilih.3' }, { id: 'kabur', teks: 'inv.tafsir.lajur.pilih.kabur' }],
       temuan: 'inv.tafsir.lajur.temuan', ringkas: 'inv.tafsir.lajur.ringkas', mapanSaat: tandaKoreksi('tol'),
     },
     {
-      id: 'sim', bukti: 'sim', tampilan: 'bingkai', seni: 'k1-catatan-sim',
+      id: 'sim', bukti: 'sim', tampilan: 'bingkai', seni: 'k1-catatan-sim', seniKet: 'inv.tafsir.sim.gambar',
       tanya: 'inv.tafsir.sim.tanya', tepat: 'cocok', hampir: ['tanggal'],
       opsi: [{ id: 'beda', teks: 'inv.tafsir.sim.pilih.beda' }, { id: 'cocok', teks: 'inv.tafsir.sim.pilih.cocok' }, { id: 'tanggal', teks: 'inv.tafsir.sim.pilih.tanggal' }],
       temuan: 'inv.tafsir.sim.temuan', ringkas: 'inv.tafsir.sim.ringkas',

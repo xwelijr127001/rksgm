@@ -27,9 +27,26 @@
  * Skor (cerita/investigasi/skor.ts) dari TANDA yang sama dengan kasus 1; tabel putusan KASUS INI: masalah pertanggungan 30,
  * butuh bukti tambahan 15, layak dijamin 0. Dua akhir: `tuntas` = putusan "ada masalah pertanggungan", `tinjau` = putusan lain
  * (diluruskan Miss Raksa). Status Pak Yusuf (30 = Cemas) hanya berubah oleh pesan.
+ *
+ * T-130 BABAK 2 (masukan Pak Peterson, rencana docs/superpowers/plans/2026-11-22-peterson-feedback.md "2 · Night trip"), di atas
+ * sambungan bersama T-127. Semua tambahan FORMATIF: tanpa poin, bukan pilihan bernilai, tanpa tanda yang dibaca skor. Yang TIDAK
+ * berubah: id node lama, id pilihan yang dinilai (kartu KEBERATAN, putusan, pesan) dan urutan percobaannya, tanda skor, versi.
+ *  b1 pembuka tanpa jam benturan (jamnya dibaca pemain); judul kartu foto netral
+ *  b2 kjalan  = tafsir 'jam' (formulir kejadian + tiga slip 21:05 / 21:18 / 21:24: slip mana jam benturan?) menggantikan garis waktu
+ *     seret-satu-kartu -> baca-struk (BARU, tafsir 'struk': di mana 21:18 pada perjalanan di struk?) -> bukti-struk
+ *     yusuf-tanya = PILIHAN dua pertanyaan: 'tekan' -> yusuf-tekan (kapan perjalanan ditutup: BERGUNA, tanda jeli) |
+ *     'tekan-dudukan' -> yusuf-tekan-dudukan (kenapa HP di dasbor: sopan, tidak membuka hal baru)
+ *     kurang (BARU, tafsir 'dokumen': berkas belum lengkap = "perlu bukti tambahan"; dokumen apa yang kurang?) -> kpolis
+ *     kpolis  = tafsir 'klausul' (kutipan polis tiga klausul: penggunaan / wilayah / pengemudi) menggantikan satu ketukan
+ *  b3 keb-buka dua baris; keb0 = TEMUAN BERPASANGAN (keterangan + bukti; kartunya tetap pilihan bernilai yang sama); keb-akui =
+ *     Pak Yusuf lebih dulu berkeberatan dengan wajar ("struk hanya mencatat kapan saya menutup aplikasinya"), lalu keterangan Mas
+ *     Agus (penumpang turun SESUDAH benturan) menjawabnya, baru ia meluruskan keterangannya
+ *  b4 putusan-buka satu baris; pesan: tiga pesan ditulis ulang (id dan nilai sama, lihat komentar node 'pesan')
+ * Simpanan di tengah kasus: semua node lama masih ada dan terjangkau; tiga node baru hanya DISISIPKAN. Simpanan yang sudah
+ * melewati titik itu tidak punya tanda `tafsir:*`: slip buktinya tanpa baris tafsir.
  */
 import type { Baris, CueLatar, Efek, Ekspresi, Episode, IdNode, KonfigInvestigasi, Kondisi, MusikNode, NodeCerita, NodeInvestigasi, Press } from '../../tipe';
-import { PILIH_LANJUT, PILIH_TEKAN, tandaBukti, tandaCatat, tandaKeberatan, tandaKoreksi, tandaPesan, tandaPutusan, tandaTebak, tandaTekan } from '../../investigasi/status';
+import { PILIH_LANJUT, PILIH_TEKAN, tandaBukti, tandaCatat, tandaKeberatan, tandaKoreksi, tandaPesan, tandaPutusan, tandaTafsir, tandaTebak, tandaTekan } from '../../investigasi/status';
 import { EPISODE_AUTO_2 } from '../auto-2/episode';
 import { PEMERAN_KASUS_2 } from './pemeran';
 import { TEKS_AUTO_2_INV_2 } from './teks';
@@ -49,8 +66,15 @@ const TELEPON_YUSUF: CueLatar = { lokasi: 'kantor', hadir: [], telepon: 'yusuf',
  * Data KASUS 2 (`Episode.investigasi`): semua yang berbeda dari kasus 1 ada di sini (lihat KonfigInvestigasi, cerita/tipe.ts).
  * Kunci teks naskahnya berawalan `inv2`.
  */
-/** T-104 "Tanya lebih lanjut" pada keterangan Pak Yusuf: kapan perjalanan itu ditutup di aplikasi? Tanpa poin; hanya konteks. */
-const TEKAN_YUSUF: Press = { id: 'tutup', questionKey: 'inv2.tekan.yusuf.tanya', answerKey: 'inv2.tekan.yusuf.jawab' };
+/**
+ * T-104 "Tanya lebih lanjut" pada keterangan Pak Yusuf. T-130: DUA pertanyaan, pilih satu.
+ *  - 'tutup' (id dan tanda lama `press:yusuf:tutup`): "Kapan perjalanan itu ditutup di aplikasi?" = BERGUNA: ia menutupnya SESUDAH
+ *    mobil menepi. Itulah yang nanti menjelaskan keberatan wajarnya ("struk hanya mencatat kapan saya menutup aplikasinya").
+ *  - 'dudukan': "Kenapa HP itu terpasang di dasbor?" = dijawab dengan sopan, tidak membuka hal baru (tanpa tanda jeli).
+ */
+const TEKAN_YUSUF: Press = { id: 'tutup', questionKey: 'inv2.tekan.yusuf.tanya', answerKey: 'inv2.tekan.yusuf.jawab', berguna: true };
+const TEKAN_YUSUF_DUDUKAN: Press = { id: 'dudukan', questionKey: 'inv2.tekan.yusuf.dudukan.tanya', answerKey: 'inv2.tekan.yusuf.dudukan.jawab' };
+const PILIH_TEKAN_DUDUKAN = `${PILIH_TEKAN}-${TEKAN_YUSUF_DUDUKAN.id}`;
 
 const KASUS: KonfigInvestigasi = {
   kasus: 'kasus-2',
@@ -63,14 +87,42 @@ const KASUS: KonfigInvestigasi = {
   balasan: { baik: 'lega', datar: 'cemas', janji: 'senang' },
   bingkai: 'seni',
   pernyataan: [
-    { id: 'yusuf', siapa: 'yusuf', teks: 'inv2.pernyataan.yusuf', press: TEKAN_YUSUF },
+    { id: 'yusuf', siapa: 'yusuf', teks: 'inv2.pernyataan.yusuf', press: TEKAN_YUSUF, pressLain: [TEKAN_YUSUF_DUDUKAN] },
     { id: 'agus', siapa: 'agus', teks: 'inv2.pernyataan.agus' },
   ],
   // Urut terkumpul (buku catatan): foto di pembuka, struk dari garis waktu, polis dari halaman polis.
   bukti: [
+    // T-130: judul kartu NETRAL (nama sumbernya); gambar slip struk dan polis = seni babak 2 (struk yang ditutup, kutipan tiga klausul).
     { id: 'foto-interior', judul: 'inv2.bukti.foto.judul', sumber: 'inv2.bukti.foto.sumber', ikon: 'foto' },
-    { id: 'struk', judul: 'inv2.bukti.struk.judul', sumber: 'inv2.bukti.struk.sumber', ikon: 'struk' },
-    { id: 'polis-kasus2', judul: 'inv2.bukti.polis.judul', sumber: 'inv2.bukti.polis.sumber', ikon: 'polis' },
+    { id: 'struk', judul: 'inv2.bukti.struk.judul', sumber: 'inv2.bukti.struk.sumber', ikon: 'struk', seni: 'k2-struk' },
+    { id: 'polis-kasus2', judul: 'inv2.bukti.polis.judul', sumber: 'inv2.bukti.polis.sumber', ikon: 'polis', seni: 'k2-polis' },
+  ],
+  // T-130 TAFSIR (formatif, urut alur):
+  //  jam      formulir kejadian + tiga slip waktu (seni T-128): slip mana jam benturan? Tanpa kartu (formulir bukan kartu bukti)
+  //           dan tanpa baris temuan sendiri: jamnya tertulis di temuan struk. Begitu juga 'dokumen' (langkah antara).
+  //  struk    struk yang ditutup: di mana jam itu pada perjalanannya? Mapan sesudah Pak Yusuf meluruskan keterangannya.
+  //  dokumen  [konfirmasi PIC] berkas belum lengkap = "perlu bukti tambahan": dokumen yang kurang = status perluasan penggunaan
+  //           pada tanggal kejadian; pengecoh = identitas penumpang (privasi), foto bumper kedua. Tanpa gambar bukti.
+  //  klausul  [konfirmasi PIC] kutipan polis tiga klausul: yang menentukan = 1 (penggunaan); 2 wilayah, 3 pengemudi.
+  tafsir: [
+    {
+      id: 'jam', tampilan: 'bingkai', seni: 'k2-formulir', seniKet: 'inv2.tafsir.jam.gambar', tanya: 'inv2.tafsir.jam.tanya', tepat: '2118',
+      opsi: (['2105', '2118', '2124'] as const).map((x) => ({ id: x, teks: `inv2.tafsir.jam.pilih.${x}`, seni: `${x.slice(0, 2)}:${x.slice(2)}`, ket: `inv2.tafsir.jam.ket.${x}` })),
+    },
+    {
+      id: 'struk', bukti: 'struk', tampilan: 'bingkai', seni: 'k2-struk', seniKet: 'inv2.tafsir.struk.gambar', tanya: 'inv2.tafsir.struk.tanya', tepat: 'tengah',
+      opsi: (['sebelum', 'tengah', 'sesudah'] as const).map((x) => ({ id: x, teks: `inv2.jalan.l3.${x}` })),
+      temuan: 'inv2.tafsir.struk.temuan', ringkas: 'inv2.tafsir.struk.ringkas', mapanSaat: tandaKoreksi('yusuf'),
+    },
+    {
+      id: 'dokumen', tampilan: 'daftar', tanya: 'inv2.tafsir.dokumen.tanya', tepat: 'perluasan', hadiah: 'k2-endorsemen',
+      opsi: (['identitas', 'perluasan', 'foto'] as const).map((x) => ({ id: x, teks: `inv2.tafsir.dokumen.pilih.${x}` })),
+    },
+    {
+      id: 'klausul', bukti: 'polis-kasus2', tampilan: 'bingkai', seni: 'k2-polis', seniKet: 'inv2.tafsir.klausul.gambar', tanya: 'inv2.tafsir.klausul.tanya', tepat: '1',
+      opsi: (['1', '2', '3'] as const).map((x) => ({ id: x, teks: `inv2.tafsir.klausul.pilih.${x}` })),
+      temuan: 'inv2.tafsir.klausul.temuan', ringkas: 'inv2.tafsir.klausul.ringkas',
+    },
   ],
   tebak: {
     pilihan: (['keluarga', 'penumpang', 'belum'] as const).map((id) => ({ id, teks: `inv2.tebak.pilih.${id}` })),
@@ -83,6 +135,10 @@ const KASUS: KonfigInvestigasi = {
     urutan: ['foto-interior', 'struk', 'polis-kasus2'],
     tanya: 'inv2.keb.tanya',
     layar: { tanya: 'inv2.keb.tanya', petunjuk1: 'inv2.keb.petunjuk1', petunjuk2: 'inv2.keb.petunjuk2' },
+    // T-130: percobaan pertama = pemain memilih DUA catatan (keterangan + bukti); kartu bukti tetap pilihan bernilai yang sama.
+    pasangan: { tanya: 'inv2.pasang.tanya', ket: 'inv2.pasang.ket', temuan: 'inv2.pasang.temuan' },
+    // T-130: struk dan kutipan polis bisa diperbesar (gambar netralnya); lembar perbesar memilih kartu yang DIBUKA (perbaikan T-131).
+    perbesar: ['struk', 'polis-kasus2'],
     // Potret di bawah cap = sel potret reaksi Designer (T-091): Pak Yusuf menjelaskan dengan tenang, kedua telapak tangan terbuka.
     reaksi: 'yusuf-terbuka',
   },
@@ -145,7 +201,13 @@ function bangunNode(): NodeCerita[] {
 
     // ---------------------------------------------------------------- b2: garis waktu perjalanan (kartu struk), halaman polis (kartu polis)
     // Pak Yusuf memperlihatkan SATU struk dengan sukarela (nama dan alamat penumpang ditutup); layarnya ui/PeriksaPerjalanan.
-    dialog('kjalan', RUANG('yusuf'), [b('inv2.jalan.1', 'narasi'), b('inv2.jalan.2', 'yusuf', 'netral')], 'bukti-struk', { investigasi: { jenis: 'periksa-perjalanan' } }),
+    // T-130: layar node ini kini tafsir 'jam' (slip mana jam benturan?); id node, jenis dan dua baris pengantarnya tidak berubah.
+    dialog('kjalan', RUANG('yusuf'), [b('inv2.jalan.1', 'narasi'), b('inv2.jalan.2', 'yusuf', 'netral')], 'baca-struk',
+      { efek: { pasang: [tandaTafsir('jam')] }, investigasi: { jenis: 'periksa-perjalanan' } }),
+    // T-130 TAFSIR 'struk' (formatif, node BARU yang disisipkan): pemain menaruh jam benturan pada perjalanan di struk. Simpanan lama
+    // di 'kjalan' lewat sini; yang sudah di 'bukti-struk' tidak.
+    dialog('baca-struk', RUANG('yusuf'), [b('inv2.baca.struk.1', 'narasi')], 'bukti-struk',
+      { efek: { pasang: [tandaTafsir('struk')] }, investigasi: { jenis: 'tafsir', tafsir: 'struk' } }),
     dialog('bukti-struk', RUANG('yusuf'), [b('inv2.bukti.struk.1', 'narasi')], 'yusuf-tanya',
       { efek: { pasang: [tandaBukti('struk')] }, investigasi: { jenis: 'bukti', bukti: 'struk' } }),
     // T-104 "Tanya lebih lanjut" (opsional, tanpa poin, NodeDasar.tekan): simpangan sesudah struk tersimpan; kedua cabang maju ke
@@ -153,25 +215,39 @@ function bangunNode(): NodeCerita[] {
     {
       id: 'yusuf-tanya', bab: '', jenis: 'pilihan', tata: RUANG('yusuf'), baris: [b('inv.ui.tekan.1', 'narasi')], tanya: 'inv.ui.tekan.pilih',
       tekan: { pernyataan: 'yusuf', press: TEKAN_YUSUF.id, langkah: 'tawar' },
+      // T-130: dua pertanyaan, pilih satu (atau lanjut). Id 'tekan' dan 'lanjut' = id lama; pertanyaan kedua = 'tekan-dudukan'.
       pilihan: [
         { id: PILIH_TEKAN, teks: TEKAN_YUSUF.questionKey, lanjut: 'yusuf-tekan' },
-        { id: PILIH_LANJUT, teks: 'inv.ui.tekan.lanjut', lanjut: 'kpolis' },
+        { id: PILIH_TEKAN_DUDUKAN, teks: TEKAN_YUSUF_DUDUKAN.questionKey, lanjut: 'yusuf-tekan-dudukan' },
+        { id: PILIH_LANJUT, teks: 'inv.ui.tekan.lanjut', lanjut: 'kurang' },
       ],
     },
     {
-      ...dialog('yusuf-tekan', RUANG('yusuf'), [b(TEKAN_YUSUF.answerKey, 'yusuf', 'netral')], 'kpolis', { efek: { pasang: [tandaTekan('yusuf', TEKAN_YUSUF.id)] } }),
+      ...dialog('yusuf-tekan', RUANG('yusuf'), [b(TEKAN_YUSUF.answerKey, 'yusuf', 'netral')], 'kurang', { efek: { pasang: [tandaTekan('yusuf', TEKAN_YUSUF.id)] } }),
       tekan: { pernyataan: 'yusuf', press: TEKAN_YUSUF.id, langkah: 'jawab' },
     },
+    {
+      ...dialog('yusuf-tekan-dudukan', RUANG('yusuf'), [b(TEKAN_YUSUF_DUDUKAN.answerKey, 'yusuf', 'netral')], 'kurang', { efek: { pasang: [tandaTekan('yusuf', TEKAN_YUSUF_DUDUKAN.id)] } }),
+      tekan: { pernyataan: 'yusuf', press: TEKAN_YUSUF_DUDUKAN.id, langkah: 'jawab' },
+    },
+    // T-130 TAFSIR 'dokumen' (formatif, node BARU; rencana butir 16): SEBELUM polisnya dibaca, berkas belum lengkap. Jawaban jujurnya
+    // saat itu "perlu bukti tambahan", dan pemain menyebut dokumen yang kurang. Putusan akhirnya (node 'putusan', bernilai) tidak
+    // berubah: di sana berkas sudah lengkap. [konfirmasi PIC] dokumen yang menentukan dan urutan memintanya.
+    dialog('kurang', KANTOR, [b('inv2.kurang.1', 'narasi')], 'kpolis',
+      { efek: { pasang: [tandaTafsir('dokumen')] }, investigasi: { jenis: 'tafsir', tafsir: 'dokumen' } }),
     // [konfirmasi PIC] Halaman polis fiktif: klausul penggunaan + status perluasan pada tanggal kejadian (ui/PeriksaPolis, satu ketukan).
-    dialog('kpolis', KANTOR, [b('inv2.polis.1', 'missRaksa', 'serius')], 'bukti-polis', { investigasi: { jenis: 'periksa-polis' } }),
+    // T-130: layarnya kini tafsir 'klausul' (penggunaan / wilayah / pengemudi) atas kutipan polis; id node dan jenisnya tidak berubah.
+    dialog('kpolis', KANTOR, [b('inv2.polis.1', 'missRaksa', 'serius')], 'bukti-polis',
+      { efek: { pasang: [tandaTafsir('klausul')] }, investigasi: { jenis: 'periksa-polis' } }),
     dialog('bukti-polis', KANTOR, [b('inv2.bukti.polis.1', 'narasi')], 'keb-buka', // [konfirmasi PIC]
       { efek: { pasang: [tandaBukti('polis-kasus2')] }, investigasi: { jenis: 'bukti', bukti: 'polis-kasus2' } }),
 
     // ---------------------------------------------------------------- b3: KEBERATAN (kalimat Pak Yusuf vs satu catatan); tanpa menuduh
+    // T-130: kalimat Miss Raksa "tunjukkan satu catatan yang menjawab: apa yang terjadi jam 21:18?" (inv2.keb-buka.3) dilepas dari
+    // graf: ia menunjuk jawabannya. Pemain kini memasangkan sendiri dua catatan. Kunci teksnya tetap ada (riwayat simpanan lama).
     dialog('keb-buka', RUANG('yusuf'), [
       b('inv2.keb-buka.1', 'narasi'),
       b('inv2.keb-buka.2', 'yusuf', 'netral'),
-      b('inv2.keb-buka.3', 'missRaksa', 'serius', RUANG_TELEPON('yusuf')),
     ], 'keb0'),
     ...keberatan(0, 'inv2.keb.1', 'keb1', (x) => `inv2.keb.salah.${x}`),
     ...keberatan(1, 'inv2.keb.2', 'keb2', (x) => `inv2.keb.pandu.${x}`),
@@ -181,7 +257,14 @@ function bangunNode(): NodeCerita[] {
     dialog('keb-cap', RUANG('yusuf'), [b('inv2.keb.cap', 'narasi')], 'keb-akui', { investigasi: { jenis: 'cap' } }),
     // Pak Yusuf tenang dan bermartabat ('tersenyum' = wajah TERBUKA di ./pemeran.ts: menjelaskan dengan tenang, bukan pose malu);
     // niatnya tidak dinilai. Miss Raksa berterima kasih.
+    // T-130 (butir 18): Pak Yusuf tidak langsung meluruskan. Keberatannya WAJAR: struk hanya mencatat kapan ia menutup aplikasinya,
+    // bukan kapan penumpangnya turun. Catatan kedua (keterangan Mas Agus: turun SESUDAH benturan) menjawabnya; baru ia meluruskan
+    // keterangannya, tetap tenang. Tanpa putaran tanya-jawab baru, tanpa menuduh. Baris 'inv2.akui.tutup' hanya untuk pemain yang
+    // tadi menanyakan kapan perjalanan itu ditutup (tanda jeli).
     dialog('keb-akui', RUANG('yusuf'), [
+      b('inv2.akui.tapi', 'yusuf', 'netral'),
+      { ...b('inv2.akui.tutup', 'narasi'), jika: tanda(tandaTekan('yusuf', TEKAN_YUSUF.id)) },
+      b('inv2.akui.agus', 'narasi'),
       b('inv2.akui.1', 'yusuf', 'tersenyum'),
       b('inv2.akui.2', 'missRaksa', 'tersenyum', RUANG_TELEPON('yusuf')),
     ], 'keb-koreksi'),
@@ -190,7 +273,8 @@ function bangunNode(): NodeCerita[] {
       { efek: { pasang: [tandaKoreksi(KEB.pernyataan)] }, investigasi: { jenis: 'koreksi', pernyataan: KEB.pernyataan } }),
 
     // ---------------------------------------------------------------- b4: putusan, pesan untuk Pak Yusuf, hasil
-    dialog('putusan-buka', KANTOR, [b('inv2.putusan.1', 'missRaksa', 'tersenyum'), b('inv2.putusan.2', 'missRaksa', 'serius')], 'putusan'),
+    // T-130: satu baris (kalimat penegasan 'inv2.putusan.1' dilepas dari graf untuk menjaga panjang kasus; kuncinya tetap ada).
+    dialog('putusan-buka', KANTOR, [b('inv2.putusan.2', 'missRaksa', 'serius')], 'putusan'),
     {
       id: 'putusan', bab: '', jenis: 'pilihan', tata: KANTOR, baris: [b('inv2.putusan.3', 'narasi')], tanya: 'inv2.putusan.tanya',
       investigasi: { jenis: 'putusan' },
@@ -204,6 +288,10 @@ function bangunNode(): NodeCerita[] {
       id: 'pesan', bab: '', jenis: 'pilihan', tata: TELEPON_YUSUF, baris: [b('inv2.pesan.1', 'narasi'), b('inv2.pesan.2', 'yusuf', 'cemas')], tanya: 'inv2.pesan.tanya',
       // [konfirmasi PIC] 'baik' = mengakui, menyebut ketentuan + temuan, jalur peninjauan ulang (kanal), perluasan ke depan terpisah
       // dari kerugian ini; 'datar' = alasan benar dan sopan tanpa jalur peninjauan; 'janji' = janji pembayaran tanpa dasar.
+      // T-130 (butir 15): TIGA pilihan, id dan nilai tidak berubah (rubrik bersama hanya mengenal baik / datar / janji, jadi pengecoh
+      // keempat tidak bisa ditambah tanpa id baru). Yang berubah hanya kalimatnya: 'baik' kini lebih pendek (ketentuan yang berlaku +
+      // jalur peninjauan ulang); 'datar' = benar tetapi penuh istilah dan PALING panjang, tanpa jalur peninjauan; 'janji' = janji
+      // pembayaran tanpa dasar yang juga menjanjikan data penumpang (pelanggaran privasi).
       pilihan: [
         { id: 'janji', teks: 'inv2.pesan.janji', efek: { kepercayaan: 10, alasan: 'inv2.pesan.janji.alasan', pasang: [tandaPesan('janji')] }, lanjut: 'pesan-janji' },
         { id: 'baik', teks: 'inv2.pesan.baik', efek: { kepercayaan: 30, alasan: 'inv2.pesan.baik.alasan', pasang: [tandaPesan('baik')] }, lanjut: 'pesan-baik' },
@@ -225,7 +313,7 @@ function bangunNode(): NodeCerita[] {
 /** Bagian tiap node (kepala layar "BAGIAN n/4"). */
 function babInv2(id: IdNode): string {
   if (['judul', 'buka', 'bukti-foto', 'tebak', 'yusuf', 'agus', 'selisih'].includes(id)) return 'b1';
-  if (['kjalan', 'bukti-struk', 'yusuf-tanya', 'yusuf-tekan', 'kpolis', 'bukti-polis'].includes(id)) return 'b2';
+  if (['kjalan', 'baca-struk', 'bukti-struk', 'yusuf-tanya', 'yusuf-tekan', 'yusuf-tekan-dudukan', 'kurang', 'kpolis', 'bukti-polis'].includes(id)) return 'b2';
   if (id.startsWith('keb')) return 'b3';
   return 'b4';
 }

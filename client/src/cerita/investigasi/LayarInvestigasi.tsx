@@ -62,7 +62,7 @@ import { aksiLanjut, daftarKasusHub, tamuBaruSemuaKasus, tujuanPangkat, type Kas
 import { RUTE_HUB, ruteKasus, useRumahCerita } from './rute';
 import { adaRekaman, bacaRekaman, berlanggananInvestigasi, catatHadiah, catatHasil, catatIntipKasus2, hadiahRekaman, pangkatRekaman, stempelSeri, TOTAL_MAKS, totalSkor, versiInvestigasi } from './simpan';
 import { MAKS_LANGKAH, poinBabak, poinKeberatan, poinPesan, poinPutusan, putusanTepat, rincianBabak, skorKasus, skorKasusLengkap, titikTerlemah, type SkorKasus, type TitikLatihan } from './skor';
-import { buktiTerkumpul, hasilKasus, hasilKasusLengkap, PESAN, PILIH_LANJUT, pernyataanTercatat, pilihTekan, semuaPernyataanDikoreksi, semuaPress, tebakanAwal, tekananTerbuka, temuanKasus, type Bukti, type HasilBabak, type HasilKeberatan, type HasilLengkap, type Pernyataan, type Pesan, type Putusan } from './status';
+import { buktiTerkumpul, hasilKasus, hasilKasusLengkap, PESAN, PILIH_LANJUT, pernyataanTercatat, pilihTekan, semuaPernyataanDikoreksi, semuaPress, tafsirDibuat, tebakanAwal, tekananTerbuka, temuanKasus, type Bukti, type HasilBabak, type HasilKeberatan, type HasilLengkap, type Pernyataan, type Pesan, type Putusan } from './status';
 import { BukuCatatan, PotretReaksi, reaksiSah, type KoreksiPernyataan, type TemuanSlip } from './ui/BukuCatatan';
 import { CapKeberatan } from './ui/CapKeberatan';
 import { PenyediaTeksInvestigasi } from './ui/dasar';
@@ -76,7 +76,7 @@ import { PeriksaPerjalanan } from './ui/PeriksaPerjalanan';
 import { PeriksaPolis } from './ui/PeriksaPolis';
 import { PeriksaSim } from './ui/PeriksaSim';
 import { PilihFormatif } from './ui/PilihFormatif';
-import { SENI_R2, type IdSeniR2 } from './ui/seniR2';
+import { SENI_R2, SLIP_WAKTU_K2, type IdSeniR2 } from './ui/seniR2';
 import { seniKasus } from './ui/seniKasus';
 import { SeniTolNetral } from './ui/SeniTolNetral';
 import { evidenceArt, PanelAward, PanelExhibit, PanelRound, PressPanel } from './ui/panel';
@@ -146,8 +146,10 @@ function slipTemuan(ep: Episode, state: StateCerita, tx: Tx): Record<string, Tem
 }
 
 /**
- * T-127: gambar bukti babak 2 (seni T-128, 288 x 192, 1 piksel gambar = 1 px CSS). `alt` = judul kartu yang netral (bukan
- * tafsirnya). `lajur` = nomor lajur 1..n di tengah tiap lajur: HANYA digambar sebagai bantuan penjelasan (kekeliruan kedua).
+ * T-127: gambar bukti babak 2 (seni T-128, 288 x 192, 1 piksel gambar = 1 px CSS). `lajur` = nomor lajur 1..n di tengah tiap
+ * lajur: HANYA digambar sebagai bantuan penjelasan (kekeliruan kedua).
+ * T-130 (tinjauan Codex): `alt` = uraian yang TERLIHAT di gambar itu (hubungan letak, isian kotak; `seniKet` kasusnya), tanpa
+ * kesimpulannya, supaya pemain pembaca layar bisa menafsirkan sendiri. Tanpa uraian = judul kartu yang netral.
  */
 function GambarR2({ seni, alt, lajur }: { seni: string; alt: string; lajur?: readonly (readonly [number, number])[] }) {
   const g = seni in SENI_R2 ? SENI_R2[seni as IdSeniR2] : null;
@@ -215,13 +217,18 @@ function simpanPeriksa(ep: Episode, state: StateCerita, n: number | null): void 
  * Simpanan lama di tengah periksa SIM tiga ketukan (periksaSim 1..2, tanpa kunci ini) = layar baru tanpa kekeliruan.
  */
 const DRAF_TAFSIR = 'tafsir';
-function tafsirTersimpan(ep: Episode, state: StateCerita): number {
+/**
+ * T-130 (tinjauan Codex): draf = DAFTAR id pilihan yang sudah ditolak (urut), supaya muat ulang memulihkan pilihan yang padam dan
+ * penunjuknya. Draf T-127 berupa ANGKA (jumlah kekeliruan saja) tetap dibaca apa adanya.
+ */
+function tafsirTersimpan(ep: Episode, state: StateCerita): number | string[] {
   const d = bacaDrafAktivitas(ep.id, kunjunganAktivitas(state));
   const n = d && typeof d === 'object' ? (d as Record<string, unknown>)[DRAF_TAFSIR] : null;
+  if (Array.isArray(n)) return n.filter((x): x is string => typeof x === 'string' && x.length <= 40).slice(0, 2);
   return typeof n === 'number' && Number.isFinite(n) ? Math.max(0, Math.min(2, Math.floor(n))) : 0;
 }
-function simpanTafsir(ep: Episode, state: StateCerita, n: number | null, periksa: boolean): void {
-  simpanDrafAktivitas(ep.id, kunjunganAktivitas(state), n === null ? {} : { ...(periksa ? { [DRAF_PERIKSA]: 1 } : {}), [DRAF_TAFSIR]: n });
+function simpanTafsir(ep: Episode, state: StateCerita, gugur: number | string[] | null, periksa: boolean): void {
+  simpanDrafAktivitas(ep.id, kunjunganAktivitas(state), gugur === null ? {} : { ...(periksa ? { [DRAF_PERIKSA]: 1 } : {}), [DRAF_TAFSIR]: gugur });
 }
 
 /**
@@ -234,14 +241,19 @@ function LayarTafsir({ ep, konfig, state, tafsir, periksa, tx, onLanjut }: { ep:
     if (periksa && periksaTersimpan(ep, state) === 0) simpanTafsir(ep, state, awal, true);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-  const kartu = konfig.bukti.find((x) => x.id === tafsir.bukti);
+  const kartu = tafsir.bukti ? konfig.bukti.find((x) => x.id === tafsir.bukti) : undefined;
   const k = (ekor: string) => tx(kunci(konfig, `tafsir.${tafsir.id}.${ekor}`));
+  const seni = tafsir.seni;
+  const alt = tafsir.seniKet ? tx(tafsir.seniKet) : kartu ? tx(kartu.judul) : '';
+  // Pilihan bergambar: slip waktu kasus 2 (96 x 68); gambarnya hiasan, nama aksesnya = teks + keterangan pilihan itu.
+  const slip = (id: string | undefined) => (id && id in SLIP_WAKTU_K2 ? <img className="r2-slip" src={SLIP_WAKTU_K2[id as keyof typeof SLIP_WAKTU_K2]} width={96} height={68} alt="" /> : undefined);
+  const hadiah = tafsir.hadiah && tafsir.hadiah in SENI_R2 ? <img className="r2-slip" src={SENI_R2[tafsir.hadiah as IdSeniR2].thumb} width={96} height={68} alt="" /> : undefined;
   return (
-    <PilihFormatif id={tafsir.id} tanya={tx(tafsir.tanya)} awal={awal}
-      gambar={(jelas) => <GambarR2 seni={tafsir.seni} alt={kartu ? tx(kartu.judul) : ''} lajur={jelas ? tafsir.lajur : undefined} />}
-      opsi={tafsir.opsi.map((o) => ({ id: o.id, teks: tx(o.teks) }))} tepat={tafsir.tepat} hampir={tafsir.hampir}
+    <PilihFormatif id={tafsir.id} tanya={tx(tafsir.tanya)} awal={awal} susun={tafsir.tampilan === 'daftar' ? 'kolom' : 'baris'} hadiah={hadiah}
+      gambar={seni ? (jelas) => <GambarR2 seni={seni} alt={alt} lajur={jelas ? tafsir.lajur : undefined} /> : undefined}
+      opsi={tafsir.opsi.map((o) => ({ id: o.id, teks: tx(o.teks), gambar: slip(o.seni), ...(o.ket ? { ket: tx(o.ket) } : {}) }))} tepat={tafsir.tepat} hampir={tafsir.hampir}
       salah={(id) => k(`salah.${id}`)} alasan={k('alasan')} benar={k('benar')} lanjut={tx('inv.ui.lanjut')}
-      onCoba={(n) => simpanTafsir(ep, state, n, periksa)} onSelesai={() => { simpanTafsir(ep, state, null, periksa); onLanjut(); }} />
+      onCoba={(gugur) => simpanTafsir(ep, state, gugur, periksa)} onSelesai={() => { simpanTafsir(ep, state, null, periksa); onLanjut(); }} />
   );
 }
 
@@ -518,12 +530,17 @@ function LayarTekan({ konfig, node, tx, onLanjut, onPilih }: { konfig: KonfigInv
 }
 
 /**
- * T-127: isi lembar "perbesar" KEBERATAN untuk kasus yang kartu tepatnya punya seni babak 2: gambar bukti yang netral (tanpa nomor
- * lajur, tanpa sorotan). undefined = lembar lama (bingkai dashcam bernomor).
+ * T-127: isi lembar "perbesar" KEBERATAN untuk kartu yang punya seni babak 2: gambar bukti yang netral (tanpa nomor lajur, tanpa
+ * sorotan). undefined = lembar lama (bingkai dashcam bernomor).
  */
-function zumBukti(konfig: KonfigInvestigasi, tx: Tx): ReactNode | undefined {
-  const b = konfig.bukti.find((x) => x.id === konfig.keberatan.tepat);
-  return b?.seni ? <GambarR2 seni={b.seni} alt={tx(b.judul)} /> : undefined;
+function zumBukti(konfig: KonfigInvestigasi, tx: Tx): (id: Bukti['id']) => ReactNode | undefined {
+  // T-130: per KARTU yang dibuka (bukan selalu kartu yang tepat). Alt = uraian tafsir kartu itu bila ada, selain itu judulnya.
+  return (id) => {
+    const b = konfig.bukti.find((x) => x.id === id);
+    if (!b?.seni) return undefined;
+    const tf = konfig.tafsir?.find((x) => x.bukti === id && x.seni === b.seni);
+    return <GambarR2 seni={b.seni} alt={tf?.seniKet ? tx(tf.seniKet) : tx(b.judul)} />;
+  };
 }
 
 export function LayarInvestigasi({ ep, state, node, tx, onLanjut, onPilih, onMulaiUlang }: {
@@ -573,7 +590,10 @@ export function LayarInvestigasi({ ep, state, node, tx, onLanjut, onPilih, onMul
       break;
     case 'bukti': {
       const id = [inv.bukti, ...(inv.juga ?? [])];
-      const tebakan = id.includes(konfig.tebak.balikPada) ? tebakanAwal(ep, state) : null;
+      // T-130 (tinjauan Codex): kalimat "Tebakan awalmu ... tafsiranmu ..." hanya bila tafsir kartu itu memang DIBUAT pemain di
+      // simpanan ini. Simpanan lama yang sudah melewati layar tafsir tidak pernah diberi "tafsiranmu" yang tidak ia buat.
+      const tafsirKartu = konfig.tafsir?.find((x) => x.bukti === konfig.tebak.balikPada);
+      const tebakan = id.includes(konfig.tebak.balikPada) && (!tafsirKartu || tafsirDibuat(state, tafsirKartu.id)) ? tebakanAwal(ep, state) : null;
       isi = <LayarBukti key={node.id} ep={ep} state={state} bukti={konfig.bukti.filter((x) => id.includes(x.id))} keterangan={barisPertama}
         balik={tebakan ? tx(kunci(konfig, `tebak.balik.${tebakan}`)) : ''} tx={tx} onLanjut={onLanjut} />;
       break;
@@ -650,9 +670,14 @@ export function LayarInvestigasi({ ep, state, node, tx, onLanjut, onPilih, onMul
       break;
     }
     case 'periksa-perjalanan':
-    case 'periksa-polis':
-      isi = <LayarPeriksa key={node.id} ep={ep} state={state} jenis={inv.jenis} onLanjut={onLanjut} />;
+    case 'periksa-polis': {
+      // T-130 (babak 2, kasus 2): kasus yang punya tafsir 'jam' / 'klausul' = pilihan formatif di node LAMA itu (id node, jenis dan
+      // lanjutannya tidak berubah); tanpa tafsir itu = layar garis waktu / kartu polis seperti semula.
+      const x = konfig.tafsir?.find((y) => y.id === (inv.jenis === 'periksa-perjalanan' ? 'jam' : 'klausul'));
+      isi = x ? <LayarTafsir key={node.id} ep={ep} konfig={konfig} state={state} tafsir={x} periksa tx={tx} onLanjut={onLanjut} />
+        : <LayarPeriksa key={node.id} ep={ep} state={state} jenis={inv.jenis} onLanjut={onLanjut} />;
       break;
+    }
     case 'putusan':
       isi = <LayarPutusan key={node.id} {...teksPutusan(konfig, tx)} onPilih={(p) => { if (onPilih(p)) playSfx('konfirmasi'); }} />;
       break;

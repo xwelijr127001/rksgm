@@ -69,7 +69,7 @@ export const TEKS_AUTO_2_INV_ID: Record<string, string> = {
   // T-127: umpan balik aktivitas dashcam (dipakai ulang dari Episode 1 Dev) TANPA nomor lajur: di kasus ini lajurnya ditafsirkan pemain sesudahnya. Hanya tabel episode ini; Episode 1 Dev tidak berubah
   'arena.dashcam.tepat': 'Betul, mobil kecil itu memotong tepat di depan truk.',
   'arena.dashcam.jelas': 'Mobil kecil itu berpindah lajur tepat di depan truk. Truk menghindar ke kiri.',
-  'inv.bukti.rekaman.1': 'Rekaman 14:32 masuk ke buku catatanmu, bersama tafsiranmu. Di rekaman itu juga terlihat rambu di bahu jalan; kamu memotretnya.',
+  'inv.bukti.rekaman.1': 'Rekaman 14:32 masuk ke buku catatanmu. Di rekaman itu juga terlihat rambu di bahu jalan; kamu memotretnya.',
   'inv.bukti.dashcam.judul': 'Rekaman 14:32',
   'inv.bukti.dashcam.sumber': 'Sumber: dashcam truk Pak Hendra',
   'inv.bukti.rambu.judul': 'Foto rambu',
@@ -83,6 +83,8 @@ export const TEKS_AUTO_2_INV_ID: Record<string, string> = {
   // T-127 (babak 2) TAFSIR: pemain membaca buktinya sendiri (formatif, tanpa poin). lajur = bingkai 14:32; sim = catatan SIM dan kendaraan
   'inv.baca.1': 'Rekaman berhenti di bingkai 14:32, sesaat sebelum truk membanting setir.',
   'inv.tafsir.lajur.tanya': 'Bingkai 14:32, sebelum truk membanting setir. Kepala truk di lajur berapa?',
+  // T-130 (tinjauan Codex): teks alt gambar tafsir = yang TERLIHAT (letak, isian kotak), tanpa kesimpulannya
+  'inv.tafsir.lajur.gambar': 'Bingkai rekaman dari atas, jam 14:32. Dari kiri: bahu jalan, lalu empat lajur yang dipisahkan tiga garis putus-putus. Truk berada di antara garis pertama dan garis kedua, dekat garis kedua. Sebuah mobil kecil berada di antara garis kedua dan garis ketiga, sedikit di depan truk.',
   'inv.tafsir.lajur.pilih.2': 'Lajur 2',
   'inv.tafsir.lajur.pilih.3': 'Lajur 3',
   'inv.tafsir.lajur.pilih.kabur': 'Tidak jelas',
@@ -93,6 +95,7 @@ export const TEKS_AUTO_2_INV_ID: Record<string, string> = {
   'inv.tafsir.lajur.temuan': 'Rekaman 14:32: kepala truk di lajur 2, mobil kecil di lajur 3.',
   'inv.tafsir.lajur.ringkas': 'truk di lajur 2',
   'inv.tafsir.sim.tanya': 'Catatan SIM dan catatan kendaraan. Apa yang kamu catat?',
+  'inv.tafsir.sim.gambar': 'Dua catatan berdampingan. Catatan SIM: foto pengemudi, kotak golongan bertuliskan B II UMUM, dan gambar kalender dengan tahun 2029. Catatan kendaraan: gambar truk dengan trailer dan kotak golongan bertuliskan B II UMUM.', // [konfirmasi PIC] golongan SIM dan masa berlaku yang tertulis di gambar
   'inv.tafsir.sim.pilih.cocok': 'Golongan cocok',
   'inv.tafsir.sim.pilih.beda': 'Golongan beda',
   'inv.tafsir.sim.pilih.tanggal': 'Tahun tak terbaca',
@@ -112,7 +115,7 @@ export const TEKS_AUTO_2_INV_ID: Record<string, string> = {
   'inv.keb.3': 'Tunjukkan rekaman dashcam kepada petugas tol.',
   'inv.keb.tanya': 'Bukti mana yang membantah "truknya di lajur 3"?',
   // T-127 (babak 2) TEMUAN BERPASANGAN di percobaan pertama KEBERATAN: satu keterangan + satu bukti
-  'inv.pasang.tanya': 'Dua catatan mana yang tidak cocok?',
+  'inv.pasang.tanya': 'Catatan mana yang tidak cocok?',
   'inv.pasang.ket': 'Pilih satu keterangan dan satu bukti.',
   'inv.pasang.salah.darto': 'Keterangan Pak Darto tidak berbeda dari bukti di bukumu. Cari keterangan yang berbeda dari buktimu.',
   'inv.pasang.alasan': 'Petugas tol mencatat lajur 3, dan catatan itulah yang membuat klaim ini dipersoalkan. Keterangan itu yang perlu diuji dengan buktimu.',

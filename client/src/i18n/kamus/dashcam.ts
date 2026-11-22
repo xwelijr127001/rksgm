@@ -32,6 +32,14 @@ const kamus: KamusRuang = {
     selesai: 'Penyebab kejadian sudah ditemukan.',
     keTanya: 'Lanjut: pertanyaan {nama}',
     belumSimpul: 'Pilih satu kesimpulan dulu.',
+    // T-130 (tinjauan Codex): varian TANPA nomor lajur (KonfigArena dashcam `tanpaNomor`: Raksa Investigator kasus 1, yang lajurnya
+    // ditafsirkan pemain sesudah menonton). Dipilih ArenaDashcam; kalimat di atas (Episode 1 lengkap dan Dev) tidak berubah.
+    'bingkai.1.netral': 'Truk melaju lurus, mobil kecil di lajur kanannya. Truk kecil berhenti di bahu kiri, pekerjanya mengganti ban.',
+    'bingkai.2.netral': 'Mobil kecil berpindah lajur, tepat ke depan truk.',
+    'tepat.netral': 'Tepat. Mobil kecil berpindah lajur tepat ke depan truk, jadi truk membanting setir ke kiri.',
+    'ragu.truk.netral': 'Truk memang menabrak pembatas. Tapi apa yang membuatnya membanting setir? Putar lagi dan lihat kanan truk.',
+    'ragu.truk-kecil.netral': 'Truk kecil itu sedang berhenti di bahu jalan. Putar lagi dan lihat kanan truk.',
+    'jelaskan.netral': 'Pemicunya mobil kecil: ia berpindah lajur tepat ke depan truk. Karena itu kita tetap memeriksa rambu dan saksi sebelum menilai klaim.',
   },
   en: {
     judul: 'Toll road dashcam footage',
@@ -60,6 +68,12 @@ const kamus: KamusRuang = {
     selesai: 'The cause of the incident has been found.',
     keTanya: 'Next: {nama}’s question',
     belumSimpul: 'Choose one conclusion first.',
+    'bingkai.1.netral': 'The truck drives straight, a small car on its right. A small truck is stopped on the left shoulder; its worker is changing a tyre.',
+    'bingkai.2.netral': 'The small car changes lanes, right in front of the truck.',
+    'tepat.netral': 'Correct. The small car changed lanes right in front of the truck, so the truck swerved left.',
+    'ragu.truk.netral': 'The truck did hit the barrier. But what made it swerve? Play again and look right of the truck.',
+    'ragu.truk-kecil.netral': 'That small truck was parked. Play again and look right of the big truck.',
+    'jelaskan.netral': 'The trigger was the small car: it changed lanes right in front of the truck. That is why we still check the signs and witnesses before judging the claim.',
   },
   zh: {
     judul: '收费公路行车记录仪录像',
@@ -88,6 +102,12 @@ const kamus: KamusRuang = {
     selesai: '已找到事故起因。',
     keTanya: '继续：{nama} 的问题',
     belumSimpul: '请先选择一个结论。',
+    'bingkai.1.netral': '卡车直行，一辆小汽车在它右侧的车道。一辆小货车停在左侧路肩，工人正在换轮胎。',
+    'bingkai.2.netral': '小汽车变道，正好切到卡车前面。',
+    'tepat.netral': '正确。小汽车变道，正好切到卡车前面，所以卡车向左猛打方向。',
+    'ragu.truk.netral': '卡车确实撞上了护栏。但是什么让它猛打方向？再播放一次，留意卡车右侧的车道。',
+    'ragu.truk-kecil.netral': '那辆小货车当时停在路肩上。再播放一次，留意卡车右侧的车道。',
+    'jelaskan.netral': '起因是那辆小汽车：它变道，正好切到卡车前面。所以在评估理赔之前，我们仍然要核对标志和证人。',
   },
 };
 

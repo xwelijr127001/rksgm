@@ -258,7 +258,7 @@ function SlipBukti({ b, pilih, teks, baru, temuan }: { b: Bukti; pilih?: PilihBu
   return (
     <li className={zum ? 'bk-slip-berzum' : undefined}>
       {/* T-088: gambar slip = tombol perbesar (saudara tombol pilih, bukan di dalamnya) */}
-      {zum ? <button type="button" className="bk-slip-zum" data-perbesar={b.id} aria-haspopup="dialog" aria-label={t('investigasi.keberatan.perbesar')} onClick={() => pilih.onPerbesar!(b.id)}><IkonInv nama="tambahan" kali={1} /></button> : null}
+      {zum ? <button type="button" className="bk-slip-zum" data-perbesar={b.id} aria-haspopup="dialog" aria-label={b.seni ? t('investigasi.keberatan.perbesarKartu', { judul: teks(b.judul) }) : t('investigasi.keberatan.perbesar')} onClick={() => pilih.onPerbesar!(b.id)}><IkonInv nama="tambahan" kali={1} /></button> : null}
       <button type="button" className="bk-slip" data-bukti={b.id} data-redup={redup ? '' : undefined} aria-pressed={pilih.terpilih === b.id} disabled={redup}
         aria-label={`${t('investigasi.bukti')}: ${teks(b.judul)}. ${teks(b.sumber)}${temuan ? `. ${t(temuan.mapan ? 'investigasi.temuan.mapan' : 'investigasi.temuan.tafsir')}: ${temuan.teks}` : ''}`} onClick={() => pilih.onPilih(b.id)}>
         {isi}

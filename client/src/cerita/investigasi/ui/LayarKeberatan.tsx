@@ -25,7 +25,10 @@
  *    516 px dari 557 px di 360 x 640, jadi catatan tempel tambahan tidak muat tanpa gulir. Tidak ada aksi mesin dan tidak ada percobaan bernilai yang terpakai. `onPilih(idBukti)` baru
  *    dipanggil saat keterangannya tepat, jadi pilihan bernilainya (id kartu, urutan percobaan) persis seperti semula.
  *  - `temuan` = baris temuan di slip bukti (tafsiran pemain / temuan terbukti), diteruskan ke BukuCatatan.
- *  - `zum` = isi lembar perbesar kasus (gambar bukti babak 2); tanpa nilai = bingkai dashcam bernomor seperti semula.
+ *  - `zum(id)` = isi lembar perbesar untuk KARTU ITU (gambar bukti babak 2); undefined = bingkai dashcam bernomor seperti semula.
+ * T-130 (tinjauan Codex T-131): lembar perbesar MEMBAWA id kartu yang dibuka. Dulu id itu dibuang dan "Pakai bukti ini" selalu
+ * memilih 'dashcam' (bisa memilih kartu bernilai yang salah begitu kasus lain memakai perbesar). Sekarang: gambar = kartu yang
+ * dibuka, judul lembar = judul kartu itu, dan "Pakai bukti ini" memilih kartu yang SAMA.
  */
 import { useEffect, useState, type ReactNode } from 'react';
 import { t } from '../../../i18n';
@@ -60,16 +63,18 @@ export function LayarKeberatan({ pernyataan, bukti, percobaan, onPilih, tx, tepa
   pasangan?: PasanganKeberatan;
   /** T-127: baris temuan per id bukti di slipnya. */
   temuan?: Readonly<Record<string, TemuanSlip>>;
-  /** T-127: gambar lembar perbesar (pengganti bingkai dashcam bernomor). */
-  zum?: ReactNode;
+  /** T-127 / T-130: gambar lembar perbesar untuk kartu itu (pengganti bingkai dashcam bernomor); undefined = bingkai lama. */
+  zum?: (id: Bukti['id']) => ReactNode | undefined;
 }) {
   const dipandu = percobaan === 2;
   const [pilih, setPilih] = useState<Bukti['id'] | null>(dipandu ? tepat : null);
   // Percobaan baru = pilihan lama dilepas (dipandu: bukti yang tepat langsung terpilih).
   useEffect(() => { setPilih(percobaan === 2 ? tepat : null); }, [percobaan, tepat]);
   // T-088: rekaman dashcam bisa DIPERBESAR (ketuk gambar slipnya) di samping kutipan yang dibantah, sebelum memutuskan.
-  const [zum, setZum] = useState(false);
+  const [zum, setZum] = useState<Bukti['id'] | null>(null);
   const teks = useTx(tx);
+  const kartuZum = zum ? bukti.find((x) => x.id === zum) : undefined;
+  const gambarZum = zum ? isiZum?.(zum) : undefined;
   // T-127: temuan berpasangan. Keterangan yang dipilih + jumlah kekeliruan memilihnya hanya hidup di layar ini.
   const berpasangan = percobaan === 0 && !!pasangan && pasangan.pernyataan.length > 1;
   const [ket, setKet] = useState<string | null>(null);
@@ -106,15 +111,15 @@ export function LayarKeberatan({ pernyataan, bukti, percobaan, onPilih, tx, tepa
       ) : null}
       <BukuCatatan pernyataan={berpasangan && pasangan ? pasangan.pernyataan : [pernyataan]} bukti={bukti} tx={tx} sorotPernyataan={berpasangan ? undefined : pernyataan.id} tanpaPensil temuan={temuan}
         pilihPernyataan={berpasangan ? { terpilih: ket, terkunci: keliruKet >= 2, onPilih: setKet } : undefined}
-        pilihBukti={{ terpilih: pilih, sorot: percobaan >= 1 ? tepat : null, redup: (id) => dipandu && id !== tepat, onPilih: setPilih, bisaPerbesar: perbesar, onPerbesar: () => setZum(true) }} />
+        pilihBukti={{ terpilih: pilih, sorot: percobaan >= 1 ? tepat : null, redup: (id) => dipandu && id !== tepat, onPilih: setPilih, bisaPerbesar: perbesar, onPerbesar: (id) => setZum(id) }} />
       {zum ? (
-        <Modal judul={t('investigasi.keberatan.zumJudul')} onTutup={() => setZum(false)} lebar={420}>
+        <Modal judul={gambarZum && kartuZum ? teks(kartuZum.judul) : t('investigasi.keberatan.zumJudul')} onTutup={() => setZum(null)} lebar={420}>
           <div className="iv-zum">
           {/* T-127: selama pemain masih MEMILIH keterangannya (temuan berpasangan), kutipan yang dibantah tidak ditunjukkan di sini */}
           {berpasangan && ket !== pernyataan.id ? null : <p className="iv-zum-kutip"><b>{t(`investigasi.siapa.${pernyataan.siapa}`)}</b><q>{teks(pernyataan.teks)}</q></p>}
-          {isiZum ?? <BingkaiDashcam besar potong="lajur" sorotTruk />}
-          {isiZum ? null : <p className="iv-label">{t('investigasi.keberatan.zumKet')}</p>}
-          <button type="button" className="primary-action iv-tombol" data-zum-pakai="" onClick={() => { setPilih('dashcam'); setZum(false); }}>{t('investigasi.keberatan.zumPakai')}</button>
+          {gambarZum ?? <BingkaiDashcam besar potong="lajur" sorotTruk />}
+          {gambarZum ? null : <p className="iv-label">{t('investigasi.keberatan.zumKet')}</p>}
+          <button type="button" className="primary-action iv-tombol" data-zum-pakai={zum} onClick={() => { if (zum) setPilih(zum); setZum(null); }}>{t('investigasi.keberatan.zumPakai')}</button>
           </div>
         </Modal>
       ) : null}

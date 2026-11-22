@@ -341,7 +341,13 @@ export interface PernyataanInvestigasi {
  * kekeliruan kedua = penjelasannya ditunjukkan dan cerita lanjut. Sesudah pemain memilih yang tepat atau dipandu, `temuan` ditulis
  * di kartu `bukti` (judul kartunya sendiri netral). Tanda: `tafsir:<id>` (dipasang efek node, sekali).
  *   tampilan   'bingkai' = gambar besar `seni` (288 x 192) + pilihan di bawahnya; `lajur` = batas kiri-kanan tiap lajur di gambar itu,
- *              dipakai untuk menomori lajur saat penjelasan ditunjukkan
+ *              dipakai untuk menomori lajur saat penjelasan ditunjukkan. 'daftar' (T-130) = tanpa gambar bukti: pilihannya
+ *              kalimat, bertumpuk selebar layar (mis. "dokumen apa yang masih kurang?")
+ *   seniKet    (T-130, tinjauan Codex) teks alt gambarnya: HUBUNGAN / ISIAN yang terlihat (apa di sebelah apa, tulisan di kotak
+ *              mana), TANPA kesimpulannya, supaya pemain pembaca layar menafsirkan dari hal yang sama dengan pemain yang melihat
+ *   bukti      kartu yang menerima temuannya; tanpa nilai (T-130) = temuan tanpa kartu (hanya di halaman "Temuan")
+ *   opsi[].seni / .ket  (T-130) pilihan bergambar (slip waktu, ui/seniR2.ts SLIP_WAKTU_K2) + keterangan gambarnya
+ *   hadiah     (T-130) gambar kecil (sel 96 x 68 `SENI_R2`) di catatan sesudah selesai: dokumen yang baru diminta
  *   opsi       pilihan urut layar; `tepat` = id yang benar; `hampir` = pilihan yang berhati-hati tetapi belum membaca sumbernya
  *              (umpan baliknya "sebagian", bukan "keliru")
  *   mapanSaat  tanda yang menjadikan tafsir ini TEMUAN MAPAN (mis. 'koreksi:tol': saksinya mengoreksi catatannya). Tanpa nilai =
@@ -351,17 +357,22 @@ export interface PernyataanInvestigasi {
  */
 export interface TafsirInvestigasi {
   id: string;
-  bukti: IdBukti;
-  tampilan: 'bingkai';
-  seni: string;
+  bukti?: IdBukti;
+  tampilan: 'bingkai' | 'daftar';
+  seni?: string;
+  seniKet?: KunciTeks;
   lajur?: readonly (readonly [number, number])[];
   tanya: KunciTeks;
-  opsi: { id: string; teks: KunciTeks }[];
+  opsi: { id: string; teks: KunciTeks; seni?: string; ket?: KunciTeks }[];
   tepat: string;
   hampir?: string[];
-  /** Kalimat temuan lengkap (halaman "Temuan" buku catatan) dan versi pendeknya untuk slip bukti. */
-  temuan: KunciTeks;
-  ringkas: KunciTeks;
+  /**
+   * Kalimat temuan lengkap (halaman "Temuan" buku catatan) dan versi pendeknya untuk slip bukti (hanya bila ada `bukti`).
+   * T-130: tanpa `temuan` = bacaan ini tidak meninggalkan baris di buku catatan (langkah antara, mis. "slip mana jam benturan?").
+   */
+  temuan?: KunciTeks;
+  ringkas?: KunciTeks;
+  hadiah?: string;
   mapanSaat?: string;
 }
 
@@ -400,7 +411,8 @@ export type PesanInvestigasi = 'baik' | 'datar' | 'janji';
  *                       memasang `koreksi:<Round.statementId>`.
  *  - tafsir           : (T-127, babak 2) node dialog; layar pilihan formatif `KonfigInvestigasi.tafsir[id]` (ui/PilihFormatif):
  *                       pilih satu bacaan, kekeliruan dipandu, selesai = lanjut dan efek node memasang `tafsir:<id>`. Tanpa poin.
- *                       Node `periksa-sim` yang kasusnya punya tafsir ber-id 'sim' memakai layar yang sama (id node lama tetap).
+ *                       Node `periksa-sim` yang kasusnya punya tafsir ber-id 'sim' memakai layar yang sama (id node lama tetap);
+ *                       begitu juga (T-130) `periksa-perjalanan` dengan tafsir 'jam' dan `periksa-polis` dengan tafsir 'klausul'.
  * `bukti.juga` (T-087): kartu bukti lain yang ikut dijepit di layar yang sama (satu halaman buku untuk dashcam + rambu).
  */
 export type NodeInvestigasi =
@@ -758,7 +770,11 @@ export type KonfigArena = DasarArena & (
    * `tetapkan(jawaban, konfig.langkah, konfig.item, konfig.bersih | konfig.ragu)` (pola sama dengan 'sim').
    */
   | { pola: 'dashcam'; langkah: string; item: string; benda: { id: 'mobil' | 'truk' | 'truk-kecil' }[]; tepat: 'mobil'; bersih: string; ragu: string;
-      /** T-127 (opsional; tanpa nilai = seperti semula): rekaman diputar TANPA pita nomor lajur 1-4 (kasus yang lajurnya ditafsirkan pemain). */
+      /**
+       * T-127 (opsional; tanpa nilai = seperti semula): rekaman diputar TANPA pita nomor lajur 1-4 (kasus yang lajurnya ditafsirkan
+       * pemain). T-130 (tinjauan Codex): varian ini juga memakai kalimat umpan balik dan keterangan bingkai diam yang TIDAK menyebut
+       * nomor lajur (kamus dashcam `*.netral`) dan pita ringkasnya tanpa nomor.
+       */
       tanpaNomor?: boolean;
       /**
        * (T-068, Episode 1 lengkap K08) Langkah kedua pada bingkai beku yang SAMA: pertanyaan tokoh `penanya` (kalimat `tanya`) dengan

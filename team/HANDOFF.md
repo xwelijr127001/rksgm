@@ -6385,3 +6385,135 @@ en / zh wording of all new strings is mine.
 - `client/src/cerita/investigator.expect.test.ts` was not run; by my script its Kasus 1 part (validator result) is unchanged.
 - Kasus 2 and 3 are untouched; their slices can use (a) to (e) as they are. The paired pick is built for the single-objection cases; Kasus 3's panel rounds need their own wiring in that slice.
 - Ranked event runs use the same screens; the formative steps add no server call, but I could not exercise a run.
+
+## T-130 (2026-11-22): round 2 slice 2 = Kasus 2 "Malam di Jalan Melati" + the T-131 review fixes (Fullstack)
+
+Built by Fullstack; uncommitted, not deployed. Owner rule: nothing was opened in a browser or on a phone and no test was run, so every height is CALCULATED and none of the new interactions has been seen running. Root `npm run typecheck` exit 0; `client/dist` rebuilt (build exit 0, copy identical to the build). No server file touched. Static check by script (not the test suite): the project validator returns no finding for the three Investigator episodes and `auto-2` (the one `auto-2-dev` finding about `{suasana}` is old); all 567 paths of Kasus 2 and all 1512 paths of Kasus 1 reach an ending.
+
+Unchanged, as the release boundary requires: scored choice ids (objection cards `foto-interior` / `struk` / `polis-kasus2`, verdict `polis` / `tambahan` / `layak`, message `baik` / `datar` / `janji`), attempt order, score marks, the shared rubric (not edited), 40 / 30 / 30, 100 per case, episode version 1. Everything new is FORMATIVE: no points, never through the ranked decision bridge.
+
+Art: the Designer's T-128 files are wired: `k2-formulir`, the three time slips, `k2-struk`, `k2-polis`, and the `k2-endorsemen` card as the "document arrived" picture. I looked at the PNG files to write the alt texts; I did not see them on a screen.
+
+### A. T-131 review fixes (Codex "Round 2 slice 1 review"), done before Kasus 2 used the plumbing
+1. **Kasus 1 no longer reveals the lane on any path.** `ArenaDashcam` with `tanpaNomor` now uses lane-free dictionary keys (`dashcam.*.netral`, id / en / zh) for the tap feedback (correct, first miss, explanation), for the reduced-motion captions of frames 1 and 2, and draws the summary strip without lane numbers. Without the flag (Episode 2 story, Dev) nothing changes. My Kasus 1 overrides `arena.dashcam.tepat|jelas` from T-127 were never read by the arena; the fix is in the dictionary instead. The neutral first-miss hint says "look right of the truck", it does not name the small car.
+2. **Alt text gives observable facts.** New optional `TafsirInvestigasi.seniKet`: what can be seen (positions, what is written in which box), without the conclusion. Kasus 1: `inv.tafsir.lajur.gambar` (shoulder, four lanes, three dashed lines, the truck between the first and second line, the car between the second and third) and `inv.tafsir.sim.gambar` (both class boxes read B II UMUM, calendar 2029). The zoom at the objection uses the same text.
+3. **Zoom carries the card id.** `LayarKeberatan` keeps the id of the card that was opened; the sheet shows that card's exhibit and title, and "Pakai bukti ini" selects that same card (it used to select `dashcam` always). The zoom button's accessible name is "Perbesar: <card title>" (new key `investigasi.keberatan.perbesarKartu`).
+4. **Resume.** The reading draft now stores the rejected option ids in order; after a reload the struck-out options and the pointer of the last miss come back (two misses = the guided state). A T-127 draft that is a number is still accepted (miss count only, no pointer). The "Tebakan awalmu ... tafsiranmu ..." line is shown only when that reading's own mark (`tafsir:<id>`) exists, so a save that was already past the reading never gets it; `inv.bukti.rekaman.1` no longer says "bersama tafsiranmu".
+
+### B. Kasus 2
+| Step | Before | Now |
+|---|---|---|
+| Opening | named the crash time 21:18 | no time; the player reads it |
+| Crash time | timeline: four taps and a drag | the incident form + three time slips: "which slip carries the time of the bump?" (21:05 boarding, 21:18 bump, 21:24 trip closed) |
+| Receipt | part of the same timeline | NEW reading on the redacted receipt: where does 21:18 fall on that trip? (before 21:05 / between / after 21:24). The card "Struk perjalanan" then carries "di tengah perjalanan" as the player's reading |
+| Follow-up to Mr Yusuf | one question | two, pick one: "Kapan perjalanan itu ditutup di aplikasi?" (useful, earns the curiosity mark: he closed it after pulling over) or "Kenapa HP itu terpasang di dasbor?" (polite, nothing new) |
+| Before the policy | none | NEW formative "Perlu bukti tambahan": the file is not complete yet; which document is missing? Correct: the use-extension status on the incident date. Distractors: the passenger's name and address, a second bumper photo. The endorsement card appears in the note once it is named |
+| Policy | tap the one clause | reading on the three-clause extract: 1 Penggunaan / 2 Wilayah / 3 Pengemudi |
+| Before the objection | Miss Raksa: "show the note that answers what happened at 21:18" | that line is gone; the player pairs two notes |
+| Objection, attempt 1 | statement given, pick a card | pick the statement AND the card |
+| After the stamp | Mr Yusuf admits at once | his reasonable "but": the receipt only records when he closed the app, the passenger could have left earlier. Agus's statement (the passenger got out after the bump) answers it, then he corrects his statement. Players with the curiosity mark get one extra line |
+| Message | best = longest | `baik` is mid-length and names the applicable term and the review route; `datar` is the longest, correct but jargon only and without the review route; `janji` promises payment AND the passenger's name and number |
+
+Card titles now: "Foto kabin", "Struk perjalanan", "Kutipan polis". The struk and polis cards can be enlarged at the objection.
+
+### Decisions the brief does not spell out (Lead to confirm)
+1. **Three scored messages kept, no fourth option.** The shared rubric knows only `baik` / `datar` / `janji`, so a fourth distractor would need a new id. Both distractor shapes are folded into the existing two: `datar` (15) = verbose jargon, `janji` (0) = promise + passenger details. Only wording changed.
+2. **The "missing document" step and the time-slip step leave no line in the notebook.** With five findings the "Temuan" tab came to 562 px in a 480 px dialog. The crash time is inside the receipt finding; the request for the document is a step, not a finding. `TafsirInvestigasi.temuan` is optional for that.
+3. **The old nodes `kjalan` and `kpolis` keep id and kind** (`periksa-perjalanan`, `periksa-polis`) and now show the readings `jam` and `klausul`. The old timeline and clause components stay in the code for a case without those readings.
+4. **Agus's statement answers Mr Yusuf's "but"** as narration inside the admission beat; no new question round and no second pairing (the plan allows one pair per case).
+5. **Miss Raksa's confirming line before the verdict (`inv2.putusan.1`) was taken out of the graph** to pay for the new steps. The key stays in the text files.
+6. **The verdict option "Butuh bukti tambahan" is unchanged** (15 points). The new formative step makes the difference explicit: before the policy is read, more evidence is the honest answer; at the verdict the file is complete.
+
+### Saves of players who are mid-case
+- All 36 old node ids exist, are reachable and reach an ending. Three nodes were added: `baca-struk` (between `kjalan` and `bukti-struk`), `yusuf-tekan-dudukan`, `kurang` (before `kpolis`).
+- A save on any old node continues. A save in the middle of the old timeline or clause check reopens on the new reading with no miss counted. One already past those points has no `tafsir:*` mark: its slips show no reading line and it gets no "tafsiranmu" recap; the receipt finding appears once the statement is corrected.
+- The old press mark `press:yusuf:tutup` now counts as the curiosity mark.
+- No text key was removed from the graph's history: lines taken out of the graph (`inv2.keb-buka.3`, `inv2.putusan.1`) keep their keys.
+
+### Calculation (id / en / zh). Room: 557 px at 360 x 640 and 617 px at 390 x 700; dialogs 480 / 540; chat sheet 527 / 587
+| Screen | 360 x 640 | Room | 390 x 700 | Room | Least spare |
+|---|---|---|---|---|---|
+| Follow-up: offer with two questions | 379 / 402 / 375 | 557 | 377 / 377 / 370 | 617 | 155 |
+| Follow-up: useful answer (curiosity mark) | 387 / 410 / 363 | 557 | 387 / 387 / 358 | 617 | 147 |
+| Follow-up: answer to the second question | 357 / 401 / 333 | 557 | 357 / 354 / 328 | 617 | 156 |
+| Crash-time slips: choosing | 414 / 414 / 414 | 557 | 414 / 414 / 414 | 617 | 143 |
+| Crash-time slips: after the first miss | 440 / 440 / 420 | 557 | 420 / 420 / 420 | 617 | 117 |
+| Crash-time slips: correct + Lanjut | 484 / 484 / 478 | 557 | 478 / 478 / 478 | 617 | 73 |
+| Crash-time slips: guided + Lanjut | 524 / 524 / 504 | 557 | 524 / 504 / 484 | 617 | 33 |
+| Receipt reading: choosing | 407 / 433 / 390 | 557 | 390 / 433 / 390 | 617 | 124 |
+| Receipt reading: after the first miss | 413 / 439 / 396 | 557 | 396 / 439 / 396 | 617 | 118 |
+| Receipt reading: correct + Lanjut | 497 / 523 / 460 | 557 | 460 / 523 / 460 | 617 | 34 |
+| Receipt reading: guided + Lanjut | 517 / 523 / 480 | 557 | 480 / 523 / 460 | 617 | 34 |
+| Missing document: choosing | 334 / 334 / 302 | 557 | 334 / 334 / 302 | 617 | 223 |
+| Missing document: after the first miss | 380 / 380 / 308 | 557 | 360 / 380 / 308 | 617 | 177 |
+| Missing document: correct (with the endorsement card) + Lanjut | 464 / 464 / 392 | 557 | 444 / 464 / 392 | 617 | 93 |
+| Missing document: guided + Lanjut | 504 / 524 / 412 | 557 | 484 / 504 / 412 | 617 | 33 |
+| Clause reading: choosing | 407 / 364 / 364 | 557 | 407 / 364 / 364 | 617 | 150 |
+| Clause reading: after the first miss | 433 / 390 / 370 | 557 | 433 / 390 / 370 | 617 | 124 |
+| Clause reading: correct + Lanjut | 497 / 454 / 434 | 557 | 497 / 454 / 434 | 617 | 60 |
+| Clause reading: guided + Lanjut | 517 / 474 / 434 | 557 | 517 / 454 / 434 | 617 | 40 |
+| New evidence: cabin photo | 321 / 321 / 296 | 557 | 321 / 296 / 271 | 617 | 236 |
+| New evidence: receipt (with the hunch recap) | 405 / 400 / 335 | 557 | 380 / 380 / 335 | 617 | 152 |
+| New evidence: policy extract | 296 / 296 / 271 | 557 | 296 / 296 / 271 | 617 | 261 |
+| Objection attempt 1 (two notes) | 536 / 533 / 490 | 557 | 513 / 513 / 490 | 617 | 21 |
+| Objection attempt 1: pointer / reasoning dialog | 116 / 116 / 76 | 480 | 96 / 96 / 76 | 540 | 364 |
+| Objection attempt 2 (texts unchanged) | 459 / 508 / 459 | 557 | 459 / 459 / 454 | 617 | 49 |
+| Objection attempt 3 (texts unchanged) | 379 / 428 / 359 | 557 | 475 / 475 / 462 | 617 | 129 |
+| Objection zoom sheet for the opened card (Kasus 1 and 2) | 350 / 350 / 326 | 480 | 350 / 350 / 326 | 540 | 130 |
+| Notebook sheet: Keterangan tab (with curiosity mark) | 386 / 386 / 334 | 480 | 357 / 352 / 334 | 540 | 94 |
+| Notebook sheet: Bukti tab (slips with finding line) | 266 / 266 / 266 | 480 | 266 / 266 / 266 | 540 | 214 |
+| Notebook sheet: Temuan tab (worst: two readings + one finding) | 418 / 396 / 334 | 480 | 400 / 396 / 290 | 540 | 62 |
+| Chat reply sheet: list (3 lines per message) | 397 / 397 / 397 | 527 | 397 / 397 / 397 | 587 | 130 |
+| Chat reply sheet: chosen message in full | 438 / 414 / 317 | 527 | 414 / 414 / 292 | 587 | 89 |
+| Message practice: list | 508 / 486 / 486 | 557 | 486 / 486 / 486 | 617 | 49 |
+| Message practice: chosen message in full | 444 / 444 / 334 | 557 | 422 / 400 / 334 | 617 | 113 |
+
+- 35 rows x 6 = 210 values, 0 over the room. Tightest: objection attempt 1 with two notes, 536 of 557 px (id at 360 x 640); Agus's statement takes three handwriting lines there.
+- First pass was over in five places: receipt and clause readings in the guided state (563 px), the paired pick (562 px), the Temuan tab (562 of 480). Fixed by shorter explanation texts, a one-line pairing heading "Catatan mana yang tidak cocok?" (also applied to Kasus 1, which gains 26 px there), a one-line clause question, and decision 2.
+- Slip buttons: 96 x 68 px picture in a 104 x 76 px button, three in a row of 328 px (column 105 px). Text options 52 px or more; the stacked document options 52 px or more.
+- Slips keep their 52 px: widest at 360 px with the widest handwriting fallback: title 137 px and finding 139 px in a 158 px column.
+- Neutral dashcam texts: none takes more lines than the text it replaces (checked at 296 px / 15 px in id / en / zh).
+- The T-126 "Rincian nilai" and T-127 Kasus 1 calculations were rerun with the changed texts: 0 over.
+- Not recalculated: interview-room and office scene beats (the longest new spoken line is 124 characters in id; the opening line of this case is 148), and the desktop layout (the new screens use the same centred Investigator column and the same single primary button as the T-127 screens).
+
+### Play time (estimate from tap and character counts, not played)
+| | Before | Now |
+|---|---|---|
+| Taps on a clean run | about 47 | about 51 (52 with the curiosity line) |
+| Dialog lines on that run | 34 | 36 (37 with the curiosity line): two removed, four added |
+| Real decisions | 3 scored | 3 scored + 4 readings + the statement half of the pair + a choice of question |
+
+My estimate: 30 to 45 seconds longer on a first clean run, about 5.5 minutes; each formative miss adds roughly 10 seconds, at most two per step. The old timeline (five taps with four instruction lines) became two short readings, which is where most of the new steps are paid for. If 5.5 minutes is too long, the cheapest cut is the time-slip step (two taps): the receipt reading could state the time itself.
+
+### Audit for early answers (Kasus 2)
+- Fixed: the opening line and the goal of chapter 3 (both named 21:18); card titles; the text after the receipt reading; the "Tebakan awalmu" lines (they said "Catatan menunjukkan ..."); Miss Raksa's line before the objection; the objection question; the policy line before the reading (it announced the private-use clause).
+- Checked by script and by reading the id texts in order: nothing shown before the slip step names a time or "mid-trip"; nothing before the document step names the extension; nothing before the clause step names private use.
+- Checked and left: the hint and guided texts of attempts 2 and 3 name the answer by design (after one and two misses); the receipt's source line says the passenger's name and address are hidden (shown after the receipt reading); the receipt alt text lists the two times and the black bars, not the conclusion; the slip pictures are described by what they show.
+- Kasus 3 is untouched.
+
+### New or changed `// [konfirmasi PIC]` lines
+`episode/auto-2-inv-2/teks.id.ts` (same keys in en and zh), 20 lines:
+- `inv2.polis.1`: the documents that arrive (policy extract and extension status).
+- `inv2.tafsir.dokumen.tanya`, `.pilih.perluasan`, `.salah.identitas`, `.alasan`, `.benar`: which document decides cover; passenger data is hidden on purpose.
+- `inv2.tafsir.klausul.pilih.1`, `.pilih.2`, `.pilih.3`, `.salah.2`, `.salah.3`, `.alasan`, `.benar`, `.temuan`, `.ringkas`: the three clause names (use, territory, driver), clause 1 decides, private use, no commercial-use extension on the incident date.
+- `inv2.pesan.baik`, `inv2.pesan.datar`, `inv2.pesan.janji`: the three customer messages (applicable term, review through Layanan Nasabah Raksa; the jargon letter; the promise of payment and of passenger data).
+- `inv2.pesan.datar.2`, `inv2.pesan.janji.2`: the right to ask for a review; passenger data must not be shared.
+`episode/auto-2-inv/teks.id.ts`: `inv.tafsir.sim.gambar` (the licence class and year written on the picture).
+`inv2.bukti.polis.judul` lost its marker: it is now only the source name "Kutipan polis". en / zh wording of all new strings is mine.
+
+### Files
+- Types and state: `client/src/cerita/tipe.ts`, `client/src/cerita/investigasi/status.ts`.
+- UI: `investigasi/ui/PilihFormatif.tsx` (rewritten props: resume list, optional exhibit, picture options, stacked options, document picture), `investigasi/ui/ronde2.css`, `investigasi/LayarInvestigasi.tsx`, `ui/LayarKeberatan.tsx`, `ui/BukuCatatan.tsx`, `cerita/hp/arena/ArenaDashcam.tsx`.
+- Dictionaries: `i18n/kamus/dashcam.ts` (6 neutral keys per language), `i18n/kamus/investigasi.ts` (1 key per language).
+- Cases: `episode/auto-2-inv-2/episode.ts` + `teks.id|en|zh.ts`; `episode/auto-2-inv/episode.ts` (two `seniKet`) + `teks.id|en|zh.ts` (3 lines).
+- Not edited: `skor.ts`, `simpan.ts`, `acara.ts`, the shared rubric, Kasus 3, the Designer's art and `seniR2.ts`, any test or QA script.
+- Outside the repo (run from `client/` with `npx tsx`): calculation `C:\Users\User\AppData\Local\Temp\claude\ec29f026d20d029c\0c4fe0f7-0adb-4cb1-b49a-10019af309f5\scratchpad\t130\hitung.mts`, static check `C:\Users\User\AppData\Local\Temp\claude\ec29f026d20d029c\0c4fe0f7-0adb-4cb1-b49a-10019af309f5\scratchpad\t130\periksa.mts`.
+
+### Hooks for QA
+`[data-pilih-formatif="jam|struk|dokumen|klausul"]` with `[data-keadaan]`, `[data-susun="baris|kolom"]`, `[data-opsi="2105|2118|2124"]` etc., `[data-pf-lanjut]`; `.pf-opsi[data-bergambar]`; `.pf-tempel[data-berhadiah]`; `[data-tanya-lanjut="tutup|dudukan"]`; `[data-perbesar="struk|polis-kasus2"]` and `[data-zum-pakai="<card id>"]` (was an empty attribute); the T-127 hooks are unchanged.
+
+### Open
+- Not seen in a browser or on a phone. Most worth a look: the three slip buttons under the incident form, the stacked document options and the note with the endorsement card, the paired pick at 360 x 640 in Indonesian (21 px spare by calculation), the zoom sheet for the struk and polis cards, the Kasus 1 dashcam replay texts.
+- Tests and QA scripts that read Kasus 2 were not run or edited. Likely to need updating: anything that walks `kjalan` (old timeline hooks), `kpolis` (old clause tap), expects `yusuf-tanya` with two options, the old card titles, the old message texts, or `data-zum-pakai=""`; and anything asserting `dashcam.tepat` in Kasus 1.
+- Ranked event runs use the same screens; the formative steps add no server call, but I could not exercise a run.
+- Kasus 3 (slice 3) can reuse all of this; its panel rounds still need their own pairing wiring, and `CINCIN_K3_FOTO` is not used yet.
