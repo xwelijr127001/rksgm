@@ -16,11 +16,14 @@
  *                                            tetap memakai keb:* (babak tunggal 'keberatan')
  *   panel-keliru:<idBabak>:<0|1>:<idBukti>   (T-102) kartu keliru yang diajukan di percobaan itu (tidak dinilai sendiri)
  *   press:<idPernyataan>:<idPress>           (T-102) "Tanya lebih lanjut" pernyataan itu sudah dibuka (tanpa poin)
+ *   tafsir:<idTafsir>                        (T-127, babak 2) pilihan formatif itu sudah dijawab (tepat atau dipandu); tanpa poin
+ * T-127: TANDA JELI dan TEMUAN tidak punya tanda sendiri: tanda jeli = press yang dibuka DAN ber-`berguna`; temuan = tafsir yang
+ * dibuat / KEBERATAN berpasangan yang selesai, "mapan" menurut tanda koreksi kasusnya. Simpanan lama tanpa tanda itu tetap sah.
  *
  * Tipe kontrak (rencana "Interfaces", dipakai komponen Task 2): Bukti, Pernyataan, HasilKeberatan.
  */
 import { LEGACY_ROUND_ID, ROUND_OUTCOMES, type RoundOutcome } from '@shared/investigator/rubric';
-import type { BuktiInvestigasi, Episode, PernyataanInvestigasi, PesanInvestigasi, Press, PutusanInvestigasi, Round, StateCerita } from '../tipe';
+import type { BuktiInvestigasi, Episode, KunciTeks, PernyataanInvestigasi, PesanInvestigasi, Press, PutusanInvestigasi, Round, StateCerita, TafsirInvestigasi } from '../tipe';
 
 export type Bukti = BuktiInvestigasi;
 export type Pernyataan = PernyataanInvestigasi;
@@ -146,10 +149,59 @@ export function sudahTekan(s: Tanda, idPernyataan: string, idPress: string): boo
   return punya(s, tandaTekan(idPernyataan, idPress));
 }
 
-/** Pernyataan (urut naskah) yang "Tanya lebih lanjut"-nya sudah dibuka: buku catatan menulis tanya-jawabnya dengan sumbernya. */
+/** T-127: semua pertanyaan sebuah pernyataan, urut layar: `press` lalu `pressLain`. */
+export function semuaPress(p: Pernyataan): Press[] {
+  return [...(p.press ? [p.press] : []), ...(p.pressLain ?? [])];
+}
+/** T-127: id pilihan node tawar untuk sebuah pertanyaan: pertanyaan pertama (`press`) tetap 'tekan'; yang lain 'tekan-<id>'. */
+export const pilihTekan = (p: Pernyataan, idPress: string): string => (p.press?.id === idPress ? PILIH_TEKAN : `${PILIH_TEKAN}-${idPress}`);
+
+/**
+ * Pernyataan (urut naskah) yang "Tanya lebih lanjut"-nya sudah dibuka: buku catatan menulis tanya-jawabnya dengan sumbernya.
+ * T-127: satu entri per pernyataan (pertanyaan PERTAMA yang terbuka menurut urut layar; satu kunjungan = satu pertanyaan).
+ */
 export function tekananTerbuka(ep: Pick<Episode, 'investigasi'>, s: Tanda): { pernyataan: Pernyataan; press: Press }[] {
   const hasil: { pernyataan: Pernyataan; press: Press }[] = [];
-  for (const p of ep.investigasi?.pernyataan ?? []) if (p.press && sudahTekan(s, p.id, p.press.id)) hasil.push({ pernyataan: p, press: p.press });
+  for (const p of ep.investigasi?.pernyataan ?? []) {
+    const press = semuaPress(p).find((x) => sudahTekan(s, p.id, x.id));
+    if (press) hasil.push({ pernyataan: p, press });
+  }
+  return hasil;
+}
+
+/** T-127 TANDA JELI: pertanyaan BERGUNA yang sudah dibuka (hiasan di buku catatan; tanpa poin, bukan stempel). */
+export function tandaJeli(ep: Pick<Episode, 'investigasi'>, s: Tanda): { pernyataan: Pernyataan; press: Press }[] {
+  return tekananTerbuka(ep, s).filter((x) => !!x.press.berguna);
+}
+
+// ------------------------------------------------------------------ T-127 (babak 2): tafsir dan temuan
+
+export const tandaTafsir = (id: string): string => `tafsir:${id}`;
+
+/**
+ * Satu baris halaman "Temuan": `teks` = kalimat lengkap, `ringkas` = versi slip bukti (hanya tafsir), `bukti` = kartu yang
+ * menerimanya, `mapan` = sudah terbukti (bukan lagi tafsiran pemain).
+ */
+export interface Temuan { id: string; teks: KunciTeks; ringkas?: KunciTeks; bukti?: Bukti['id']; mapan: boolean }
+
+/** Tafsir sebuah kasus yang sudah dibuat pemain ATAU sudah mapan lewat tandanya (simpanan lama tanpa `tafsir:<id>`). */
+function temuanTafsir(x: TafsirInvestigasi, s: Tanda): Temuan | null {
+  const dibuat = punya(s, tandaTafsir(x.id));
+  const mapan = x.mapanSaat ? punya(s, x.mapanSaat) : dibuat;
+  return dibuat || mapan ? { id: `tafsir:${x.id}`, teks: x.temuan, ringkas: x.ringkas, bukti: x.bukti, mapan } : null;
+}
+
+/**
+ * Semua temuan kasus ini, urut naskah: tafsir (TafsirInvestigasi) lalu temuan berpasangan KEBERATAN (sesudah babaknya selesai;
+ * mapan sesudah pernyataannya dikoreksi). TAFSIRAN (mapan false) dan TEMUAN (mapan true) digambar terpisah oleh pemanggil.
+ */
+export function temuanKasus(ep: Pick<Episode, 'investigasi'>, s: Tanda): Temuan[] {
+  const k = ep.investigasi;
+  if (!k) return [];
+  const hasil: Temuan[] = [];
+  for (const x of k.tafsir ?? []) { const t = temuanTafsir(x, s); if (t) hasil.push(t); }
+  const pas = k.keberatan.pasangan;
+  if (pas && hasilKeberatan(s)) hasil.push({ id: 'pasangan', teks: pas.temuan, mapan: punya(s, tandaKoreksi(k.keberatan.pernyataan)) });
   return hasil;
 }
 

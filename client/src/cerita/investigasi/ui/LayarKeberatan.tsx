@@ -17,12 +17,21 @@
  * T-115 (tanpa gulir; angka "Ukur" di atas tidak berlaku lagi, hitungan baru di team/HANDOFF.md "## T-115"): di layar ini kepala
  * halaman buku ("KETERANGAN 1", "BUKTI 3") tidak digambar, dan pada langkah dipandu di layar < 680 px hanya slip yang tepat yang
  * tampil (ui/muat.css). Dengan lebar huruf aplikasi yang sebenarnya layar ini 419..508 px (ruang isi 557).
+ * T-127 (babak 2, masukan Pak Peterson butir 17: "buku catatan sebagai alat"; hitungan: team/HANDOFF.md "## T-127"):
+ *  - `pasangan` (hanya percobaan 0): TEMUAN BERPASANGAN. Pemain memilih DUA catatan: satu keterangan (keping polaroid di halaman
+ *    atas) dan satu bukti (slip di halaman bawah), lalu "KEBERATAN!". Keterangan yang dipilih hanya dinilai di layar ini:
+ *    keliru pertama = penunjuk (`salah(id)`), keliru kedua = penjelasan (`alasan`) dan keterangan yang dibantah terpilih sendiri
+ *    serta terkunci. Umpan baliknya LEMBAR kecil Miss Raksa (dialog, satu tombol tutup), bukan catatan di halaman: layar ini sudah
+ *    516 px dari 557 px di 360 x 640, jadi catatan tempel tambahan tidak muat tanpa gulir. Tidak ada aksi mesin dan tidak ada percobaan bernilai yang terpakai. `onPilih(idBukti)` baru
+ *    dipanggil saat keterangannya tepat, jadi pilihan bernilainya (id kartu, urutan percobaan) persis seperti semula.
+ *  - `temuan` = baris temuan di slip bukti (tafsiran pemain / temuan terbukti), diteruskan ke BukuCatatan.
+ *  - `zum` = isi lembar perbesar kasus (gambar bukti babak 2); tanpa nilai = bingkai dashcam bernomor seperti semula.
  */
-import { useEffect, useState } from 'react';
+import { useEffect, useState, type ReactNode } from 'react';
 import { t } from '../../../i18n';
 import { Modal } from '../../../ui/kit';
 import { BingkaiDashcam } from '../../hp/arena/ArenaDashcam';
-import { BukuCatatan, PotretReaksi } from './BukuCatatan';
+import { BukuCatatan, PotretReaksi, type TemuanSlip } from './BukuCatatan';
 import { useTx } from './dasar';
 import './tambahan.css';
 import type { Bukti, Pernyataan, Tx } from './dasar';
@@ -30,7 +39,10 @@ import './investigasi.css';
 
 const PERBESAR_BAWAAN: readonly Bukti['id'][] = ['dashcam'];
 
-export function LayarKeberatan({ pernyataan, bukti, percobaan, onPilih, tx, tepat = 'dashcam', tanya, petunjuk1, petunjuk2, perbesar = PERBESAR_BAWAAN }: {
+/** T-127: temuan berpasangan (lihat kepala berkas). `pernyataan` = semua keterangan yang sudah tersemat, urut naskah. */
+export interface PasanganKeberatan { pernyataan: Pernyataan[]; ket: string; salah: (id: string) => string; alasan: string }
+
+export function LayarKeberatan({ pernyataan, bukti, percobaan, onPilih, tx, tepat = 'dashcam', tanya, petunjuk1, petunjuk2, perbesar = PERBESAR_BAWAAN, pasangan, temuan, zum: isiZum }: {
   pernyataan: Pernyataan;
   bukti: Bukti[];
   percobaan: 0 | 1 | 2;
@@ -44,6 +56,12 @@ export function LayarKeberatan({ pernyataan, bukti, percobaan, onPilih, tx, tepa
   petunjuk2?: string;
   /** T-090: kartu yang gambarnya bisa diperbesar (kasus tanpa rekaman dashcam mengirim []). */
   perbesar?: readonly Bukti['id'][];
+  /** T-127: temuan berpasangan di percobaan pertama (tanpa nilai / satu keterangan saja = layar seperti semula). */
+  pasangan?: PasanganKeberatan;
+  /** T-127: baris temuan per id bukti di slipnya. */
+  temuan?: Readonly<Record<string, TemuanSlip>>;
+  /** T-127: gambar lembar perbesar (pengganti bingkai dashcam bernomor). */
+  zum?: ReactNode;
 }) {
   const dipandu = percobaan === 2;
   const [pilih, setPilih] = useState<Bukti['id'] | null>(dipandu ? tepat : null);
@@ -52,10 +70,33 @@ export function LayarKeberatan({ pernyataan, bukti, percobaan, onPilih, tx, tepa
   // T-088: rekaman dashcam bisa DIPERBESAR (ketuk gambar slipnya) di samping kutipan yang dibantah, sebelum memutuskan.
   const [zum, setZum] = useState(false);
   const teks = useTx(tx);
+  // T-127: temuan berpasangan. Keterangan yang dipilih + jumlah kekeliruan memilihnya hanya hidup di layar ini.
+  const berpasangan = percobaan === 0 && !!pasangan && pasangan.pernyataan.length > 1;
+  const [ket, setKet] = useState<string | null>(null);
+  const [keliruKet, setKeliruKet] = useState(0);
+  const [catatan, setCatatan] = useState<string | null>(null);
+  const ajukan = () => {
+    if (!pilih) return;
+    if (berpasangan && pasangan && ket !== pernyataan.id) {
+      if (!ket) return;
+      const n = keliruKet + 1;
+      setKeliruKet(n);
+      // Keliru pertama: penunjuk untuk keterangan itu, pilihannya dilepas. Keliru kedua: penjelasan, keterangan yang dibantah terpilih.
+      if (n === 1) { setCatatan(pasangan.salah(ket)); setKet(null); } else { setCatatan(pasangan.alasan); setKet(pernyataan.id); }
+      return;
+    }
+    onPilih(pilih);
+  };
+  const siap = !!pilih && (!berpasangan || !!ket);
   return (
-    <section className="iv-layar iv-keberatan" data-layar-keberatan="" data-percobaan={percobaan} aria-labelledby="iv-keberatan-tanya">
+    <section className="iv-layar iv-keberatan" data-layar-keberatan="" data-percobaan={percobaan} data-berpasangan={berpasangan ? '' : undefined} aria-labelledby="iv-keberatan-tanya">
       <h2 id="iv-keberatan-tanya" className="iv-tanya" tabIndex={-1} data-cer-fokus="">{tanya ?? t('investigasi.keberatan.tanya')}</h2>
-      {percobaan === 0 ? <p className="iv-label">{t('investigasi.keberatan.pilih')}</p> : null}
+      {percobaan === 0 ? <p className="iv-label">{berpasangan && pasangan ? pasangan.ket : t('investigasi.keberatan.pilih')}</p> : null}
+      {berpasangan && catatan ? (
+        <Modal judul={t(keliruKet >= 2 ? 'investigasi.formatif.penjelasan' : 'investigasi.formatif.sumber')} onTutup={() => setCatatan(null)} lebar={420}>
+          <p className="iv-tempel iv-pandu iv-pasang-catatan" role="status" data-pasang-catatan={keliruKet >= 2 ? 'alasan' : 'penunjuk'}><PotretReaksi reaksi="miss-berpikir" ukuran={48} /><span>{catatan}</span></p>
+        </Modal>
+      ) : null}
       {percobaan === 1 ? <p className="iv-tempel" role="status">{petunjuk1 ?? t('investigasi.keberatan.petunjuk1')}</p> : null}
       {dipandu ? (
         <p className="iv-tempel iv-pandu" role="status">
@@ -63,20 +104,22 @@ export function LayarKeberatan({ pernyataan, bukti, percobaan, onPilih, tx, tepa
           <span>{petunjuk2 ?? t('investigasi.keberatan.petunjuk2')}</span>
         </p>
       ) : null}
-      <BukuCatatan pernyataan={[pernyataan]} bukti={bukti} tx={tx} sorotPernyataan={pernyataan.id} tanpaPensil
+      <BukuCatatan pernyataan={berpasangan && pasangan ? pasangan.pernyataan : [pernyataan]} bukti={bukti} tx={tx} sorotPernyataan={berpasangan ? undefined : pernyataan.id} tanpaPensil temuan={temuan}
+        pilihPernyataan={berpasangan ? { terpilih: ket, terkunci: keliruKet >= 2, onPilih: setKet } : undefined}
         pilihBukti={{ terpilih: pilih, sorot: percobaan >= 1 ? tepat : null, redup: (id) => dipandu && id !== tepat, onPilih: setPilih, bisaPerbesar: perbesar, onPerbesar: () => setZum(true) }} />
       {zum ? (
         <Modal judul={t('investigasi.keberatan.zumJudul')} onTutup={() => setZum(false)} lebar={420}>
           <div className="iv-zum">
-          <p className="iv-zum-kutip"><b>{t(`investigasi.siapa.${pernyataan.siapa}`)}</b><q>{teks(pernyataan.teks)}</q></p>
-          <BingkaiDashcam besar potong="lajur" sorotTruk />
-          <p className="iv-label">{t('investigasi.keberatan.zumKet')}</p>
+          {/* T-127: selama pemain masih MEMILIH keterangannya (temuan berpasangan), kutipan yang dibantah tidak ditunjukkan di sini */}
+          {berpasangan && ket !== pernyataan.id ? null : <p className="iv-zum-kutip"><b>{t(`investigasi.siapa.${pernyataan.siapa}`)}</b><q>{teks(pernyataan.teks)}</q></p>}
+          {isiZum ?? <BingkaiDashcam besar potong="lajur" sorotTruk />}
+          {isiZum ? null : <p className="iv-label">{t('investigasi.keberatan.zumKet')}</p>}
           <button type="button" className="primary-action iv-tombol" data-zum-pakai="" onClick={() => { setPilih('dashcam'); setZum(false); }}>{t('investigasi.keberatan.zumPakai')}</button>
           </div>
         </Modal>
       ) : null}
-      <button type="button" className="primary-action iv-tombol iv-tombol-keberatan" data-keberatan="" disabled={!pilih} onClick={() => { if (pilih) onPilih(pilih); }}>
-        {pilih ? t('investigasi.keberatan.tombol') : t('investigasi.keberatan.belum')}
+      <button type="button" className="primary-action iv-tombol iv-tombol-keberatan" data-keberatan="" disabled={!siap} onClick={ajukan}>
+        {siap ? t('investigasi.keberatan.tombol') : berpasangan ? t('investigasi.pasang.belum') : t('investigasi.keberatan.belum')}
       </button>
     </section>
   );

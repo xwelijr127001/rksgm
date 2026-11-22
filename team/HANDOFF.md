@@ -6192,3 +6192,196 @@ No new policy or legal sentence was written. The verdict and message reasons are
 - Two states of the result screen have 1 px spare at 360 x 640 by calculation.
 - The visible card label says "today's card", not "decorative"; the word is only in the hover title and for screen readers.
 - `k06` two columns versus one 600 px column: Lead's choice (see above).
+
+## T-128 (2026-11-22): round 2 exhibit ART for all three cases (Designer, art only)
+
+### CONTRACT (written before drawing; file names and sizes are fixed, Fullstack can wire against them)
+All files are NEW, in `client/src/cerita/seni/investigasi/r2/`. No existing image is changed. Two formats, the same as the existing exhibits:
+- **exhibit** `<name>.png`, 288 x 192 (3 : 2, the zoom frame of `PanelExhibit`; show at 1 image px = 1 CSS px)
+- **card** `<name>-kartu.png`, 96 x 68 (the evidence-card cell of `KartuBukti` / the panel cards; show at 1x, or 2x on a cover)
+Import map with the same ids: `client/src/cerita/investigasi/ui/seniR2.ts` (`SENI_R2[id] = { exhibit, thumb }`, `SLIP_WAKTU_K2`, `LAJUR_K1_BINGKAI`). No component: the existing frames can show these as they are.
+Text baked into the images: only times, dates as day numbers, clause numbers 1 to 3, and the licence class code and year that the existing licence art already carries. No names, no brands, no addresses, no prices, no tick or cross that would give an answer away.
+
+| id | exhibit / card file | what it shows |
+|---|---|---|
+| `k1-bingkai-1432` | `k1-bingkai-1432.png`, `k1-bingkai-1432-kartu.png` | Kasus 1. The dashcam frame BEFORE the swerve, from above, stamped 14:32. All four lanes and the left verge are in view and NO lane is numbered, so the lane is found by counting lane lines from the left. The truck drives in lane 2 but close to the line to lane 3 (not centred); the small car is in lane 3, just ahead, starting to drift left. Lane areas in the 288 px image for a tap target: lane 1 x 24 to 90, lane 2 x 90 to 156, lane 3 x 156 to 222, lane 4 x 222 to 288. |
+| `k1-pos-petugas` | `k1-pos-petugas.png`, `k1-pos-petugas-kartu.png` | Kasus 1. The officer's sightline: the view out of the toll booth window, across the lanes. The small car is nearer and in front of the truck's tractor, which is partly hidden behind it; from here the two overlap and depth (which lane) cannot be read. |
+| `k1-catatan-sim` | `k1-catatan-sim.png`, `k1-catatan-sim-kartu.png` | Kasus 1. Two records side by side: the licence record (class box "B II UMUM", valid-until year "2029", both as on the existing licence art) and the vehicle record (truck with trailer, required class box "B II UMUM"). Both class boxes and the year are readable; nothing is ticked, crossed or highlighted. |
+| `k2-slip-2105` | `k2-slip-2105.png` (card size only, 96 x 68) | Kasus 2. Time slip "21:05": pickup (person stepping to a car door, map pin). |
+| `k2-slip-2118` | `k2-slip-2118.png` (96 x 68) | Kasus 2. Time slip "21:18": the bump (car rear and motorbike, impact mark). |
+| `k2-slip-2124` | `k2-slip-2124.png` (96 x 68) | Kasus 2. Time slip "21:24": trip closed in the app (phone with a closed-trip bar). |
+| `k2-formulir` | `k2-formulir.png`, `k2-formulir-kartu.png` | Kasus 2. The incident form: a paper form with a time box "21:18", a small sketch of the car hit from behind by a motorbike, and ruled lines for the rest. |
+| `k2-struk` | `k2-struk.png`, `k2-struk-kartu.png` | Kasus 2. The trip receipt, redacted: route line from "21:05" to "21:24", black bars over the passenger's name and both addresses, fare lines as plain bars. Neutral: it does not say who rode or what the trip was. |
+| `k2-polis` | `k2-polis.png`, `k2-polis-kartu.png` | Kasus 2. A policy extract page with three numbered clause blocks: 1 = use (car with a house), 2 = territory (map outline), 3 = driver (person at a steering wheel). Text is ruled lines; none of the three is highlighted. Clause areas in the 288 px image: clause 1 y 44 to 88, clause 2 y 92 to 136, clause 3 y 140 to 184 (x 16 to 272). |
+| `k2-endorsemen` | `k2-endorsemen.png`, `k2-endorsemen-kartu.png` | Kasus 2. A use-endorsement document: a rider sheet clipped to a policy page, with a car-and-passenger symbol, an effective-date box (calendar, left EMPTY so the text decides what it says) and a seal. |
+| `k3-foto-inspeksi-03` | `k3-foto-inspeksi-03.png`, `k3-foto-inspeksi-03-kartu.png` | Kasus 3. The inspection photo in the workshop bay with the cracked mirror visible and a camera date stamp "03". |
+| `k3-kartu-kejadian-14` | `k3-kartu-kejadian-14.png`, `k3-kartu-kejadian-14-kartu.png` | Kasus 3. The incident record card: calendar leaf "14", a sketch of the car in a parking bay with the impact at the rear bumper only. Pairs with the photo: 03 comes before 14. |
+| `k3-penawaran` | `k3-penawaran.png`, `k3-penawaran-kartu.png` | Kasus 3. The repair estimate: a sheet with two numbered lines, 1 = bumper symbol, 2 = mirror symbol, amounts as plain bars, a total line. Neither line is marked. |
+
+### RESULT (after drawing)
+Drawn by the Designer; uncommitted, not deployed. Nothing was opened in a browser or on a phone and no test was run. Root `npm run typecheck` exit 0; `client/dist` rebuilt (build exit 0; other workers' files on disk at that moment are in it, so the Lead rebuilds after the slices land). The images are not used by any screen yet, so no screen, score, save or text changed.
+
+- All 23 files of the contract exist in `client/src/cerita/seni/investigasi/r2/` with the names and sizes above; `client/src/cerita/investigasi/ui/seniR2.ts` imports every one (so a missing file fails the build). It also exports `KLAUSUL_K2_POLIS` (the three clause rectangles) next to `LAJUR_K1_BINGKAI`.
+- Generator: `character/investigator-t128/bangun.mts` (re-run rewrites only the `r2/` files).
+- No file outside `r2/`, `seniR2.ts`, `character/investigator-t128/` and this document was written. No episode, locale, `LayarInvestigasi`, `PressPanel` or `BukuCatatan` edit.
+
+### How each picture keeps its answer open
+- `k1-bingkai-1432`: built 1 : 1 from the dashcam replay sprites, so it matches the footage. No lane numbers. The truck is 5 px from the line between lanes 2 and 3; its lane is found by counting the three dashed lines from the left kerb.
+- `k1-pos-petugas`: the car covers the tractor's wheels and the lane lines under it, so the view really cannot tell the lane.
+- `k1-catatan-sim`: both class boxes read "B II UMUM" and the year reads "2029" (the values of the existing licence and registration art, so the genuine licence stays genuine). "Class mismatch" and "unreadable date" are then wrong by reading, not by a mark.
+- `k2-formulir`, `k2-struk`, the three slips: only the times differ; the receipt shows no person and no purpose of the trip.
+- `k2-polis`: three equal clause blocks. `k2-endorsemen`: the date box is empty on purpose.
+- `k3-penawaran`: no red ring around line 2 (the existing estimate card has one). `k3-kartu-kejadian-14`: the impact is at the rear bumper only; the mirror is not marked.
+
+### Things to know
+- **`k3-foto-inspeksi-03` is built on the existing workshop photo** (`panel/foto-inspeksi.png`), which already has a thin orange ring around the mirror on the car. I kept it (same photo as today) and added the close inset of the cracked glass and the "03" stamp. If the ring should go for round 2, I need to redraw that photo.
+- **The card of `k1-catatan-sim`** (96 x 68) shows the licence record whole and only the edge of the vehicle record; both class boxes side by side need the 288 px exhibit.
+- **The licence class code "B II UMUM" and the year "2029" are baked in**, as in the existing art. They are licence facts: the text that explains them needs the usual `// [konfirmasi PIC]` (Fullstack's lines).
+- **Found while looking at the old art, not changed:** the officer's note in `seni/investigasi/kilas-tol.png` reads "JAM 09.40", while the dashcam is stamped 14:32 (and T-125 changed Pak Darto's line to "Siang itu" for that reason). If the note is shown as an exhibit in round 2, either the art or the text has to give; I can redraw the note as a new file.
+- The pickup, bump and close slips use the same paper and layout, so their order is not hinted by colour.
+- Legibility at 360 px: the zoom frame shows the exhibits at 1 : 1 (288 px wide); the smallest baked text is 14 px tall (times, day numbers, class code). See `seni-t128-360.png`.
+
+### Previews (the real pixels) in `character/investigator-t128/`
+`seni-t128-kasus1.png`, `seni-t128-kasus2.png`, `seni-t128-kasus3.png` (each exhibit with its card at 2x; the slips on the Kasus 2 sheet) and `seni-t128-360.png` (every exhibit in a 360 px phone column).
+
+### Open
+- Not seen in the app. Fullstack wires the images; say if a picture needs another crop, a detail close-up (144 x 112, as the panel photos have) or a different symbol.
+
+### T-129 note (2026-11-22): two art fixes on the T-128 findings (Designer, Lead's decisions)
+Uncommitted, not deployed; nothing opened in a browser; root `npm run typecheck` exit 0, `client/dist` rebuilt (build exit 0). Art only: no episode, locale or UI file edited.
+
+1. **Ring around the mirror removed** (it pointed at the item in question before the player had worked it out).
+   - `seni/investigasi/panel/foto-inspeksi.png` (288 x 192, same name and size): the workshop photo without the ring. This is the photo the panel zoom shows today.
+   - `panel/bukti-foto-inspeksi.png` and cell 0 of `panel/bukti.png` (same names and sizes): the frame of the small mirror inset is ink now, not orange.
+   - `r2/k3-foto-inspeksi-03.png` and its card: rebuilt on the ring-free photo; I also took out the leader line I had drawn from the inset to the car, for the same reason. Contract otherwise unchanged (crack visible in the corner print, stamp "03").
+   - NEW overlay for a later "finding" screen: `r2/k3-foto-inspeksi-cincin.png` (288 x 192, transparent, only the ring at the old position). Lay it over `panel/foto-inspeksi.png` or `k3-foto-inspeksi-03.png` after the player has found it. In `ui/seniR2.ts` as `CINCIN_K3_FOTO`. Not used by any screen yet.
+2. **Officer's note** `seni/investigasi/kilas-tol.png` (168 x 92, same name and size): "JAM 14.40" instead of "09.40". Nothing else in the picture moved, so the hand that writes the lane number and the correction overlay still line up.
+
+Checked by checksum: of the existing Investigator images only these four files changed (`panel/foto-inspeksi.png`, `panel/bukti-foto-inspeksi.png`, `panel/bukti.png`, `kilas-tol.png`). Generators updated so a re-run keeps the fixes: `character/investigator-t103/adegan.mts`, `character/investigator-t079/bangun.mts`, `character/investigator-t128/bangun.mts`.
+
+Left as they are, for the Lead to judge:
+- The 16 px icon "foto-inspeksi" in `panel/ikon.png` is a photo with an orange dot (it marks the kind of evidence, not a place on the car).
+- The card of the incident photo (`panel/bukti-kartu-kejadian.png`) has a yellow ring at the rear bumper, the damage nobody disputes.
+- The panel zoom's "look closer" button still swaps the workshop photo for the mirror close-up (`panel/spion.png`); that is the player's own action, and it is UI, not art.
+- If any text still says the officer wrote his note in the morning, it now disagrees with 14.40; I did not read the locale files for this (Fullstack's).
+
+Preview: `character/investigator-t128/seni-t129.png` (photo, photo with the overlay, card, officer's note); `seni-t128-kasus3.png` and `seni-t128-360.png` are regenerated.
+
+## T-127 (2026-11-22): round 2 slice 1 = shared plumbing + Kasus 1 "Truk di Tol" (Fullstack)
+
+Built by Fullstack; uncommitted, not deployed. Owner rule: nothing was opened in a browser or on a phone and no test was run, so every height is CALCULATED and none of the new interactions has been seen running. Root `npm run typecheck` exit 0; `client/dist` rebuilt (build exit 0). No server file touched. Static check by script (not the test suite): the project validator returns no finding for the three Investigator episodes and all 1512 paths of Kasus 1 reach an ending.
+
+Unchanged, as the release boundary requires: scored choice ids (objection cards `rambu` / `dashcam` / `sim`, verdict, message `baik` / `datar` / `janji`), attempt order, score marks, rubric version, 40 / 30 / 30, 100 per case, 300 total, `raksa:investigasi:v1`, stamps, grades, bests, episode version. Everything new is FORMATIVE: no points, never through the ranked decision bridge (`investigasi/acara.ts` only knows objection, verdict and message), nothing written to the device record.
+
+Art: the Designer's T-128 files are wired (no placeholders): `k1-bingkai-1432`, `k1-pos-petugas`, `k1-catatan-sim`.
+
+### 1. Shared plumbing (reusable by Kasus 2 and 3)
+- **(a) Press = a choice of questions.** `PernyataanInvestigasi.pressLain` adds 1 or 2 questions next to `press`; the offer node gets one option per question (`tekan` = the old id, `tekan-<id>` for the others, `lanjut`). One question per witness visit. `Press.berguna` marks the useful one; it may carry a picture (`seni`, `seniKet`). `PressPanel` got two optional props (`choices`, `mark`).
+- **Curiosity mark ("Tanda jeli").** Not stored on its own: it is read from the existing `press:<statement>:<id>` mark plus `berguna`, so an old save without it is simply without a mark. Shown on the answer screen and on the notebook page (star on the statement chip, one line in the question note). No points, not a case stamp.
+- **(b) Formative pick with guided retry.** `KonfigInvestigasi.tafsir[]` + node kind `tafsir` + component `ui/PilihFormatif.tsx`: a question, the exhibit, 2 or 3 readings. First miss = a pointer to the source for that option, the option is struck out; second miss = Miss Raksa shows the reasoning (the exhibit gets its aid, e.g. lane numbers) and the story continues. An option can be "almost" (`hampir`) instead of wrong. Misses survive a reload as the visit draft. The node's effect sets `tafsir:<id>`.
+- **(c) Paired-note finding, at most one per case.** `keberatan.pasangan`: on the FIRST objection attempt the player picks two notes in the notebook, one statement and one piece of evidence. Only the statement pick is new and it is formative (first miss: pointer; second miss: reasoning, the right statement is selected and locked), shown as a small Miss Raksa dialog. The evidence card is still the same scored pick.
+- **(d) Tentative vs established.** `status.ts temuanKasus`: a reading is tentative until its `mapanSaat` mark exists (Kasus 1 lane: until the officer corrects his report). The notebook sheet has a third tab "Temuan" with two separate sections, "Tafsiranmu, belum dikonfirmasi" and "Temuan yang sudah terbukti".
+- **(e) Neutral exhibit titles.** Card titles name the source only. The finding is a second line on the slip, written only after the player has read the exhibit or was guided: pencil mark and dashed line while tentative, tick once established.
+
+### 2. Kasus 1
+| Step | Before | Now |
+|---|---|---|
+| Officer's statement | arrived after the crash | on duty at the post; saw it from the side; wrote the note a few minutes later (fits the "JAM 14.40" note of T-129) |
+| Follow-up | one question | two, pick one: "Bapak berdiri di mana waktu melihatnya?" (useful: shows the view from the post, earns the mark) or "Apa yang dilarang rambu di ruas itu?" (polite, nothing new) |
+| Dashcam activity | lanes numbered 1 to 4, feedback named lanes 3 and 2 | this case plays it without the lane-number strip and with lane-free feedback (Episode 1 Dev unchanged) |
+| After the footage | card "Rekaman dashcam: truk di lajur 2" | NEW reading step on the 14:32 frame (no lane numbers): "Lajur 2" / "Lajur 3" / "Tidak jelas"; then the card "Rekaman 14:32" with "truk di lajur 2" as the player's reading |
+| Licence | three taps, each "COCOK" | one reading on the two records: "Golongan cocok" / "Golongan beda" / "Tahun tak terbaca". The licence stays genuine; wrong options are misreadings |
+| Before the objection | Miss Raksa: "one of your cards disproves it" | that line is gone; the player pairs two notes |
+| Objection, attempt 1 | statement given, pick a card | pick the statement AND the card ("Dua catatan mana yang tidak cocok?") |
+| After the stamp | officer admits at once | he first objects ("ada kendaraan di lajur 3"), then tells the small car from the truck's cab, then corrects his report. Players with the curiosity mark get one extra line that recalls his sightline |
+| Message | best = by far the longest | best is mid-length (136 characters in id), the short one (106) is correct but cold, the promise of payment is the longest (207) and still wrong |
+
+Card titles now: "Rekaman 14:32", "Foto rambu", "SIM dan STNK".
+
+### Decisions the brief does not spell out (Lead to confirm)
+1. **Pairing lives inside the scored objection.** I did not add a separate pairing step before it: that would name the scored card one screen early. The pair's statement half is formative, the card half is the existing scored pick.
+2. **Lane reading uses three answer buttons under the frame, not tap areas on the lanes.** With tap areas the player would only tap the truck; with buttons they must count unnumbered lanes from the left. The lane rectangles from the T-128 contract are used for the numbered aid after the second miss.
+3. **Officer's story changed** from "arrived afterwards" to "saw it from the post" so the sightline picture and his "but" make sense. Old key names are kept.
+4. **Dashcam activity without lane numbers in this case only** (new optional `tanpaNomor` on the dashcam arena config), otherwise the reading step is answered before it is asked.
+5. **Objection zoom** shows the neutral 14:32 frame for this case instead of the numbered frame with the truck highlighted; while the statement is still being chosen it does not quote the challenged statement.
+6. **Old hologram and QR steps of the licence check are no longer shown** in Kasus 1 (the three-tap component stays in the code for a case without a licence reading).
+7. **The curiosity mark lives in the case progress**, so "Ulang dari awal" clears it. Keeping it across replays would need a new field in the device record, which the boundary forbids.
+
+### Saves of players who are mid-case
+- All 35 old node ids exist and are reachable; two nodes were added (`tol-tekan-rambu`, `baca-rekaman`); `baca-rekaman` is inserted between `kdash` and `bukti-rekaman`.
+- A save standing on any old node continues. One that is already past `kdash` has no `tafsir:*` mark: its slips show no reading line, and the finding appears once the report is corrected. One that had opened the old single question keeps its mark `press:tol:lihat` and so shows the curiosity mark.
+- A save in the middle of the old three-tap licence check reopens on the new reading with no miss counted.
+- No text key was removed; changed lines reuse their keys, so an old history shows the new wording.
+
+### Calculation (id / en / zh). Room: 557 px at 360 x 640 and 617 px at 390 x 700; dialogs 480 / 540; chat sheet 527 / 587
+| Screen | 360 x 640 | Room | 390 x 700 | Room | Least spare |
+|---|---|---|---|---|---|
+| Follow-up: offer with two questions | 379 / 379 / 375 | 557 | 377 / 379 / 375 | 617 | 178 |
+| Follow-up: useful answer (post picture + curiosity mark) | 454 / 475 / 430 | 557 | 454 / 454 / 430 | 617 | 82 |
+| Follow-up: answer to the second question | 357 / 354 / 333 | 557 | 357 / 333 / 333 | 617 | 200 |
+| Lane reading: choosing | 416 / 416 / 390 | 557 | 416 / 416 / 390 | 617 | 141 |
+| Lane reading: after the first miss | 442 / 442 / 396 | 557 | 442 / 442 / 396 | 617 | 115 |
+| Lane reading: correct + Lanjut | 486 / 486 / 460 | 557 | 486 / 486 / 454 | 617 | 71 |
+| Lane reading: guided + Lanjut | 526 / 526 / 500 | 557 | 506 / 526 / 500 | 617 | 31 |
+| Licence reading: choosing | 390 / 390 / 364 | 557 | 390 / 390 / 364 | 617 | 167 |
+| Licence reading: after the first miss | 416 / 416 / 370 | 557 | 416 / 396 / 370 | 617 | 141 |
+| Licence reading: correct or guided + Lanjut | 480 / 480 / 434 | 557 | 480 / 460 / 434 | 617 | 77 |
+| New evidence: footage + sign | 443 / 443 / 418 | 557 | 443 / 443 / 418 | 617 | 114 |
+| New evidence: licence | 322 / 322 / 297 | 557 | 297 / 297 / 297 | 617 | 235 |
+| Objection attempt 1 (two notes) | 516 / 510 / 490 | 557 | 490 / 490 / 490 | 617 | 41 |
+| Objection attempt 1: pointer / reasoning dialog | 136 / 116 / 96 | 480 | 116 / 96 / 76 | 540 | 344 |
+| Objection attempt 2 (unchanged) | 481 / 507 / 459 | 557 | 481 / 459 / 459 | 617 | 50 |
+| Objection attempt 3 (unchanged) | 359 / 385 / 359 | 557 | 475 / 475 / 467 | 617 | 142 |
+| Notebook sheet: Keterangan tab (with curiosity mark) | 386 / 386 / 352 | 480 | 386 / 368 / 352 | 540 | 94 |
+| Notebook sheet: Bukti tab (slips with finding line) | 266 / 266 / 266 | 480 | 266 / 266 / 266 | 540 | 214 |
+| Notebook sheet: Temuan tab (worst: two readings + one finding) | 374 / 352 / 312 | 480 | 312 / 330 / 290 | 540 | 106 |
+| Chat reply sheet: list | 397 / 397 / 373 | 527 | 397 / 397 / 373 | 587 | 130 |
+| Chat reply sheet: chosen message in full | 317 / 317 / 244 | 527 | 292 / 292 / 244 | 587 | 210 |
+| Message practice: list | 530 / 530 / 486 | 557 | 508 / 530 / 486 | 617 | 27 |
+| Message practice: chosen message in full | 356 / 334 / 290 | 557 | 334 / 312 / 290 | 617 | 201 |
+
+- 24 screens x 6 = 144 values, 0 over the room. Tightest: message practice list, 530 of 557 px (id, en at 360 x 640).
+- Slips keep their 52 px: the title is one line next to the finding. Widest at 360 px with the widest handwriting fallback: title 138 px and finding 114 px in a 158 px column.
+- The first paired-note version put the pointer and the reasoning on the page and came to 578 / 592 px; that is why they are a dialog now.
+- Tap targets: reading options 52 px or more, question buttons 52 px or more, statement chips 56 x 62 px.
+- The "Rincian nilai" sheet of T-126 was recalculated with the new texts: Kasus 1 pages unchanged or shorter.
+- Not recalculated: interview-room and office scene beats. The longest new spoken line is about 100 characters; the longest line removed was about 115.
+
+### Play time (estimate from tap and character counts, not played)
+| | Before | Now |
+|---|---|---|
+| Taps on a clean run | about 53 | about 52 (53 with the curiosity line) |
+| Fixed animations | about 13 s | about 12 s (no licence scan) |
+| Text to read on that run | baseline | about 100 characters more in total (the licence step reads less, the messages and the readings more) |
+| Real decisions | 3 scored | 3 scored + 2 readings + the statement half of the pair + a choice of question |
+
+My estimate: 20 to 35 seconds longer on a first clean run, so about 5 to 5.5 minutes; each formative miss adds roughly 10 seconds, at most two per step. The licence step is shorter than before (4 taps instead of 8).
+
+### Audit for early answers (Kasus 1)
+- Fixed: card titles; the text after the footage; the "Tebakan awalmu" lines (they said "Rekaman menunjukkan lajur 2" / "Tepat!"); the dashcam activity feedback and its numbered lanes; Miss Raksa's line before the objection; the history line of the first attempt (it named the officer's statement); the zoom at the objection.
+- Checked and left: the opening line states both claims; the flashback captions are marked as each witness's account; the hint and guided texts of attempts 2 and 3 name the answer by design (after one and two misses); alt text of the new pictures is the neutral card title; the post picture's alt describes what is seen, not what it means.
+- Left for the Designer / Lead: `investigasi.ts` `keberatan.zumKet` ("Cocokkan dengan nomor lajur di bawah truk") is no longer shown in Kasus 1.
+
+### New or changed `// [konfirmasi PIC]` lines (`episode/auto-2-inv/teks.id.ts`, same keys in en and zh)
+- `inv.tekan.tol.rambu.jawab`: what the sign prohibits (trucks and trailers, lanes 3 and 4).
+- `inv.bukti.sim.1`: the licence is valid for the trailer truck.
+- `inv.tafsir.sim.salah.tanggal`, `inv.tafsir.sim.alasan`, `inv.tafsir.sim.benar`, `inv.tafsir.sim.temuan`: licence class B II Umum, the class required for the vehicle, valid until 2029.
+- `inv.pesan.baik`, `inv.pesan.datar`, `inv.pesan.janji`: the three customer messages (claim status, next step, the payment promise that stays wrong).
+en / zh wording of all new strings is mine.
+
+### Files
+- Types and state: `client/src/cerita/tipe.ts`, `client/src/cerita/investigasi/status.ts`.
+- New: `client/src/cerita/investigasi/ui/PilihFormatif.tsx`, `client/src/cerita/investigasi/ui/ronde2.css`.
+- Changed UI: `investigasi/LayarInvestigasi.tsx`, `ui/BukuCatatan.tsx`, `ui/LayarKeberatan.tsx`, `ui/panel/PressPanel.tsx`, `cerita/hp/arena/ArenaDashcam.tsx` (one optional flag).
+- Case: `episode/auto-2-inv/episode.ts`, `teks.id.ts`, `teks.en.ts`, `teks.zh.ts`; dictionary `i18n/kamus/investigasi.ts` (15 new keys in id / en / zh).
+- Not edited: `skor.ts`, `simpan.ts`, `acara.ts`, the shared rubric, Kasus 2 and 3, the Designer's art and `seniR2.ts`.
+- Outside the repo: calculation `C:\Users\User\AppData\Local\Temp\claude\ec29f026d20d029c\0c4fe0f7-0adb-4cb1-b49a-10019af309f5\scratchpad\t127\hitung.mts`, static check `C:\Users\User\AppData\Local\Temp\claude\ec29f026d20d029c\0c4fe0f7-0adb-4cb1-b49a-10019af309f5\scratchpad\t127\periksa.mts` (both run from `client/` with `npx tsx`).
+
+### Hooks for QA
+`[data-tanya-pilihan]` with `[data-tanya-lanjut="lihat|rambu"]`; `[data-layar-tekan="jawab"][data-tekan-press]`; `[data-tanda-jeli]`; `[data-pilih-formatif="lajur|sim"]` with `[data-keadaan="awal|keliru|hampir|dipandu|tepat"]`, `[data-opsi]`, `[data-pf-lanjut]`; `[data-seni-r2]`; `[data-layar-keberatan][data-berpasangan]`, `[data-pilih-keterangan]`, `[data-pasang-catatan="penunjuk|alasan"]`; `.bk-slip-temuan[data-temuan="tafsir|mapan"]`; `[data-tab-buku="temuan"]`, `[data-daftar-temuan]`. In Kasus 1 `[data-periksa-sim]` and `[data-ps-lanjut]` no longer appear.
+
+### Open
+- Not seen in a browser or on a phone. Most worth a look: the lane reading on the 14:32 frame, the paired pick and its dialog, the slips with the finding line, the dashcam replay without lane numbers, the "Temuan" tab.
+- `client/src/cerita/investigator.expect.test.ts` was not run; by my script its Kasus 1 part (validator result) is unchanged.
+- Kasus 2 and 3 are untouched; their slices can use (a) to (e) as they are. The paired pick is built for the single-objection cases; Kasus 3's panel rounds need their own wiring in that slice.
+- Ranked event runs use the same screens; the formative steps add no server call, but I could not exercise a run.

@@ -261,6 +261,11 @@ export interface BuktiInvestigasi {
   ikon: 'rekaman' | 'foto' | 'kartu' | 'struk' | 'polis';
   /** T-106: kutipan PERSIS kartu ini (kunci teks): keterangan lembar "perbesar" dan kartu babak panel. Opsional (kasus 3). */
   kutipan?: KunciTeks;
+  /**
+   * T-127 (babak 2): seni kartu ini dari peta `SENI_R2` (investigasi/ui/seniR2.ts, T-128): gambar slip 96 x 68 dan bingkai besar
+   * 288 x 192. Tanpa nilai = seni lama kartu itu. Gambar babak 2 NETRAL (tanpa nomor lajur, tanpa centang): tafsirnya dari pemain.
+   */
+  seni?: string;
 }
 
 /** T-102: pembuat pernyataan kasus 1-2 (tabel potret lama berindeks tipe ini). */
@@ -278,6 +283,16 @@ export interface Press {
   id: string;
   questionKey: KunciTeks;
   answerKey: KunciTeks;
+  /**
+   * T-127 (babak 2, tambahan opsional; tanpa nilai = pertanyaan biasa): pertanyaan ini BERGUNA, yaitu jawabannya membuka detail yang
+   * relevan dengan sumbernya. Membukanya memberi TANDA JELI di buku catatan (hiasan: tanpa poin, bukan stempel kasus, tidak dikirim
+   * ke papan acara). Tandanya tidak disimpan tersendiri: ia dibaca dari tanda `press:<pernyataan>:<id>` yang sudah ada + bendera
+   * ini, jadi simpanan lama tanpa tanda itu tetap sah.
+   */
+  berguna?: boolean;
+  /** T-127: gambar yang ikut ditunjukkan bersama jawabannya (id `SENI_R2`, mis. pandangan dari pos petugas); `seniKet` = teks alt-nya. */
+  seni?: string;
+  seniKet?: KunciTeks;
 }
 
 /**
@@ -312,6 +327,42 @@ export interface PernyataanInvestigasi {
   teks: KunciTeks;
   /** T-102: "Tanya lebih lanjut" pada pernyataan ini (opsional; tanpa nilai = pernyataan seperti semula). */
   press?: Press;
+  /**
+   * T-127 (babak 2): pertanyaan LAIN yang ditawarkan bersama `press` pada kunjungan saksi itu (jadi 2-3 pertanyaan, pilih SATU).
+   * Node tawar memberi tiap pertanyaan pilihannya sendiri: `press` tetap ber-id pilihan 'tekan' (simpanan lama), yang lain
+   * 'tekan-<id press>' (investigasi/status.ts `pilihTekan`); tiap pertanyaan punya node jawabnya sendiri.
+   */
+  pressLain?: Press[];
+}
+
+/**
+ * T-127 (babak 2) TAFSIR: satu PILIHAN FORMATIF atas satu bukti. Pemain memilih satu dari beberapa bacaan; tanpa poin, tanpa
+ * waktu, tidak pernah lewat sambungan pilihan bernilai (investigasi/acara.ts). Kekeliruan pertama = penunjuk ke SUMBERnya,
+ * kekeliruan kedua = penjelasannya ditunjukkan dan cerita lanjut. Sesudah pemain memilih yang tepat atau dipandu, `temuan` ditulis
+ * di kartu `bukti` (judul kartunya sendiri netral). Tanda: `tafsir:<id>` (dipasang efek node, sekali).
+ *   tampilan   'bingkai' = gambar besar `seni` (288 x 192) + pilihan di bawahnya; `lajur` = batas kiri-kanan tiap lajur di gambar itu,
+ *              dipakai untuk menomori lajur saat penjelasan ditunjukkan
+ *   opsi       pilihan urut layar; `tepat` = id yang benar; `hampir` = pilihan yang berhati-hati tetapi belum membaca sumbernya
+ *              (umpan baliknya "sebagian", bukan "keliru")
+ *   mapanSaat  tanda yang menjadikan tafsir ini TEMUAN MAPAN (mis. 'koreksi:tol': saksinya mengoreksi catatannya). Tanpa nilai =
+ *              mapan begitu tafsirnya dibuat (pemeriksaan dokumen yang terbaca langsung).
+ * Kunci teks (awalan kasus): `<awalan>.tafsir.<id>.salah.<opsi>` (kekeliruan pertama: penunjuk sumber untuk pilihan itu),
+ * `.alasan` (kekeliruan kedua: penjelasan), `.benar` (tepat).
+ */
+export interface TafsirInvestigasi {
+  id: string;
+  bukti: IdBukti;
+  tampilan: 'bingkai';
+  seni: string;
+  lajur?: readonly (readonly [number, number])[];
+  tanya: KunciTeks;
+  opsi: { id: string; teks: KunciTeks }[];
+  tepat: string;
+  hampir?: string[];
+  /** Kalimat temuan lengkap (halaman "Temuan" buku catatan) dan versi pendeknya untuk slip bukti. */
+  temuan: KunciTeks;
+  ringkas: KunciTeks;
+  mapanSaat?: string;
 }
 
 /** Putusan klaim dan pesan untuk nasabah (id pilihan node `putusan` / `pesan`; tanda `putusan:<id>` / `pesan:<id>`). */
@@ -347,6 +398,9 @@ export type PesanInvestigasi = 'baik' | 'datar' | 'janji';
  *                       keliru memasang `panel-keliru:<round>:<attempt>:<idBukti>`. Babak 1 tidak pernah diulang sesudah babak 2.
  *  - panel-koreksi    : (T-102) node dialog sesudah babak selesai: pembuat pernyataan mengoreksi keterangannya; efek node
  *                       memasang `koreksi:<Round.statementId>`.
+ *  - tafsir           : (T-127, babak 2) node dialog; layar pilihan formatif `KonfigInvestigasi.tafsir[id]` (ui/PilihFormatif):
+ *                       pilih satu bacaan, kekeliruan dipandu, selesai = lanjut dan efek node memasang `tafsir:<id>`. Tanpa poin.
+ *                       Node `periksa-sim` yang kasusnya punya tafsir ber-id 'sim' memakai layar yang sama (id node lama tetap).
  * `bukti.juga` (T-087): kartu bukti lain yang ikut dijepit di layar yang sama (satu halaman buku untuk dashcam + rambu).
  */
 export type NodeInvestigasi =
@@ -362,6 +416,7 @@ export type NodeInvestigasi =
   | { jenis: 'keberatan'; pernyataan: string; tepat: BuktiInvestigasi['id']; percobaan: 0 | 1 | 2 }
   | { jenis: 'cap' }
   | { jenis: 'periksa-sim' }
+  | { jenis: 'tafsir'; tafsir: TafsirInvestigasi['id'] }
   | { jenis: 'putusan' }
   | { jenis: 'hasil-investigasi' };
 
@@ -416,7 +471,19 @@ export interface KonfigInvestigasi {
     layar?: { tanya: KunciTeks; petunjuk1: KunciTeks; petunjuk2: KunciTeks };
     perbesar?: BuktiInvestigasi['id'][];
     reaksi?: string;
+    /**
+     * T-127 (babak 2) TEMUAN BERPASANGAN, paling banyak satu per kasus: di percobaan PERTAMA pemain memilih DUA catatan di buku
+     * catatannya, satu keterangan dan satu bukti. Keterangan yang dipilih hanya dinilai FORMATIF (keliru pertama = penunjuk, keliru
+     * kedua = penjelasan lalu keterangan yang benar terpilih sendiri; tidak ada aksi mesin, tidak ada percobaan yang terpakai). Kartu
+     * buktinya tetap PILIHAN BERNILAI yang sama (id pilihan, urutan percobaan, tanda dan poin tidak berubah).
+     *   tanya / ket  judul dan keterangan layar di percobaan pertama
+     *   temuan       kalimat temuan di halaman "Temuan" sesudah KEBERATAN selesai; mapan sesudah `koreksi:<pernyataan>`
+     * Kunci teks: `<awalan>.pasang.salah.<idPernyataan>` (keterangan keliru, pertama) dan `<awalan>.pasang.alasan` (kedua).
+     */
+    pasangan?: { tanya: KunciTeks; ket: KunciTeks; temuan: KunciTeks };
   };
+  /** T-127 (babak 2): pilihan formatif kasus ini (lihat TafsirInvestigasi). Tanpa nilai = kasus tanpa tafsir. */
+  tafsir?: TafsirInvestigasi[];
   /** Tabel putusan kasus ini (kasus 1: layak 30 / tambahan 15 / polis 0; kasus 2: polis 30 / tambahan 15 / layak 0). */
   putusan: Record<PutusanInvestigasi, 30 | 15 | 0>;
   /**
@@ -467,8 +534,13 @@ export interface PressPanelProps {
   question: string;
   answer: string;
   opened: boolean;
-  onPress: () => void;
+  /** T-127: dengan `choices`, id pertanyaan yang dipilih ikut dikirim. */
+  onPress: (id?: string) => void;
   onClose: () => void;
+  /** T-127 (tambahan opsional): 2-3 pertanyaan untuk dipilih SATU (opened false): tiap pertanyaan satu tombol. */
+  choices?: { id: string; question: string }[];
+  /** T-127: (opened true) baris "tanda jeli" di bawah jawaban: pertanyaan ini berguna. */
+  mark?: string;
 }
 
 /** Satu kartu di layar babak panel. `excerpt` = kutipan persis yang relevan untuk babak ini (sama dengan isi gambar). */
@@ -686,6 +758,8 @@ export type KonfigArena = DasarArena & (
    * `tetapkan(jawaban, konfig.langkah, konfig.item, konfig.bersih | konfig.ragu)` (pola sama dengan 'sim').
    */
   | { pola: 'dashcam'; langkah: string; item: string; benda: { id: 'mobil' | 'truk' | 'truk-kecil' }[]; tepat: 'mobil'; bersih: string; ragu: string;
+      /** T-127 (opsional; tanpa nilai = seperti semula): rekaman diputar TANPA pita nomor lajur 1-4 (kasus yang lajurnya ditafsirkan pemain). */
+      tanpaNomor?: boolean;
       /**
        * (T-068, Episode 1 lengkap K08) Langkah kedua pada bingkai beku yang SAMA: pertanyaan tokoh `penanya` (kalimat `tanya`) dengan
        * pilihan kesimpulan (langkah pilih-satu misi `langkah`). Tanpa ini arena berakhir sesudah ketukan penyebab (Episode 1 Dev kdash).

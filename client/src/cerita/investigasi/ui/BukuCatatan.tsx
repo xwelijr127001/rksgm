@@ -24,6 +24,15 @@
  *                 halaman tidak bertambah. Dipakai lembar buku catatan (Menu) dan arsip kasus.
  *   ringkasBukti  halaman "Bukti" tinggal kepalanya ("BUKTI 3"): layar semat cukup memperlihatkan bahwa buktinya ada.
  *   jumlahBukti   angka di kepala halaman "Bukti" bila yang digambar hanya sebagian (layar "Bukti baru!": slip yang baru saja).
+ *
+ * T-127 (babak 2, masukan Pak Peterson butir 12, 14, 17; semua opsional, tanpa prop ini buku persis seperti di atas):
+ *   temuan            per id bukti: baris TEMUAN di slipnya, di bawah judul kartu yang netral. `mapan` false = tafsiran pemain
+ *                     (tanda pensil, garis putus); true = temuan yang sudah terbukti (centang, tinta). Slip ber-temuan memotong
+ *                     judulnya menjadi satu baris, jadi tinggi slip tetap 52 px.
+ *   pilihPernyataan   KEBERATAN berpasangan: halaman "Keterangan" = keping polaroid yang bisa DIPILIH (satu), kalimat keterangan
+ *                     yang dipilih di bawahnya. Bersama `pilihBukti` = "pilih dua catatan".
+ *   tanya[].jeli      pertanyaan itu berguna: TANDA JELI (bintang di keping + satu baris di catatan tanya-jawabnya).
+ *   `Bukti.seni`      gambar slip dari seni babak 2 (ui/seniR2.ts) sebagai ganti potongan atlas lama.
  */
 import { useState, type CSSProperties } from 'react';
 import { t } from '../../../i18n';
@@ -31,6 +40,7 @@ import { PotretPikselHp } from '../../ui/latar/piksel/PotretPikselHp';
 import buktiUrl from '../../seni/investigasi/bukti.png';
 import bukti2Url from '../../seni/investigasi/bukti-kasus2.png';
 import { PanelAssets } from './panel/aset';
+import { SENI_R2, type IdSeniR2 } from './seniR2';
 import reaksi2Url from '../../seni/investigasi/reaksi-kasus2.png';
 import type { IdTokohPiksel } from '../../seni/piksel';
 import klipUrl from '../../seni/investigasi/klip.png';
@@ -101,6 +111,17 @@ const POTONG_BUKTI: Record<Bukti['id'], readonly [string, number, number]> = {
   'pesan-pengajuan': [PanelAssets.evidence['pesan-pengajuan']!.thumb, 6, 12], penawaran: [PanelAssets.evidence.penawaran!.thumb, 6, 12],
 };
 
+/** T-127: potongan gambar slip sebuah kartu: seni babak 2 (`Bukti.seni`, sel 96 x 68) bila ada, selain itu atlas lama. */
+function potongBukti(b: Bukti): readonly [string, number, number] {
+  const r2 = b.seni && b.seni in SENI_R2 ? SENI_R2[b.seni as IdSeniR2] : null;
+  return r2 ? [r2.thumb, 6, 12] : POTONG_BUKTI[b.id];
+}
+
+/** T-127: baris temuan di slip sebuah bukti (teks jadi, pendek). */
+export interface TemuanSlip { teks: string; mapan: boolean }
+/** T-127: keterangan sebagai pilihan tunggal (KEBERATAN berpasangan). `terkunci` = sudah dipandu: tidak bisa diganti lagi. */
+export interface PilihPernyataan { terpilih: string | null; onPilih: (id: string) => void; terkunci?: boolean }
+
 export interface PilihBukti {
   terpilih: Bukti['id'] | null;
   /** Bukti yang bagian gambarnya disorot (petunjuk). */
@@ -116,7 +137,7 @@ export interface PilihBukti {
 export interface KoreksiPernyataan { id: string; teks: string; baru?: boolean }
 
 /** T-106: "Tanya lebih lanjut" yang sudah dibuka pada pernyataan `id`: pertanyaan dan jawabannya ditulis di bawah pernyataan itu. */
-export interface TanyaPernyataan { id: string; tanya: string; jawab: string }
+export interface TanyaPernyataan { id: string; tanya: string; jawab: string; /** T-127: label tanda jeli bila pertanyaannya berguna. */ jeli?: string }
 
 function BarisKeterangan({ p, keadaan, sorot, teks, koreksi, tanya }: { p: Pernyataan; keadaan: 'tersemat' | 'baru' | 'menunggu'; sorot: boolean; teks: Tx; koreksi?: KoreksiPernyataan; tanya?: TanyaPernyataan }) {
   return (
@@ -129,7 +150,7 @@ function BarisKeterangan({ p, keadaan, sorot, teks, koreksi, tanya }: { p: Perny
         <b className="bk-siapa">{t(`investigasi.siapa.${p.siapa}`)}</b>
         <q className="bk-tulisan">{teks(p.teks)}</q>
         {koreksi ? <ins className="bk-tulisan bk-koreksi">{koreksi.teks}</ins> : null}
-        {tanya ? <span className="bk-tanya" data-tanya-lanjut=""><b>{t('investigasi.tanyaLanjut')}</b><span>{tanya.tanya}</span><q className="bk-tulisan">{tanya.jawab}</q></span> : null}
+        {tanya ? <span className="bk-tanya" data-tanya-lanjut=""><b>{t('investigasi.tanyaLanjut')}</b><span>{tanya.tanya}</span><q className="bk-tulisan">{tanya.jawab}</q>{tanya.jeli ? <em className="bk-jeli" data-tanda-jeli=""><span aria-hidden="true">✦</span>{tanya.jeli}</em> : null}</span> : null}
       </span>
     </li>
   );
@@ -159,13 +180,14 @@ function KeteranganSatu({ pernyataan, teks, koreksi, tanya }: { pernyataan: Pern
               <IkonInv nama="pin" kali={1} className="bk-pin" />
             </span>
             <i className="bk-keping-no" aria-hidden="true">{i + 1}</i>
+            {tanya?.find((y) => y.id === x.id)?.jeli ? <i className="bk-keping-jeli" aria-hidden="true">✦</i> : null}
           </button>
         ))}
       </div>
       <div className="bk-baris bk-satu-isi" role="tabpanel" data-pernyataan={p.id} data-keadaan="tersemat" data-koreksi={kor ? 'ada' : undefined}>
         <b className="bk-siapa">{t(`investigasi.siapa.${p.siapa}`)}</b>
         {tny && bukaTanya ? (
-          <span className="bk-tanya" data-tanya-lanjut=""><b>{t('investigasi.tanyaLanjut')}</b><span>{tny.tanya}</span><q className="bk-tulisan">{tny.jawab}</q></span>
+          <span className="bk-tanya" data-tanya-lanjut=""><b>{t('investigasi.tanyaLanjut')}</b><span>{tny.tanya}</span><q className="bk-tulisan">{tny.jawab}</q>{tny.jeli ? <em className="bk-jeli" data-tanda-jeli=""><span aria-hidden="true">✦</span>{tny.jeli}</em> : null}</span>
         ) : (
           <>
             <q className="bk-tulisan">{teks(p.teks)}</q>
@@ -182,15 +204,51 @@ function KeteranganSatu({ pernyataan, teks, koreksi, tanya }: { pernyataan: Pern
   );
 }
 
-function SlipBukti({ b, pilih, teks, baru }: { b: Bukti; pilih?: PilihBukti; teks: Tx; baru?: boolean }) {
-  const [atlas, px, py] = POTONG_BUKTI[b.id];
+/**
+ * T-127: halaman "Keterangan" sebagai PILIHAN (KEBERATAN berpasangan): keping polaroid bernomor = pilihan tunggal; kalimat keterangan
+ * yang dipilih tampil di bawahnya (belum memilih = ajakan satu baris). Tinggi tetap: panelnya selalu setinggi keterangan terpanjang
+ * (semua kalimat menumpuk di satu sel, yang tidak dipilih tak terlihat), jadi slip bukti di bawahnya tidak melompat.
+ */
+function KeteranganPilih({ pernyataan, teks, pilih }: { pernyataan: Pernyataan[]; teks: Tx; pilih: PilihPernyataan }) {
+  return (
+    <div className="bk-satu bk-pilih-ket" data-keterangan-pilih="" data-terkunci={pilih.terkunci ? '' : undefined}>
+      <div className="bk-keping" role="radiogroup" aria-label={t('investigasi.keterangan')}>
+        {pernyataan.map((x, i) => (
+          <button key={x.id} type="button" role="radio" aria-checked={pilih.terpilih === x.id} className="bk-keping-tombol" data-keping={x.id} data-pilih-keterangan={x.id}
+            disabled={pilih.terkunci && pilih.terpilih !== x.id} aria-label={`${i + 1}. ${t(`investigasi.siapa.${x.siapa}`)}: ${teks(x.teks)}`} onClick={() => { if (!pilih.terkunci) pilih.onPilih(x.id); }}>
+            <span className="bk-polaroid" aria-hidden="true">
+              <PotretPikselHp tokoh={TOKOH_PIKSEL[x.siapa]} ekspresi="netral" ukuran={40} label="" />
+              <IkonInv nama="pin" kali={1} className="bk-pin" />
+            </span>
+            <i className="bk-keping-no" aria-hidden="true">{i + 1}</i>
+          </button>
+        ))}
+      </div>
+      <div className="bk-pilih-tumpuk" aria-live="polite">
+        {pernyataan.map((x) => (
+          <div key={x.id} className="bk-baris bk-satu-isi" data-pernyataan={x.id} data-keadaan="tersemat" data-sembunyi={pilih.terpilih === x.id ? undefined : ''} aria-hidden={pilih.terpilih === x.id ? undefined : true}>
+            <b className="bk-siapa">{t(`investigasi.siapa.${x.siapa}`)}</b>
+            <q className="bk-tulisan">{teks(x.teks)}</q>
+          </div>
+        ))}
+        {pilih.terpilih ? null : <p className="bk-pilih-ajak">{t('investigasi.pasang.pilihKet')}</p>}
+      </div>
+    </div>
+  );
+}
+
+function SlipBukti({ b, pilih, teks, baru, temuan }: { b: Bukti; pilih?: PilihBukti; teks: Tx; baru?: boolean; temuan?: TemuanSlip }) {
+  const [atlas, px, py] = potongBukti(b);
   const isi = (
     <>
       <i className="bk-klip" aria-hidden="true" style={{ backgroundImage: `url(${klipUrl})` }} />
       <span className="bk-slip-gambar" aria-hidden="true" style={{ backgroundImage: `url(${atlas})`, backgroundPosition: `${-px}px ${-py}px` }}>
-        {pilih?.sorot === b.id ? <i className="bk-slip-sorot" data-bukti={b.id} /> : null}
+        {pilih?.sorot === b.id ? <i className="bk-slip-sorot" data-bukti={b.seni ? undefined : b.id} /> : null}
       </span>
-      <span className="bk-slip-teks"><b className="bk-tulisan">{teks(b.judul)}</b></span>
+      <span className="bk-slip-teks" data-bertemuan={temuan ? '' : undefined}>
+        <b className="bk-tulisan">{teks(b.judul)}</b>
+        {temuan ? <small className="bk-slip-temuan" data-temuan={temuan.mapan ? 'mapan' : 'tafsir'}><span aria-hidden="true">{temuan.mapan ? '✓' : '✎'}</span><span className="sr-only">{t(temuan.mapan ? 'investigasi.temuan.mapan' : 'investigasi.temuan.tafsir')}: </span>{temuan.teks}</small> : null}
+      </span>
       {pilih ? <span className="iv-bukti-tanda" aria-hidden="true">{pilih.terpilih === b.id ? '✓' : ''}</span> : null}
     </>
   );
@@ -202,14 +260,14 @@ function SlipBukti({ b, pilih, teks, baru }: { b: Bukti; pilih?: PilihBukti; tek
       {/* T-088: gambar slip = tombol perbesar (saudara tombol pilih, bukan di dalamnya) */}
       {zum ? <button type="button" className="bk-slip-zum" data-perbesar={b.id} aria-haspopup="dialog" aria-label={t('investigasi.keberatan.perbesar')} onClick={() => pilih.onPerbesar!(b.id)}><IkonInv nama="tambahan" kali={1} /></button> : null}
       <button type="button" className="bk-slip" data-bukti={b.id} data-redup={redup ? '' : undefined} aria-pressed={pilih.terpilih === b.id} disabled={redup}
-        aria-label={`${t('investigasi.bukti')}: ${teks(b.judul)}. ${teks(b.sumber)}`} onClick={() => pilih.onPilih(b.id)}>
+        aria-label={`${t('investigasi.bukti')}: ${teks(b.judul)}. ${teks(b.sumber)}${temuan ? `. ${t(temuan.mapan ? 'investigasi.temuan.mapan' : 'investigasi.temuan.tafsir')}: ${temuan.teks}` : ''}`} onClick={() => pilih.onPilih(b.id)}>
         {isi}
       </button>
     </li>
   );
 }
 
-export function BukuCatatan({ pernyataan, bukti, tx, menunggu, pernyataanBaru, sorotPernyataan, pilihBukti, tanpaPensil = false, buktiBaru, halaman = 'semua', koreksi, tanya, satu = false, ringkasBukti = false, jumlahBukti }: {
+export function BukuCatatan({ pernyataan, bukti, tx, menunggu, pernyataanBaru, sorotPernyataan, pilihBukti, tanpaPensil = false, buktiBaru, halaman = 'semua', koreksi, tanya, satu = false, ringkasBukti = false, jumlahBukti, temuan, pilihPernyataan }: {
   pernyataan: Pernyataan[];
   bukti: Bukti[];
   tx?: Tx;
@@ -232,6 +290,10 @@ export function BukuCatatan({ pernyataan, bukti, tx, menunggu, pernyataanBaru, s
   ringkasBukti?: boolean;
   /** T-115: angka di kepala halaman "Bukti" bila `bukti` hanya sebagian dari yang terkumpul. */
   jumlahBukti?: number;
+  /** T-127: baris temuan per id bukti (tafsiran pemain atau temuan yang sudah terbukti). */
+  temuan?: Readonly<Record<string, TemuanSlip>>;
+  /** T-127: keterangan sebagai pilihan tunggal (KEBERATAN berpasangan). */
+  pilihPernyataan?: PilihPernyataan;
 }) {
   const teks = useTx(tx);
   const semuaKoreksi: readonly KoreksiPernyataan[] = !koreksi ? [] : 'id' in koreksi ? [koreksi] : koreksi;
@@ -242,7 +304,7 @@ export function BukuCatatan({ pernyataan, bukti, tx, menunggu, pernyataanBaru, s
       {halaman === 'bukti' ? null : <>
       <div className="bk-halaman bk-atas">
         <h3 className="bk-judul"><IkonInv nama="pin" kali={1} />{t('investigasi.keterangan')}<span className="iv-hitung">{jumlah}</span></h3>
-        {satu && jumlah ? <KeteranganSatu pernyataan={pernyataan} teks={teks} koreksi={semuaKoreksi} tanya={tanya} /> : jumlah || menunggu ? (
+        {pilihPernyataan && jumlah ? <KeteranganPilih pernyataan={pernyataan} teks={teks} pilih={pilihPernyataan} /> : satu && jumlah ? <KeteranganSatu pernyataan={pernyataan} teks={teks} koreksi={semuaKoreksi} tanya={tanya} /> : jumlah || menunggu ? (
           <ul className="bk-daftar">
             {pernyataan.map((p) => <BarisKeterangan key={p.id} p={p} keadaan={p.id === pernyataanBaru ? 'baru' : 'tersemat'} sorot={p.id === sorotPernyataan} teks={teks} koreksi={semuaKoreksi.find((k) => k.id === p.id)} tanya={tanya?.find((x) => x.id === p.id)} />)}
             {menunggu ? <BarisKeterangan key={`tunggu-${menunggu.id}`} p={menunggu} keadaan="menunggu" sorot={false} teks={teks} /> : null}
@@ -254,7 +316,7 @@ export function BukuCatatan({ pernyataan, bukti, tx, menunggu, pernyataanBaru, s
       {halaman === 'keterangan' ? null : <div className="bk-halaman bk-bawah">
         <h3 className="bk-judul"><IkonInv nama="foto" kali={1} />{t('investigasi.bukti')}<span className="iv-hitung">{jumlahBukti ?? bukti.length}</span></h3>
         {ringkasBukti ? null : bukti.length
-          ? <ul className="bk-daftar bk-slip-daftar">{bukti.map((b) => <SlipBukti key={b.id} b={b} pilih={pilihBukti} teks={teks} baru={typeof buktiBaru === 'string' ? b.id === buktiBaru : !!buktiBaru?.includes(b.id)} />)}</ul>
+          ? <ul className="bk-daftar bk-slip-daftar">{bukti.map((b) => <SlipBukti key={b.id} b={b} pilih={pilihBukti} teks={teks} temuan={temuan?.[b.id]} baru={typeof buktiBaru === 'string' ? b.id === buktiBaru : !!buktiBaru?.includes(b.id)} />)}</ul>
           : <p className="bk-kosong bk-tulisan">{t('investigasi.kosongBukti')}</p>}
       </div>}
       {tanpaPensil ? null : <span className="bk-pensil" aria-hidden="true" />}

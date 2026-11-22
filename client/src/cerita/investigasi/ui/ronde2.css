@@ -1,0 +1,84 @@
+/* ==================================================================== T-127 BABAK 2 (masukan Pak Peterson; Fullstack)
+   Gaya bagian bersama babak 2: gambar bukti netral (seni T-128), pilih formatif (ui/PilihFormatif.tsx), pilihan "Tanya lebih lanjut"
+   dan tanda jeli, baris temuan di slip bukti, keterangan yang bisa dipilih (KEBERATAN berpasangan), halaman "Temuan" buku catatan.
+   Semua pemilih di sini BARU (awalan r2-, pf-, atau kelas / atribut yang baru dipasang T-127): tidak ada aturan lama yang ditimpa
+   kecuali yang disebut. Diimpor oleh LayarInvestigasi.tsx (sesudah muat.css) dan PilihFormatif.tsx. Hitungan muat: HANDOFF "## T-127".
+   Palet = palet Investigator: tinta #212121, krem #fff9f5, jingga #ff9000, kuning #ffe38a, hijau terbukti #1f5c3f / #e6f1ea. */
+
+/* ---------------------------------------------------------------- gambar bukti babak 2: 288 x 192, 1 piksel gambar = 1 px CSS */
+.r2-bingkai { position: relative; display: block; box-sizing: content-box; width: 288px; height: 192px; border: 2px solid #212121; background: #212121; box-shadow: 0 2px 0 #212121; }
+.r2-bingkai img { display: block; width: 288px; height: 192px; image-rendering: pixelated; }
+/* nomor lajur: HANYA sebagai bantuan penjelasan (sesudah keliru kedua), di tengah tiap lajur */
+.r2-lajur { position: absolute; bottom: 6px; width: 28px; height: 28px; margin-left: -14px; box-sizing: border-box; display: grid; place-items: center; border: 2px solid #212121; background: #ffe38a;
+  color: #212121; font-size: 16px; line-height: 1; font-weight: 800; font-style: normal; animation: r2-muncul .2s steps(3) both; }
+@keyframes r2-muncul { from { opacity: 0; translate: 0 4px; } }
+
+/* ---------------------------------------------------------------- pilih formatif */
+.iv-layar.pf { gap: 8px; }
+.pf-gambar { justify-self: center; }
+.pf-gambar[data-tunjuk] .r2-bingkai { outline: 3px solid #ff9000; outline-offset: 2px; animation: r2-tunjuk 1s steps(1) 3; }
+@keyframes r2-tunjuk { 50% { outline-color: #212121; } }
+.pf-opsi { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; }
+.pf-opsi[data-jumlah="2"] { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.pf-pilih { min-height: 52px; box-sizing: border-box; margin: 0; padding: 4px 6px; display: grid; place-items: center; border: 2px solid #212121; border-radius: 0; background: #ffffff; color: #212121;
+  font: inherit; font-size: 15px; line-height: 19px; font-weight: 800; text-align: center; box-shadow: 0 2px 0 #212121; cursor: pointer; }
+.pf-pilih:active:not(:disabled) { translate: 0 2px; box-shadow: none; }
+.pf-pilih:focus-visible { outline: 3px solid #1d6fd1; outline-offset: 2px; }
+.pf-pilih:disabled { cursor: default; }
+.pf-pilih[data-gugur] { border-color: #9e9e9e; background: #f2f2f2; color: #5f5f5f; box-shadow: none; text-decoration: line-through; }
+.pf-pilih[data-jawab] { border-color: #1f5c3f; background: #e6f1ea; color: #1f5c3f; box-shadow: 0 2px 0 #1f5c3f; }
+.pf-pilih:disabled:not([data-gugur]):not([data-jawab]) { border-color: #9e9e9e; color: #5f5f5f; box-shadow: none; }
+/* catatan umpan balik: tinggi terkecil tetap, supaya tombol "Lanjut" tidak mendorong pilihan saat muncul */
+.pf-catatan { display: grid; align-content: start; min-height: 66px; }
+.pf-tempel { rotate: none; font-size: 15px; line-height: 20px; }
+.pf-tempel b { display: block; font-size: 13px; line-height: 16px; font-weight: 800; letter-spacing: .04em; text-transform: uppercase; color: #7a3e00; }
+.pf-tempel[data-tepat] { border-color: #1f5c3f; background: #e6f1ea; }
+.pf-tempel[data-tepat] b { color: #1f5c3f; }
+
+/* ---------------------------------------------------------------- "Tanya lebih lanjut": 2-3 pertanyaan, gambar jawaban, tanda jeli */
+.iv-tekan[data-tekan-banyak], .iv-tekan[data-tekan-press] { gap: 8px; }
+.pn-tanya-daftar { display: grid; gap: 8px; }
+.pn-tanya.pn-tanya-pilih { justify-self: stretch; width: 100%; min-height: 52px; box-sizing: border-box; }
+.pn-tanya-pilih .pn-tanya-teks b { font-size: 16px; line-height: 21px; font-weight: 800; }
+.iv-tekan-gambar { justify-self: center; }
+.pn-jawab-jeli { justify-self: start; display: inline-flex; align-items: center; gap: 6px; padding: 1px 8px; border: 2px solid #212121; background: #ffe38a; font-size: 14px; line-height: 18px; font-weight: 800; color: #212121; }
+
+/* tanda jeli di buku catatan: bintang di keping polaroid + satu baris di catatan tanya-jawab */
+.bk-keping-jeli { position: absolute; left: 0; top: 0; width: 16px; height: 16px; box-sizing: border-box; display: grid; place-items: center; border: 2px solid #2a211e; background: #ffe38a; color: #212121; font-size: 9px; line-height: 1; font-style: normal; }
+.bk-jeli { justify-self: start; display: inline-flex; align-items: center; gap: 4px; margin-top: 2px; padding: 0 6px; border: 2px solid #2a211e; background: #ffe38a; color: #212121; font-size: 12px; line-height: 16px; font-weight: 800; font-style: normal; }
+
+/* ---------------------------------------------------------------- baris temuan di slip bukti (judul kartu netral, satu baris) */
+.bk-slip-teks[data-bertemuan] { display: grid; gap: 1px; }
+.bk-slip .bk-slip-teks[data-bertemuan] .bk-tulisan { -webkit-line-clamp: 1; }
+.bk-slip-temuan { justify-self: start; max-width: 100%; display: flex; align-items: baseline; gap: 4px; font-size: 13px; line-height: 16px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.bk-slip-temuan[data-temuan="tafsir"] { color: #5f5f5f; border-bottom: 1px dashed #9e9e9e; }
+.bk-slip-temuan[data-temuan="mapan"] { color: #1f5c3f; }
+
+/* ---------------------------------------------------------------- KEBERATAN berpasangan: keterangan = pilihan tunggal (keping polaroid) */
+.bk-pilih-ket .bk-keping-tombol .bk-polaroid { opacity: 1; }
+.bk-pilih-ket .bk-keping-tombol[aria-checked="true"] .bk-polaroid { outline: 3px solid #ff9000; outline-offset: 1px; }
+.bk-pilih-ket .bk-keping-tombol:disabled { cursor: default; }
+.bk-pilih-ket .bk-keping-tombol:disabled .bk-polaroid { opacity: .45; }
+.bk-pilih-tumpuk { display: grid; }
+.bk-pilih-tumpuk > * { grid-area: 1 / 1; }
+.bk-pilih-tumpuk > [data-sembunyi] { visibility: hidden; }
+.bk-pilih-ajak { align-self: center; padding: 2px; font-size: 15px; line-height: 20px; font-weight: 700; color: #7a3e00; }
+
+/* ---------------------------------------------------------------- buku catatan (Menu): tab ketiga "Temuan" */
+.iv-buku-lembar .iv-tab[data-tiga] .iv-tab-tombol { flex-direction: column; gap: 0; min-height: 48px; }
+.iv-buku-lembar .iv-tab[data-tiga] .iv-hitung { margin-left: 0; }
+.iv-temuan { display: grid; gap: 8px; color: #212121; }
+.iv-temuan-bagian { display: grid; gap: 4px; padding: 8px 10px; border: 2px solid #212121; background: #ffffff; box-shadow: 0 2px 0 #212121; }
+.iv-temuan-bagian[data-temuan="tafsir"] { border-style: dashed; background: #fffdf6; box-shadow: none; }
+.iv-temuan-bagian h3 { margin: 0; display: flex; align-items: center; gap: 6px; font-size: 14px; line-height: 18px; font-weight: 800; letter-spacing: .04em; text-transform: uppercase; color: #7a3e00; }
+.iv-temuan-bagian[data-temuan="mapan"] h3 { color: #1f5c3f; }
+.iv-temuan-bagian ul { margin: 0; padding: 0; list-style: none; display: grid; gap: 6px; }
+.iv-temuan-bagian li { font-size: 16px; line-height: 22px; }
+.iv-temuan-kosong { margin: 0; font-size: 15px; line-height: 20px; color: #5f5f5f; }
+
+@media (prefers-reduced-motion: reduce) {
+  :root:not([data-gerak="penuh"]) :is(.r2-lajur, .pf-gambar[data-tunjuk] .r2-bingkai) { animation: none !important; }
+}
+
+/* lembar umpan balik keterangan (KEBERATAN berpasangan): catatan Miss Raksa di dalam dialog */
+.iv-pasang-catatan { margin: 0; }

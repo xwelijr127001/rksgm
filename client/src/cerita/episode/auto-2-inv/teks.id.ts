@@ -34,51 +34,89 @@ export const TEKS_AUTO_2_INV_ID: Record<string, string> = {
   'inv.tebak.pilih.2': 'Lajur 2',
   'inv.tebak.pilih.3': 'Lajur 3',
   'inv.tebak.pilih.4': 'Lajur 4',
-  'inv.tebak.balik.1': 'Tebakan awalmu: lajur 1. Rekaman menunjukkan lajur 2. Tidak apa-apa: sekarang kamu punya buktinya.',
-  'inv.tebak.balik.2': 'Tebakan awalmu: lajur 2. Tepat! Sekarang rekamannya membuktikannya.',
-  'inv.tebak.balik.3': 'Tebakan awalmu: lajur 3. Rekaman menunjukkan lajur 2. Tidak apa-apa: sekarang kamu punya buktinya.',
-  'inv.tebak.balik.4': 'Tebakan awalmu: lajur 4. Rekaman menunjukkan lajur 2. Tidak apa-apa: sekarang kamu punya buktinya.',
+  'inv.tebak.balik.1': 'Tebakan awalmu: lajur 1. Tafsiranmu dari rekaman: lajur 2.',
+  'inv.tebak.balik.2': 'Tebakan awalmu: lajur 2, sama dengan tafsiranmu dari rekaman.',
+  'inv.tebak.balik.3': 'Tebakan awalmu: lajur 3. Tafsiranmu dari rekaman: lajur 2.',
+  'inv.tebak.balik.4': 'Tebakan awalmu: lajur 4. Tafsiranmu dari rekaman: lajur 2.',
 
   // Keterangan (pernyataan yang dicatat)
   'inv.darto.1': 'Ruang wawancara. Pak Darto, pengemudi truknya, sudah menunggu.',
   'inv.darto.2': 'Siang itu saya jalan seperti biasa. Tiba-tiba ada mobil kecil memotong dari kanan.',
   'inv.darto.3': 'Saya di lajur 2. Saya banting setir ke kiri supaya tidak menabraknya.',
   'inv.pernyataan.darto': 'Saya di lajur 2. Mobil kecil tiba-tiba memotong.',
-  'inv.tol.1': 'Berikutnya petugas tol yang datang ke lokasi sesudah kejadian.',
-  'inv.tol.2': 'Waktu saya tiba, truknya sudah menempel di pembatas. Saya langsung mencatat posisinya.',
+  'inv.tol.1': 'Berikutnya petugas tol yang berjaga di pos dekat lokasi kejadian.',
+  'inv.tol.2': 'Saya melihatnya dari pos. Kejadiannya cepat sekali. Beberapa menit kemudian saya menulis catatannya.',
   'inv.tol.3': 'Di catatan saya, truknya di lajur 3.',
   'inv.pernyataan.tol': 'Di catatan saya, truknya di lajur 3.',
   // T-104 "Tanya lebih lanjut" (opsional, tanpa poin). Kunci inv.ui.tekan.* dipakai semua kasus (ikut tabel pembungkus).
   'inv.ui.tekan.1': 'Sebelum lanjut, kamu boleh bertanya satu hal lagi. Tanpa poin, tanpa waktu.',
   'inv.ui.tekan.pilih': 'Mau bertanya lebih lanjut?',
+  // T-127 (babak 2): beberapa pertanyaan per kunjungan saksi, pilih SATU; dipakai semua kasus
+  'inv.ui.tekan.apa': 'Mau bertanya apa?',
+  'inv.ui.tekan.satu': 'Pilih satu pertanyaan. Tanpa poin, tanpa waktu.',
   'inv.ui.tekan.lanjut': 'Lanjut tanpa bertanya',
-  'inv.tekan.tol.tanya': 'Tanya: Bapak melihat sendiri truk itu melaju di lajur 3?',
-  'inv.tekan.tol.jawab': 'Tidak. Saya tiba sesudah kejadian. Lajurnya saya hitung dari posisi truk yang sudah berhenti.',
+  'inv.tekan.tol.tanya': 'Tanya: Bapak berdiri di mana waktu melihatnya?',
+  'inv.tekan.tol.jawab': 'Di dalam pos, di samping jalan. Dari jendela itu saya melihat kendaraannya dari samping, berjajar.',
+  // T-127: teks alt gambar pandangan dari pos (pertanyaan yang berguna) dan pertanyaan kedua (sopan, tidak membuka hal baru)
+  'inv.tekan.tol.gambar': 'Pandangan dari jendela pos petugas ke jalan tol, dari samping: sebuah mobil kecil di depan sebuah truk.',
+  'inv.tekan.tol.rambu.tanya': 'Tanya: Apa yang dilarang rambu di ruas itu?',
+  'inv.tekan.tol.rambu.jawab': 'Truk dan trailer dilarang memakai lajur 3 dan 4. Itu sebabnya saya mencatat lajurnya.', // [konfirmasi PIC]
   'inv.selisih.1': 'Lajur 2 atau lajur 3? Dua keterangan itu tidak mungkin sama-sama benar. Kita butuh bukti.',
 
   // Bukti
   'inv.kdash.1': 'Truk Pak Hendra punya dashcam. Pak Darto menyerahkan kartu memorinya.',
   'inv.kdash.2': 'Silakan diputar. Semuanya terekam di situ.',
-  'inv.bukti.rekaman.1': 'Rekamannya jelas: truk berjalan di lajur 2 sampai mobil kecil memotong di depannya. Di bingkai yang sama terlihat rambu di bahu jalan; kamu memotretnya.',
-  'inv.bukti.dashcam.judul': 'Rekaman dashcam: truk di lajur 2',
+  // T-127: umpan balik aktivitas dashcam (dipakai ulang dari Episode 1 Dev) TANPA nomor lajur: di kasus ini lajurnya ditafsirkan pemain sesudahnya. Hanya tabel episode ini; Episode 1 Dev tidak berubah
+  'arena.dashcam.tepat': 'Betul, mobil kecil itu memotong tepat di depan truk.',
+  'arena.dashcam.jelas': 'Mobil kecil itu berpindah lajur tepat di depan truk. Truk menghindar ke kiri.',
+  'inv.bukti.rekaman.1': 'Rekaman 14:32 masuk ke buku catatanmu, bersama tafsiranmu. Di rekaman itu juga terlihat rambu di bahu jalan; kamu memotretnya.',
+  'inv.bukti.dashcam.judul': 'Rekaman 14:32',
   'inv.bukti.dashcam.sumber': 'Sumber: dashcam truk Pak Hendra',
-  'inv.bukti.rambu.judul': 'Rambu: truk dilarang di lajur 3 dan 4',
+  'inv.bukti.rambu.judul': 'Foto rambu',
   'inv.bukti.rambu.sumber': 'Sumber: foto rambu dari rekaman',
   'inv.ksim.1': 'Satu hal lagi: apakah Pak Darto berhak mengemudikan truk itu? Pak Bima, pemeriksa kejadian, membantumu.',
   'inv.sim.1': 'Satu hal lagi: apakah Pak Darto berhak mengemudikan truk itu? Kamu memintanya menunjukkan SIM.',
   'inv.sim.2': 'Ini SIM saya, dan ini STNK truknya. Silakan diperiksa.',
-  'inv.bukti.sim.1': 'SIM Pak Darto asli dan golongannya sesuai untuk truk trailer.',
-  'inv.bukti.sim.judul': 'SIM B II Umum asli',
-  'inv.bukti.sim.sumber': 'Sumber: SIM Pak Darto, diperiksa di meja wawancara',
+  'inv.bukti.sim.1': 'SIM Pak Darto sah untuk truk trailer itu. Catatannya masuk ke buku catatanmu.', // [konfirmasi PIC]
+  'inv.bukti.sim.judul': 'SIM dan STNK',
+  'inv.bukti.sim.sumber': 'Sumber: SIM Pak Darto dan STNK truk, diperiksa di meja wawancara',
+  // T-127 (babak 2) TAFSIR: pemain membaca buktinya sendiri (formatif, tanpa poin). lajur = bingkai 14:32; sim = catatan SIM dan kendaraan
+  'inv.baca.1': 'Rekaman berhenti di bingkai 14:32, sesaat sebelum truk membanting setir.',
+  'inv.tafsir.lajur.tanya': 'Bingkai 14:32, sebelum truk membanting setir. Kepala truk di lajur berapa?',
+  'inv.tafsir.lajur.pilih.2': 'Lajur 2',
+  'inv.tafsir.lajur.pilih.3': 'Lajur 3',
+  'inv.tafsir.lajur.pilih.kabur': 'Tidak jelas',
+  'inv.tafsir.lajur.salah.3': 'Lajur dihitung dari kiri, mulai sesudah bahu jalan. Hitung garis putus-putusnya, lalu lihat lagi kepala truknya.',
+  'inv.tafsir.lajur.salah.kabur': 'Berhati-hati itu baik. Tapi garis lajurnya terlihat di bingkai ini: hitung dari kiri, lalu cari kepala truknya.',
+  'inv.tafsir.lajur.alasan': 'Dari kiri: bahu jalan, lajur 1, lalu lajur 2. Kepala truk ada di lajur 2, dekat garis ke lajur 3. Yang di lajur 3 itu mobil kecil.',
+  'inv.tafsir.lajur.benar': 'Kepala truk di lajur 2, dihitung dari kiri. Mobil kecil di lajur 3.',
+  'inv.tafsir.lajur.temuan': 'Rekaman 14:32: kepala truk di lajur 2, mobil kecil di lajur 3.',
+  'inv.tafsir.lajur.ringkas': 'truk di lajur 2',
+  'inv.tafsir.sim.tanya': 'Catatan SIM dan catatan kendaraan. Apa yang kamu catat?',
+  'inv.tafsir.sim.pilih.cocok': 'Golongan cocok',
+  'inv.tafsir.sim.pilih.beda': 'Golongan beda',
+  'inv.tafsir.sim.pilih.tanggal': 'Tahun tak terbaca',
+  'inv.tafsir.sim.salah.beda': 'Lihat kotak golongan di kedua catatan. Bandingkan tulisannya satu per satu.',
+  'inv.tafsir.sim.salah.tanggal': 'Tahunnya tertulis di samping gambar kalender: 2029. Sekarang bandingkan kotak golongan di kedua catatan.', // [konfirmasi PIC]
+  'inv.tafsir.sim.alasan': 'Kedua kotak golongan bertuliskan B II Umum: cocok. SIM itu berlaku sampai 2029.', // [konfirmasi PIC]
+  'inv.tafsir.sim.benar': 'Golongan di SIM, B II Umum, sama dengan yang diwajibkan untuk truk trailer ini. Berlaku sampai 2029.', // [konfirmasi PIC]
+  'inv.tafsir.sim.temuan': 'SIM Pak Darto: golongan B II Umum, sama dengan yang diwajibkan untuk truk trailer; berlaku sampai 2029.', // [konfirmasi PIC]
+  'inv.tafsir.sim.ringkas': 'golongan cocok',
 
   // Keberatan
   'inv.keb-buka.1': 'Tiga kartu bukti sudah ada di buku catatanmu. Kamu menemui petugas tol sekali lagi.',
   'inv.keb-buka.2': 'Catatan saya tidak berubah: truknya di lajur 3.',
   'inv.keb-buka.3': 'Pernyataan itu bisa dibantah dengan salah satu buktimu. Tunjukkan yang tepat!',
-  'inv.keb.1': 'Pilih satu kartu bukti untuk membantah pernyataan petugas tol.',
+  'inv.keb.1': 'Pilih dua catatan yang tidak cocok: satu keterangan dan satu bukti.',
   'inv.keb.2': 'Coba lagi. Cari kartu yang menunjukkan posisi truk di jalan.',
   'inv.keb.3': 'Tunjukkan rekaman dashcam kepada petugas tol.',
   'inv.keb.tanya': 'Bukti mana yang membantah "truknya di lajur 3"?',
+  // T-127 (babak 2) TEMUAN BERPASANGAN di percobaan pertama KEBERATAN: satu keterangan + satu bukti
+  'inv.pasang.tanya': 'Dua catatan mana yang tidak cocok?',
+  'inv.pasang.ket': 'Pilih satu keterangan dan satu bukti.',
+  'inv.pasang.salah.darto': 'Keterangan Pak Darto tidak berbeda dari bukti di bukumu. Cari keterangan yang berbeda dari buktimu.',
+  'inv.pasang.alasan': 'Petugas tol mencatat lajur 3, dan catatan itulah yang membuat klaim ini dipersoalkan. Keterangan itu yang perlu diuji dengan buktimu.',
+  'inv.pasang.temuan': 'Catatan petugas tol (lajur 3) tidak cocok dengan rekaman 14:32 (lajur 2).',
   'inv.keb.pilih.dashcam': 'Tunjukkan rekaman dashcam',
   'inv.keb.pilih.rambu': 'Tunjukkan foto rambu',
   'inv.keb.pilih.sim': 'Tunjukkan SIM',
@@ -87,8 +125,11 @@ export const TEKS_AUTO_2_INV_ID: Record<string, string> = {
   'inv.keb.pandu.rambu': 'Rambu hanya aturannya, bukan posisi truk. Mari kita lihat bersama.',
   'inv.keb.pandu.sim': 'SIM hanya soal pengemudinya, bukan posisi truk. Mari kita lihat bersama.',
   'inv.keb.cap': 'KEBERATAN! Rekaman dashcam menunjukkan truk di lajur 2, bukan lajur 3.',
-  'inv.akui.1': 'Lajur 2? Coba saya lihat... Benar. Waktu saya tiba truknya sudah melintang, jadi saya keliru menghitung lajurnya.',
-  'inv.akui.2': 'Oh, saya salah catat lajurnya. Saya perbaiki laporannya.',
+  'inv.akui.1': 'Tapi saya ingat betul: waktu itu ada kendaraan di lajur 3.',
+  // T-127: baris ini hanya tampil bila pemain tadi menanyakan tempat petugas berdiri (tanda jeli)
+  'inv.akui.pos': 'Kamu ingat jawabannya tadi: dari pos, ia melihat kendaraannya dari samping.',
+  'inv.akui.2': 'Oh... yang di lajur 3 itu mobil kecilnya. Kepala truknya di lajur 2.',
+  'inv.akui.4': 'Dari pos, mobil itu menutupi kepala truknya. Saya salah catat lajurnya. Saya perbaiki laporannya.',
   'inv.akui.3': 'Terima kasih. Saya memang di lajur 2.',
   'inv.koreksi.1': 'Petugas tol membuka buku catatannya dan memperbaiki laporannya.',
 
@@ -108,14 +149,14 @@ export const TEKS_AUTO_2_INV_ID: Record<string, string> = {
   'inv.pesan.1': 'Terakhir, kabari Pak Hendra, pemilik truk. Ia menunggu sejak pagi.',
   'inv.pesan.2': 'Bagaimana hasilnya? Saya dengar ada masalah soal lajur truk saya.',
   'inv.pesan.tanya': 'Pesan mana yang kamu kirim?',
-  'inv.pesan.baik': 'Pak Hendra, pemeriksaan selesai. Rekaman dashcam membuktikan truk Bapak di lajur 2, jadi catatan petugas sudah diperbaiki dan klaim Bapak layak dijamin. Berikutnya berkas kami teruskan untuk persetujuan. Saya kabari begitu ada hasilnya.',
-  'inv.pesan.datar': 'Klaim layak dijamin. Tunggu proses selanjutnya.',
-  'inv.pesan.janji': 'Beres, Pak! Klaim Bapak pasti cair minggu ini, saya jamin.',
+  'inv.pesan.baik': 'Catatan lajur sudah diperbaiki, Pak: truk Bapak di lajur 2. Berkasnya kami teruskan untuk persetujuan. Saya kabari begitu ada keputusan.', // [konfirmasi PIC]
+  'inv.pesan.datar': 'Hasil pemeriksaan: klaim layak dijamin. Berkas akan diproses sesuai prosedur yang berlaku. Mohon ditunggu.', // [konfirmasi PIC]
+  'inv.pesan.janji': 'Kabar baik, Pak Hendra! Semua bukti berpihak kepada Bapak, jadi tidak ada lagi yang perlu dikhawatirkan. Klaim Bapak pasti cair minggu ini, saya sendiri yang menjamin. Bapak boleh langsung mengabari bengkel.', // [konfirmasi PIC]
   'inv.pesan.baik.alasan': 'Pak Hendra tahu hasilnya, alasannya, dan langkah berikutnya.',
   'inv.pesan.janji.alasan': 'Pak Hendra senang, tetapi tanggal itu belum tentu bisa ditepati.',
   'inv.pesan.baik.1': 'Syukurlah. Terima kasih sudah memeriksa dengan teliti dan menjelaskan langkahnya.',
   'inv.pesan.datar.1': 'Oh... baik. Tapi soal lajur itu bagaimana? Dan saya harus menunggu apa?',
-  'inv.pesan.datar.2': 'Pesanmu benar, tetapi Pak Hendra masih bertanya-tanya.',
+  'inv.pesan.datar.2': 'Pesanmu benar, tetapi tidak menyebut soal lajur dan tidak memberi tahu apa yang ditunggu.',
   'inv.pesan.janji.1': 'Wah, minggu ini? Saya pegang janjinya, ya!',
   'inv.pesan.janji.2': 'Persetujuan belum keluar. Janji tanggal yang belum pasti bisa menjadi masalah baru.',
 

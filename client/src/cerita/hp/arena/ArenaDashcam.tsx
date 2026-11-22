@@ -203,7 +203,8 @@ export function ArenaPolaDashcam({ ep, konfig, jawaban, ubah, tx, labelKirim, on
               (bingkai beku, bingkai diam, Safari mana pun) ia selalu di tempatnya; masuknya dari atas = animasi terpisah (dashcam.css). */}
           <span className="dc-truk-kecil" aria-hidden="true" style={{ left: 'calc(var(--x0) + 65px)', '--nyala': `url(${trukKecilNyala})`, '--mati': `url(${trukKecilMati})` } as CSSProperties} />
           {/* T-073: nomor lajur di DALAM adegan, 6 px dari tepi bawah (bukan top 226: tepi bingkai 3 px memotongnya di HP) */}
-          <img className="dc-nomor" src={nomorLajur} alt="" aria-hidden="true" style={{ left: 'var(--x0)', bottom: 6, width: 336, height: 13 }} />
+          {/* T-127: `tanpaNomor` (Raksa Investigator kasus 1) = tanpa pita nomor lajur: lajurnya ditafsirkan pemain sesudah menonton */}
+          {konfig.tanpaNomor ? null : <img className="dc-nomor" src={nomorLajur} alt="" aria-hidden="true" style={{ left: 'var(--x0)', bottom: 6, width: 336, height: 13 }} />}
           <img className="dc-jejak" src={jejak} alt="" aria-hidden="true" style={{ left: `calc(var(--x0) + ${SPRITE.jejak.x}px)`, top: SPRITE.jejak.y, width: SPRITE.jejak.w, height: SPRITE.jejak.h }} />
           {/* animasi: pose 0 bergerak (CSS) lalu diganti pose piksel beku; gerak dikurangi: pose bingkai 1 / 2 / 3 */}
           {(['truk', 'mobil'] as const).map((k) => POSE[k].map((p, i) => (
