@@ -452,7 +452,10 @@ h1[data-fokus-halaman]:focus-visible {
 }
 a.mrk:hover { color: var(--hijau-tua); }
 a.mrk:focus-visible { outline: 3px solid var(--fokus); outline-offset: 4px; border-radius: 6px; }
-.mrk img { display: block; max-width: 150px; max-height: 40px; }
+.mrk img { display: block; width: auto; height: auto; max-width: 150px; max-height: 40px; }
+/* T-138: logo burung 118 x 40 tidak pernah lebih besar dari wordmark yang digantikannya di tiap konteks. */
+.mrk-besar img { max-width: none; max-height: clamp(40px, 4.6vw, 52px); }
+@media (max-width: 560px) { .mrk-kepala-kiri .mrk img { max-height: 30px; } }
 .mrk-besar { font-size: clamp(34px, 4.6vw, 52px); gap: 16px; }
 .mrk-besar .mrk-game { font-size: 0.36em; padding: 0.3em 0 0.3em 16px; }
 /* Latar gelap (proyektor). */

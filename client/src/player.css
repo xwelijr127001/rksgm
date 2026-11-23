@@ -545,6 +545,8 @@ button.alur-spanduk-gabung { border: 0; cursor: pointer; font: inherit; }
 .lp-pemuat-isi { display: flex; flex-direction: column; align-items: center; margin-top: -8vh; }
 .lp-pemuat .mrk { font-size: 34px; min-height: 0; }
 .lp-pemuat .mrk-game { font-size: 14px; padding: 4px 0 4px 12px; }
+.lp-pemuat .mrk img { max-width: none; max-height: 34px; } /* T-138: setinggi wordmark pemuat (34 px; 48 px di layar lebar) */
+@media (min-width: 901px) { .lp-pemuat .mrk img { max-height: 48px; } }
 .lp-pemuat-raki { margin-top: 24px; display: block; }
 .lp-pemuat-bar { display: flex; gap: 4px; margin-top: 20px; }
 .lp-pemuat-bar i { width: 28px; height: 10px; background: var(--krem-tua); border-bottom: 3px solid #e0e0e0; animation: lp-seg 1.2s steps(1) infinite; }

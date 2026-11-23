@@ -13,6 +13,7 @@
  *   (ui/halaman.ts) ditahan sampai pemuat dilepas. Lepas: inert dibuang di AWAL pudar 200 ms, lalu dilepas sesudah 260 ms.
  * - StrictMode: satu tenggat (dari ref waktu pasang pertama), semua timer/pendengar dibersihkan, hasil sesudah lepas diabaikan.
  */
+import { BRAND } from '@shared/brand';
 import { useLayoutEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { TOKOH } from '@shared/brand';
@@ -194,7 +195,9 @@ export function KerangkaPemuat({ teks, selesai = false }: { teks: string; selesa
   return (
     <div className="lp-pemuat" data-selesai={selesai ? '' : undefined}>
       <div className="lp-pemuat-isi">
-        <div className="mrk" aria-hidden="true"><span className="mrk-raksa">RAKSA</span><span className="mrk-game">GAME</span></div>
+        <div className="mrk" aria-hidden="true">{BRAND.logoPath /* T-138: logo burung, setinggi wordmark pemuat */
+          ? <img src={BRAND.logoPath} srcSet={`${BRAND.logoPath} 1x, ${BRAND.logoPath.replace(/.png$/, '@2x.png')} 2x`} width={118} height={40} alt="" />
+          : <><span className="mrk-raksa">RAKSA</span><span className="mrk-game">GAME</span></>}</div>
         <span className="lp-pemuat-raki" aria-hidden="true"><Raki size={80} mood="sapa" /></span>
         <div className="lp-pemuat-bar" aria-hidden="true"><i /><i /><i /><i /></div>
         <p className="lp-pemuat-teks" role="status">{teks}</p>

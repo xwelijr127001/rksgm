@@ -10,6 +10,7 @@
  * page session; other episodes and routes pass straight through. After the first screen: remaining story music in the
  * background (low priority, idle time).
  */
+import { BRAND } from '@shared/brand';
 import { useEffect, useState, type ReactNode } from 'react';
 import { useParams } from 'react-router-dom';
 import { pramuatMusik, siapkanAudio, type Track } from '../audio/audio';
@@ -104,7 +105,9 @@ export function PramuatCerita({ children }: { children: ReactNode }) {
   return (
     <div className="lp-pemuat" data-pramuat-cerita="">
       <div className="lp-pemuat-isi">
-        <div className="mrk" aria-hidden="true"><span className="mrk-raksa">RAKSA</span><span className="mrk-game">GAME</span></div>
+        <div className="mrk" aria-hidden="true">{BRAND.logoPath /* T-138: logo burung, setinggi wordmark pemuat */
+          ? <img src={BRAND.logoPath} srcSet={`${BRAND.logoPath} 1x, ${BRAND.logoPath.replace(/.png$/, '@2x.png')} 2x`} width={118} height={40} alt="" />
+          : <><span className="mrk-raksa">RAKSA</span><span className="mrk-game">GAME</span></>}</div>
         <span className="lp-pemuat-raki" aria-hidden="true"><Raki size={80} mood="sapa" /></span>
         <div className="lp-pemuat-bar" data-nyata="" role="progressbar" aria-valuemin={0} aria-valuemax={100} aria-valuenow={persen} aria-label={t('umum.pramuatCerita')}>
           {Array.from({ length: SEGMEN }, (_, i) => <i key={i} data-isi={i < isi ? '' : undefined} />)}

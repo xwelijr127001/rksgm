@@ -6728,3 +6728,26 @@ Margin at 360 x 640 is 6 px in the worst case (case 3, English). If case 1's Eng
 **Open:** nothing seen in a browser; the wrap counts are estimates. The 3-line chip on the hub may look heavy; not changed (Codex's diff kept).
 
 **T-137 follow-up (Lead decision):** bubble text shortened to id 'Kamu investigatornya!' / en 'You are the investigator!' / zh '你就是调查员！'; layout and `sampulPeran` unchanged. Estimated wrap in the 154 px (360) / 184 px (390) bubble: id 2 lines at 360 ('investigatornya!' about 138 px) and 2 at 390, en 2 lines at both, zh 1 line; so the bubble is at most 2 lines (56 px) and the deviation above no longer applies. Heights in the table are unchanged (the bubble does not set the stage height). Typecheck 0, `client/dist` rebuilt; still not seen in a browser.
+
+## T-138 (2026-11-23): owl logo replaces the "RAKSA | GAME" wordmark, same footprint (Designer)
+Uncommitted, not deployed. Not opened in a browser or on a phone; no test run. Root `npm run typecheck` exit 0; `client/dist` rebuilt (build exit 0, logo and icon files are in `client/dist`).
+
+**Assets** (generator `character/logo-burung/bangun.mts`, from the owner's `sumber.png`; white removed with edge alpha, no halo):
+- `client/public/logo/logo-raksa-game.png` 118 x 40 and `@2x` 236 x 80: owl bust left, "RAKSA / GAME" in two lines right. Light pages.
+- `client/public/logo/logo-raksa-game-gelap.png` and `@2x`: dark pages. Letters without the dark outline, owl with a thin cream outline so the headband does not vanish.
+- `client/public/favicon-32.png`, `favicon-48.png` (owl head, transparent) and `apple-touch-icon.png` 180 x 180 (owl on brand cream #FFF9F5; the old one is kept as `character/logo-burung/apple-touch-icon-lama.png`). `favicon.svg` is left on disk, no longer linked.
+- Source kept: `character/logo-burung/logo-lengkap-transparan.png` (full tall lockup, transparent).
+- **"Asuransi Raksa / Since 1975" is dropped** from the header lockup: unreadable at 40 px.
+- **Letters are redrawn, not scaled:** the artwork's 5 x 7 pixel letters are read cell by cell and drawn on whole pixels (2 px per cell at 1x), same shapes and the artwork's green (#B5C838). On light pages they get a 1 px dark outline (the owl's outline colour #322F3B), because the green alone on cream is about 1.8 : 1. This outline is my addition to the artwork: owner to confirm.
+
+**Also wired:** the two loaders (`components/PemuatAwal.tsx`, `cerita/PramuatCerita.tsx`) had their own copy of the text wordmark; they now show the same logo.
+**Wiring:** `shared/brand.ts` (`logoPath`, new `logoPathGelap`), `client/src/components/Merek.tsx` (dark file for `nada="gelap"`, `srcSet` 1x / 2x, alt and aria unchanged: "RAKSA GAME" where the mark is not a link), `client/src/theme.css`, `client/src/player.css`, `client/index.html`.
+**Footprint (calculated):** the logo is 118 x 40; the wordmark was about 127 x 22 text in a 44 px high box (`.mrk` min-height), so no header grows and nothing moves.
+| where | old wordmark | logo |
+|---|---|---|
+| player header, story, staff shell, story projector, host (wide) | about 127 wide, box 44 high | 118 x 40 |
+| host header under 560 px (`.mrk` min-height 30) | 20 px text | capped at 30 px high (88 wide) |
+| projector (`.mrk-besar`) | text 34 .. 52 px high, about 200 .. 300 wide | capped at 40 .. 52 px high (118 .. 153 wide) |
+| first-visit loader | 34 px (48 px on wide screens) | capped at 34 / 48 px high |
+`BrandTitle` in `ui/kit.tsx` has no caller; it would show the light logo at 34 / 64 px, not changed.
+**Open:** not seen in a browser. At 30 / 34 / 48 / 52 px the logo is scaled by a non-whole factor, so the pixel letters are slightly soft there (crisp at 40 px). `BRAND.assetNote` ("logo belum diverifikasi") is now out of date; not mine to reword. Preview: `character/logo-burung/pratinjau-t138.png` (phone header light, projector dark, icons; 2x and 1x).

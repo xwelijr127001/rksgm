@@ -26,10 +26,13 @@ export const BRAND = {
     biru: '#3E7285',
   },
   /**
-   * Logo resmi belum diverifikasi. Taruh file di client/public/logo/logo-raksa.svg
-   * (atau .png) lalu isi path-nya di sini; bila null, judul tipografis dipakai.
+   * T-138: logo burung hantu dari pemilik (character/logo-burung/sumber.png), versi kepala mendatar 118 x 40 px
+   * (burung di kiri, "RAKSA / GAME" di kanan; character/logo-burung/bangun.mts). Berkas @2x di samping tiap berkas
+   * (`nama@2x.png`). Bila null, judul tipografis dipakai.
    */
-  logoPath: null as string | null,
+  logoPath: '/logo/logo-raksa-game.png' as string | null,
+  /** Logo yang sama untuk latar gelap (proyektor): tanpa garis luar gelap pada huruf, burung bergaris krem. */
+  logoPathGelap: '/logo/logo-raksa-game-gelap.png' as string | null,
   /** Catatan aset yang belum terverifikasi, ditampilkan di layar host. */
   assetNote:
     'Logo & warna resmi belum diverifikasi dari raksaonline.com. Ganti di shared/brand.ts.',

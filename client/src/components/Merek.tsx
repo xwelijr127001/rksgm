@@ -25,8 +25,10 @@ export function Merek({
 }) {
   useBahasa();
   const kelas = ['mrk', ukuran === 'besar' ? 'mrk-besar' : '', nada === 'gelap' ? 'mrk-gelap' : '', className].filter(Boolean).join(' ');
-  const isi = BRAND.logoPath ? (
-    <img src={BRAND.logoPath} alt={tautan ? '' : BRAND.gameName} />
+  // T-138: logo burung hantu 118 x 40 (+ @2x); latar gelap memakai berkas gelap. Ukuran kotak: .mrk img di theme.css.
+  const logo = nada === 'gelap' ? BRAND.logoPathGelap ?? BRAND.logoPath : BRAND.logoPath;
+  const isi = logo ? (
+    <img src={logo} srcSet={`${logo} 1x, ${logo.replace(/.png$/, '@2x.png')} 2x`} width={118} height={40} alt={tautan ? '' : BRAND.gameName} />
   ) : (
     <>
       <span className="mrk-raksa" aria-hidden="true">RAKSA</span>
