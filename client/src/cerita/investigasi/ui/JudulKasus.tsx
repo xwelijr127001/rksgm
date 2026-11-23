@@ -18,6 +18,11 @@
  * Ukur (hitung, sampul.css): ruang isi 360 x 640 = 544 px. Panggung 84 + 8 + berkas (tab 26 + badan 248; +28 judul dua baris,
  * +20 kait dua baris) + 10 + tombol 56 = 432 .. 480 px; dengan tautan "Tamu baru" (12 + 48) 492 .. 540 px. Layar lebih tinggi:
  * tinggi minimum bagian = min(100dvh - 157 px, 640 px); sisanya mengisi panggung (sampai 204 px) dan jarak (sampai 16 px).
+ * T-137: balon = PERAN pemain ("Kamu investigatornya!", paling banyak 2 baris, lebih lebar: sisa 152 px untuk Miss Raksa) dan
+ * baris tugas `investigasi.sampulPeran` (13 / 17 px, dua baris = 36 px) di bawah kalimat kait. Layar pendek (< 700 px, sampul.css):
+ * sela 4 px, bantalan lebih rapat, dan "Raksa Investigator" tanpa asal cerita disembunyikan (kepala layar sudah menyebut Investigator).
+ * Hitung 360 x 640 (ruang 484 dengan "Tamu baru"): kasus 1 448 (+20 kait dua baris = 468); kasus 2 / 3 430 (+20, +28 judul dua
+ * baris = 478). 390 x 700 (ruang 544, tanpa perapatan): 468 .. 516.
  * T-122: tata letak = kolom lentur dengan dua sela (`.iv-sampul-sela`), bukan kisi minmax (yang memakai batas atasnya di layar pendek).
  */
 import type { CSSProperties, ReactNode } from 'react';
@@ -67,9 +72,11 @@ export function JudulKasus({ nomor, judul, onMulai, tx, gambar }: { nomor: numbe
       <div className="iv-sampul-berkas">
         <p className="iv-sampul-tab">{t('investigasi.kasus', { n: nomor })}</p>
         <div className="iv-sampul-badan">
-          <p className="iv-sampul-sub">{t('hubInv.nama')}{asal ? <span data-asal-cerita=""> · {asal}</span> : null}</p>
+          <p className="iv-sampul-sub" data-polos={asal ? undefined : ''}>{t('hubInv.nama')}{asal ? <span data-asal-cerita=""> · {asal}</span> : null}</p>
           <h2 id="iv-judul-kasus" tabIndex={-1} data-cer-fokus="">{teks(judul)}</h2>
           {kait ? <p className="iv-sampul-kait">{kait}</p> : null}
+          {/* T-137 (pemilik: "supaya dia tau role nya apa"): tugas pemain, satu kalimat, di semua sampul kasus */}
+          <p className="iv-sampul-peran" data-peran-investigator="">{t('investigasi.sampulPeran')}</p>
           <div className="iv-sampul-baris">
             <span className="iv-sampul-foto" aria-hidden="true">
               <img className="iv-sampul-klip" src={seniKlip} alt="" width={10} height={22} />

@@ -31,10 +31,10 @@
 .iv-sampul-kilau { left: -32px; top: -4px; width: 200px; height: 184px; animation: iv-sampul-kelip 2.4s steps(1) infinite; }
 .iv-sampul-kilau[data-set="b"] { animation-delay: -1.2s; }
 /* balon ucapan di kiri, di tengah ruang di atas pita tanah; ekornya menunjuk ke Miss Raksa */
-.iv-layar .iv-sampul-balon { position: absolute; left: 10px; top: calc((100% - 24px) / 2); translate: 0 -50%; z-index: 3; max-width: calc(100% - 176px); box-sizing: border-box; margin: 0; padding: 6px 10px;
+.iv-layar .iv-sampul-balon { position: absolute; left: 6px; top: 50%; translate: 0 -50%; z-index: 3; max-width: calc(100% - 152px); box-sizing: border-box; margin: 0; padding: 6px 8px;
   border: 2px solid #212121; background: #ffffff; box-shadow: 0 3px 0 #f0a030; font-size: 16px; line-height: 20px; font-weight: 800; color: #212121; }
 .iv-sampul-balon::after { content: ""; position: absolute; right: -10px; top: 50%; width: 8px; height: 8px; margin-top: -6px; background: #ffffff; border: 2px solid #212121; border-left: 0; border-bottom: 0; rotate: 45deg; translate: -5px 0; }
-@container iv-sampul-panggung (min-height: 200px) { .iv-sampul-pita { display: block; } }
+@container iv-sampul-panggung (min-height: 200px) { .iv-sampul-pita { display: block; } .iv-layar .iv-sampul-balon { top: calc((100% - 24px) / 2); } }
 @keyframes iv-sampul-sinar { to { rotate: 360deg; } }
 @keyframes iv-sampul-napas { 0%, 100% { translate: 0 0; } 50% { translate: 0 2px; } }
 @keyframes iv-sampul-kelip { 0%, 100% { opacity: 1; } 50% { opacity: .15; } }
@@ -49,6 +49,8 @@
 .iv-sampul-badan h2 { font-size: 24px; line-height: 28px; font-weight: 800; letter-spacing: -.01em; color: #212121; overflow-wrap: anywhere; }
 .iv-sampul-badan h2:focus { outline: none; }
 .iv-sampul-kait { margin-top: 2px !important; font-size: 16px; line-height: 20px; font-weight: 700; color: #33241a; }
+/* T-137: tugas pemain ("Tugasmu: ..."), garis jingga di kiri; dua baris di 360 px */
+.iv-sampul-peran { margin-top: 2px !important; padding-left: 6px; border-left: 3px solid #ff9000; font-size: 13px; line-height: 17px; font-weight: 700; color: #5a3a24; }
 .iv-sampul-baris { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 8px; align-items: start; margin-top: 8px; }
 /* foto kasus berklip 192 x 136 (2x), sedikit miring; stempel kasus menumpang bila sudah tuntas */
 .iv-sampul-foto { position: relative; box-sizing: border-box; padding: 4px 4px 6px; background: #ffffff; border: 2px solid #212121; box-shadow: 2px 2px 0 #ffc46b; rotate: -1.5deg; }
@@ -63,6 +65,17 @@
 .iv-sampul-keping > li[data-terbaik] > small { font-size: 12px; line-height: 14px; font-weight: 700; color: #ffffff; }
 /* HP sangat sempit: keping di bawah foto, berjajar */
 @media (max-width: 339.98px) { .iv-sampul-baris { grid-template-columns: minmax(0, 1fr); justify-items: center; } .iv-layar .iv-sampul-keping { grid-auto-flow: column; } }
+
+/* T-137: layar pendek (di bawah 700 px): jarak dirapatkan supaya baris tugas muat tanpa gulir; huruf tidak dikecilkan. Kepala layar
+   sudah menyebut "Investigator", jadi baris "Raksa Investigator" tanpa asal cerita (kasus 2, 3) disembunyikan di sini. */
+@media (max-height: 699.98px) {
+  .iv-sampul > .iv-sampul-sela, .iv-sampul > .iv-sampul-sela[data-dua] { flex-basis: 4px; min-height: 4px; }
+  .iv-layar .iv-sampul-tab { padding: 2px 14px 0; }
+  .iv-sampul-badan { padding: 6px 10px 8px; }
+  .iv-sampul-sub[data-polos] { display: none; }
+  .iv-sampul-baris { margin-top: 6px; }
+  .iv-sampul-foto { padding-bottom: 4px; }
+}
 
 /* ---- tombol "Mulai selidiki": kunci piksel jingga besar, panah berkedip, dua kilau (seperti tombol utama hub) */
 .iv-sampul .iv-sampul-mulai { position: relative; box-sizing: border-box; min-height: 56px; gap: 12px; font-size: 20px; letter-spacing: .02em; outline: 2px solid #212121; outline-offset: 0; }

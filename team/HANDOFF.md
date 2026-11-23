@@ -6705,3 +6705,26 @@ Uncommitted, not deployed. Not opened in a browser or on a phone; no test run. R
 Ran only: `client/src/cerita/investigator.expect.test.ts`, server `rubric.expect`, `store.expect`, `skor.expect` (all pass; server 3 files untouched), plus the new `client/src/cerita/investigasi/ronde2.expect.test.ts` (3 snapshots, registered last in root `test:client`); `npm run typecheck` exit 0. Nothing else run, no browser, no commit.
 Changed snapshot (updated, explained): `investigator.expect.test.ts` Kasus 3 walk only: paths 5292 -> 3969 (tinjau 3528 -> 2646, tuntas 1764 -> 1323), states 78 -> 116, `masalah` still [], validator still [] for all three episodes. This is the rebuilt Kasus 3 graph (new steps/choices); no score, rubric, id, total or rank value moved.
 New snapshots: (a) walk Kasus 1 = 1512 paths (504 tuntas / 1008 tinjau, 111 states), Kasus 2 = 567 paths (189 / 378, 105 states), no problems; (b) per case perfect = 100 S, all-guided = 70 B (40/10, 40/10, 20/5+5), and perfect with every formative tanda (catat, tekan, tafsir, panel-keliru; 6/8/12 marks) is identical to perfect, series 300 = TOTAL_MAKS, rank kepala; (c) Kasus 3 `janji`: no ragam (old record or old state) -> id `janji`, face senang; with ragam -> id `tolak`, face cemas; `baik` unchanged. (d) "Rincian nilai" (rincianBabak, titikTerlemah) is pure and is inside (b); the draft with rejected ids and miss count lives only in components, skipped, no refactor. Update: `tsx --tsconfig client/tsconfig.json --test --test-update-snapshots <file>`. Looks wrong: nothing.
+
+## T-137 (2026-11-23): the case cover tells the player their role (Designer)
+Uncommitted, not deployed. Not opened in a browser or on a phone; no test run. Root `npm run typecheck` exit 0; `client/dist` rebuilt (build exit 0). Codex's `kamus/hubInv.ts` diff is untouched.
+
+**Changed:** `i18n/kamus/investigasi.ts` (`sampulSapa` reworded, new `sampulPeran`, id / en / zh as briefed), `cerita/investigasi/ui/JudulKasus.tsx`, `ui/sampul.css`. No art change.
+- **Bubble** = the role line, still 16 / 20 px weight 800. It is wider now (stage width minus 152 px instead of 176) and centred in the stage.
+- **Task line** `investigasi.sampulPeran` under the hook sentence, 13 / 17 px with an orange bar on the left; two lines. On every cover, first visit and replay.
+- **Short screens (under 700 px tall) only:** flexible gaps start at 4 px, tab / body / photo padding 2 px tighter each, and the "Raksa Investigator" line is hidden when it has no "from the Episode 1 story" part (cases 2 and 3; the screen header already says "Investigator"). No font was made smaller.
+
+**Bubble is NOT max 2 lines everywhere (deviation from the brief).** Miss Raksa's sticker is 136 px wide and fills her box, so at 360 px the bubble has about 154 px of text width. By estimate: id 3 lines at 360 and 2 at 390; en 3 lines at 360 and 390; zh 2 lines. Three lines (76 px) fit the shortest stage (84 px, 80 inside the border). Two lines for id / en on a phone would need a shorter text, a smaller font or a new stage layout.
+
+**No-scroll calculation** (text widths ESTIMATED per character, not measured; room for the section = 484 px at 360 x 640 and 544 px at 390 x 700, both with the "Tamu baru" link):
+| screen | case | stage + gaps + file + button | worst wrap | total | room |
+|---|---|---|---|---|---|
+| 360 x 640 | 1 (with story line) | 448 | hook 2 lines (en, zh) +20 | 468 | 484 |
+| 360 x 640 | 2 | 430 | hook 2 lines +20 | 450 | 484 |
+| 360 x 640 | 3 | 430 | hook 2 lines (id, en) +20, title 2 lines (en) +28 | 478 | 484 |
+| 390 x 700 | 1 to 3 (no tightening) | 468 | +20 +28 | 516 | 544 |
+Margin at 360 x 640 is 6 px in the worst case (case 3, English). If case 1's English title also wrapped (estimated 273 of 304 px, so no) it would be 496 and scroll by 12 px.
+**Hub fresh state:** the role chip (`hubInv.durasi`) sits in a 102 px text column beside the photo and by estimate wraps to 3 lines in id (was 2), 2 in en / zh. The hub is a flex column whose stage shrinks from 260 to 88 px, with 21 px spare at 360 x 640, so one extra 16 px line does not scroll.
+**Open:** nothing seen in a browser; the wrap counts are estimates. The 3-line chip on the hub may look heavy; not changed (Codex's diff kept).
+
+**T-137 follow-up (Lead decision):** bubble text shortened to id 'Kamu investigatornya!' / en 'You are the investigator!' / zh '你就是调查员！'; layout and `sampulPeran` unchanged. Estimated wrap in the 154 px (360) / 184 px (390) bubble: id 2 lines at 360 ('investigatornya!' about 138 px) and 2 at 390, en 2 lines at both, zh 1 line; so the bubble is at most 2 lines (56 px) and the deviation above no longer applies. Heights in the table are unchanged (the bubble does not set the stage height). Typecheck 0, `client/dist` rebuilt; still not seen in a browser.

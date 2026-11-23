@@ -10,7 +10,8 @@ const kamus: KamusRuang = {
     judulSub: 'Raksa Investigator',
     mulai: 'Mulai selidiki',
     // T-120: sampul kasus (ui/JudulKasus.tsx)
-    sampulSapa: 'Ayo kita selidiki!',
+    sampulSapa: 'Kamu investigatornya!', // T-137: balon = peran pemain
+    sampulPeran: 'Tugasmu: periksa bukti, temukan yang tidak cocok, lalu putuskan klaimnya.',
     sampulDurasi: '±{n} menit',
     sampulBukti: '{n} bukti',
     sampulTerbaik: 'Terbaik',
@@ -180,7 +181,8 @@ const kamus: KamusRuang = {
     judulSub: 'Raksa Investigator',
     mulai: 'Start investigating',
     // T-120: sampul kasus (ui/JudulKasus.tsx)
-    sampulSapa: 'Let’s investigate!',
+    sampulSapa: 'You are the investigator!',
+    sampulPeran: 'Your job: check the evidence, find what doesn’t add up, then decide the claim.',
     sampulDurasi: '±{n} min',
     sampulBukti: '{n} clues',
     sampulTerbaik: 'Best',
@@ -347,7 +349,8 @@ const kamus: KamusRuang = {
     judulSub: 'Raksa Investigator',
     mulai: '开始调查',
     // T-120: sampul kasus (ui/JudulKasus.tsx)
-    sampulSapa: '我们来调查吧！',
+    sampulSapa: '你就是调查员！',
+    sampulPeran: '你的任务：检查证据，找出不一致之处，然后决定理赔结果。',
     sampulDurasi: '约 {n} 分钟',
     sampulBukti: '{n} 份证据',
     sampulTerbaik: '最高',
