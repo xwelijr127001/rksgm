@@ -81,6 +81,9 @@ export const TEKS_AUTO_2_INV_3_ID: Record<string, string> = {
   'inv3.tafsir.urutan.salah.saat': 'Dua catatan itu tidak bertanggal sama. Bandingkan cap di sudut foto ini dengan kalender di kartu kejadian.',
   'inv3.tafsir.urutan.salah.sesudah': 'Urutannya belum pas. Bandingkan cap di sudut foto ini dengan kalender di kartu kejadian.',
   'inv3.tafsir.urutan.alasan': 'Cap foto ini 03; kartu kejadian bertanggal 14. Tanggal 3 lebih dulu: retak spion itu sudah ada sebelum kejadian parkir.', // [konfirmasi PIC] rumusan kerusakan lama
+  // T-139 (pemilik: salah = peringatan sampai benar): kunci `*.lagi*` dan `*.4` = kalimat sesudah kekeliruan KEDUA dst. (penunjuk yang
+  // lebih kuat, tanpa jawabannya). Kunci lama `*.pandu.*` dan `*.3` tidak dipakai graf lagi; tetap di sini untuk riwayat simpanan lama.
+  'inv3.tafsir.urutan.lagi': 'Cap di sudut kiri bawah foto: 03. Kalender di kartu kejadian: 14. Tanggal mana yang lebih dulu?',
   'inv3.tafsir.urutan.benar': 'Cap foto 03, kartu kejadian 14: retak spion itu sudah ada sebelum kejadian parkir.', // [konfirmasi PIC] rumusan kerusakan lama
   'inv3.tafsir.urutan.temuan': 'Foto pemeriksaan bercap 03, kartu kejadian bertanggal 14: retak spion sudah ada sebelum kejadian parkir.', // [konfirmasi PIC] rumusan kerusakan lama
   'inv3.tafsir.urutan.ringkas': 'sebelum kejadian',
@@ -114,13 +117,16 @@ export const TEKS_AUTO_2_INV_3_ID: Record<string, string> = {
   'inv3.panel.kronologi.1': 'Pilih satu bukti untuk ditunjukkan kepada panel.',
   'inv3.panel.kronologi.2': 'Coba lagi. Cari bukti yang bertanggal sebelum kejadian.',
   'inv3.panel.kronologi.3': 'Tunjukkan foto pemeriksaan tanggal 3 kepada panel.',
+  'inv3.panel.kronologi.4': 'Coba sekali lagi. Pilih bukti yang belum kamu tunjukkan.',
   'inv3.panel.kronologi.tanya': 'Bukti mana yang menunjukkan kapan retak spion itu sudah ada?',
   'inv3.panel.kronologi.petunjuk1': 'Belum tepat. Bukti mana yang tanggalnya sebelum kejadian tanggal 14?',
-  'inv3.panel.kronologi.petunjuk2': 'Kejadian parkir tanggal 14. Foto pemeriksaan tanggal 3 sudah menunjukkan retak spion. Pakai foto itu.',
+  'inv3.panel.kronologi.petunjuk2': 'Masih belum. Kejadian parkir tanggal 14. Bukti mana yang mencantumkan tanggal yang lebih awal?',
   'inv3.panel.kronologi.salah.kartu-kejadian': 'Kartu kejadian mencatat apa yang dilaporkan, bukan kapan retak spion itu mulai ada.',
   'inv3.panel.kronologi.salah.penawaran': 'Perkiraan biaya hanya menunjukkan harga, bukan kapan kerusakannya terjadi.',
   'inv3.panel.kronologi.pandu.kartu-kejadian': 'Kartu itu hanya laporannya. Mari kita lihat bersama bukti yang bertanggal sebelum kejadian.',
   'inv3.panel.kronologi.pandu.penawaran': 'Perkiraan itu hanya soal harga. Mari kita lihat bersama bukti yang bertanggal sebelum kejadian.',
+  'inv3.panel.kronologi.lagi.kartu-kejadian': 'Kartu itu hanya laporannya. Silakan coba lagi: cari bukti yang bertanggal sebelum kejadian.',
+  'inv3.panel.kronologi.lagi.penawaran': 'Perkiraan itu hanya soal harga. Silakan coba lagi: cari bukti yang bertanggal sebelum kejadian.',
   'inv3.panel.kronologi.koreksi': 'Keterangan dikoreksi: retak spion sudah ada sebelum kejadian',
   'inv3.kronologi.jawab.1': 'Foto pemeriksaan tanggal 3 menunjukkan retak spion sudah ada, sebelas hari sebelum kejadian parkir tanggal 14.',
   'inv3.kronologi.jawab.2': 'Pak Gilang, silakan menanggapi.', // [konfirmasi PIC] hak menanggapi
@@ -141,13 +147,16 @@ export const TEKS_AUTO_2_INV_3_ID: Record<string, string> = {
   'inv3.panel.pengajuan.1': 'Pilih satu bukti untuk ditunjukkan kepada panel.',
   'inv3.panel.pengajuan.2': 'Coba lagi. Cari bukti yang memuat kata-kata Pak Gilang sendiri.',
   'inv3.panel.pengajuan.3': 'Tunjukkan kutipan pesan tanggal 15 kepada panel.',
+  'inv3.panel.pengajuan.4': 'Coba sekali lagi. Pilih bukti yang belum kamu tunjukkan.',
   'inv3.panel.pengajuan.tanya': 'Bukti mana yang menunjukkan apa yang diminta Pak Gilang kepada bengkel?',
   'inv3.panel.pengajuan.petunjuk1': 'Belum tepat. Bukti mana yang memuat kata-kata Pak Gilang sendiri?',
-  'inv3.panel.pengajuan.petunjuk2': 'Di kutipan pesan tanggal 15, Pak Gilang menulis bahwa retaknya sudah lama dan meminta itu dimasukkan. Pakai kutipan itu.',
+  'inv3.panel.pengajuan.petunjuk2': 'Masih belum. Harga dan tanggal tidak menjawabnya. Bukti mana yang ditulis Pak Gilang sendiri?',
   'inv3.panel.pengajuan.salah.penawaran': 'Perkiraan biaya menunjukkan dua baris dan harganya, bukan apa yang diminta Pak Gilang.',
   'inv3.panel.pengajuan.salah.foto-inspeksi': 'Foto itu menunjukkan kapan retaknya sudah ada, bukan apa yang diminta untuk ditulis.',
   'inv3.panel.pengajuan.pandu.penawaran': 'Perkiraan itu hanya daftar dan harga. Mari kita lihat bersama kata-kata Pak Gilang sendiri.',
   'inv3.panel.pengajuan.pandu.foto-inspeksi': 'Foto itu sudah menjawab soal waktu. Mari kita lihat bersama kata-kata Pak Gilang sendiri.',
+  'inv3.panel.pengajuan.lagi.penawaran': 'Perkiraan itu hanya daftar dan harga. Silakan coba lagi: cari kata-kata Pak Gilang sendiri.',
+  'inv3.panel.pengajuan.lagi.foto-inspeksi': 'Foto itu sudah menjawab soal waktu. Silakan coba lagi: cari kata-kata Pak Gilang sendiri.',
   'inv3.panel.pengajuan.koreksi': 'Keterangan dikoreksi: retak lama diminta masuk sebagai kerusakan kejadian ini',
   'inv3.pengajuan.jawab.1': 'Di kutipan pesan tanggal 15, Pak Gilang menulis bahwa retak spion itu sudah lama dan meminta agar dimasukkan sebagai kerusakan kejadian ini.',
   'inv3.pengajuan.jawab.2': 'Pak Gilang, Pak Seno, silakan menanggapi.', // [konfirmasi PIC] hak menanggapi

@@ -29,6 +29,15 @@
  * T-130 (tinjauan Codex T-131): lembar perbesar MEMBAWA id kartu yang dibuka. Dulu id itu dibuang dan "Pakai bukti ini" selalu
  * memilih 'dashcam' (bisa memilih kartu bernilai yang salah begitu kasus lain memakai perbesar). Sekarang: gambar = kartu yang
  * dibuka, judul lembar = judul kartu itu, dan "Pakai bukti ini" memilih kartu yang SAMA.
+ * T-139 (pemilik, 23 Nov: "salah = peringatan sampai benar"; daftar percobaan di kepala berkas ini tidak berlaku lagi untuk
+ * percobaan 2): TIDAK ADA lagi bukti yang dipilihkan dan tidak ada yang dipudarkan demi menunjukkan jawabannya.
+ *  - `dicoba` = kartu bukti yang SUDAH diajukan dan keliru (pemanggil membacanya dari tanda cerita): bercap "sudah dicoba", redup,
+ *    dan mati, di percobaan 1 maupun 2. Kartu lain tetap bisa dipilih; pemain sendiri yang memilih lalu menekan KEBERATAN.
+ *  - percobaan 2 = catatan tempel biasa berisi `petunjuk2`: penunjuk yang LEBIH KUAT ke tempat melihat (tanpa menyebut kartunya),
+ *    dengan tinggi yang sama seperti percobaan 1 (tanpa potret Miss Raksa), jadi ketiga slip tetap tampil di layar pendek.
+ *  - temuan berpasangan: keterangan yang keliru = penunjuk (`salah(id)`), lalu keterangan itu ditandai dan mati; keterangan yang
+ *    dibantah TIDAK lagi dipilihkan. `alasan` tampil SESUDAH pasangan yang tepat diajukan, hanya bila pemain keliru memilih
+ *    keterangan dua kali atau lebih; menutup lembarnya meneruskan ke `onPilih`.
  */
 import { useEffect, useState, type ReactNode } from 'react';
 import { t } from '../../../i18n';
@@ -45,7 +54,9 @@ const PERBESAR_BAWAAN: readonly Bukti['id'][] = ['dashcam'];
 /** T-127: temuan berpasangan (lihat kepala berkas). `pernyataan` = semua keterangan yang sudah tersemat, urut naskah. */
 export interface PasanganKeberatan { pernyataan: Pernyataan[]; ket: string; salah: (id: string) => string; alasan: string }
 
-export function LayarKeberatan({ pernyataan, bukti, percobaan, onPilih, tx, tepat = 'dashcam', tanya, petunjuk1, petunjuk2, perbesar = PERBESAR_BAWAAN, pasangan, temuan, zum: isiZum }: {
+const TANPA_DICOBA: readonly Bukti['id'][] = [];
+
+export function LayarKeberatan({ pernyataan, bukti, percobaan, onPilih, tx, tepat = 'dashcam', tanya, petunjuk1, petunjuk2, perbesar = PERBESAR_BAWAAN, pasangan, temuan, zum: isiZum, dicoba = TANPA_DICOBA }: {
   pernyataan: Pernyataan;
   bukti: Bukti[];
   percobaan: 0 | 1 | 2;
@@ -65,11 +76,15 @@ export function LayarKeberatan({ pernyataan, bukti, percobaan, onPilih, tx, tepa
   temuan?: Readonly<Record<string, TemuanSlip>>;
   /** T-127 / T-130: gambar lembar perbesar untuk kartu itu (pengganti bingkai dashcam bernomor); undefined = bingkai lama. */
   zum?: (id: Bukti['id']) => ReactNode | undefined;
+  /** T-139: kartu yang sudah diajukan dan keliru: bercap "sudah dicoba", tidak bisa dipilih lagi. */
+  dicoba?: readonly Bukti['id'][];
 }) {
-  const dipandu = percobaan === 2;
-  const [pilih, setPilih] = useState<Bukti['id'] | null>(dipandu ? tepat : null);
-  // Percobaan baru = pilihan lama dilepas (dipandu: bukti yang tepat langsung terpilih).
-  useEffect(() => { setPilih(percobaan === 2 ? tepat : null); }, [percobaan, tepat]);
+  const [pilih, setPilih] = useState<Bukti['id'] | null>(null);
+  // Percobaan baru = pilihan lama dilepas. T-139: tidak ada kartu yang dipilihkan, di percobaan mana pun.
+  useEffect(() => { setPilih(null); }, [percobaan, tepat]);
+  // Kartu yang baru saja ditandai "sudah dicoba" (keliru di percobaan ketiga dst.) dilepas dari pilihan.
+  const kunciDicoba = dicoba.join('|');
+  useEffect(() => { setPilih((p) => (p && dicoba.includes(p) ? null : p)); /* eslint-disable-next-line react-hooks/exhaustive-deps */ }, [kunciDicoba]);
   // T-088: rekaman dashcam bisa DIPERBESAR (ketuk gambar slipnya) di samping kutipan yang dibantah, sebelum memutuskan.
   const [zum, setZum] = useState<Bukti['id'] | null>(null);
   const teks = useTx(tx);
@@ -79,18 +94,28 @@ export function LayarKeberatan({ pernyataan, bukti, percobaan, onPilih, tx, tepa
   const berpasangan = percobaan === 0 && !!pasangan && pasangan.pernyataan.length > 1;
   const [ket, setKet] = useState<string | null>(null);
   const [keliruKet, setKeliruKet] = useState(0);
-  const [catatan, setCatatan] = useState<string | null>(null);
+  /** Keterangan yang sudah dipilih dan keliru (keping ditandai, tidak bisa dipilih lagi). */
+  const [ketDicoba, setKetDicoba] = useState<string[]>([]);
+  const [catatan, setCatatan] = useState<{ teks: string; jenis: 'penunjuk' | 'alasan' } | null>(null);
   const ajukan = () => {
-    if (!pilih) return;
+    if (!pilih || dicoba.includes(pilih)) return;
     if (berpasangan && pasangan && ket !== pernyataan.id) {
       if (!ket) return;
-      const n = keliruKet + 1;
-      setKeliruKet(n);
-      // Keliru pertama: penunjuk untuk keterangan itu, pilihannya dilepas. Keliru kedua: penjelasan, keterangan yang dibantah terpilih.
-      if (n === 1) { setCatatan(pasangan.salah(ket)); setKet(null); } else { setCatatan(pasangan.alasan); setKet(pernyataan.id); }
+      // T-139: keterangan keliru = penunjuk untuk keterangan itu, pilihannya dilepas dan kepingnya ditandai; berapa kali pun.
+      setKeliruKet(keliruKet + 1);
+      setKetDicoba((d) => (d.includes(ket) ? d : [...d, ket]));
+      setCatatan({ teks: pasangan.salah(ket), jenis: 'penunjuk' });
+      setKet(null);
       return;
     }
+    // Pasangan tepat sesudah dua kekeliruan atau lebih: penjelasannya tampil dulu; menutup lembar itu meneruskan pilihannya.
+    if (berpasangan && pasangan && keliruKet >= 2) { setCatatan({ teks: pasangan.alasan, jenis: 'alasan' }); return; }
     onPilih(pilih);
+  };
+  const tutupCatatan = () => {
+    const lanjut = catatan?.jenis === 'alasan' && !!pilih;
+    setCatatan(null);
+    if (lanjut && pilih) onPilih(pilih);
   };
   const siap = !!pilih && (!berpasangan || !!ket);
   return (
@@ -98,20 +123,17 @@ export function LayarKeberatan({ pernyataan, bukti, percobaan, onPilih, tx, tepa
       <h2 id="iv-keberatan-tanya" className="iv-tanya" tabIndex={-1} data-cer-fokus="">{tanya ?? t('investigasi.keberatan.tanya')}</h2>
       {percobaan === 0 ? <p className="iv-label">{berpasangan && pasangan ? pasangan.ket : t('investigasi.keberatan.pilih')}</p> : null}
       {berpasangan && catatan ? (
-        <Modal judul={t(keliruKet >= 2 ? 'investigasi.formatif.penjelasan' : 'investigasi.formatif.sumber')} onTutup={() => setCatatan(null)} lebar={420}>
-          <p className="iv-tempel iv-pandu iv-pasang-catatan" role="status" data-pasang-catatan={keliruKet >= 2 ? 'alasan' : 'penunjuk'}><PotretReaksi reaksi="miss-berpikir" ukuran={48} /><span>{catatan}</span></p>
+        <Modal judul={t(catatan.jenis === 'alasan' ? 'investigasi.formatif.penjelasan' : 'investigasi.formatif.sumber')} onTutup={tutupCatatan} lebar={420}>
+          <p className="iv-tempel iv-pandu iv-pasang-catatan" role="status" data-pasang-catatan={catatan.jenis}><PotretReaksi reaksi="miss-berpikir" ukuran={48} /><span>{catatan.teks}</span></p>
         </Modal>
       ) : null}
       {percobaan === 1 ? <p className="iv-tempel" role="status">{petunjuk1 ?? t('investigasi.keberatan.petunjuk1')}</p> : null}
-      {dipandu ? (
-        <p className="iv-tempel iv-pandu" role="status">
-          <PotretReaksi reaksi="miss-berpikir" ukuran={48} />
-          <span>{petunjuk2 ?? t('investigasi.keberatan.petunjuk2')}</span>
-        </p>
-      ) : null}
+      {/* T-139: percobaan ketiga dst. = penunjuk yang lebih kuat, catatan biasa (tanpa potret, setinggi catatan percobaan kedua);
+          key = jumlah kartu yang sudah dicoba, supaya pembaca layar membacakannya lagi sesudah kekeliruan berikutnya */}
+      {percobaan === 2 ? <p key={dicoba.length} className="iv-tempel" role="status" data-petunjuk-kuat="">{petunjuk2 ?? t('investigasi.keberatan.petunjuk2')}</p> : null}
       <BukuCatatan pernyataan={berpasangan && pasangan ? pasangan.pernyataan : [pernyataan]} bukti={bukti} tx={tx} sorotPernyataan={berpasangan ? undefined : pernyataan.id} tanpaPensil temuan={temuan}
-        pilihPernyataan={berpasangan ? { terpilih: ket, terkunci: keliruKet >= 2, onPilih: setKet } : undefined}
-        pilihBukti={{ terpilih: pilih, sorot: percobaan >= 1 ? tepat : null, redup: (id) => dipandu && id !== tepat, onPilih: setPilih, bisaPerbesar: perbesar, onPerbesar: (id) => setZum(id) }} />
+        pilihPernyataan={berpasangan ? { terpilih: ket, dicoba: ketDicoba, onPilih: setKet } : undefined}
+        pilihBukti={{ terpilih: pilih, sorot: percobaan >= 1 ? tepat : null, dicoba, onPilih: setPilih, bisaPerbesar: perbesar, onPerbesar: (id) => setZum(id) }} />
       {zum ? (
         <Modal judul={gambarZum && kartuZum ? teks(kartuZum.judul) : t('investigasi.keberatan.zumJudul')} onTutup={() => setZum(null)} lebar={420}>
           <div className="iv-zum">
@@ -119,7 +141,10 @@ export function LayarKeberatan({ pernyataan, bukti, percobaan, onPilih, tx, tepa
           {berpasangan && ket !== pernyataan.id ? null : <p className="iv-zum-kutip"><b>{t(`investigasi.siapa.${pernyataan.siapa}`)}</b><q>{teks(pernyataan.teks)}</q></p>}
           {gambarZum ?? <BingkaiDashcam besar potong="lajur" sorotTruk />}
           {gambarZum ? null : <p className="iv-label">{t('investigasi.keberatan.zumKet')}</p>}
-          <button type="button" className="primary-action iv-tombol" data-zum-pakai={zum} onClick={() => { if (zum) setPilih(zum); setZum(null); }}>{t('investigasi.keberatan.zumPakai')}</button>
+          {/* T-139: kartu yang sudah dicoba hanya bisa dilihat, tidak bisa dipakai lagi */}
+          {dicoba.includes(zum)
+            ? <p className="iv-label" data-zum-dicoba={zum}>{t('investigasi.dicoba')}</p>
+            : <button type="button" className="primary-action iv-tombol" data-zum-pakai={zum} onClick={() => { if (zum) setPilih(zum); setZum(null); }}>{t('investigasi.keberatan.zumPakai')}</button>}
           </div>
         </Modal>
       ) : null}

@@ -91,6 +91,9 @@ export const TEKS_AUTO_2_INV_ID: Record<string, string> = {
   'inv.tafsir.lajur.salah.3': 'Lajur dihitung dari kiri, mulai sesudah bahu jalan. Hitung garis putus-putusnya, lalu lihat lagi kepala truknya.',
   'inv.tafsir.lajur.salah.kabur': 'Berhati-hati itu baik. Tapi garis lajurnya terlihat di bingkai ini: hitung dari kiri, lalu cari kepala truknya.',
   'inv.tafsir.lajur.alasan': 'Dari kiri: bahu jalan, lajur 1, lalu lajur 2. Kepala truk ada di lajur 2, dekat garis ke lajur 3. Yang di lajur 3 itu mobil kecil.',
+  // T-139 (pemilik: salah = peringatan sampai benar): kunci `*.lagi*` dan `*.4` = kalimat sesudah kekeliruan KEDUA dst. (penunjuk yang
+  // lebih kuat, tanpa jawabannya). Kunci lama `*.pandu.*` dan `*.3` tidak dipakai graf lagi; tetap di sini untuk riwayat simpanan lama.
+  'inv.tafsir.lajur.lagi': 'Mulai dari bahu jalan di kiri: tiap garis putus-putus menutup satu lajur. Berapa garis sebelum kepala truk?',
   'inv.tafsir.lajur.benar': 'Kepala truk di lajur 2, dihitung dari kiri. Mobil kecil di lajur 3.',
   'inv.tafsir.lajur.temuan': 'Rekaman 14:32: kepala truk di lajur 2, mobil kecil di lajur 3.',
   'inv.tafsir.lajur.ringkas': 'truk di lajur 2',
@@ -102,6 +105,7 @@ export const TEKS_AUTO_2_INV_ID: Record<string, string> = {
   'inv.tafsir.sim.salah.beda': 'Lihat kotak golongan di kedua catatan. Bandingkan tulisannya satu per satu.',
   'inv.tafsir.sim.salah.tanggal': 'Tahunnya tertulis di samping gambar kalender: 2029. Sekarang bandingkan kotak golongan di kedua catatan.', // [konfirmasi PIC]
   'inv.tafsir.sim.alasan': 'Kedua kotak golongan bertuliskan B II Umum: cocok. SIM itu berlaku sampai 2029.', // [konfirmasi PIC]
+  'inv.tafsir.sim.lagi': 'Tutup foto dan kalendernya dengan jarimu. Baca hanya dua kotak golongan, huruf demi huruf.',
   'inv.tafsir.sim.benar': 'Golongan di SIM, B II Umum, sama dengan yang diwajibkan untuk truk trailer ini. Berlaku sampai 2029.', // [konfirmasi PIC]
   'inv.tafsir.sim.temuan': 'SIM Pak Darto: golongan B II Umum, sama dengan yang diwajibkan untuk truk trailer; berlaku sampai 2029.', // [konfirmasi PIC]
   'inv.tafsir.sim.ringkas': 'golongan cocok',
@@ -113,6 +117,7 @@ export const TEKS_AUTO_2_INV_ID: Record<string, string> = {
   'inv.keb.1': 'Pilih dua catatan yang tidak cocok: satu keterangan dan satu bukti.',
   'inv.keb.2': 'Coba lagi. Cari kartu yang menunjukkan posisi truk di jalan.',
   'inv.keb.3': 'Tunjukkan rekaman dashcam kepada petugas tol.',
+  'inv.keb.4': 'Coba sekali lagi. Pilih kartu yang belum kamu coba.',
   'inv.keb.tanya': 'Bukti mana yang membantah "truknya di lajur 3"?',
   // T-127 (babak 2) TEMUAN BERPASANGAN di percobaan pertama KEBERATAN: satu keterangan + satu bukti
   'inv.pasang.tanya': 'Catatan mana yang tidak cocok?',
@@ -127,6 +132,8 @@ export const TEKS_AUTO_2_INV_ID: Record<string, string> = {
   'inv.keb.salah.sim': 'SIM membuktikan Pak Darto berhak mengemudikan truk itu. SIM tidak menunjukkan truknya di lajur berapa. Coba kartu lain.',
   'inv.keb.pandu.rambu': 'Rambu hanya aturannya, bukan posisi truk. Mari kita lihat bersama.',
   'inv.keb.pandu.sim': 'SIM hanya soal pengemudinya, bukan posisi truk. Mari kita lihat bersama.',
+  'inv.keb.lagi.rambu': 'Rambu hanya aturannya, bukan posisi truk. Coba lagi: cari kartu yang memperlihatkan truknya sendiri di jalan.',
+  'inv.keb.lagi.sim': 'SIM hanya soal pengemudinya, bukan posisi truk. Coba lagi: cari kartu yang memperlihatkan truknya sendiri di jalan.',
   'inv.keb.cap': 'KEBERATAN! Rekaman dashcam menunjukkan truk di lajur 2, bukan lajur 3.',
   'inv.akui.1': 'Tapi saya ingat betul: waktu itu ada kendaraan di lajur 3.',
   // T-127: baris ini hanya tampil bila pemain tadi menanyakan tempat petugas berdiri (tanda jeli)

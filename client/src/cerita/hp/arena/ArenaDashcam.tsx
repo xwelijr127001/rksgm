@@ -16,8 +16,14 @@
  * Lalu "Ketuk kendaraan yang memicu kejadian." Tiga sasaran ketuk (>= 48 px, cincin piksel saat fokus) baru aktif di bingkai beku;
  * ketukan selama rekaman berjalan diabaikan (tombolnya belum ada). "Putar lagi" selalu bisa. Gerak dikurangi: tiga bingkai diam
  * dengan "Lanjut" (bingkai 3 = bingkai beku), tetap bisa dijawab.
- * Hasil: `mobil` (konfig.tepat) pada ketukan pertama -> `bersih`; ketukan keliru -> petunjuk singkat + putar lagi; ketukan keliru
- * kedua -> `ragu` + penjelasan. Mobil yang diketuk sesudah satu kekeliruan = tepat tetapi dicatat `ragu`. Lalu alur Kirim biasa.
+ * Hasil: `mobil` (konfig.tepat) pada ketukan pertama -> `bersih`; sesudah satu kekeliruan atau lebih -> `ragu`. Lalu alur Kirim biasa.
+ * T-139 (pemilik, 23 Nov: "salah = peringatan sampai benar; jangan berhenti sesudah dua kali memilih"): ketukan keliru TIDAK
+ * PERNAH menyelesaikan langkah dan jawabannya tidak pernah ditunjukkan. Keliru pertama = petunjuk kendaraan itu (`ragu.<id>`);
+ * keliru kedua dan seterusnya = penunjuk yang lebih kuat ke TEMPAT melihat (`ragu2.<id>`: lajurnya), tetap tanpa jawaban. Kendaraan
+ * yang sudah diketuk keliru ditandai "sudah dicoba" dan tidak bisa diketuk lagi. Langkah selesai HANYA oleh ketukan yang tepat;
+ * penjelasan lama (`jelaskan`) tampil SESUDAH ketukan tepat itu bila pemain keliru dua kali atau lebih. Hasil yang dicatat tidak
+ * berubah (`bersih` / `ragu`). Arena yang dibuka lagi dengan hasil yang SUDAH tercatat (draf kunjungan) langsung tampil selesai:
+ * rekaman tidak diputar ulang dan hasilnya tidak bisa ditimpa.
  *
  * KONTRAK (rencana Task 2 / Interfaces): konfig = KonfigArena pola 'dashcam' (cerita/tipe.ts, Task 1): { langkah; item; benda:
  * { id: 'mobil' | 'truk' | 'truk-kecil' }[]; tepat: 'mobil'; bersih; ragu }. Jawaban = tetapkan(jawaban, langkah, item, bersih | ragu)
@@ -42,7 +48,7 @@ import debu from '../../seni/aktivitas/dashcam/debu.png';
 import SPRITE from '../../seni/aktivitas/dashcam/sprite.json';
 import { KeSlot, SlotKepalaArena } from '../cangkang';
 import { PotretHp, TombolKirim } from '../bagianHp';
-import { pilihOpsi, tetapkan } from './logika';
+import { petaLangkah, pilihOpsi, tetapkan } from './logika';
 import type { PropsPola } from './pola';
 import type { KonfigArena } from '../../tipe';
 import './dashcam.css';
@@ -116,10 +122,13 @@ export function BingkaiDashcam({ besar = false, potong = 'rambu', sorotTruk = fa
 
 export function ArenaPolaDashcam({ ep, konfig, jawaban, ubah, tx, labelKirim, onKirim }: PropsPola & { konfig: KonfigDashcam }) {
   const kurang = useReducedMotion();
-  const [tahap, setTahap] = useState<Tahap>('putar');
+  // T-139: hasil rekaman yang SUDAH tercatat di draf kunjungan = langkah ini sudah selesai; tidak diputar atau dibuka lagi.
+  const [tahap, setTahap] = useState<Tahap>(() => (petaLangkah(jawaban, konfig.langkah)[konfig.item] ? 'selesai' : 'putar'));
   const [bingkai, setBingkai] = useState(kurang ? 1 : 0); // 0 = animasi; 1..3 = bingkai diam (gerak dikurangi)
   const [putaran, setPutaran] = useState(0);
   const [salah, setSalah] = useState(0);
+  /** T-139: kendaraan yang sudah diketuk dan keliru (ditandai "sudah dicoba", tidak bisa diketuk lagi). */
+  const [dicoba, setDicoba] = useState<IdKendaraan[]>([]);
   const [pesan, setPesan] = useState<{ kunci: string; jenis: 'tepat' | 'ragu' | 'jelaskan' } | null>(null);
   const [diketuk, setDiketuk] = useState<IdKendaraan | null>(null);
   // T-068: langkah kedua (konfig.simpul, Episode 1 lengkap K08): pertanyaan tokoh pada bingkai beku yang sama. 'ulang' = rekaman
@@ -165,18 +174,20 @@ export function ArenaPolaDashcam({ ep, konfig, jawaban, ubah, tx, labelKirim, on
   };
   const selesai = (alt: string) => { setTahap('selesai'); ubah(tetapkan(jawaban, konfig.langkah, konfig.item, alt)); };
   const ketuk = (id: IdKendaraan) => {
-    if (tahap !== 'pilih') return;
+    if (tahap !== 'pilih' || dicoba.includes(id)) return;
     setDiketuk(id);
     if (id === konfig.tepat) {
       playSfx('konfirmasi');
-      setPesan({ kunci: nt('dashcam.tepat'), jenis: 'tepat' });
+      // T-139: dua kekeliruan atau lebih = penjelasan lama tampil SESUDAH ketukan yang tepat (dulu: sebelum, sebagai jawaban).
+      setPesan(salah >= 2 ? { kunci: nt('dashcam.jelaskan'), jenis: 'jelaskan' } : { kunci: nt('dashcam.tepat'), jenis: 'tepat' });
       selesai(salah ? konfig.ragu : konfig.bersih);
       return;
     }
+    // T-139: keliru = peringatan + coba lagi, berapa kali pun. Pertama: petunjuk kendaraan itu; kedua dst.: penunjuk lajurnya.
     playSfx('batal');
-    if (salah >= 1) { setPesan({ kunci: nt('dashcam.jelaskan'), jenis: 'jelaskan' }); selesai(konfig.ragu); return; }
-    setSalah(1);
-    setPesan({ kunci: nt(`dashcam.ragu.${id}`), jenis: 'ragu' });
+    setSalah(salah + 1);
+    setDicoba([...dicoba, id]);
+    setPesan({ kunci: nt(`dashcam.${salah >= 1 ? 'ragu2' : 'ragu'}.${id}`), jenis: 'ragu' });
     if (lewatKeyboard.current) fokus.current = 'putar';
   };
 
@@ -219,10 +230,16 @@ export function ArenaPolaDashcam({ ep, konfig, jawaban, ubah, tx, labelKirim, on
           {/* bingkai kamera: sudut, REKAM */}
           <span className="dc-sudut" aria-hidden="true" />
           <span className="dc-rekam" aria-hidden="true"><i />{t('dashcam.rekam')} 14:32</span>
-          {fase === 'rekaman' && tahap !== 'putar' ? (['mobil', 'truk-kecil', 'truk'] as const).filter((id) => benda.has(id)).map((id) => (
-            <button key={id} type="button" className="dc-sasaran" data-kendaraan={id} style={SASARAN[id]} aria-label={t(`dashcam.benda.${id}`)}
-              data-keadaan={diketuk === id ? (id === konfig.tepat ? 'tepat' : 'ragu') : undefined} disabled={tahap === 'selesai'} onClick={() => ketuk(id)} />
-          )) : null}
+          {fase === 'rekaman' && tahap !== 'putar' ? (['mobil', 'truk-kecil', 'truk'] as const).filter((id) => benda.has(id)).map((id) => {
+            // T-139: kendaraan yang sudah diketuk keliru = berlabel "sudah dicoba", redup, dan mati (juga sesudah "Putar lagi").
+            const coba = dicoba.includes(id);
+            return (
+              <button key={id} type="button" className="dc-sasaran" data-kendaraan={id} style={SASARAN[id]} aria-label={coba ? `${t(`dashcam.benda.${id}`)} (${t('dashcam.dicoba')})` : t(`dashcam.benda.${id}`)}
+                data-dicoba={coba ? '' : undefined} data-keadaan={diketuk === id ? (id === konfig.tepat ? 'tepat' : 'ragu') : undefined} disabled={tahap === 'selesai' || coba} onClick={() => ketuk(id)}>
+                {coba ? <i className="dc-dicoba" aria-hidden="true">{t('dashcam.dicoba')}</i> : null}
+              </button>
+            );
+          }) : null}
         </div>
         {/* T-067: tombol di dalam adegan: kanan atas selama rekaman / bingkai 1-2, kanan bawah di bingkai beku (dashcam.css) */}
         <div className="dc-kendali">

@@ -247,15 +247,19 @@ function babakPanel(r: Round, sesudah: IdNode): NodeCerita[] {
           };
         }),
       },
-      // Kalimat sesudah kartu keliru: `<awalan>.panel.<babak>.salah.<kartu>` (percobaan 0) / `.pandu.<kartu>` (percobaan 1).
+      // Kalimat sesudah kartu keliru: `<awalan>.panel.<babak>.salah.<kartu>` (percobaan 0) / `.lagi.<kartu>` (percobaan 1).
+      // T-139: `.lagi.*` = batas kartu itu + "silakan coba lagi" + penunjuk; menggantikan `.pandu.*` ("mari kita lihat bersama",
+      // kuncinya tetap ada di berkas teks untuk riwayat simpanan lama).
       ...r.evidenceIds.filter((x) => !r.acceptedIds.includes(x)).map((x) =>
-        dialog(`${id}-${x}`, PANEL, [b(`inv3.panel.${r.id}.${n === 0 ? 'salah' : 'pandu'}.${x}`, 'ketua', n === 0 ? 'netral' : 'serius')], berikut)),
+        dialog(`${id}-${x}`, PANEL, [b(`inv3.panel.${r.id}.${n === 0 ? 'salah' : 'lagi'}.${x}`, 'ketua', n === 0 ? 'netral' : 'serius')], berikut)),
     ];
   };
   return [
     ...coba(0),
     ...coba(1),
-    dialog(`${awal}-2`, PANEL, [b(`inv3.panel.${r.id}.3`, 'narasi')], sesudah,
+    // T-139: percobaan ketiga dst. (id node, tanda panel:<babak>:guided dan nilainya tidak berubah): pemain memilih sendiri; baris
+    // node ini tidak lagi menyebut kartunya (`.3` -> `.4`). Kartu yang sudah dicoba mati di layar (LayarInvestigasi PanelKasus).
+    dialog(`${awal}-2`, PANEL, [b(`inv3.panel.${r.id}.4`, 'narasi')], sesudah,
       { efek: { pasang: [tandaPanel(r.id, 'guided')] }, investigasi: { jenis: 'panel', round: r.id, attempt: 2 } }),
   ];
 }

@@ -50,11 +50,10 @@
 .pp .pp-isi { gap: 6px; padding-bottom: 8px; }
 
 /* ================================================================ 4c. KEBERATAN (kasus 1-2): kepala halaman buku tidak diulang (layar ini
-   sudah punya pertanyaan dan label sendiri); langkah dipandu di layar pendek: hanya slip yang tepat yang tampil */
+   sudah punya pertanyaan dan label sendiri).
+   T-139: aturan "langkah dipandu di layar pendek: hanya slip yang tepat yang tampil" DILEPAS. Slip yang sudah dicoba tetap tampil
+   (bercap "sudah dicoba"); percobaan ketiga memakai catatan setinggi percobaan kedua, jadi ketiga slip muat (HANDOFF "## T-139"). */
 .iv-keberatan .bk-judul { display: none; }
-@media (max-height: 679.98px) {
-  .iv-keberatan[data-percobaan="2"] .bk-slip-daftar > li:has(> .bk-slip[data-redup]) { display: none; }
-}
 
 /* ================================================================ 5. putusan: alasan terbuka pada kartu yang DIPILIH saja
    (tiga alasan utuh sekaligus tidak muat di kasus 2 dan 3; kartu lain tetap satu ketukan jauhnya, dan putusan baru berlaku
@@ -103,10 +102,8 @@
 .pn-ronde .pn-ruang { height: 72px; background-position: center -12px, 0 -12px; background-size: 360px 104px, 100% 104px; background-repeat: no-repeat; }
 .pn-ronde .pn-kursi { top: 4px; }
 .pn-ronde .pn-kartu-teks small { display: none; }
-/* langkah dipandu di layar pendek: hanya kartu yang diterima yang tampil (di layar >= 680 px kartu lain tetap tampil pudar) */
-@media (max-height: 679.98px) {
-  .pn-ronde[data-percobaan="2"] .pn-kartu[data-redup] { display: none; }
-}
+/* T-139: aturan "langkah dipandu di layar pendek: hanya kartu yang diterima yang tampil" DILEPAS. Kartu yang sudah dicoba tetap
+   tampil (bercap "sudah dicoba") di semua layar; tinggi percobaan ketiga = percobaan kedua (HANDOFF "## T-139"). */
 
 /* ================================================================ 11. lembar bukti (PanelExhibit)
    Foto utuh dan foto dekat memakai kotak 3 : 2 yang sama; tombol gantinya (44 x 44) menumpang di sudut foto. Di layar < 700 px

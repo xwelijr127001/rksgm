@@ -119,15 +119,20 @@ function potongBukti(b: Bukti): readonly [string, number, number] {
 
 /** T-127: baris temuan di slip sebuah bukti (teks jadi, pendek). */
 export interface TemuanSlip { teks: string; mapan: boolean }
-/** T-127: keterangan sebagai pilihan tunggal (KEBERATAN berpasangan). `terkunci` = sudah dipandu: tidak bisa diganti lagi. */
-export interface PilihPernyataan { terpilih: string | null; onPilih: (id: string) => void; terkunci?: boolean }
+/**
+ * T-127: keterangan sebagai pilihan tunggal (KEBERATAN berpasangan). T-139: `dicoba` = keterangan yang sudah dipilih dan keliru:
+ * kepingnya redup, bertanda silang dan mati (nama aksesnya menyebut "sudah dicoba"); tidak ada lagi keterangan yang dipilihkan.
+ */
+export interface PilihPernyataan { terpilih: string | null; onPilih: (id: string) => void; dicoba?: readonly string[] }
 
 export interface PilihBukti {
   terpilih: Bukti['id'] | null;
   /** Bukti yang bagian gambarnya disorot (petunjuk). */
   sorot?: Bukti['id'] | null;
-  /** Bukti yang pudar dan tidak bisa dipilih (langkah dipandu). */
+  /** Bukti yang pudar dan tidak bisa dipilih. */
   redup?: (id: Bukti['id']) => boolean;
+  /** T-139: bukti yang SUDAH diajukan dan keliru: cap "sudah dicoba" di gambarnya, redup, dan tidak bisa dipilih lagi. */
+  dicoba?: readonly Bukti['id'][];
   onPilih: (id: Bukti['id']) => void;
   /** T-088: bukti yang gambarnya bisa DIPERBESAR (ketuk gambarnya) sebelum memilih; mis. rekaman dashcam. */
   bisaPerbesar?: readonly Bukti['id'][];
@@ -211,18 +216,23 @@ function KeteranganSatu({ pernyataan, teks, koreksi, tanya }: { pernyataan: Pern
  */
 function KeteranganPilih({ pernyataan, teks, pilih }: { pernyataan: Pernyataan[]; teks: Tx; pilih: PilihPernyataan }) {
   return (
-    <div className="bk-satu bk-pilih-ket" data-keterangan-pilih="" data-terkunci={pilih.terkunci ? '' : undefined}>
+    <div className="bk-satu bk-pilih-ket" data-keterangan-pilih="">
       <div className="bk-keping" role="radiogroup" aria-label={t('investigasi.keterangan')}>
-        {pernyataan.map((x, i) => (
-          <button key={x.id} type="button" role="radio" aria-checked={pilih.terpilih === x.id} className="bk-keping-tombol" data-keping={x.id} data-pilih-keterangan={x.id}
-            disabled={pilih.terkunci && pilih.terpilih !== x.id} aria-label={`${i + 1}. ${t(`investigasi.siapa.${x.siapa}`)}: ${teks(x.teks)}`} onClick={() => { if (!pilih.terkunci) pilih.onPilih(x.id); }}>
-            <span className="bk-polaroid" aria-hidden="true">
-              <PotretPikselHp tokoh={TOKOH_PIKSEL[x.siapa]} ekspresi="netral" ukuran={40} label="" />
-              <IkonInv nama="pin" kali={1} className="bk-pin" />
-            </span>
-            <i className="bk-keping-no" aria-hidden="true">{i + 1}</i>
-          </button>
-        ))}
+        {pernyataan.map((x, i) => {
+          // T-139: keterangan yang sudah dipilih dan keliru = redup, bersilang, mati; nama aksesnya menyebut "sudah dicoba".
+          const dicoba = !!pilih.dicoba?.includes(x.id);
+          return (
+            <button key={x.id} type="button" role="radio" aria-checked={pilih.terpilih === x.id} className="bk-keping-tombol" data-keping={x.id} data-pilih-keterangan={x.id} data-dicoba={dicoba ? '' : undefined}
+              disabled={dicoba} aria-label={`${i + 1}. ${t(`investigasi.siapa.${x.siapa}`)}: ${teks(x.teks)}${dicoba ? ` (${t('investigasi.dicoba')})` : ''}`} title={dicoba ? t('investigasi.dicoba') : undefined} onClick={() => { if (!dicoba) pilih.onPilih(x.id); }}>
+              <span className="bk-polaroid" aria-hidden="true">
+                <PotretPikselHp tokoh={TOKOH_PIKSEL[x.siapa]} ekspresi="netral" ukuran={40} label="" />
+                <IkonInv nama="pin" kali={1} className="bk-pin" />
+              </span>
+              <i className="bk-keping-no" aria-hidden="true">{i + 1}</i>
+              {dicoba ? <i className="bk-keping-coba" aria-hidden="true">✕</i> : null}
+            </button>
+          );
+        })}
       </div>
       <div className="bk-pilih-tumpuk" aria-live="polite">
         {pernyataan.map((x) => (
@@ -239,11 +249,14 @@ function KeteranganPilih({ pernyataan, teks, pilih }: { pernyataan: Pernyataan[]
 
 function SlipBukti({ b, pilih, teks, baru, temuan }: { b: Bukti; pilih?: PilihBukti; teks: Tx; baru?: boolean; temuan?: TemuanSlip }) {
   const [atlas, px, py] = potongBukti(b);
+  // T-139: bukti yang sudah diajukan dan keliru: cap "sudah dicoba" di atas gambarnya (lapisan, tinggi slip tidak berubah).
+  const dicoba = !!pilih?.dicoba?.includes(b.id);
   const isi = (
     <>
       <i className="bk-klip" aria-hidden="true" style={{ backgroundImage: `url(${klipUrl})` }} />
       <span className="bk-slip-gambar" aria-hidden="true" style={{ backgroundImage: `url(${atlas})`, backgroundPosition: `${-px}px ${-py}px` }}>
-        {pilih?.sorot === b.id ? <i className="bk-slip-sorot" data-bukti={b.seni ? undefined : b.id} /> : null}
+        {pilih?.sorot === b.id && !dicoba ? <i className="bk-slip-sorot" data-bukti={b.seni ? undefined : b.id} /> : null}
+        {dicoba ? <i className="iv-cap-dicoba">{t('investigasi.dicoba')}</i> : null}
       </span>
       <span className="bk-slip-teks" data-bertemuan={temuan ? '' : undefined}>
         <b className="bk-tulisan">{teks(b.judul)}</b>
@@ -253,14 +266,14 @@ function SlipBukti({ b, pilih, teks, baru, temuan }: { b: Bukti; pilih?: PilihBu
     </>
   );
   if (!pilih) return <li><div className="bk-slip" data-bukti={b.id} data-baru={baru ? '' : undefined} title={teks(b.sumber)}>{isi}</div></li>;
-  const redup = pilih.redup?.(b.id) ?? false;
+  const redup = !dicoba && (pilih.redup?.(b.id) ?? false);
   const zum = !!pilih.onPerbesar && !!pilih.bisaPerbesar?.includes(b.id);
   return (
     <li className={zum ? 'bk-slip-berzum' : undefined}>
       {/* T-088: gambar slip = tombol perbesar (saudara tombol pilih, bukan di dalamnya) */}
       {zum ? <button type="button" className="bk-slip-zum" data-perbesar={b.id} aria-haspopup="dialog" aria-label={b.seni ? t('investigasi.keberatan.perbesarKartu', { judul: teks(b.judul) }) : t('investigasi.keberatan.perbesar')} onClick={() => pilih.onPerbesar!(b.id)}><IkonInv nama="tambahan" kali={1} /></button> : null}
-      <button type="button" className="bk-slip" data-bukti={b.id} data-redup={redup ? '' : undefined} aria-pressed={pilih.terpilih === b.id} disabled={redup}
-        aria-label={`${t('investigasi.bukti')}: ${teks(b.judul)}. ${teks(b.sumber)}${temuan ? `. ${t(temuan.mapan ? 'investigasi.temuan.mapan' : 'investigasi.temuan.tafsir')}: ${temuan.teks}` : ''}`} onClick={() => pilih.onPilih(b.id)}>
+      <button type="button" className="bk-slip" data-bukti={b.id} data-redup={redup ? '' : undefined} data-dicoba={dicoba ? '' : undefined} aria-pressed={pilih.terpilih === b.id} disabled={redup || dicoba}
+        aria-label={`${t('investigasi.bukti')}: ${teks(b.judul)}. ${teks(b.sumber)}${temuan ? `. ${t(temuan.mapan ? 'investigasi.temuan.mapan' : 'investigasi.temuan.tafsir')}: ${temuan.teks}` : ''}${dicoba ? ` (${t('investigasi.dicoba')})` : ''}`} onClick={() => pilih.onPilih(b.id)}>
         {isi}
       </button>
     </li>

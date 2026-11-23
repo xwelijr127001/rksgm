@@ -68,6 +68,7 @@ export const TEKS_AUTO_2_INV_3_ZH: Record<string, string> = {
   'inv3.tafsir.urutan.salah.saat': '这两份记录的日期并不相同。把照片角上的日期戳和事故卡上的日历比一比。',
   'inv3.tafsir.urutan.salah.sesudah': '先后顺序还不对。把照片角上的日期戳和事故卡上的日历比一比。',
   'inv3.tafsir.urutan.alasan': '照片的日期戳是 03；事故卡的日期是 14。3 日在前：后视镜的裂纹在停车场事故之前就已存在。', // [konfirmasi PIC] rumusan kerusakan lama
+  'inv3.tafsir.urutan.lagi': '照片左下角的日期戳：03。事故卡上的日历：14。哪个日期在前？',
   'inv3.tafsir.urutan.benar': '照片日期戳 03，事故卡 14：后视镜的裂纹在停车场事故之前就已存在。', // [konfirmasi PIC] rumusan kerusakan lama
   'inv3.tafsir.urutan.temuan': '检查照片日期戳 03，事故卡日期 14：后视镜的裂纹在停车场事故之前就已存在。', // [konfirmasi PIC] rumusan kerusakan lama
   'inv3.tafsir.urutan.ringkas': '事故之前',
@@ -97,13 +98,16 @@ export const TEKS_AUTO_2_INV_3_ZH: Record<string, string> = {
   'inv3.panel.kronologi.1': '请选择一项证据出示给小组。',
   'inv3.panel.kronologi.2': '再试一次。找日期在事故之前的证据。',
   'inv3.panel.kronologi.3': '把 3 日的检查照片出示给小组。',
+  'inv3.panel.kronologi.4': '再试一次。选一项你还没出示过的证据。',
   'inv3.panel.kronologi.tanya': '哪项证据能说明后视镜的裂纹何时就已存在？',
   'inv3.panel.kronologi.petunjuk1': '还不对。哪项证据的日期早于 14 日的事故？',
-  'inv3.panel.kronologi.petunjuk2': '停车场事故发生在 14 日。3 日的检查照片已经显示后视镜有裂纹。用那张照片。',
+  'inv3.panel.kronologi.petunjuk2': '还是不对。停车场事故发生在 14 日。哪项证据上的日期更早？',
   'inv3.panel.kronologi.salah.kartu-kejadian': '事故卡记录的是报告的内容，而不是后视镜裂纹最早何时出现。',
   'inv3.panel.kronologi.salah.penawaran': '估价单只显示价格，不显示损坏发生的时间。',
   'inv3.panel.kronologi.pandu.kartu-kejadian': '那张卡只是报告。我们一起看看日期在事故之前的证据。',
   'inv3.panel.kronologi.pandu.penawaran': '那份估价单只关乎价格。我们一起看看日期在事故之前的证据。',
+  'inv3.panel.kronologi.lagi.kartu-kejadian': '那张卡只是报告。请再试一次：找日期在事故之前的证据。',
+  'inv3.panel.kronologi.lagi.penawaran': '那份估价单只关乎价格。请再试一次：找日期在事故之前的证据。',
   'inv3.panel.kronologi.koreksi': '陈述已更正：后视镜裂纹在事故前就已存在',
   'inv3.kronologi.jawab.1': '3 日的检查照片显示后视镜裂纹早已存在，比 14 日的停车场事故早十一天。',
   'inv3.kronologi.jawab.2': 'Gilang 先生，请您回应。', // [konfirmasi PIC]
@@ -121,13 +125,16 @@ export const TEKS_AUTO_2_INV_3_ZH: Record<string, string> = {
   'inv3.panel.pengajuan.1': '请选择一项证据出示给小组。',
   'inv3.panel.pengajuan.2': '再试一次。找含有 Gilang 先生本人原话的证据。',
   'inv3.panel.pengajuan.3': '把 15 日的信息摘录出示给小组。',
+  'inv3.panel.pengajuan.4': '再试一次。选一项你还没出示过的证据。',
   'inv3.panel.pengajuan.tanya': '哪项证据能说明 Gilang 先生向修理厂提出了什么要求？',
   'inv3.panel.pengajuan.petunjuk1': '还不对。哪项证据含有 Gilang 先生本人的原话？',
-  'inv3.panel.pengajuan.petunjuk2': '在 15 日的信息摘录里，Gilang 先生写明裂纹是旧的，并要求把它算进去。用那段摘录。',
+  'inv3.panel.pengajuan.petunjuk2': '还是不对。价格和日期回答不了这个问题。哪项证据是 Gilang 先生自己写的？',
   'inv3.panel.pengajuan.salah.penawaran': '估价单显示的是两行项目和价格，而不是 Gilang 先生提出的要求。',
   'inv3.panel.pengajuan.salah.foto-inspeksi': '那张照片说明的是裂纹何时就已存在，而不是要求怎样填写。',
   'inv3.panel.pengajuan.pandu.penawaran': '那份估价单只是清单和价格。我们一起看看 Gilang 先生本人的原话。',
   'inv3.panel.pengajuan.pandu.foto-inspeksi': '那张照片已经回答了时间的问题。我们一起看看 Gilang 先生本人的原话。',
+  'inv3.panel.pengajuan.lagi.penawaran': '那份估价单只是清单和价格。请再试一次：找 Gilang 先生本人的原话。',
+  'inv3.panel.pengajuan.lagi.foto-inspeksi': '那张照片已经回答了时间的问题。请再试一次：找 Gilang 先生本人的原话。',
   'inv3.panel.pengajuan.koreksi': '陈述已更正：要求把旧裂纹算作这次事故的损坏',
   'inv3.pengajuan.jawab.1': '在 15 日的信息摘录里，Gilang 先生写明后视镜裂纹是旧的，并要求把它算作这次事故的损坏。',
   'inv3.pengajuan.jawab.2': 'Gilang 先生、Seno 先生，请回应。', // [konfirmasi PIC]

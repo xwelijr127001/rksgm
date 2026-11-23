@@ -588,8 +588,13 @@ export interface PanelCard {
   title: string;
   source: string;
   excerpt?: string;
-  /** true = tampil pudar dan tidak bisa diajukan (langkah dipandu: hanya kartu yang diterima yang aktif). */
+  /** true = tampil pudar dan tidak bisa diajukan. T-139: dipakai untuk kartu yang SUDAH diajukan dan keliru (lihat `tried`). */
   disabled?: boolean;
+  /**
+   * T-139 (opsional): kartu ini sudah diajukan di babak ini dan keliru: berlabel "sudah dicoba" (selalu bersama `disabled`). Kartu
+   * lain tetap aktif di semua percobaan: tidak ada lagi kartu yang dipilihkan untuk pemain.
+   */
+  tried?: boolean;
   /**
    * T-132 (opsional; tanpa nilai = seni panel lama menurut id kartu): seni babak 2 kartu ini (T-128), URL gambar. `thumb` 96 x 68
    * untuk daftar kartu, `exhibit` 288 x 192 untuk lembar "perbesar" (foto + keterangan, tanpa tombol "lihat dari dekat"),
@@ -603,7 +608,8 @@ export interface PanelCard {
  *   chair      ketua panel: id pemeran, nama, pertanyaan babak (`Round.promptKey`), dan `hint` pada attempt 1 / 2 (`hintKeys`)
  *   statement  pernyataan yang dibantah: id, pembuat (`siapa`), nama tampil, kalimatnya
  *   cards      kartu urut layar
- *   attempt    0 = pertama, 1 = kedua, 2 = dipandu
+ *   attempt    0 = pertama, 1 = kedua, 2 = ketiga dan seterusnya (T-139: tidak lagi "dipandu": tidak ada kartu yang dipilihkan;
+ *              kartu yang sudah keliru datang ber-`tried` + `disabled`, dan babak baru selesai saat kartu yang diterima diajukan)
  *   onInspect  tamu memperbesar kartu itu (komponen sendiri menggambar tampilan besar dan mengembalikan fokus saat ditutup;
  *              callback ini hanya pemberitahuan, mis. untuk bunyi)
  *   onPresent  tamu MENGAJUKAN kartu itu; induk yang memutuskan tepat / keliru

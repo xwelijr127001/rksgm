@@ -250,9 +250,13 @@ function bangunNode(): NodeCerita[] {
       b('inv2.keb-buka.2', 'yusuf', 'netral'),
     ], 'keb0'),
     ...keberatan(0, 'inv2.keb.1', 'keb1', (x) => `inv2.keb.salah.${x}`),
-    ...keberatan(1, 'inv2.keb.2', 'keb2', (x) => `inv2.keb.pandu.${x}`),
-    // Percobaan ketiga = dipandu: hanya kartu tepat yang melanjutkan (node dialog; ketukan kartu itu = lanjut).
-    dialog('keb2', RUANG('yusuf'), [b('inv2.keb.3', 'narasi')], 'keb-cap',
+    // T-139 (pemilik: salah = peringatan sampai benar): kalimat sesudah catatan keliru KEDUA = penunjuk + coba lagi
+    // (inv2.keb.lagi.*, dulu inv2.keb.pandu.* "mari kita lihat bersama"); baris node keb2 tidak lagi menyebut catatannya
+    // (inv2.keb.3 -> inv2.keb.4). Kunci lama tetap ada di berkas teks (riwayat simpanan lama menyimpan kunci).
+    ...keberatan(1, 'inv2.keb.2', 'keb2', (x) => `inv2.keb.lagi.${x}`),
+    // Percobaan ketiga dst. (node dialog; id, efek keb:dipandu dan nilainya tidak berubah): pemain memilih sendiri; hanya catatan
+    // tepat yang melanjutkan (ketukannya = lanjut). Catatan yang sudah dicoba mati di layar.
+    dialog('keb2', RUANG('yusuf'), [b('inv2.keb.4', 'narasi')], 'keb-cap',
       { efek: { pasang: [tandaKeberatan('dipandu')] }, investigasi: { jenis: 'keberatan', pernyataan: KEB.pernyataan, tepat: TEPAT, percobaan: 2 } }),
     dialog('keb-cap', RUANG('yusuf'), [b('inv2.keb.cap', 'narasi')], 'keb-akui', { investigasi: { jenis: 'cap' } }),
     // Pak Yusuf tenang dan bermartabat ('tersenyum' = wajah TERBUKA di ./pemeran.ts: menjelaskan dengan tenang, bukan pose malu);

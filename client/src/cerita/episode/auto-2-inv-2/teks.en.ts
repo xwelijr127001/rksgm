@@ -105,6 +105,7 @@ export const TEKS_AUTO_2_INV_2_EN: Record<string, string> = {
   'inv2.tafsir.jam.salah.2105': 'The 21:05 slip shows a person getting into a car. Look at the time box on the incident form.',
   'inv2.tafsir.jam.salah.2124': 'The 21:24 slip shows a trip being closed in the app. Look at the time box on the incident form.',
   'inv2.tafsir.jam.alasan': 'The time box on the incident form reads 21:18, and its sketch shows the bump. The 21:18 slip is the time of the bump.',
+  'inv2.tafsir.jam.lagi': 'Read the number in the time box on the incident form, then find the slip with exactly the same number.',
   'inv2.tafsir.jam.benar': 'The incident form records the bump at 21:18.',
   'inv2.baca.struk.1': 'You put the time of the bump next to the trip receipt.',
   'inv2.tafsir.struk.tanya': 'The bump was at 21:18. Where does that time fall on the trip in this receipt?',
@@ -112,6 +113,7 @@ export const TEKS_AUTO_2_INV_2_EN: Record<string, string> = {
   'inv2.tafsir.struk.salah.sebelum': 'Compare the time with the numbers on the receipt: 21:18 is later than 21:05.',
   'inv2.tafsir.struk.salah.sesudah': 'Compare the time with the numbers on the receipt: 21:18 is earlier than 21:24.',
   'inv2.tafsir.struk.alasan': 'Receipt: 21:05 at the start, 21:24 at the end. 21:18 lies between them: the bump happened mid-trip.',
+  'inv2.tafsir.struk.lagi': 'Look at the route line on the receipt: 21:05 at the start, 21:24 at the end. Where does 21:18 sit on that line?',
   'inv2.tafsir.struk.benar': '21:18 lies between 21:05 and 21:24: the bump happened in the middle of the trip on that receipt.',
   'inv2.tafsir.struk.temuan': 'Trip receipt: the 21:18 bump falls between 21:05 and 21:24, in the middle of that trip.',
   'inv2.tafsir.struk.ringkas': 'mid-trip',
@@ -123,6 +125,7 @@ export const TEKS_AUTO_2_INV_2_EN: Record<string, string> = {
   'inv2.tafsir.dokumen.salah.identitas': 'Who the passenger was does not change what the policy says, and that data is hidden on purpose. Which document decides whether this is covered?', // [konfirmasi PIC]
   'inv2.tafsir.dokumen.salah.foto': 'The damage to the bumper is not in doubt. What you have not read yet is what the policy said on that date.',
   'inv2.tafsir.dokumen.alasan': 'The receipt already answers what happened. What is missing: what the policy says, and whether a use extension was in place on the incident date. Without that we may not decide yet.', // [konfirmasi PIC]
+  'inv2.tafsir.dokumen.lagi': 'The incident and the damage are already in your notebook. What have you not read at all in this file yet?',
   'inv2.tafsir.dokumen.benar': 'That is what is missing: what the policy says and the use-extension status on the incident date. We ask for the document first.', // [konfirmasi PIC]
   'inv2.tafsir.klausul.tanya': 'Which clause decides this case?',
   'inv2.tafsir.klausul.gambar': 'A policy extract with three numbered clauses: clause 1 shows a car and a house, clause 2 shows a map, clause 3 shows a person at a steering wheel.',
@@ -132,6 +135,7 @@ export const TEKS_AUTO_2_INV_2_EN: Record<string, string> = {
   'inv2.tafsir.klausul.salah.2': 'The place of the incident is not in question in this file. What was different about this car that night?', // [konfirmasi PIC]
   'inv2.tafsir.klausul.salah.3': 'Mr Yusuf was driving himself, and that is not in question. What was different about this car that night?', // [konfirmasi PIC]
   'inv2.tafsir.klausul.alasan': 'Territory and driver are not in question. What differed that night was how the car was used: clause 1, use.', // [konfirmasi PIC]
+  'inv2.tafsir.klausul.lagi': 'Look again at the trip receipt in your notebook: that night this car carried a paying passenger. Which clause deals with that?', // [konfirmasi PIC]
   'inv2.tafsir.klausul.benar': 'Clause 1 governs the use of the vehicle, and how the car was used is what was different that night.', // [konfirmasi PIC]
   'inv2.tafsir.klausul.temuan': 'Policy extract, clause 1: private use. Commercial-use extension on the incident date: none.', // [konfirmasi PIC]
   'inv2.tafsir.klausul.ringkas': 'private use', // [konfirmasi PIC]
@@ -142,6 +146,7 @@ export const TEKS_AUTO_2_INV_2_EN: Record<string, string> = {
   'inv2.keb.1': 'Choose two notes that do not match: one statement and one piece of evidence.',
   'inv2.keb.2': 'Try again. Look for the record with a time on it.',
   'inv2.keb.3': 'Show Mr Yusuf the trip receipt.',
+  'inv2.keb.4': 'Try once more. Choose a record you have not tried yet.',
   'inv2.keb.tanya': 'Which record answers Mr Yusuf’s statement?',
   'inv2.pasang.tanya': 'Which notes do not match?',
   'inv2.pasang.ket': 'Choose one statement and one piece of evidence.',
@@ -149,7 +154,7 @@ export const TEKS_AUTO_2_INV_2_EN: Record<string, string> = {
   'inv2.pasang.alasan': 'Mr Yusuf said he was only driving his family that night. That is the statement to check against your records.',
   'inv2.pasang.temuan': 'The statement "only driving family" does not match the trip receipt: the 21:18 bump falls between 21:05 and 21:24.',
   'inv2.keb.petunjuk1': 'Not quite. Which record has a time on it? Look at the highlighted one.',
-  'inv2.keb.petunjuk2': 'The bump happened at 21:18. The receipt records a paying passenger from 21:05 to 21:24. Use that receipt.',
+  'inv2.keb.petunjuk2': 'Not yet. The bump was at 21:18. Which record shows the times of that night?',
   'inv2.keb.pilih.foto-interior': 'Show the interior photo',
   'inv2.keb.pilih.struk': 'Show the trip receipt',
   'inv2.keb.pilih.polis-kasus2': 'Show the policy',
@@ -157,6 +162,8 @@ export const TEKS_AUTO_2_INV_2_EN: Record<string, string> = {
   'inv2.keb.salah.polis-kasus2': 'The policy explains the rules, not what was happening at 21:18.',
   'inv2.keb.pandu.foto-interior': 'That photo is only a hint, not a record of the time. Let us look together.',
   'inv2.keb.pandu.polis-kasus2': 'The policy is only the rules, not what happened that night. Let us look together.',
+  'inv2.keb.lagi.foto-interior': 'That photo is only a hint, not a record of the time. Try again: look for the record that carries the times of that night.',
+  'inv2.keb.lagi.polis-kasus2': 'The policy is only the rules, not what happened that night. Try again: look for the record that carries the times of that night.',
   'inv2.keb.cap': 'The trip receipt records a paying passenger from 21:05 to 21:24. The bump happened at 21:18.',
   'inv2.akui.tapi': 'But that receipt only records when I closed the app. The passenger could have got out before that.',
   'inv2.akui.tutup': 'You remember his answer: he closed the trip after pulling over.',

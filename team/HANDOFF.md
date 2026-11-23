@@ -6751,3 +6751,137 @@ Uncommitted, not deployed. Not opened in a browser or on a phone; no test run. R
 | first-visit loader | 34 px (48 px on wide screens) | capped at 34 / 48 px high |
 `BrandTitle` in `ui/kit.tsx` has no caller; it would show the light logo at 34 / 64 px, not changed.
 **Open:** not seen in a browser. At 30 / 34 / 48 / 52 px the logo is scaled by a non-whole factor, so the pixel letters are slightly soft there (crisp at 40 px). `BRAND.assetNote` ("logo belum diverifikasi") is now out of date; not mine to reword. Preview: `character/logo-burung/pratinjau-t138.png` (phone header light, projector dark, icons; 2x and 1x).
+
+## T-139 (2026-11-23): wrong answer = warning and try again until right; no reveal after two misses (Fullstack)
+
+Built by Fullstack; uncommitted, not deployed. Owner rule: nothing was opened in a browser or on a phone and no test was run. Root `npm run typecheck` exit 0; `client/dist` rebuilt (build exit 0, copy identical to the build). No server or shared file touched.
+
+### The rule as built
+- A wrong pick never finishes a step and the answer is never shown or pre-selected. The step ends only when the player picks the right answer.
+- Miss 1 shows the existing hint for that option. Miss 2 and later show a stronger pointer to where to look, without the answer.
+- An option that was picked wrong is dimmed, labelled "sudah dicoba" / "already tried" / "已试过" (also in its accessible name) and disabled.
+- The reasoning that the old reveal showed now appears after the right pick, only when the player missed twice or more.
+
+### Outcome mapping (unchanged ids and points)
+| Screen | right on try 1 | right after 1 miss | right after 2+ misses |
+|---|---|---|---|
+| Dashcam (`ArenaDashcam`) | `bersih` | `ragu` | `ragu` (what the old reveal recorded) |
+| Reading (`PilihFormatif`, formative, no points) | `first` | `second` | `guided` |
+| Objection, Kasus 1-2 | `keb:tepat` | `keb:tepat-kedua` | `keb:dipandu` |
+| Panel round, Kasus 3 | `panel:<round>:first` | `:second` | `:guided` |
+
+Engine graph, node ids, choice ids, marks, rubric 40/30/30, totals, `raksa:investigasi:v1` and the ranked bridge are untouched. At the third try only the right card is sent on, as before; a wrong card there is handled on the screen and never reaches the engine or the ranked endpoint.
+
+### Screens changed
+1. **Dashcam** (`hp/arena/ArenaDashcam.tsx`; Episode 2 K08 "Periksa rambu di lokasi", Episode 1 Dev, Investigator Kasus 1).
+   - Miss 1: `dashcam.ragu.<id>` as before. Miss 2+: new `dashcam.ragu2.<id>` (points at lane 3; `.netral` variants say "the lane right of the truck", no lane number).
+   - The tapped wrong vehicle gets a dark veil and a "sudah dicoba" tag and cannot be tapped again, also after "Putar lagi".
+   - `dashcam.jelaskan` is shown after the right tap when there were 2+ misses (green, like a correct result). With 0 or 1 miss the result box is as before.
+   - An arena reopened with a result already in its visit draft opens as finished; the recording is not replayed and the result cannot be overwritten.
+2. **Reading** (`investigasi/ui/PilihFormatif.tsx`, all seven readings).
+   - Miss 2+ shows the new case text `<awalan>.tafsir.<id>.lagi` under the label "Lihat lebih dekat". The player keeps choosing.
+   - Right after 2+ misses: the old explanation (`alasan`) with the picture aid (lane numbers), then "Lanjut".
+   - Rejected text options show a small "sudah dicoba" line under the struck text; picture options (time slips) get a stamp over the picture.
+3. **Objection** (`investigasi/ui/LayarKeberatan.tsx`, `BukuCatatan.tsx`, `LayarInvestigasi.tsx` `KeberatanKasus`).
+   - Third try: no card is pre-selected and the other cards are no longer hidden or disabled wholesale. Cards already presented wrong (read from the existing marks `keb:keliru:<n>:<id>`) carry a "sudah dicoba" stamp and are disabled, on try 2 and try 3.
+   - The third-try note is a plain hint (`petunjuk2`, reworded, no card named) instead of Miss Raksa giving the answer.
+   - Paired pick (try 1): a wrong statement gets its pointer, is marked with a cross and disabled. The challenged statement is no longer selected for the player. `pasang.alasan` would show after the right pair when the statement was missed twice; with two statements per case that cannot happen today.
+4. **Panel round** (`investigasi/ui/panel/PanelRound.tsx`, `LayarInvestigasi.tsx` `PanelKasus`): same as the objection, from the marks `panel-keliru:<round>:<n>:<id>`. New optional `PanelCard.tried`.
+5. **Practice** (objection and panel round on the result screen): a wrong card is marked and the player tries again without limit; scores per try as before.
+6. **Lines between tries** (dialogue nodes, ids unchanged): after the second wrong card the line no longer says "Mari kita lihat bersama" and the third-try node no longer names the card. New text keys `*.keb.lagi.<card>`, `*.keb.4`, `inv3.panel.<round>.lagi.<card>`, `inv3.panel.<round>.4`. The old keys stay in the text files because saved histories store text keys.
+
+### Old saves
+- A save standing on the third-try node (`keb2`, `panel-<round>-2`) loads there. Its wrong cards are marked from the marks it already holds; the player picks the right card and continues with the same `dipandu` / `guided` result.
+- A save where the same wrong card was presented twice (possible before today) has one wrong card still open at the third try. Picking it marks it on the screen; nothing is sent.
+- Reading drafts: a draft written before today with two misses means the answer was already shown. It reopens as finished (answer marked, explanation, "Lanjut", result `guided`). New drafts carry `tafsirAturan: 2`; rejected ids and the miss count restore as before.
+- Finished steps are not reopened anywhere.
+
+### Deliberately left
+- **Highlight at try 2 of the objection (Kasus 1-2).** The existing miss-1 hint blinks a frame on the right card's picture and says "Lihat bagian yang disorot". I kept it because the brief says miss 1 = existing hint. It does point at the right card. Removing it is one line (`sorot` in `LayarKeberatan`) plus the "look at the highlighted part" sentence in three hints; say if you want it.
+- **Score detail wording** "dipandu" / "guided" (`investigasi.rincian.*`, T-126): unchanged. The outcome is now "right on the third try or later"; rewording changes the fit of that screen.
+- **Statement chips in the paired pick** are 56 px: a tried chip shows a cross; the words "sudah dicoba" are in its accessible name and title only.
+- **Dashcam misses are not saved mid-step** (as before): a reload during the step starts the count again. The finished result is kept.
+- **Third-try wrong picks are kept on the screen only**: after a reload that card is open again (old saves only).
+- **No 2-miss reveal found elsewhere.** `ArenaSim` (SIM check) already lets the player tap until right. The other Episode 1 / Episode 2 activities (`ArenaSusun`, `ArenaTujuan`, `ArenaBandingkan`, `ArenaBundel`, `ArenaPesan`, `ArenaRambu`, `ui/Aktivitas.tsx`) and the story choices are submit-then-consequence, with no tries. `PeriksaSim`, `PeriksaPerjalanan`, `PeriksaPolis`, `TebakLajur`, `LayarPutusan` have no wrong-answer reveal. `KartuBukti` has no caller.
+
+### Texts (id / en / zh, same digits)
+- Dashcam dictionary: `ragu2.truk`, `ragu2.truk-kecil`, both `.netral`, `dicoba`.
+- Investigasi dictionary: `dicoba`, `formatif.lagi`; `keberatan.petunjuk2` reworded (Kasus 1 third-try hint).
+- Panel label table (`ui/panel/teks.ts`): `dicoba`.
+- Kasus 1: `inv.tafsir.lajur.lagi`, `inv.tafsir.sim.lagi`, `inv.keb.4`, `inv.keb.lagi.rambu`, `inv.keb.lagi.sim`.
+- Kasus 2: `inv2.tafsir.{jam,struk,dokumen,klausul}.lagi`, `inv2.keb.4`, `inv2.keb.lagi.{foto-interior,polis-kasus2}`; `inv2.keb.petunjuk2` reworded.
+- Kasus 3: `inv3.tafsir.urutan.lagi`, `inv3.panel.{kronologi,pengajuan}.4`, four `inv3.panel.<round>.lagi.<card>`; both `petunjuk2` reworded.
+- `// [konfirmasi PIC]`: `inv2.tafsir.klausul.lagi` (asks which clause deals with a paying passenger). No other new line states policy.
+- The three reworded `petunjuk2` hints are screen hints, never stored in a history.
+
+### Fit (calculated, no browser)
+Room 557 px at 360 x 640 and 617 px at 390 x 700. 54 screen states x 2 sizes x 3 languages: 0 over, least spare 20 px.
+
+| State (id / en / zh) | 360 x 640 | Room | 390 x 700 | Room | Least spare |
+|---|---|---|---|---|---|
+| K1 reading lajur: miss 2+ | 442 / 442 / 396 | 557 | 442 / 442 / 396 | 617 | 115 |
+| K1 reading lajur: right after 2+ misses + Lanjut | 526 / 526 / 500 | 557 | 506 / 526 / 500 | 617 | 31 |
+| K1 reading sim: miss 2+ | 427 / 427 / 370 | 557 | 427 / 427 / 370 | 617 | 130 |
+| K1 reading sim: right after 2+ misses + Lanjut | 491 / 491 / 434 | 557 | 491 / 471 / 434 | 617 | 66 |
+| K2 reading jam: miss 2+ | 420 / 440 / 420 | 557 | 420 / 440 / 420 | 617 | 117 |
+| K2 reading jam: right after 2+ misses + Lanjut | 524 / 524 / 504 | 557 | 524 / 504 / 484 | 617 | 33 |
+| K2 reading struk: miss 2+ | 413 / 459 / 396 | 557 | 407 / 459 / 396 | 617 | 98 |
+| K2 reading struk: right after 2+ misses + Lanjut | 517 / 523 / 480 | 557 | 491 / 523 / 460 | 617 | 34 |
+| K2 reading dokumen: miss 2+ | 360 / 360 / 308 | 557 | 360 / 360 / 308 | 617 | 197 |
+| K2 reading dokumen: right after 2+ misses + Lanjut | 504 / 524 / 412 | 557 | 484 / 504 / 412 | 617 | 33 |
+| K2 reading klausul: miss 2+ | 453 / 410 / 370 | 557 | 427 / 390 / 370 | 617 | 104 |
+| K2 reading klausul: right after 2+ misses + Lanjut | 517 / 474 / 434 | 557 | 517 / 454 / 434 | 617 | 40 |
+| K3 reading urutan: miss 2+ | 453 / 453 / 422 | 557 | 453 / 453 / 422 | 617 | 104 |
+| K3 reading urutan: right after 2+ misses + Lanjut | 537 / 537 / 506 | 557 | 537 / 537 / 506 | 617 | 20 |
+| K1 objection, try 3+ (3 slips shown) | 481 / 507 / 459 | 557 | 481 / 481 / 459 | 617 | 50 |
+| K2 objection, try 3+ (3 slips shown) | 481 / 508 / 459 | 557 | 459 / 459 / 454 | 617 | 49 |
+| K1 practice objection, try 3+ | 509 / 535 / 487 | 557 | 509 / 509 / 487 | 617 | 22 |
+| K2 practice objection, try 3+ | 509 / 536 / 487 | 557 | 487 / 487 / 482 | 617 | 21 |
+| K3 panel kronologi, try 3+ (3 cards shown) | 504 / 504 / 458 | 557 | 504 / 482 / 458 | 617 | 53 |
+| K3 panel pengajuan, try 3+ (3 cards shown) | 504 / 504 / 458 | 557 | 504 / 482 / 458 | 617 | 53 |
+
+- The third try used to hide the other cards on screens under 680 px tall (`muat.css`) to make room for the Miss Raksa note. Both hide rules are removed; the third try now has the height of the second try.
+- A rejected text option grows by its 13 px label only when its text is already two lines; that is in the figures above (largest growth 11 px in a row).
+- Stamp on a picture: 50 x 30 px (id), 53 x 30 (en), 45 x 18 (zh) on pictures of 72 x 44 or larger. It is an overlay, so no card changes height.
+- Full model of all Investigator screens (144 rows, T-115) rerun with the new third try: 0 over; only the third-try rows changed. Scene with the new line after the second wrong card: at most 463 of 557 px.
+- **Dashcam: relative proof only.** I have no absolute model of the arena shell. In every state the box holds no more lines than it did in the same state before:
+
+| Dashcam message box, lines at 360 (id / en / zh) | before | now |
+|---|---|---|
+| after miss 1 | 4 / 3 / 3 at most | same texts |
+| after miss 2 | `jelaskan` 4 / 5 / 3 | `ragu2` 3 / 3 / 2 |
+| right with 0 or 1 miss | `tepat` + note | same texts |
+| right after 2+ misses | did not exist (step ended on the miss with `jelaskan`) | `jelaskan` 4 / 5 / 3 |
+
+  The "sudah dicoba" tag (94 x 18 px at most) is an overlay inside the 336 px scene.
+
+### Found while editing
+The check mark of the right reading option was a separate grid row inside the button, not on the text line as the T-127 / T-130 / T-134 calculations assumed (up to 19 px taller for a two-line option). It is now inline with the text, so those calculations hold.
+
+### Checks by script (not the test suite)
+- Validator clean for the three Investigator episodes and `auto-2`. `auto-2-dev` reports `kenalan.suasana: parameter {suasana}`; that file is not touched by this task.
+- All 1512 / 567 / 3969 paths of Kasus 1 / 2 / 3 reach an ending (same counts as before).
+- Engine walk, Kasus 1 and 2: two wrong cards then the right one ends on `keb-cap` with `dipandu`; one wrong = `tepat-kedua`; none = `tepat`. Kasus 3, both rounds: two wrong then right = `guided`. Tried-card readers return the wrong cards in order and do not leak between rounds.
+- Texts: every new key exists in id / en / zh, digits equal, key sets equal across languages. Against git HEAD only the three `petunjuk2` hints changed among old keys. No new hint contains the name of the right card or option (two reading hints name their own source, the receipt).
+
+### Files
+`client/src/cerita/hp/arena/ArenaDashcam.tsx`, `dashcam.css`; `client/src/i18n/kamus/dashcam.ts`, `investigasi.ts`; `client/src/cerita/tipe.ts`; `client/src/cerita/investigasi/status.ts`, `LayarInvestigasi.tsx`; `investigasi/ui/PilihFormatif.tsx`, `LayarKeberatan.tsx`, `BukuCatatan.tsx`, `ronde2.css`, `muat.css`; `investigasi/ui/panel/PanelRound.tsx`, `teks.ts`; `episode/auto-2-inv`, `auto-2-inv-2`, `auto-2-inv-3`: `episode.ts` and `teks.{id,en,zh}.ts`.
+Scripts outside the repo (run from `client/` with `npx tsx`):
+- `C:\Users\User\AppData\Local\Temp\claude\ec29f026d20d029c\0c4fe0f7-0adb-4cb1-b49a-10019af309f5\scratchpad\t139\hitung.mts` (fit of the changed states; all 54 rows in `C:\Users\User\AppData\Local\Temp\claude\ec29f026d20d029c\0c4fe0f7-0adb-4cb1-b49a-10019af309f5\scratchpad\t139\tabel.md`)
+- `C:\Users\User\AppData\Local\Temp\claude\ec29f026d20d029c\0c4fe0f7-0adb-4cb1-b49a-10019af309f5\scratchpad\t139\hitung-semua.mts` (full 144-row model)
+- `C:\Users\User\AppData\Local\Temp\claude\ec29f026d20d029c\0c4fe0f7-0adb-4cb1-b49a-10019af309f5\scratchpad\t139\periksa.mts` (validator, engine walk, texts)
+
+### Hooks for QA
+- Dashcam: `.dc-sasaran[data-dicoba]`, `.hp-dashcam[data-salah="<n>"]`, `.dc-pesan[data-jenis="ragu" | "tepat" | "jelaskan"]`.
+- Reading: `[data-pilih-formatif][data-keadaan="awal" | "keliru" | "hampir" | "keliru-lagi" | "tepat" | "dipandu"]`, `[data-keliru="<n>"]`, `.pf-pilih[data-gugur]`, `[data-pf-lanjut]` (only after the right pick).
+- Objection: `.bk-slip[data-dicoba]`, `[data-petunjuk-kuat]`, `[data-pilih-keterangan][data-dicoba]`, `[data-zum-dicoba]`.
+- Panel: `.pn-kartu[data-dicoba]`, `.pn-kartu-pilih[data-dicoba]`.
+
+### Open
+- Not seen in a browser or on a phone: the stamp on the small pictures, the tag on the dashcam vehicles, the label inside a rejected option.
+- No test was run or edited. Tests or snapshots that assert the old behaviour (reveal after two misses, pre-selected card at the third try, `*.pandu.*` / `*.3` line keys on the path) will need an update.
+- Draft key `tafsirAturan` is new in the visit draft of a reading; an older build ignores it.
+
+## T-140 (QA): investigator expect tests on the uncommitted T-139 change
+Ran only the client `investigator.expect` + `investigasi/ronde2.expect` (4 tests) and server `rubric.expect` (2 tests): all pass, 0 failures, no snapshot differed or was updated.
+So path-walk counts, validator results, score table, totals, ranks and `janji` ragam wording are all unchanged by T-139. Nothing else run, no browser, no commit.

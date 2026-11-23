@@ -104,6 +104,7 @@ export const TEKS_AUTO_2_INV_2_ZH: Record<string, string> = {
   'inv2.tafsir.jam.salah.2105': '21:05 的时间条画的是有人上车。看看事故登记表上的时间栏。',
   'inv2.tafsir.jam.salah.2124': '21:24 的时间条画的是应用里行程结束。看看事故登记表上的时间栏。',
   'inv2.tafsir.jam.alasan': '事故登记表的时间栏写着 21:18，草图画的是碰擦。21:18 的时间条就是碰擦的时间。',
+  'inv2.tafsir.jam.lagi': '读出事故登记表时间栏里的数字，再找数字完全相同的时间条。',
   'inv2.tafsir.jam.benar': '事故登记表记录的碰擦时间是 21:18。',
   'inv2.baca.struk.1': '你把碰擦时间放到行程小票旁边对照。',
   'inv2.tafsir.struk.tanya': '碰擦发生在 21:18。这个时间落在小票这段行程的哪里？',
@@ -111,6 +112,7 @@ export const TEKS_AUTO_2_INV_2_ZH: Record<string, string> = {
   'inv2.tafsir.struk.salah.sebelum': '把这个时间和小票上的数字比一比：21:18 比 21:05 晚。',
   'inv2.tafsir.struk.salah.sesudah': '把这个时间和小票上的数字比一比：21:18 比 21:24 早。',
   'inv2.tafsir.struk.alasan': '小票：起点 21:05，终点 21:24。21:18 在两者之间：碰擦发生在行程中途。',
+  'inv2.tafsir.struk.lagi': '看小票上的路线：起点 21:05，终点 21:24。21:18 落在这条线的哪里？',
   'inv2.tafsir.struk.benar': '21:18 在 21:05 和 21:24 之间：碰擦发生在小票上这段行程的中途。',
   'inv2.tafsir.struk.temuan': '行程小票：21:18 的碰擦发生在 21:05 和 21:24 之间，也就是这段行程的中途。',
   'inv2.tafsir.struk.ringkas': '在行程中途',
@@ -122,6 +124,7 @@ export const TEKS_AUTO_2_INV_2_ZH: Record<string, string> = {
   'inv2.tafsir.dokumen.salah.identitas': '乘客是谁并不改变保单的内容，而且这些资料是特意遮住的。哪份文件决定能不能承保？', // [konfirmasi PIC]
   'inv2.tafsir.dokumen.salah.foto': '保险杠的损坏没有疑问。你还没读到的，是保单在那一天写了什么。',
   'inv2.tafsir.dokumen.alasan': '小票已经回答了发生了什么。还缺的是：保单的内容，以及事故当日有没有使用扩展。没有这些，我们还不能下结论。', // [konfirmasi PIC]
+  'inv2.tafsir.dokumen.lagi': '事故和损坏都已经记在你的笔记本里。这份案卷里还有什么是你完全没读过的？',
   'inv2.tafsir.dokumen.benar': '缺的就是这个：保单的内容和事故当日的使用扩展状态。我们先把文件要来。', // [konfirmasi PIC]
   'inv2.tafsir.klausul.tanya': '哪一项条款对本案起决定作用？',
   'inv2.tafsir.klausul.gambar': '保单摘录，有三项带编号的条款：第 1 项画着汽车和房子，第 2 项画着地图，第 3 项画着握方向盘的人。',
@@ -131,6 +134,7 @@ export const TEKS_AUTO_2_INV_2_ZH: Record<string, string> = {
   'inv2.tafsir.klausul.salah.2': '事发地点在这份案卷里没有争议。那晚这辆车有什么不一样？', // [konfirmasi PIC]
   'inv2.tafsir.klausul.salah.3': '开车的是 Yusuf 先生本人，这一点没有争议。那晚这辆车有什么不一样？', // [konfirmasi PIC]
   'inv2.tafsir.klausul.alasan': '地域和驾驶人都没有争议。那晚不同的是车的用途：第 1 项条款，使用。', // [konfirmasi PIC]
+  'inv2.tafsir.klausul.lagi': '再看看笔记本里的行程小票：那晚这辆车载了付费乘客。哪一项条款管这件事？', // [konfirmasi PIC]
   'inv2.tafsir.klausul.benar': '第 1 项条款规定车辆的使用，而那晚不同的正是车的用途。', // [konfirmasi PIC]
   'inv2.tafsir.klausul.temuan': '保单摘录，第 1 项条款：私人使用。事故当日的商业使用扩展：无。', // [konfirmasi PIC]
   'inv2.tafsir.klausul.ringkas': '私人使用', // [konfirmasi PIC]
@@ -141,6 +145,7 @@ export const TEKS_AUTO_2_INV_2_ZH: Record<string, string> = {
   'inv2.keb.1': '选出两条对不上的记录：一条陈述和一件证据。',
   'inv2.keb.2': '再试一次。找带时间的那份记录。',
   'inv2.keb.3': '把行程小票给 Yusuf 先生看。',
+  'inv2.keb.4': '再试一次。选一份你还没试过的记录。',
   'inv2.keb.tanya': '哪份记录能回应 Yusuf 先生的陈述？',
   'inv2.pasang.tanya': '哪些记录对不上？',
   'inv2.pasang.ket': '选一条陈述和一件证据。',
@@ -148,7 +153,7 @@ export const TEKS_AUTO_2_INV_2_ZH: Record<string, string> = {
   'inv2.pasang.alasan': 'Yusuf 先生说那晚他只是送家人。需要和记录核对的就是这条陈述。',
   'inv2.pasang.temuan': '“只是送家人”的陈述与行程小票对不上：21:18 的碰擦发生在 21:05 和 21:24 之间。',
   'inv2.keb.petunjuk1': '还不对。哪份记录上有时间？看高亮的那一份。',
-  'inv2.keb.petunjuk2': '碰擦发生在 21:18。小票记录了从 21:05 到 21:24 的付费乘客。用这张小票。',
+  'inv2.keb.petunjuk2': '还是不对。碰擦发生在 21:18。哪份记录上有当晚的时间？',
   'inv2.keb.pilih.foto-interior': '出示车内照片',
   'inv2.keb.pilih.struk': '出示行程小票',
   'inv2.keb.pilih.polis-kasus2': '出示保单',
@@ -156,6 +161,8 @@ export const TEKS_AUTO_2_INV_2_ZH: Record<string, string> = {
   'inv2.keb.salah.polis-kasus2': '保单说明的是规则，不是 21:18 发生了什么。',
   'inv2.keb.pandu.foto-interior': '那张照片只是线索，不是时间记录。我们一起来看。',
   'inv2.keb.pandu.polis-kasus2': '保单只是规则，不是那天晚上发生的事。我们一起来看。',
+  'inv2.keb.lagi.foto-interior': '那张照片只是线索，不是时间记录。再试一次：找记有当晚时间的那份记录。',
+  'inv2.keb.lagi.polis-kasus2': '保单只是规则，不是那天晚上发生的事。再试一次：找记有当晚时间的那份记录。',
   'inv2.keb.cap': '行程小票记录了从 21:05 到 21:24 的付费乘客。碰擦发生在 21:18。',
   'inv2.akui.tapi': '可是小票只记录了我什么时候关掉应用。乘客也可能在那之前就下车了。',
   'inv2.akui.tutup': '你想起他刚才的回答：他是靠边停车之后才结束那一单的。',

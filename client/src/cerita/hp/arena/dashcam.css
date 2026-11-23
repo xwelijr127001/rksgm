@@ -107,6 +107,10 @@
 .dc-sasaran[data-keadaan="tepat"] { outline: 3px solid #3f8f5a; box-shadow: 0 0 0 3px #fff; }
 .dc-sasaran[data-keadaan="ragu"] { outline: 3px dashed #f6d25c; box-shadow: 0 0 0 3px #212121; }
 .dc-sasaran:disabled { cursor: default; }
+/* T-139: kendaraan yang sudah diketuk keliru: selubung gelap + label "sudah dicoba" di tengahnya (boleh lebih lebar dari sasaran);
+   tidak bisa diketuk lagi. Label = lapisan di atas adegan, jadi tinggi layar tidak berubah. */
+.dc-sasaran[data-dicoba] { outline: 2px dashed rgba(255, 255, 255, .7); background: rgba(33, 33, 33, .45); box-shadow: none; }
+.dc-dicoba { position: absolute; left: 50%; top: 50%; translate: -50% -50%; padding: 1px 5px; border: 2px solid #212121; background: #fff9f0; color: #212121; font-size: 12px; line-height: 14px; font-weight: 800; font-style: normal; white-space: nowrap; pointer-events: none; }
 
 /* tombol di dalam adegan, SELALU pojok kanan bawah (lajur 3-4 bawah: mobil berangkat di kanan ATAS dan pindah ke kiri; truk di lajur 2;
    bingkai beku: kosong). "Lanjut" (gerak dikurangi) bertumpuk di atas "Putar lagi". */
@@ -126,7 +130,8 @@
 /* pesan */
 .dc-pesan { padding: 10px 12px; border: 2px solid #212121; background: #fff9f0; font-size: 17px; line-height: 1.4; }
 .dc-pesan p { margin: 0; }
-.dc-pesan[data-jenis="tepat"] { background: #e6f4e3; border-color: #3f8f5a; }
+/* T-139: 'jelaskan' kini hanya tampil SESUDAH ketukan yang tepat (pemain keliru dua kali atau lebih): tampil sebagai hasil tepat. */
+.dc-pesan:is([data-jenis="tepat"], [data-jenis="jelaskan"]) { background: #e6f4e3; border-color: #3f8f5a; }
 .dc-pesan[data-jenis="ragu"] { background: #fff4cf; }
 .dc-catatan { margin-top: 6px !important; font-size: 16px; color: #3c3c3c; }
 

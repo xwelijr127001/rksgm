@@ -17,6 +17,10 @@
  *   panel-keliru:<idBabak>:<0|1>:<idBukti>   (T-102) kartu keliru yang diajukan di percobaan itu (tidak dinilai sendiri)
  *   press:<idPernyataan>:<idPress>           (T-102) "Tanya lebih lanjut" pernyataan itu sudah dibuka (tanpa poin)
  *   tafsir:<idTafsir>                        (T-127, babak 2) pilihan formatif itu sudah dijawab (tepat atau dipandu); tanpa poin
+ * T-139 (pemilik: "salah = peringatan sampai benar"): tanda dan nilainya TIDAK berubah, hanya cara mencapainya. `keb:dipandu` dan
+ * `panel:<idBabak>:guided` kini berarti "tepat pada percobaan KETIGA atau sesudahnya" (dulu: jawabannya ditunjukkan sesudah dua
+ * kekeliruan). Kartu yang sudah keliru dibaca dari `keb:keliru:<percobaan>:<idBukti>` / `panel-keliru:*` (kartuKeberatanKeliru,
+ * kartuPanelKeliru) supaya layar bisa menandainya "sudah dicoba".
  * T-127: TANDA JELI dan TEMUAN tidak punya tanda sendiri: tanda jeli = press yang dibuka DAN ber-`berguna`; temuan = tafsir yang
  * dibuat / KEBERATAN berpasangan yang selesai, "mapan" menurut tanda koreksi kasusnya. Simpanan lama tanpa tanda itu tetap sah.
  *
@@ -120,6 +124,25 @@ export const KE_HASIL_KEBERATAN: Readonly<Record<HasilBabak, HasilKeberatan>> = 
 export const tandaPanel = (idBabak: string, hasil: HasilBabak): string => `panel:${idBabak}:${hasil}`;
 export const tandaPanelKeliru = (idBabak: string, percobaan: 0 | 1, idBukti: string): string => `panel-keliru:${idBabak}:${percobaan}:${idBukti}`;
 export const tandaTekan = (idPernyataan: string, idPress: string): string => `press:${idPernyataan}:${idPress}`;
+
+/**
+ * T-139: kartu bukti yang SUDAH diajukan dan keliru (urut diajukan, tanpa ganda), dibaca dari tanda yang sudah lama dipasang
+ * pilihan keliru: KEBERATAN kasus 1-2 `keb:keliru:<percobaan>:<idBukti>`, babak panel `panel-keliru:<idBabak>:<percobaan>:<idBukti>`.
+ * Layar memakainya untuk menandai kartu itu "sudah dicoba" dan mematikannya di percobaan berikutnya. Hanya dibaca: tidak ada
+ * tanda baru, jadi simpanan lama (termasuk yang sedang berada di langkah ketiga) memberi daftar yang sama.
+ */
+function kartuKeliru(s: Tanda, awalan: string): string[] {
+  const hasil: string[] = [];
+  for (const t of s.tanda) {
+    if (!t.startsWith(awalan)) continue;
+    // sisa = "<percobaan>:<idBukti>"
+    const id = t.slice(awalan.length).replace(/^\d+:/, '');
+    if (id && !hasil.includes(id)) hasil.push(id);
+  }
+  return hasil;
+}
+export const kartuKeberatanKeliru = (s: Tanda): string[] => kartuKeliru(s, 'keb:keliru:');
+export const kartuPanelKeliru = (s: Tanda, idBabak: string): string[] => kartuKeliru(s, `panel-keliru:${idBabak}:`);
 /** Id pilihan tetap node tawar "Tanya lebih lanjut" (`NodeDasar.tekan` langkah 'tawar', T-104). */
 export const PILIH_TEKAN = 'tekan';
 export const PILIH_LANJUT = 'lanjut';

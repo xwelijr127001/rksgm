@@ -75,6 +75,7 @@ export const TEKS_AUTO_2_INV_ZH: Record<string, string> = {
   'inv.tafsir.lajur.salah.3': '车道从左边数起，从路肩之后开始算。数一数虚线，再看看车头在哪里。',
   'inv.tafsir.lajur.salah.kabur': '谨慎是好事。不过这一帧里车道线看得见：从左边数起，再找车头。',
   'inv.tafsir.lajur.alasan': '从左边数：路肩、第 1 车道，然后是第 2 车道。车头在第 2 车道，靠近通往第 3 车道的那条线。第 3 车道上的是那辆小汽车。',
+  'inv.tafsir.lajur.lagi': '从左边的路肩开始：每条虚线隔出一条车道。到车头之前有几条虚线？',
   'inv.tafsir.lajur.benar': '从左边数，车头在第 2 车道。小汽车在第 3 车道。',
   'inv.tafsir.lajur.temuan': '录像 14:32：车头在第 2 车道，小汽车在第 3 车道。',
   'inv.tafsir.lajur.ringkas': '卡车在第 2 车道',
@@ -86,6 +87,7 @@ export const TEKS_AUTO_2_INV_ZH: Record<string, string> = {
   'inv.tafsir.sim.salah.beda': '看看两份记录上的类别栏，把上面的字逐一对比。',
   'inv.tafsir.sim.salah.tanggal': '年份就写在日历图案旁边：2029。现在对比两份记录上的类别栏。', // [konfirmasi PIC]
   'inv.tafsir.sim.alasan': '两个类别栏都写着 B II Umum：相符。驾照有效期到 2029 年。', // [konfirmasi PIC]
+  'inv.tafsir.sim.lagi': '用手指遮住照片和日历。只读两个类别栏，一个字一个字地比。',
   'inv.tafsir.sim.benar': '驾照类别 B II Umum 与这辆半挂卡车要求的一致。有效期到 2029 年。', // [konfirmasi PIC]
   'inv.tafsir.sim.temuan': 'Darto 先生的驾照：类别 B II Umum，与半挂卡车要求的一致；有效期到 2029 年。', // [konfirmasi PIC]
   'inv.tafsir.sim.ringkas': '类别相符',
@@ -96,6 +98,7 @@ export const TEKS_AUTO_2_INV_ZH: Record<string, string> = {
   'inv.keb.1': '选出两条对不上的记录：一条陈述和一件证据。',
   'inv.keb.2': '再试一次。找出能说明卡车在路上位置的那张卡。',
   'inv.keb.3': '把行车记录仪录像给收费站人员看。',
+  'inv.keb.4': '再试一次。选一张你还没试过的卡。',
   'inv.keb.tanya': '哪一项证据能反驳“卡车在第 3 车道”？',
   'inv.pasang.tanya': '哪些记录对不上？',
   'inv.pasang.ket': '选一条陈述和一件证据。',
@@ -109,6 +112,8 @@ export const TEKS_AUTO_2_INV_ZH: Record<string, string> = {
   'inv.keb.salah.sim': '驾照证明 Darto 先生有资格驾驶那辆卡车，却不能说明卡车在哪条车道。换一张卡试试。',
   'inv.keb.pandu.rambu': '路标只是规定，不能说明卡车的位置。我们一起来看。',
   'inv.keb.pandu.sim': '驾照只和司机有关，不能说明卡车的位置。我们一起来看。',
+  'inv.keb.lagi.rambu': '路标只是规定，不能说明卡车的位置。再试一次：找拍到卡车本身在路上的那张卡。',
+  'inv.keb.lagi.sim': '驾照只和司机有关，不能说明卡车的位置。再试一次：找拍到卡车本身在路上的那张卡。',
   'inv.keb.cap': '异议！行车记录仪录像显示卡车在第 2 车道，不是第 3 车道。',
   'inv.akui.1': '可是我记得很清楚：当时第 3 车道上有车。',
   'inv.akui.pos': '你想起他刚才的回答：从岗亭看过去，车辆是侧面对着他的。',

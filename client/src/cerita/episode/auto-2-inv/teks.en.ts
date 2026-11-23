@@ -75,6 +75,7 @@ export const TEKS_AUTO_2_INV_EN: Record<string, string> = {
   'inv.tafsir.lajur.salah.3': 'Lanes are counted from the left, starting after the shoulder. Count the dashed lines, then look at the truck’s cab again.',
   'inv.tafsir.lajur.salah.kabur': 'Being careful is good. But the lane lines are visible in this frame: count from the left, then find the truck’s cab.',
   'inv.tafsir.lajur.alasan': 'From the left: the shoulder, lane 1, then lane 2. The truck’s cab is in lane 2, close to the line to lane 3. The one in lane 3 is the small car.',
+  'inv.tafsir.lajur.lagi': 'Start at the shoulder on the left: each dashed line closes one lane. How many lines come before the truck’s cab?',
   'inv.tafsir.lajur.benar': 'The truck’s cab is in lane 2, counted from the left. The small car is in lane 3.',
   'inv.tafsir.lajur.temuan': 'Recording 14:32: the truck’s cab in lane 2, the small car in lane 3.',
   'inv.tafsir.lajur.ringkas': 'truck in lane 2',
@@ -86,6 +87,7 @@ export const TEKS_AUTO_2_INV_EN: Record<string, string> = {
   'inv.tafsir.sim.salah.beda': 'Look at the class box on both records. Compare the writing piece by piece.',
   'inv.tafsir.sim.salah.tanggal': 'The year is written next to the calendar: 2029. Now compare the class box on both records.', // [konfirmasi PIC]
   'inv.tafsir.sim.alasan': 'Both class boxes read B II Umum: they match. The licence is valid until 2029.', // [konfirmasi PIC]
+  'inv.tafsir.sim.lagi': 'Cover the photo and the calendar with your finger. Read only the two class boxes, letter by letter.',
   'inv.tafsir.sim.benar': 'The licence class, B II Umum, is the one required for this trailer truck. Valid until 2029.', // [konfirmasi PIC]
   'inv.tafsir.sim.temuan': 'Mr Darto’s licence: class B II Umum, as required for the trailer truck; valid until 2029.', // [konfirmasi PIC]
   'inv.tafsir.sim.ringkas': 'class matches',
@@ -96,6 +98,7 @@ export const TEKS_AUTO_2_INV_EN: Record<string, string> = {
   'inv.keb.1': 'Choose two notes that do not match: one statement and one piece of evidence.',
   'inv.keb.2': 'Try again. Look for the card that shows where the truck was on the road.',
   'inv.keb.3': 'Show the dashcam recording to the toll officer.',
+  'inv.keb.4': 'Try once more. Choose a card you have not tried yet.',
   'inv.keb.tanya': 'Which evidence disproves "the truck was in lane 3"?',
   'inv.pasang.tanya': 'Which notes do not match?',
   'inv.pasang.ket': 'Choose one statement and one piece of evidence.',
@@ -109,6 +112,8 @@ export const TEKS_AUTO_2_INV_EN: Record<string, string> = {
   'inv.keb.salah.sim': 'The licence proves Mr Darto was allowed to drive that truck. It does not show which lane the truck was in. Try another card.',
   'inv.keb.pandu.rambu': 'The sign is only the rule, not where the truck was. Let us look together.',
   'inv.keb.pandu.sim': 'The licence is only about the driver, not where the truck was. Let us look together.',
+  'inv.keb.lagi.rambu': 'The sign is only the rule, not where the truck was. Try again: look for the card that shows the truck itself on the road.',
+  'inv.keb.lagi.sim': 'The licence is only about the driver, not where the truck was. Try again: look for the card that shows the truck itself on the road.',
   'inv.keb.cap': 'OBJECTION! The dashcam recording shows the truck in lane 2, not lane 3.',
   'inv.akui.1': 'But I remember it clearly: there was a vehicle in lane 3 at that moment.',
   'inv.akui.pos': 'You remember his answer: from the post, he saw the vehicles from the side.',

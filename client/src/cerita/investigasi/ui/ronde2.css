@@ -25,7 +25,10 @@
 .pf-pilih:active:not(:disabled) { translate: 0 2px; box-shadow: none; }
 .pf-pilih:focus-visible { outline: 3px solid #1d6fd1; outline-offset: 2px; }
 .pf-pilih:disabled { cursor: default; }
-.pf-pilih[data-gugur] { border-color: #9e9e9e; background: #f2f2f2; color: #5f5f5f; box-shadow: none; text-decoration: line-through; }
+/* T-139: coretan hanya pada tulisan pilihannya (.pf-teks); label "sudah dicoba" di bawahnya tidak ikut dicoret */
+.pf-pilih[data-gugur] { align-content: center; border-color: #9e9e9e; background: #f2f2f2; color: #5f5f5f; box-shadow: none; }
+.pf-pilih[data-gugur] > .pf-teks { text-decoration: line-through; }
+.pf-dicoba { display: block; font-size: 11px; line-height: 13px; font-weight: 800; letter-spacing: .02em; color: #5f5f5f; }
 .pf-pilih[data-jawab] { border-color: #1f5c3f; background: #e6f1ea; color: #1f5c3f; box-shadow: 0 2px 0 #1f5c3f; }
 .pf-pilih:disabled:not([data-gugur]):not([data-jawab]) { border-color: #9e9e9e; color: #5f5f5f; box-shadow: none; }
 /* catatan umpan balik: tinggi terkecil tetap, supaya tombol "Lanjut" tidak mendorong pilihan saat muncul */
@@ -90,7 +93,8 @@
    - catatan ber-hadiah: gambar kecil dokumen (96 x 68) di kiri kalimatnya, menggantikan potret Miss Raksa */
 .r2-slip { display: block; width: 96px; height: 68px; image-rendering: pixelated; }
 .pf-opsi[data-bergambar] .pf-pilih { position: relative; min-height: 76px; padding: 2px; }
-.pf-opsi[data-bergambar] .pf-pilih[data-gugur] { opacity: .45; text-decoration: none; }
+/* T-139: hanya gambarnya yang dipudarkan; cap "sudah dicoba" di atasnya tetap terbaca */
+.pf-opsi[data-bergambar] .pf-pilih[data-gugur] > .r2-slip { opacity: .45; }
 .pf-opsi[data-bergambar] .pf-centang { position: absolute; right: -2px; top: -2px; width: 22px; height: 22px; display: grid; place-items: center; background: #1f5c3f; color: #ffffff; font-size: 14px; line-height: 1; font-weight: 800; }
 .pf[data-susun="kolom"] .pf-opsi { grid-template-columns: minmax(0, 1fr); }
 .pf[data-susun="kolom"] .pf-pilih { justify-items: start; padding: 6px 10px; font-size: 16px; line-height: 21px; text-align: left; }
@@ -113,3 +117,24 @@
 .pf-kepala[data-bersamping] { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px; align-items: center; }
 .pf-kepala[data-bersamping] > .iv-tanya { margin: 0; }
 .pf-samping { display: block; border: 2px solid #212121; background: #fffdf6; box-shadow: 0 2px 0 #212121; }
+
+/* ==================================================================== T-139: pilihan yang SUDAH DICOBA dan keliru
+   Pemilik (23 Nov): salah = peringatan sampai benar. Pilihan keliru tetap tampil, redup, berlabel "sudah dicoba", dan mati:
+   - .iv-cap-dicoba: cap kecil DI ATAS gambar (slip bukti 84 x 44, kartu panel 72 x 44, slip waktu 96 x 68). Lapisan, jadi tinggi
+     kartu tidak berubah. Dua kata = dua baris (min-content); zh satu baris (keep-all). Tinggi cap 30 px, lebar <= 60 px.
+   - .pf-dicoba (di atas): baris kecil di bawah tulisan pilihan formatif yang berupa teks.
+   - keping keterangan (KEBERATAN berpasangan, 56 px): silang di sudut; frasa "sudah dicoba" ada di nama akses dan title-nya.
+   Hitungan muat: team/HANDOFF.md "## T-139". */
+.iv-cap-dicoba { position: absolute; z-index: 2; left: 50%; top: 50%; translate: -50% -50%; width: min-content; box-sizing: border-box; padding: 1px 4px; border: 2px solid #212121; background: #fffdf6; color: #212121;
+  font-size: 11px; line-height: 12px; font-weight: 800; font-style: normal; text-align: center; text-decoration: none; word-break: keep-all; pointer-events: none; }
+/* slip bukti (buku catatan di layar KEBERATAN) */
+button.bk-slip[data-dicoba] { border-color: #9e9e9e; background: #f2f2f2; box-shadow: none; cursor: default; }
+button.bk-slip[data-dicoba] > :is(.bk-klip, .bk-slip-teks, .iv-bukti-tanda) { opacity: .45; }
+.bk-slip[data-dicoba] .bk-slip-gambar::after { content: ''; position: absolute; inset: 0; background: rgba(242, 242, 242, .6); }
+/* kartu bukti babak panel */
+.pn-kartu-pilih[data-dicoba]:disabled { opacity: 1; border-color: #9e9e9e; background: #f2f2f2; box-shadow: none; }
+.pn-kartu-pilih[data-dicoba] > :is(.pn-kartu-teks, .pn-kartu-tanda) { opacity: .45; }
+.pn-kartu-pilih[data-dicoba] > .pn-kartu-gambar { position: relative; }
+.pn-kartu-pilih[data-dicoba] > .pn-kartu-gambar::after { content: ''; position: absolute; inset: 0; background: rgba(242, 242, 242, .6); }
+/* keping keterangan yang sudah dicoba */
+.bk-keping-coba { position: absolute; left: 0; top: 0; width: 16px; height: 16px; box-sizing: border-box; display: grid; place-items: center; border: 2px solid #2a211e; background: #fffdf6; color: #212121; font-size: 10px; line-height: 1; font-weight: 800; font-style: normal; }

@@ -40,6 +40,14 @@ const kamus: KamusRuang = {
     'ragu.truk.netral': 'Truk memang menabrak pembatas. Tapi apa yang membuatnya membanting setir? Putar lagi dan lihat kanan truk.',
     'ragu.truk-kecil.netral': 'Truk kecil itu sedang berhenti di bahu jalan. Putar lagi dan lihat kanan truk.',
     'jelaskan.netral': 'Pemicunya mobil kecil: ia berpindah lajur tepat ke depan truk. Karena itu kita tetap memeriksa rambu dan saksi sebelum menilai klaim.',
+    // T-139 (pemilik: salah = peringatan sampai benar): keliru KEDUA dan seterusnya = penunjuk yang lebih kuat ke TEMPAT melihat
+    // (lajurnya), tetap tanpa menyebut jawabannya. `jelaskan` kini baru tampil SESUDAH ketukan yang tepat. `dicoba` = label kendaraan
+    // yang sudah diketuk keliru.
+    'ragu2.truk': 'Belum tepat. Truk itu menghindari sesuatu. Putar lagi dan ikuti lajur 3 sejak awal rekaman.',
+    'ragu2.truk-kecil': 'Belum tepat. Truk kecil itu diam sejak awal. Putar lagi dan ikuti lajur 3 sejak awal rekaman.',
+    'ragu2.truk.netral': 'Belum tepat. Truk itu menghindari sesuatu. Putar lagi dan ikuti lajur di kanan truk sejak awal.',
+    'ragu2.truk-kecil.netral': 'Belum tepat. Truk kecil itu diam sejak awal. Putar lagi dan ikuti lajur di kanan truk sejak awal.',
+    dicoba: 'sudah dicoba',
   },
   en: {
     judul: 'Toll road dashcam footage',
@@ -74,6 +82,11 @@ const kamus: KamusRuang = {
     'ragu.truk.netral': 'The truck did hit the barrier. But what made it swerve? Play again and look right of the truck.',
     'ragu.truk-kecil.netral': 'That small truck was parked. Play again and look right of the big truck.',
     'jelaskan.netral': 'The trigger was the small car: it changed lanes right in front of the truck. That is why we still check the signs and witnesses before judging the claim.',
+    'ragu2.truk': 'Not yet. The truck was avoiding something. Play again and follow lane 3 from the very start.',
+    'ragu2.truk-kecil': 'Not yet. The small truck never moved. Play again and follow lane 3 from the very start.',
+    'ragu2.truk.netral': 'Not yet. The truck was avoiding something. Play again and follow the lane on its right from the start.',
+    'ragu2.truk-kecil.netral': 'Not yet. The small truck never moved. Play again and follow the lane right of the big truck.',
+    dicoba: 'already tried',
   },
   zh: {
     judul: '收费公路行车记录仪录像',
@@ -108,6 +121,11 @@ const kamus: KamusRuang = {
     'ragu.truk.netral': '卡车确实撞上了护栏。但是什么让它猛打方向？再播放一次，留意卡车右侧的车道。',
     'ragu.truk-kecil.netral': '那辆小货车当时停在路肩上。再播放一次，留意卡车右侧的车道。',
     'jelaskan.netral': '起因是那辆小汽车：它变道，正好切到卡车前面。所以在评估理赔之前，我们仍然要核对标志和证人。',
+    'ragu2.truk': '还不对。卡车是在躲避什么。再播放一次，从头盯住第 3 车道。',
+    'ragu2.truk-kecil': '还不对。那辆小货车一直没动。再播放一次，从头盯住第 3 车道。',
+    'ragu2.truk.netral': '还不对。卡车是在躲避什么。再播放一次，从头盯住卡车右侧的车道。',
+    'ragu2.truk-kecil.netral': '还不对。那辆小货车一直没动。再播放一次，从头盯住卡车右侧的车道。',
+    dicoba: '已试过',
   },
 };
 

@@ -62,7 +62,7 @@ import { aksiLanjut, daftarKasusHub, tamuBaruSemuaKasus, tujuanPangkat, type Kas
 import { RUTE_HUB, ruteKasus, useRumahCerita } from './rute';
 import { adaRekaman, bacaRekaman, berlanggananInvestigasi, catatHadiah, catatHasil, catatIntipKasus2, hadiahRekaman, pangkatRekaman, stempelSeri, TOTAL_MAKS, totalSkor, versiInvestigasi } from './simpan';
 import { MAKS_LANGKAH, poinBabak, poinKeberatan, poinPesan, poinPutusan, putusanTepat, rincianBabak, skorKasus, skorKasusLengkap, titikTerlemah, type SkorKasus, type TitikLatihan } from './skor';
-import { buktiTerkumpul, hasilKasus, hasilKasusLengkap, PESAN, PILIH_LANJUT, pernyataanTercatat, pilihTekan, naskahPesan, punyaRagam, ragamRekaman, semuaPernyataanDikoreksi, semuaPress, tafsirDibuat, tebakanAwal, tekananTerbuka, temuanKasus, type Bukti, type HasilBabak, type HasilKeberatan, type HasilLengkap, type Pernyataan, type Pesan, type Putusan } from './status';
+import { buktiTerkumpul, hasilKasus, hasilKasusLengkap, kartuKeberatanKeliru, kartuPanelKeliru, PESAN, PILIH_LANJUT, pernyataanTercatat, pilihTekan, naskahPesan, punyaRagam, ragamRekaman, semuaPernyataanDikoreksi, semuaPress, tafsirDibuat, tebakanAwal, tekananTerbuka, temuanKasus, type Bukti, type HasilBabak, type HasilKeberatan, type HasilLengkap, type Pernyataan, type Pesan, type Putusan } from './status';
 import { BukuCatatan, PotretReaksi, reaksiSah, type KoreksiPernyataan, type TemuanSlip } from './ui/BukuCatatan';
 import { CapKeberatan } from './ui/CapKeberatan';
 import { PenyediaTeksInvestigasi } from './ui/dasar';
@@ -99,7 +99,10 @@ function urutKartu(konfig: KonfigInvestigasi, bukti: Bukti[]): Bukti[] {
   return [...bukti].sort((a, b) => ke(a) - ke(b));
 }
 
-/** Teks layar KEBERATAN kasus (T-090): pertanyaan kasus hanya di percobaan pertama; tanpa `layar` = teks bawaan komponen. */
+/**
+ * Teks layar KEBERATAN kasus (T-090): pertanyaan kasus hanya di percobaan pertama; tanpa `layar` = teks bawaan komponen.
+ * T-139: `petunjuk2` = penunjuk yang lebih kuat untuk percobaan ketiga dan seterusnya (tidak lagi menyebut kartunya).
+ */
 function teksKeberatan(konfig: KonfigInvestigasi, percobaan: 0 | 1 | 2, tx: Tx): { tanya?: string; petunjuk1?: string; petunjuk2?: string } {
   const l = konfig.keberatan.layar;
   return l ? { tanya: percobaan === 0 ? tx(l.tanya) : undefined, petunjuk1: tx(l.petunjuk1), petunjuk2: tx(l.petunjuk2) } : {};
@@ -135,12 +138,13 @@ const LAPIS_R2: Readonly<Record<string, string>> = { 'k3-cincin': CINCIN_K3_FOTO
  * T-106: kartu bukti untuk komponen panel Designer (teks sudah diterjemahkan; `kutipan` = kutipan persis kartu itu).
  * T-132: kartu ber-`seni` membawa gambar babak 2-nya (kartu dan gambar besar yang netral); `bertemuan` = temuan kartu itu sudah ada
  * (tafsir dibuat / dipandu, atau pernyataannya dikoreksi): baru saat itu lapisan penunjuknya (`lapis`) ikut dikirim.
+ * T-139: `dicoba` = kartu itu sudah diajukan di babak ini dan keliru: mati dan bercap "sudah dicoba" (`disabled` + `tried`).
  */
-function kartuPanel(b: Bukti, tx: Tx, redup = false, bertemuan = false): PanelCard {
+function kartuPanel(b: Bukti, tx: Tx, dicoba = false, bertemuan = false): PanelCard {
   const g = b.seni && b.seni in SENI_R2 ? SENI_R2[b.seni as IdSeniR2] : null;
   const lapis = bertemuan && b.lapis ? LAPIS_R2[b.lapis] : undefined;
   return {
-    id: b.id, title: tx(b.judul), source: tx(b.sumber), ...(b.kutipan ? { excerpt: tx(b.kutipan) } : {}), ...(redup ? { disabled: true } : {}),
+    id: b.id, title: tx(b.judul), source: tx(b.sumber), ...(b.kutipan ? { excerpt: tx(b.kutipan) } : {}), ...(dicoba ? { disabled: true, tried: true } : {}),
     ...(g ? { art: { thumb: g.thumb, exhibit: g.exhibit, ...(lapis ? { overlay: lapis } : {}) } } : {}),
   };
 }
@@ -241,21 +245,31 @@ const DRAF_TAFSIR = 'tafsir';
  * Dibaca: angka lama = jumlahnya; larik T-130 tanpa jumlah = banyaknya id; selain itu yang terbesar dari keduanya.
  */
 const DRAF_TAFSIR_JUMLAH = 'tafsirJumlah';
+/**
+ * T-139 (pemilik: salah = peringatan sampai benar): dua kekeliruan TIDAK lagi menyelesaikan bacaan. Draf aturan baru membawa
+ * penanda `tafsirAturan: 2`. Draf TANPA penanda itu dengan dua kekeliruan berasal dari aturan lama: di sana jawabannya sudah
+ * ditunjukkan dan layarnya tinggal menunggu "Lanjut" => `terungkap`, dipulihkan sebagai layar selesai (tidak dibuka lagi). Draf
+ * terungkap disimpan ulang dengan penanda 1, supaya tetap terbaca terungkap sesudah muat ulang berikutnya.
+ */
+const DRAF_TAFSIR_ATURAN = 'tafsirAturan';
 function tafsirTersimpan(ep: Episode, state: StateCerita): DrafFormatif {
   const d = bacaDrafAktivitas(ep.id, kunjunganAktivitas(state));
   const o = d && typeof d === 'object' ? (d as Record<string, unknown>) : {};
   const n = o[DRAF_TAFSIR]; const j = o[DRAF_TAFSIR_JUMLAH];
-  const angka = (x: unknown): number => (typeof x === 'number' && Number.isFinite(x) ? Math.max(0, Math.min(2, Math.floor(x))) : 0);
-  const gugur = Array.isArray(n) ? n.filter((x): x is string => typeof x === 'string' && x.length <= 40).slice(0, 2) : [];
-  return { gugur, jumlah: Math.max(gugur.length, angka(j), Array.isArray(n) ? 0 : angka(n)) };
+  const angka = (x: unknown): number => (typeof x === 'number' && Number.isFinite(x) ? Math.max(0, Math.min(99, Math.floor(x))) : 0);
+  const gugur = Array.isArray(n) ? n.filter((x): x is string => typeof x === 'string' && x.length <= 40).slice(0, 8) : [];
+  const jumlah = Math.max(gugur.length, angka(j), Array.isArray(n) ? 0 : angka(n));
+  return { gugur, jumlah, ...(jumlah >= 2 && o[DRAF_TAFSIR_ATURAN] !== 2 ? { terungkap: true } : {}) };
 }
 function simpanTafsir(ep: Episode, state: StateCerita, draf: DrafFormatif | null, periksa: boolean): void {
-  simpanDrafAktivitas(ep.id, kunjunganAktivitas(state), draf === null ? {} : { ...(periksa ? { [DRAF_PERIKSA]: 1 } : {}), [DRAF_TAFSIR]: [...draf.gugur], [DRAF_TAFSIR_JUMLAH]: draf.jumlah });
+  simpanDrafAktivitas(ep.id, kunjunganAktivitas(state), draf === null ? {} : { ...(periksa ? { [DRAF_PERIKSA]: 1 } : {}), [DRAF_TAFSIR]: [...draf.gugur], [DRAF_TAFSIR_JUMLAH]: draf.jumlah, [DRAF_TAFSIR_ATURAN]: draf.terungkap ? 1 : 2 });
 }
 
 /**
- * T-127 node `tafsir` (dan `periksa-sim` ber-tafsir): layar PilihFormatif untuk satu `TafsirInvestigasi`. Selesai (tepat atau
- * dipandu) = aksi mesin 'lanjut'; efek node itulah yang memasang `tafsir:<id>`. Tidak ada pilihan bernilai di sini.
+ * T-127 node `tafsir` (dan `periksa-sim` ber-tafsir): layar PilihFormatif untuk satu `TafsirInvestigasi`. Selesai = aksi mesin
+ * 'lanjut'; efek node itulah yang memasang `tafsir:<id>`. Tidak ada pilihan bernilai di sini.
+ * T-139: selesai HANYA saat pemain memilih bacaan yang tepat. Kekeliruan kedua dst. = penunjuk yang lebih kuat, teks kasus
+ * `<awalan>.tafsir.<id>.lagi` (tanpa teks itu: penunjuk pilihan yang baru ditolak).
  */
 function LayarTafsir({ ep, konfig, state, tafsir, periksa, tx, onLanjut }: { ep: Episode; konfig: KonfigInvestigasi; state: StateCerita; tafsir: TafsirInvestigasi; periksa: boolean; tx: Tx; onLanjut: () => void }) {
   const [awal] = useState(() => tafsirTersimpan(ep, state));
@@ -265,6 +279,7 @@ function LayarTafsir({ ep, konfig, state, tafsir, periksa, tx, onLanjut }: { ep:
   }, []);
   const kartu = tafsir.bukti ? konfig.bukti.find((x) => x.id === tafsir.bukti) : undefined;
   const k = (ekor: string) => tx(kunci(konfig, `tafsir.${tafsir.id}.${ekor}`));
+  const adaLagi = Object.prototype.hasOwnProperty.call(ep.teks.id, kunci(konfig, `tafsir.${tafsir.id}.lagi`));
   const seni = tafsir.seni;
   const alt = tafsir.seniKet ? tx(tafsir.seniKet) : kartu ? tx(kartu.judul) : '';
   // Pilihan bergambar: slip waktu kasus 2 (96 x 68); gambarnya hiasan, nama aksesnya = teks + keterangan pilihan itu.
@@ -278,7 +293,7 @@ function LayarTafsir({ ep, konfig, state, tafsir, periksa, tx, onLanjut }: { ep:
     <PilihFormatif id={tafsir.id} tanya={tx(tafsir.tanya)} awal={awal} susun={tafsir.tampilan === 'daftar' ? 'kolom' : 'baris'} hadiah={hadiah} samping={samping}
       gambar={seni ? (jelas, selesai) => <GambarR2 seni={seni} alt={alt} lajur={jelas ? tafsir.lajur : undefined} lapis={selesai ? kartu?.lapis : undefined} /> : undefined}
       opsi={tafsir.opsi.map((o) => ({ id: o.id, teks: tx(o.teks), gambar: slip(o.seni), ...(o.ket ? { ket: tx(o.ket) } : {}) }))} tepat={tafsir.tepat} hampir={tafsir.hampir}
-      salah={(id) => k(`salah.${id}`)} alasan={k('alasan')} benar={k('benar')} lanjut={tx('inv.ui.lanjut')}
+      salah={(id) => k(`salah.${id}`)} lagi={adaLagi ? k('lagi') : undefined} alasan={k('alasan')} benar={k('benar')} lanjut={tx('inv.ui.lanjut')}
       onCoba={(gugur, jumlah) => simpanTafsir(ep, state, { gugur, jumlah }, periksa)} onSelesai={() => { simpanTafsir(ep, state, null, periksa); onLanjut(); }} />
   );
 }
@@ -499,11 +514,13 @@ function LayarKoreksi({ konfig, pernyataan, tx, onLanjut, baris }: { konfig: Kon
 
 /**
  * T-106: SATU babak panel (kasus 3) = komponen Designer `PanelRound` (props beku T-102). Kartu = `Round.evidenceIds` yang sudah
- * terkumpul, urut layar; langkah dipandu (attempt 2) meredupkan kartu yang tidak diterima. Komponen hanya mengembalikan PILIHAN;
- * pemanggil (node cerita atau latihan) yang memutuskan tepat / keliru.
+ * terkumpul, urut layar. Komponen hanya mengembalikan PILIHAN; pemanggil (node cerita atau latihan) yang memutuskan tepat / keliru.
+ * T-139: tidak ada lagi langkah "dipandu" yang meredupkan semua kartu selain yang diterima. `dicoba` = kartu yang SUDAH diajukan
+ * dan keliru di babak ini (pemanggil: tanda cerita, atau daftar latihan): mati dan bercap "sudah dicoba"; kartu lain tetap aktif.
  */
-function BabakPanel({ ep, konfig, state, round, attempt, tx, onPresent }: {
+function BabakPanel({ ep, konfig, state, round, attempt, tx, dicoba, onPresent }: {
   ep: Episode; konfig: KonfigInvestigasi; state: StateCerita; round: Round; attempt: 0 | 1 | 2; tx: Tx;
+  dicoba: readonly string[];
   onPresent: (id: Bukti['id'], diterima: boolean) => void;
 }) {
   const p = konfig.pernyataan.find((x) => x.id === round.statementId);
@@ -514,7 +531,7 @@ function BabakPanel({ ep, konfig, state, round, attempt, tx, onPresent }: {
   const temuan = slipTemuan(ep, state, tx);
   const cards = round.evidenceIds.filter((id) => punya.includes(id)).flatMap((id) => {
     const b = konfig.bukti.find((x) => x.id === id);
-    return b ? [kartuPanel(b, tx, attempt === 2 && !round.acceptedIds.includes(id), !!temuan[id])] : [];
+    return b ? [kartuPanel(b, tx, dicoba.includes(id) && !round.acceptedIds.includes(id), !!temuan[id])] : [];
   });
   return (
     <PanelRound key={`${round.id}-${attempt}`} attempt={attempt}
@@ -569,6 +586,61 @@ function zumBukti(konfig: KonfigInvestigasi, tx: Tx): (id: Bukti['id']) => React
     const tf = konfig.tafsir?.find((x) => x.bukti === id && x.seni === b.seni);
     return <GambarR2 seni={b.seni} alt={tf?.seniKet ? tx(tf.seniKet) : tx(b.judul)} />;
   };
+}
+
+/**
+ * T-139: layar KEBERATAN sebuah node cerita. Kartu yang sudah diajukan dan keliru (`keb:keliru:*`) ditandai "sudah dicoba" dan
+ * mati. Percobaan 0 / 1 = pilihan mesin seperti semula. Percobaan 2 (node dialog; dulu "dipandu": kartu yang tepat sudah terpilih
+ * dan yang lain mati): pemain memilih sendiri. Kartu yang tepat = lanjut (efek node memasang keb:dipandu, nilainya sama seperti
+ * dulu); kartu keliru TIDAK dikirim ke mesin (jadi tidak ke sambungan pilihan bernilai): ditandai di layar ini dan pemain mencoba
+ * lagi. Kekeliruan di percobaan 2 hanya mungkin pada simpanan lama (kartu yang sama diajukan dua kali): di aturan baru kedua
+ * kartu keliru sudah mati di titik ini.
+ */
+function KeberatanKasus({ ep, konfig, state, inv, tx, onPilih }: {
+  ep: Episode; konfig: KonfigInvestigasi; state: StateCerita; inv: Extract<NodeInvestigasi, { jenis: 'keberatan' }>; tx: Tx; onPilih: (id: string) => boolean;
+}) {
+  const [lokal, setLokal] = useState<string[]>([]);
+  const pernyataan = konfig.pernyataan.find((x) => x.id === inv.pernyataan);
+  if (!pernyataan) return null;
+  // Hanya kartu yang SUDAH terkumpul yang dikirim: kartu lain tidak bisa dipilih (mesin pun menolaknya lewat `jika`).
+  const bukti = urutKartu(konfig, buktiTerkumpul(ep, state));
+  const keliru = kartuKeberatanKeliru(state);
+  const dicoba = bukti.map((b) => b.id).filter((id) => id !== inv.tepat && (keliru.includes(id) || lokal.includes(id)));
+  // T-127: percobaan pertama = temuan berpasangan (bila kasusnya punya `pasangan`): keterangan dipilih dari yang sudah tersemat.
+  const pas = inv.percobaan === 0 ? konfig.keberatan.pasangan : undefined;
+  return (
+    <LayarKeberatan pernyataan={pernyataan} bukti={bukti} percobaan={inv.percobaan} tepat={inv.tepat} dicoba={dicoba}
+      perbesar={konfig.keberatan.perbesar ?? []} {...teksKeberatan(konfig, inv.percobaan, tx)}
+      {...(pas ? { tanya: tx(pas.tanya), pasangan: { pernyataan: pernyataanTercatat(ep, state), ket: tx(pas.ket), salah: (id: string) => tx(kunci(konfig, `pasang.salah.${id}`)), alasan: tx(kunci(konfig, 'pasang.alasan')) } } : {})}
+      temuan={slipTemuan(ep, state, tx)} zum={zumBukti(konfig, tx)}
+      onPilih={(id) => {
+        if (inv.percobaan === 2) {
+          if (id === inv.tepat) onPilih(id);
+          else { playSfx('keliru'); setLokal((l) => (l.includes(id) ? l : [...l, id])); }
+          return;
+        }
+        if (onPilih(id) && id !== inv.tepat) playSfx('keliru'); // T-085: dengung rendah lembut
+      }} />
+  );
+}
+
+/** T-139: satu babak panel sebuah node cerita; aturan dan alasannya sama dengan KeberatanKasus (tanda `panel-keliru:<babak>:*`). */
+function PanelKasus({ ep, konfig, state, round, attempt, tx, onPilih }: {
+  ep: Episode; konfig: KonfigInvestigasi; state: StateCerita; round: Round; attempt: 0 | 1 | 2; tx: Tx; onPilih: (id: string) => boolean;
+}) {
+  const [lokal, setLokal] = useState<string[]>([]);
+  const dicoba = [...new Set([...kartuPanelKeliru(state, round.id), ...lokal])];
+  return (
+    <BabakPanel ep={ep} konfig={konfig} state={state} round={round} attempt={attempt} tx={tx} dicoba={dicoba}
+      onPresent={(id, diterima) => {
+        if (attempt === 2) {
+          if (diterima) onPilih(id);
+          else { playSfx('keliru'); setLokal((l) => (l.includes(id) ? l : [...l, id])); }
+          return;
+        }
+        if (onPilih(id)) playSfx(diterima ? 'konfirmasi' : 'keliru');
+      }} />
+  );
 }
 
 export function LayarInvestigasi({ ep, state, node, tx, onLanjut, onPilih, onMulaiUlang }: {
@@ -628,36 +700,18 @@ export function LayarInvestigasi({ ep, state, node, tx, onLanjut, onPilih, onMul
     }
     case 'keberatan': {
       const pernyataan = konfig.pernyataan.find((x) => x.id === inv.pernyataan);
-      // Hanya kartu yang SUDAH terkumpul yang dikirim: kartu lain tidak bisa dipilih (mesin pun menolaknya lewat `jika`).
-      const bukti = urutKartu(konfig, buktiTerkumpul(ep, state));
       if (!pernyataan) { isi = <section className="iv-layar"><button type="button" className="primary-action iv-tombol" onClick={onLanjut}>{tx('inv.ui.lanjut')}</button></section>; break; }
-      // T-127: percobaan pertama = temuan berpasangan (bila kasusnya punya `pasangan`): keterangan dipilih dari yang sudah tersemat.
-      const pas = inv.percobaan === 0 ? konfig.keberatan.pasangan : undefined;
-      isi = (
-        <LayarKeberatan key={node.id} pernyataan={pernyataan} bukti={bukti} percobaan={inv.percobaan} tepat={inv.tepat}
-          perbesar={konfig.keberatan.perbesar ?? []} {...teksKeberatan(konfig, inv.percobaan, tx)}
-          {...(pas ? { tanya: tx(pas.tanya), pasangan: { pernyataan: pernyataanTercatat(ep, state), ket: tx(pas.ket), salah: (id: string) => tx(kunci(konfig, `pasang.salah.${id}`)), alasan: tx(kunci(konfig, 'pasang.alasan')) } } : {})}
-          temuan={slipTemuan(ep, state, tx)} zum={zumBukti(konfig, tx)}
-          onPilih={(id) => {
-            // Percobaan 2 (dipandu, node dialog): hanya kartu tepat yang melanjutkan. Percobaan 0 / 1: pilihan mesin.
-            if (inv.percobaan === 2) { if (id === inv.tepat) onPilih(id); return; }
-            if (onPilih(id) && id !== inv.tepat) playSfx('keliru'); // T-085: dengung rendah lembut
-          }} />
-      );
+      // T-139: layar + kartu yang sudah dicoba (KeberatanKasus); percobaan 2 tidak lagi memilihkan kartunya.
+      isi = <KeberatanKasus key={node.id} ep={ep} konfig={konfig} state={state} inv={inv} tx={tx} onPilih={onPilih} />;
       break;
     }
     case 'panel': {
-      // T-106: satu percobaan satu babak panel. Percobaan 0 / 1 = pilihan mesin (id pilihan = id kartu); percobaan 2 (dipandu,
-      // node dialog): hanya kartu yang diterima yang melanjutkan (pemutar mengirimnya lewat jalur pilihan bernilai yang sama).
+      // T-106: satu percobaan satu babak panel. Percobaan 0 / 1 = pilihan mesin (id pilihan = id kartu); percobaan 2 (node
+      // dialog): hanya kartu yang diterima yang melanjutkan (pemutar mengirimnya lewat jalur pilihan bernilai yang sama).
+      // T-139: kartu keliru di percobaan 2 ditandai di layar dan pemain mencoba lagi (PanelKasus); tidak ada kartu yang dipilihkan.
       const r = konfig.panel?.rounds.find((x) => x.id === inv.round);
       if (!r) { isi = <section className="iv-layar"><button type="button" className="primary-action iv-tombol" onClick={onLanjut}>{tx('inv.ui.lanjut')}</button></section>; break; }
-      isi = (
-        <BabakPanel ep={ep} konfig={konfig} state={state} round={r} attempt={inv.attempt} tx={tx}
-          onPresent={(id, diterima) => {
-            if (inv.attempt === 2) { if (diterima) onPilih(id); return; }
-            if (onPilih(id)) playSfx(diterima ? 'konfirmasi' : 'keliru');
-          }} />
-      );
+      isi = <PanelKasus key={node.id} ep={ep} konfig={konfig} state={state} round={r} attempt={inv.attempt} tx={tx} onPilih={onPilih} />;
       break;
     }
     case 'panel-koreksi': {
@@ -756,11 +810,17 @@ export function GerbangKasus({ ep, state, tx, onLanjut, onBaru }: { ep: Episode;
 
 // ------------------------------------------------------------------ latihan pilihan terlemah (T-087, review pilot butir 6)
 
-/** Latihan KEBERATAN: tiga percobaan seperti di kasus (petunjuk, lalu dipandu), dengan cap bila tepat. Tidak menyentuh mesin. */
+/**
+ * Latihan KEBERATAN: percobaan seperti di kasus, dengan cap bila tepat. Tidak menyentuh mesin.
+ * T-139: kartu keliru = kalimat Miss Raksa + coba lagi, berapa kali pun; kartu itu ditandai "sudah dicoba". Tepat pada percobaan
+ * pertama / kedua / ketiga dst. = tepat / tepat-kedua / dipandu (nilai latihan sama seperti dulu).
+ */
 function LatihanKeberatan({ ep, konfig, state, tx, onHasil }: { ep: Episode; konfig: KonfigInvestigasi; state: StateCerita; tx: Tx; onHasil: (h: HasilKeberatan) => void }) {
   const pernyataan = konfig.pernyataan.find((x) => x.id === konfig.keberatan.pernyataan);
   const tepat = konfig.keberatan.tepat;
   const [percobaan, setPercobaan] = useState<0 | 1 | 2>(0);
+  /** T-139: kartu yang sudah diajukan dan keliru di latihan ini. */
+  const [dicoba, setDicoba] = useState<Bukti['id'][]>([]);
   /** Kalimat Miss Raksa sesudah kartu yang keliru (menunggu "Lanjut"). */
   const [sela, setSela] = useState<string | null>(null);
   const [cap, setCap] = useState<HasilKeberatan | null>(null);
@@ -783,13 +843,15 @@ function LatihanKeberatan({ ep, konfig, state, tx, onHasil }: { ep: Episode; kon
     );
   }
   return (
-    <LayarKeberatan key={percobaan} pernyataan={pernyataan} bukti={urutKartu(konfig, buktiTerkumpul(ep, state))} percobaan={percobaan} tepat={tepat}
+    <LayarKeberatan key={percobaan} pernyataan={pernyataan} bukti={urutKartu(konfig, buktiTerkumpul(ep, state))} percobaan={percobaan} tepat={tepat} dicoba={dicoba}
       perbesar={konfig.keberatan.perbesar ?? []} {...teksKeberatan(konfig, percobaan, tx)} temuan={slipTemuan(ep, state, tx)} zum={zumBukti(konfig, tx)}
       onPilih={(id) => {
         if (id === tepat) { jedaMusik(HENING_KEBERATAN_S, NAIK_KEBERATAN_S); setCap(percobaan === 0 ? 'tepat' : percobaan === 1 ? 'tepat-kedua' : 'dipandu'); return; }
-        if (percobaan === 2) return;
         playSfx('keliru');
-        setSela(tx(kunci(konfig, percobaan === 0 ? `keb.salah.${id}` : `keb.pandu.${id}`)));
+        setDicoba((d) => (d.includes(id) ? d : [...d, id]));
+        // Percobaan ketiga dst.: penunjuk kuatnya sudah ada di layar; kartu itu ditandai dan pemain mencoba lagi.
+        if (percobaan === 2) return;
+        setSela(tx(kunci(konfig, percobaan === 0 ? `keb.salah.${id}` : `keb.lagi.${id}`)));
       }} />
   );
 }
@@ -833,9 +895,13 @@ function LatihanPesan({ ep, konfig, tx, onHasil }: { ep: Episode; konfig: Konfig
  * LATIHAN satu langkah yang dinilai, dengan konteks kasus (buku catatan dari state akhir). Hanya tampilan: mesin cerita, skor
  * kasus dan rekaman perangkat TIDAK disentuh, jadi skor terbaik permainan penuh tidak bisa berubah dari sini.
  */
-/** T-106: latihan SATU babak panel (kasus 3): percobaan pertama, kedua, lalu dipandu; tidak mengubah skor terbaik. */
+/**
+ * T-106: latihan SATU babak panel (kasus 3); tidak mengubah skor terbaik. T-139: kartu keliru = kalimat ketua + coba lagi, berapa
+ * kali pun (kartu itu ditandai "sudah dicoba"); tepat pada percobaan pertama / kedua / ketiga dst. = first / second / guided.
+ */
 function LatihanPanel({ ep, konfig, state, round, tx, onHasil }: { ep: Episode; konfig: KonfigInvestigasi; state: StateCerita; round: Round; tx: Tx; onHasil: (h: HasilBabak) => void }) {
   const [attempt, setAttempt] = useState<0 | 1 | 2>(0);
+  const [dicoba, setDicoba] = useState<string[]>([]);
   const [sela, setSela] = useState<string | null>(null);
   if (sela) {
     return (
@@ -846,12 +912,13 @@ function LatihanPanel({ ep, konfig, state, round, tx, onHasil }: { ep: Episode; 
     );
   }
   return (
-    <BabakPanel ep={ep} konfig={konfig} state={state} round={round} attempt={attempt} tx={tx}
+    <BabakPanel ep={ep} konfig={konfig} state={state} round={round} attempt={attempt} tx={tx} dicoba={dicoba}
       onPresent={(id, diterima) => {
         if (diterima) { playSfx('konfirmasi'); onHasil(attempt === 0 ? 'first' : attempt === 1 ? 'second' : 'guided'); return; }
-        if (attempt === 2) return;
         playSfx('keliru');
-        setSela(tx(kunci(konfig, `panel.${round.id}.${attempt === 0 ? 'salah' : 'pandu'}.${id}`)));
+        setDicoba((d) => (d.includes(id) ? d : [...d, id]));
+        if (attempt === 2) return;
+        setSela(tx(kunci(konfig, `panel.${round.id}.${attempt === 0 ? 'salah' : 'lagi'}.${id}`)));
       }} />
   );
 }

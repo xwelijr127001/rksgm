@@ -17,6 +17,10 @@
  * T-115 (Fullstack, tanpa gulir; hitungan di atas meleset: kartu berjudul dua baris + baris sumber = 63 px, bukan 52): ruang
  * panel dipotong menjadi 72 px, baris sumber kartu tidak diulang di daftar (ada di lembar bukti), jarak 6 px, dan pada langkah
  * dipandu di layar < 680 px hanya kartu yang diterima yang tampil (ui/muat.css). Tinggi sekarang 390..504 px (ruang isi 557).
+ * T-139 (Fullstack; pemilik: "salah = peringatan sampai benar"): TIDAK ADA lagi kartu yang dipilihkan. Di percobaan mana pun tamu
+ * sendiri yang memilih lalu menekan "Tunjukkan bukti ini". Kartu yang sudah diajukan dan keliru datang ber-`tried` (+ `disabled`):
+ * bercap "sudah dicoba" di gambarnya, redup, tidak bisa dipilih (tetap bisa diperbesar). Kartu itu TETAP tampil di layar pendek
+ * (aturan sembunyi muat.css dilepas); tinggi percobaan 2 = tinggi percobaan 1 dengan petunjuknya (hitungan: HANDOFF "## T-139").
  */
 import { useEffect, useState } from 'react';
 import type { IdBukti, PanelRoundProps } from '../../../tipe';
@@ -31,12 +35,10 @@ const KURSI: Readonly<Record<string, PanelSeat>> = { pemohon: 'pemohon', penaksi
 
 export function PanelRound({ chair, statement, cards, attempt, onInspect, onPresent }: PanelRoundProps) {
   const L = useLabelPanel();
-  const aktif = cards.filter((c) => !c.disabled);
-  const awal = (): IdBukti | null => (attempt === 2 && aktif.length === 1 ? aktif[0]!.id : null);
-  const [pilih, setPilih] = useState<IdBukti | null>(awal);
-  // Percobaan atau pernyataan baru = pilihan lama dilepas (dipandu: satu-satunya kartu aktif langsung terpilih).
+  const [pilih, setPilih] = useState<IdBukti | null>(null);
+  // Percobaan, pernyataan, atau daftar kartu aktif yang baru = pilihan lama dilepas. T-139: tidak ada kartu yang dipilihkan.
   const kunciKartu = cards.map((c) => c.id + (c.disabled ? '-' : '+')).join('|');
-  useEffect(() => { setPilih(awal()); /* eslint-disable-next-line react-hooks/exhaustive-deps */ }, [attempt, statement.id, kunciKartu]);
+  useEffect(() => { setPilih(null); }, [attempt, statement.id, kunciKartu]);
   const [lembar, setLembar] = useState<IdBukti | null>(null);
   const kartuLembar = lembar ? cards.find((c) => c.id === lembar) : undefined;
   const petunjuk = attempt > 0 && chair.hint ? chair.hint : null;
@@ -58,10 +60,14 @@ export function PanelRound({ chair, statement, cards, attempt, onInspect, onPres
           const seni = evidenceArt(c.id);
           const terpilih = pilih === c.id;
           return (
-            <li key={c.id} className="pn-kartu" data-kartu={c.id} data-terpilih={terpilih ? '' : undefined} data-redup={c.disabled ? '' : undefined}>
-              <button type="button" className="pn-kartu-pilih" aria-pressed={terpilih} disabled={c.disabled} aria-label={L('bukti', { judul: c.title })} onClick={() => setPilih(c.id)}>
+            <li key={c.id} className="pn-kartu" data-kartu={c.id} data-terpilih={terpilih ? '' : undefined} data-redup={c.disabled ? '' : undefined} data-dicoba={c.tried ? '' : undefined}>
+              <button type="button" className="pn-kartu-pilih" aria-pressed={terpilih} disabled={c.disabled} data-dicoba={c.tried ? '' : undefined}
+                aria-label={c.tried ? `${L('bukti', { judul: c.title })} (${L('dicoba')})` : L('bukti', { judul: c.title })} onClick={() => setPilih(c.id)}>
                 {/* T-132: kartu ber-seni babak 2 (`art`) memakai gambar kartu yang NETRAL (mis. perkiraan biaya tanpa cincin merah) */}
-                <span className="pn-kartu-gambar" aria-hidden="true" data-seni-r2={c.art ? '' : undefined} style={c.art ? { backgroundImage: `url(${c.art.thumb})` } : seni ? { backgroundImage: `url(${seni.thumb})` } : undefined} />
+                <span className="pn-kartu-gambar" aria-hidden="true" data-seni-r2={c.art ? '' : undefined} style={c.art ? { backgroundImage: `url(${c.art.thumb})` } : seni ? { backgroundImage: `url(${seni.thumb})` } : undefined}>
+                  {/* T-139: cap "sudah dicoba" di atas gambar kartu yang sudah diajukan dan keliru */}
+                  {c.tried ? <i className="iv-cap-dicoba">{L('dicoba')}</i> : null}
+                </span>
                 <span className="pn-kartu-teks"><b>{c.title}</b><small>{c.source}</small></span>
                 <span className="pn-kartu-tanda" aria-hidden="true">{terpilih ? '✓' : ''}</span>
               </button>

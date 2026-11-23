@@ -69,6 +69,7 @@ export const TEKS_AUTO_2_INV_3_EN: Record<string, string> = {
   'inv3.tafsir.urutan.salah.saat': 'The two records do not carry the same date. Compare the stamp in the corner of this photo with the calendar on the incident card.',
   'inv3.tafsir.urutan.salah.sesudah': 'The order is not right yet. Compare the stamp in the corner of this photo with the calendar on the incident card.',
   'inv3.tafsir.urutan.alasan': 'This photo is stamped 03; the incident card is dated 14. The 3rd comes first: the mirror crack was there before the parking incident.', // [konfirmasi PIC] rumusan kerusakan lama
+  'inv3.tafsir.urutan.lagi': 'The stamp in the bottom-left corner of the photo: 03. The calendar on the incident card: 14. Which date comes first?',
   'inv3.tafsir.urutan.benar': 'Photo stamp 03, incident card 14: the mirror crack was there before the parking incident.', // [konfirmasi PIC] rumusan kerusakan lama
   'inv3.tafsir.urutan.temuan': 'Inspection photo stamped 03, incident card dated 14: the mirror crack was there before the parking incident.', // [konfirmasi PIC] rumusan kerusakan lama
   'inv3.tafsir.urutan.ringkas': 'before the incident',
@@ -98,13 +99,16 @@ export const TEKS_AUTO_2_INV_3_EN: Record<string, string> = {
   'inv3.panel.kronologi.1': 'Choose one piece of evidence to present to the panel.',
   'inv3.panel.kronologi.2': 'Try again. Look for evidence dated before the incident.',
   'inv3.panel.kronologi.3': 'Present the inspection photo from the 3rd to the panel.',
+  'inv3.panel.kronologi.4': 'Try once more. Choose evidence you have not presented yet.',
   'inv3.panel.kronologi.tanya': 'Which evidence shows when the mirror crack was already there?',
   'inv3.panel.kronologi.petunjuk1': 'Not quite. Which evidence is dated before the incident on the 14th?',
-  'inv3.panel.kronologi.petunjuk2': 'The parking incident was on the 14th. The inspection photo from the 3rd already shows the mirror crack. Use that photo.',
+  'inv3.panel.kronologi.petunjuk2': 'Not yet. The parking incident was on the 14th. Which evidence carries an earlier date?',
   'inv3.panel.kronologi.salah.kartu-kejadian': 'The incident card records what was reported, not when the mirror crack first appeared.',
   'inv3.panel.kronologi.salah.penawaran': 'The estimate shows only the price, not when the damage happened.',
   'inv3.panel.kronologi.pandu.kartu-kejadian': 'That card is only the report. Let us look together at the evidence dated before the incident.',
   'inv3.panel.kronologi.pandu.penawaran': 'That estimate is only about price. Let us look together at the evidence dated before the incident.',
+  'inv3.panel.kronologi.lagi.kartu-kejadian': 'That card is only the report. Please try again: look for the evidence dated before the incident.',
+  'inv3.panel.kronologi.lagi.penawaran': 'That estimate is only about price. Please try again: look for the evidence dated before the incident.',
   'inv3.panel.kronologi.koreksi': 'Account corrected: the mirror crack was there before the incident',
   'inv3.kronologi.jawab.1': 'The inspection photo from the 3rd shows the mirror crack was already there, eleven days before the parking incident on the 14th.',
   'inv3.kronologi.jawab.2': 'Mr Gilang, please respond.', // [konfirmasi PIC]
@@ -122,13 +126,16 @@ export const TEKS_AUTO_2_INV_3_EN: Record<string, string> = {
   'inv3.panel.pengajuan.1': 'Choose one piece of evidence to present to the panel.',
   'inv3.panel.pengajuan.2': 'Try again. Look for the evidence that carries Mr Gilang’s own words.',
   'inv3.panel.pengajuan.3': 'Present the message extract from the 15th to the panel.',
+  'inv3.panel.pengajuan.4': 'Try once more. Choose evidence you have not presented yet.',
   'inv3.panel.pengajuan.tanya': 'Which evidence shows what Mr Gilang asked the workshop to do?',
   'inv3.panel.pengajuan.petunjuk1': 'Not quite. Which evidence carries Mr Gilang’s own words?',
-  'inv3.panel.pengajuan.petunjuk2': 'In the message extract from the 15th, Mr Gilang wrote that the crack was old and asked for it to be included. Use that extract.',
+  'inv3.panel.pengajuan.petunjuk2': 'Not yet. Prices and dates do not answer this. Which evidence did Mr Gilang write himself?',
   'inv3.panel.pengajuan.salah.penawaran': 'The estimate shows two lines and their prices, not what Mr Gilang asked for.',
   'inv3.panel.pengajuan.salah.foto-inspeksi': 'That photo shows when the crack was already there, not what was asked to be written.',
   'inv3.panel.pengajuan.pandu.penawaran': 'That estimate is only a list and prices. Let us look together at Mr Gilang’s own words.',
   'inv3.panel.pengajuan.pandu.foto-inspeksi': 'That photo has already answered the question of time. Let us look together at Mr Gilang’s own words.',
+  'inv3.panel.pengajuan.lagi.penawaran': 'That estimate is only a list and prices. Please try again: look for Mr Gilang’s own words.',
+  'inv3.panel.pengajuan.lagi.foto-inspeksi': 'That photo has already answered the question of time. Please try again: look for Mr Gilang’s own words.',
   'inv3.panel.pengajuan.koreksi': 'Account corrected: the old crack was asked to be included as damage from this incident',
   'inv3.pengajuan.jawab.1': 'In the message extract from the 15th, Mr Gilang wrote that the mirror crack was old and asked for it to be included as damage from this incident.',
   'inv3.pengajuan.jawab.2': 'Mr Gilang, Mr Seno, please respond.', // [konfirmasi PIC]

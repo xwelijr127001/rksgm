@@ -217,9 +217,13 @@ function bangunNode(): NodeCerita[] {
       b('inv.keb-buka.2', 'tol', 'serius'),
     ], 'keb0'),
     ...keberatan(0, 'inv.keb.1', 'keb1', (x) => `inv.keb.salah.${x}`),
-    ...keberatan(1, 'inv.keb.2', 'keb2', (x) => `inv.keb.pandu.${x}`),
-    // Percobaan ketiga = dipandu: hanya kartu tepat yang melanjutkan (node dialog; ketukan kartu itu = lanjut).
-    dialog('keb2', RUANG('tol', 'darto'), [b('inv.keb.3', 'narasi')], 'keb-cap',
+    // T-139 (pemilik: salah = peringatan sampai benar): kalimat sesudah kartu keliru KEDUA tidak lagi "mari kita lihat bersama"
+    // (inv.keb.pandu.*) melainkan penunjuk + coba lagi (inv.keb.lagi.*); baris node keb2 tidak lagi menyebut kartunya (inv.keb.3
+    // -> inv.keb.4). Kunci lama tetap ada di berkas teks (riwayat simpanan lama menyimpan kunci).
+    ...keberatan(1, 'inv.keb.2', 'keb2', (x) => `inv.keb.lagi.${x}`),
+    // Percobaan ketiga dst. (node dialog; id, efek keb:dipandu dan nilainya tidak berubah): pemain memilih sendiri; hanya kartu
+    // tepat yang melanjutkan (ketukan kartu itu = lanjut). Kartu yang sudah dicoba mati di layar (LayarInvestigasi KeberatanKasus).
+    dialog('keb2', RUANG('tol', 'darto'), [b('inv.keb.4', 'narasi')], 'keb-cap',
       { efek: { pasang: [tandaKeberatan('dipandu')] }, investigasi: { jenis: 'keberatan', pernyataan: KEB.pernyataan, tepat: TEPAT, percobaan: 2 } }),
     dialog('keb-cap', RUANG('tol', 'darto'), [b('inv.keb.cap', 'narasi')], 'keb-akui', { investigasi: { jenis: 'cap' } }),
     // T-127 (butir 18): petugas tidak langsung mengaku. Ia lebih dulu berkeberatan dengan sopan (ia memang melihat kendaraan di

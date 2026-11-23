@@ -23,6 +23,8 @@ const LABEL = {
     utuh: 'Lihat foto utuh',
     dibantah: 'Pernyataan yang diperiksa',
     ruang: 'Ruang panel',
+    // T-139: cap kartu yang sudah diajukan dan keliru (sama dengan kamus investigasi `dicoba`)
+    dicoba: 'sudah dicoba',
   },
   en: {
     tanya: 'Ask a follow-up',
@@ -40,6 +42,7 @@ const LABEL = {
     utuh: 'See the whole photo',
     dibantah: 'Statement under review',
     ruang: 'Panel room',
+    dicoba: 'already tried',
   },
   zh: {
     tanya: '继续追问',
@@ -57,6 +60,7 @@ const LABEL = {
     utuh: '查看整张照片',
     dibantah: '正在核对的陈述',
     ruang: '评审室',
+    dicoba: '已试过',
   },
 } as const;
 export type LabelPanel = keyof (typeof LABEL)['id'];
